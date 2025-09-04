@@ -18,21 +18,21 @@ from hope.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):
-    def setUp(cls) -> None:
+    def setUp(self) -> None:
         create_afghanistan()
-        cls.payment_plan = PaymentPlanFactory(
+        self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
         factory = APIRequestFactory()
-        cls.request = factory.post("/just_any_url/")
-        cls.request.user = cls.client  # type: ignore
-        cls.request.parser_context = {
+        self.request = factory.post("/just_any_url/")
+        self.request.user = self.client  # type: ignore
+        self.request.parser_context = {
             "kwargs": {
-                "payment_plan_id": str(cls.payment_plan.id),
+                "payment_plan_id": str(self.payment_plan.id),
             }
         }
-        cls.context = {"payment_plan": cls.payment_plan, "request": cls.request}
-        cls.file = SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf")
+        self.context = {"payment_plan": self.payment_plan, "request": self.request}
+        self.file = SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf")
 
     def test_validate_file_size_success(self) -> None:
         document_data = {"file": self.file, "title": "test"}
@@ -102,28 +102,28 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
 
 
 class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
-    def setUp(cls) -> None:
-        cls.business_area = create_afghanistan()
-        cls.client = APIClient()
-        cls.user = UserFactory(username="Hope_USER", password="GoodJod")
+    def setUp(self) -> None:
+        self.business_area = create_afghanistan()
+        self.client = APIClient()
+        self.user = UserFactory(username="Hope_USER", password="GoodJod")
         role, created = Role.objects.update_or_create(
             name="TestName",
             defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]},
         )
-        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(
+        user_role, _ = RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
 
-        cls.url = reverse(
+        self.url = reverse(
             "api:payments:supporting-documents-list",
             kwargs={
                 "business_area_slug": "afghanistan",
-                "program_slug": cls.payment_plan.program.slug,
-                "payment_plan_id": str(cls.payment_plan.id),
+                "program_slug": self.payment_plan.program.slug,
+                "payment_plan_id": str(self.payment_plan.id),
             },
         )
-        cls.file = SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf")
+        self.file = SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf")
 
     def tearDown(self) -> None:
         for document in PaymentPlanSupportingDocument.objects.all():
@@ -155,10 +155,10 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
 
 
 class PaymentPlanSupportingDocumentViewTests(TestCase):
-    def setUp(cls) -> None:
-        cls.business_area = create_afghanistan()
-        cls.client = APIClient()
-        cls.user = UserFactory(username="Hope_USER", password="GoodJod")
+    def setUp(self) -> None:
+        self.business_area = create_afghanistan()
+        self.client = APIClient()
+        self.user = UserFactory(username="Hope_USER", password="GoodJod")
         role, created = Role.objects.update_or_create(
             name="TestName",
             defaults={
@@ -168,23 +168,23 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
                 ]
             },
         )
-        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(
+        user_role, _ = RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
-        cls.document = PaymentPlanSupportingDocument.objects.create(
-            payment_plan=cls.payment_plan,
+        self.document = PaymentPlanSupportingDocument.objects.create(
+            payment_plan=self.payment_plan,
             title="Test Document333",
             file=SimpleUploadedFile("test.pdf", b"aaa"),
         )
 
-        cls.url = reverse(
+        self.url = reverse(
             "api:payments:supporting-documents-detail",
             kwargs={
                 "business_area_slug": "afghanistan",
-                "program_slug": cls.payment_plan.program.slug,
-                "payment_plan_id": str(cls.payment_plan.id),
-                "file_id": str(cls.document.id),
+                "program_slug": self.payment_plan.program.slug,
+                "payment_plan_id": str(self.payment_plan.id),
+                "file_id": str(self.document.id),
             },
         )
 

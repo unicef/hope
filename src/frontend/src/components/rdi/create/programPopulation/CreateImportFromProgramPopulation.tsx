@@ -6,13 +6,13 @@ import { Box } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete/FormikAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -130,13 +130,19 @@ export const CreateImportFromProgramPopulationForm = ({
     }
   }, [formik.values.importType]);
 
+  const [programSearch, setProgramSearch] = useState('');
+
   if (programsDataLoading) return <LoadingComponent />;
   if (!programsData) return null;
 
-  const mappedProgramChoices = programsData.results.map((element) => ({
-    name: element.name,
-    value: element.id,
-  }));
+  const filteredProgramChoices = programsData.results
+    .filter((element) =>
+      element.name.toLowerCase().includes(programSearch.toLowerCase()),
+    )
+    .map((element) => ({
+      labelEn: element.name,
+      value: element.id,
+    }));
 
   return (
     <FormikProvider value={formik}>
@@ -156,9 +162,9 @@ export const CreateImportFromProgramPopulationForm = ({
           name="importFromProgramId"
           label={t('Programme Name')}
           fullWidth
-          variant="outlined"
-          choices={mappedProgramChoices}
-          component={FormikSelectField}
+          choices={filteredProgramChoices}
+          component={FormikAutocomplete}
+          onInputChange={(_e, value) => setProgramSearch(value)}
         />
       </Box>
       <Box mt={2}>

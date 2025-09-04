@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
+from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionError, RequestError
 from elasticsearch_dsl.connections import create_connection
 
 from hope.apps.utils.elasticsearch_utils import (
@@ -58,7 +59,7 @@ class ElasticsearchPanel:
                         populate_all_indexes()
                     else:
                         raise ValueError(opt)
-                except Exception as exc:
+                except (ElasticsearchConnectionError, RequestError, ValueError) as exc:
                     logger.warning(exc)
                     messages.add_message(request, messages.ERROR, f"{exc.__class__.__name__}: {exc}")
         else:

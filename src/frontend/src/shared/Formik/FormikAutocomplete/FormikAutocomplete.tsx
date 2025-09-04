@@ -21,6 +21,7 @@ export function FormikAutocomplete({
     <Box mt={2}>
       <Autocomplete
         id="combo-box-demo"
+        size="small"
         options={choices}
         onChange={handleChange}
         value={realSelectedValue}

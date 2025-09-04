@@ -5,6 +5,7 @@
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
+import type { Bulk } from '../models/Bulk';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
 import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
 import type { BulkUpdateGrievanceTicketsPriority } from '../models/BulkUpdateGrievanceTicketsPriority';
@@ -52,6 +53,7 @@ import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTreeList } from '../models/PaginatedAreaTreeList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
+import type { PaginatedAuthorizedUserList } from '../models/PaginatedAuthorizedUserList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
@@ -73,9 +75,10 @@ import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListLis
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
 import type { PaginatedPaymentVerificationPlanListList } from '../models/PaginatedPaymentVerificationPlanListList';
+import type { PaginatedPDUOnlineEditListList } from '../models/PaginatedPDUOnlineEditListList';
+import type { PaginatedPDUXlsxTemplateListList } from '../models/PaginatedPDUXlsxTemplateListList';
+import type { PaginatedPDUXlsxUploadListList } from '../models/PaginatedPDUXlsxUploadListList';
 import type { PaginatedPendingPaymentList } from '../models/PaginatedPendingPaymentList';
-import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
-import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/PaginatedPeriodicDataUpdateUploadListList';
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
 import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCycleListList';
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
@@ -113,10 +116,15 @@ import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificat
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
 import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
-import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
-import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
-import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
-import type { PeriodicDataUpdateUploadDetail } from '../models/PeriodicDataUpdateUploadDetail';
+import type { PDUOnlineEditCreate } from '../models/PDUOnlineEditCreate';
+import type { PDUOnlineEditDetail } from '../models/PDUOnlineEditDetail';
+import type { PDUOnlineEditSaveData } from '../models/PDUOnlineEditSaveData';
+import type { PDUOnlineEditSendBack } from '../models/PDUOnlineEditSendBack';
+import type { PDUOnlineEditUpdateAuthorizedUsers } from '../models/PDUOnlineEditUpdateAuthorizedUsers';
+import type { PDUXlsxTemplateCreate } from '../models/PDUXlsxTemplateCreate';
+import type { PDUXlsxTemplateDetail } from '../models/PDUXlsxTemplateDetail';
+import type { PDUXlsxUpload } from '../models/PDUXlsxUpload';
+import type { PDUXlsxUploadDetail } from '../models/PDUXlsxUploadDetail';
 import type { Profile } from '../models/Profile';
 import type { ProgramAPI } from '../models/ProgramAPI';
 import type { ProgramChoices } from '../models/ProgramChoices';
@@ -10575,7 +10583,520 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedPeriodicDataUpdateTemplateListList
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PaginatedPDUOnlineEditListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
+        businessAreaSlug,
+        programSlug,
+        limit,
+        offset,
+        ordering,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `PENDING_CREATE` - Pending create
+         * * `NEW` - New
+         * * `READY` - Ready
+         * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
+         * * `MERGED` - Merged
+         * * `NOT_SCHEDULED_CREATE` - Not scheduled create
+         * * `CREATING` - Creating
+         * * `FAILED_CREATE` - Failed create
+         * * `CANCELED_CREATE` - Canceled create
+         * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
+         * * `MERGING` - Processing
+         * * `FAILED_MERGE` - Failed merge
+         * * `CANCELED_MERGE` - Canceled merge
+         */
+        status?: Array<'APPROVED' | 'CANCELED_CREATE' | 'CANCELED_MERGE' | 'CREATING' | 'FAILED_CREATE' | 'FAILED_MERGE' | 'MERGED' | 'MERGING' | 'NEW' | 'NOT_SCHEDULED_CREATE' | 'NOT_SCHEDULED_MERGE' | 'PENDING_CREATE' | 'PENDING_MERGE' | 'READY'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPDUOnlineEditListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: PDUOnlineEditCreate,
+    }): CancelablePromise<PDUOnlineEditCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<PDUOnlineEditDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditSaveData
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+        requestBody: PDUOnlineEditSaveData,
+    }): CancelablePromise<PDUOnlineEditSaveData> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/save_data/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditSendBack
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendBackCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+        requestBody: PDUOnlineEditSendBack,
+    }): CancelablePromise<PDUOnlineEditSendBack> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/send_back/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendForApprovalCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/send_for_approval/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PDUOnlineEditUpdateAuthorizedUsers
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUpdateAuthorizedUsersCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this pdu online edit.
+         */
+        id: number,
+        programSlug: string,
+        requestBody: PDUOnlineEditUpdateAuthorizedUsers,
+    }): CancelablePromise<PDUOnlineEditUpdateAuthorizedUsers> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/{id}/update_authorized_users/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns Bulk
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: Bulk,
+    }): CancelablePromise<Bulk> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/bulk_approve/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns Bulk
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: Bulk,
+    }): CancelablePromise<Bulk> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/bulk_merge/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+        ordering,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `PENDING_CREATE` - Pending create
+         * * `NEW` - New
+         * * `READY` - Ready
+         * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
+         * * `MERGED` - Merged
+         * * `NOT_SCHEDULED_CREATE` - Not scheduled create
+         * * `CREATING` - Creating
+         * * `FAILED_CREATE` - Failed create
+         * * `CANCELED_CREATE` - Canceled create
+         * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
+         * * `MERGING` - Processing
+         * * `FAILED_MERGE` - Failed merge
+         * * `CANCELED_MERGE` - Canceled merge
+         */
+        status?: Array<'APPROVED' | 'CANCELED_CREATE' | 'CANCELED_MERGE' | 'CREATING' | 'FAILED_CREATE' | 'FAILED_MERGE' | 'MERGED' | 'MERGING' | 'NEW' | 'NOT_SCHEDULED_CREATE' | 'NOT_SCHEDULED_MERGE' | 'PENDING_CREATE' | 'PENDING_MERGE' | 'READY'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'ordering': ordering,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * Provide an authorization check for the requesting user.
+     *
+     * Ensures the user is in the `authorized_users` list of the PDUOnlineEdit instance.
+     * If the action is a 'detail=False', it checks all instances specified in the 'ids' field of the request data.
+     * @returns PaginatedAuthorizedUserList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList({
+        businessAreaSlug,
+        programSlug,
+        limit,
+        offset,
+        ordering,
+        permission,
+        search,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Filter by permission
+         */
+        permission?: 'PDU_ONLINE_APPROVE' | 'PDU_ONLINE_MERGE' | 'PDU_ONLINE_SAVE_DATA',
+        /**
+         * Search users by first name, last name, username, or email.
+         */
+        search?: string,
+        /**
+         * * `PENDING_CREATE` - Pending create
+         * * `NEW` - New
+         * * `READY` - Ready
+         * * `APPROVED` - Approved
+         * * `PENDING_MERGE` - Pending merge
+         * * `MERGED` - Merged
+         * * `NOT_SCHEDULED_CREATE` - Not scheduled create
+         * * `CREATING` - Creating
+         * * `FAILED_CREATE` - Failed create
+         * * `CANCELED_CREATE` - Canceled create
+         * * `NOT_SCHEDULED_MERGE` - Not scheduled merge
+         * * `MERGING` - Processing
+         * * `FAILED_MERGE` - Failed merge
+         * * `CANCELED_MERGE` - Canceled merge
+         */
+        status?: Array<'APPROVED' | 'CANCELED_CREATE' | 'CANCELED_MERGE' | 'CREATING' | 'FAILED_CREATE' | 'FAILED_MERGE' | 'MERGED' | 'MERGING' | 'NEW' | 'NOT_SCHEDULED_CREATE' | 'NOT_SCHEDULED_MERGE' | 'PENDING_CREATE' | 'PENDING_MERGE' | 'READY'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedAuthorizedUserList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-online-edits/users_available/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'permission': permission,
+                'search': search,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPDUXlsxTemplateListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesList({
@@ -10603,7 +11124,7 @@ export class RestService {
         ordering?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedPeriodicDataUpdateTemplateListList> {
+    }): CancelablePromise<PaginatedPDUXlsxTemplateListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
@@ -10621,7 +11142,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PeriodicDataUpdateTemplateCreate
+     * @returns PDUXlsxTemplateCreate
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesCreate({
@@ -10631,8 +11152,8 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        requestBody: PeriodicDataUpdateTemplateCreate,
-    }): CancelablePromise<PeriodicDataUpdateTemplateCreate> {
+        requestBody: PDUXlsxTemplateCreate,
+    }): CancelablePromise<PDUXlsxTemplateCreate> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
@@ -10645,7 +11166,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PeriodicDataUpdateTemplateDetail
+     * @returns PDUXlsxTemplateDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
@@ -10655,11 +11176,11 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
         programSlug: string,
-    }): CancelablePromise<PeriodicDataUpdateTemplateDetail> {
+    }): CancelablePromise<PDUXlsxTemplateDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/',
@@ -10681,7 +11202,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
         programSlug: string,
@@ -10707,7 +11228,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update template.
+         * A unique integer value identifying this pdu xlsx template.
          */
         id: number,
         programSlug: string,
@@ -10723,7 +11244,41 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedPeriodicDataUpdateUploadListList
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPDUXlsxUploadListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsList({
@@ -10751,7 +11306,7 @@ export class RestService {
         ordering?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedPeriodicDataUpdateUploadListList> {
+    }): CancelablePromise<PaginatedPDUXlsxUploadListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/',
@@ -10769,7 +11324,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PeriodicDataUpdateUploadDetail
+     * @returns PDUXlsxUploadDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
@@ -10779,11 +11334,11 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A unique integer value identifying this periodic data update upload.
+         * A unique integer value identifying this pdu xlsx upload.
          */
         id: number,
         programSlug: string,
-    }): CancelablePromise<PeriodicDataUpdateUploadDetail> {
+    }): CancelablePromise<PDUXlsxUploadDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/{id}/',
@@ -10795,7 +11350,41 @@ export class RestService {
         });
     }
     /**
-     * @returns PeriodicDataUpdateUpload
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns PDUXlsxUpload
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate({
@@ -10805,8 +11394,8 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        formData: PeriodicDataUpdateUpload,
-    }): CancelablePromise<PeriodicDataUpdateUpload> {
+        formData: PDUXlsxUpload,
+    }): CancelablePromise<PDUXlsxUpload> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/upload/',

@@ -87,7 +87,7 @@ class SensitiveGrievanceTicketFactory(DjangoModelFactory):
     payment = None
 
     @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:  # noqa: N805
         household, individuals = create_household(
             household_args={"size": 2, "business_area": obj.ticket.business_area},
         )
@@ -113,7 +113,7 @@ class GrievanceComplaintTicketFactory(DjangoModelFactory):
     payment = None
 
     @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:  # noqa: N805
         household, individuals = create_household(
             household_args={"size": 2, "business_area": obj.ticket.business_area},
         )

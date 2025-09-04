@@ -3,6 +3,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
+from django.db import OperationalError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -128,7 +129,7 @@ class CreateOrUpdateDashReportView(APIView):
                 {"detail": _("DashReport generation task has been triggered.")},
                 status=status.HTTP_202_ACCEPTED,
             )
-        except Exception as e:
+        except OperationalError as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -12,10 +12,6 @@ from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.payment.models import AccountType
-from hope.apps.universal_update_script.celery_tasks import (
-    generate_universal_individual_update_template,
-    run_universal_individual_update,
-)
 from hope.apps.universal_update_script.models import DocumentType, UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
@@ -132,9 +128,9 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         "saved_logs",
         "logs_property",
         "backup_snapshot",
-        "task_status",
+        "task_statuses",
         "template_file",
-        "curr_async_result_id",
+        "celery_tasks_results_ids",
     )
     fieldsets = (
         (
@@ -145,8 +141,8 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
                     "template_file",
                     "update_file",
                     "unicef_ids",
-                    "task_status",
-                    "curr_async_result_id",
+                    "task_statuses",
+                    "celery_tasks_results_ids",
                 ),
             },
         ),
@@ -182,10 +178,10 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
 
     logs_property.short_description = "Live Logs"
 
-    def task_status(self, obj: UniversalUpdate) -> str:
-        return obj.celery_status or "-"
+    def task_statuses(self, obj: UniversalUpdate) -> dict:
+        return obj.celery_statuses
 
-    task_status.short_description = "Task Status"
+    task_statuses.short_description = "Task Statuses"
 
     @staticmethod
     def start_universal_update_task_visible(btn: Button) -> bool:
@@ -198,8 +194,8 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     )
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
-        universal_update.queue(generate_universal_individual_update_template)
-        self.message_user(request, "Gnerating Excel Template Task Scheduled")
+        universal_update.queue("generate_universal_individual_update_template")
+        self.message_user(request, "Generating Excel Template Task Scheduled")
 
     @button(
         label="Start Universal Update Task",
@@ -209,5 +205,5 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
-        universal_update.queue(run_universal_individual_update)
+        universal_update.queue("run_universal_individual_update")
         self.message_user(request, "Universal individual update task scheduled")
