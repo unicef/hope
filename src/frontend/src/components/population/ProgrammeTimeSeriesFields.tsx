@@ -59,7 +59,7 @@ export const ProgrammeTimeSeriesFields = ({
                 parseInt(roundNumber) - 1
               ];
             const value = roundData.value;
-            const dateOfCollection = roundData.collection_date;
+            const dateOfCollection = roundData.collectionDate;
             rows.push({
               key: `${pduDataDict[fieldName]}-roundNumber`,
               fieldName: pduDataDict[fieldName].label,

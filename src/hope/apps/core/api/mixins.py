@@ -106,6 +106,7 @@ class BusinessAreaMixin:
 
 class ProgramMixin:
     program_model_field = "program"
+    program_model_field_is_many = False
 
     @cached_property
     def business_area(self) -> BusinessArea:
@@ -132,16 +133,14 @@ class ProgramMixin:
         return context
 
     def get_queryset(self) -> QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .filter(
-                **{
-                    f"{self.program_model_field}__slug__in": [self.program_slug],
-                    f"{self.program_model_field}__business_area__slug": self.business_area_slug,
-                }
-            )
-        )
+        filter_by_program = {
+            f"{self.program_model_field}": self.program.id,
+        }
+        if self.program_model_field_is_many:
+            filter_by_program = {
+                f"{self.program_model_field}__in": [self.program.id],
+            }
+        return super().get_queryset().filter(**filter_by_program)
 
 
 class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
