@@ -17,8 +17,6 @@ from hope.apps.registration_data.services.mark_submissions import MarkSubmission
 
 
 class TestMarkSubmissions(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

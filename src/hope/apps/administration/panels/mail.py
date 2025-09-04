@@ -1,3 +1,4 @@
+from smtplib import SMTPException
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
@@ -64,7 +65,7 @@ def email(self: Any, request: HttpRequest, extra_context: dict | None = None) ->
                             messages.SUCCESS,
                             f"Email sent to {request.user.email}",
                         )
-        except Exception as e:
+        except SMTPException as e:
             logger.warning(e)
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")
     context["logs"] = logs

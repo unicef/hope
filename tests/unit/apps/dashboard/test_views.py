@@ -2,6 +2,7 @@ from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
 from django.core.cache import cache
+from django.db import OperationalError
 from django.http import Http404
 from django.test import RequestFactory
 from django.urls import reverse
@@ -132,14 +133,12 @@ def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: M
 @pytest.mark.django_db(databases=["default"])
 @patch(
     "hope.apps.dashboard.views.generate_dash_report_task.delay",
-    side_effect=Exception("Unexpected error"),
+    side_effect=OperationalError("Unexpected error"),
 )
 def test_create_or_update_dash_report_internal_server_error(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
-    """
-    Test that a 500 response is returned when an unexpected error occurs.
-    """
+    """Test that a 500 response is returned when an unexpected error occurs."""
     user = setup_client["user"]
     client = setup_client["client"]
     generate_report_url = setup_client["generate_report_url"]

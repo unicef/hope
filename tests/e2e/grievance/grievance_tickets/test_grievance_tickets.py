@@ -5,7 +5,7 @@ from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 import pytest
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -1304,7 +1304,7 @@ class TestGrievanceTickets:
                     "IND-00-0000.0011"
                 ).find_elements(By.TAG_NAME, "svg")
             ]
-        except BaseException:
+        except TimeoutException:
             sleep(4)
             assert "person-icon" not in [
                 ii.get_attribute("data-cy")

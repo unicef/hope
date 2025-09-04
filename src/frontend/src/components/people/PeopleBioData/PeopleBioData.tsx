@@ -59,7 +59,7 @@ export const PeopleBioData = ({
     <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={doc.type.label}>
+          <LabelizedField label={doc.type?.label}>
             {doc.photo ? (
               <DocumentPopulationPhotoModal
                 documentNumber={doc.documentNumber}
@@ -71,7 +71,7 @@ export const PeopleBioData = ({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{doc.country.name}</LabelizedField>
+        <LabelizedField label="issued">{doc.country?.name}</LabelizedField>
       </Box>
     </Grid>
   ));

@@ -18,8 +18,6 @@ from hope.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
 
 
 class TestFixingGrievanceTickets(BaseTestCase):
-    databases = "__all__"
-
     @parameterized.expand(
         [
             (True, DISABLED),

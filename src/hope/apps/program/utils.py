@@ -3,6 +3,7 @@ from secrets import randbelow
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from django.db.utils import IntegrityError
 from django.utils import timezone
 
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
@@ -463,7 +464,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
                 create_roles_for_new_representation(household, program, rdi)
-        except Exception as e:
+        except IntegrityError as e:
             error_message = str(e)
             if "unique_if_not_removed_and_valid_for_representations" in error_message:
                 if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):

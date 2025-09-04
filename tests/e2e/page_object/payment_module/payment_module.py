@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -152,6 +153,6 @@ class PaymentModule(BaseComponents):
         try:
             sleep(0.5)
             return self.get_elements(self.rows)[number]
-        except BaseException:
+        except TimeoutException:
             sleep(5)
             return self.get_elements(self.rows)[number]

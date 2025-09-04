@@ -6,6 +6,7 @@ from time import sleep
 from dateutil.relativedelta import relativedelta
 import openpyxl
 import pytest
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -372,7 +373,7 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_button_submit().click()
         try:
             page_payment_verification_details.get_button_new_plan().click()
-        except BaseException:
+        except (TimeoutException, StaleElementReferenceException):
             sleep(3)
             page_payment_verification_details.get_button_new_plan().click()
         page_payment_verification_details.get_button_submit().click()
