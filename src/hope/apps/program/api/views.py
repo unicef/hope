@@ -33,6 +33,7 @@ from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
     CountActionMixin,
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -481,12 +482,14 @@ class ProgramCycleViewSet(
         "partial_update": ProgramCycleUpdateSerializer,
     }
     permissions_by_action = {
-        "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST],
         "retrieve": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
         "create": [Permissions.PM_PROGRAMME_CYCLE_CREATE],
         "update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
         "partial_update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
         "destroy": [Permissions.PM_PROGRAMME_CYCLE_DELETE],
+        "finish": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+        "reactivate": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     }
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -517,17 +520,16 @@ class ProgramCycleViewSet(
             raise ValidationError("Only Draft Programme Cycle can be deleted.")
 
         if program_cycle.program.cycles.count() == 1:
-            raise ValidationError("Don’t allow to delete last Cycle.")
+            raise ValidationError("Don't allow to delete last Cycle.")
 
         if program_cycle.payment_plans.exists():
-            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
+            raise ValidationError("Don't allow to delete Cycle with assigned Target Population")
 
         program_cycle.delete()
 
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     )
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
@@ -537,7 +539,6 @@ class ProgramCycleViewSet(
     @action(
         detail=True,
         methods=["post"],
-        PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE],
     )
     def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
@@ -547,6 +548,7 @@ class ProgramCycleViewSet(
 
 class BeneficiaryGroupViewSet(
     mixins.ListModelMixin,
+    PermissionsMixin,
     GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]
