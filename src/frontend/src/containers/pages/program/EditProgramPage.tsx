@@ -217,12 +217,6 @@ const EditProgramPage = (): ReactElement => {
         'pduFields',
       ]);
 
-      console.log('pduFieldsToSend', pduFieldsToSend);
-      console.log(
-        'deepUnderscore(pduFieldsToSend)',
-        deepUnderscore(pduFieldsToSend),
-      );
-
       // Build the base programData object
       const programData: ProgramUpdate = {
         programmeCode: requestValuesDetails.programmeCode,
@@ -398,7 +392,6 @@ const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
-            console.log('values.pduFields', values.pduFields);
             const handleNextStep = async () => {
               await handleNext({
                 validateForm,
