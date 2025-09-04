@@ -321,7 +321,6 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         (acc, [, field]) => {
           const f = field as PduField;
           const backendKey = f.fieldName;
-          console.log('backendKey', backendKey);
 
           acc[backendKey] = {
             round_number: f.roundNumber,
@@ -379,7 +378,6 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       to: `/${baseUrl}/population/individuals`,
     },
   ];
-  console.log('allPduFields', allPduFields);
 
   return (
     <>
