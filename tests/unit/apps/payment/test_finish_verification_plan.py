@@ -117,6 +117,5 @@ class TestFinishVerificationPlan(TestCase):
     def test_finish_verification_if_pp_not_finished_yet(self) -> None:
         Payment.objects.all().update(status=Payment.STATUS_PENDING)
         assert not self.verification.payment_plan.is_reconciled
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(ValidationError, match="You can finish only if reconciliation is finalized"):
             VerificationPlanStatusChangeServices(self.verification).finish()
-        assert e.value.message == "You can finish only if reconciliation is finalized"
