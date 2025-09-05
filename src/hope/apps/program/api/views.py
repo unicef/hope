@@ -454,7 +454,7 @@ class ProgramViewSet(
         },
     )
     @action(detail=True, methods=["get"])
-    def payments(self) -> Response:
+    def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         page = self.paginate_queryset(payments)
