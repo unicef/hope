@@ -6,7 +6,6 @@ import { GreyText } from './GreyText';
 
 const PaperContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   background-color: #fff;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -15,7 +14,6 @@ const PaperContainer = styled(Box)`
 
 const BoxContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   width: 100%;
 `;
@@ -26,6 +24,7 @@ interface BaseSectionProps {
   title?: string | ReactElement;
   description?: string;
   p?: number;
+  containerPadding?: string | number | object;
   noPaper?: boolean;
   tabs?: ReactElement;
   stepper?: ReactElement;
@@ -37,6 +36,7 @@ export const BaseSection = ({
   title = '',
   description,
   p = 3,
+  containerPadding,
   noPaper = false,
   tabs = null,
   stepper = null,
@@ -44,8 +44,23 @@ export const BaseSection = ({
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
+  // Default to theme spacing if containerPadding is not provided
+  // theme.spacing(3) vertical, theme.spacing(4) horizontal
+  // We'll use MUI's sx prop for padding
+  const defaultPadding = { py: 3, px: 4 };
+  let containerSx;
+  if (containerPadding !== undefined) {
+    if (typeof containerPadding === 'object') {
+      containerSx = containerPadding;
+    } else {
+      containerSx = { p: containerPadding };
+    }
+  } else {
+    containerSx = defaultPadding;
+  }
+
   return (
-    <Container>
+    <Container sx={containerSx}>
       <Box p={p}>
         {stepper && <Box mb={2}>{stepper}</Box>}
         <Box

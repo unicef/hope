@@ -60,7 +60,7 @@ export const CreateImportFromProgramPopulationForm = ({
     businessAreaSlug: businessArea,
     beneficiaryGroupMatch: programId,
     compatibleDct: programId,
-    first: 100,
+    limit: 100,
   };
 
   const { data: programsData, isLoading: programsDataLoading } =

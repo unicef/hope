@@ -140,9 +140,8 @@ const NewOfflineTemplatePage = (): ReactElement => {
   const handleSubmit = (values) => {
     // Build filters object
     const filters = {
-      registration_data_import_id:
-        filter.registrationDataImportId?.value ?? null,
-      target_population_id: filter.targetPopulationId?.value ?? null,
+      registration_data_import_id: filter.registrationDataImportId ?? null,
+      target_population_id: filter.targetPopulationId ?? null,
       gender: filter.gender,
       age: {
         from: filter.ageFrom ? Number(filter.ageFrom) : null,
