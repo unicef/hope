@@ -120,7 +120,7 @@ def get_payment_items_for_dashboard(
 def get_quantity_in_usd(
     amount: Decimal,
     currency: str,
-    exchange_rate: Decimal,
+    exchange_rate: Union[Decimal, float],
     currency_exchange_date: datetime.datetime,
     exchange_rates_client: Optional["ExchangeRateClient"] = None,
 ) -> Optional[Decimal]:

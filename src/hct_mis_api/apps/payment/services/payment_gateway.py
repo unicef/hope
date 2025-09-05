@@ -588,7 +588,7 @@ class PaymentGatewayService:
         ).distinct()
 
         for payment_plan in payment_plans:
-            exchange_rate = payment_plan.get_exchange_rate()
+            exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
@@ -627,11 +627,11 @@ class PaymentGatewayService:
                 [pg_payment_record],
                 payment.parent_split,
                 payment.parent,
-                payment.parent.get_exchange_rate(),
+                payment.parent.exchange_rate,
             )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
-        exchange_rate = payment_plan.get_exchange_rate()
+        exchange_rate = payment_plan.exchange_rate
 
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
