@@ -39,7 +39,7 @@ class TestQCFReportsService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        partner_unicef = PartnerFactory(name="UNICEF")
+        partner_unicef = PartnerFactory(name="UNICEF_test")
         cls.user = UserFactory.create(partner=partner_unicef)
         role, created = Role.objects.update_or_create(
             name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
