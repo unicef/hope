@@ -1,8 +1,13 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Generator, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    Union,
+)
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_sync.mixin import SyncMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -39,11 +44,7 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(
-        self,
-        request: "HttpRequest",
-        params: dict[str, str],
-        model: type[Model],
-        model_admin: ModelAdmin,
+        self, request: "HttpRequest", params: dict[str, str], model: type[Model], model_admin: ModelAdmin
     ) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
@@ -159,7 +160,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",
