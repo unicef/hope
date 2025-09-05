@@ -42,7 +42,7 @@ export function AdminAreaAutocompleteMultipleRest({
       setLoading(true);
       try {
         const queryParams: { [key: string]: string } = {
-          first: '100',
+          limit: '100',
           name: capitalize(debouncedInputText),
           level: level.toString(),
         };
