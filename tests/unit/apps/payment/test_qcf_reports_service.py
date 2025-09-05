@@ -10,7 +10,7 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, User, UserRole
+from hope.apps.account.models import Role, User, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import (
     PaymentPlan,
@@ -44,7 +44,7 @@ class TestQCFReportsService(TestCase):
         role, created = Role.objects.update_or_create(
             name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
         cls.payment_plan = PaymentPlanFactory(
