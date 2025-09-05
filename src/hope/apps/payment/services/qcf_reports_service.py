@@ -270,9 +270,7 @@ class QCFReportsService:
         """
         business_area = report.payment_plan.business_area
         users = [
-            user
-            for user in User.objects.all()
-            if user.has_permission(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
+            user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
         for user in users:
             self.send_report_email_to_user(user, report)
