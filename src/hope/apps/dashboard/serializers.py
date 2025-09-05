@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 class DashboardBaseSerializer(serializers.Serializer):
-    total_delivered_quantity_usd = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_delivered_quantity_usd = serializers.DecimalField(max_digits=15, decimal_places=2)
     payments = serializers.IntegerField()
     individuals = serializers.IntegerField()
     households = serializers.IntegerField()
@@ -20,7 +20,7 @@ class DashboardBaseSerializer(serializers.Serializer):
     month = serializers.CharField(required=False)
     admin1 = serializers.CharField(required=False)
     currency = serializers.CharField(required=False)
-    total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    total_delivered_quantity = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
     country = serializers.CharField(required=False)
     region = serializers.CharField(required=False)
-    total_planned_usd = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    total_planned_usd = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)

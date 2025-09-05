@@ -57,4 +57,8 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role",
         "schedule": crontab(hour="*/24"),
     },
+    "periodic_sync_payment_plan_invoices_western_union_ftp": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp",
+        "schedule": crontab(hour="*/24"),
+    },
 }

@@ -13,6 +13,7 @@ from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hope.apps.utils.exceptions import log_and_raise
 
 
 class VerificationPlanStatusChangeServices:
@@ -123,6 +124,9 @@ class VerificationPlanStatusChangeServices:
             raise error
 
     def finish(self) -> PaymentVerificationPlan:
+        if not self.payment_verification_plan.payment_plan.is_reconciled:
+            log_and_raise("You can finish only if reconciliation is finalized")
+
         self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_FINISHED
         self.payment_verification_plan.completion_date = timezone.now()
         self.payment_verification_plan.save()

@@ -3,40 +3,40 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `ACCEPTED` - Accepted
+ * * `TP_OPEN` - Open
+ * * `TP_LOCKED` - Locked
+ * * `PROCESSING` - Processing
+ * * `STEFICON_WAIT` - Steficon Wait
+ * * `STEFICON_RUN` - Steficon Run
+ * * `STEFICON_COMPLETED` - Steficon Completed
+ * * `STEFICON_ERROR` - Steficon Error
  * * `DRAFT` - Draft
- * * `FINISHED` - Finished
+ * * `PREPARING` - Preparing
+ * * `OPEN` - Open
+ * * `LOCKED` - Locked
+ * * `LOCKED_FSP` - Locked FSP
  * * `IN_APPROVAL` - In Approval
  * * `IN_AUTHORIZATION` - In Authorization
  * * `IN_REVIEW` - In Review
- * * `TP_LOCKED` - Locked
- * * `LOCKED` - Locked
- * * `LOCKED_FSP` - Locked FSP
- * * `TP_OPEN` - Open
- * * `OPEN` - Open
- * * `PREPARING` - Preparing
- * * `PROCESSING` - Processing
- * * `STEFICON_COMPLETED` - Steficon Completed
- * * `STEFICON_ERROR` - Steficon Error
- * * `STEFICON_RUN` - Steficon Run
- * * `STEFICON_WAIT` - Steficon Wait
+ * * `ACCEPTED` - Accepted
+ * * `FINISHED` - Finished
  */
 export enum PaymentPlanStatusEnum {
-    ACCEPTED = 'ACCEPTED',
+    TP_OPEN = 'TP_OPEN',
+    TP_LOCKED = 'TP_LOCKED',
+    PROCESSING = 'PROCESSING',
+    STEFICON_WAIT = 'STEFICON_WAIT',
+    STEFICON_RUN = 'STEFICON_RUN',
+    STEFICON_COMPLETED = 'STEFICON_COMPLETED',
+    STEFICON_ERROR = 'STEFICON_ERROR',
     DRAFT = 'DRAFT',
-    FINISHED = 'FINISHED',
+    PREPARING = 'PREPARING',
+    OPEN = 'OPEN',
+    LOCKED = 'LOCKED',
+    LOCKED_FSP = 'LOCKED_FSP',
     IN_APPROVAL = 'IN_APPROVAL',
     IN_AUTHORIZATION = 'IN_AUTHORIZATION',
     IN_REVIEW = 'IN_REVIEW',
-    TP_LOCKED = 'TP_LOCKED',
-    LOCKED = 'LOCKED',
-    LOCKED_FSP = 'LOCKED_FSP',
-    TP_OPEN = 'TP_OPEN',
-    OPEN = 'OPEN',
-    PREPARING = 'PREPARING',
-    PROCESSING = 'PROCESSING',
-    STEFICON_COMPLETED = 'STEFICON_COMPLETED',
-    STEFICON_ERROR = 'STEFICON_ERROR',
-    STEFICON_RUN = 'STEFICON_RUN',
-    STEFICON_WAIT = 'STEFICON_WAIT',
+    ACCEPTED = 'ACCEPTED',
+    FINISHED = 'FINISHED',
 }

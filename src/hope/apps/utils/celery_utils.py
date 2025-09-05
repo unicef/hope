@@ -72,23 +72,24 @@ def get_all_celery_tasks(queue_name: str) -> list:
 
 
 def get_task_in_queue_or_running(
-    name: str,
-    all_celery_tasks: list | None = None,
-    args: list | None = None,
-    kwargs: dict | None = None,
+    name: str, all_celery_tasks: list | None = None, args: list | None = None, kwargs: dict | None = None
 ) -> dict | None:
     if all_celery_tasks is None:
         all_celery_tasks = get_all_celery_tasks("default")
+
     for task in all_celery_tasks:
         if task["name"] != name:
             continue
-        if args is not None:
-            if len(args) != len(task.get("args", [])):
-                continue
-            if not all(a == b for a, b in zip(args, task.get("args", []), strict=True)):
-                continue
+
+        if args is not None and (
+            len(args) != len(task.get("args", []))
+            or not all(a == b for a, b in zip(args, task.get("args", []), strict=False))
+        ):
+            continue
+
         if kwargs is not None and not all(task.get("kwargs", {}).get(key) == value for key, value in kwargs.items()):
             continue
+
         return task
 
     return None

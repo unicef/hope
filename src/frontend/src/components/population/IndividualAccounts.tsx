@@ -1,4 +1,5 @@
 import { DividerLine } from '@components/core/DividerLine';
+import React, { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
@@ -6,7 +7,6 @@ import { Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { renderSomethingOrDash } from '@utils/utils';
 import { t } from 'i18next';
-import { FC } from 'react';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -70,7 +70,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
                     </LabelizedField>
                   </Grid>
                 );
-})}
+                })}
               </Grid>
               {index < individual.accounts.length - 1 && <DividerLine />}
             </Grid>
