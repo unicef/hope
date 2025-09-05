@@ -1,4 +1,3 @@
-/* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -307,9 +306,15 @@ export const sendRequest = async (
   }
 
   onCancel(() => controller.abort());
-
-  let response = await fetch(url, request);
+  let  response = await fetch(url, request);
   const content = await response.json();
+  try {
+    if (response?.status == 403&&content?.detail!=="Authentication credentials were not provided.") {
+      window.location.href = '/access-denied/';
+    }
+  }catch (error) {
+    console.error(error);
+  }
   response.json = async () => {
     let camelized = deepCamelize(content);
     // Special handling for pdu_fields

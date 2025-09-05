@@ -53,6 +53,7 @@ export function LookUpSelectionTablesCommunication({
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
             permissions,
+
           )}
           enableRadioButton
           selectedTargetPopulation={values.targetPopulation}
