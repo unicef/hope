@@ -90,7 +90,7 @@ dependencies = [
   "nested-multipart-parser",
   "openpyxl==3.1.5",
   "openpyxl-image-loader>=1.0.5,<2",
-  "paramiko>=4.0.0",
+  "paramiko>=4",
   "phonenumbers>=8.12.49,<9",
   "pillow>=10.2,<11",
   "prompt-toolkit>=3.0.29,<4",
