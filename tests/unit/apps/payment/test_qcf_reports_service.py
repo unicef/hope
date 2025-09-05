@@ -10,7 +10,7 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, User, RoleAssignment
+from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import (
     PaymentPlan,
