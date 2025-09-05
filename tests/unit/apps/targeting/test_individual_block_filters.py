@@ -387,23 +387,27 @@ class TestIndividualBlockFilter(TestCase):
         empty_basic_query = payment_plan.get_basic_query()
         assert str(empty_basic_query) == "(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', []))))"
 
-        payment_plan.excluded_ids = "HH-1, HH-2"
+        payment_plan.excluded_ids = f"{self.household_1_indiv.unicef_id}, {self.household_2_indiv.unicef_id}"
         payment_plan.save()
         payment_plan.refresh_from_db()
 
         basic_query_1 = payment_plan.get_basic_query()
         assert not payment_plan.is_social_worker_program
-        assert str(basic_query_1) == "(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', ['HH-1', 'HH-2']))))"
+        assert str(basic_query_1) == (
+            f"(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', "
+            f"['{self.household_1_indiv.unicef_id}', "
+            f"'{self.household_2_indiv.unicef_id}']))))"
+        )
 
         self.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
         self.program.data_collecting_type.save()
-        payment_plan.excluded_ids = "IND_01, IND-02"
+        payment_plan.excluded_ids = f"{self.household_1_indiv.unicef_id}, {self.household_2_indiv.unicef_id}"
         payment_plan.save()
         payment_plan.refresh_from_db()
 
         assert payment_plan.is_social_worker_program
         basic_query_2 = payment_plan.get_basic_query()
         assert (
-            str(basic_query_2)
-            == "(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', ['IND_01', 'IND-02']))))"
+            str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', "
+            f"['{self.household_1_indiv.unicef_id}', '{self.household_2_indiv.unicef_id}']))))"
         )
