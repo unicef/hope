@@ -41,7 +41,7 @@ export function AccountField({
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const dataFields = account?.data ? JSON.parse(account.data) : {};
+  const dataFields = account?.dataFields || {};
 
   const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
 

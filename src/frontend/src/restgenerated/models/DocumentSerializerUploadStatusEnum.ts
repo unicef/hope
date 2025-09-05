@@ -3,16 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `ACTIVE` - Active
- * * `FINISHED` - Finished
  * * `PENDING` - Pending
+ * * `VALID` - Valid
+ * * `NEED_INVESTIGATION` - Need Investigation
  * * `INVALID` - Invalid
- * * `RAPID_PRO_ERROR` - RapidPro Error
  */
-export enum PaymentVerificationPlanStatusEnum {
-    ACTIVE = 'ACTIVE',
-    FINISHED = 'FINISHED',
+export enum DocumentSerializerUploadStatusEnum {
     PENDING = 'PENDING',
+    VALID = 'VALID',
+    NEED_INVESTIGATION = 'NEED_INVESTIGATION',
     INVALID = 'INVALID',
-    RAPID_PRO_ERROR = 'RAPID_PRO_ERROR',
 }

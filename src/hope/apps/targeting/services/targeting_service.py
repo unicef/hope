@@ -41,7 +41,7 @@ class TargetingCriteriaQueryingBase:
 
     def get_basic_query(self) -> Q:
         key_filter = "unicef_id__in" if not self.is_social_worker_program else "individuals__unicef_id__in"
-        return Q(withdrawn=False) & ~Q(**{key_filter: self.get_excluded_household_ids()})
+        return Q(withdrawn=False) & ~Q(**{key_filter: self.excluded_household_ids_targeting_level})
 
     def apply_targeting_criteria_exclusion_flags(self) -> Q:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()

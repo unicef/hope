@@ -2,14 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CountryEnum } from './CountryEnum';
-import type { DocumentTypeEnum } from './DocumentTypeEnum';
+import type { Country } from './Country';
+import type { DocumentType } from './DocumentType';
 export type Document = {
-    type: DocumentTypeEnum;
-    country: CountryEnum;
-    image?: string;
-    documentNumber: string;
-    issuanceDate?: string;
-    expiryDate?: string;
+    readonly id: string;
+    type: DocumentType;
+    country: Country;
+    documentNumber?: string;
+    photo?: string;
 };
 

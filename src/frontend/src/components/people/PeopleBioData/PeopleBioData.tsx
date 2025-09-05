@@ -59,9 +59,8 @@ export const PeopleBioData = ({
     <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          {/* @ts-ignore field available */}
           <LabelizedField label={doc.type?.label}>
-            {doc.image ? (
+            {doc.photo ? (
               <DocumentPopulationPhotoModal
                 documentNumber={doc.documentNumber}
                 documentId={doc.id}
@@ -72,7 +71,6 @@ export const PeopleBioData = ({
             )}
           </LabelizedField>
         </Box>
-        {/* @ts-ignore field available */}
         <LabelizedField label="issued">{doc.country?.name}</LabelizedField>
       </Box>
     </Grid>

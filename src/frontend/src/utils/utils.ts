@@ -163,36 +163,6 @@ export function populationStatusToColor(
   }
 }
 
-export function cashPlanStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'DISTRIBUTION_COMPLETED':
-      return theme.hctPalette.green;
-    case 'TRANSACTION_COMPLETED':
-      return theme.hctPalette.green;
-    default:
-      return theme.palette.error.main;
-  }
-}
-
-export function paymentRecordStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'PENDING':
-      return theme.hctPalette.orange;
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'PARTIALLY_DISTRIBUTED':
-      return theme.hctPalette.lightBlue;
-    default:
-      return theme.palette.error.main;
-  }
-}
 
 export function paymentStatusToColor(
   theme: typeof themeObj,

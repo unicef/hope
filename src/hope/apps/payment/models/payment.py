@@ -876,19 +876,12 @@ class PaymentPlan(
         return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_household_ids_targeting_level(self) -> list:
-        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+    def excluded_household_ids_targeting_level(self) -> list[str]:
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids) if self.excluded_ids else []
 
     @property
     def targeting_criteria_string(self) -> str:
         return Truncator(self.get_criteria_string()).chars(390, "...")
-
-    def get_excluded_household_ids(self) -> list[str]:
-        if not self.excluded_ids:
-            return []
-        hh_ids_list = []
-        hh_ids_list.extend(hh_id.strip() for hh_id in self.excluded_ids.split(",") if hh_id.strip())
-        return hh_ids_list
 
     def get_query(self) -> Q:
         query = super().get_query()

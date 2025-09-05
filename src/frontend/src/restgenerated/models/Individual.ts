@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Account } from './Account';
+import type { AccountLax } from './AccountLax';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
-import type { Document } from './Document';
+import type { DocumentSerializerLax } from './DocumentSerializerLax';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
@@ -24,9 +24,9 @@ export type Individual = {
     readonly household: string;
     observedDisability?: string;
     maritalStatus?: string;
-    documents?: Array<Document>;
+    documents?: Array<DocumentSerializerLax>;
     birthDate: string;
-    accounts?: Array<Account>;
+    accounts?: Array<AccountLax>;
     photo?: string | null;
     individualId: string;
     removedDate?: string | null;
