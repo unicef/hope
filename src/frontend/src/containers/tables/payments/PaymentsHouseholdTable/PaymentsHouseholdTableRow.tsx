@@ -4,8 +4,8 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
   formatCurrencyWithSymbol,
-  paymentRecordStatusToColor,
   paymentStatusDisplayMap,
+  paymentStatusToColor,
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
@@ -52,7 +52,7 @@ export function PaymentsHouseholdTableRow({
       <TableCell align="left">
         <StatusBox
           status={payment.status}
-          statusToColor={paymentRecordStatusToColor}
+          statusToColor={paymentStatusToColor}
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
