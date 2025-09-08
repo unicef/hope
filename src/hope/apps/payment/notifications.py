@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.utils.mailjet import MailjetClient
 
@@ -122,8 +121,8 @@ class PaymentNotification:
             "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
-                f"{encode_id_base64(self.payment_plan.program.id, 'Program')}/payment-module/payment-plans/"
-                f"{encode_id_base64(self.payment_plan.id, 'PaymentPlan')}"
+                f"{self.payment_plan.program.slug}/payment-module/payment-plans/"
+                f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,
             "payment_plan_creator": self.payment_plan_creator.get_full_name(),
