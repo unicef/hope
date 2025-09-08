@@ -200,11 +200,11 @@ const EditGrievancePage = (): ReactElement => {
 
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { first: 100 }, businessAreaSlug],
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessAreaSlug],
       queryFn: () =>
         RestService.restBusinessAreasProgramsList(
           createApiParams(
-            { businessAreaSlug, first: 100 },
+            { businessAreaSlug, limit: 100 },
             {
               withPagination: false,
             },
