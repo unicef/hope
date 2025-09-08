@@ -718,7 +718,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count(
                 "id",
-                filter=Q(status__in=Payment.FAILED_STATUSES),
+                filter=Q(status__in=tuple(set(Payment.FAILED_STATUSES) - {Payment.STATUS_NOT_DISTRIBUTED})),
             ),
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
