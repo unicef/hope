@@ -122,6 +122,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
+        if user.is_superuser:
+            return {e.value for e in Permissions}
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         if program_slug := request.query_params.get("program"):  # scope program
             if program := Program.objects.filter(slug=program_slug).first():

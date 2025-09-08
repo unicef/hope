@@ -293,7 +293,7 @@ export const GlobalProgramSelect = () => {
       setQueryParams({});
     } else {
       setQueryParams({
-        first: 10,
+        limit: 10,
         orderBy: 'name',
         status: [
           ProgramStatusEnum.ACTIVE,

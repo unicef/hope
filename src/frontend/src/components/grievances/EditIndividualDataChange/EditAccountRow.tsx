@@ -26,7 +26,7 @@ export function EditAccountRow({
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
-  const dataFields = JSON.parse(account.data);
+  const dataFields = account.dataFields;
   return isEdited ? (
     <>
       <AccountField
@@ -48,7 +48,7 @@ export function EditAccountRow({
           onClick={() => {
             arrayHelpers.remove({
               id: account.id,
-              ...account.data,
+              ...account.dataFields,
             });
             setEdit(false);
           }}

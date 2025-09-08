@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Account } from './Account';
+import type { AccountSerializerUpload } from './AccountSerializerUpload';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
@@ -11,7 +11,7 @@ import type { CountryEnum } from './CountryEnum';
 import type { CountryOriginEnum } from './CountryOriginEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
-import type { Document } from './Document';
+import type { DocumentSerializerUpload } from './DocumentSerializerUpload';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
@@ -29,8 +29,8 @@ export type PushPeople = {
     lastRegistrationDate?: string;
     observedDisability?: string;
     maritalStatus?: string;
-    documents?: Array<Document>;
-    accounts?: Array<Account>;
+    documents?: Array<DocumentSerializerUpload>;
+    accounts?: Array<AccountSerializerUpload>;
     birthDate: string;
     photo?: string;
     type: PushPeopleTypeEnum;
