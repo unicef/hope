@@ -7,6 +7,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -385,6 +386,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       <PageHeader
         title={`Online Edits Template Details${name ? `: ${name}` : ''}`}
         breadCrumbs={breadCrumbsItems}
+        flags={<AdminButton adminUrl={data.adminUrl} />}
         handleBack={() =>
           navigate(
             `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=online-edits`,
