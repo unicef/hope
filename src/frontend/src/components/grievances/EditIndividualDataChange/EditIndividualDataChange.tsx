@@ -81,13 +81,13 @@ function EditIndividualDataChange({
   });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
-    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id, individual.program.slug],
+    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
     queryFn: () => {
       if (!individual?.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug: individual.program.slug,
-        id: individual.id,
+        programSlug: programSlug,
+        id: individual?.id,
       });
     },
     enabled: !!individual?.id && !!businessAreaSlug,
