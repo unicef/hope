@@ -49,8 +49,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def validate(self) -> None:
         self._validate_headers()
-        self._validate_rows()
-        self._validate_imported_file()
+        if self.errors:
+            self._validate_rows()
+            self._validate_imported_file()
 
     def import_payment_list(self) -> None:
         exchange_rate = self.payment_plan.get_exchange_rate()
@@ -85,10 +86,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         Payment.objects.bulk_update(payments, fields=("signature_hash",))
 
     def _validate_headers(self) -> None:
-        required_headers = ["payment_id", "entitlement_quantity"]
         all_headers = [header.value for header in self.ws_payments[1]]
 
-        for required_header in required_headers:
+        for required_header in ["payment_id", "entitlement_quantity"]:
             if required_header not in all_headers:
                 self.errors.append(
                     XlsxError(
