@@ -29,6 +29,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             ProhibitNullCharactersValidator(),
         ],
         null=True,
+        blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
@@ -231,6 +232,7 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
             ProhibitNullCharactersValidator(),
         ],
         null=True,
+        blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
