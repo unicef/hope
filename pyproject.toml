@@ -103,7 +103,7 @@ dependencies = [
   "pytz>=2022.1,<2023",
   "pyyaml>=6,<7",
   "pyzipper>=0.3.6",
-  "sentry-sdk==2.8",
+  "sentry-sdk==2.37",
   "setuptools==71.1",
   "single-source>=0.3,<1",
   "social-auth-app-django>=5,<6",
