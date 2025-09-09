@@ -1,6 +1,5 @@
 import io
 from typing import Any, List
-from unittest import mock
 
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
