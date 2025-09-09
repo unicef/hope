@@ -1,4 +1,5 @@
 import logging.config
+from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -28,6 +29,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_qcf_report_email_notifications,
+    update_exchange_rate_on_release_payments,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
@@ -317,6 +319,58 @@ class TestPaymentCeleryTask(TestCase):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
+
+    @patch("hct_mis_api.apps.payment.celery_tasks.get_quantity_in_usd")
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_money_fields")
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate")
+    def test_update_exchange_rate_on_release_payments_success(
+        self,
+        mock_get_exchange_rate: Mock,
+        mock_update_money_fields: Mock,
+        mock_get_quantity_in_usd: Mock,
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+            exchange_rate=0.1,
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.exchange_rate, Decimal("0.10000000"))
+        payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
+
+        mock_get_exchange_rate.return_value = 1.25
+        mock_get_quantity_in_usd.return_value = 125.0
+
+        update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.exchange_rate, 1.25)
+
+        payment.refresh_from_db()
+        self.assertEqual(payment.entitlement_quantity_usd, 125.0)
+
+        mock_update_money_fields.assert_called_once()
+
+    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hct_mis_api.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
+    def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
+        self, mock_retry: Mock, mock_logger: Mock
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+        )
+        mock_retry.side_effect = Retry("force retry just for testing")
+
+        with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
+            with self.assertRaises(Retry):
+                update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+
+        mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
+        mock_retry.assert_called_once()
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
