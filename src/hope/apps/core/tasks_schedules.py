@@ -58,7 +58,7 @@ TASKS_SCHEDULES = {
         "schedule": crontab(hour="*/24"),
     },
     "periodic_sync_payment_plan_invoices_western_union_ftp": {
-        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp",
+        "task": "hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp",
         "schedule": crontab(hour="*/24"),
     },
 }
