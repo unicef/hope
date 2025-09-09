@@ -98,8 +98,8 @@ def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> bool:
             pdu_online_edit.status = PDUOnlineEdit.Status.MERGED
             pdu_online_edit.save(update_fields=["status"])
 
-        except Exception as e:
-            logger.exception("Failed to merge PDU online edit data: %s", e)
+        except Exception:
+            logger.exception("Failed to merge PDU online edit")
             pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_MERGE
             pdu_online_edit.save(update_fields=["status"])
             raise
@@ -155,5 +155,5 @@ def send_pdu_online_edit_notification_emails(
         action_user = User.objects.get(id=action_user_id)
         set_sentry_business_area_tag(pdu_online_edit.business_area.name)
         PDUOnlineEditNotification(pdu_online_edit, action, action_user, action_date_formatted).send_email_notification()
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Failed to send PDU Online Edit notification")
