@@ -126,6 +126,11 @@ CONSTANCE_CONFIG = {
         "Should send payment plans notification",
         bool,
     ),
+    "SEND_PDU_ONLINE_EDIT_NOTIFICATION": (
+        False,
+        "Should send PDU Online Edit notification",
+        bool,
+    ),
     "ENABLE_MAILJET": (
         False,
         "Enable sending emails via Mailjet",
@@ -134,6 +139,11 @@ CONSTANCE_CONFIG = {
     "MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION": (
         0,
         "Mailjet template id for payment plan notification",
+        int,
+    ),
+    "MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION": (
+        0,
+        "Mailjet template id for PDU Online Edit notification",
         int,
     ),
     "IGNORED_USER_LINKED_OBJECTS": (

@@ -7,6 +7,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -34,7 +35,7 @@ import {
 } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
@@ -73,6 +74,7 @@ function getUserRoles(
 
 const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const { businessArea, programId, baseUrl } = useBaseUrl();
+  const navigate = useNavigate();
   const { selectedProgram } = useProgramContext();
   const { id } = useParams();
   const { t } = useTranslation();
@@ -384,6 +386,12 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       <PageHeader
         title={`Online Edits Template Details${name ? `: ${name}` : ''}`}
         breadCrumbs={breadCrumbsItems}
+        flags={<AdminButton adminUrl={data.adminUrl} />}
+        handleBack={() =>
+          navigate(
+            `/${baseUrl}/population/individuals?tab=periodic-data-updates&subtab=online-edits`,
+          )
+        }
       >
         <>
           {status === 'NEW' && canSave && isAuthorized && (
