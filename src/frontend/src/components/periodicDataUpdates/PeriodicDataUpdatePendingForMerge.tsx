@@ -162,6 +162,12 @@ const PeriodicDataUpdatePendingForMerge = () => {
     .map((row: any) => row.id);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // If indeterminate (some selected, not all), clicking should deselect all
+    if (selected.length > 0 && selected.length < authorizedIds.length) {
+      setSelected([]);
+      return;
+    }
+    // Otherwise, toggle all
     if (event.target.checked) {
       setSelected(authorizedIds);
     } else {
@@ -247,10 +253,11 @@ const PeriodicDataUpdatePendingForMerge = () => {
             {headCell.id === 'checkbox' ? (
               <Checkbox
                 indeterminate={
-                  selected.length > 0 && selected.length < results.length
+                  selected.length > 0 && selected.length < authorizedIds.length
                 }
                 checked={
-                  selected.length > 0 && selected.length === results.length
+                  selected.length > 0 &&
+                  selected.length === authorizedIds.length
                 }
                 onChange={handleSelectAllClick}
                 slotProps={{ input: { 'aria-label': 'select all rows' } }}
@@ -275,7 +282,6 @@ const PeriodicDataUpdatePendingForMerge = () => {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       title="Periodic Data Updates pending for Merge"
-      onSelectAllClick={handleSelectAllClick}
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
       hidePagination={true}
