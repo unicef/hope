@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import UniqueConstraint
 
 from hope.apps.core.models import FileTemp
-from hope.apps.utils.models import CeleryEnabledModel, TimeStampedModel
+from hope.apps.utils.models import AdminUrlMixin, CeleryEnabledModel, TimeStampedModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
@@ -29,6 +29,7 @@ class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
             ProhibitNullCharactersValidator(),
         ],
         null=True,
+        blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
@@ -202,7 +203,7 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
         return status_dict[self.combined_status]
 
 
-class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
+class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
     class Status(models.TextChoices):
         PENDING_CREATE = "PENDING_CREATE", "Pending create"
         NEW = "NEW", "New"
@@ -231,6 +232,7 @@ class PDUOnlineEdit(TimeStampedModel, CeleryEnabledModel):
             ProhibitNullCharactersValidator(),
         ],
         null=True,
+        blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
