@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest import mock
 
 from django.test import TestCase
+from django.urls import reverse
 
 import openpyxl
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -13,6 +14,7 @@ from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     WesternUnionInvoice,
@@ -200,5 +202,30 @@ class TestQCFReportsService(TestCase):
             self.assertEqual(refunds_total, 0)
 
             with mock.patch.object(User, "email_user") as mock_email_user:
-                service.send_notification_emails(report)  # type: ignore
-                mock_email_user.assert_called_once()
+                with mock.patch(
+                    "hct_mis_api.apps.payment.services.qcf_reports_service.render_to_string"
+                ) as mock_render_to_string:
+                    service.send_notification_emails(report)  # type: ignore
+                    mock_email_user.assert_called_once()
+                    assert mock_render_to_string.call_count == 2
+                    args, kwargs = mock_render_to_string.call_args
+                    context = kwargs["context"]
+                    program_id = encode_id_base64(report.payment_plan.program.id, "Program")
+                    payment_plan_id = encode_id_base64(report.payment_plan.id, "PaymentPlan")
+                    plan_path = f"/{report.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{payment_plan_id}"
+                    plan_link = QCFReportsService.get_link(plan_path)
+                    report_link = QCFReportsService.get_link(
+                        reverse(
+                            "download-payment-plan-invoice-report-pdf",
+                            args=[encode_id_base64(report.id, "WesternUnionPaymentPlanReport")],
+                        )
+                    )
+
+                    assert context == {
+                        "first_name": getattr(self.user, "first_name", ""),
+                        "last_name": getattr(self.user, "last_name", ""),
+                        "email": getattr(self.user, "email", ""),
+                        "message": f"Payment Plan: {plan_link}",
+                        "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
+                        "link": f"Western Union QCF Report file: {report_link}",
+                    }

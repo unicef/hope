@@ -9,12 +9,17 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import (
+    PaymentPlan,
+    PaymentVerificationPlan,
+    WesternUnionPaymentPlanReport,
+)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.http import (
         HttpRequest,
+        HttpResponse,
         HttpResponsePermanentRedirect,
         HttpResponseRedirect,
     )
@@ -93,3 +98,14 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         return redirect(payment_plan.export_pdf_file_summary.file.url)
 
     log_and_raise(f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}", error_type=FileNotFoundError)
+
+
+@login_required
+def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: str) -> "HttpResponse":
+    report = WesternUnionPaymentPlanReport.objects.get(id=decode_id_string(report_id))
+    payment_plan = report.payment_plan
+
+    if not request.user.has_permission(Permissions.RECEIVE_PARSED_WU_QCF.value, payment_plan.business_area):
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    return redirect(report.report_file.file.url)
