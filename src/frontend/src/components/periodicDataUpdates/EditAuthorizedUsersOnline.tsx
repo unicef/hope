@@ -83,7 +83,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
               variant="contained"
               color="primary"
               type="submit"
-              disabled={isSubmitting || values.authorizedUsers.length === 0}
+              disabled={isSubmitting}
             >
               {t('Save')}
             </Button>
