@@ -78,6 +78,7 @@ class QCFReportsService:
         for filename, file_like in files:
             if not WesternUnionInvoice.objects.filter(name=filename).exists():
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
+                file_like.seek(0)  # rewind
                 self.process_zip_file(file_like, wu_qcf_file)
 
     def test_process_file(self, filename: str, file_like: io.BytesIO) -> None:

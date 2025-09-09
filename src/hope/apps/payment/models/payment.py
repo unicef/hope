@@ -33,6 +33,7 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
+from hope.apps.payment.models import Approval
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -915,8 +916,15 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> datetime:
-        now = timezone.now().date()
-        return min(now, self.dispersion_end_date)
+        if (
+            self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            and (process := self.approval_process.first())
+            and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
+        ):
+            return approval.created_at.date()
+        else:
+            now = timezone.now().date()
+            return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
     def can_create_payment_verification_plan(self) -> int:
