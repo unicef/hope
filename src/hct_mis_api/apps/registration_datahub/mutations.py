@@ -542,6 +542,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         pull_pictures = graphene.Boolean(required=True)
 
     @classmethod
+    @transaction.atomic()
     @is_authenticated
     def mutate(
         cls,
@@ -564,7 +565,8 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             pull_pictures=pull_pictures,
         )
-        pull_kobo_submissions_task.delay(import_data.id, program_id)
+        transaction.on_commit(lambda: pull_kobo_submissions_task.delay(import_data.id, program_id))
+
         return SaveKoboProjectImportDataAsync(import_data=import_data)
 
 
