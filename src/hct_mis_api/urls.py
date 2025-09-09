@@ -63,6 +63,11 @@ api_patterns = [
         name="download-payment-plan-summary-pdf",
     ),
     path(
+        "download-payment-plan-invoice-report-pdf/<str:report_id>",
+        hct_mis_api.apps.payment.views.download_payment_plan_invoice_report_pdf,
+        name="download-payment-plan-invoice-report-pdf",
+    ),
+    path(
         "download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
