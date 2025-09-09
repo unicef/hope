@@ -47,6 +47,7 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
+from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 from hope.apps.periodic_data_update.models import (
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
@@ -54,7 +55,6 @@ from hope.apps.periodic_data_update.models import (
     PDUXlsxUpload,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
-from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 
 logger = logging.getLogger(__name__)
 

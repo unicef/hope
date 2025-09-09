@@ -5,25 +5,85 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('periodic_data_update', '0002_migration'),
+        ("periodic_data_update", "0002_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pduonlineedit',
-            name='name',
-            field=models.CharField(blank=True, max_length=255, null=True, validators=[django.core.validators.MinLengthValidator(3), django.core.validators.MaxLengthValidator(255), django.core.validators.RegexValidator('\\s{2,}', 'Double spaces characters are not allowed.', code='double_spaces_characters_not_allowed', inverse_match=True), django.core.validators.RegexValidator('(^\\s+)|(\\s+$)', 'Leading or trailing spaces characters are not allowed.', code='leading_trailing_spaces_characters_not_allowed', inverse_match=True), django.core.validators.ProhibitNullCharactersValidator()]),
+            model_name="pduonlineedit",
+            name="name",
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                validators=[
+                    django.core.validators.MinLengthValidator(3),
+                    django.core.validators.MaxLengthValidator(255),
+                    django.core.validators.RegexValidator(
+                        "\\s{2,}",
+                        "Double spaces characters are not allowed.",
+                        code="double_spaces_characters_not_allowed",
+                        inverse_match=True,
+                    ),
+                    django.core.validators.RegexValidator(
+                        "(^\\s+)|(\\s+$)",
+                        "Leading or trailing spaces characters are not allowed.",
+                        code="leading_trailing_spaces_characters_not_allowed",
+                        inverse_match=True,
+                    ),
+                    django.core.validators.ProhibitNullCharactersValidator(),
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='pduonlineedit',
-            name='status',
-            field=models.CharField(choices=[('PENDING_CREATE', 'Pending create'), ('NEW', 'New'), ('READY', 'Ready'), ('APPROVED', 'Approved'), ('PENDING_MERGE', 'Pending merge'), ('MERGED', 'Merged'), ('NOT_SCHEDULED_CREATE', 'Not scheduled create'), ('CREATING', 'Creating'), ('FAILED_CREATE', 'Failed create'), ('CANCELED_CREATE', 'Canceled create'), ('NOT_SCHEDULED_MERGE', 'Not scheduled merge'), ('MERGING', 'Processing'), ('FAILED_MERGE', 'Failed merge'), ('CANCELED_MERGE', 'Canceled merge')], default='PENDING_CREATE', max_length=20),
+            model_name="pduonlineedit",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING_CREATE", "Pending create"),
+                    ("NEW", "New"),
+                    ("READY", "Ready"),
+                    ("APPROVED", "Approved"),
+                    ("PENDING_MERGE", "Pending merge"),
+                    ("MERGED", "Merged"),
+                    ("NOT_SCHEDULED_CREATE", "Not scheduled create"),
+                    ("CREATING", "Creating"),
+                    ("FAILED_CREATE", "Failed create"),
+                    ("CANCELED_CREATE", "Canceled create"),
+                    ("NOT_SCHEDULED_MERGE", "Not scheduled merge"),
+                    ("MERGING", "Processing"),
+                    ("FAILED_MERGE", "Failed merge"),
+                    ("CANCELED_MERGE", "Canceled merge"),
+                ],
+                default="PENDING_CREATE",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='pduxlsxtemplate',
-            name='name',
-            field=models.CharField(blank=True, max_length=255, null=True, validators=[django.core.validators.MinLengthValidator(3), django.core.validators.MaxLengthValidator(255), django.core.validators.RegexValidator('\\s{2,}', 'Double spaces characters are not allowed.', code='double_spaces_characters_not_allowed', inverse_match=True), django.core.validators.RegexValidator('(^\\s+)|(\\s+$)', 'Leading or trailing spaces characters are not allowed.', code='leading_trailing_spaces_characters_not_allowed', inverse_match=True), django.core.validators.ProhibitNullCharactersValidator()]),
+            model_name="pduxlsxtemplate",
+            name="name",
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                validators=[
+                    django.core.validators.MinLengthValidator(3),
+                    django.core.validators.MaxLengthValidator(255),
+                    django.core.validators.RegexValidator(
+                        "\\s{2,}",
+                        "Double spaces characters are not allowed.",
+                        code="double_spaces_characters_not_allowed",
+                        inverse_match=True,
+                    ),
+                    django.core.validators.RegexValidator(
+                        "(^\\s+)|(\\s+$)",
+                        "Leading or trailing spaces characters are not allowed.",
+                        code="leading_trailing_spaces_characters_not_allowed",
+                        inverse_match=True,
+                    ),
+                    django.core.validators.ProhibitNullCharactersValidator(),
+                ],
+            ),
         ),
     ]

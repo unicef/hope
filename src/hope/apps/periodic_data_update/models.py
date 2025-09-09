@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import UniqueConstraint
 
 from hope.apps.core.models import FileTemp
-from hope.apps.utils.models import CeleryEnabledModel, TimeStampedModel, AdminUrlMixin
+from hope.apps.utils.models import AdminUrlMixin, CeleryEnabledModel, TimeStampedModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 

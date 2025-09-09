@@ -6,9 +6,9 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.db import transaction
 
+from hope.apps.account.models import User
 from hope.apps.core.celery import app
 from hope.apps.core.models import FileTemp
-from hope.apps.account.models import User
 from hope.apps.periodic_data_update.models import (
     PDUOnlineEdit,
     PDUXlsxTemplate,

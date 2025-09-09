@@ -125,7 +125,9 @@ class PaymentNotification:
                 f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,
-            "payment_plan_creator": self.payment_plan_creator.get_full_name()  if self.payment_plan_creator else "Unknown",
+            "payment_plan_creator": self.payment_plan_creator.get_full_name()
+            if self.payment_plan_creator
+            else "Unknown",
             "payment_plan_creation_date": f"{self.payment_plan_creation_date:%-d %B %Y}",
             "action_user": self.action_user.get_full_name(),
             "action_date": self.action_date,
