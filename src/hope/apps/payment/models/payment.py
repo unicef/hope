@@ -33,7 +33,6 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
-from hope.apps.payment.models import Approval
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -49,6 +48,7 @@ from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import FEMALE, MALE, DocumentType, Household, Individual
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.apps.payment.managers import PaymentManager
+from hope.apps.payment.models import Approval
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.steficon.models import Rule, RuleCommit
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
@@ -922,9 +922,8 @@ class PaymentPlan(
             and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
             return approval.created_at.date()
-        else:
-            now = timezone.now().date()
-            return self.dispersion_end_date if self.dispersion_end_date < now else now
+        now = timezone.now().date()
+        return min(now, self.dispersion_end_date)
 
     @property
     def can_create_payment_verification_plan(self) -> int:

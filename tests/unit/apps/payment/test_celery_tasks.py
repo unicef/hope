@@ -1,5 +1,5 @@
-import logging.config
 from decimal import Decimal
+import logging.config
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
@@ -334,7 +334,7 @@ class TestPaymentCeleryTask(TestCase):
             exchange_rate=0.1,
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.exchange_rate, Decimal("0.10000000"))
+        assert payment_plan.exchange_rate == Decimal("0.10000000")
         payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
 
         mock_get_exchange_rate.return_value = 1.25
@@ -342,10 +342,10 @@ class TestPaymentCeleryTask(TestCase):
 
         update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.exchange_rate, 1.25)
+        assert payment_plan.exchange_rate == 1.25
 
         payment.refresh_from_db()
-        self.assertEqual(payment.entitlement_quantity_usd, 125.0)
+        assert payment.entitlement_quantity_usd == 125.0
 
         mock_update_money_fields.assert_called_once()
 
@@ -363,7 +363,7 @@ class TestPaymentCeleryTask(TestCase):
         mock_retry.side_effect = Retry("force retry just for testing")
 
         with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
-            with self.assertRaises(Retry):
+            with pytest.raises(Retry):
                 update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
 
         mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
