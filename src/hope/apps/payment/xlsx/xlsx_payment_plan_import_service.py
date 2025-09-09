@@ -49,7 +49,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def validate(self) -> None:
         self._validate_headers()
-        if self.errors:
+        if not self.errors:
             self._validate_rows()
             self._validate_imported_file()
 
