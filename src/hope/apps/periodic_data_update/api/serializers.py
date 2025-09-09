@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
     PDUOnlineEdit,
@@ -229,7 +230,7 @@ class PDUOnlineEditListSerializer(serializers.ModelSerializer):
         return user in obj.authorized_users.all()
 
 
-class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
+class PDUOnlineEditDetailSerializer(AdminUrlSerializerMixin, PDUOnlineEditListSerializer):
     sent_back_comment = PDUOnlineEditSentBackCommentSerializer()
     authorized_users = AuthorizedUserSerializer(many=True)
     approved_by = serializers.CharField(source="approved_by.get_full_name", default="")
@@ -244,6 +245,7 @@ class PDUOnlineEditDetailSerializer(PDUOnlineEditListSerializer):
             "edit_data",
             "authorized_users",
             "is_creator",
+            "admin_url",
         )
 
     def get_is_creator(self, obj: PDUOnlineEdit) -> bool:

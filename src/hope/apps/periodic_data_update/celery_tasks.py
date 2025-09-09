@@ -6,6 +6,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.db import transaction
 
+from hope.apps.account.models import User
 from hope.apps.core.celery import app
 from hope.apps.core.models import FileTemp
 from hope.apps.periodic_data_update.models import (
@@ -29,7 +30,7 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_data_update_template_version_cache_function,
 )
 from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
+from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +97,9 @@ def merge_pdu_online_edit_task(self: Any, pdu_online_edit_id: int) -> bool:
             service.merge_edit_data()
             pdu_online_edit.status = PDUOnlineEdit.Status.MERGED
             pdu_online_edit.save(update_fields=["status"])
-        except Exception as e:
-            logger.exception("Failed to merge PDU online edit data: %s", e)
+
+        except Exception:
+            logger.exception("Failed to merge PDU online edit")
             pdu_online_edit.status = PDUOnlineEdit.Status.FAILED_MERGE
             pdu_online_edit.save(update_fields=["status"])
             raise
@@ -134,3 +136,24 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
     except Exception as e:  # pragma: no cover
         logger.exception("Remove old PDU files Error")  # pragma: no cover
         raise self.retry(exc=e)  # pragma: no cover
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_pdu_online_edit_notification_emails(
+    self: Any,
+    pdu_online_edit_id: int,
+    action: str,
+    action_user_id: str,
+    action_date_formatted: str,
+) -> None:
+    from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
+
+    try:
+        pdu_online_edit = PDUOnlineEdit.objects.get(id=pdu_online_edit_id)
+        action_user = User.objects.get(id=action_user_id)
+        set_sentry_business_area_tag(pdu_online_edit.business_area.name)
+        PDUOnlineEditNotification(pdu_online_edit, action, action_user, action_date_formatted).send_email_notification()
+    except Exception:
+        logger.exception("Failed to send PDU Online Edit notification")

@@ -73,7 +73,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
         setSubmitting(false);
       }}
     >
-      {({ setFieldValue, values, handleSubmit, isSubmitting }) => (
+      {({ setFieldValue, handleSubmit, isSubmitting }) => (
         <form onSubmit={handleSubmit}>
           <PageHeader
             title={`${t('Edit Authorized Users')} - Template ID: ${id}`}
@@ -83,7 +83,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
               variant="contained"
               color="primary"
               type="submit"
-              disabled={isSubmitting || values.authorizedUsers.length === 0}
+              disabled={isSubmitting}
             >
               {t('Save')}
             </Button>
