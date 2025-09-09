@@ -223,7 +223,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def import_payment_list(self) -> None:
         self.logger.info("Starting importing payment list")
-        exchange_rate = self.payment_plan.get_exchange_rate()
+        exchange_rate = self.payment_plan.exchange_rate
 
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)

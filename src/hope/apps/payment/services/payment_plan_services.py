@@ -32,6 +32,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_notification_emails,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_to_payment_gateway,
+    update_exchange_rate_on_release_payments,
 )
 from hope.apps.payment.models import (
     Approval,
@@ -372,7 +373,8 @@ class PaymentPlanService:
             if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
-                # remove imported and export files
+                # AB#272790
+                transaction.on_commit(lambda: update_exchange_rate_on_release_payments.delay(str(self.payment_plan.id)))
 
             if approval_type == Approval.REJECT:
                 self.payment_plan.status_reject()
