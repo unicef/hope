@@ -317,9 +317,9 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.get_quantity_in_usd")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,
@@ -349,8 +349,8 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_update_money_fields.assert_called_once()
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
     def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
         self, mock_retry: Mock, mock_logger: Mock
     ) -> None:

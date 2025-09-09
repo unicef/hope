@@ -347,7 +347,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
-    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+    from hope.apps.payment.models import Payment, PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
