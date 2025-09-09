@@ -269,4 +269,3 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
         if permissions:
             assert KoboImportData.objects.count() == 1
-
