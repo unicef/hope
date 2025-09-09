@@ -51,7 +51,7 @@ Upon clicking “Next”, the programme partners page will appear where you can 
 
 #### Complete setup
 
-After clicking the save button, a page with the summary of the programme details will be displayed.
+After clicking the SAVE button, a page with the summary of the programme details will be displayed.
 
 Three actions can occur in the Programme Details page:
 
