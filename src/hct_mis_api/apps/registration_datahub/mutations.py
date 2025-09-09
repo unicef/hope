@@ -565,7 +565,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             pull_pictures=pull_pictures,
         )
-        transaction.on_commit(lambda: pull_kobo_submissions_task.delay(import_data.id, program_id))
+        transaction.on_commit(lambda: pull_kobo_submissions_task.delay(import_data.id, program_id))  # pragma: no cover
 
         return SaveKoboProjectImportDataAsync(import_data=import_data)
 
