@@ -100,6 +100,13 @@ export const DrawerItems = ({
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     let updatedMenuItems = [...items];
+
+    // When in global business area, only show Country Dashboard
+    if (businessArea === 'global') {
+      updatedMenuItems = updatedMenuItems.filter(
+        (item) => item.name === 'Country Dashboard',
+      );
+    }
     const getIndexByName = (name: string): number =>
       updatedMenuItems.findIndex((item) => item?.name === name);
     const programDetailsIndex = getIndexByName('Programme Details');

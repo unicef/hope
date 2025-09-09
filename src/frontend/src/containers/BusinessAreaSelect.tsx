@@ -91,7 +91,11 @@ export function BusinessAreaSelect(): ReactElement {
       const newBusinessArea = e.target.value;
       setSelectedBusinessArea(newBusinessArea);
       queryClient.clear();
-      navigate(`/${newBusinessArea}/programs/all/list`);
+      if (newBusinessArea === 'global') {
+        navigate('/global/programs/all/country-dashboard');
+      } else {
+        navigate(`/${newBusinessArea}/programs/all/list`);
+      }
     },
     [queryClient, navigate],
   );
