@@ -111,11 +111,8 @@ class TestPDUOnlineEditNotification(BaseTestCase):
             partner=partner_unicef_hq
         )  # UNICEF HQ has "Role with all permissions"
         cls.user_with_partner_unicef_in_ba = UserFactory(partner=partner_unicef_in_ba)  # has "Role for UNICEF Partners"
-        cls.user_with_partner_unicef_hq_authorized = UserFactory(
-            partner=partner_unicef_hq
-        )
+        cls.user_with_partner_unicef_hq_authorized = UserFactory(partner=partner_unicef_hq)
         cls.user_with_partner_unicef_in_ba_authorized = UserFactory(partner=partner_unicef_in_ba)
-
 
         # adjust "Role for UNICEF Partners" to have only approval permission
         role_for_unicef_partners = RoleFactory(name="Role for UNICEF Partners")
@@ -146,9 +143,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         )
 
         # users with approval permission
-        cls.user_with_approval_permission = UserFactory(
-            partner=partner_empty
-        )
+        cls.user_with_approval_permission = UserFactory(partner=partner_empty)
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission,
             [Permissions.PDU_ONLINE_APPROVE],
@@ -157,9 +152,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_authorized = UserFactory(
-            partner=partner_empty
-        )
+        cls.user_with_approval_permission_authorized = UserFactory(partner=partner_empty)
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_authorized,
             [Permissions.PDU_ONLINE_APPROVE],
@@ -327,7 +320,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         )
 
         actual_recipients = list(pdu_notification.user_recipients.all())
-        self.assertEqual(actual_recipients, [])
+        assert actual_recipients == []
 
     @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
     @mock.patch("hope.apps.utils.mailjet.MailjetClient.send_email")
@@ -475,9 +468,9 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         pdu_notification.send_email_notification()
         assert mock_send.call_count == 1
 
-        self.assertEqual(pdu_notification.email_subject, "PDU Online Edit pending for Approval")
-        self.assertEqual(pdu_notification.action_name, "sent for approval")
-        self.assertEqual(pdu_notification.recipient_title, "Approver")
+        assert pdu_notification.email_subject == "PDU Online Edit pending for Approval"
+        assert pdu_notification.action_name == "sent for approval"
+        assert pdu_notification.recipient_title == "Approver"
 
     @override_config(
         SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
@@ -497,9 +490,9 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         pdu_notification.send_email_notification()
         assert mock_send.call_count == 1
 
-        self.assertEqual(pdu_notification.email_subject, "PDU Online Edit pending for Merge")
-        self.assertEqual(pdu_notification.action_name, "approved")
-        self.assertEqual(pdu_notification.recipient_title, "Merger")
+        assert pdu_notification.email_subject == "PDU Online Edit pending for Merge"
+        assert pdu_notification.action_name == "approved"
+        assert pdu_notification.recipient_title == "Merger"
 
     @override_config(
         SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
@@ -519,9 +512,9 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         pdu_notification.send_email_notification()
         assert mock_send.call_count == 1
 
-        self.assertEqual(pdu_notification.email_subject, "PDU Online Edit sent back")
-        self.assertEqual(pdu_notification.action_name, "sent back")
-        self.assertEqual(pdu_notification.recipient_title, "Creator")
+        assert pdu_notification.email_subject == "PDU Online Edit sent back"
+        assert pdu_notification.action_name == "sent back"
+        assert pdu_notification.recipient_title == "Creator"
 
     def test_email_body_variables_content(self) -> None:
         pdu_notification = PDUOnlineEditNotification(
@@ -548,7 +541,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         ]
 
         for key in expected_keys:
-            self.assertIn(key, body_variables)
+            assert key in body_variables
 
         assert body_variables["first_name"] == "PDU Online Edit"
         assert body_variables["last_name"] == "Approver"
@@ -560,4 +553,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
         assert body_variables["action_user"] == self.user_action_user.get_full_name()
         assert body_variables["action_date"] == "1 January 2025"
         assert body_variables["program_name"] == self.program.name
-        assert f"/population/individuals/online-templates/{self.pdu_online_edit.id}" in body_variables["pdu_online_edit_url"]
+        assert (
+            f"/population/individuals/online-templates/{self.pdu_online_edit.id}"
+            in body_variables["pdu_online_edit_url"]
+        )

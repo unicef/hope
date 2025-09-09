@@ -115,7 +115,7 @@ class PDUOnlineEditNotification:
         if config.SEND_PDU_ONLINE_EDIT_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception: # pragma: no cover
+            except Exception:  # pragma: no cover
                 logger.exception("Failed to send PDU Online Edit notification")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
