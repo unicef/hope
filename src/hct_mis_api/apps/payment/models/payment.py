@@ -55,6 +55,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.models import Approval
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -880,8 +881,15 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> datetime:
-        now = timezone.now().date()
-        return self.dispersion_end_date if self.dispersion_end_date < now else now
+        if (
+            self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            and (process := self.approval_process.first())
+            and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
+        ):
+            return approval.created_at.date()
+        else:
+            now = timezone.now().date()
+            return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
     def can_create_payment_verification_plan(self) -> int:
