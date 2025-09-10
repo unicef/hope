@@ -264,8 +264,7 @@ class QCFReportsService:
             business_area=business_area,
         ).exclude(expiry_date__lt=timezone.now())
         users = User.objects.filter(
-            Q(role_assignments__in=role_assignments) |
-            Q(partner__role_assignments__in=role_assignments)
+            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
         ).distinct()
 
         for user in users:

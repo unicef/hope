@@ -41,7 +41,8 @@ class TestQCFReportsService(TestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory.create(partner=partner_unicef)
+        partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory.create(partner=partner_unicef_hq)
         role, _ = Role.objects.update_or_create(
             name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
@@ -141,47 +142,47 @@ class TestQCFReportsService(TestCase):
             # Check 1st payment row
             row_values = [cell.value for cell in ws[2]]
             assert row_values == [
-                    self.p1.unicef_id,
-                    "0486455966",
-                    True,
-                    "0486455966",
-                    self.p1.parent.unicef_id,
-                    self.program.name,
-                    None,
-                    262.55,
-                    7.88,
-                    0,
-                ]
+                self.p1.unicef_id,
+                "0486455966",
+                True,
+                "0486455966",
+                self.p1.parent.unicef_id,
+                self.program.name,
+                None,
+                262.55,
+                7.88,
+                0,
+            ]
 
             # Check 2nd payment row
             row_values = [cell.value for cell in ws[3]]
             assert row_values == [
-                    self.p2.unicef_id,
-                    "1131933875",
-                    False,
-                    "669",
-                    self.p2.parent.unicef_id,
-                    self.program.name,
-                    None,
-                    262.55,
-                    7.88,
-                    0,
-                ]
+                self.p2.unicef_id,
+                "1131933875",
+                False,
+                "669",
+                self.p2.parent.unicef_id,
+                self.program.name,
+                None,
+                262.55,
+                7.88,
+                0,
+            ]
 
             # Check 3rd payment row
             row_values = [cell.value for cell in ws[4]]
             assert row_values == [
-                    self.p3.unicef_id,
-                    "1389434830",
-                    False,
-                    None,
-                    self.p3.parent.unicef_id,
-                    self.program.name,
-                    None,
-                    665.22,
-                    19.96,
-                    0,
-                ]
+                self.p3.unicef_id,
+                "1389434830",
+                False,
+                None,
+                self.p3.parent.unicef_id,
+                self.program.name,
+                None,
+                665.22,
+                19.96,
+                0,
+            ]
 
             # Optionally, check totals
             last_row = ws.max_row
@@ -204,8 +205,10 @@ class TestQCFReportsService(TestCase):
                     context = kwargs["context"]
                     program_slug = report.payment_plan.program.slug
                     payment_plan_id = report.payment_plan.id
-                    plan_path = (f"/{report.payment_plan.business_area.slug}/"
-                                 f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}")
+                    plan_path = (
+                        f"/{report.payment_plan.business_area.slug}/"
+                        f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+                    )
                     plan_link = QCFReportsService.get_link(plan_path)
                     report_link = QCFReportsService.get_link(
                         reverse(
