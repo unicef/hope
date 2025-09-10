@@ -75,7 +75,7 @@ class TestQCFReportsService(TestCase):
         cls.p3.save()
 
     @mock.patch(
-        "hct_mis_api.apps.payment.services.qcf_reports_service.WesternUnionFTPClient",
+        "hope.apps.payment.services.qcf_reports_service.WesternUnionFTPClient",
         WUClientMock,
     )
     def test_process_files_since_with_real_zip(self) -> None:
@@ -197,7 +197,7 @@ class TestQCFReportsService(TestCase):
 
             with mock.patch.object(User, "email_user") as mock_email_user:
                 with mock.patch(
-                    "hct_mis_api.apps.payment.services.qcf_reports_service.render_to_string"
+                    "hope.apps.payment.services.qcf_reports_service.render_to_string"
                 ) as mock_render_to_string:
                     service.send_notification_emails(report)  # type: ignore
                     mock_email_user.assert_called_once()
