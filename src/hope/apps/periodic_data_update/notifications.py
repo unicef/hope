@@ -22,7 +22,7 @@ class PDUOnlineEditNotification:
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PDU_ONLINE_APPROVE.name,
         ACTION_APPROVE: Permissions.PDU_ONLINE_MERGE.name,
-        ACTION_SEND_BACK: None,  # Special case - notify the creator
+        ACTION_SEND_BACK: Permissions.PDU_ONLINE_SAVE_DATA.name,
     }
 
     ACTION_PREPARE_EMAIL_BODIES_MAP = {
@@ -39,7 +39,7 @@ class PDUOnlineEditNotification:
         ACTION_SEND_BACK: {
             "action_name": "sent back",
             "subject": "PDU Online Edit sent back",
-            "recipient_title": "Creator",
+            "recipient_title": "Editor",
         },
     }
 
@@ -64,10 +64,6 @@ class PDUOnlineEditNotification:
         self.enable_email_notification = self.pdu_online_edit.business_area.enable_email_notification
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
-        if self.action == self.ACTION_SEND_BACK:
-            # For send back action, notify the creator
-            return User.objects.filter(id=self.pdu_creator.id).exclude(id=self.action_user.id)
-
         permission = self.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
         business_area = self.pdu_online_edit.business_area
         program = self.pdu_online_edit.program
