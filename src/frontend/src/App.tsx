@@ -8,17 +8,33 @@ import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSw
 import { BaseHomeRouter } from '@containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgramRoutesSwitch';
 import { AutoLogout } from '@core/AutoLogout';
-import React, { FC, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
+import { FC, useEffect } from 'react';
 import {
   createBrowserRouter,
   Route,
   RouterProvider,
   Routes,
+  useLocation,
   useNavigate,
   useParams,
 } from 'react-router-dom';
 import { Providers } from './providers';
-import * as Sentry from '@sentry/react';
+
+const GlobalDashboardRedirect: FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const path = location.pathname;
+    if (
+      path.startsWith('/global') &&
+      path !== '/global/programs/all/country-dashboard'
+    ) {
+      navigate('/global/programs/all/country-dashboard', { replace: true });
+    }
+  }, [location, navigate]);
+  return null;
+};
 
 const RedirectToPrograms: FC = () => {
   const navigate = useNavigate();
@@ -32,38 +48,41 @@ const RedirectToPrograms: FC = () => {
 };
 
 const Root: FC = () => (
-  <Routes>
-    <Route path="/login/*" element={<LoginPage />} />
-    <Route path="/maintenance/*" element={<MaintenancePage />} />
-    <Route path="/404/*" element={<PageNotFound />} />
-    <Route path="/access-denied/*" element={<AccessDenied />} />
-    <Route path="/error/*" element={<SomethingWentWrong />} />
-    <Route
-      path="/sentry-check"
-      element={
-        <button
-          type="button"
-          onClick={() => {
-            throw new Error('Am I working?');
-          }}
-        >
-          Throw new error
-        </button>
-      }
-    />
-    <Route element={<BaseHomeRouter />}>
+  <>
+    <GlobalDashboardRedirect />
+    <Routes>
+      <Route path="/login/*" element={<LoginPage />} />
+      <Route path="/maintenance/*" element={<MaintenancePage />} />
+      <Route path="/404/*" element={<PageNotFound />} />
+      <Route path="/access-denied/*" element={<AccessDenied />} />
+      <Route path="/error/*" element={<SomethingWentWrong />} />
       <Route
-        path="/:businessArea/programs/all/*"
-        element={<AllProgramsRoutesSwitch />}
+        path="/sentry-check"
+        element={
+          <button
+            type="button"
+            onClick={() => {
+              throw new Error('Am I working?');
+            }}
+          >
+            Throw new error
+          </button>
+        }
       />
-      <Route
-        path="/:businessArea/programs/:programId/*"
-        element={<SelectedProgramRoutesSwitch />}
-      />
-    </Route>
-    <Route path="/" element={<DefaultRoute />} />
-    <Route path="/:businessArea" element={<RedirectToPrograms />} />
-  </Routes>
+      <Route element={<BaseHomeRouter />}>
+        <Route
+          path="/:businessArea/programs/all/*"
+          element={<AllProgramsRoutesSwitch />}
+        />
+        <Route
+          path="/:businessArea/programs/:programId/*"
+          element={<SelectedProgramRoutesSwitch />}
+        />
+      </Route>
+      <Route path="/" element={<DefaultRoute />} />
+      <Route path="/:businessArea" element={<RedirectToPrograms />} />
+    </Routes>
+  </>
 );
 
 const sentryCreateBrowserRouter =
