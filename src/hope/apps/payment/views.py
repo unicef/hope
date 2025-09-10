@@ -1,14 +1,13 @@
 import logging
 from typing import TYPE_CHECKING, Union
 
-from apps.payment.models import WesternUnionPaymentPlanReport
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan, PaymentVerificationPlan
+from hope.apps.payment.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
