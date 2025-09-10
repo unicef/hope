@@ -233,13 +233,13 @@ class TestQCFReportsService(TestCase):
             )
 
             # test download with perm
-            self.client.force_login(self.user)
+            self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
             response = self.client.get(download_link)
             assert response.status_code == 302
-            assert f"/api/download-payment-plan-invoice-report-pdf/{report.id}" in response.url
+            assert f"/api/uploads/{report.report_file.file.name}" in response.url
 
             # test download wo perm
             self.role_ass.delete()
-            self.client.force_login(self.user)
+            self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
             response = self.client.get(download_link)
             assert response.status_code == 403
