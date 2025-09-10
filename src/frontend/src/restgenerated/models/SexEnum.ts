@@ -5,6 +5,9 @@
 /**
  * * `MALE` - Male
  * * `FEMALE` - Female
+ * * `OTHER` - Other
+ * * `NOT_COLLECTED` - Not collected
+ * * `NOT_ANSWERED` - Not answered
  */
 export enum SexEnum {
     MALE = 'MALE',

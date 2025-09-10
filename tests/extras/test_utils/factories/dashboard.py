@@ -1,4 +1,5 @@
 import factory
+
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 
 
@@ -9,4 +10,11 @@ class ModifiedPaymentFactory(PaymentFactory):
     """
 
     parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
-    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
+    status = factory.Iterator(
+        [
+            "Transaction Successful",
+            "Distribution Successful",
+            "Partially Distributed",
+            "Pending",
+        ]
+    )

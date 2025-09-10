@@ -2,11 +2,10 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
-
-import pytz
 from parameterized import parameterized
+import pytz
 
-from hct_mis_api.apps.core.utils import timezone_datetime
+from hope.apps.core.utils import timezone_datetime
 
 
 class TestTimezoneDatetime(TestCase):
@@ -18,4 +17,4 @@ class TestTimezoneDatetime(TestCase):
         ]
     )
     def test_timezone_datetime(self, date: datetime.date) -> None:
-        self.assertEqual(timezone_datetime(date), timezone.datetime(2022, 9, 24, tzinfo=pytz.utc))
+        assert timezone_datetime(date) == timezone.datetime(2022, 9, 24, tzinfo=pytz.utc)

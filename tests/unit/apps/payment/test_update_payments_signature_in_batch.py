@@ -6,9 +6,8 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.models import Payment
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
 
 class TestUpdatePaymentsSignatureInBatch(TestCase):
@@ -59,9 +58,9 @@ class TestUpdatePaymentsSignatureInBatch(TestCase):
 
     def test_number_of_queries(self) -> None:
         Payment.objects.all().update(signature_hash="")
-        self.assertEqual(Payment.objects.filter(signature_hash="").count(), 3)
-        self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 0)
+        assert Payment.objects.filter(signature_hash="").count() == 3
+        assert Payment.objects.exclude(signature_hash="").count() == 0
         with self.assertNumQueries(8):
             PaymentPlanService(self.payment_plan).recalculate_signatures_in_batch(2)
-        self.assertEqual(Payment.objects.filter(signature_hash="").count(), 0)
-        self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 3)
+        assert Payment.objects.filter(signature_hash="").count() == 0
+        assert Payment.objects.exclude(signature_hash="").count() == 3

@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CommentIcon from '@mui/icons-material/Comment';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  AllGrievanceTicketQuery,
-  useBulkUpdateGrievanceAddNoteMutation,
-} from '@generated/graphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { BulkGrievanceTicketsAddNote } from '@restgenerated/models/BulkGrievanceTicketsAddNote';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -19,36 +20,54 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkAddNoteModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
-  businessArea: string;
+  selectedTickets: GrievanceTicketList[];
   setSelected;
 }
 
 export function BulkAddNoteModal({
   selectedTickets,
-  businessArea,
   setSelected,
 }: BulkAddNoteModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = useState<string>('');
-  const [mutate] = useBulkUpdateGrievanceAddNoteMutation();
-  const onSave = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          note: value,
-          businessAreaSlug: businessArea,
-          grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
-        },
-        refetchQueries: ['AllGrievanceTicket'],
-        awaitRefetchQueries: true,
+  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkGrievanceTicketsAddNote) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
+        businessAreaSlug,
+        formData: params,
       });
+    },
+    onSuccess: () => {
+      if (isAllPrograms) {
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasGrievanceTickets'],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasProgramsGrievanceTickets',
+            { program: programId },
+          ],
+        });
+      }
       setSelected([]);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      throw e;
-    }
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
+
+  const onSave = async (): Promise<void> => {
+    await mutateAsync({
+      grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+      note: value,
+    });
   };
 
   return (

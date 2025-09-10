@@ -12,9 +12,9 @@ title: Setup
 
 
 ## Get started
-### Backend 
+### Backend
 1. Clone the repository
-    
+
     ```bash
     git clone git@github.com:unicef/hope.git
     ```
@@ -56,7 +56,7 @@ In a new terminal window
     ```bash
     yarn dev
     ```
-   
+
 ## Access the application
 - Admin panel is running on `http://localhost:3000/api/unicorn/`
 - Login with the superuser credentials created in step 6 of the backend setup

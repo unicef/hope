@@ -1,24 +1,24 @@
 from unittest.mock import patch
 
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
+from hope.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
 
 
-class TestCoreFields(APITestCase):
+class TestCoreFields(BaseTestCase):
     def setUp(self) -> None:
         self.scopes = [Scope.GLOBAL, Scope.XLSX_PEOPLE]
         super().setUp()
 
     def test_all_fields_have_lookup(self) -> None:
         for field in get_core_fields_attributes():
-            self.assertTrue(field.get("lookup"), f'{field.get("name")} does not have a lookup')
+            assert field.get("lookup"), f"{field.get('name')} does not have a lookup"
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        "hope.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
         lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -31,7 +31,13 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                    Scope.XLSX_PEOPLE,
+                ],
             },
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce524",
@@ -44,7 +50,12 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name1_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                ],
             },
             {
                 "id": "36ab3421-6e7a-40d1-b816-ea5cbdcc0b6a",
@@ -63,10 +74,10 @@ class TestCoreFields(APITestCase):
     )
     def test_xlsx_people_scope_filtering(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
-        self.assertEqual(len(factory_result), 2)
+        assert len(factory_result) == 2
 
     @patch(
-        "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+        "hope.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
         lambda: [
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -79,14 +90,20 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                    Scope.XLSX_PEOPLE,
+                ],
             }
         ],
     )
     def test_xlsx_people_scope_modification(self) -> None:
         factory_result = FieldFactory.from_only_scopes(self.scopes)
-        self.assertEqual(factory_result[0]["xlsx_field"], "pp_given_name_i_c")
+        assert factory_result[0]["xlsx_field"] == "pp_given_name_i_c"
 
     def test_get_all_core_fields_choices(self) -> None:
         choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(choices[0], ("age", "Age (calculated)"))
+        assert choices[0] == ("age", "Age (calculated)")

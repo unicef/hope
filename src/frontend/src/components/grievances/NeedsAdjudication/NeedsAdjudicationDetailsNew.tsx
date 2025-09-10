@@ -6,17 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { ApproveBox } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { NeedsAdjudicationActions } from './NeedsAdjudicationActions';
 import { NeedsAdjudicationTable } from './NeedsAdjudicationTable';
-import { GrievanceTicketQuery } from '@generated/graphql';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export const NeedsAdjudicationDetailsNew = ({
   ticket,
   canApprove,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
-  const details = ticket.needsAdjudicationTicketDetails;
+  const details = ticket.ticketDetails;
   const {
     extraData,
     goldenRecordsIndividual,
@@ -63,8 +63,7 @@ export const NeedsAdjudicationDetailsNew = ({
   const isTicketForApproval =
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
-  const { selectedDuplicates, selectedDistinct } =
-    ticket.needsAdjudicationTicketDetails;
+  const { selectedDuplicates, selectedDistinct } = ticket.ticketDetails;
 
   const markedDuplicateInPossibleDuplicates = [
     ...selectedDuplicates

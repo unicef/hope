@@ -1,5 +1,7 @@
 from typing import Any
 
+from parameterized import parameterized
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
@@ -7,52 +9,15 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.grievance.management.commands.fix_grievance_tickets import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.grievance.management.commands.fix_grievance_tickets import (
     fix_disability_fields,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
 
 
-class TestFixingGrievanceTickets(APITestCase):
-    databases = "__all__"
-
-    CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
-    mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
-      createGrievanceTicket(input:$input){
-        grievanceTickets{
-          description
-          category
-          issueType
-          individualDataUpdateTicketDetails{
-            individual{
-              fullName
-            }
-            individualData
-          }
-          sensitiveTicketDetails{
-            id
-          }
-          householdDataUpdateTicketDetails{
-            household{
-              id
-            }
-            householdData
-          }
-          addIndividualTicketDetails{
-            household{
-              id
-            }
-            individualData
-          }
-        }
-      }
-    }
-    """
-
+class TestFixingGrievanceTickets(BaseTestCase):
     @parameterized.expand(
         [
             (True, DISABLED),
@@ -94,13 +59,13 @@ class TestFixingGrievanceTickets(APITestCase):
         )
         self.individual = individuals[0]
 
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert GrievanceTicket.objects.count() == 0
         ticket = GrievanceTicketFactory(
             business_area=self.business_area,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 1
         TicketIndividualDataUpdateDetailsFactory(
             ticket=ticket,
             individual=self.individual,
@@ -110,18 +75,12 @@ class TestFixingGrievanceTickets(APITestCase):
                 }
             },
         )
-        self.assertEqual(
-            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
-            previous_value,
-        )
+        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == previous_value
 
         fix_disability_fields()
 
         ticket.refresh_from_db()
-        self.assertEqual(
-            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
-            new_value,
-        )
+        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == new_value
 
     def test_skipping_when_ind_data_update_ticket_details_does_not_exist(self) -> None:
         self.user = UserFactory.create()
@@ -158,13 +117,13 @@ class TestFixingGrievanceTickets(APITestCase):
         )
         self.individual = individuals[0]
 
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert GrievanceTicket.objects.count() == 0
         GrievanceTicketFactory(
             business_area=self.business_area,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 1
 
         fix_disability_fields()
         # didn't throw, so it skipped ticket with not existing TicketIndividualDataUpdateDetailsFactory

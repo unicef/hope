@@ -2,7 +2,6 @@ import { Box, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { ContentLink } from '@core/ContentLink';
@@ -14,11 +13,12 @@ import {
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function OtherRelatedTickets({
   ticket,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -30,23 +30,25 @@ export function OtherRelatedTickets({
   const { existingTickets, linkedTickets } = ticket;
 
   const renderIds = (tickets): ReactElement =>
-    tickets.length
-      ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.id,
-            edge.category,
-            baseUrl,
-          );
+    tickets.length ? (
+      tickets.map((edge) => {
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          edge.id,
+          edge.category,
+          baseUrl,
+        );
 
-          return (
-            <Box key={edge.id} mb={1}>
-              <ContentLink href={grievanceDetailsPath}>
-                {edge.unicefId}
-              </ContentLink>
-            </Box>
-          );
-        })
-      : '-';
+        return (
+          <Box key={edge.id} mb={1}>
+            <ContentLink href={grievanceDetailsPath}>
+              {edge.unicefId}
+            </ContentLink>
+          </Box>
+        );
+      })
+    ) : (
+      <>-</>
+    );
 
   const openExistingTickets =
     ticket.household?.id && existingTickets.length

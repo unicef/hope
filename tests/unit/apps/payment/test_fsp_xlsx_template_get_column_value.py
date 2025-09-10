@@ -1,4 +1,4 @@
-from typing import Any
+from parameterized import parameterized
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -14,22 +14,20 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from parameterized import parameterized
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.models import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 
 
-class FinancialServiceProviderXlsxTemplateTest(APITestCase):
+class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -66,7 +64,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
         # return empty string if no document
-        self.assertEqual(result, "")
+        assert result == ""
 
     @parameterized.expand(
         [
@@ -79,10 +77,14 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             ("test_wrong_column_name", "invalid_column_name"),
         ]
     )
-    def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
+    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
-            individual_args={"full_name": "John Wilson", "given_name": "John", "family_name": "Wilson"},
+            individual_args={
+                "full_name": "John Wilson",
+                "given_name": "John",
+                "family_name": "Wilson",
+            },
         )
         individual = individuals[0]
 
@@ -117,4 +119,4 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             "registration_token": document.document_number,
             "invalid_column_name": "wrong_column_name",
         }
-        self.assertEqual(accepted_results.get(field_name), result)
+        assert accepted_results.get(field_name) == result

@@ -1,14 +1,16 @@
-import random
-import string
 from datetime import timedelta
 from decimal import Decimal
+import random
 from random import randint
+import string
 from typing import Any, Optional
 from uuid import UUID
 
 from django.utils import timezone
-
 import factory
+from factory.django import DjangoModelFactory
+from pytz import utc
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.geo import CountryFactory
@@ -30,15 +32,12 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from factory.django import DjangoModelFactory
-from pytz import utc
-
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
-from hct_mis_api.apps.payment.models import (
+from hope.apps.account.models import User
+from hope.apps.core.currencies import CURRENCY_CHOICES
+from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.apps.geo.models import Area
+from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
+from hope.apps.payment.models import (
     Account,
     AccountType,
     Approval,
@@ -56,14 +55,14 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import to_decimal
+from hope.apps.program.models import Program
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
@@ -121,7 +120,7 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):
-    payment_plan = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentPlanFactory")
+    payment_plan = factory.SubFactory("extras.test_utils.factories.payment.PaymentPlanFactory")
     status = factory.fuzzy.FuzzyChoice(
         ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
@@ -146,7 +145,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
 
 
 class PaymentVerificationFactory(DjangoModelFactory):
-    payment = factory.SubFactory("hct_mis_api.apps.payment.fixtures.PaymentFactory")
+    payment = factory.SubFactory("extras.test_utils.factories.payment.PaymentFactory")
     payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -207,18 +206,23 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    programme_code = factory.LazyAttribute(
-        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-    )
+    programme_code = factory.LazyAttribute(lambda o: RealProgramFactory.generate_programme_code(o))
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
-            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            master_detail=bool(o.data_collecting_type.type != DataCollectingType.Type.SOCIAL),
             name=(
                 factory.Faker("word") if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else "Household"
             ),
         )
     )
+
+    @staticmethod
+    def generate_programme_code(obj: Any) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
+            return RealProgramFactory.generate_programme_code(obj)
+        return programme_code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -298,7 +302,9 @@ class PaymentFactory(DjangoModelFactory):
         lambda o: (
             o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
             or IndividualRoleInHouseholdFactory(
-                household=o.household, individual=o.household.head_of_household, role=ROLE_PRIMARY
+                household=o.household,
+                individual=o.household.head_of_household,
+                role=ROLE_PRIMARY,
             )
         ).individual
     )
@@ -393,7 +399,7 @@ def create_payment_verification_plan_with_status(
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
+                "admin2": Area.objects.order_by("?").first(),
                 "program": program,
             },
             {"registration_data_import": registration_data_import},
@@ -487,7 +493,7 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
-    data_collecting_type = DataCollectingType.objects.get(code="full")
+    data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:
@@ -741,8 +747,18 @@ def generate_delivery_mechanisms() -> None:
             "account_type": account_types["bank"],
         },
         {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": None},
-        {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
-        {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {
+            "code": "cash_by_fsp",
+            "name": "Cash by FSP",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
+        {
+            "code": "cheque",
+            "name": "Cheque",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "deposit_to_card",
             "name": "Deposit to Card",
@@ -766,8 +782,18 @@ def generate_delivery_mechanisms() -> None:
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
         },
-        {"code": "referral", "name": "Referral", "transfer_type": "CASH", "account_type": account_types["bank"]},
-        {"code": "transfer", "name": "Transfer", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {
+            "code": "referral",
+            "name": "Referral",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
+        {
+            "code": "transfer",
+            "name": "Transfer",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "transfer_to_account",
             "name": "Transfer to Account",
@@ -775,7 +801,12 @@ def generate_delivery_mechanisms() -> None:
             "account_type": account_types["bank"],
             "required_fields": ["name", "number", "code"],
         },
-        {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
+        {
+            "code": "voucher",
+            "name": "Voucher",
+            "transfer_type": "VOUCHER",
+            "account_type": account_types["bank"],
+        },
         {
             "code": "cash_over_the_counter",
             "name": "Cash over the counter",
@@ -812,7 +843,9 @@ def generate_delivery_mechanisms() -> None:
         )
         for fsp in FinancialServiceProvider.objects.all():
             DeliveryMechanismConfig.objects.get_or_create(
-                fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
+                fsp=fsp,
+                delivery_mechanism=delivery_mechanism,
+                required_fields=dm.get("required_fields", []),
             )
         FinancialServiceProvider.objects.get_or_create(
             name="United Bank for Africa - Nigeria",

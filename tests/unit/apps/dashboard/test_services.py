@@ -1,12 +1,12 @@
 import calendar
-import json
 from decimal import Decimal
+import json
 from typing import Any, Callable, Dict, Optional, Type
 
 from django.core.cache import cache
 from django.utils import timezone
-
 import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
@@ -17,19 +17,18 @@ from extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
-from hct_mis_api.apps.dashboard.services import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.dashboard.serializers import DashboardBaseSerializer
+from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.household.models import Household
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.program.models import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -74,14 +73,15 @@ def _create_test_payment_for_queryset(
     return payment, pp
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
+@pytest.mark.django_db(transaction=True)
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
     expected_key: str = f"dashboard_data_{slug}"
     assert cache_class.get_cache_key(slug) == expected_key
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
@@ -94,7 +94,7 @@ def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> Non
     assert data == {"test": f"{cache_name}_data"}
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is not found in the cache."""
@@ -103,7 +103,7 @@ def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> No
     assert data is None
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that store_data correctly stores data in the cache."""
@@ -115,7 +115,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "cache_name, cache_class, slug, expected_optional_fields",
+    ("cache_name", "cache_class", "slug", "expected_optional_fields"),
     [
         (
             "DashboardDataCache",
@@ -155,9 +155,9 @@ def test_refresh_data(
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
-        assert (
-            item.keys() & expected_optional_fields == expected_optional_fields
-        ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
 
@@ -165,7 +165,10 @@ def test_refresh_data(
 TEST_CASES = [
     (
         "delivered_quantity_usd prioritized",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardDataCache,
     ),
@@ -183,13 +186,20 @@ TEST_CASES = [
     ),
     (
         "Pending status with null delivered_quantity_usd",
-        {"status": "Pending", "delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "status": "Pending",
+            "delivered_quantity_usd": None,
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("250.0"),
         DashboardDataCache,
     ),
     (
         "global cache prioritizes delivered_quantity_usd",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardGlobalDataCache,
     ),
@@ -197,7 +207,7 @@ TEST_CASES = [
 
 
 @pytest.mark.parametrize(
-    "test_name, payment_updates, expected_total, cache_service",
+    ("test_name", "payment_updates", "expected_total", "cache_service"),
     TEST_CASES,
     ids=[case[0] for case in TEST_CASES],
 )
@@ -456,20 +466,34 @@ def test_payment_plan_counts() -> None:
     user = UserFactory()
 
     create_payment_verification_plan_with_status(
-        payment_plan=pp2, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp2,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
     create_payment_verification_plan_with_status(
-        payment_plan=pp4, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp4,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
 
     PaymentFactory(
-        parent=pp1, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+        parent=pp1,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp3, program=prog_b_sector_y, delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+        parent=pp3,
+        program=prog_b_sector_y,
+        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp5, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+        parent=pp5,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc),
     )
     Payment.objects.filter(parent=pp1, business_area=ba).update(
         delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
@@ -537,7 +561,14 @@ def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
     cache.delete(cache_key)
@@ -559,7 +590,14 @@ def test_refresh_data_no_payments_global() -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardGlobalDataCache.get_cache_key("global")
     cache.delete(cache_key)
@@ -615,7 +653,7 @@ def test_partial_refresh_empty_cache_fallback(
 
 
 @pytest.mark.parametrize(
-    "cache_class_under_test, is_global_scenario",
+    ("cache_class_under_test", "is_global_scenario"),
     [
         (DashboardGlobalDataCache, True),
         (DashboardDataCache, False),
@@ -808,9 +846,9 @@ def test_base_queryset_filter_plan_status() -> None:
 
     payment_invalid, _ = _create_test_payment_for_queryset(prog, ba, pp_status=invalid_status)
     qs_invalid = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-    assert not qs_invalid.filter(
-        pk=payment_invalid.pk
-    ).exists(), f"Payment should be excluded for PP status {invalid_status}"
+    assert not qs_invalid.filter(pk=payment_invalid.pk).exists(), (
+        f"Payment should be excluded for PP status {invalid_status}"
+    )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
@@ -870,7 +908,12 @@ def test_base_queryset_filter_payment_status() -> None:
     prog = ProgramFactory.create(business_area=ba)
 
     included_status = "Transaction Successful"
-    excluded_statuses = ["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]
+    excluded_statuses = [
+        "Transaction Erroneous",
+        "Not Distributed",
+        "Force failed",
+        "Manually Cancelled",
+    ]
 
     payment_included, _ = _create_test_payment_for_queryset(prog, ba, payment_status=included_status)
     qs_included = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
@@ -879,9 +922,9 @@ def test_base_queryset_filter_payment_status() -> None:
     for status_val in excluded_statuses:
         payment_excluded, _ = _create_test_payment_for_queryset(prog, ba, payment_status=status_val)
         qs_excluded = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-        assert not qs_excluded.filter(
-            pk=payment_excluded.pk
-        ).exists(), f"Payment should be excluded for status {status_val}"
+        assert not qs_excluded.filter(pk=payment_excluded.pk).exists(), (
+            f"Payment should be excluded for status {status_val}"
+        )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])

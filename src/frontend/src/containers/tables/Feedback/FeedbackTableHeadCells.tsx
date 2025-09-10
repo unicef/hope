@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { FeedbackNode } from '@generated/graphql';
+import { FeedbackList } from '@restgenerated/models/FeedbackList';
 
-export const headCells: HeadCell<FeedbackNode>[] = [
+export const headCells: HeadCell<FeedbackList>[] = [
   {
     disablePadding: false,
     label: 'Feedback ID',

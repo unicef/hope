@@ -4,7 +4,6 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { ContentLink } from '@core/ContentLink';
@@ -13,6 +12,7 @@ import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignR
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -39,7 +39,7 @@ export const ReassignRoleBox = ({
   shouldDisplayButton,
   shouldDisableButton,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
 }): ReactElement => {
@@ -54,39 +54,29 @@ export const ReassignRoleBox = ({
   let uniqueIndividual;
 
   if (ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-    individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
-    household =
-      ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
-    reassignData = JSON.parse(
-      ticket.needsAdjudicationTicketDetails.roleReassignData,
-    );
+    individual = ticket.ticketDetails.selectedIndividual;
+    household = ticket.ticketDetails.selectedIndividual?.household;
+    reassignData = ticket.ticketDetails.roleReassignData;
     uniqueIndividual =
-      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
-      individual.id
-        ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
-        : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
+      ticket.ticketDetails.possibleDuplicate.id === individual.id
+        ? ticket.ticketDetails.goldenRecordsIndividual
+        : ticket.ticketDetails.possibleDuplicate;
   } else if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   ) {
-    reassignData = JSON.parse(
-      ticket.systemFlaggingTicketDetails.roleReassignData,
-    );
+    reassignData = ticket.ticketDetails.roleReassignData;
   }
-  let householdsAndRoles = individual?.householdsAndRoles || [];
+  let householdsAndRoles = individual?.rolesInHouseholds || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
   ) {
-    if (isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
+    if (isEmpty(ticket.ticketDetails.individualData.role)) {
       householdsAndRoles = [];
     }
-    if (
-      isEmpty(
-        ticket.individualDataUpdateTicketDetails.individualData.relationship,
-      )
-    ) {
+    if (isEmpty(ticket.ticketDetails.individualData.relationship)) {
       shouldShowReassignHoH = false;
     }
   }
@@ -94,7 +84,8 @@ export const ReassignRoleBox = ({
   if (reassignData && typeof reassignData === 'object') {
     for (const key of Object.keys(reassignData)) {
       if (reassignData[key] && reassignData[key].individual) {
-        reassignDataDictByIndividualId[reassignData[key].individual] = reassignData[key];
+        reassignDataDictByIndividualId[reassignData[key].individual] =
+          reassignData[key];
       }
     }
   }
@@ -133,7 +124,6 @@ export const ReassignRoleBox = ({
         reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
-            ticket={ticket}
             household={el.household}
             individual={uniqueIndividual}
           />
@@ -148,12 +138,10 @@ export const ReassignRoleBox = ({
         (ticket.individual?.role === 'PRIMARY' ||
           ticket.individual?.relationship === 'HEAD')) ||
       (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-        ticket.individualDataUpdateTicketDetails?.individualData?.role
-          ?.previous_value === 'PRIMARY' &&
-        (ticket.individualDataUpdateTicketDetails?.individualData?.role
-          ?.value === 'ALTERNATE' ||
-          ticket.individualDataUpdateTicketDetails?.individualData?.role
-            ?.value === 'NO_ROLE'))
+        ticket.ticketDetails?.individualData?.role?.previous_value ===
+          'PRIMARY' &&
+        (ticket.ticketDetails?.individualData?.role?.value === 'ALTERNATE' ||
+          ticket.ticketDetails?.individualData?.role?.value === 'NO_ROLE'))
     ) {
       return (
         <Typography variant="body2">

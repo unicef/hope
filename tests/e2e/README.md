@@ -75,11 +75,11 @@ source $(brew --prefix nvm)/nvm.sh
 - In terminal:
 ```bash
 source ~/.bash_profile
-source ../development_tools/local_selenium_init.sh 
+source ../development_tools/local_selenium_init.sh
 
-# second tab: 
+# second tab:
 docker compose -f ./development_tools/compose.yml --profile services up --build
-# first tab: 
+# first tab:
 python -m pytest -n auto -rP --reuse-db -p no:warnings --cov-report= --capture=sys --html-report=$OUTPUT_DATA_ROOT/report/report.html tests/e2e
 ```
 

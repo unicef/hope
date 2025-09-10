@@ -1,38 +1,39 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class ProgramCycleDetailsPage(BaseComponents):
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonCreatePaymentPlan = 'a[data-cy="button-create-payment-plan"]'
-    buttonFinishProgrammeCycle = 'button[data-cy="button-finish-programme-cycle"]'
-    buttonReactivateProgrammeCycle = 'button[data-cy="button-reactivate-programme-cycle"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    labelCreatedBy = 'div[data-cy="label-Created By"]'
-    labelStartDate = 'div[data-cy="label-Start Date"]'
-    labelEndDate = 'div[data-cy="label-End Date"]'
-    labelProgrammeStartDate = 'div[data-cy="label-Programme Start Date"]'
-    labelProgrammeEndDate = 'div[data-cy="label-Programme End Date"]'
-    labelFrequencyOfPayment = 'div[data-cy="label-Frequency of Payment"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    datePickerFilterFrom = 'div[data-cy="date-picker-filter-From"]'
-    datePickerFilterTo = 'div[data-cy="date-picker-filter-To"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    button_create_payment_plan = 'a[data-cy="button-create-payment-plan"]'
+    button_finish_programme_cycle = 'button[data-cy="button-finish-programme-cycle"]'
+    button_reactivate_programme_cycle = 'button[data-cy="button-reactivate-programme-cycle"]'
+    status_container = 'div[data-cy="status-container"]'
+    label_created_by = 'div[data-cy="label-Created By"]'
+    label_start_date = 'div[data-cy="label-Start Date"]'
+    label_end_date = 'div[data-cy="label-End Date"]'
+    label_programme_start_date = 'div[data-cy="label-Programme Start Date"]'
+    label_programme_end_date = 'div[data-cy="label-Programme End Date"]'
+    label_frequency_of_payment = 'div[data-cy="label-Frequency of Payment"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    date_picker_filter_from = 'div[data-cy="date-picker-filter-From"]'
+    date_picker_filter_to = 'div[data-cy="date-picker-filter-To"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_label = 'span[data-cy="table-label"]'
+    table_row = 'tr[data-cy="table-row"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getButtonCreatePaymentPlan(self) -> WebElement:
-        return self.wait_for(self.buttonCreatePaymentPlan)
+    def get_button_create_payment_plan(self) -> WebElement:
+        return self.wait_for(self.button_create_payment_plan)
 
-    def getButtonFinishProgrammeCycle(self) -> WebElement:
-        return self.wait_for(self.buttonFinishProgrammeCycle)
+    def get_button_finish_programme_cycle(self) -> WebElement:
+        return self.wait_for(self.button_finish_programme_cycle)
 
-    def getButtonReactivateProgrammeCycle(self) -> WebElement:
+    def get_button_reactivate_programme_cycle(self) -> WebElement:
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")
@@ -42,49 +43,49 @@ class ProgramCycleDetailsPage(BaseComponents):
         from time import sleep
 
         sleep(2)
-        return self.wait_for(self.buttonReactivateProgrammeCycle)
+        return self.wait_for(self.button_reactivate_programme_cycle)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getLabelCreatedBy(self) -> WebElement:
-        return self.wait_for(self.labelCreatedBy)
+    def get_label_created_by(self) -> WebElement:
+        return self.wait_for(self.label_created_by)
 
-    def getLabelStartDate(self) -> WebElement:
-        return self.wait_for(self.labelStartDate)
+    def get_label_start_date(self) -> WebElement:
+        return self.wait_for(self.label_start_date)
 
-    def getLabelEndDate(self) -> WebElement:
-        return self.wait_for(self.labelEndDate)
+    def get_label_end_date(self) -> WebElement:
+        return self.wait_for(self.label_end_date)
 
-    def getLabelProgrammeStartDate(self) -> WebElement:
-        return self.wait_for(self.labelProgrammeStartDate)
+    def get_label_programme_start_date(self) -> WebElement:
+        return self.wait_for(self.label_programme_start_date)
 
-    def getLabelProgrammeEndDate(self) -> WebElement:
-        return self.wait_for(self.labelProgrammeEndDate)
+    def get_label_programme_end_date(self) -> WebElement:
+        return self.wait_for(self.label_programme_end_date)
 
-    def getLabelFrequencyOfPayment(self) -> WebElement:
-        return self.wait_for(self.labelFrequencyOfPayment)
+    def get_label_frequency_of_payment(self) -> WebElement:
+        return self.wait_for(self.label_frequency_of_payment)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getDatePickerFilterFrom(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterFrom)
+    def get_date_picker_filter_from(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_from)
 
-    def getDatePickerFilterTo(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterTo)
+    def get_date_picker_filter_to(self) -> WebElement:
+        return self.wait_for(self.date_picker_filter_to)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)

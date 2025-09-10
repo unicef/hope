@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type ProgramCycleCreate = {
     title: string;
-    start_date: string;
-    end_date?: string;
+    startDate: string;
+    endDate?: string | null;
 };
 

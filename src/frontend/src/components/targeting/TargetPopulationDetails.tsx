@@ -11,9 +11,10 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface ProgramDetailsProps {
-  targetPopulation;
+  targetPopulation : TargetPopulationDetail;
 }
 
 function TargetPopulationDetails({
@@ -44,7 +45,7 @@ function TargetPopulationDetails({
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
-              value={`${createdBy.firstName} ${createdBy.lastName}`}
+              value={createdBy}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>

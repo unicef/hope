@@ -4,19 +4,18 @@ import json
 from typing import Any
 from unittest.mock import patch
 
+from constance.test import override_config
 from django.conf import settings
 from django.test import TestCase, override_settings
-
-import pytest
-from constance.test import override_config
-from extras.test_utils.factories.account import UserFactory
 from openpyxl import Workbook
+import pytest
 
-from hct_mis_api.apps.utils.mailjet import MailjetClient
+from extras.test_utils.factories.account import UserFactory
+from hope.apps.utils.mailjet import MailjetClient
 
 
 class TestMailjet(TestCase):
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template(self, mocked_requests_post: Any) -> None:
@@ -34,7 +33,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template",
                         "To": [
                             {
@@ -61,11 +63,13 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(
-        EMAIL_SUBJECT_PREFIX="test", CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"]
+        EMAIL_SUBJECT_PREFIX="test",
+        CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"],
     )
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_with_catch_all(self, mocked_requests_post: Any) -> None:
@@ -83,7 +87,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template for Catch All",
                         "To": [
                             {
@@ -110,9 +117,10 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_html_and_text_body(self, mocked_requests_post: Any) -> None:
@@ -130,7 +138,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with HTML and Text body",
                         "To": [
                             {
@@ -156,9 +167,10 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_text_body(self, mocked_requests_post: Any) -> None:
@@ -175,7 +187,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Text body",
                         "To": [
                             {
@@ -200,9 +215,10 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_and_attachment(self, mocked_requests_post: Any) -> None:
@@ -243,7 +259,10 @@ class TestMailjet(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": "[test] Subject for email with Template and Attachments",
                         "To": [
                             {
@@ -282,9 +301,10 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_html_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -295,12 +315,11 @@ class TestMailjet(TestCase):
             ccs=["testcc@email.com"],
             variables={"key": "value"},
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You cannot use both template and custom email body"
+        mocked_requests_post.assert_not_called()
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_text_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -311,12 +330,11 @@ class TestMailjet(TestCase):
             ccs=["testcc@email.com"],
             variables={"key": "value"},
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You cannot use both template and custom email body"):
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You cannot use both template and custom email body"
+        mocked_requests_post.assert_not_called()
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_without_variables(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -325,12 +343,11 @@ class TestMailjet(TestCase):
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You need to provide body variables for template email"):
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You need to provide body variables for template email"
+        mocked_requests_post.assert_not_called()
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
         self, mocked_requests_post: Any
@@ -340,12 +357,11 @@ class TestMailjet(TestCase):
             recipients=["test@email.com", "test2@email.com"],
             ccs=["testcc@email.com"],
         )
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError, match="You need to provide either template or custom email body"):
             mailjet.send_email()
-            mocked_requests_post.assert_not_called()
-        assert str(exc.value) == "You need to provide either template or custom email body"
+        mocked_requests_post.assert_not_called()
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_email_user_via_mailjet(self, mocked_requests_post: Any) -> None:
@@ -385,4 +401,5 @@ class TestMailjet(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )

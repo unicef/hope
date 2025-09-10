@@ -1,22 +1,24 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from django.core.management import call_command
 from django.utils import timezone
-
 import pytest
-from extras.test_utils.factories.core import create_afghanistan
 from strategy_field.utils import fqn
 
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
-from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
-from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from extras.test_utils.factories.core import create_afghanistan
+from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
+from hope.apps.sanction_list.strategies.un import UNSanctionList
+from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+
+if TYPE_CHECKING:
+    from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@pytest.fixture()
+@pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
     from test_utils.factories.sanction_list import SanctionListFactory
 
@@ -27,6 +29,7 @@ def sanction_list(db: Any) -> "SanctionList":
 def program(db: Any, sanction_list: "SanctionList") -> "Program":
     from extras.test_utils.factories.program import ProgramFactory
 
+    call_command("loadcountries")
     create_afghanistan()
     program = ProgramFactory()
     program.sanction_lists.add(sanction_list)

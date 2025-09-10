@@ -9,14 +9,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import PaymentVerificationFilters from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentVerificationTable from '@containers/tables/payments/PaymentVerificationTable/PaymentVerificationTable';
 
 const initialFilter = {
-  status: [PaymentPlanStatus.Finished, PaymentPlanStatus.Accepted],
+  status: [PaymentPlanStatusEnum.FINISHED, PaymentPlanStatusEnum.ACCEPTED],
   search: '',
-  verificationStatus: [],
+  paymentVerificationSummaryStatus: [],
   serviceProvider: '',
   deliveryTypes: [],
   startDate: '',

@@ -20,6 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -84,16 +85,16 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   const selectedPlansUnicefIds = inAuthorizationData?.results
     .filter((plan) => selectedAuthorized.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {
-      field: 'unicef_id',
+      field: 'unicefId',
       headerName: t('Payment Plan ID'),
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programId}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
           newTab={true}
         >
           {params.value}
@@ -102,13 +103,13 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
     },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
-      field: 'last_approval_process_date',
+      field: 'lastApprovalProcessDate',
       headerName: t('Last Modified Date'),
       width: 200,
       renderCell: (params) => <UniversalMoment>{params.value}</UniversalMoment>,
     },
     {
-      field: 'last_approval_process_by',
+      field: 'lastApprovalProcessBy',
       headerName: t('Approved by'),
       width: 200,
     },
@@ -116,7 +117,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   const filteredRows = filterRows(
     inAuthorizationData?.results || [],
-    'last_approval_process_date',
+    'lastApprovalProcessDate',
     searchText,
     columns,
   );
@@ -133,12 +134,14 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
           size="small"
           data-cy="search-authorization"
           onChange={(e) => setSearchText(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
           }}
         />
       )}
@@ -155,7 +158,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
             showMessage(t('Payment Plan(s) Authorized'));
             setSelectedAuthorized([]);
           } catch (e) {
-            showMessage(e.message);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

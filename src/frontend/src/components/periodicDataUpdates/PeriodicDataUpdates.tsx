@@ -1,19 +1,43 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { Box, Tab, Tabs, Fade } from '@mui/material';
-import { ChangeEvent, ReactElement, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Box, Tab, Tabs, Fade, Paper } from '@mui/material';
+import { ChangeEvent, ReactElement, useState, useEffect, useMemo } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
-import { PeriodicDataUpdatesUpdatesList } from './PeriodicDataUpdatesUpdatesList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
 import { useProgramContext } from 'src/programContext';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
-
+import { PeriodicDataUpdatesOfflineTemplates } from './PeriodicDataUpdatesOfflineTemplates';
+import { PeriodicDataUpdatesOfflineEdits } from './PeriodicDataUpdatesOfflineEdits';
+import PeriodicDataUpdatesOnlineEdits from './PeriodicDataUpdatesOnlineEdits';
 export const PeriodicDataUpdates = (): ReactElement => {
-  const [value, setValue] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Nested tab logic: tab=periodic-data-updates&subtab=offline-templates|offline-edits|online-edits
+  const searchParams = new URLSearchParams(location.search);
+  const subtabParam = searchParams.get('subtab');
+  const tabMap = useMemo(
+    () => ({
+      'offline-templates': 0,
+      'offline-edits': 1,
+      'online-edits': 2,
+    }),
+    [],
+  );
+  const initialTab = tabMap[subtabParam as keyof typeof tabMap] ?? 0;
+  const [value, setValue] = useState(initialTab);
+
+  useEffect(() => {
+    const subtabParamEffect = new URLSearchParams(location.search).get(
+      'subtab',
+    );
+    const intendedTab = tabMap[subtabParamEffect as keyof typeof tabMap] ?? 0;
+    if (intendedTab !== value) {
+      setValue(intendedTab);
+    }
+  }, [location.search, tabMap, value]);
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
@@ -25,59 +49,84 @@ export const PeriodicDataUpdates = (): ReactElement => {
 
   const handleChange = (_event: ChangeEvent<object>, newValue: number) => {
     setValue(newValue);
+    const tabParam = searchParams.get('tab') || 'periodic-data-updates';
+    let subtab = 'offline-templates';
+    if (newValue === 1) subtab = 'offline-edits';
+    if (newValue === 2) subtab = 'online-edits';
+    navigate(
+      { search: `?tab=${tabParam}&subtab=${subtab}` },
+      { replace: true },
+    );
   };
 
   const newTemplatePath = isSocialDctType
-    ? `/${baseUrl}/population/people/new-template`
-    : `/${baseUrl}/population/individuals/new-template`;
+    ? `/${baseUrl}/population/people/new-offline-template`
+    : `/${baseUrl}/population/individuals/new-offline-template`;
 
   return (
-    <BaseSection
-      title="Periodic Data Updates"
-      tabs={
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="periodic data updates tabs"
-          >
-            <Tab label="Templates" data-cy="pdu-templates" />
-            <Tab label="Updates" data-cy="pdu-updates" />
-          </Tabs>
-        </Box>
-      }
-      buttons={
-        <Box display="flex" align-items="center">
-          <Box mr={2}>
-            <ButtonTooltip
-              variant="contained"
-              color="primary"
-              component={Link}
-              to={newTemplatePath}
-              startIcon={<AddIcon />}
-              data-cy="new-template-button"
-              disabled={!canCreatePDUTemplate}
-            >
-              New Template
-            </ButtonTooltip>
-          </Box>
-          <Box>
-            <PeriodDataUpdatesUploadDialog />
-          </Box>
-        </Box>
-      }
-    >
+    <>
+      <Box p={3}>
+        <Paper elevation={1} sx={{ mb: 0, borderRadius: 2 }}>
+          <BaseSection
+            title="Periodic Data Updates"
+            tabs={
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tabs
+                  value={value}
+                  onChange={handleChange}
+                  aria-label="periodic data updates tabs"
+                >
+                  <Tab
+                    label="Offline Templates"
+                    data-cy="pdu-offline-templates"
+                  />
+                  <Tab label="Offline Edits" data-cy="pdu-offline-edits" />
+                  <Tab label="Online Edits" data-cy="pdu-online-edits" />
+                </Tabs>
+              </Box>
+            }
+          />
+        </Paper>
+      </Box>
       <Fade in={true} timeout={500} key={value}>
-        {value === 0 ? (
-          <Box>
-            <PeriodicDataUpdatesTemplatesList />
-          </Box>
-        ) : (
-          <Box>
-            <PeriodicDataUpdatesUpdatesList />
-          </Box>
-        )}
+        <div>
+          {value === 0 && (
+            <Box p={3}>
+              <Paper>
+                <Box display="flex" justifyContent="flex-end" p={6}>
+                  <ButtonTooltip
+                    variant="contained"
+                    color="primary"
+                    component={Link}
+                    to={newTemplatePath}
+                    startIcon={<AddIcon />}
+                    data-cy="new-template-button"
+                    disabled={!canCreatePDUTemplate}
+                  >
+                    New Template
+                  </ButtonTooltip>
+                </Box>
+                <PeriodicDataUpdatesOfflineTemplates />
+              </Paper>
+            </Box>
+          )}
+          {value === 1 && (
+            <Box p={3}>
+              <Paper>
+                <Box display="flex" justifyContent="flex-end" p={6}>
+                  <PeriodDataUpdatesUploadDialog />
+                </Box>
+                <PeriodicDataUpdatesOfflineEdits />
+              </Paper>
+            </Box>
+          )}
+          {value === 2 && (
+            <Box>
+              <PeriodicDataUpdatesOnlineEdits />
+            </Box>
+          )}
+        </div>
       </Fade>
-    </BaseSection>
+    </>
   );
 };

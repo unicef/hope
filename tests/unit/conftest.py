@@ -1,20 +1,46 @@
 import logging
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from time import sleep
 from typing import Any
 
-from django.conf import settings
-
-import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from django.conf import settings
+from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
-from extras.test_utils.fixtures import *  # noqa: ABS101, F403, F401
+import pytest
+
+from extras.test_utils.fixtures import *  # noqa: F403, F401
+from hope.apps.account.models import Partner, Role
+
+
+@pytest.fixture(autouse=True)
+def create_unicef_partner(db: Any) -> None:
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    return Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(autouse=True)
+def create_role_with_all_permissions(db: Any) -> None:
+    return Role.objects.get_or_create(name="Role with all permissions")
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        Role.objects.get_or_create(name="Role with all permissions")
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -28,22 +54,27 @@ def pytest_addoption(parser: Parser) -> None:
 
 @pytest.fixture(autouse=True)
 def clear_default_cache() -> None:
-    from django.core.cache import cache
+    from django.core.cache import cache  # noqa
 
     cache.clear()
 
 
 def pytest_configure(config: Config) -> None:
-    pytest.localhost = True if config.getoption("--localhost") else False
+    pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
     sys.path.append(str(utils))
 
     sys._called_from_pytest = True
-    from django.conf import settings
+    from django.conf import settings  # noqa
 
     settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "10.0.2.2",
+        os.getenv("DOMAIN", ""),
+    ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
@@ -68,7 +99,7 @@ def pytest_configure(config: Config) -> None:
     settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
         }
     }
@@ -86,7 +117,6 @@ def pytest_configure(config: Config) -> None:
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
@@ -97,12 +127,12 @@ def pytest_configure(config: Config) -> None:
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_datahub.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,
@@ -114,7 +144,7 @@ def pytest_configure(config: Config) -> None:
 
 
 def pytest_unconfigure(config: Config) -> None:
-    import sys
+    import sys  # noqa
 
     del sys._called_from_pytest
 
@@ -177,9 +207,9 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
 @pytest.fixture(scope="session", autouse=True)
 def register_custom_sql_signal() -> None:
-    from django.db import connections
-    from django.db.migrations.loader import MigrationLoader
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db import connections  # noqa
+    from django.db.migrations.loader import MigrationLoader  # noqa
+    from django.db.models.signals import post_migrate, pre_migrate  # noqa
 
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
@@ -195,15 +225,20 @@ def register_custom_sql_signal() -> None:
         apps.add(app_label)
 
         for operation in migration.operations:
-            from django.db.migrations.operations.special import RunSQL
+            from django.db.migrations.operations.special import RunSQL  # noqa
 
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
                 for stmt in sql_statements:
-                    all_sqls.append(stmt)
+                    all_sqls.append(stmt)  # noqa
 
     def pre_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
@@ -212,7 +247,12 @@ def register_custom_sql_signal() -> None:
         conn.cursor().execute(pre_sql)
 
     def post_migration_custom_sql(
-        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+        sender: Any,
+        app_config: Any,
+        verbosity: Any,
+        interactive: Any,
+        using: Any,
+        **kwargs: Any,
     ) -> None:
         app_label = app_config.label
         if app_label not in apps:
@@ -224,5 +264,18 @@ def register_custom_sql_signal() -> None:
         for stmt in all_sqls:
             conn.cursor().execute(stmt)
 
-    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
-    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)
+    pre_migrate.connect(
+        pre_migration_custom_sql,
+        dispatch_uid="tests.pre_migrationc_custom_sql",
+        weak=False,
+    )
+    post_migrate.connect(
+        post_migration_custom_sql,
+        dispatch_uid="tests.post_migration_custom_sql",
+        weak=False,
+    )
+
+
+@pytest.fixture(autouse=True)
+def clear_cache_before_each_test() -> None:
+    cache.clear()

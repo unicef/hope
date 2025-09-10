@@ -6,17 +6,17 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { renderUserName } from '@utils/utils';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useCreateGrievanceTicketNoteMutation,
-  useMeQuery,
-} from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceCreateNote } from '@restgenerated/models/GrievanceCreateNote';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 const Name = styled.span`
   font-size: 16px;
@@ -39,17 +39,53 @@ export function Notes({
   notes,
   canAddNote,
 }: {
-  notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  notes: GrievanceTicketDetail['ticketNotes'];
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryFn: () => {
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
+      });
+    },
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   const { id } = useParams();
   const { isActiveProgram } = useProgramContext();
-  const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending: loading } = useMutation({
+    mutationFn: (params: GrievanceCreateNote) => {
+      return RestService.restBusinessAreasGrievanceTicketsCreateNoteCreate({
+        businessAreaSlug,
+        id: id,
+        formData: params,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          id,
+        ],
+      });
+    },
+    onError: (error: any) => {
+      showMessage(
+        error?.body?.errors || error?.message || t('An error occurred'),
+      );
+    },
+  });
 
   if (meLoading) {
     return null;
@@ -87,13 +123,8 @@ export function Notes({
     </Grid>
   );
 
-  const mappedNotes = notes?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
+  const mappedNotes = notes?.map((el) =>
+    note(renderUserName(el.createdBy), el.createdAt, el.description, el.id),
   );
 
   const initialValues: { [key: string]: string } = {
@@ -104,7 +135,7 @@ export function Notes({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>
@@ -113,12 +144,7 @@ export function Notes({
           initialValues={initialValues}
           onSubmit={(values, { resetForm }) => {
             mutate({
-              variables: {
-                noteInput: { ticket: id, description: values.newNote },
-              },
-              refetchQueries: () => [
-                { query: GrievanceTicketDocument, variables: { id } },
-              ],
+              description: values.newNote,
             });
             resetForm({});
           }}
@@ -138,7 +164,7 @@ export function Notes({
                   <Grid size={{ xs: 10 }}>
                     <Grid size={{ xs: 12 }}>
                       <Box display="flex" justifyContent="space-between">
-                        <Name>{renderUserName(meData.me)}</Name>
+                        <Name>{renderUserName(meData)}</Name>
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12 }}>

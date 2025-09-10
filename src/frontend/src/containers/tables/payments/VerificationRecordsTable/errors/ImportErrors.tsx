@@ -2,7 +2,6 @@ import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
-import { XlsxErrorNode } from '@generated/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -17,7 +16,7 @@ const ErrorsContainer = styled.div`
 export function ImportErrors({
   errors,
 }: {
-  errors: XlsxErrorNode[];
+  errors: any;
 }): ReactElement {
   const [expanded, setExpanded] = useState(false);
   if (!errors || !errors.length) {

@@ -4,19 +4,18 @@ import json
 from typing import Any
 from unittest.mock import patch
 
+from constance.test import override_config
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 from django.utils import timezone
-
-from constance.test import override_config
 from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
+from hope.apps.sanction_list.models import UploadedXLSXFile
+from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
 
@@ -28,8 +27,8 @@ class TestSanctionList(TestCase):
             associated_email="test_email@email.com",
         )
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
-    @patch("hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     @freeze_time("2024-01-10 01:01:01")
@@ -79,14 +78,16 @@ class TestSanctionList(TestCase):
             "title": "Sanction List Check",
         }
         subject = (
-            f"Sanction List Check - file: {original_file_name}, "
-            f"date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
+            f"Sanction List Check - file: {original_file_name}, date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
         )
         expected_data = json.dumps(
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": f"[test] {subject}",
                         "To": [{"Email": "test_email@email.com"}],
                         "Cc": [{"Email": settings.SANCTION_LIST_CC_MAIL}],
@@ -108,4 +109,5 @@ class TestSanctionList(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )

@@ -1,20 +1,20 @@
 import { Box, Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { renderUserName } from '@utils/utils';
 import { DividerLine } from '@core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   width: 100%;
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptanceProcessRow({
@@ -76,13 +76,13 @@ export function AcceptanceProcessRow({
           )}
         </Grid>
         <Grid size={{ xs: 4 }}>
-          {actions.financeRelease.length > 0 && (
+          {actions.finance_release.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
                 sentForFinanceReleaseBy,
               )}`}
               topDate={sentForFinanceReleaseDate}
-              approvals={actions.financeRelease}
+              approvals={actions.finance_release}
             />
           )}
         </Grid>
@@ -118,7 +118,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approvalProcess.totalCount > 1 && <DividerLine />}
+      {approvalProcess.length > 1 && <DividerLine />}
     </StyledBox>
   );
 }

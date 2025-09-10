@@ -12,23 +12,23 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GreenIcon = styled.div`
-    color: #28cb15;
+  color: #28cb15;
 `;
 
 const StyledTable = styled(Table)`
-    min-width: 100px;
+  min-width: 100px;
 `;
 
 export interface AccountsTableProps {
   values;
   isEdit;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   index;
   account;
@@ -36,24 +36,19 @@ export interface AccountsTableProps {
 }
 
 export function AccountTable({
-                                values,
-                                isEdit,
-                                ticket,
-                                setFieldValue,
-                                index,
-                                account,
-                                accountFinancialInstitutionsDict,
-                              }: AccountsTableProps): ReactElement {
+  values,
+  isEdit,
+  ticket,
+  setFieldValue,
+  index,
+  account,
+  accountFinancialInstitutionsDict,
+}: AccountsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedAccounts } = values;
 
   const handleSelectAccount = (idx): void => {
-    handleSelected(
-      idx,
-      'selectedAccounts',
-      selectedAccounts,
-      setFieldValue,
-    );
+    handleSelected(idx, 'selectedAccounts', selectedAccounts, setFieldValue);
   };
 
   return (

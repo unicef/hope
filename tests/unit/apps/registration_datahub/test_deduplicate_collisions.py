@@ -1,34 +1,34 @@
 from typing import Any
 
 import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import Household, PendingIndividual
-from hct_mis_api.apps.program.collision_detectors import (
-    IdentificationKeyCollisionDetector,
-)
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.geo.models import Country
+from hope.apps.household.models import Household, PendingIndividual
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland)
     program = ProgramFactory.create(
-        name="Test Program for Deduplication", status=Program.ACTIVE, business_area=business_area
+        name="Test Program for Deduplication",
+        status=Program.ACTIVE,
+        business_area=business_area,
     )
     program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
@@ -36,21 +36,25 @@ def program(poland: Country) -> Program:
     return program
 
 
-@pytest.fixture()
+@pytest.fixture
 def importing_registration_data_import(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
-        program=program, business_area=program.business_area, status=RegistrationDataImport.IMPORTING
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.IMPORTING,
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def registration_data_import_merged(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory.create(
-        program=program, business_area=program.business_area, status=RegistrationDataImport.MERGED
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.MERGED,
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def merged_household(
     program: Program, registration_data_import_merged: RegistrationDataImport
 ) -> tuple[Household, PendingIndividual]:
@@ -74,7 +78,7 @@ def merged_household(
     return (household, PendingIndividual.objects.get(pk=inds[0].pk))
 
 
-@pytest.fixture()
+@pytest.fixture
 def pending_household(
     program: Program, importing_registration_data_import: RegistrationDataImport
 ) -> tuple[Household, PendingIndividual]:

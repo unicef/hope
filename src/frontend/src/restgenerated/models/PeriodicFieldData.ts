@@ -5,7 +5,11 @@
 import type { SubtypeEnum } from './SubtypeEnum';
 export type PeriodicFieldData = {
     subtype: SubtypeEnum;
-    number_of_rounds: number;
-    rounds_names?: Array<string>;
+    numberOfRounds: number;
+    roundsNames?: Array<string>;
+    /**
+     * Number of rounds already used in templates and cannot be used in template creation again.
+     */
+    roundsCovered?: number;
 };
 

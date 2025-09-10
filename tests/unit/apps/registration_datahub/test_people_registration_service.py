@@ -2,16 +2,21 @@ import datetime
 import json
 from typing import Union
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.program import ProgramFactory
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.core.models import DataCollectingType
+from hope.apps.household.models import (
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -19,23 +24,21 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.people_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.people_registration_service import (
     PeopleRegistrationService,
 )
 
 
 class TestPeopleRegistrationService(TestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
+        call_command("init_geo_fixtures")
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
@@ -64,7 +67,11 @@ class TestPeopleRegistrationService(TestCase):
                 "disability_id_i_c": "document.disability_certificate-document_number",
                 "disability_id_photo_i_c": "document.disability_certificate-photo",
             },
-            "flex_fields": ["marketing.can_unicef_contact_you", "enumerators", "macioce"],
+            "flex_fields": [
+                "marketing.can_unicef_contact_you",
+                "enumerators",
+                "macioce",
+            ],
             "household_constances": {"zip_code": "00126"},
             "individual_constances": {"pregnant": True},
         }
@@ -104,7 +111,9 @@ class TestPeopleRegistrationService(TestCase):
         cls.files = {
             "individuals": [
                 {
-                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP////////////////////////////////////"
+                    "//////////////////////////////////////////////////wgALCAABAAEBAREA/"
+                    "8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
@@ -147,16 +156,16 @@ class TestPeopleRegistrationService(TestCase):
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
         records[0].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 1
+        assert PendingHousehold.objects.count() == 1
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 1
 
         pending_household = PendingHousehold.objects.all()[0]
         registration_data_import = pending_household.registration_data_import
-        self.assertIn("ff", pending_household.flex_fields.keys())
-        self.assertEqual(registration_data_import.program, self.program)
+        assert "ff" in pending_household.flex_fields
+        assert registration_data_import.program == self.program
 
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -177,26 +186,24 @@ class TestPeopleRegistrationService(TestCase):
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 1
+        assert PendingHousehold.objects.count() == 1
 
         household = PendingHousehold.objects.first()
-        self.assertEqual(household.zip_code, "00126")
-        self.assertEqual(household.flex_fields["ff"], "random")
-        self.assertEqual(household.flex_fields["enumerators"], "ABC")
-        self.assertEqual(household.flex_fields["marketing_can_unicef_contact_you"], "YES")
+        assert household.zip_code == "00126"
+        assert household.flex_fields["ff"] == "random"
+        assert household.flex_fields["enumerators"] == "ABC"
+        assert household.flex_fields["marketing_can_unicef_contact_you"] == "YES"
 
         assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
         assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
         assert PendingIndividual.objects.get(
-            **{
-                "given_name": "Jan",
-                "middle_name": "Roman",
-                "family_name": "Romaniak",
-                "sex": "MALE",
-                "email": "email123@mail.com",
-                "phone_no": "+393892781511",
-                "pregnant": True,
-            }
+            given_name="Jan",
+            middle_name="Roman",
+            family_name="Romaniak",
+            sex="MALE",
+            email="email123@mail.com",
+            phone_no="+393892781511",
+            pregnant=True,
         )
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1

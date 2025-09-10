@@ -5,16 +5,13 @@ import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  AllAddIndividualFieldsQuery,
-  IndividualQuery,
-} from '@generated/graphql';
 import { EditPeopleDataChangeField } from './EditPeopleDataChangeField';
 import { CurrentValue } from './CurrentValue';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 export interface EditPeopleDataChangeFieldRowProps {
-  fields: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'];
-  individual: IndividualQuery['individual'];
+  fields: any[];
+  individual: IndividualDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];

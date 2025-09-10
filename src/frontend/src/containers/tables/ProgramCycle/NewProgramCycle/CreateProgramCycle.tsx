@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { today } from '@utils/utils';
+import { showApiErrorMessages, today } from '@utils/utils';
 import moment from 'moment/moment';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
@@ -14,7 +14,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { LoadingButton } from '@core/LoadingButton';
 import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '@generated/graphql';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import { GreyText } from '@core/GreyText';
 import Grid from '@mui/material/Grid2';
@@ -22,18 +21,16 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  createProgramCycle,
-  ProgramCycleCreate,
-  ProgramCycleCreateResponse,
-} from '@api/programCycleApi';
+import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
 import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface CreateProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
@@ -56,12 +53,12 @@ const CreateProgramCycle = ({
 
   let endDate = Yup.date()
     .min(today, t('End Date cannot be in the past'))
-    .when('start_date', ([start_date], schema) =>
-      start_date
+    .when('startDate', ([startDate], schema) =>
+      startDate
         ? schema.min(
-            new Date(start_date),
+            new Date(startDate),
             `${t('End date have to be greater than')} ${moment(
-              start_date,
+              startDate,
             ).format('YYYY-MM-DD')}`,
           )
         : schema,
@@ -77,34 +74,38 @@ const CreateProgramCycle = ({
       .required(t('Programme Cycle Title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    start_date: Yup.date()
+    startDate: Yup.date()
       .required(t('Start Date is required'))
       .min(
         program.startDate,
         t('Start Date cannot be before Programme Start Date'),
       ),
-    end_date: endDate,
+    endDate: endDate,
   });
 
   const initialValues: {
     [key: string]: string | boolean | number;
   } = {
     title: '',
-    start_date: undefined,
-    end_date: undefined,
+    startDate: undefined,
+    endDate: undefined,
   };
 
   const { mutateAsync, isPending, error } = useMutation<
-    ProgramCycleCreateResponse,
+    ProgramCycleCreate,
     MutationError,
     ProgramCycleCreate
   >({
     mutationFn: async (body) => {
-      return createProgramCycle(businessArea, program.id, body);
+      return RestService.restBusinessAreasProgramsCyclesCreate({
+        businessAreaSlug: businessArea,
+        programSlug: program.slug,
+        requestBody: body,
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+        queryKey: ['programCycles', businessArea, program.slug],
       });
       onSubmit();
     },
@@ -114,12 +115,12 @@ const CreateProgramCycle = ({
     try {
       await mutateAsync({
         title: values.title,
-        start_date: values.start_date,
-        end_date: values.end_date,
+        startDate: values.startDate,
+        endDate: values.endDate,
       });
       showMessage(t('Programme Cycle Created'));
     } catch (e) {
-      /* empty */
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -162,29 +163,29 @@ const CreateProgramCycle = ({
                 </Grid>
                 <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                   <Field
-                    name="start_date"
+                    name="startDate"
                     label={t('Start Date')}
                     component={FormikDateField}
                     required
                     fullWidth
                     decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   />
-                  {error?.data?.start_date && (
+                  {error?.data?.startDate && (
                     <FormHelperText error>
-                      {error.data.start_date}
+                      {error.data.startDate}
                     </FormHelperText>
                   )}
                 </Grid>
                 <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                   <Field
-                    name="end_date"
+                    name="endDate"
                     label={t('End Date')}
                     component={FormikDateField}
                     fullWidth
                     decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   />
-                  {error?.data?.end_date && (
-                    <FormHelperText error>{error.data.end_date}</FormHelperText>
+                  {error?.data?.endDate && (
+                    <FormHelperText error>{error.data.endDate}</FormHelperText>
                   )}
                 </Grid>
               </Grid>

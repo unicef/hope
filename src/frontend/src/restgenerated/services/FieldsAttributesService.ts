@@ -7,6 +7,7 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class FieldsAttributesService {
     /**
+     * Return the list of FieldAttribute.
      * @returns any No response body
      * @throws ApiError
      */

@@ -4,9 +4,10 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from django.http import JsonResponse
+import pytest
 
-from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
-from hct_mis_api.api.utils import humanize_errors
+from hope.api.endpoints.rdi.upload import RDINestedSerializer
+from hope.api.utils import humanize_errors
 
 MEMBER = {
     "birth_date": "2000-01-01",
@@ -24,6 +25,7 @@ HOUSEHOLD = {
 }
 
 
+@pytest.mark.django_db
 class ValidatorTest(TestCase):
     maxDiff = None
 
@@ -36,12 +38,12 @@ class ValidatorTest(TestCase):
         serializer.is_valid()
         return humanize_errors(json.loads(JsonResponse(serializer.errors).content))
 
-    def assertErrors(self, post_data: Dict, expected: Dict) -> None:
+    def assert_errors(self, post_data: Dict, expected: Dict) -> None:
         res = self._run(post_data)
-        self.assertDictEqual(res, expected)
+        assert res == expected
 
     def test_empty_post(self) -> None:
-        self.assertErrors(
+        self.assert_errors(
             {},
             {
                 "households": ["This field is required."],
@@ -52,7 +54,7 @@ class ValidatorTest(TestCase):
 
     def test_empty_households(self) -> None:
         data = {"households": [], "name": "Test1"}
-        self.assertErrors(
+        self.assert_errors(
             data,
             {
                 "households": ["This field is required."],
@@ -62,7 +64,7 @@ class ValidatorTest(TestCase):
 
     def test_empty_household_value(self) -> None:
         data = {"households": [{}], "name": "Test1"}
-        self.assertErrors(
+        self.assert_errors(
             data,
             {
                 "households": [
@@ -86,7 +88,7 @@ class ValidatorTest(TestCase):
             ],
             "name": "Test1",
         }
-        self.assertErrors(
+        self.assert_errors(
             data,
             {
                 "households": [{"Household #1": [{"members": ["This field is required"]}]}],
@@ -99,7 +101,7 @@ class ValidatorTest(TestCase):
         h1["members"] = [MEMBER, MEMBER]
 
         data = {"name": "Test1", "households": [h1]}
-        self.assertErrors(
+        self.assert_errors(
             data,
             {
                 "households": [
@@ -120,7 +122,7 @@ class ValidatorTest(TestCase):
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
         data = {"name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}
-        self.assertErrors(
+        self.assert_errors(
             data,
             {
                 "households": [

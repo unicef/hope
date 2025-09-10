@@ -1,10 +1,9 @@
 from django.utils import timezone
-
-from extras.test_utils.factories.account import UserFactory
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.api.models import APIToken, Grant
+from extras.test_utils.factories.account import UserFactory
+from hope.api.models import APIToken, Grant
 
 
 class APITokenFactory(DjangoModelFactory):

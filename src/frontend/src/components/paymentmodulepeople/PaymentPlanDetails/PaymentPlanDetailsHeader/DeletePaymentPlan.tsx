@@ -13,45 +13,68 @@ import { Delete } from '@mui/icons-material';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  PaymentPlanQuery,
-  useDeletePaymentPMutation,
-} from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 export interface DeletePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function DeletePaymentPlan({
   paymentPlan,
 }: DeletePaymentPlanProps): ReactElement {
   const navigate = useNavigate();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
+  const { mutateAsync: deletePaymentPlan, isPending: loadingDelete } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansDestroy({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
+    });
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentPlanId: id,
-        },
+      await deletePaymentPlan({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id,
       });
       showMessage(t('Payment Plan Deleted'));
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Ignore empty response error
+      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+        showMessage(t('Payment Plan Deleted'));
+        navigate(`/${baseUrl}/payment-module/payment-plans`);
+      } else {
+        showMessage(e.message);
+      }
     }
   };
+
   return (
     <>
       <Box p={2}>

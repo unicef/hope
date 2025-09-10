@@ -4,15 +4,13 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from django.test import TestCase
+import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    registration_xlsx_import_task,
-)
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 
 
 class TestRegistrationXlsxImportTask(TestCase):
@@ -22,14 +20,17 @@ class TestRegistrationXlsxImportTask(TestCase):
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute", return_value=None)
-    def test_task_start_importing(self, _: Any) -> None:
+    @patch(
+        "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+        return_value=None,
+    )
+    def test_task_start_importing(self, mock_execute: Any) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
 
         self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_rdi_cannot_be_import_if_not_schedule_for_import(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORTING)
@@ -37,7 +38,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_only_one_task_for_the_same_rdi_could_be_run(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORTING)
@@ -46,11 +47,11 @@ class TestRegistrationXlsxImportTask(TestCase):
         def _mock(*args: Any, **kwargs: Any) -> Any:
             yield False
 
-        with patch("hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache", new=_mock):
+        with patch("hope.apps.registration_datahub.celery_tasks.locked_cache", new=_mock):
             self._run_task(rdi.id)
 
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORTING)
+        assert rdi.status == RegistrationDataImport.IMPORTING
 
     def test_rdi_marked_as_import_error_on_task_failed(self) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
@@ -58,11 +59,12 @@ class TestRegistrationXlsxImportTask(TestCase):
         def _mock(*args: Any, **kwargs: Any) -> None:
             raise Exception("something went wrong")
 
-        with patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute", new=_mock):
-            with self.assertRaises(Exception) as context:
+        with patch(
+            "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+            new=_mock,
+        ):
+            with pytest.raises(Exception, match="something went wrong"):
                 self._run_task(rdi.id)
-
-        self.assertEqual(str(context.exception), "something went wrong")
 
     def _run_task(self, rdi_id: str) -> None:
         registration_xlsx_import_task(

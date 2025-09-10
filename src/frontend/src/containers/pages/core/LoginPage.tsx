@@ -66,7 +66,7 @@ export function LoginPage(): ReactElement {
             component="a"
             href={
               next
-                ? `${LOGIN_URL}?next=/accounts/profile%3Fnext%3D${next}`
+                ? `${LOGIN_URL}?next=${next}`
                 : LOGIN_URL
             }
           >

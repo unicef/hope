@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { renderUserName } from '@utils/utils';
-import { SurveyNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { Survey } from '@restgenerated/models/Survey';
 
 interface SurveysTableRowProps {
-  survey: SurveyNode;
+  survey: Survey;
   canViewDetails: boolean;
   categoryDict;
 }
@@ -42,8 +41,8 @@ export function SurveysTableRow({
       </TableCell>
       <TableCell align="left">{survey.title}</TableCell>
       <TableCell align="left">{categoryDict[survey.category]}</TableCell>
-      <TableCell align="left">{survey.numberOfRecipients}</TableCell>
-      <TableCell align="left">{renderUserName(survey.createdBy)}</TableCell>
+      <TableCell align="left">{survey.numberOfRecipients || 'N/A'}</TableCell>
+      <TableCell align="left">{survey.createdBy}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{survey.createdAt}</UniversalMoment>
       </TableCell>

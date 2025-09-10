@@ -1,8 +1,8 @@
 import pytest
-from extras.test_utils.factories.geo import CountryFactory
 
-from hct_mis_api.apps.geo.celery_tasks import import_areas_from_csv_task
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from extras.test_utils.factories.geo import CountryFactory
+from hope.apps.geo.celery_tasks import import_areas_from_csv_task
+from hope.apps.geo.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db
 

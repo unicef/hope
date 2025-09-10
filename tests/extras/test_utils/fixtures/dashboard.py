@@ -1,18 +1,17 @@
 from typing import Callable, Dict, Optional
 
 from django.db import transaction
-
 import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.dashboard import ModifiedPaymentFactory
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.household.models import Household
 
-from hct_mis_api.apps.household.models import Household
 
-
-@pytest.fixture()
+@pytest.fixture
 @pytest.mark.django_db(databases=["default", "read_only"])
 def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]], Household]:
     """
@@ -36,7 +35,11 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]]
                     "female_age_group_0_5_disabled_count": 1,
                     "female_age_group_6_11_disabled_count": 1,
                     "male_age_group_60_disabled_count": 1,
-                    "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
+                    "admin1": AreaFactory(
+                        name="Kabul",
+                        area_type__name="Province",
+                        area_type__area_level=1,
+                    ),
                     "program": program,
                     **(household_extra_args or {}),
                 }

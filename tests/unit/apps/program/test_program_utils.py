@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 from django.core.cache import cache
 from django.test import TestCase
-
 import pytest
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -18,9 +18,8 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
@@ -29,11 +28,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.utils import (
+from hope.apps.program.utils import (
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class TestEnrolHouseholdToProgram(TestCase):
@@ -131,10 +130,12 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.program2,
             self.str_user_id,
         )
-        self.assertEqual(hh_count, Household.objects.count())
-        self.assertEqual(ind_count, Individual.objects.count())
+        assert hh_count == Household.objects.count()
+        assert ind_count == Individual.objects.count()
 
-    def test_enroll_original_household_to_program_representation_already_enrolled(self) -> None:
+    def test_enroll_original_household_to_program_representation_already_enrolled(
+        self,
+    ) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
@@ -143,12 +144,12 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.program2,
             self.str_user_id,
         )
-        self.assertEqual(hh_count, Household.objects.count())
-        self.assertEqual(ind_count, Individual.objects.count())
+        assert hh_count == Household.objects.count()
+        assert ind_count == Individual.objects.count()
 
     def test_enroll_household_to_program(self) -> None:
-        hh_count = Household.original_and_repr_objects.count()
-        ind_count = Individual.original_and_repr_objects.count()
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
         document_count = Document.objects.count()
         identities_count = IndividualIdentity.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
@@ -160,53 +161,41 @@ class TestEnrolHouseholdToProgram(TestCase):
 
         self.individual_2_already_enrolled.refresh_from_db()
         # 1 new hh enrolled to program2
-        self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
+        assert hh_count + 1 == Household.objects.count()
         # 2 new individuals enrolled to program2, individual1 and individual_hoh, individual2 was already in program 2
-        self.assertEqual(ind_count + 2, Individual.original_and_repr_objects.count())
+        assert ind_count + 2 == Individual.objects.count()
         # 1 new object related to individual1 enrolled to program2
-        self.assertEqual(document_count + 1, Document.objects.count())
-        self.assertEqual(identities_count + 1, IndividualIdentity.objects.count())
-        self.assertEqual(roles_count + 2, IndividualRoleInHousehold.objects.count())
+        assert document_count + 1 == Document.objects.count()
+        assert identities_count + 1 == IndividualIdentity.objects.count()
+        assert roles_count + 2 == IndividualRoleInHousehold.objects.count()
 
         original_household = Household.objects.get(id=self.original_household_id)
         enrolled_household = original_household.copied_to.first()
 
-        self.assertEqual(self.individual_2_already_enrolled.household, enrolled_household)
-        self.assertEqual(original_household.copied_to.count(), 1)
-        self.assertEqual(enrolled_household.program, self.program2)
-        self.assertEqual(enrolled_household.unicef_id, original_household.unicef_id)
-        self.assertEqual(
-            enrolled_household.head_of_household,
-            self.individual_hoh.copied_to.filter(program=self.program2).first(),
+        assert self.individual_2_already_enrolled.household == enrolled_household
+        assert original_household.copied_to.count() == 1
+        assert enrolled_household.program == self.program2
+        assert enrolled_household.unicef_id == original_household.unicef_id
+        assert (
+            enrolled_household.head_of_household == self.individual_hoh.copied_to.filter(program=self.program2).first()
         )
-        self.assertEqual(
-            enrolled_household.individuals.count(),
-            original_household.individuals.count(),
-            2,
-        )
-        self.assertEqual(
-            enrolled_household.individuals.first().program,
-            self.program2,
-        )
+        assert enrolled_household.individuals.count() == original_household.individuals.count() == 3
+        assert enrolled_household.individuals.first().program == self.program2
 
-        self.assertIsNotNone(
-            IndividualRoleInHousehold.objects.filter(
-                individual=self.individual1.copied_to.filter(program=self.program2).first(),
-                household=enrolled_household,
-                role=ROLE_PRIMARY,
-            ).first()
-        )
-        self.assertIsNotNone(
-            IndividualRoleInHousehold.objects.filter(
-                individual=self.individual_2_original.copied_to.filter(program=self.program2).first(),
-                household=enrolled_household,
-                role=ROLE_ALTERNATE,
-            ).first()
-        )
+        assert IndividualRoleInHousehold.objects.filter(
+            individual=self.individual1.copied_to.filter(program=self.program2).first(),
+            household=enrolled_household,
+            role=ROLE_PRIMARY,
+        ).first()
+        assert IndividualRoleInHousehold.objects.filter(
+            individual=self.individual_2_original.copied_to.filter(program=self.program2).first(),
+            household=enrolled_household,
+            role=ROLE_ALTERNATE,
+        ).first()
 
     def test_enroll_household_with_external_collector(self) -> None:
-        hh_count = Household.original_and_repr_objects.count()
-        ind_count = Individual.original_and_repr_objects.count()
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
 
         enroll_households_to_program(
@@ -215,22 +204,20 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.str_user_id,
         )
         hh = Household.objects.order_by("created_at").last()
-        self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
+        assert hh_count + 1 == Household.objects.count()
         # 2 new individuals enrolled - individual_external and individual_hoh
-        self.assertEqual(ind_count + 2, Individual.original_and_repr_objects.count())
-        self.assertEqual(roles_count + 1, IndividualRoleInHousehold.objects.count())
+        assert ind_count + 2 == Individual.objects.count()
+        assert roles_count + 1 == IndividualRoleInHousehold.objects.count()
 
-        self.assertEqual(
-            hh.head_of_household,
-            self.individual_hoh_e.copied_to.filter(program=self.program2).first(),
-        )
-        self.assertIsNotNone(self.individual_external.copied_to.filter(program=self.program2).first())
-        self.assertIsNotNone(
+        assert hh.head_of_household == self.individual_hoh_e.copied_to.filter(program=self.program2).first()
+        assert self.individual_external.copied_to.filter(program=self.program2).first() is not None
+        assert (
             IndividualRoleInHousehold.objects.filter(
                 individual=self.individual_external.copied_to.filter(program=self.program2).first(),
                 household=hh,
                 role=ROLE_PRIMARY,
             ).first()
+            is not None
         )
 
     def test_enroll_household_with_head_of_household_already_copied(self) -> None:
@@ -238,7 +225,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         head_of_household_already_enrolled_program1.refresh_from_db()
 
         head_of_household_already_enrolled_program2 = IndividualFactory(
-            household=None, program=self.program2, unicef_id=head_of_household_already_enrolled_program1.unicef_id
+            household=None,
+            program=self.program2,
+            unicef_id=head_of_household_already_enrolled_program1.unicef_id,
         )
 
         household_already_with_head_already_enrolled = HouseholdFactory(
@@ -257,27 +246,23 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.str_user_id,
         )
         hh = Household.objects.order_by("created_at").last()
-        self.assertEqual(hh_count + 1, Household.objects.count())
-        self.assertEqual(ind_count, Individual.objects.count())
+        assert hh_count + 1 == Household.objects.count()
+        assert ind_count == Individual.objects.count()
 
-        self.assertEqual(
-            hh.head_of_household,
-            head_of_household_already_enrolled_program2,
-        )
-        self.assertEqual(
-            hh.program,
-            self.program2,
-        )
+        assert hh.head_of_household == head_of_household_already_enrolled_program2
+        assert hh.program == self.program2
 
     @pytest.mark.elasticsearch
     def test_enroll_households_to_program_task(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
         enroll_households_to_program_task(
-            [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
+            [str(self.household_already_enrolled.id)],
+            str(self.program2.pk),
+            self.str_user_id,
         )
-        self.assertEqual(hh_count, Household.objects.count())
-        self.assertEqual(ind_count, Individual.objects.count())
+        assert hh_count == Household.objects.count()
+        assert ind_count == Individual.objects.count()
 
     @pytest.mark.elasticsearch
     def test_enroll_households_to_program_task_already_running(self) -> None:
@@ -295,30 +280,31 @@ class TestEnrolHouseholdToProgram(TestCase):
 
         enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
 
-        self.assertEqual(hh_count, Household.objects.count())
-        self.assertEqual(ind_count, Individual.objects.count())
+        assert hh_count == Household.objects.count()
+        assert ind_count == Individual.objects.count()
 
         cache.delete(cache_key)
 
         enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
 
-        self.assertEqual(hh_count + 1, Household.objects.count())
-        self.assertEqual(ind_count + 2, Individual.objects.count())
+        assert hh_count + 1 == Household.objects.count()
+        assert ind_count + 2 == Individual.objects.count()
 
-    @patch("hct_mis_api.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.side_effect = [1111, 5555]
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_when_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
-            business_area=self.program1.business_area, name="RDI for enroll households to Programme: Program 1"
+            business_area=self.program1.business_area,
+            name="RDI for enroll households to Programme: Program 1",
         )
         result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1 (1111)"
-        self.assertEqual(result, expected_name)
+        expected_name = "RDI for enroll households to Programme: Program 1 (2111)"
+        assert result == expected_name
 
-    @patch("hct_mis_api.apps.program.utils.randint")
-    def test_generate_rdi_unique_name_no_conflicts(self, mock_randint: Any) -> None:
-        mock_randint.return_value = 3333
+    @patch("hope.apps.program.utils.randbelow")
+    def test_generate_rdi_unique_name_no_conflicts(self, mock_randbelow: Any) -> None:
+        mock_randbelow.return_value = 3333
         result = generate_rdi_unique_name(self.program1)
         expected_name = "RDI for enroll households to Programme: Program 1"
-        self.assertEqual(result, expected_name)
-        self.assertFalse(RegistrationDataImport.objects.filter(name=expected_name).exists())
+        assert result == expected_name
+        assert not RegistrationDataImport.objects.filter(name=expected_name).exists()

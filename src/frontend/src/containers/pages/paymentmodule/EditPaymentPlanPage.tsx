@@ -1,64 +1,93 @@
-import { Form, Formik } from 'formik';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import moment from 'moment';
-import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { today } from '@utils/utils';
-import {
-  useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
-  useUpdatePpMutation,
-} from '@generated/graphql';
-import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { showApiErrorMessages, today } from '@utils/utils';
+import { Form, Formik } from 'formik';
+import moment from 'moment';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const EditPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
     });
 
-  const [mutate] = useUpdatePpMutation();
+  const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id: mutationId,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
+          businessAreaSlug,
+          id: mutationId,
+          programSlug,
+          requestBody,
+        }),
+    });
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         status: 'DRAFT',
-        program: programId,
-      },
-    });
+      });
+    },
+  });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
-  const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
@@ -88,23 +117,24 @@ const EditPaymentPlanPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const requestBody = {
+      dispersionStartDate: values.dispersionStartDate,
+      dispersionEndDate: values.dispersionEndDate,
+      currency: values.currency?.value
+        ? values.currency.value
+        : values.currency,
+    };
     try {
-      const res = await mutate({
-        variables: {
-          paymentPlanId: values.paymentPlanId,
-          dispersionStartDate: values.dispersionStartDate,
-          dispersionEndDate: values.dispersionEndDate,
-          currency: values.currency?.value
-            ? values.currency.value
-            : values.currency,
-        },
+      const res = await updatePaymentPlan({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+        requestBody,
       });
       showMessage(t('Payment Plan Edited'));
-      navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -122,6 +152,7 @@ const EditPaymentPlanPage = (): ReactElement => {
             handleSubmit={submitForm}
             baseUrl={baseUrl}
             permissions={permissions}
+            loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}

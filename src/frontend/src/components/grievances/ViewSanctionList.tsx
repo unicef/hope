@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
 } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,22 +1,19 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useBusinessArea } from '@hooks/useBusinessArea';
-import {
-  AllHouseholdsQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { MouseEvent, ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableRowCommunicationProps {
-  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
-  radioChangeHandler: (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-  ) => void;
-  selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
-  choicesData: HouseholdChoiceDataQuery;
+  household: HouseholdList;
+  radioChangeHandler: (household) => void;
+  selectedHousehold: HouseholdDetail;
+  choicesData: HouseholdChoices;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
@@ -70,7 +67,7 @@ export function LookUpHouseholdTableRowCommunication({
             onClick={(event) => checkboxClickHandler(event, household.id)}
             checked={isItemSelected}
             data-cy="input-checkbox-household"
-            inputProps={{ 'aria-labelledby': household.id }}
+            slotProps={{ input: { 'aria-labelledby': household.id } }}
             disabled={isSelectionDisabled}
           />
         ) : (
@@ -82,7 +79,7 @@ export function LookUpHouseholdTableRowCommunication({
             }}
             value={household.id}
             name="radio-button-household"
-            inputProps={{ 'aria-label': household.id }}
+            slotProps={{ input: { 'aria-label': household.id } }}
             data-cy="input-radio-household"
             disabled={isSelectionDisabled}
           />
@@ -93,7 +90,7 @@ export function LookUpHouseholdTableRowCommunication({
           {household.unicefId}
         </BlackLink>
       </TableCell>
-      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align="left">{household.headOfHousehold}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
       <TableCell align="left">

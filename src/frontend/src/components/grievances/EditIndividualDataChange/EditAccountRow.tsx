@@ -1,18 +1,19 @@
-import { Box, Grid2 as Grid, IconButton, Button } from '@mui/material';
+import { Box, Button, Grid2 as Grid, IconButton } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
 import React, { Fragment, ReactElement, useState } from 'react';
-import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { Account } from '@restgenerated/models/Account';
 
 export interface EditAccountRowProps {
   values;
-  account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
+  account: Account;
   arrayHelpers;
   id: string;
- addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  individualChoicesData: IndividualChoices
 }
 
 export function EditAccountRow({
@@ -20,12 +21,12 @@ export function EditAccountRow({
   account,
   arrayHelpers,
   id,
-  addIndividualFieldsData,
+  individualChoicesData,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
-  const dataFields = JSON.parse(account.dataFields);
+  const dataFields = account.dataFields;
   return isEdited ? (
     <>
       <AccountField
@@ -35,8 +36,8 @@ export function EditAccountRow({
         isEdited={isEdited}
         account={account}
         values={values}
-        accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
-        accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
+        accountTypeChoices={individualChoicesData.accountTypeChoices}
+        accountFinancialInstitutionChoices={individualChoicesData.accountFinancialInstitutionChoices}
         onDelete={() => {}}
       />
       <Box display="flex" alignItems="center">
@@ -61,18 +62,17 @@ export function EditAccountRow({
       <Grid size={{ xs: 4 }} key="type">
         <LabelizedField
           label="type"
-          value={String(account.name)}
+          value={String(account.accountType)}
         />
       </Grid>
-
     {Object.entries(dataFields).map(([key, value]) => {
       let displayValue = String(value);
 
       if (
         key === 'financial_institution' &&
-        Array.isArray(addIndividualFieldsData.accountFinancialInstitutionChoices)
+        Array.isArray(individualChoicesData.accountFinancialInstitutionChoices)
       ) {
-        const choice = addIndividualFieldsData.accountFinancialInstitutionChoices.find(
+        const choice = individualChoicesData.accountFinancialInstitutionChoices.find(
           (c: any) => c.value === value,
         );
         displayValue = choice ? choice.name : String(value);

@@ -16,19 +16,25 @@ class TestCrossAreaTickets(TestCase):
         individual1_from_area1 = IndividualFactory(business_area=business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=business_area, household=None)
         household1_from_area1 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area1, head_of_household=individual1_from_area1
+            business_area=business_area,
+            admin2=admin_area1,
+            head_of_household=individual1_from_area1,
         )
         individual1_from_area1.household = household1_from_area1
         individual1_from_area1.save()
         household2_from_area1 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area1, head_of_household=individual2_from_area1
+            business_area=business_area,
+            admin2=admin_area1,
+            head_of_household=individual2_from_area1,
         )
         individual2_from_area1.household = household2_from_area1
         individual2_from_area1.save()
 
         individual_from_area2 = IndividualFactory(business_area=business_area, household=None)
         household_from_area2 = HouseholdFactory(
-            business_area=business_area, admin2=admin_area2, head_of_household=individual_from_area2
+            business_area=business_area,
+            admin2=admin_area2,
+            head_of_household=individual_from_area2,
         )
         individual_from_area2.household = household_from_area2
         individual_from_area2.save()
@@ -52,12 +58,12 @@ class TestCrossAreaTickets(TestCase):
     def test_cross_area_field(self) -> None:
         self.needs_adjudication_ticket_cross_area.populate_cross_area_flag()
         self.needs_adjudication_ticket_cross_area.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_cross_area.is_cross_area, True)
+        assert self.needs_adjudication_ticket_cross_area.is_cross_area is True
 
         self.needs_adjudication_ticket_same_area.populate_cross_area_flag()
         self.needs_adjudication_ticket_same_area.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_same_area.is_cross_area, False)
+        assert self.needs_adjudication_ticket_same_area.is_cross_area is False
 
         self.needs_adjudication_ticket_ind_no_household.populate_cross_area_flag()
         self.needs_adjudication_ticket_ind_no_household.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_ind_no_household.is_cross_area, False)
+        assert self.needs_adjudication_ticket_ind_no_household.is_cross_area is False

@@ -1,6 +1,5 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { FeedbackQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -10,22 +9,23 @@ import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 
 interface LinkedGrievanceProps {
-  feedback: FeedbackQuery['feedback'];
+  feedback: FeedbackDetail;
 }
 
 function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
-    feedback.linkedGrievance?.id,
-    feedback.linkedGrievance?.category,
+    feedback.linkedGrievanceId,
+    Number(feedback.linkedGrievanceCategory),
     baseUrl,
   );
   return (
     <Grid size={{ xs: 4 }}>
-      {feedback.linkedGrievance ? (
+      {feedback.linkedGrievanceId ? (
         <Box p={3}>
           <ContainerColumnWithBorder>
             <Title>
@@ -34,7 +34,7 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
                 <BlackLink to={grievanceDetailsPath}>
-                  {feedback.linkedGrievance.unicefId}
+                  {feedback.linkedGrievanceUnicefId}
                 </BlackLink>
               </LabelizedField>
             </OverviewContainer>

@@ -1,0 +1,8 @@
+from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.apps.core.models import BusinessArea
+
+
+class BusinessAreaFilter(UpdatedAtFilter):
+    class Meta:
+        model = BusinessArea
+        fields = ("active",)

@@ -2,12 +2,12 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
+from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
 
 
 class SanctionListFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Sanction List {n}")
-    strategy = "hct_mis_api.apps.sanction_list.strategies.un.UNSanctionList"
+    strategy = "hope.apps.sanction_list.strategies.un.UNSanctionList"
 
     class Meta:
         model = SanctionList

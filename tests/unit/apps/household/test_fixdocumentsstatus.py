@@ -6,11 +6,10 @@ from extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_for_fixtures,
 )
-
-from hct_mis_api.apps.household.management.commands.fixdocumentsstatus import (
+from hope.apps.household.management.commands.fixdocumentsstatus import (
     fix_documents_statuses,
 )
-from hct_mis_api.apps.household.models import Document, Household, Individual
+from hope.apps.household.models import Document, Household, Individual
 
 
 class TestDocumentStatusFixer(TestCase):
@@ -33,7 +32,7 @@ class TestDocumentStatusFixer(TestCase):
 
         fixed_documents = fix_documents_statuses()
 
-        self.assertTrue(Household.objects.filter(withdrawn=True).count(), 1)
-        self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 5)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(), 40)
-        self.assertEqual(fixed_documents, 10)
+        assert Household.objects.filter(withdrawn=True).count(), 1
+        assert Individual.objects.filter(withdrawn=True).count() == 5
+        assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 40
+        assert fixed_documents == 10

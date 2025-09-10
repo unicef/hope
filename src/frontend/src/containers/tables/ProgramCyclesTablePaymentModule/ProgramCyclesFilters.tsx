@@ -88,11 +88,11 @@ export const ProgramCyclesFilters = ({
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.total_entitled_quantity_usd_from}
+            value={filter.totalEntitledQuantityUsdFrom}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange(
-                'total_entitled_quantity_usd_from',
+                'totalEntitledQuantityUsdFrom',
                 e.target.value,
               )
             }
@@ -101,19 +101,19 @@ export const ProgramCyclesFilters = ({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.total_entitled_quantity_usd_to}
+            value={filter.totalEntitledQuantityUsdTo}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange(
-                'total_entitled_quantity_usd_to',
+                'totalEntitledQuantityUsdTo',
                 e.target.value,
               )
             }
             error={
-              filter.total_entitled_quantity_usd_from &&
-              filter.total_entitled_quantity_usd_to &&
-              filter.total_entitled_quantity_usd_from >
-                filter.total_entitled_quantity_usd_to
+              filter.totalEntitledQuantityUsdFrom &&
+              filter.totalEntitledQuantityUsdTo &&
+              filter.totalEntitledQuantityUsdFrom >
+                filter.totalEntitledQuantityUsdTo
             }
           />
         </Grid>
@@ -122,7 +122,7 @@ export const ProgramCyclesFilters = ({
             topLabel="Date"
             onChange={(date) =>
               handleFilterChange(
-                'start_date',
+                'startDate',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
@@ -137,7 +137,7 @@ export const ProgramCyclesFilters = ({
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
-            value={filter.end_date}
+            value={filter.endDate}
           />
         </Grid>
       </Grid>

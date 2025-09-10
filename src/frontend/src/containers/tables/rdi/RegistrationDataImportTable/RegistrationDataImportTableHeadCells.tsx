@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { RegistrationDataImportNode } from '@generated/graphql';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
-export const headCells: HeadCell<RegistrationDataImportNode>[] = [
+export const headCells: HeadCell<RegistrationDataImportList>[] = [
   {
     disablePadding: false,
     label: '',

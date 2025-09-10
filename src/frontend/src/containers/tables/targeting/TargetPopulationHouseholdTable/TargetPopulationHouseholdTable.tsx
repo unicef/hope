@@ -1,32 +1,74 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells } from '@utils/utils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
+import { useProgramContext } from 'src/programContext';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
-import { useProgramContext } from 'src/programContext';
-import { adjustHeadCells } from '@utils/utils';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
-  query?;
-  queryObjectName?;
   variables?;
   canViewDetails?: boolean;
 }
 
 export function TargetPopulationHouseholdTable({
   id,
-  query,
-  queryObjectName,
   variables,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
-  const initialVariables = {
-    ...(id && { paymentPlanId: id }),
-    ...variables,
-  };
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...variables,
+      businessAreaSlug,
+      programSlug,
+      id,
+    }),
+    [variables, businessAreaSlug, programSlug, id],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: householdsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPendingPaymentList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      businessAreaSlug,
+      programSlug,
+      queryVariables,
+      id,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList(
+        createApiParams(
+          {
+            businessAreaSlug,
+            programSlug,
+            id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -45,16 +87,18 @@ export function TargetPopulationHouseholdTable({
 
   return (
     <TableWrapper>
-      <UniversalTable
+      <UniversalRestTable
         title={t(`${beneficiaryGroup?.groupLabelPlural}`)}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={query}
-        queriedObjectName={queryObjectName}
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        isLoading={isLoading}
+        data={householdsData}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        renderRow={(row: PendingPayment) => (
           <TargetPopulationHouseholdTableRow
-            key={(row as { id: string }).id}
+            key={row.id}
             payment={row}
             canViewDetails={canViewDetails}
           />

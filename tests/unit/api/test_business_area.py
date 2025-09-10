@@ -1,10 +1,9 @@
-from extras.test_utils.factories.account import BusinessAreaFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase, token_grant_permission
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import BusinessArea
+from extras.test_utils.factories.account import BusinessAreaFactory
+from hope.api.models import Grant
+from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):
@@ -14,17 +13,17 @@ class APIBusinessAreaTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.list_url = reverse("api:business-area-list")
+        cls.list_url = reverse("api:core:business-areas-list")
 
     def test_list_business_area(self) -> None:
-        business_area1: BusinessArea = BusinessAreaFactory(
+        business_area1 = BusinessAreaFactory(
             slug="ukraine11",
             code="1234",
             name="Ukraine",
             long_name="the long name of Ukraine",
             active=True,
         )
-        business_area2: BusinessArea = BusinessAreaFactory(
+        business_area2 = BusinessAreaFactory(
             slug="BA 2",
             code="5678",
             name="Bus Area 2",
@@ -39,44 +38,38 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()["results"]), 3)
-        self.assertIn(
-            {
-                "id": str(self.business_area.id),
-                "name": self.business_area.name,
-                "code": self.business_area.code,
-                "long_name": self.business_area.long_name,
-                "slug": self.business_area.slug,
-                "parent": None,
-                "is_split": self.business_area.is_split,
-                "active": self.business_area.active,
-            },
-            response.json()["results"],
-        )
-        self.assertIn(
-            {
-                "id": str(business_area1.id),
-                "name": business_area1.name,
-                "code": business_area1.code,
-                "long_name": business_area1.long_name,
-                "slug": business_area1.slug,
-                "parent": None,
-                "is_split": business_area1.is_split,
-                "active": business_area1.active,
-            },
-            response.json()["results"],
-        )
-        self.assertIn(
-            {
-                "id": str(business_area2.id),
-                "name": business_area2.name,
-                "code": business_area2.code,
-                "long_name": business_area2.long_name,
-                "slug": business_area2.slug,
-                "parent": str(business_area2.parent.id),
-                "is_split": business_area2.is_split,
-                "active": business_area2.active,
-            },
-            response.json()["results"],
-        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 3
+        assert {
+            "id": str(self.business_area.id),
+            "name": self.business_area.name,
+            "code": self.business_area.code,
+            "long_name": self.business_area.long_name,
+            "slug": self.business_area.slug,
+            "parent": None,
+            "is_split": self.business_area.is_split,
+            "active": self.business_area.active,
+            "is_accountability_applicable": self.business_area.is_accountability_applicable,
+        } in response.json()["results"]
+        assert {
+            "id": str(business_area1.id),
+            "name": business_area1.name,
+            "code": business_area1.code,
+            "long_name": business_area1.long_name,
+            "slug": business_area1.slug,
+            "parent": None,
+            "is_split": business_area1.is_split,
+            "active": business_area1.active,
+            "is_accountability_applicable": business_area1.is_accountability_applicable,
+        } in response.json()["results"]
+        assert {
+            "id": str(business_area2.id),
+            "name": business_area2.name,
+            "code": business_area2.code,
+            "long_name": business_area2.long_name,
+            "slug": business_area2.slug,
+            "parent": str(business_area2.parent.id),
+            "is_split": business_area2.is_split,
+            "active": business_area2.active,
+            "is_accountability_applicable": business_area2.is_accountability_applicable,
+        } in response.json()["results"]

@@ -1,85 +1,86 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class FeedbackDetailsPage(BaseComponents):
     # Locators
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    titlePage = 'h5[data-cy="page-header-title"]'
-    buttonEdit = 'a[data-cy="button-edit"]'
-    labelCategory = 'div[data-cy="label-Category"]'
-    labelIssueType = 'div[data-cy="label-Issue Type"]'
-    labelHouseholdID = 'div[data-cy="label-Group ID"]'
-    labelIndividualID = 'div[data-cy="label-Member ID"]'
-    labelProgramme = 'div[data-cy="label-Programme"]'
-    labelCreatedBy = 'div[data-cy="label-Created By"]'
-    labelDateCreated = 'div[data-cy="label-Date Created"]'
-    labelLastModifiedDate = 'div[data-cy="label-Last Modified Date"]'
-    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
-    labelAreaVillagePayPoint = 'div[data-cy="label-Area / Village / Pay point"]'
-    labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"  ]'
-    labelDescription = 'div[data-cy="label-Description"]'
-    labelComments = 'div[data-cy="label-Comments"]'
-    buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
-    labelTicketId = 'div[data-cy="label-Ticket Id"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    title_page = 'h5[data-cy="page-header-title"]'
+    button_edit = 'a[data-cy="button-edit"]'
+    label_category = 'div[data-cy="label-Category"]'
+    label_issue_type = 'div[data-cy="label-Issue Type"]'
+    label_household_id = 'div[data-cy="label-Group ID"]'
+    label_individual_id = 'div[data-cy="label-Member ID"]'
+    label_programme = 'div[data-cy="label-Programme"]'
+    label_created_by = 'div[data-cy="label-Created By"]'
+    label_date_created = 'div[data-cy="label-Date Created"]'
+    label_last_modified_date = 'div[data-cy="label-Last Modified Date"]'
+    label_administrative_level2 = 'div[data-cy="label-Administrative Level 2"]'
+    label_area_village_pay_point = 'div[data-cy="label-Area / Village / Pay point"]'
+    label_languages_spoken = 'div[data-cy="label-Languages Spoken"  ]'
+    label_description = 'div[data-cy="label-Description"]'
+    label_comments = 'div[data-cy="label-Comments"]'
+    button_create_linked_ticket = 'button[data-cy="button-create-linked-ticket"]'
+    label_ticket_id = 'div[data-cy="label-Ticket Id"]'
 
     # Texts
-    textTitle = "Feedback ID: "
-    textCategory = "Feedback"
-    textIssueType = "Negative Feedback"
-    textDescription = "Negative Feedback"
+    text_title = "Feedback ID: "
+    text_category = "Feedback"
+    text_issue_type = "Negative Feedback"
+    text_description = "Negative Feedback"
 
     # Elements
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getTitlePage(self) -> WebElement:
-        return self.wait_for(self.titlePage)
+    def get_title_page(self) -> WebElement:
+        return self.wait_for(self.title_page)
 
-    def getButtonEdit(self) -> WebElement:
-        return self.wait_for(self.buttonEdit)
+    def get_button_edit(self) -> WebElement:
+        return self.wait_for(self.button_edit)
 
-    def getCategory(self) -> WebElement:
-        return self.wait_for(self.labelCategory)
+    def get_category(self) -> WebElement:
+        return self.wait_for(self.label_category)
 
-    def getIssueType(self) -> WebElement:
-        return self.wait_for(self.labelIssueType)
+    def get_issue_type(self) -> WebElement:
+        return self.wait_for(self.label_issue_type)
 
-    def getHouseholdID(self) -> WebElement:
-        return self.wait_for(self.labelHouseholdID)
+    def get_household_id(self) -> WebElement:
+        return self.wait_for(self.label_household_id)
 
-    def getIndividualID(self) -> WebElement:
-        return self.wait_for(self.labelIndividualID)
+    def get_individual_id(self) -> WebElement:
+        return self.wait_for(self.label_individual_id)
 
-    def getProgramme(self) -> WebElement:
-        return self.wait_for(self.labelProgramme)
+    def get_programme(self) -> WebElement:
+        return self.wait_for(self.label_programme)
 
-    def getCreatedBy(self) -> WebElement:
-        return self.wait_for(self.labelCreatedBy)
+    def get_created_by(self) -> WebElement:
+        return self.wait_for(self.label_created_by)
 
-    def getDateCreated(self) -> WebElement:
-        return self.wait_for(self.labelDateCreated)
+    def get_date_created(self) -> WebElement:
+        return self.wait_for(self.label_date_created)
 
-    def getLastModifiedDate(self) -> WebElement:
-        return self.wait_for(self.labelLastModifiedDate)
+    def get_last_modified_date(self) -> WebElement:
+        return self.wait_for(self.label_last_modified_date)
 
-    def getAdministrativeLevel2(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel2)
+    def get_administrative_level2(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level2)
 
-    def getAreaVillagePayPoint(self) -> WebElement:
-        return self.wait_for(self.labelAreaVillagePayPoint)
+    def get_area_village_pay_point(self) -> WebElement:
+        return self.wait_for(self.label_area_village_pay_point)
 
-    def getLanguagesSpoken(self) -> WebElement:
-        return self.wait_for(self.labelLanguagesSpoken)
+    def get_languages_spoken(self) -> WebElement:
+        return self.wait_for(self.label_languages_spoken)
 
-    def getDescription(self) -> WebElement:
-        return self.wait_for(self.labelDescription)
+    def get_description(self) -> WebElement:
+        return self.wait_for(self.label_description)
 
-    def getComments(self) -> WebElement:
-        return self.wait_for(self.labelComments)
+    def get_comments(self) -> WebElement:
+        return self.wait_for(self.label_comments)
 
-    def getButtonCreateLinkedTicket(self) -> WebElement:
-        return self.wait_for(self.buttonCreateLinkedTicket)
+    def get_button_create_linked_ticket(self) -> WebElement:
+        return self.wait_for(self.button_create_linked_ticket)
 
-    def getLabelTicketId(self) -> WebElement:
-        return self.wait_for(self.labelTicketId)
+    def get_label_ticket_id(self) -> WebElement:
+        return self.wait_for(self.label_ticket_id)

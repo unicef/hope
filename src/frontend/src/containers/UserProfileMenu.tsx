@@ -9,9 +9,6 @@ import {
   Popper,
 } from '@mui/material';
 import styled from 'styled-components';
-import { MeQuery } from '@generated/graphql';
-import { clearCache } from '@utils/utils';
-import { getClient } from '../apollo/client';
 import React, { ReactElement, useState, useRef, useEffect } from 'react';
 
 const UserProfileButton = styled(Button)`
@@ -23,7 +20,7 @@ const MenuButtonText = styled.span`
   margin-left: ${({ theme }) => theme.spacing(2)};
 `;
 interface UserProfileMenuProps {
-  meData: MeQuery;
+  meData;
 }
 export function UserProfileMenu({
   meData,
@@ -44,9 +41,8 @@ export function UserProfileMenu({
     setOpen((previousOpen) => !previousOpen);
   };
 
-  const handleClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const handleClearCache = () => {
+    //TODO: Clear the cache from backend and frontend
   };
 
   const handleClose = (event): void => {
@@ -67,8 +63,7 @@ export function UserProfileMenu({
     handleClearCache();
   };
 
-  const handleClearCacheAndReloadWindow = async (): Promise<void> => {
-    await handleClearCache();
+  const handleClearCacheAndReloadWindow = () => {
     window.location.reload();
   };
 
@@ -89,8 +84,8 @@ export function UserProfileMenu({
         onClick={handleToggle}
         data-cy="menu-user-profile"
       >
-        <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
-        <MenuButtonText> {meData.me.email}</MenuButtonText>
+        <Avatar alt={meData.email} src="/static/images/avatar/1.jpg" />
+        <MenuButtonText> {meData.email}</MenuButtonText>
       </UserProfileButton>
       <Popper
         open={open}

@@ -3,18 +3,17 @@ from random import choice
 from typing import Callable
 
 from django.utils import timezone
-
 import factory
 import pytest
+from selenium.webdriver.common.by import By
+
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from selenium.webdriver.common.by import By
-
-from hct_mis_api.apps.dashboard.services import DashboardDataCache
-from hct_mis_api.apps.program.models import BeneficiaryGroup
+from hope.apps.dashboard.services import DashboardDataCache
+from hope.apps.program.models import BeneficiaryGroup
 
 
 class ModifiedPaymentFactory(PaymentFactory):
@@ -24,7 +23,14 @@ class ModifiedPaymentFactory(PaymentFactory):
     """
 
     parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
-    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
+    status = factory.Iterator(
+        [
+            "Transaction Successful",
+            "Distribution Successful",
+            "Partially Distributed",
+            "Pending",
+        ]
+    )
     delivered_quantity = factory.Faker("random_int", min=100, max=500)
     delivered_quantity_usd = factory.Faker("random_int", min=100, max=200)
     delivery_date = factory.Faker("date_time_this_month", before_now=True)
@@ -38,7 +44,11 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     household_args = {
         "business_area": business_area,
-        "program": ProgramFactory(business_area=business_area, status="Active", beneficiary_group=beneficiary_group),
+        "program": ProgramFactory(
+            business_area=business_area,
+            status="Active",
+            beneficiary_group=beneficiary_group,
+        ),
         "size": 5,
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
@@ -58,53 +68,53 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
 
 
 @pytest.mark.xfail(reason="UNSTABLE")
-@pytest.mark.django_db()
+@pytest.mark.django_db
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:
-    def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard, business_area: Callable) -> None:
+    def test_smoke_country_dashboard(self, page_country_dashboard: CountryDashboard, business_area: Callable) -> None:
         DashboardDataCache.refresh_data(business_area.slug)
-        pageCountryDashboard.getNavCountryDashboard().click()
-        pageCountryDashboard.switch_to_dashboard_iframe()
+        page_country_dashboard.get_nav_country_dashboard().click()
+        page_country_dashboard.switch_to_dashboard_iframe()
 
         from selenium.webdriver.support.ui import WebDriverWait
 
-        wait = WebDriverWait(pageCountryDashboard.driver, 20)
+        wait = WebDriverWait(page_country_dashboard.driver, 20)
         wait.until(
-            lambda driver: pageCountryDashboard.get_total_amount_paid().text != ""
-            and pageCountryDashboard.get_total_amount_paid().text != "0.00 USD"
+            lambda driver: page_country_dashboard.get_total_amount_paid().text != ""
+            and page_country_dashboard.get_total_amount_paid().text != "0.00 USD"
         )
 
-        assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
-        assert (
-            pageCountryDashboard.get_total_amount_paid_local().text != ""
-        ), "Expected total amount in local paid to be populated."
-        assert (
-            int(pageCountryDashboard.get_number_of_payments().text) > 0
-        ), "Expected number of payments to be greater than zero."
-        assert (
-            pageCountryDashboard.get_outstanding_payments().text == "0.00 USD"
-        ), "Expected outstanding payments to be 0.00 USD"
-        assert (
-            int(pageCountryDashboard.get_households_reached().text) > 0
-        ), "Expected households reached to be greater than zero."
-        assert int(pageCountryDashboard.get_pwd_reached().text) == 0, "Expected PWD reached to be zero."
-        assert (
-            int(pageCountryDashboard.get_children_reached().text) > 0
-        ), "Expected children reached to be greater than zero."
-        assert (
-            int(pageCountryDashboard.get_individuals_reached().text) > 0
-        ), "Expected individuals reached to be greater than zero."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-fsp"
-        ).is_displayed(), "Payments by FSP chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-delivery"
-        ).is_displayed(), "Payments by Delivery chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-sector"
-        ).is_displayed(), "Payments by Sector chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-admin1"
-        ).is_displayed(), "Payments by Admin 1 chart should be displayed."
+        assert page_country_dashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
+        assert page_country_dashboard.get_total_amount_paid_local().text != "", (
+            "Expected total amount in local paid to be populated."
+        )
+        assert int(page_country_dashboard.get_number_of_payments().text) > 0, (
+            "Expected number of payments to be greater than zero."
+        )
+        assert page_country_dashboard.get_outstanding_payments().text == "0.00 USD", (
+            "Expected outstanding payments to be 0.00 USD"
+        )
+        assert int(page_country_dashboard.get_households_reached().text) > 0, (
+            "Expected households reached to be greater than zero."
+        )
+        assert int(page_country_dashboard.get_pwd_reached().text) == 0, "Expected PWD reached to be zero."
+        assert int(page_country_dashboard.get_children_reached().text) > 0, (
+            "Expected children reached to be greater than zero."
+        )
+        assert int(page_country_dashboard.get_individuals_reached().text) > 0, (
+            "Expected individuals reached to be greater than zero."
+        )
+        assert page_country_dashboard.driver.find_element(By.ID, "payments-by-fsp").is_displayed(), (
+            "Payments by FSP chart should be displayed."
+        )
+        assert page_country_dashboard.driver.find_element(By.ID, "payments-by-delivery").is_displayed(), (
+            "Payments by Delivery chart should be displayed."
+        )
+        assert page_country_dashboard.driver.find_element(By.ID, "payments-by-sector").is_displayed(), (
+            "Payments by Sector chart should be displayed."
+        )
+        assert page_country_dashboard.driver.find_element(By.ID, "payments-by-admin1").is_displayed(), (
+            "Payments by Admin 1 chart should be displayed."
+        )
 
-        pageCountryDashboard.switch_to_default_content()
+        page_country_dashboard.switch_to_default_content()

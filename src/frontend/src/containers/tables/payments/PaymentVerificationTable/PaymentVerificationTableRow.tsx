@@ -2,10 +2,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import {
-  PaymentPlanNode,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -14,9 +10,10 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 
 interface PaymentVerificationTableRowProps {
-  plan: PaymentPlanNode;
+  plan: PaymentVerificationPlanList;
   canViewDetails: boolean;
 }
 
@@ -30,10 +27,6 @@ export function PaymentVerificationTableRow({
   const handleClick = (): void => {
     navigate(planVerificationPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
-  if (!statusChoicesData) return null;
 
   return (
     <ClickableTableRow
@@ -52,7 +45,7 @@ export function PaymentVerificationTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={plan?.paymentVerificationSummary?.status}
+          status={plan?.verificationStatus}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>
@@ -64,7 +57,7 @@ export function PaymentVerificationTableRow({
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left" data-cy="cycle-title">
-        {plan.programCycle.title}
+        {plan?.programCycleTitle || '-'}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>

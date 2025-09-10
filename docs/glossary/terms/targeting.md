@@ -21,6 +21,6 @@ Single Entry of a Target Population. It becomes a <glossary:Payment Record>
 
 
 !!! note
-    
+
     - Target Population and Payment Plan is the same object in different phases of its life cycle
     - HouseHold Selection and Payment Record is the same object in different phases of its life cycle

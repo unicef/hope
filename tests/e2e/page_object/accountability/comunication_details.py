@@ -1,73 +1,74 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class AccountabilityCommunicationDetails(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    labelCreatedBy = 'div[data-cy="label-Created By"]'
-    labelDateCreated = 'div[data-cy="label-Date Created"]'
-    labelTargetPopulation = 'div[data-cy="label-Target Population"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    householdId = 'th[data-cy="household-id"]'
-    tableLabel = 'span[data-cy="table-label"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    label_created_by = 'div[data-cy="label-Created By"]'
+    label_date_created = 'div[data-cy="label-Date Created"]'
+    label_target_population = 'div[data-cy="label-Target Population"]'
+    table_title = 'h6[data-cy="table-title"]'
+    household_id = 'th[data-cy="household-id"]'
+    table_label = 'span[data-cy="table-label"]'
     status = 'th[data-cy="status"]'
-    householdHeadName = 'th[data-cy="household-head-name"]'
-    householdSize = 'th[data-cy="household-size"]'
-    householdLocation = 'th[data-cy="household-location"]'
-    householdResidenceStatus = 'th[data-cy="household-residence-status"]'
-    householdRegistrationDate = 'th[data-cy="household-registration-date"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    communicationMessageDetails = 'div[data-cy="communication-message-details"]'
+    household_head_name = 'th[data-cy="household-head-name"]'
+    household_size = 'th[data-cy="household-size"]'
+    household_location = 'th[data-cy="household-location"]'
+    household_residence_status = 'th[data-cy="household-residence-status"]'
+    household_registration_date = 'th[data-cy="household-registration-date"]'
+    table_row = 'tr[data-cy="table-row"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    communication_message_details = 'div[data-cy="communication-message-details"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getLabelCreatedBy(self) -> WebElement:
-        return self.wait_for(self.labelCreatedBy)
+    def get_label_created_by(self) -> WebElement:
+        return self.wait_for(self.label_created_by)
 
-    def getLabelDateCreated(self) -> WebElement:
-        return self.wait_for(self.labelDateCreated)
+    def get_label_date_created(self) -> WebElement:
+        return self.wait_for(self.label_date_created)
 
-    def getLabelTargetPopulation(self) -> WebElement:
-        return self.wait_for(self.labelTargetPopulation)
+    def get_label_target_population(self) -> WebElement:
+        return self.wait_for(self.label_target_population)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getHouseholdId(self) -> WebElement:
-        return self.wait_for(self.householdId)
+    def get_household_id(self) -> WebElement:
+        return self.wait_for(self.household_id)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getStatus(self) -> WebElement:
+    def get_status(self) -> WebElement:
         return self.wait_for(self.status)
 
-    def getHouseholdHeadName(self) -> WebElement:
-        return self.wait_for(self.householdHeadName)
+    def get_household_head_name(self) -> WebElement:
+        return self.wait_for(self.household_head_name)
 
-    def getHouseholdSize(self) -> WebElement:
-        return self.wait_for(self.householdSize)
+    def get_household_size(self) -> WebElement:
+        return self.wait_for(self.household_size)
 
-    def getHouseholdLocation(self) -> WebElement:
-        return self.wait_for(self.householdLocation)
+    def get_household_location(self) -> WebElement:
+        return self.wait_for(self.household_location)
 
-    def getHouseholdResidenceStatus(self) -> WebElement:
-        return self.wait_for(self.householdResidenceStatus)
+    def get_household_residence_status(self) -> WebElement:
+        return self.wait_for(self.household_residence_status)
 
-    def getHouseholdRegistrationDate(self) -> WebElement:
-        return self.wait_for(self.householdRegistrationDate)
+    def get_household_registration_date(self) -> WebElement:
+        return self.wait_for(self.household_registration_date)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getCommunicationMessageDetails(self) -> WebElement:
-        return self.wait_for(self.communicationMessageDetails)
+    def get_communication_message_details(self) -> WebElement:
+        return self.wait_for(self.communication_message_details)

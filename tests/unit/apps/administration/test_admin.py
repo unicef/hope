@@ -1,19 +1,20 @@
-from typing import Any, Dict, Iterable, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
-
-import factory
 from django_webtest import WebTest
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
+import factory
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
+from hope.apps.account.models import Role, RoleAssignment, User
+from hope.apps.account.permissions import Permissions
+
+if TYPE_CHECKING:
+    from hope.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []
 
@@ -21,7 +22,7 @@ factories_registry = {}
 
 
 class AutoRegisterFactoryMetaClass(FactoryMetaClass):
-    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:
+    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:  # noqa
         new_class = super().__new__(mcs, class_name, bases, attrs)
         factories_registry[new_class._meta.model] = new_class
         return new_class
@@ -58,12 +59,12 @@ class TestAdminSite(WebTest):
     @staticmethod
     def create_user_role_with_permissions(
         user: "User", permissions: Iterable, business_area: "BusinessArea"
-    ) -> UserRole:
+    ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
         return user_role
 
     @parameterized.expand(model_admins)
@@ -71,4 +72,4 @@ class TestAdminSite(WebTest):
         self.create_user_role_with_permissions(self.superuser, [Permissions.DOWNLOAD_STORAGE_FILE], self.business_area)
         url = reverse(admin_urlname(model_admin.model._meta, "changelist"))  # type: ignore # str vs SafeString
         res = self.app.get(url, user=self.superuser)
-        self.assertEqual(res.status_code, 200)
+        assert res.status_code == 200

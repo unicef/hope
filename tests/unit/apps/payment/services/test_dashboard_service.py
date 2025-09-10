@@ -1,6 +1,7 @@
 from django.utils import timezone
-
 import pytest
+from pytz import utc
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -12,17 +13,15 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from pytz import utc
-
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
-from hct_mis_api.apps.payment.services.dashboard_service import (
+from hope.apps.geo.models import Area
+from hope.apps.household.models import Household
+from hope.apps.payment.models import DeliveryMechanism, Payment
+from hope.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )
-from hct_mis_api.apps.program.models import Program
+from hope.apps.program.models import Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 class TestPaymentVerificationChartQuery:
@@ -44,13 +43,19 @@ class TestPaymentVerificationChartQuery:
             area_level=2,
         )
         admin_area1 = AreaFactory(
-            name=f"{business_area.slug} city 1", area_type=area_type, p_code=f"{business_area.slug} 1"
+            name=f"{business_area.slug} city 1",
+            area_type=area_type,
+            p_code=f"{business_area.slug} 1",
         )
         admin_area2 = AreaFactory(
-            name=f"{business_area.slug} city 2", area_type=area_type, p_code=f"{business_area.slug} 2"
+            name=f"{business_area.slug} city 2",
+            area_type=area_type,
+            p_code=f"{business_area.slug} 2",
         )
         admin_area3 = AreaFactory(
-            name=f"{business_area.slug} city 3", area_type=area_type, p_code=f"{business_area.slug} 3"
+            name=f"{business_area.slug} city 3",
+            area_type=area_type,
+            p_code=f"{business_area.slug} 3",
         )
 
         program = ProgramFactory(
@@ -61,22 +66,52 @@ class TestPaymentVerificationChartQuery:
         )
 
         household1, individuals1 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area1,
+                "program": program,
+            },
         )
         household2, individuals2 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area2,
+                "program": program,
+            },
         )
         household3, individuals3 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area3,
+                "program": program,
+            },
         )
         household4, individuals4 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area1,
+                "program": program,
+            },
         )
         household5, individuals5 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area2,
+                "program": program,
+            },
         )
         household6, individuals6 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3, "program": program},
+            household_args={
+                "size": 2,
+                "business_area": business_area,
+                "admin2": admin_area3,
+                "program": program,
+            },
         )
 
         payment_plan1 = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=business_area)

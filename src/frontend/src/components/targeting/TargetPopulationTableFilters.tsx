@@ -2,10 +2,9 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  PaymentPlanStatus,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -55,23 +54,26 @@ export const TargetPopulationTableFilters = ({
 
   const allowedStatusChoices = [
     'ASSIGNED',
-    PaymentPlanStatus.TpOpen,
-    PaymentPlanStatus.TpLocked,
-    PaymentPlanStatus.Processing,
-    PaymentPlanStatus.SteficonRun,
-    PaymentPlanStatus.SteficonWait,
-    PaymentPlanStatus.SteficonCompleted,
-    PaymentPlanStatus.SteficonError,
+    PaymentPlanStatusEnum.TP_OPEN,
+    PaymentPlanStatusEnum.TP_LOCKED,
+    PaymentPlanStatusEnum.PROCESSING,
+    PaymentPlanStatusEnum.STEFICON_RUN,
+    PaymentPlanStatusEnum.STEFICON_WAIT,
+    PaymentPlanStatusEnum.STEFICON_COMPLETED,
+    PaymentPlanStatusEnum.STEFICON_ERROR,
   ];
 
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = useQuery({
+    queryKey: ['choicesPaymentPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   const preparedStatusChoices =
     [
       { name: 'Assigned', value: 'ASSIGNED' },
-      ...(statusChoicesData?.paymentPlanStatusChoices || []),
+      ...(statusChoicesData || []),
     ]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+      allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
     ) || [];
 
   return (
@@ -108,10 +110,10 @@ export const TargetPopulationTableFilters = ({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
-            value={filter.totalHouseholdsCountMin}
+            value={filter.totalHouseholdsCountGte}
             placeholder={t('From')}
             onChange={(e) =>
-              handleFilterChange('totalHouseholdsCountMin', e.target.value)
+              handleFilterChange('totalHouseholdsCountGte', e.target.value)
             }
             icon={<Group />}
             data-cy="filters-total-households-count-min"
@@ -119,10 +121,10 @@ export const TargetPopulationTableFilters = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <NumberTextField
-            value={filter.totalHouseholdsCountMax}
+            value={filter.totalHouseholdsCountLte}
             placeholder={t('To')}
             onChange={(e) =>
-              handleFilterChange('totalHouseholdsCountMax', e.target.value)
+              handleFilterChange('totalHouseholdsCountLte', e.target.value)
             }
             icon={<Group />}
             data-cy="filters-total-households-count-max"
@@ -132,15 +134,15 @@ export const TargetPopulationTableFilters = ({
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
-            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
-            value={filter.createdAtRangeMin}
+            onChange={(date) => handleFilterChange('createdAtGte', date)}
+            value={filter.createdAtGte}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
-            value={filter.createdAtRangeMax}
+            onChange={(date) => handleFilterChange('createdAtLte', date)}
+            value={filter.createdAtLte}
           />
         </Grid>
       </Grid>

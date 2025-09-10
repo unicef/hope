@@ -1,166 +1,167 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentVerification(BaseComponents):
     # Locators
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    filterSearch = 'div[data-cy="filter-search"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    filterStatus = 'div[data-cy="filter-status"]'
-    filterFsp = 'div[data-cy="filter-fsp"]'
-    filterModality = 'div[data-cy="filter-Modality"]'
-    filterStartDate = 'div[data-cy="filter-start-date"]'
-    filterEndDate = 'div[data-cy="filter-end-date"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    unicefid = 'th[data-cy="unicefId"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    verificationstatus = 'th[data-cy="verificationStatus"]'
-    totaldeliveredquantity = 'th[data-cy="totalDeliveredQuantity"]'
-    startdate = 'th[data-cy="startDate"]'
-    cycleTitleHeader = 'th[data-cy="cycleTitle"]'
-    cycleTitle = 'td[data-cy="cycle-title"]'
-    updatedat = 'th[data-cy="updatedAt"]'
-    cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    buttonNewPlan = 'button[data-cy="button-new-plan"]'
-    tabFullList = 'button[data-cy="tab-full-list"]'
-    tabRandomSampling = 'button[data-cy="tab-random-sampling"]'
-    selectExcludedadminareasfull = 'div[data-cy="select-excludedAdminAreasFull"]'
-    checkboxVerificationChannel = 'div[data-cy="checkbox-verification-channel"]'
-    sliderConfidenceInterval = 'span[data-cy="slider-confidence-interval"]'
-    sliderMarginOfError = 'span[data-cy="slider-margin-of-error"]'
-    inputAdmincheckbox = 'span[data-cy="input-adminCheckbox"]'
-    inputAgecheckbox = 'span[data-cy="input-ageCheckbox"]'
-    inputSexcheckbox = 'span[data-cy="input-sexCheckbox"]'
-    dialogActionsContainer = 'div[data-cy="dialog-actions-container"]'
-    buttonCancel = 'button[data-cy="button-cancel"]'
-    buttonSubmit = 'button[data-cy="button-submit"]'
-    radioRapidpro = 'span[data-cy="radio-rapidpro"]'
-    radioXlsx = 'span[data-cy="radio-xlsx"]'
-    radioManual = 'span[data-cy="radio-manual"]'
-    radioVerificationChannel = 'span[data-cy="radio-{}"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    filter_search = 'div[data-cy="filter-search"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    filter_status = 'div[data-cy="filter-status"]'
+    filter_fsp = 'div[data-cy="filter-fsp"]'
+    filter_modality = 'div[data-cy="filter-Modality"]'
+    filter_start_date = 'div[data-cy="filter-start-date"]'
+    filter_end_date = 'div[data-cy="filter-end-date"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    table_title = 'h6[data-cy="table-title"]'
+    unicef_id = 'th[data-cy="unicefId"]'
+    table_label = 'span[data-cy="table-label"]'
+    verification_status = 'th[data-cy="verificationStatus"]'
+    total_delivered_quantity = 'th[data-cy="totalDeliveredQuantity"]'
+    start_date = 'th[data-cy="startDate"]'
+    cycle_title_header = 'th[data-cy="cycleTitle"]'
+    cycle_title = 'td[data-cy="cycle-title"]'
+    updated_at = 'th[data-cy="updatedAt"]'
+    cash_plan_table_row = 'tr[data-cy="cash-plan-table-row"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    button_new_plan = 'button[data-cy="button-new-plan"]'
+    tab_full_list = 'button[data-cy="tab-full-list"]'
+    tab_random_sampling = 'button[data-cy="tab-random-sampling"]'
+    select_excluded_admin_areas_full = 'div[data-cy="select-excludedAdminAreasFull"]'
+    checkbox_verification_channel = 'div[data-cy="checkbox-verification-channel"]'
+    slider_confidence_interval = 'span[data-cy="slider-confidence-interval"]'
+    slider_margin_of_error = 'span[data-cy="slider-margin-of-error"]'
+    input_admin_checkbox = 'span[data-cy="input-adminCheckbox"]'
+    input_age_checkbox = 'span[data-cy="input-ageCheckbox"]'
+    input_sex_checkbox = 'span[data-cy="input-sexCheckbox"]'
+    dialog_actions_container = 'div[data-cy="dialog-actions-container"]'
+    button_cancel = 'button[data-cy="button-cancel"]'
+    button_submit = 'button[data-cy="button-submit"]'
+    radio_rapidpro = 'span[data-cy="radio-rapidpro"]'
+    radio_xlsx = 'span[data-cy="radio-xlsx"]'
+    radio_manual = 'span[data-cy="radio-manual"]'
+    radio_verification_channel = 'span[data-cy="radio-{}"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getFilterSearch(self) -> WebElement:
-        return self.wait_for(self.filterSearch)
+    def get_filter_search(self) -> WebElement:
+        return self.wait_for(self.filter_search)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getFilterStatus(self) -> WebElement:
-        return self.wait_for(self.filterStatus)
+    def get_filter_status(self) -> WebElement:
+        return self.wait_for(self.filter_status)
 
-    def getFilterFsp(self) -> WebElement:
-        return self.wait_for(self.filterFsp)
+    def get_filter_fsp(self) -> WebElement:
+        return self.wait_for(self.filter_fsp)
 
-    def getFilterModality(self) -> WebElement:
-        return self.wait_for(self.filterModality)
+    def get_filter_modality(self) -> WebElement:
+        return self.wait_for(self.filter_modality)
 
-    def getFilterStartDate(self) -> WebElement:
-        return self.wait_for(self.filterStartDate)
+    def get_filter_start_date(self) -> WebElement:
+        return self.wait_for(self.filter_start_date)
 
-    def getFilterEndDate(self) -> WebElement:
-        return self.wait_for(self.filterEndDate)
+    def get_filter_end_date(self) -> WebElement:
+        return self.wait_for(self.filter_end_date)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getUnicefid(self) -> WebElement:
-        return self.wait_for(self.unicefid)
+    def get_unicef_id(self) -> WebElement:
+        return self.wait_for(self.unicef_id)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getVerificationstatus(self) -> WebElement:
-        return self.wait_for(self.verificationstatus)
+    def get_verification_status(self) -> WebElement:
+        return self.wait_for(self.verification_status)
 
-    def getTotaldeliveredquantity(self) -> WebElement:
-        return self.wait_for(self.totaldeliveredquantity)
+    def get_total_delivered_quantity(self) -> WebElement:
+        return self.wait_for(self.total_delivered_quantity)
 
-    def getStartdate(self) -> WebElement:
-        return self.wait_for(self.startdate)
+    def get_start_date(self) -> WebElement:
+        return self.wait_for(self.start_date)
 
-    def getCycleTitleHeader(self) -> WebElement:
-        return self.wait_for(self.cycleTitleHeader)
+    def get_cycle_title_header(self) -> WebElement:
+        return self.wait_for(self.cycle_title_header)
 
-    def getCycleTitle(self) -> WebElement:
-        return self.wait_for(self.cycleTitle)
+    def get_cycle_title(self) -> WebElement:
+        return self.wait_for(self.cycle_title)
 
-    def getUpdatedat(self) -> WebElement:
-        return self.wait_for(self.updatedat)
+    def get_updated_at(self) -> WebElement:
+        return self.wait_for(self.updated_at)
 
-    def getCashPlanTableRow(self) -> WebElement:
-        return self.wait_for(self.cashPlanTableRow)
+    def get_cash_plan_table_row(self) -> WebElement:
+        return self.wait_for(self.cash_plan_table_row)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getButtonNewPlan(self) -> WebElement:
-        return self.wait_for(self.buttonNewPlan)
+    def get_button_new_plan(self) -> WebElement:
+        return self.wait_for(self.button_new_plan)
 
-    def getTabFullList(self) -> WebElement:
-        return self.wait_for(self.tabFullList)
+    def get_tab_full_list(self) -> WebElement:
+        return self.wait_for(self.tab_full_list)
 
-    def getTabRandomSampling(self) -> WebElement:
-        return self.wait_for(self.tabRandomSampling)
+    def get_tab_random_sampling(self) -> WebElement:
+        return self.wait_for(self.tab_random_sampling)
 
-    def getSelectExcludedadminareasfull(self) -> WebElement:
-        return self.wait_for(self.selectExcludedadminareasfull)
+    def get_select_excluded_admin_areas_full(self) -> WebElement:
+        return self.wait_for(self.select_excluded_admin_areas_full)
 
-    def getCheckboxVerificationChannel(self) -> WebElement:
-        return self.wait_for(self.checkboxVerificationChannel)
+    def get_checkbox_verification_channel(self) -> WebElement:
+        return self.wait_for(self.checkbox_verification_channel)
 
-    def getRadioRapidpro(self) -> WebElement:
-        return self.wait_for(self.radioRapidpro)
+    def get_radio_rapidpro(self) -> WebElement:
+        return self.wait_for(self.radio_rapidpro)
 
-    def getRadioXlsx(self) -> WebElement:
-        return self.wait_for(self.radioXlsx)
+    def get_radio_xlsx(self) -> WebElement:
+        return self.wait_for(self.radio_xlsx)
 
-    def getRadioManual(self) -> WebElement:
-        return self.wait_for(self.radioManual)
+    def get_radio_manual(self) -> WebElement:
+        return self.wait_for(self.radio_manual)
 
-    def getRadioVerificationChannel(self, name: str) -> WebElement:
-        return self.wait_for(self.radioVerificationChannel.format(name))
+    def get_radio_verification_channel(self, name: str) -> WebElement:
+        return self.wait_for(self.radio_verification_channel.format(name))
 
-    def getSliderConfidenceInterval(self) -> WebElement:
-        return self.wait_for(self.sliderConfidenceInterval)
+    def get_slider_confidence_interval(self) -> WebElement:
+        return self.wait_for(self.slider_confidence_interval)
 
-    def getSliderMarginOfError(self) -> WebElement:
-        return self.wait_for(self.sliderMarginOfError)
+    def get_slider_margin_of_error(self) -> WebElement:
+        return self.wait_for(self.slider_margin_of_error)
 
-    def getInputAdmincheckbox(self) -> WebElement:
-        return self.wait_for(self.inputAdmincheckbox)
+    def get_input_admin_checkbox(self) -> WebElement:
+        return self.wait_for(self.input_admin_checkbox)
 
-    def getInputAgecheckbox(self) -> WebElement:
-        return self.wait_for(self.inputAgecheckbox)
+    def get_input_age_checkbox(self) -> WebElement:
+        return self.wait_for(self.input_age_checkbox)
 
-    def getInputSexcheckbox(self) -> WebElement:
-        return self.wait_for(self.inputSexcheckbox)
+    def get_input_sex_checkbox(self) -> WebElement:
+        return self.wait_for(self.input_sex_checkbox)
 
-    def getDialogActionsContainer(self) -> WebElement:
-        return self.wait_for(self.dialogActionsContainer)
+    def get_dialog_actions_container(self) -> WebElement:
+        return self.wait_for(self.dialog_actions_container)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def getButtonSubmit(self) -> WebElement:
-        return self.wait_for(self.buttonSubmit)
+    def get_button_submit(self) -> WebElement:
+        return self.wait_for(self.button_submit)

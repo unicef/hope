@@ -1,171 +1,174 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class IndividualsDetails(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    labelFullName = 'div[data-cy="label-Full Name"]'
-    labelGivenName = 'div[data-cy="label-Given Name"]'
-    labelMiddleName = 'div[data-cy="label-Middle Name"]'
-    labelFamilyName = 'div[data-cy="label-Family Name"]'
-    labelGender = 'div[data-cy="label-Gender"]'
-    labelAge = 'div[data-cy="label-Age"]'
-    labelDateOfBirth = 'div[data-cy="label-Date of Birth"]'
-    labelEstimatedDateOfBirth = 'div[data-cy="label-Estimated Date of Birth"]'
-    labelMaritalStatus = 'div[data-cy="label-Marital Status"]'
-    labelWorkStatus = 'div[data-cy="label-Work Status"]'
-    labelPregnant = 'div[data-cy="label-Pregnant"]'
-    labelHouseholdId = 'div[data-cy="label-Items Group ID"]'
-    labelRole = 'div[data-cy="label-Role"]'
-    labelRelationshipToHoh = 'div[data-cy="label-Relationship to Head Of Items Group"]'
-    labelPreferredLanguage = 'div[data-cy="label-Preferred language"]'
-    labelLinkedHouseholds = 'div[data-cy="label-Linked Items Groups"]'
-    labelObservedDisabilities = 'div[data-cy="label-Observed disabilities"]'
-    labelSeeingDisabilitySeverity = 'div[data-cy="label-Seeing disability severity"]'
-    labelHearingDisabilitySeverity = 'div[data-cy="label-Hearing disability severity"]'
-    labelPhysicalDisabilitySeverity = 'div[data-cy="label-Physical disability severity"]'
-    labelRememberingOrConcentratingDisabilitySeverity = (
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    label_full_name = 'div[data-cy="label-Full Name"]'
+    label_given_name = 'div[data-cy="label-Given Name"]'
+    label_middle_name = 'div[data-cy="label-Middle Name"]'
+    label_family_name = 'div[data-cy="label-Family Name"]'
+    label_gender = 'div[data-cy="label-Gender"]'
+    label_age = 'div[data-cy="label-Age"]'
+    label_date_of_birth = 'div[data-cy="label-Date of Birth"]'
+    label_estimated_date_of_birth = 'div[data-cy="label-Estimated Date of Birth"]'
+    label_marital_status = 'div[data-cy="label-Marital Status"]'
+    label_work_status = 'div[data-cy="label-Work Status"]'
+    label_pregnant = 'div[data-cy="label-Pregnant"]'
+    label_household_id = 'div[data-cy="label-Items Group ID"]'
+    label_role = 'div[data-cy="label-Role"]'
+    label_relationship_to_hoh = 'div[data-cy="label-Relationship to Head Of Items Group"]'
+    label_preferred_language = 'div[data-cy="label-Preferred language"]'
+    label_linked_households = 'div[data-cy="label-Linked Items Groups"]'
+    label_observed_disabilities = 'div[data-cy="label-Observed disabilities"]'
+    label_seeing_disability_severity = 'div[data-cy="label-Seeing disability severity"]'
+    label_hearing_disability_severity = 'div[data-cy="label-Hearing disability severity"]'
+    label_physical_disability_severity = 'div[data-cy="label-Physical disability severity"]'
+    label_remembering_or_concentrating_disability_severity = (
         'div[data-cy="label-Remembering or concentrating disability severity"]'
     )
-    labelSelfCareDisabilitySeverity = 'div[data-cy="label-Self-care disability severity"]'
-    labelCommunicatingDisabilitySeverity = 'div[data-cy="label-Communicating disability severity"]'
-    labelDisability = 'div[data-cy="label-Disability"]'
-    labelBirth_certificate = 'div[data-cy="label-BIRTH_CERTIFICATE"]'
-    labelIssued = 'div[data-cy="label-issued"]'
-    labelDrivers_license = 'div[data-cy="label-DRIVERS_LICENSE"]'
-    labelElectoral_card = 'div[data-cy="label-ELECTORAL_CARD"]'
-    labelNational_passport = 'div[data-cy="label-NATIONAL_PASSPORT"]'
-    labelNational_id = 'div[data-cy="label-NATIONAL_ID"]'
-    labelUnhcrId = 'div[data-cy="label-UNHCR ID"]'
-    labelWfpId = 'div[data-cy="label-WFP ID"]'
-    labelEmail = 'div[data-cy="label-Email"]'
-    labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
-    labelAlternativePhoneNumber = 'div[data-cy="label-Alternative Phone Number"]'
-    labelDateOfLastScreeningAgainstSanctionsList = 'div[data-cy="label-Date of last screening against sanctions list"]'
-    labelLinkedGrievances = 'div[data-cy="label-Linked Grievances"]'
-    labelSchoolEnrolled = 'div[data-cy="label-school enrolled"]'
-    labelSchoolEnrolledBefore = 'div[data-cy="label-school enrolled before"]'
+    label_self_care_disability_severity = 'div[data-cy="label-Self-care disability severity"]'
+    label_communicating_disability_severity = 'div[data-cy="label-Communicating disability severity"]'
+    label_disability = 'div[data-cy="label-Disability"]'
+    label_birth_certificate = 'div[data-cy="label-BIRTH_CERTIFICATE"]'
+    label_issued = 'div[data-cy="label-issued"]'
+    label_drivers_license = 'div[data-cy="label-DRIVERS_LICENSE"]'
+    label_electoral_card = 'div[data-cy="label-ELECTORAL_CARD"]'
+    label_national_passport = 'div[data-cy="label-NATIONAL_PASSPORT"]'
+    label_national_id = 'div[data-cy="label-NATIONAL_ID"]'
+    label_unhcr_id = 'div[data-cy="label-UNHCR ID"]'
+    label_wfp_id = 'div[data-cy="label-WFP ID"]'
+    label_email = 'div[data-cy="label-Email"]'
+    label_phone_number = 'div[data-cy="label-Phone Number"]'
+    label_alternative_phone_number = 'div[data-cy="label-Alternative Phone Number"]'
+    label_date_of_last_screening_against_sanctions_list = (
+        'div[data-cy="label-Date of last screening against sanctions list"]'
+    )
+    label_linked_grievances = 'div[data-cy="label-Linked Grievances"]'
+    label_school_enrolled = 'div[data-cy="label-school enrolled"]'
+    label_school_enrolled_before = 'div[data-cy="label-school enrolled before"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getLabelFullName(self) -> WebElement:
-        return self.wait_for(self.labelFullName)
+    def get_label_full_name(self) -> WebElement:
+        return self.wait_for(self.label_full_name)
 
-    def getLabelGivenName(self) -> WebElement:
-        return self.wait_for(self.labelGivenName)
+    def get_label_given_name(self) -> WebElement:
+        return self.wait_for(self.label_given_name)
 
-    def getLabelMiddleName(self) -> WebElement:
-        return self.wait_for(self.labelMiddleName)
+    def get_label_middle_name(self) -> WebElement:
+        return self.wait_for(self.label_middle_name)
 
-    def getLabelFamilyName(self) -> WebElement:
-        return self.wait_for(self.labelFamilyName)
+    def get_label_family_name(self) -> WebElement:
+        return self.wait_for(self.label_family_name)
 
-    def getLabelGender(self) -> WebElement:
-        return self.wait_for(self.labelGender)
+    def get_label_gender(self) -> WebElement:
+        return self.wait_for(self.label_gender)
 
-    def getLabelAge(self) -> WebElement:
-        return self.wait_for(self.labelAge)
+    def get_label_age(self) -> WebElement:
+        return self.wait_for(self.label_age)
 
-    def getLabelDateOfBirth(self) -> WebElement:
-        return self.wait_for(self.labelDateOfBirth)
+    def get_label_date_of_birth(self) -> WebElement:
+        return self.wait_for(self.label_date_of_birth)
 
-    def getLabelEstimatedDateOfBirth(self) -> WebElement:
-        return self.wait_for(self.labelEstimatedDateOfBirth)
+    def get_label_estimated_date_of_birth(self) -> WebElement:
+        return self.wait_for(self.label_estimated_date_of_birth)
 
-    def getLabelMaritalStatus(self) -> WebElement:
-        return self.wait_for(self.labelMaritalStatus)
+    def get_label_marital_status(self) -> WebElement:
+        return self.wait_for(self.label_marital_status)
 
-    def getLabelWorkStatus(self) -> WebElement:
-        return self.wait_for(self.labelWorkStatus)
+    def get_label_work_status(self) -> WebElement:
+        return self.wait_for(self.label_work_status)
 
-    def getLabelPregnant(self) -> WebElement:
-        return self.wait_for(self.labelPregnant)
+    def get_label_pregnant(self) -> WebElement:
+        return self.wait_for(self.label_pregnant)
 
-    def getLabelHouseholdId(self) -> WebElement:
-        return self.wait_for(self.labelHouseholdId)
+    def get_label_household_id(self) -> WebElement:
+        return self.wait_for(self.label_household_id)
 
-    def getLabelRole(self) -> WebElement:
-        return self.wait_for(self.labelRole)
+    def get_label_role(self) -> WebElement:
+        return self.wait_for(self.label_role)
 
-    def getLabelRelationshipToHoh(self) -> WebElement:
-        return self.wait_for(self.labelRelationshipToHoh)
+    def get_label_relationship_to_hoh(self) -> WebElement:
+        return self.wait_for(self.label_relationship_to_hoh)
 
-    def getLabelPreferredLanguage(self) -> WebElement:
-        return self.wait_for(self.labelPreferredLanguage)
+    def get_label_preferred_language(self) -> WebElement:
+        return self.wait_for(self.label_preferred_language)
 
-    def getLabelLinkedHouseholds(self) -> WebElement:
-        return self.wait_for(self.labelLinkedHouseholds)
+    def get_label_linked_households(self) -> WebElement:
+        return self.wait_for(self.label_linked_households)
 
-    def getLabelObservedDisabilities(self) -> WebElement:
-        return self.wait_for(self.labelObservedDisabilities)
+    def get_label_observed_disabilities(self) -> WebElement:
+        return self.wait_for(self.label_observed_disabilities)
 
-    def getLabelSeeingDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelSeeingDisabilitySeverity)
+    def get_label_seeing_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_seeing_disability_severity)
 
-    def getLabelHearingDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelHearingDisabilitySeverity)
+    def get_label_hearing_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_hearing_disability_severity)
 
-    def getLabelPhysicalDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelPhysicalDisabilitySeverity)
+    def get_label_physical_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_physical_disability_severity)
 
-    def getLabelRememberingOrConcentratingDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelRememberingOrConcentratingDisabilitySeverity)
+    def get_label_remembering_or_concentrating_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_remembering_or_concentrating_disability_severity)
 
-    def getLabelSelfCareDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelSelfCareDisabilitySeverity)
+    def get_label_self_care_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_self_care_disability_severity)
 
-    def getLabelCommunicatingDisabilitySeverity(self) -> WebElement:
-        return self.wait_for(self.labelCommunicatingDisabilitySeverity)
+    def get_label_communicating_disability_severity(self) -> WebElement:
+        return self.wait_for(self.label_communicating_disability_severity)
 
-    def getLabelDisability(self) -> WebElement:
-        return self.wait_for(self.labelDisability)
+    def get_label_disability(self) -> WebElement:
+        return self.wait_for(self.label_disability)
 
-    def getLabelBirth_certificate(self) -> WebElement:
-        return self.wait_for(self.labelBirth_certificate)
+    def get_label_birth_certificate(self) -> WebElement:
+        return self.wait_for(self.label_birth_certificate)
 
-    def getLabelIssued(self) -> WebElement:
-        return self.wait_for(self.labelIssued)
+    def get_label_issued(self) -> WebElement:
+        return self.wait_for(self.label_issued)
 
-    def getLabelDrivers_license(self) -> WebElement:
-        return self.wait_for(self.labelDrivers_license)
+    def get_label_drivers_license(self) -> WebElement:
+        return self.wait_for(self.label_drivers_license)
 
-    def getLabelElectoral_card(self) -> WebElement:
-        return self.wait_for(self.labelElectoral_card)
+    def get_label_electoral_card(self) -> WebElement:
+        return self.wait_for(self.label_electoral_card)
 
-    def getLabelNational_passport(self) -> WebElement:
-        return self.wait_for(self.labelNational_passport)
+    def get_label_national_passport(self) -> WebElement:
+        return self.wait_for(self.label_national_passport)
 
-    def getLabelNational_id(self) -> WebElement:
-        return self.wait_for(self.labelNational_id)
+    def get_label_national_id(self) -> WebElement:
+        return self.wait_for(self.label_national_id)
 
-    def getLabelUnhcrId(self) -> WebElement:
-        return self.wait_for(self.labelUnhcrId)
+    def get_label_unhcr_id(self) -> WebElement:
+        return self.wait_for(self.label_unhcr_id)
 
-    def getLabelWfpId(self) -> WebElement:
-        return self.wait_for(self.labelWfpId)
+    def get_label_wfp_id(self) -> WebElement:
+        return self.wait_for(self.label_wfp_id)
 
-    def getLabelEmail(self) -> WebElement:
-        return self.wait_for(self.labelEmail)
+    def get_label_email(self) -> WebElement:
+        return self.wait_for(self.label_email)
 
-    def getLabelPhoneNumber(self) -> WebElement:
-        return self.wait_for(self.labelPhoneNumber)
+    def get_label_phone_number(self) -> WebElement:
+        return self.wait_for(self.label_phone_number)
 
-    def getLabelAlternativePhoneNumber(self) -> WebElement:
-        return self.wait_for(self.labelAlternativePhoneNumber)
+    def get_label_alternative_phone_number(self) -> WebElement:
+        return self.wait_for(self.label_alternative_phone_number)
 
-    def getLabelDateOfLastScreeningAgainstSanctionsList(self) -> WebElement:
-        return self.wait_for(self.labelDateOfLastScreeningAgainstSanctionsList)
+    def get_label_date_of_last_screening_against_sanctions_list(self) -> WebElement:
+        return self.wait_for(self.label_date_of_last_screening_against_sanctions_list)
 
-    def getLabelLinkedGrievances(self) -> WebElement:
-        return self.wait_for(self.labelLinkedGrievances)
+    def get_label_linked_grievances(self) -> WebElement:
+        return self.wait_for(self.label_linked_grievances)
 
-    def getLabelSchoolEnrolled(self) -> WebElement:
-        return self.wait_for(self.labelSchoolEnrolled)
+    def get_label_school_enrolled(self) -> WebElement:
+        return self.wait_for(self.label_school_enrolled)
 
-    def getLabelSchoolEnrolledBefore(self) -> WebElement:
-        return self.wait_for(self.labelSchoolEnrolledBefore)
+    def get_label_school_enrolled_before(self) -> WebElement:
+        return self.wait_for(self.label_school_enrolled_before)

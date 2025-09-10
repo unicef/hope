@@ -1,14 +1,15 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface FspSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  baseUrl: string;
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function FspSection({ paymentPlan }: FspSectionProps): ReactElement {

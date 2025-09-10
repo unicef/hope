@@ -1,18 +1,32 @@
+import contextlib
+import logging
 import os
 import time
 from time import sleep
-from typing import Literal, Optional, Union
+from typing import Callable, Literal, Optional, Tuple, Union
 
 from django.conf import settings
-
 from selenium.common import NoSuchElementException
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+
+logger = logging.getLogger(__name__)
+
+
+def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
+    def _predicate(driver):
+        try:
+            actual = driver.find_element(*locator).text.strip()
+            return actual == expected
+        except (StaleElementReferenceException, NoSuchElementException):
+            return False
+
+    return _predicate
 
 
 class Common:
@@ -41,37 +55,95 @@ class Common:
                 sleep(1)
             else:
                 return elements
-        else:
-            raise Exception("No elements found")
+        raise Exception("No elements found")
 
-    def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
+    def wait_for(
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
         try:
-            return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
+            return self._wait(timeout).until(expected_conditions.visibility_of_element_located((element_type, locator)))
         except TimeoutException:
             pass
         raise NoSuchElementException(f"Element: {locator} not found")
 
     def wait_for_disappear(
-        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], WebElement]:
-        return self._wait(timeout).until_not(EC.visibility_of_element_located((element_type, locator)))
+        return self._wait(timeout).until_not(expected_conditions.visibility_of_element_located((element_type, locator)))
 
     def wait_for_text_disappear(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], WebElement]:
-        return self._wait(timeout).until_not(EC.text_to_be_present_in_element((element_type, locator), text))
+        return self._wait(timeout).until_not(
+            expected_conditions.text_to_be_present_in_element((element_type, locator), text)
+        )
 
     def wait_for_text(
-        self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> Union[Literal[False, True], bool]:
         try:
-            return self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
+            return self._wait(timeout).until(
+                expected_conditions.text_to_be_present_in_element((element_type, locator), text)
+            )
         except TimeoutException:
             pass
         raise NoSuchElementException(
             f"Element: {text} not found in {locator}. Displayed text:"
             f" {self.driver.find_element(element_type, locator).text}"
         )
+
+    def wait_for_text_to_be_exact(
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> bool:
+        """
+        Wait until element text equals *exactly* ``text``.
+        Returns True on success, otherwise raises TimeoutException.
+        """
+        try:
+            WebDriverWait(self.driver, timeout).until(text_to_be_exact_in_element((element_type, locator), text))
+            return True  # success!
+        except TimeoutException:
+            actual = ""
+            with contextlib.suppress(Exception):
+                actual = self.driver.find_element(element_type, locator).text.strip()
+            raise TimeoutException(
+                f"Timed out after {timeout}s waiting for "
+                f"text '{text}' in element {locator}. "
+                f"Last seen text: '{actual}'."
+            )
+
+    def wait_for_text_in_any_element(
+        self,
+        text: str,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> bool:
+        try:
+            return self._wait(timeout).until(
+                lambda driver: any(text in el.text for el in driver.find_elements(element_type, locator))
+            )
+        except TimeoutException:
+            pass
+        raise NoSuchElementException(f"Text '{text}' not found in any element matching {locator}.")
 
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
         for _ in range(retry):
@@ -81,9 +153,12 @@ class Common:
         return self.driver.current_url
 
     def element_clickable(
-        self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> bool:
-        return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
+        return self._wait(timeout).until(expected_conditions.element_to_be_clickable((element_type, locator)))
 
     def select_listbox_element(
         self,
@@ -99,7 +174,9 @@ class Common:
         for item in items:
             sleep(delay_between_checks)
             if name in item.text:
-                self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
+                self._wait().until(
+                    expected_conditions.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]"))
+                )
                 item.click()
                 self.wait_for_disappear('ul[role="listbox"]')
                 break
@@ -121,45 +198,52 @@ class Common:
             sleep(delay_between_checks)
             if name in item.text:
                 return item
-        else:
-            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         current_page_url = self.driver.current_url
         button.click()
-        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (current_page_url, url_fragment)
+        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (
+            current_page_url,
+            url_fragment,
+        )
 
     def upload_file(
-        self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
+        self,
+        upload_file: str,
+        xpath: str = "//input[@type='file']",
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
         from time import sleep
 
         sleep(5)
-        self._wait(timeout).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
+        self._wait(timeout).until(expected_conditions.presence_of_element_located((By.XPATH, xpath))).send_keys(
+            upload_file
+        )
         sleep(2)
 
-    def select_option_by_name(self, optionName: str) -> None:
-        selectOption = f'li[data-cy="select-option-{optionName}"]'
+    def select_option_by_name(self, option_name: str) -> None:
+        select_option = f'li[data-cy="select-option-{option_name}"]'
         try:
-            self.wait_for(selectOption).click()
-            self.wait_for_disappear(selectOption)
-        except BaseException:
+            self.wait_for(select_option).click()
+            self.wait_for_disappear(select_option)
+        except TimeoutException:
             sleep(1)
-            self.wait_for(selectOption).click()
-            self.wait_for_disappear(selectOption)
+            self.wait_for(select_option).click()
+            self.wait_for_disappear(select_option)
 
-    def select_multiple_option_by_name(self, *optionNames: [str]) -> None:
-        for optionName in optionNames:
-            selectOption = f'li[data-cy="select-option-{optionName}"]'
-            self.wait_for(selectOption).click()
+    def select_multiple_option_by_name(self, *args: [str]) -> None:
+        for option_name in args:
+            select_option = f'li[data-cy="select-option-{option_name}"]'
+            self.wait_for(select_option).click()
         actions = ActionChains(self.driver)
         actions.send_keys(Keys.ESCAPE).perform()
         try:
-            self.wait_for_disappear(selectOption)
-        except BaseException:
+            self.wait_for_disappear(select_option)
+        except TimeoutException:
             sleep(1)
-            self.wait_for(selectOption).click()
-            self.wait_for_disappear(selectOption)
+            self.wait_for(select_option).click()
+            self.wait_for_disappear(select_option)
 
     @staticmethod
     def choose_option(list_options: list, name: str) -> bool:
@@ -174,16 +258,24 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: Optional[str] = None, delay_sec: float = 1
+        self,
+        file_name: str = "test",
+        file_type: str = "png",
+        file_path: Optional[str] = None,
+        delay_sec: float = 1,
     ) -> None:
         if file_path is None:
             file_path = settings.SCREENSHOT_DIRECTORY
         sleep(delay_sec)
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
-        print("Saving screenshot to:", full_filename)
         self.driver.get_screenshot_as_file(full_filename)
 
-    def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
+    def scroll(
+        self,
+        scroll_by: int = 600,
+        wait_after_start_scrolling: int = 2,
+        execute: int = 1,
+    ) -> None:
         for _ in range(execute):
             self.driver.execute_script(
                 f"""
@@ -198,22 +290,22 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")
-            except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")
+                logger.info(f"{ii.text}: {ii.get_attribute(attribute)}")
+            except TimeoutException:
+                logger.info(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)
         hover.perform()
 
     def wait_for_element_clickable(self, locator: str) -> bool:
-        return self._wait().until(EC.element_to_be_clickable((By.XPATH, locator)))
+        return self._wait().until(expected_conditions.element_to_be_clickable((By.XPATH, locator)))
 
     def check_file_exists(self, filepath: str, timeout: int = DEFAULT_TIMEOUT) -> bool:
         start_time = time.time()
         while True:
             if os.path.exists(filepath):
                 return True
-            elif time.time() - start_time > timeout:
+            if time.time() - start_time > timeout:
                 raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
             sleep(0.02)
