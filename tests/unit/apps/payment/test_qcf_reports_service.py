@@ -45,9 +45,9 @@ class TestQCFReportsService(TestCase):
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory.create(partner=partner_unicef)
         role, created = Role.objects.update_or_create(
-            name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
+            name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        cls.user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
         cls.payment_plan = PaymentPlanFactory(
@@ -229,3 +229,20 @@ class TestQCFReportsService(TestCase):
                         "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
                         "link": f"Western Union QCF Report file: {report_link}",
                     }
+
+            download_link = reverse(
+                "download-payment-plan-invoice-report-pdf",
+                args=[encode_id_base64(report.id, "WesternUnionPaymentPlanReport")],
+            )
+
+            # test download with perm
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn(report.report_file.file.url, response.url)
+
+            # test download wo perm
+            self.user_role.delete()
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            self.assertEqual(response.status_code, 403)
