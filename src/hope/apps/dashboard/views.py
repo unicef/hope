@@ -14,7 +14,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from hope.apps.account.models import RoleAssignment
 from hope.apps.account.permissions import Permissions, check_permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.celery_tasks import generate_dash_report_task
@@ -49,14 +48,7 @@ class DashboardDataView(APIView):
         has_permission = False
 
         if is_global:
-            if (
-                request.user.is_superuser
-                or RoleAssignment.objects.filter(
-                    user=request.user,
-                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
-                    business_area__active=True,
-                ).exists()
-            ):
+            if request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
@@ -102,14 +94,7 @@ class CreateOrUpdateDashReportView(APIView):
         business_area_obj = None
 
         if is_global:
-            if (
-                request.user.is_superuser
-                or RoleAssignment.objects.filter(
-                    user=request.user,
-                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
-                    business_area__active=True,
-                ).exists()
-            ):
+            if request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
@@ -152,14 +137,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
 
         has_permission = False
         if is_global:
-            if (
-                self.request.user.is_superuser
-                or RoleAssignment.objects.filter(
-                    user=self.request.user,
-                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
-                    business_area__active=True,
-                ).exists()
-            ):
+            if self.request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
