@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.db.models import Q, QuerySet
-from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl import Document as ESDocument, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.household.models import (
+    Document,
     Household,
     Individual,
     IndividualIdentity,
@@ -12,7 +13,7 @@ from hope.apps.household.models import (
 )
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
+RelatedInstanceType = ESDocument | Household | IndividualIdentity | IndividualRoleInHousehold
 
 index_settings = {
     "number_of_shards": 1,
@@ -28,7 +29,7 @@ index_settings = {
 }
 
 
-class IndividualDocument(Document):
+class IndividualDocument(ESDocument):
     id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer,
@@ -160,7 +161,7 @@ def get_individual_doc(
 
 
 @registry.register_document
-class HouseholdDocument(Document):
+class HouseholdDocument(ESDocument):
     head_of_household = fields.ObjectField(
         properties={
             "unicef_id": fields.TextField(),
