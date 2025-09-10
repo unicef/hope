@@ -47,6 +47,7 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
+from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 from hope.apps.periodic_data_update.models import (
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
@@ -266,6 +267,15 @@ class PDUOnlineEditViewSet(
             instance.sent_back_comment.delete()
         instance.status = PDUOnlineEdit.Status.READY
         instance.save()
+
+        # Send notification email
+        send_pdu_online_edit_notification_emails.delay(
+            instance.id,
+            "SEND_FOR_APPROVAL",
+            str(request.user.id),
+            f"{timezone.now():%-d %B %Y}",
+        )
+
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
 
     @action(detail=True, methods=["post"])
@@ -321,6 +331,14 @@ class PDUOnlineEditViewSet(
             pdu_online_edit=instance,
         )
 
+        # Send notification email
+        send_pdu_online_edit_notification_emails.delay(
+            instance.id,
+            "SEND_BACK",
+            str(request.user.id),
+            f"{timezone.now():%-d %B %Y}",
+        )
+
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
 
     @action(detail=False, methods=["post"])
@@ -339,6 +357,15 @@ class PDUOnlineEditViewSet(
             approved_by=request.user,
             approved_at=timezone.now(),
         )
+
+        # Send notification emails for each approved PDU Edit
+        for pdu_edit in pdu_edits:
+            send_pdu_online_edit_notification_emails.delay(
+                pdu_edit.id,
+                "APPROVE",
+                str(request.user.id),
+                f"{timezone.now():%-d %B %Y}",
+            )
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{approved_count} PDU Online Edits approved successfully."}

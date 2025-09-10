@@ -104,22 +104,29 @@ export function AccountToEditTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {account.data_fields.map((field, fieldIndex) => {
-            const isFinancialInstitutionField = field.name === 'financial_institution';
-            const previousValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.previous_value] : field.previous_value;
-            const newValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.value] : field.value;
-            return (
-            <TableRow key={fieldIndex}>
-              <TableCell align="left"></TableCell>
-              <TableCell align="left">{field.name}</TableCell>
-              <TableCell align="left">{previousValue || '-'}</TableCell>
-              <TableCell align="left">
-                {renderNewOrNotUpdated(previousValue, newValue)}
-              </TableCell>
-            </TableRow>
-          );
-})}
-        </TableBody>
+            {account.data_fields.map(
+              (field, fieldIndex) => {
+                const isFinancialInstitutionField = field.name === 'financial_institution';
+                const previousValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.previous_value] : field.previous_value;
+                const newValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.value] : field.value;
+                return (
+                <TableRow key={fieldIndex}>
+                  <TableCell align="left"></TableCell>
+                  <TableCell align="left">{field.name}</TableCell>
+                  <TableCell align="left">
+                    {previousValue || '-'}
+                  </TableCell>
+                  <TableCell align="left">
+                    {renderNewOrNotUpdated(
+                      previousValue,
+                      newValue,
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+},
+            )}
+          </TableBody>
       </StyledTable>
     </>
   );

@@ -103,9 +103,11 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
             <Box ml={6} data-cy="business-area-container">
               <BusinessAreaSelect />
             </Box>
-            <Box ml={6} data-cy="global-program-filter-container">
-              <GlobalProgramSelect />
-            </Box>
+            {businessArea !== 'global' && (
+              <Box ml={6} data-cy="global-program-filter-container">
+                <GlobalProgramSelect />
+              </Box>
+            )}
           </Box>
         </Box>
         <Box display="flex" justifyContent="flex-end">

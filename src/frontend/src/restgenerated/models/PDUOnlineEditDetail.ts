@@ -19,5 +19,6 @@ export type PDUOnlineEditDetail = {
     editData?: any;
     authorizedUsers: Array<AuthorizedUser>;
     readonly isCreator: boolean;
+    readonly adminUrl: string;
 };
 
