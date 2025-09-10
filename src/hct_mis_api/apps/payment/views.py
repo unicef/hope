@@ -16,7 +16,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
         HttpRequest,
         HttpResponse,
