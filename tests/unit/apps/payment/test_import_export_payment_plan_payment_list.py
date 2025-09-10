@@ -172,11 +172,16 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         assert service.errors == error_msg
 
-    def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(
+    def test_import_invalid_file_without_required_columns(self) -> None:
+        error_msg_1 = XlsxError(
             sheet="Payment Plan - Payment List",
-            coordinates="N3",
-            message="Unexpected value",
+            coordinates=None,
+            message="Header entitlement_quantity is required",
+        )
+        error_msg_2 = XlsxError(
+            sheet="Payment Plan - Payment List",
+            coordinates=None,
+            message="Header entitlement_quantity is required",
         )
         content = Path(
             f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx"
@@ -186,7 +191,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, file)
         service.open_workbook()
         service.validate()
-        assert error_msg in service.errors
+
+        assert error_msg_1 in service.errors
+        assert error_msg_2 in service.errors
 
     @patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
@@ -574,3 +581,23 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             self.payment_plan.eligible_payments.first(), fsp_xlsx_template
         )
         assert payment_row_without_snapshot[-4] == ""
+
+    def test_headers_for_social_worker_program(self) -> None:
+        program = self.payment_plan.program
+        program.beneficiary_group.master_detail = False
+        program.beneficiary_group.name = "People"
+        program.beneficiary_group.save()
+        program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        program.save()
+
+        assert self.payment_plan.is_social_worker_program is True
+
+        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        assert len(export_service.headers) == 11
+        assert "household_size" not in export_service.headers
+        assert "household_id" not in export_service.headers
+
+        import_service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
+        assert len(import_service.headers) == 11
+        assert "household_size" not in import_service.headers
+        assert "household_id" not in import_service.headers

@@ -30,11 +30,15 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self.payment_ids_list = (
             payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
         )
+        self.headers = list(self.HEADERS)
+        if self.payment_plan.is_social_worker_program:
+            self.headers.remove("household_size")
+            self.headers.remove("household_id")
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-            for column_name in self.HEADERS
+            for column_name in self.headers
         ]
         self.ws_export_list.append(payment_row)
 
@@ -45,6 +49,9 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             for payment in payment_qs:
                 self._add_payment_row(payment)
 
+    def _add_headers(self) -> None:
+        self.ws_export_list.append(self.headers)
+
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._add_headers()
@@ -52,7 +59,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self._adjust_column_width_from_col(ws=self.ws_export_list)
         self._add_col_bgcolor(
             [
-                self.HEADERS.index("entitlement_quantity") + 1,
+                self.headers.index("entitlement_quantity") + 1,
             ],
             no_of_columns=len(self.payment_ids_list) + 1,
         )

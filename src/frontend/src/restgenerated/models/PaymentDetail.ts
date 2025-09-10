@@ -18,8 +18,8 @@ export type PaymentDetail = {
     householdSize: number;
     readonly householdAdmin2: string;
     readonly householdStatus: string;
-    hohPhoneNo: string;
-    hohPhoneNoAlternative: string;
+    readonly hohPhoneNo: string;
+    readonly hohPhoneNoAlternative: string;
     /**
      * Get from Household Snapshot
      */
@@ -35,10 +35,10 @@ export type PaymentDetail = {
     readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
-    hohFullName: string;
+    readonly hohFullName: string;
     readonly collectorId: string;
-    collectorPhoneNo: string;
-    collectorPhoneNoAlt: string;
+    readonly collectorPhoneNo: string;
+    readonly collectorPhoneNoAlt: string;
     readonly verification: PaymentVerificationDetails;
     readonly paymentPlanHardConflicted: boolean;
     readonly paymentPlanHardConflictedData: Array<any>;

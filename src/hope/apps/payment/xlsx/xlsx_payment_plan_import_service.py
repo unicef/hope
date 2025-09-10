@@ -26,7 +26,6 @@ Row = tuple[Cell]
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "s", "n", "n", "s", "s")
     BATCH_SIZE = 1000
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
@@ -37,6 +36,10 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         }
         self.errors: list[XlsxError] = []
         self.is_updated = False
+        self.headers = list(self.HEADERS)
+        if self.payment_plan.is_social_worker_program:
+            self.headers.remove("household_size")
+            self.headers.remove("household_id")
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -46,8 +49,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
     def validate(self) -> None:
         self._validate_headers()
-        self._validate_rows()
-        self._validate_imported_file()
+        if not self.errors:
+            self._validate_rows()
+            self._validate_imported_file()
 
     def import_payment_list(self) -> None:
         exchange_rate = self.payment_plan.get_exchange_rate()
@@ -82,72 +86,20 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         Payment.objects.bulk_update(payments, fields=("signature_hash",))
 
     def _validate_headers(self) -> None:
-        headers_row = self.ws_payments[1]
-        accepted_headers = self.HEADERS
-        if len(headers_row) != len(accepted_headers):
-            self.errors.append(
-                XlsxError(
-                    self.TITLE,
-                    None,
-                    f"Different count of headers. Acceptable headers are: [{accepted_headers}]",
-                )
-            )
-        for column, header in enumerate(headers_row):
-            if column >= len(accepted_headers):
-                self.errors.append(
-                    XlsxError(
-                        self.TITLE,
-                        header.coordinate,
-                        f"Unexpected header {header.value}",
-                    )
-                )
-            elif header.value != accepted_headers[column]:
-                self.errors.append(
-                    XlsxError(
-                        self.TITLE,
-                        header.coordinate,
-                        f"Unexpected header {header.value} expected {accepted_headers[column]}",
-                    )
-                )
+        all_headers = [header.value for header in self.ws_payments[1]]
 
-    def _validate_row_types(self, row: Row) -> None:
-        column = 0
-        for cell in row:
-            if cell.value is None:
-                column += 1
-                continue
-            if column >= len(self.COLUMNS_TYPES):
-                break
-            if cell.data_type != self.COLUMNS_TYPES[column]:
-                readable_cell_error = self.TYPES_READABLE_MAPPING[self.COLUMNS_TYPES[column]]
+        for required_header in ["payment_id", "entitlement_quantity"]:
+            if required_header not in all_headers:
                 self.errors.append(
                     XlsxError(
                         self.TITLE,
-                        cell.coordinate,
-                        f"Wrong type off cell {readable_cell_error} "
-                        f"expected, {self.TYPES_READABLE_MAPPING[cell.data_type]} given.",
+                        None,
+                        f"Header {required_header} is required",
                     )
                 )
-            column += 1
-
-    def _validate_row_number(self, row: Row) -> None:
-        column = 0
-        for cell in row:
-            if cell.value is None:
-                column += 1
-                continue
-            if column >= len(self.COLUMNS_TYPES):
-                self.errors.append(
-                    XlsxError(
-                        self.TITLE,
-                        cell.coordinate,
-                        "Unexpected value",
-                    )
-                )
-            column += 1
 
     def _validate_payment_id(self, row: Row, payments_ids: list[str]) -> None:
-        cell = row[self.HEADERS.index("payment_id")]
+        cell = row[self.headers.index("payment_id")]
         if cell.value not in payments_ids:
             self.errors.append(
                 XlsxError(
@@ -158,11 +110,11 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             )
 
     def _validate_entitlement(self, row: Row) -> None:
-        payment_id = row[self.HEADERS.index("payment_id")].value
+        payment_id = row[self.headers.index("payment_id")].value
         payment = self.payments_dict.get(str(payment_id))
         if payment is None:
             return
-        entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
+        entitlement_amount = row[self.headers.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
             converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
             if converted_entitlement_amount != payment.entitlement_quantity:
@@ -183,14 +135,12 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
-            self._validate_row_number(row)
-            self._validate_row_types(row)
             self._validate_payment_id(row, payments_ids)
             self._validate_entitlement(row)
 
     def _import_row(self, row: Row, exchange_rate: float) -> Payment | None:
-        payment_id = row[self.HEADERS.index("payment_id")].value
-        entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
+        payment_id = row[self.headers.index("payment_id")].value
+        entitlement_amount = row[self.headers.index("entitlement_quantity")].value
 
         payment = self.payments_dict.get(str(payment_id))
 

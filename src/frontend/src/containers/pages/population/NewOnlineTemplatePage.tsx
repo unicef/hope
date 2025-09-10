@@ -243,7 +243,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
         return (
           <form onSubmit={formikHandleSubmit}>
             <PageHeader
-              title={t('New Online Template Page')}
+              title={t('New Online Edit Page')}
               breadCrumbs={
                 hasPermissions(
                   PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
