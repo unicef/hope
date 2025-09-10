@@ -150,6 +150,27 @@ class TestBasePaymentPlanModel:
         assert modified_data.modified_date == payment_plan.updated_at
         assert modified_data.modified_by is None
 
+    def test_currency_exchange_date(self, afghanistan: BusinessAreaFactory) -> None:
+        payment_plan = PaymentPlanFactory(
+            business_area=afghanistan,
+            status=PaymentPlan.Status.LOCKED,
+            dispersion_end_date=datetime(2000, 11, 11).date(),
+        )
+        payment_plan.refresh_from_db()
+        assert str(payment_plan.currency_exchange_date) == "2000-11-11"
+
+        payment_plan.status = PaymentPlan.Status.ACCEPTED
+        payment_plan.save()
+
+        approval_process = ApprovalProcessFactory(
+            payment_plan=payment_plan,
+        )
+        approval = ApprovalFactory.create(
+            approval_process=approval_process,
+            type=Approval.FINANCE_RELEASE,
+        )
+        assert str(payment_plan.currency_exchange_date) == str(approval.created_at.date())
+
 
 class TestPaymentPlanModel(TestCase):
     @classmethod

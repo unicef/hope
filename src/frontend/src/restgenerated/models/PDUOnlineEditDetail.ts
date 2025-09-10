@@ -21,3 +21,4 @@ export type PDUOnlineEditDetail = {
     readonly isCreator: boolean;
     readonly adminUrl: string;
 };
+
