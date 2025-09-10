@@ -236,7 +236,7 @@ class TestQCFReportsService(TestCase):
             self.client.force_login(self.user)
             response = self.client.get(download_link)
             assert response.status_code == 302
-            assert report.report_file.file.url in response.url
+            assert f"/api/download-payment-plan-invoice-report-pdf/{report.id}" in response.url
 
             # test download wo perm
             self.role_ass.delete()
