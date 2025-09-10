@@ -12,3 +12,4 @@ export type PDUOnlineEditList = {
     statusDisplay: string;
     readonly isAuthorized: boolean;
 };
+

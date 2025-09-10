@@ -42,7 +42,7 @@ class XlsxExportTargetingService:
             filters["vulnerability_score__lte"] = self.payment_plan.vulnerability_score_max
         if self.payment_plan.vulnerability_score_min is not None:
             filters["vulnerability_score__gte"] = self.payment_plan.vulnerability_score_min
-        hh_ids = list(self.payment_plan.payment_items.filter(**filters).values_list("household_id", flat=True))
+        hh_ids = list(self.payment_plan.eligible_payments.filter(**filters).values_list("household_id", flat=True))
         return self.payment_plan.household_list.filter(id__in=hh_ids)
 
     @cached_property
