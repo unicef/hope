@@ -22,7 +22,7 @@ class PDUOnlineEditNotification:
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PDU_ONLINE_APPROVE.name,
         ACTION_APPROVE: Permissions.PDU_ONLINE_MERGE.name,
-        ACTION_SEND_BACK: Permissions.PDU_ONLINE_SAVE_DATA.name
+        ACTION_SEND_BACK: Permissions.PDU_ONLINE_SAVE_DATA.name,
     }
 
     ACTION_PREPARE_EMAIL_BODIES_MAP = {
