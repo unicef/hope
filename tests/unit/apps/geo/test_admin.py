@@ -87,6 +87,7 @@ def test_upload(mock_task_delay: Mock, rf: RequestFactory, site: AdminSite, supe
     assert Area.objects.count() == 5
 
     # get
+    # client.force_login(superuser, "django.contrib.auth.backends.ModelBackend")
     request = rf.get(reverse("admin:geo_area_changelist"))
     request.user = superuser
     changelist_view = AreaAdmin(Area, site).changelist_view
@@ -105,9 +106,9 @@ def test_upload(mock_task_delay: Mock, rf: RequestFactory, site: AdminSite, supe
     )
     request.user = superuser
     site.admin_view(changelist_view)(request)
-    # FIXME!!!
-    # assert resp.status_code == 302
-    # mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
+    # FIXME need to fix this test
+    assert request.status_code == 302
+    mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
 
 
 @pytest.mark.parametrize(
@@ -136,20 +137,20 @@ def test_upload(mock_task_delay: Mock, rf: RequestFactory, site: AdminSite, supe
 def test_upload_validation(
     csv_content: bytes, expected_message: str, app: DjangoTestApp, client: Client, superuser: User
 ) -> None:
-    client.force_login(superuser)
-    app.set_cookie("sessionid", client.cookies["sessionid"].value)
+    client.force_login(superuser, "django.contrib.auth.backends.ModelBackend")
+    # app.set_cookie("sessionid", client.cookies["sessionid"].value)
 
-    # resp = app.get(reverse("admin:geo_area_changelist")).click("Import Areas") # fix login
-    # form = resp.form
-    # form["file"] = Upload(
-    #     "file.csv",
-    #     csv_content,
-    #     "text/csv",
-    # )
-    # resp = form.submit("Import")
-    # FIXME
-    # assert resp.status_int == 302
-    # redirect_resp = resp.follow()
-    # messages = list(redirect_resp.context["messages"])
-    # assert len(messages) == 1
-    # assert expected_message in str(messages[0])
+    resp = app.get(reverse("admin:geo_area_changelist")).click("Import Areas") # fix login
+    form = resp.form
+    form["file"] = Upload(
+        "file.csv",
+        csv_content,
+        "text/csv",
+    )
+    resp = form.submit("Import")
+    # FIXME need to fix this test
+    assert resp.status_int == 302
+    redirect_resp = resp.follow()
+    messages = list(redirect_resp.context["messages"])
+    assert len(messages) == 1
+    assert expected_message in str(messages[0])
