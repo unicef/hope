@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RemoveField(
             model_name="grievanceticket",
+            name="is_original",
+        ),
+        migrations.RemoveField(
+            model_name="grievanceticket",
             name="is_migration_handled",
         ),
         migrations.RemoveField(
