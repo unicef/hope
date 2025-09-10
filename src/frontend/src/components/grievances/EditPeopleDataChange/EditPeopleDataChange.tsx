@@ -16,8 +16,8 @@ import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {ExistingAccountsFieldArray} from "@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray";
-import {NewAccountFieldArray} from "@components/grievances/EditIndividualDataChange/NewAccountFieldArray";
+import { ExistingAccountsFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray';
+import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid #d8d8d8;
