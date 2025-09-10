@@ -4,6 +4,7 @@ import os
 from unittest import mock
 
 from django.test import TestCase
+from django.urls import reverse
 import openpyxl
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -39,12 +40,15 @@ class TestQCFReportsService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        partner_unicef = PartnerFactory(name="UNICEF_test")
+        partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory.create(partner=partner_unicef)
-        role, created = Role.objects.update_or_create(
-            name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
+        role, _ = Role.objects.update_or_create(
+            name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
-        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        cls.role_ass = RoleAssignment.objects.create(
+            role=role,
+            business_area=cls.business_area,
+        )
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
         cls.payment_plan = PaymentPlanFactory(
@@ -69,7 +73,7 @@ class TestQCFReportsService(TestCase):
         cls.p3.save()
 
     @mock.patch(
-        "hope.apps.payment.services.qcf_reports_service.WesternUnionFTPClient",
+        "hct_mis_api.apps.payment.services.qcf_reports_service.WesternUnionFTPClient",
         WUClientMock,
     )
     def test_process_files_since_with_real_zip(self) -> None:
@@ -137,47 +141,47 @@ class TestQCFReportsService(TestCase):
             # Check 1st payment row
             row_values = [cell.value for cell in ws[2]]
             assert row_values == [
-                self.p1.unicef_id,
-                "0486455966",
-                True,
-                "0486455966",
-                self.p1.parent.unicef_id,
-                self.program.name,
-                None,
-                262.55,
-                7.88,
-                0,
-            ]
+                    self.p1.unicef_id,
+                    "0486455966",
+                    True,
+                    "0486455966",
+                    self.p1.parent.unicef_id,
+                    self.program.name,
+                    None,
+                    262.55,
+                    7.88,
+                    0,
+                ]
 
             # Check 2nd payment row
             row_values = [cell.value for cell in ws[3]]
             assert row_values == [
-                self.p2.unicef_id,
-                "1131933875",
-                False,
-                "669",
-                self.p2.parent.unicef_id,
-                self.program.name,
-                None,
-                262.55,
-                7.88,
-                0,
-            ]
+                    self.p2.unicef_id,
+                    "1131933875",
+                    False,
+                    "669",
+                    self.p2.parent.unicef_id,
+                    self.program.name,
+                    None,
+                    262.55,
+                    7.88,
+                    0,
+                ]
 
             # Check 3rd payment row
             row_values = [cell.value for cell in ws[4]]
             assert row_values == [
-                self.p3.unicef_id,
-                "1389434830",
-                False,
-                None,
-                self.p3.parent.unicef_id,
-                self.program.name,
-                None,
-                665.22,
-                19.96,
-                0,
-            ]
+                    self.p3.unicef_id,
+                    "1389434830",
+                    False,
+                    None,
+                    self.p3.parent.unicef_id,
+                    self.program.name,
+                    None,
+                    665.22,
+                    19.96,
+                    0,
+                ]
 
             # Optionally, check totals
             last_row = ws.max_row
@@ -190,5 +194,48 @@ class TestQCFReportsService(TestCase):
             assert refunds_total == 0
 
             with mock.patch.object(User, "email_user") as mock_email_user:
-                service.send_notification_emails(report)  # type: ignore
-                mock_email_user.assert_called_once()
+                with mock.patch(
+                    "hct_mis_api.apps.payment.services.qcf_reports_service.render_to_string"
+                ) as mock_render_to_string:
+                    service.send_notification_emails(report)  # type: ignore
+                    mock_email_user.assert_called_once()
+                    assert mock_render_to_string.call_count == 2
+                    args, kwargs = mock_render_to_string.call_args
+                    context = kwargs["context"]
+                    program_slug = report.payment_plan.program.slug
+                    payment_plan_id = report.payment_plan.id
+                    plan_path = (f"/{report.payment_plan.business_area.slug}/"
+                                 f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}")
+                    plan_link = QCFReportsService.get_link(plan_path)
+                    report_link = QCFReportsService.get_link(
+                        reverse(
+                            "download-payment-plan-invoice-report-pdf",
+                            args=[report.id],
+                        )
+                    )
+
+                    assert context == {
+                        "first_name": getattr(self.user, "first_name", ""),
+                        "last_name": getattr(self.user, "last_name", ""),
+                        "email": getattr(self.user, "email", ""),
+                        "message": f"Payment Plan: {plan_link}",
+                        "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
+                        "link": f"Western Union QCF Report file: {report_link}",
+                    }
+
+            download_link = reverse(
+                "download-payment-plan-invoice-report-pdf",
+                args=[report.id],
+            )
+
+            # test download with perm
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            assert response.status_code == 302
+            assert report.report_file.file.url in response.url
+
+            # test download wo perm
+            self.role_ass.delete()
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            assert response.status_code == 403

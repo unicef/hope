@@ -1,6 +1,7 @@
 import logging
 from typing import TYPE_CHECKING, Union
 
+from apps.payment.models import WesternUnionPaymentPlanReport
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
@@ -13,6 +14,7 @@ from hope.apps.utils.exceptions import log_and_raise
 if TYPE_CHECKING:
     from django.http import (
         HttpRequest,
+        HttpResponse,
         HttpResponsePermanentRedirect,
         HttpResponseRedirect,
     )
@@ -111,3 +113,14 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         error_type=FileNotFoundError,
     )
     return None
+
+
+@login_required
+def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: str) -> "HttpResponse":
+    report = WesternUnionPaymentPlanReport.objects.get(id=report_id)
+    payment_plan = report.payment_plan
+
+    if not request.user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.value, payment_plan.program):
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    return redirect(report.report_file.file.url)
