@@ -16,6 +16,8 @@ import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ExistingAccountsFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray';
+import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid #d8d8d8;
@@ -191,8 +193,7 @@ function EditPeopleDataChange({
           )}
         </Box>
       </BoxWithBorders>
-      {/* //TODO: Uncomment and implement the logic for rendering payment channels */}
-      {/* <BoxWithBorders>
+      <BoxWithBorders>
         <Box mt={3}>
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
@@ -200,17 +201,17 @@ function EditPeopleDataChange({
           <ExistingAccountsFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-            addIndividualFieldsData={editPeopleFieldsData}
+            individual={fullIndividual}
+            individualChoicesData={individualChoicesData}
           />
           {!isEditTicket && (
             <NewAccountFieldArray
               values={values}
-              addIndividualFieldsData={editPeopleFieldsData}
+              individualChoicesData={individualChoicesData}
             />
           )}
         </Box>
-      </BoxWithBorders> */}
+      </BoxWithBorders>
     </>
   );
 }
