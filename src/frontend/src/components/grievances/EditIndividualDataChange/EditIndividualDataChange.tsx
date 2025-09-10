@@ -90,7 +90,7 @@ function EditIndividualDataChange({
         id: individual?.id,
       });
     },
-    enabled: !!individual?.id && !!businessAreaSlug,
+    enabled: !!individual?.id && !!programSlug &&!!businessAreaSlug,
   });
 
   useEffect(() => {
