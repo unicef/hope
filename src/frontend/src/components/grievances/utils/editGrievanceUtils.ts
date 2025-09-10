@@ -85,7 +85,7 @@ function mapFieldsToObjects(fields: { [key: string]: Field }) {
 function prepareInitialValueEditIndividual(initialValues, ticket) {
   const {
     individual,
-    individualDataUpdateTicketDetails: { individualData },
+    ticketDetails,
   } = ticket;
 
   const {
@@ -98,7 +98,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     accounts,
     accountsToEdit,
     ...rest
-  } = individualData;
+  } = ticketDetails.individualData;
 
   const { flexFields, ...remainingFields } = rest;
 
