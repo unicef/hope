@@ -269,6 +269,58 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
             },
         )
 
+    def test_registration_data_import_create_program_with_wrong_ids_filter(self) -> None:
+        user = UserFactory(partner=self.partner)
+        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
+        self.update_partner_access_to_program(self.partner, self.import_to_program)
+
+        self.household_1, self.individuals_1 = create_household_and_individuals(
+            household_data={"program": self.import_from_program},
+            individuals_data=[{}],
+        )
+        self.household_2, self.individuals_2 = create_household_and_individuals(
+            household_data={"program": self.import_from_program},
+            individuals_data=[{}],
+        )
+        self.household_3, self.individuals_3 = create_household_and_individuals(
+            household_data={"program": self.import_from_program},
+            individuals_data=[{}, {}],
+        )
+        self.household_4, self.individuals_4 = create_household_and_individuals(
+            household_data={"program": self.import_from_program},
+            individuals_data=[{}, {}],
+        )
+        self.household_5, self.individuals_5 = create_household_and_individuals(
+            household_data={"program": self.import_from_program},
+            individuals_data=[{}, {}],
+        )
+        # create external collector for household_5
+        external_collector = IndividualFactory(program=self.import_from_program)
+        IndividualRoleInHousehold.objects.create(
+            household=self.household_5,
+            individual=external_collector,
+            role=ROLE_PRIMARY,
+            rdi_merge_status="MERGED",
+        )
+
+        ind_id = "IND-000001"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
+            context={
+                "user": user,
+                "headers": {"Program": self.id_to_base64(self.import_to_program.id, "ProgramNode")},
+            },
+            variables={
+                "registrationDataImportData": {
+                    "importFromProgramId": self.id_to_base64(self.import_from_program.id, "ProgramNode"),
+                    "name": "New Import of Data IND Ids",
+                    "businessAreaSlug": self.afghanistan.slug,
+                    "importFromIds": ind_id,
+                }
+            },
+        )
+
     def test_registration_data_import_create_program_with_ids_filter(self) -> None:
         user = UserFactory(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
