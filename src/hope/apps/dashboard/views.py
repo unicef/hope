@@ -49,7 +49,14 @@ class DashboardDataView(APIView):
         has_permission = False
 
         if is_global:
-            if request.user.is_superuser or request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
+            if (
+                request.user.is_superuser
+                or RoleAssignment.objects.filter(
+                    user=request.user,
+                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+                    business_area__active=True,
+                ).exists()
+            ):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
@@ -144,9 +151,15 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
         is_global = business_area_slug.lower() == "global"
 
         has_permission = False
-
         if is_global:
-            if self.request.user.is_superuser or self.request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
+            if (
+                self.request.user.is_superuser
+                or RoleAssignment.objects.filter(
+                    user=self.request.user,
+                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+                    business_area__active=True,
+                ).exists()
+            ):
                 has_permission = True
         else:
             business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
