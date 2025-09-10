@@ -111,6 +111,50 @@ snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registrati
     ]
 }
 
+snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 1'] = {
+    'data': {
+        'registrationProgramPopulationImport': {
+            'registrationDataImport': {
+                'dataSource': 'PROGRAM_POPULATION',
+                'name': 'New Import of Data HH Ids',
+                'screenBeneficiary': False
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 2'] = {
+    'data': {
+        'registrationProgramPopulationImport': {
+            'registrationDataImport': {
+                'dataSource': 'PROGRAM_POPULATION',
+                'name': 'New Import of Data Ind ids',
+                'screenBeneficiary': False
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_wrong_ids_filter 1'] = {
+    'data': {
+        'registrationProgramPopulationImport': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': "['Invalid unicef ids, must start with HH-']",
+            'path': [
+                'registrationProgramPopulationImport'
+            ]
+        }
+    ]
+}
+
 snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_different_beneficiary_group 1'] = {
     'data': {
         'registrationProgramPopulationImport': None
@@ -161,28 +205,4 @@ snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registrati
             ]
         }
     ]
-}
-
-snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 1'] = {
-    'data': {
-        'registrationProgramPopulationImport': {
-            'registrationDataImport': {
-                'dataSource': 'PROGRAM_POPULATION',
-                'name': 'New Import of Data HH Ids',
-                'screenBeneficiary': False
-            }
-        }
-    }
-}
-
-snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 2'] = {
-    'data': {
-        'registrationProgramPopulationImport': {
-            'registrationDataImport': {
-                'dataSource': 'PROGRAM_POPULATION',
-                'name': 'New Import of Data Ind ids',
-                'screenBeneficiary': False
-            }
-        }
-    }
 }
