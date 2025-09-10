@@ -47,6 +47,7 @@ class TestQCFReportsService(TestCase):
             name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
         cls.role_ass = RoleAssignment.objects.create(
+            user=cls.user,
             role=role,
             business_area=cls.business_area,
         )
