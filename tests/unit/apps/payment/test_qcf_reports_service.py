@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest import mock
 
 from django.test import TestCase
+from django.urls import reverse
 
 import openpyxl
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -13,6 +14,7 @@ from extras.test_utils.factories.program import ProgramFactory
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     WesternUnionInvoice,
@@ -43,9 +45,9 @@ class TestQCFReportsService(TestCase):
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory.create(partner=partner_unicef)
         role, created = Role.objects.update_or_create(
-            name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
+            name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        cls.user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
         cls.payment_plan = PaymentPlanFactory(
@@ -200,5 +202,47 @@ class TestQCFReportsService(TestCase):
             self.assertEqual(refunds_total, 0)
 
             with mock.patch.object(User, "email_user") as mock_email_user:
-                service.send_notification_emails(report)  # type: ignore
-                mock_email_user.assert_called_once()
+                with mock.patch(
+                    "hct_mis_api.apps.payment.services.qcf_reports_service.render_to_string"
+                ) as mock_render_to_string:
+                    service.send_notification_emails(report)  # type: ignore
+                    mock_email_user.assert_called_once()
+                    assert mock_render_to_string.call_count == 2
+                    args, kwargs = mock_render_to_string.call_args
+                    context = kwargs["context"]
+                    program_id = encode_id_base64(report.payment_plan.program.id, "Program")
+                    payment_plan_id = encode_id_base64(report.payment_plan.id, "PaymentPlan")
+                    plan_path = f"/{report.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{payment_plan_id}"
+                    plan_link = QCFReportsService.get_link(plan_path)
+                    report_link = QCFReportsService.get_link(
+                        reverse(
+                            "download-payment-plan-invoice-report-pdf",
+                            args=[encode_id_base64(report.id, "WesternUnionPaymentPlanReport")],
+                        )
+                    )
+
+                    assert context == {
+                        "first_name": getattr(self.user, "first_name", ""),
+                        "last_name": getattr(self.user, "last_name", ""),
+                        "email": getattr(self.user, "email", ""),
+                        "message": f"Payment Plan: {plan_link}",
+                        "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
+                        "link": f"Western Union QCF Report file: {report_link}",
+                    }
+
+            download_link = reverse(
+                "download-payment-plan-invoice-report-pdf",
+                args=[encode_id_base64(report.id, "WesternUnionPaymentPlanReport")],
+            )
+
+            # test download with perm
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn(report.report_file.file.url, response.url)
+
+            # test download wo perm
+            self.user_role.delete()
+            self.client.force_login(self.user)
+            response = self.client.get(download_link)
+            self.assertEqual(response.status_code, 403)
