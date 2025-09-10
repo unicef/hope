@@ -115,7 +115,10 @@ def create_registration_data_import_for_import_program_population(
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     import_from_program_id = registration_data_import_data.pop("import_from_program_id")
     import_from_ids = registration_data_import_data.get("import_from_ids")
-
+    program = Program.objects.get(id=import_to_program_id)
+    should_start_with = "IND-" if program.is_social_worker_program else "HH-"
+    if import_from_ids and any([x for x in import_from_ids.split(",") if not x.strip().startswith(should_start_with)]):
+        raise ValidationError(f"Invalid unicef ids, must start with {should_start_with}")
     households, individuals = get_rdi_program_population(import_from_program_id, import_to_program_id, import_from_ids)
     created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
@@ -542,6 +545,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         pull_pictures = graphene.Boolean(required=True)
 
     @classmethod
+    @transaction.atomic()
     @is_authenticated
     def mutate(
         cls,
@@ -564,7 +568,8 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             pull_pictures=pull_pictures,
         )
-        pull_kobo_submissions_task.delay(import_data.id, program_id)
+        transaction.on_commit(lambda: pull_kobo_submissions_task.delay(import_data.id, program_id))  # pragma: no cover
+
         return SaveKoboProjectImportDataAsync(import_data=import_data)
 
 

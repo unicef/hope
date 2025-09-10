@@ -6,13 +6,15 @@ import zipfile
 from collections import defaultdict
 from datetime import datetime
 from tempfile import NamedTemporaryFile
-from typing import IO, List, Tuple
+from typing import IO, List, Optional, Tuple
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 import openpyxl
 from openpyxl.styles import Font
@@ -20,6 +22,7 @@ from openpyxl.styles import Font
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.celery_tasks import send_qcf_report_email_notifications
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models.payment import (
@@ -276,21 +279,40 @@ class QCFReportsService:
             for user in User.objects.all()
             if user.has_permission(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
-        print(users)
         for user in users:
             self.send_report_email_to_user(user, report)
+
+    @staticmethod
+    def get_link(api_url: Optional[str] = None) -> str:
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
+        if api_url:
+            return link
+        return ""
 
     def send_report_email_to_user(self, user: User, report: WesternUnionPaymentPlanReport) -> None:
         text_template = "payment/qcf_report_email.txt"
         html_template = "payment/qcf_report_email.html"
 
+        path_name = "download-payment-plan-invoice-report-pdf"
+        payment_plan = report.payment_plan
+
+        report_id = encode_id_base64(report.id, "WesternUnionPaymentPlanReport")
+        payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        program_id = encode_id_base64(payment_plan.program.id, "Program")
+
+        payment_plan_link = self.get_link(
+            f"/{payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{payment_plan_id}"
+        )
+        download_link = self.get_link(reverse(path_name, args=[report_id]))
+
         context = {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
-            "message": f"Payment Plan {report.payment_plan.unicef_id} Payment List export file's Passwords.",
+            "message": f"Payment Plan: {payment_plan_link}",
             "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-            "link": f"Western Union QCF Report file: {report.report_file.file.url}",
+            "link": f"Western Union QCF Report file: {download_link}",
         }
 
         user.email_user(
