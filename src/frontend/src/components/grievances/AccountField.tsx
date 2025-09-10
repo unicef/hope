@@ -135,7 +135,7 @@ export function AccountField({
       ) : (
         <>
           {Object.entries(dataFields).map(([key, value]) => {
-            let displayValue = String(value);
+              let displayValue = String(value);
               const isFinancialInstitutionField = key === 'financial_institution';
               if (
                 isFinancialInstitutionField &&
@@ -151,22 +151,22 @@ export function AccountField({
                 ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices } : {}),
               };
 
-            return (
-            <Fragment key={key}>
-              <Grid size={{ xs: 4 }}>
-                <LabelizedField
-                  label={t('Account Item')}
-                  value={String(key)}
-                />
-              </Grid>
-              <Grid size={{ xs: 4 }}>
-                <LabelizedField
-                  label={t('Current Value')}
-                  value={displayValue}
-                />
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                  <Field
+              return (
+                <Fragment key={key}>
+                  <Grid size={{ xs: 4 }}>
+                    <LabelizedField
+                      label={t('Account Item')}
+                      value={String(key)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 4 }}>
+                    <LabelizedField
+                      label={t('Current Value')}
+                      value={displayValue}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 3 }}>
+                    <Field
                       name={`${accountFieldName}.${key}`}
                       fullWidth
                       variant="outlined"
@@ -175,10 +175,11 @@ export function AccountField({
                       disabled={isEditTicket}
                       {...fieldProps}
                     />
-              </Grid>
-            </Fragment>
-          );
-})}
+                  </Grid>
+                </Fragment>
+              );
+            },
+          )}
         </>
       )
       }

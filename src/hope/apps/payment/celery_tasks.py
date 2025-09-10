@@ -346,6 +346,36 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
+def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
+    from hope.apps.payment.models import Payment, PaymentPlan
+
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+    try:
+        payment_plan.exchange_rate = payment_plan.get_exchange_rate()
+        payment_plan.save(update_fields=["exchange_rate"])
+        payment_plan.refresh_from_db(fields=["exchange_rate"])
+        updates = []
+        with transaction.atomic():
+            for payment in payment_plan.eligible_payments:
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=payment.entitlement_quantity,
+                    currency=payment_plan.currency,
+                    exchange_rate=payment_plan.exchange_rate,
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
+                updates.append(payment)
+            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"])
+            payment_plan.update_money_fields()
+
+    except Exception as e:
+        logger.exception("PaymentPlan Update Exchange Rate On Release Payments Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files."""
     try:
@@ -867,3 +897,46 @@ class CheckRapidProVerificationTask:
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_record_verification.received_amount = received_amount
         return payment_record_verification
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
+    from datetime import datetime, timedelta
+
+    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+
+    try:
+        service = QCFReportsService()
+        service.process_files_since(datetime.now() - timedelta(hours=24))
+
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
+    from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
+    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+
+    with cache.lock(
+        f"send_qcf_email_notifications_{qcf_report_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        qcf_report = WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id)
+        try:
+            set_sentry_business_area_tag(qcf_report.payment_plan.business_area.name)
+
+            service = QCFReportsService()
+            service.send_notification_emails(qcf_report)
+            qcf_report.sent = True
+            qcf_report.save()
+
+        except Exception as e:
+            logger.exception(f"Failed to send QCF report emails for {qcf_report}")
+            raise self.retry(exc=e)

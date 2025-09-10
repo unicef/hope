@@ -16,13 +16,14 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { BlackLink } from '@components/core/BlackLink';
 
 const onlineEditsHeadCells: HeadCell<any>[] = [
   {
     id: 'id',
     numeric: false,
     disablePadding: false,
-    label: 'ID',
+    label: 'Template ID',
     dataCy: 'head-cell-id',
   },
   {
@@ -126,7 +127,14 @@ const NewPeriodicDataUpdates = (): ReactElement => {
         onClick={() => navigate(url)}
         style={{ cursor: 'pointer' }}
       >
-        <TableCell>{row.id}</TableCell>
+        <TableCell>
+          <BlackLink
+            to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
+            data-cy={`template-id-link-${row.id}`}
+          >
+            {row.id}
+          </BlackLink>
+        </TableCell>
         <TableCell>{row.name}</TableCell>
         <TableCell align="right">{row.numberOfRecords}</TableCell>
         <TableCell>

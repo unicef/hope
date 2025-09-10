@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.utils.mailjet import MailjetClient
 
@@ -111,8 +110,8 @@ class PaymentNotification:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception as e:  # pragma: no cover
-                logger.exception(e)
+            except Exception:  # pragma: no cover
+                logger.exception("Failed to send payment plan notification")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
@@ -122,11 +121,13 @@ class PaymentNotification:
             "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
-                f"{encode_id_base64(self.payment_plan.program.id, 'Program')}/payment-module/payment-plans/"
-                f"{encode_id_base64(self.payment_plan.id, 'PaymentPlan')}"
+                f"{self.payment_plan.program.slug}/payment-module/payment-plans/"
+                f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,
-            "payment_plan_creator": self.payment_plan_creator.get_full_name(),
+            "payment_plan_creator": self.payment_plan_creator.get_full_name()
+            if self.payment_plan_creator
+            else "Unknown",
             "payment_plan_creation_date": f"{self.payment_plan_creation_date:%-d %B %Y}",
             "action_user": self.action_user.get_full_name(),
             "action_date": self.action_date,
