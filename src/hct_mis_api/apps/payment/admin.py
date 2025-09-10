@@ -733,9 +733,17 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 @admin.register(Account)
 class AccountAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "number", "get_business_area", "get_program", "account_type", "is_unique")
+    list_display = (
+        "individual",
+        "financial_institution",
+        "number",
+        "get_business_area",
+        "get_program",
+        "account_type",
+        "is_unique",
+    )
 
-    raw_id_fields = ("account_type", "individual")
+    raw_id_fields = ("account_type", "individual", "financial_institution")
     readonly_fields = ("unique_key", "signature_hash")
     search_fields = (
         "number",
