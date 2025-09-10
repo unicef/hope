@@ -142,6 +142,43 @@ class TestPDUOnlineEditNotification(BaseTestCase):
             partner=partner_with_action_permissions_in_whole_ba
         )
 
+        # users with edit permission
+        cls.user_with_edit_permission = UserFactory(partner=partner_empty)
+        cls.create_user_role_with_permissions(
+            cls.user_with_edit_permission,
+            [Permissions.PDU_ONLINE_SAVE_DATA],
+            cls.business_area,
+            program=cls.program,
+            name="Role with edit permission",
+        )
+
+        cls.user_with_edit_permission_authorized = UserFactory(partner=partner_empty)
+        cls.create_user_role_with_permissions(
+            cls.user_with_edit_permission_authorized,
+            [Permissions.PDU_ONLINE_SAVE_DATA],
+            cls.business_area,
+            program=cls.program,
+            name="Role with edit permission",
+        )
+
+        cls.user_with_edit_permission_in_ba = UserFactory(partner=partner_empty)
+        cls.create_user_role_with_permissions(
+            cls.user_with_edit_permission_in_ba,
+            [Permissions.PDU_ONLINE_SAVE_DATA],
+            cls.business_area,
+            whole_business_area_access=True,
+            name="Role with edit permission",
+        )
+
+        cls.user_with_edit_permission_in_ba_authorized = UserFactory(partner=partner_empty)
+        cls.create_user_role_with_permissions(
+            cls.user_with_edit_permission_in_ba_authorized,
+            [Permissions.PDU_ONLINE_SAVE_DATA],
+            cls.business_area,
+            whole_business_area_access=True,
+            name="Role with edit permission",
+        )
+
         # users with approval permission
         cls.user_with_approval_permission = UserFactory(partner=partner_empty)
         cls.create_user_role_with_permissions(
@@ -222,6 +259,8 @@ class TestPDUOnlineEditNotification(BaseTestCase):
             cls.user_with_partner_unicef_in_ba_authorized,
             cls.user_with_no_permissions_partner_with_action_permissions_authorized,
             cls.user_with_no_permissions_partner_with_action_permissions_in_whole_ba_authorized,
+            cls.user_with_edit_permission_authorized,
+            cls.user_with_edit_permission_in_ba_authorized,
             cls.user_with_approval_permission_authorized,
             cls.user_with_approval_permission_in_ba_authorized,
             cls.user_with_merge_permission_authorized,
@@ -283,7 +322,8 @@ class TestPDUOnlineEditNotification(BaseTestCase):
 
     def test_send_back_action_notification_recipients(self) -> None:
         """
-        Test that send back action notifies the creator of the PDU Edit.
+        Test that approve action notifies users with save data permission
+        who are in the authorized users list.
         """
         pdu_notification = PDUOnlineEditNotification(
             self.pdu_online_edit,
@@ -292,11 +332,19 @@ class TestPDUOnlineEditNotification(BaseTestCase):
             "1 January 2025",
         )
 
-        expected_recipients = [self.user_pdu_creator]
+        expected_recipients = [
+            self.user_with_partner_unicef_hq_authorized,
+            self.user_with_no_permissions_partner_with_action_permissions_authorized,
+            self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba_authorized,
+            self.user_with_edit_permission_authorized,
+            self.user_with_edit_permission_in_ba_authorized,
+        ]
+
         actual_recipients = list(pdu_notification.user_recipients.all())
 
         assert len(actual_recipients) == len(expected_recipients)
-        assert self.user_pdu_creator in actual_recipients
+        for expected_recipient in expected_recipients:
+            assert expected_recipient in actual_recipients
 
     def test_no_authorized_users_no_recipients(self) -> None:
         """
@@ -514,7 +562,7 @@ class TestPDUOnlineEditNotification(BaseTestCase):
 
         assert pdu_notification.email_subject == "PDU Online Edit sent back"
         assert pdu_notification.action_name == "sent back"
-        assert pdu_notification.recipient_title == "Creator"
+        assert pdu_notification.recipient_title == "Editor"
 
     def test_email_body_variables_content(self) -> None:
         pdu_notification = PDUOnlineEditNotification(
