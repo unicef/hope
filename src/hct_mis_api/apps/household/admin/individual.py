@@ -48,8 +48,9 @@ logger = logging.getLogger(__name__)
 class IndividualAccountInline(admin.TabularInline):
     model = Account
     extra = 0
-    fields = ("account_type", "number", "data", "view_link")
+    fields = ("account_type", "financial_institution", "number", "data", "view_link")
 
+    raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
     def view_link(self, obj: Any) -> str:
