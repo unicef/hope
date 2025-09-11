@@ -257,9 +257,7 @@ class QCFReportsService:
     def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
         business_area = report.payment_plan.business_area
         users = [
-            user
-            for user in User.objects.all()
-            if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
+            user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
 
         for user in users:
