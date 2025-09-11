@@ -168,7 +168,10 @@ def check_against_sanction_list_pre_merge(
                 score = individual_hit.meta.score
                 if score < possible_match_score:
                     continue
-                marked_individual = Individual.objects.filter(id=individual_hit.id).first()
+                marked_individual = Individual.all_objects.filter(id=individual_hit.id).first()
+                if not marked_individual:
+                    log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
+                    continue
                 if marked_individual.program_id != program.id:
                     log.debug(
                         f"Skipping individual {marked_individual.unicef_id} with ID {marked_individual.id} "
@@ -176,9 +179,6 @@ def check_against_sanction_list_pre_merge(
                     )
                     continue
 
-                if not marked_individual:
-                    log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
-                    continue
                 possible_matches.add(marked_individual.id)
                 tickets_info = _generate_ticket(
                     marked_individual,

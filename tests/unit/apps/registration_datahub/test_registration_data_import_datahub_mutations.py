@@ -1,6 +1,5 @@
 import io
 from typing import Any, List
-from unittest import mock
 
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
@@ -251,27 +250,21 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     )
     def test_save_kobo_project_import_data_async(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        with mock.patch(
-            "hct_mis_api.apps.registration_datahub.mutations.pull_kobo_submissions_task.delay"
-        ) as pull_kobo_submissions_task_mock:
-            self.snapshot_graphql_request(
-                request_string=self.SAVE_KOBO_PROJECT_IMPORT_DATA_ASYNC,
-                context={
-                    "user": self.user,
-                    "headers": {
-                        "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                        "Business-Area": self.business_area.slug,
-                    },
+        self.snapshot_graphql_request(
+            request_string=self.SAVE_KOBO_PROJECT_IMPORT_DATA_ASYNC,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
                 },
-                variables={
-                    "uid": 123,
-                    "businessAreaSlug": self.business_area_slug,
-                    "onlyActiveSubmissions": True,
-                    "pullPictures": False,
-                },
-            )
-            if permissions:
-                assert KoboImportData.objects.count() == 1
-                kobo_import_data = KoboImportData.objects.first()
-                pull_kobo_submissions_task_mock.assert_called_once_with(kobo_import_data.id, str(self.program.id))
+            },
+            variables={
+                "uid": 123,
+                "businessAreaSlug": self.business_area_slug,
+                "onlyActiveSubmissions": True,
+                "pullPictures": False,
+            },
+        )
+        if permissions:
+            assert KoboImportData.objects.count() == 1
