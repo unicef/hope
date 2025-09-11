@@ -611,10 +611,20 @@ export function programStatusToPriority(status: string): number {
   }
 }
 
+function isBase64(str) {
+  if (typeof str !== 'string') return false;
+  if (!str.length || str.length % 4 !== 0) return false;
+  // Regex covers pure base64 (no mime or data: prefix)
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(str);
+}
+
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
+  if (!isBase64(idString))
+      return idString;
   if (idString.includes(':')) {
     // Already decoded
     return idString.split(':')[1];

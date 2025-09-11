@@ -374,31 +374,27 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          individualDataUpdateIssueTypeExtras: {
-            individualData: {
-              ...individualData,
-              documents: transformNestedData(
-                values.individualDataUpdateFieldsDocuments,
-              ),
-              documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-              documentsToEdit: transformNestedData(
-                values.individualDataUpdateDocumentsToEdit,
-              ),
-              identities: transformNestedData(
-                values.individualDataUpdateFieldsIdentities,
-              ),
-              identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
-              identitiesToEdit: transformNestedData(
-                values.individualDataUpdateIdentitiesToEdit,
-              ),
-              accountsToEdit: values.individualDataUpdateAccountsToEdit,
-            },
-          },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      individualDataUpdateIssueTypeExtras: {
+        individualData: {
+          ...individualData,
+          documents: transformNestedData(
+            values.individualDataUpdateFieldsDocuments,
+          ),
+          documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+          documentsToEdit: transformNestedData(
+            values.individualDataUpdateDocumentsToEdit,
+          ),
+          identities: transformNestedData(
+            values.individualDataUpdateFieldsIdentities,
+          ),
+          identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+          identitiesToEdit: transformNestedData(
+            values.individualDataUpdateIdentitiesToEdit,
+          ),
+          accountsToEdit: values.individualDataUpdateAccountsToEdit,
         },
       },
     },
