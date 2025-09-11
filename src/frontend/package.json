@@ -136,7 +136,6 @@
     "typescript": "~5.3.0"
   },
   "resolutions": {
-    "minimatch": "^9.0.3",
     "brace-expansion": "^2.0.2",
     "micromatch": "^4.0.8",
     "tmp": "^0.2.5",
