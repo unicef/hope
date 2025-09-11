@@ -39,7 +39,7 @@
       <td></td>
       <td></td>
       <td>Target Population</td>
-      <td>{{ payment_plan.target_population.name }}</td>
+      <td>{{ payment_plan.name }}</td>
     </tr>
     <tr>
       <td></td>
@@ -51,14 +51,24 @@
       <td colspan="4" class="header">SUMMARY</td>
     </tr>
     <tr>
-      <td>Total number of households covered</td>
-      <td>{{ payment_plan.total_households_count }}</td>
+      {% if is_social_worker_program %}
+        <td>Total number of people covered</td>
+        <td>{{ payment_plan.total_individuals_count }}</td>
+      {% else %}
+        <td>Total number of households covered</td>
+        <td>{{ payment_plan.total_households_count }}</td>
+      {% endif %}
       <td>Total entitlement</td>
       <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
     </tr>
     <tr>
-      <td>Total number of individuals covered</td>
-      <td>{{ payment_plan.total_individuals_count }}</td>
+      {% if is_social_worker_program %}
+        <td></td>
+        <td></td>
+      {% else %}
+        <td>Total number of individuals covered</td>
+        <td>{{ payment_plan.total_individuals_count }}</td>
+      {% endif %}
       <td>Currency</td>
       <td>{{ payment_plan.currency }}</td>
     </tr>
@@ -77,7 +87,11 @@
       <td colspan="6" class="header">RECONCILIATION SUMMARY</td>
     </tr>
     <tr>
-      <td>Total Households redeemed</td>
+      {% if is_social_worker_program %}
+        <td>Total pending People</td>
+      {% else %}
+        <td>Total Households redeemed</td>
+      {% endif %}
       <td>{{reconciliation.reconciled|default_if_none:"0"}}</td>
       <td>Total amount redeemed ({{ payment_plan.currency }})</td>
       <td>{{reconciliation.reconciled_local|default_if_none:"0"}}</td>
@@ -85,7 +99,11 @@
       <td>{{reconciliation.reconciled_usd|default_if_none:"0"}}</td>
     </tr>
     <tr>
-      <td>Total pending Households</td>
+      {% if is_social_worker_program %}
+        <td>Total pending People</td>
+      {% else %}
+        <td>Total pending Households</td>
+      {% endif %}
       <td>{{reconciliation.pending|default_if_none:"0"}}</td>
       <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
       <td>{{reconciliation.failed_local|default_if_none:"0"}}</td>
