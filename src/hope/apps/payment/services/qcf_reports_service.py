@@ -259,7 +259,7 @@ class QCFReportsService:
         users = [
             user
             for user in User.objects.all()
-            if user.has_permission(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
+            if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
 
         for user in users:
@@ -282,10 +282,10 @@ class QCFReportsService:
 
         report_id = str(report.id)
         payment_plan_id = str(payment_plan.id)
-        program_id = str(payment_plan.program.id)
+        program_slug = report.payment_plan.program.slug
 
         payment_plan_link = self.get_link(
-            f"/{payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{payment_plan_id}"
+            f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
         )
         download_link = self.get_link(reverse(path_name, args=[report_id]))
 
