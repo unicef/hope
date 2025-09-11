@@ -1,4 +1,4 @@
-FROM node:13-alpine as dev
+FROM node:20.19.0-alpine as dev
 WORKDIR /code
 COPY package.json yarn.lock /code/
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
@@ -7,7 +7,7 @@ COPY . /code/
 EXPOSE 3000
 CMD ["yarn", "dev"]
 
-FROM node:13-alpine as dist-builder
+FROM node:20.19.0-alpine as dist-builder
 WORKDIR /code
 COPY --from=dev /code /code
 ARG SENTRY_DSN
