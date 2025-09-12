@@ -64,18 +64,16 @@ def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
-    return request.user.has_permission(
+    return request.user.has_perm(
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
-        payment_plan.business_area,
-        payment_plan.program_cycle.program_id,
+        payment_plan.program,
     )
 
 
 def has_payment_plan_export_per_fsp_permission(request: Any, payment_plan: PaymentPlan) -> bool:
-    return request.user.has_permission(
+    return request.user.has_perm(
         Permissions.PM_VIEW_LIST.value,
-        payment_plan.business_area,
-        payment_plan.program_cycle.program_id,
+        payment_plan.program,
     )
 
 
@@ -215,10 +213,9 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
 
 
 def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
-    return request.user.has_permission(
+    return request.user.has_perm(
         Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
-        payment.business_area,
-        payment.parent.program_cycle.program_id,
+        payment.parent.program,
     )
 
 

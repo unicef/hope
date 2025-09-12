@@ -8,11 +8,13 @@ from tempfile import NamedTemporaryFile
 from typing import IO
 import zipfile
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.template.loader import render_to_string
+from django.urls import reverse
 import openpyxl
 from openpyxl.styles import Font
 
@@ -80,11 +82,6 @@ class QCFReportsService:
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
                 file_like.seek(0)  # rewind
                 self.process_zip_file(file_like, wu_qcf_file)
-
-    def test_process_file(self, filename: str, file_like: io.BytesIO) -> None:
-        # TODO remove after testing
-        wu_qcf_file = self.store_qcf_file(filename, file_like)
-        self.process_zip_file(file_like, wu_qcf_file)
 
     def store_qcf_file(self, filename: str, file_like: io.BytesIO) -> WesternUnionInvoice:
         content_file = ContentFile(file_like.read(), name=filename)
@@ -258,35 +255,45 @@ class QCFReportsService:
         return wb
 
     def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
-        """# TODO refactor to 'dev' new perms.
-
-        role_assignments = RoleAssignment.objects.filter(
-            role__permissions__contains=[Permissions.RECEIVE_PARSED_WU_QCF.name],
-            business_area=business_area,
-        ).exclude(expiry_date__lt=timezone.now())
-        users = User.objects.filter(
-            Q(role_assignments__in=role_assignments) |
-            Q(partner__role_assignments__in=role_assignments)
-        ).distinct().
-        """
         business_area = report.payment_plan.business_area
         users = [
             user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
+
         for user in users:
             self.send_report_email_to_user(user, report)
+
+    @staticmethod
+    def get_link(api_url: str | None = None) -> str:
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
+        if api_url:
+            return link
+        return ""
 
     def send_report_email_to_user(self, user: User, report: WesternUnionPaymentPlanReport) -> None:
         text_template = "payment/qcf_report_email.txt"
         html_template = "payment/qcf_report_email.html"
 
+        path_name = "download-payment-plan-invoice-report-pdf"
+        payment_plan = report.payment_plan
+
+        report_id = str(report.id)
+        payment_plan_id = str(payment_plan.id)
+        program_slug = report.payment_plan.program.slug
+
+        payment_plan_link = self.get_link(
+            f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+        )
+        download_link = self.get_link(reverse(path_name, args=[report_id]))
+
         context = {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
-            "message": f"Payment Plan {report.payment_plan.unicef_id} Payment List export file's Passwords.",
+            "message": f"Payment Plan: {payment_plan_link}",
             "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-            "link": f"Western Union QCF Report file: {report.report_file.file.url}",
+            "link": f"Western Union QCF Report file: {download_link}",
         }
 
         user.email_user(
