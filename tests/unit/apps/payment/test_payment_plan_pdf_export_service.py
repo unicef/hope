@@ -129,22 +129,18 @@ class TestPaymentPlanPDFExportService(TestCase):
         pdf_context_data = kwargs["data"]
         pdf_reconciliation_qs = pdf_context_data["reconciliation"]
 
-        self.assertEqual(pdf_reconciliation_qs["pending_usd"], 20.0)
-        self.assertEqual(pdf_reconciliation_qs["pending_local"], 10.0)
+        self.assertEqual(pdf_reconciliation_qs["pending"], 1)
+        self.assertEqual(pdf_reconciliation_qs["reconciled"], 2)
         self.assertEqual(pdf_reconciliation_qs["reconciled_usd"], 30.0)
         self.assertEqual(pdf_reconciliation_qs["reconciled_local"], 15.0)
         self.assertEqual(pdf_reconciliation_qs["failed_usd"], 210.0)
         self.assertEqual(pdf_reconciliation_qs["failed_local"], 105.0)
         self.assertEqual(
-            pdf_reconciliation_qs["failed_local"]
-            + pdf_reconciliation_qs["reconciled_local"]
-            + pdf_reconciliation_qs["pending_local"],
+            pdf_reconciliation_qs["failed_local"] + pdf_reconciliation_qs["reconciled_local"] + 10,
             self.payment_plan.total_entitled_quantity,
         )
         self.assertEqual(
-            pdf_reconciliation_qs["failed_usd"]
-            + pdf_reconciliation_qs["reconciled_usd"]
-            + pdf_reconciliation_qs["pending_usd"],
+            pdf_reconciliation_qs["failed_usd"] + pdf_reconciliation_qs["reconciled_usd"] + 20,
             self.payment_plan.total_entitled_quantity_usd,
         )
 
