@@ -223,7 +223,7 @@ class TestPDUOnlineEditCreate:
         assert response_json_detail["name"] is None
         assert response_json_detail["number_of_records"] == 1
         assert response_json_detail["created_by"] == self.user.get_full_name()
-        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%SZ}"
         assert response_json_detail["status"] == PDUOnlineEdit.Status.NEW
         assert response_json_detail["status_display"] == PDUOnlineEdit.Status.NEW.label
         assert response_json_detail["is_authorized"] is False

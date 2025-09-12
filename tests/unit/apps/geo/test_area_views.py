@@ -155,53 +155,49 @@ class TestAreaViews:
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_1_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_2_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_1_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_1_area_type_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_2_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_2_area_type_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_1_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_1_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_2_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_2_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
             "area_type": str(self.area_type_other.id),
-            "updated_at": self.area_other.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_other.updated_at.isoformat(),
         } not in response_json
 
     def test_list_areas_filter(
@@ -227,32 +223,28 @@ class TestAreaViews:
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_1_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_2_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json_1
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_1_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_1_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_2_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_2_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json_1
 
         response_level_2 = self.client.get(self.url_list, {"level": 2})

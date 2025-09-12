@@ -240,7 +240,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert len(response_json) == 1
 
         assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime(
-            "%Y-%m-%dT%H:%M:%S.%fZ"
+            "%Y-%m-%dT%H:%M:%SZ"
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
 
@@ -251,7 +251,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         response_json = response.json()["results"]
         assert len(response_json) == 1
         assert response_json[0]["last_approval_process_date"] == approval_authorization.created_at.strftime(
-            "%Y-%m-%dT%H:%M:%S.%fZ"
+            "%Y-%m-%dT%H:%M:%SZ"
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
@@ -262,7 +262,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         response_json = response.json()["results"]
         assert len(response_json) == 1
         assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime(
-            "%Y-%m-%dT%H:%M:%S.%fZ"
+            "%Y-%m-%dT%H:%M:%SZ"
         )
         assert response_json[0]["last_approval_process_by"] == str(approval_release.created_by)
 
@@ -978,8 +978,8 @@ class TestTargetPopulationList:
         assert tp["status"] == self.tp.get_status_display().upper()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
-        assert tp["created_at"] == self.tp.created_at.isoformat().replace("+00:00", "Z")
-        assert tp["updated_at"] == self.tp.updated_at.isoformat().replace("+00:00", "Z")
+        assert tp["created_at"] == self.tp.created_at.isoformat()
+        assert tp["updated_at"] == self.tp.updated_at.isoformat()
         assert tp["created_by"] == self.user.get_full_name()
 
     def test_target_population_caching(self, create_user_role_with_permissions: Any) -> None:

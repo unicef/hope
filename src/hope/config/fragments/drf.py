@@ -1,4 +1,5 @@
 REST_FRAMEWORK = {
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%SZ",
     "DEFAULT_PAGINATION_CLASS": "hope.apps.core.api.pagination.NoCountLimitOffsetPagination",
     "PAGE_SIZE": 50,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
