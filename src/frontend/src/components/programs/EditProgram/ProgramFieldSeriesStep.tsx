@@ -1,5 +1,6 @@
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { DividerLine } from '@components/core/DividerLine';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,6 +32,7 @@ interface ProgramFieldSeriesStepProps {
   program?;
   setStep: (step: number) => void;
   step: number;
+  loading: boolean;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -44,6 +46,7 @@ export const ProgramFieldSeriesStep = ({
   program,
   setStep,
   step,
+  loading,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -261,14 +264,15 @@ export const ProgramFieldSeriesStep = ({
               {t('Back')}
             </Button>
           </Box>
-          <Button
+          <LoadingButton
             data-cy="button-save"
             variant="contained"
             color="primary"
             onClick={submitForm}
+            loading={loading}
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </Box>
       </Box>
     </>
