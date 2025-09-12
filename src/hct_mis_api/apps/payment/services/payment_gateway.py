@@ -160,12 +160,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                         f" collector {obj.collector}."
                     )
 
-            elif financial_institution_code := (
-                # this needs to be unified
-                account_data.get("code")
-                or account_data.get("bank_code")
-                or account_data.get("uba_code")
-            ):
+            elif financial_institution_code := account_data.get("code"):
                 # financial_institution_code is now collected as a specific fsp code (uba_code)
 
                 uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
