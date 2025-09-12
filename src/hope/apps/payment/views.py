@@ -10,7 +10,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.payment.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 from hope.apps.utils.exceptions import log_and_raise
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
         HttpRequest,
         HttpResponse,
