@@ -1,9 +1,8 @@
 from django.db import transaction
 
-from apps.payment.models import FinancialInstitution
-
 from hct_mis_api.apps.payment.models import (
     Account,
+    FinancialInstitution,
     FinancialInstitutionMapping,
     FinancialServiceProvider,
 )
