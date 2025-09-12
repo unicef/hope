@@ -65,7 +65,7 @@ def populate_nigeria_account_financial_institution() -> None:
 
     # "bank_code" accounts
     accounts_to_update = []
-    accounts = Account.all_objects.filter(individual__business_area__slug="nigeria", data__code__isnull=False)
+    accounts = Account.all_objects.filter(individual__business_area__slug="nigeria", data__bank_code__isnull=False)
     for account in accounts.iterator():
         account.data["code"] = account.data.pop("bank_code")
         if not account.financial_institution:
