@@ -92,23 +92,24 @@ const EditProgramPage = (): ReactElement => {
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: updateProgramDetails } = useMutation({
-    mutationFn: (programData: ProgramUpdate) => {
-      return RestService.restBusinessAreasProgramsUpdate({
-        businessAreaSlug: businessArea,
-        slug: id,
-        requestBody: programData,
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['businessAreaProgram', businessArea, id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
-      });
-    },
-  });
+  const { mutateAsync: updateProgramDetails, isPending: loadingUpdateProgram } =
+    useMutation({
+      mutationFn: (programData: ProgramUpdate) => {
+        return RestService.restBusinessAreasProgramsUpdate({
+          businessAreaSlug: businessArea,
+          slug: id,
+          requestBody: programData,
+        });
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaProgram', businessArea, id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaPrograms', businessArea],
+        });
+      },
+    });
 
   const {
     mutateAsync: updateProgramPartners,
@@ -446,6 +447,7 @@ const EditProgramPage = (): ReactElement => {
                             program={program}
                             setFieldValue={setFieldValue}
                             submitForm={submitForm}
+                            loading={loadingUpdateProgram}
                           />
                         )}
                       </div>
