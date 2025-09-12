@@ -619,7 +619,7 @@ class TestPaymentGatewayService(APITestCase):
             number="123456789",
             data={
                 "provider": "Provider",
-                "service_provider_code": "CBA",
+                "code": "CBA",
             },
             account_type=AccountType.objects.get(key="mobile"),
             financial_institution=fi,
@@ -635,6 +635,21 @@ class TestPaymentGatewayService(APITestCase):
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
         self.payments[0].refresh_from_db()
+
+        with self.assertRaisesMessage(
+            Exception,
+            f"No Financial Institution Mapping found for"
+            f" financial_institution {fi},"
+            f" fsp {self.payments[0].financial_service_provider},"
+            f" payment {self.payments[0].id},"
+            f" collector {self.payments[0].collector}.",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+            post_mock.reset_mock()
+
+        FinancialInstitutionMapping.objects.create(
+            financial_service_provider=self.pg_fsp, financial_institution=fi, code="123"
+        )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
@@ -654,7 +669,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "mobile_money",
                         "account_type": "mobile",
                         "account": {
-                            "service_provider_code": "CBA",
+                            "service_provider_code": "123",
                             "number": "123456789",
                             "provider": "Provider",
                             "financial_institution": str(fi.id),
