@@ -13,14 +13,12 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import timezone
 import openpyxl
 from openpyxl.styles import Font
 
-from hope.apps.account.models import RoleAssignment, User
+from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications
@@ -258,14 +256,9 @@ class QCFReportsService:
 
     def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
         business_area = report.payment_plan.business_area
-
-        role_assignments = RoleAssignment.objects.filter(
-            role__permissions__contains=[Permissions.RECEIVE_PARSED_WU_QCF.name],
-            business_area=business_area,
-        ).exclude(expiry_date__lt=timezone.now())
-        users = User.objects.filter(
-            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-        ).distinct()
+        users = [
+            user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
+        ]
 
         for user in users:
             self.send_report_email_to_user(user, report)
@@ -285,10 +278,14 @@ class QCFReportsService:
         path_name = "download-payment-plan-invoice-report-pdf"
         payment_plan = report.payment_plan
 
+        report_id = str(report.id)
+        payment_plan_id = str(payment_plan.id)
+        program_slug = report.payment_plan.program.slug
+
         payment_plan_link = self.get_link(
-            f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.slug}/payment-module/payment-plans/{payment_plan.id}"
+            f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
         )
-        download_link = self.get_link(reverse(path_name, args=[report.id]))
+        download_link = self.get_link(reverse(path_name, args=[report_id]))
 
         context = {
             "first_name": getattr(user, "first_name", ""),
