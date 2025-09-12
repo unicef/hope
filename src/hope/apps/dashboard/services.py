@@ -137,16 +137,14 @@ class DashboardCacheBase(Protocol):
         ]
 
         return base_queryset.annotate(
-            payment_quantity_usd=Coalesce(
-                F("delivered_quantity_usd"),
-                F("entitlement_quantity_usd"),
-                Value(0.0),
+            payment_quantity_usd=models.Case(
+                models.When(delivered_quantity_usd__gt=0, then=F("delivered_quantity_usd")),
+                default=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 output_field=DecimalField(),
             ),
-            payment_quantity=Coalesce(
-                F("delivered_quantity"),
-                F("entitlement_quantity"),
-                Value(0.0),
+            payment_quantity=models.Case(
+                models.When(delivered_quantity__gt=0, then=F("delivered_quantity")),
+                default=Coalesce(F("entitlement_quantity"), Value(0.0)),
                 output_field=DecimalField(),
             ),
             total_planned_usd_for_this_payment=models.Case(
