@@ -21,7 +21,12 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
+from hct_mis_api.apps.payment.models import (
+    FinancialInstitution,
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+)
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
@@ -105,6 +110,14 @@ class TestNigeriaPeopleRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
+        cls.fi = FinancialInstitution.objects.create(
+            name="Nigeria Bank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+        FinancialInstitutionMapping.objects.create(
+            financial_service_provider=FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria"),
+            financial_institution=cls.fi,
+            code="000004",
+        )
 
     def test_import_data_to_datahub(self) -> None:
         service = NigeriaPeopleRegistrationService(self.registration)
@@ -159,10 +172,11 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                 "name": "United Bank for Africa",
                 "uba_code": "000004",
                 "holder_name": "xxxx",
-                "financial_institution": "",
+                "financial_institution": str(self.fi.id),
             },
         )
         self.assertEqual(account.account_type.key, "bank")
+        self.assertEqual(account.financial_institution, self.fi)
 
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
         self.assertEqual(national_id.individual, primary_collector)

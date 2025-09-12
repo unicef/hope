@@ -121,7 +121,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 account.financial_institution = uba_mapping.financial_institution
                 account.save(update_fields=["financial_institution"])
 
-            except FinancialInstitutionMapping.DoesNotExist:
+            except FinancialInstitutionMapping.DoesNotExist:  # pragma: no cover
                 logger.error(
                     f"FinancialInstitutionMapping for {uba_fsp} uba code {financial_institution_code} not found"
                 )
