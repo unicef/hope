@@ -34,10 +34,18 @@ export const AdminAreaFixedAutocomplete = ({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['adminAreas', debouncedInputText, businessArea, level, parentId],
+    queryKey: [
+      'adminAreas',
+      debouncedInputText,
+      businessArea,
+      level,
+      parentId,
+      value,
+    ],
     queryFn: () =>
       RestService.restAreasList({
-        search: debouncedInputText,
+        id: value || undefined,
+        search: debouncedInputText || '',
         areaTypeAreaLevel: level === 1 ? 1 : 2,
         parentId: parentId || undefined,
         limit: 50,
