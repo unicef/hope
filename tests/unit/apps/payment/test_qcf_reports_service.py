@@ -4,6 +4,7 @@ import os
 from unittest import mock
 
 from django.test import TestCase
+from django.urls import reverse
 import openpyxl
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -39,12 +40,17 @@ class TestQCFReportsService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        partner_unicef = PartnerFactory(name="UNICEF_test")
-        cls.user = UserFactory.create(partner=partner_unicef)
-        role, created = Role.objects.update_or_create(
-            name="test role", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
+        partner_unicef = PartnerFactory(name="UNICEF")
+        partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory.create(partner=partner_unicef_hq)
+        role, _ = Role.objects.update_or_create(
+            name="RECEIVE_PARSED_WU_QCF", defaults={"permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]}
         )
-        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        cls.role_ass = RoleAssignment.objects.create(
+            user=cls.user,
+            role=role,
+            business_area=cls.business_area,
+        )
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
         cls.payment_plan = PaymentPlanFactory(
@@ -190,5 +196,50 @@ class TestQCFReportsService(TestCase):
             assert refunds_total == 0
 
             with mock.patch.object(User, "email_user") as mock_email_user:
-                service.send_notification_emails(report)  # type: ignore
-                mock_email_user.assert_called_once()
+                with mock.patch(
+                    "hope.apps.payment.services.qcf_reports_service.render_to_string"
+                ) as mock_render_to_string:
+                    service.send_notification_emails(report)  # type: ignore
+                    mock_email_user.assert_called_once()
+                    assert mock_render_to_string.call_count == 2
+                    args, kwargs = mock_render_to_string.call_args
+                    context = kwargs["context"]
+                    program_slug = report.payment_plan.program.slug
+                    payment_plan_id = report.payment_plan.id
+                    plan_path = (
+                        f"/{report.payment_plan.business_area.slug}/"
+                        f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+                    )
+                    plan_link = QCFReportsService.get_link(plan_path)
+                    report_link = QCFReportsService.get_link(
+                        reverse(
+                            "download-payment-plan-invoice-report-pdf",
+                            args=[report.id],
+                        )
+                    )
+
+                    assert context == {
+                        "first_name": getattr(self.user, "first_name", ""),
+                        "last_name": getattr(self.user, "last_name", ""),
+                        "email": getattr(self.user, "email", ""),
+                        "message": f"Payment Plan: {plan_link}",
+                        "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
+                        "link": f"Western Union QCF Report file: {report_link}",
+                    }
+
+            download_link = reverse(
+                "download-payment-plan-invoice-report-pdf",
+                args=[report.id],
+            )
+
+            # test download with perm
+            self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
+            response = self.client.get(download_link)
+            assert response.status_code == 302
+            assert f"/api/uploads/{report.report_file.file.name}" in response.url
+
+            # test download wo perm
+            self.role_ass.delete()
+            self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
+            response = self.client.get(download_link)
+            assert response.status_code == 403
