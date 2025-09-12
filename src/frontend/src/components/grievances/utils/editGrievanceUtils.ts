@@ -85,7 +85,7 @@ function mapFieldsToObjects(fields: { [key: string]: Field }) {
 function prepareInitialValueEditIndividual(initialValues, ticket) {
   const {
     individual,
-    individualDataUpdateTicketDetails: { individualData },
+    ticketDetails,
   } = ticket;
 
   const {
@@ -98,7 +98,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     accounts,
     accountsToEdit,
     ...rest
-  } = individualData;
+  } = ticketDetails.individualData;
 
   const { flexFields, ...remainingFields } = rest;
 
@@ -374,31 +374,27 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          individualDataUpdateIssueTypeExtras: {
-            individualData: {
-              ...individualData,
-              documents: transformNestedData(
-                values.individualDataUpdateFieldsDocuments,
-              ),
-              documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-              documentsToEdit: transformNestedData(
-                values.individualDataUpdateDocumentsToEdit,
-              ),
-              identities: transformNestedData(
-                values.individualDataUpdateFieldsIdentities,
-              ),
-              identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
-              identitiesToEdit: transformNestedData(
-                values.individualDataUpdateIdentitiesToEdit,
-              ),
-              accountsToEdit: values.individualDataUpdateAccountsToEdit,
-            },
-          },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      individualDataUpdateIssueTypeExtras: {
+        individualData: {
+          ...individualData,
+          documents: transformNestedData(
+            values.individualDataUpdateFieldsDocuments,
+          ),
+          documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+          documentsToEdit: transformNestedData(
+            values.individualDataUpdateDocumentsToEdit,
+          ),
+          identities: transformNestedData(
+            values.individualDataUpdateFieldsIdentities,
+          ),
+          identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+          identitiesToEdit: transformNestedData(
+            values.individualDataUpdateIdentitiesToEdit,
+          ),
+          accountsToEdit: values.individualDataUpdateAccountsToEdit,
         },
       },
     },
