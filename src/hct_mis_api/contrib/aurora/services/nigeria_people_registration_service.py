@@ -1,8 +1,6 @@
 import logging
 from typing import Any, Dict, Optional
 
-from apps.payment.models import FinancialInstitutionMapping
-
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
@@ -16,7 +14,11 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PendingAccount
+from hct_mis_api.apps.payment.models import (
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
