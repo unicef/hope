@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
     - develop
-    
+
 permissions:
   contents: read
 
@@ -80,7 +80,7 @@ jobs:
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
-          file: "output.zip" 
+          file: "output.zip"
           store_baseline_file: false
           json_output: true
           json_output_file: "veracode_sast.json"
@@ -97,11 +97,11 @@ jobs:
         pipeline-results-json: veracode_sast.json
         output-results-sarif: veracode_sast.sarif
         ref: ${{ github.ref }}
-        commitSHA: ${{ github.sha }}     
+        commitSHA: ${{ github.sha }}
     - name: Upload SARIF file to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3 # Check for the latest version
       with:
-        sarif_file: 'veracode_sast.sarif'        
+        sarif_file: 'veracode_sast.sarif'
   #  - name: Veracode Pipeline
   #    continue-on-error: true
   #    run: |
@@ -118,13 +118,13 @@ jobs:
           filepath: 'output.zip'
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
-    - name: Veracode SCA 
+    - name: Veracode SCA
       uses: veracode/container_iac_secrets_scanning@v1.0.4
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
-          command: "scan" 
+          command: "scan"
           type: "directory"
           format: "table"
     - name: Veracode SCA2
@@ -142,13 +142,13 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Veracode Container Scan 
+    - name: Veracode Container Scan
       uses: veracode/container_iac_secrets_scanning@v1.0.4
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
-          command: "scan" 
+          command: "scan"
           type: "image"
           source: ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev
           format: "json"
