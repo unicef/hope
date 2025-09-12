@@ -170,7 +170,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
             {
                 "number": "2087008012",
                 "name": "United Bank for Africa",
-                "uba_code": "000004",
+                "code": "000004",
                 "holder_name": "xxxx",
                 "financial_institution": str(self.fi.id),
             },

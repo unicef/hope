@@ -119,7 +119,8 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                     financial_service_provider=uba_fsp,
                 )
                 account.financial_institution = uba_mapping.financial_institution
-                account.save(update_fields=["financial_institution"])
+                account.data["code"] = account.data.pop("uba_code")
+                account.save(update_fields=["financial_institution", "data"])
 
             except FinancialInstitutionMapping.DoesNotExist:  # pragma: no cover
                 logger.error(
