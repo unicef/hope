@@ -140,7 +140,7 @@ def test_upload_validation(
     client.force_login(superuser, "django.contrib.auth.backends.ModelBackend")
     # app.set_cookie("sessionid", client.cookies["sessionid"].value)
 
-    resp = app.get(reverse("admin:geo_area_changelist")).click("Import Areas") # fix login
+    resp = app.get(reverse("admin:geo_area_changelist")).click("Import Areas")  # fix login
     form = resp.form
     form["file"] = Upload(
         "file.csv",
