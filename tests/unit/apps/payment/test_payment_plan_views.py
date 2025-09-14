@@ -978,8 +978,8 @@ class TestTargetPopulationList:
         assert tp["status"] == self.tp.get_status_display().upper()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
-        assert tp["created_at"] == self.tp.created_at.isoformat()
-        assert tp["updated_at"] == self.tp.updated_at.isoformat()
+        assert tp["created_at"] == self.tp.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+        assert tp["updated_at"] == self.tp.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
         assert tp["created_by"] == self.user.get_full_name()
 
     def test_target_population_caching(self, create_user_role_with_permissions: Any) -> None:
