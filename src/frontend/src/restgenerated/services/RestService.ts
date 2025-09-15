@@ -504,6 +504,7 @@ export class RestService {
         areaTypeAreaLevel,
         countryIsoCode2,
         countryIsoCode3,
+        id,
         limit,
         offset,
         ordering,
@@ -520,6 +521,7 @@ export class RestService {
         areaTypeAreaLevel?: number,
         countryIsoCode2?: string,
         countryIsoCode3?: string,
+        id?: string,
         /**
          * Number of results to return per page.
          */
@@ -552,6 +554,7 @@ export class RestService {
                 'area_type_area_level': areaTypeAreaLevel,
                 'country_iso_code2': countryIsoCode2,
                 'country_iso_code3': countryIsoCode3,
+                'id': id,
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
