@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
-from admin_sync.mixin import GetManyFromRemoteMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
@@ -156,7 +156,7 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin,
+    SyncModelAdmin,
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
