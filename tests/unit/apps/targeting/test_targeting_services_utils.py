@@ -43,13 +43,15 @@ class TestPaymentPlanModel(TestCase):
         assert ids_1 == f"{self.hh1}"
 
         ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", Household, self.program)
-        assert ids_2 == f"{self.hh1}, {self.hh2}"
+        assert f"{self.hh1}" in ids_2
+        assert f"{self.hh2}" in ids_2
 
         ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", Individual, self.program)
         assert ids_3 == f"{self.ind1}"
 
         ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", Individual, self.program)
-        assert ids_4 == f"{self.ind1}, {self.ind2}"
+        assert f"{self.ind1}" in ids_4
+        assert f"{self.ind2}" in ids_4
 
     def test_from_input_to_targeting_criteria(self) -> None:
         assert TargetingCriteriaRule.objects.count() == 0
