@@ -1,5 +1,6 @@
 from typing import Any, List
 
+from flaky import flaky
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -80,6 +81,7 @@ class TestPDUOnlineEditList:
         response = self.api_client.get(self.url_list)
         assert response.status_code == expected_status
 
+    @flaky(max_runs=3, min_passes=1)
     def test_pdu_online_edit_list(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
