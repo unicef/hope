@@ -31,6 +31,17 @@ def setup_client(api_client: Callable, afghanistan: BusinessAreaFactory) -> Dict
     """
     user = UserFactory(is_superuser=False, is_staff=False)
     user.user_permissions.clear()
+    global_business_area, _ = BusinessArea.objects.get_or_create(
+        slug="global",
+        defaults={
+            "name": "Global",
+            "code": "GLOBAL",
+            "long_name": "Global Business Area",
+            "region_code": "GLOBAL",
+            "region_name": "GLOBAL",
+            "has_data_sharing_agreement": True,
+        },
+    )
 
     client = api_client(user)
     list_url = reverse("api:household-data", args=[afghanistan.slug])
@@ -42,6 +53,7 @@ def setup_client(api_client: Callable, afghanistan: BusinessAreaFactory) -> Dict
         "client": client,
         "user": user,
         "business_area": afghanistan,
+        "global_business_area": global_business_area,
         "list_url": list_url,
         "global_url": global_url,
         "generate_report_url": generate_report_url,
@@ -82,7 +94,7 @@ def test_dashboard_data_view_access_granted(
 
 @pytest.mark.django_db(databases=["default"])
 @patch("hope.apps.dashboard.views.generate_dash_report_task.delay")
-def test_create_or_update_dash_report_task_triggered(
+def test_create_or_update_dash_report_task_triggered_for_superuser(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
     """
@@ -94,6 +106,29 @@ def test_create_or_update_dash_report_task_triggered(
 
     user.is_superuser = True
     user.save()
+
+    response = client.post(generate_report_url)
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.data["detail"] == "DashReport generation task has been triggered."
+    mock_task_delay.assert_called_once_with(setup_client["business_area"].slug)
+
+
+@pytest.mark.django_db(databases=["default"])
+@patch("hope.apps.dashboard.views.generate_dash_report_task.delay")
+def test_create_or_update_dash_report_task_triggered_with_permission(
+    mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
+) -> None:
+    """
+    Test that the DashReport generation task is successfully triggered for a user with permission.
+    """
+    user = setup_client["user"]
+    client = setup_client["client"]
+    generate_report_url = setup_client["generate_report_url"]
+    business_area = setup_client["business_area"]
+
+    role = RoleFactory(name="Dashboard Admin", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+    RoleAssignment.objects.create(user=user, role=role, business_area=business_area)
 
     response = client.post(generate_report_url)
 
@@ -189,6 +224,8 @@ def test_dashboard_report_view_context_without_permission(afghanistan: Callable,
     [
         ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),
         ("afghanistan", "list_url", status.HTTP_200_OK, True),
+        ("global", "global_url", status.HTTP_403_FORBIDDEN, False),
+        ("global", "global_url", status.HTTP_200_OK, True),
     ],
 )
 def test_dashboard_data_view_permissions(
@@ -205,6 +242,7 @@ def test_dashboard_data_view_permissions(
     client = setup_client["client"]
     user = setup_client["user"]
     business_area = setup_client["business_area"]
+    global_business_area = setup_client["global_business_area"]
     url = setup_client[expected_url_key]
 
     if permission_granted:
@@ -212,7 +250,7 @@ def test_dashboard_data_view_permissions(
             name="Dashboard Viewer",
             permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
         )
-        assigned_area = "global" if business_area_slug == "global" else business_area
+        assigned_area = global_business_area if business_area_slug == "global" else business_area
         RoleAssignment.objects.create(user=user, role=role, business_area=assigned_area)
 
     _ = populate_dashboard_cache(business_area)
@@ -233,11 +271,12 @@ def test_dashboard_data_view_global_slug_cache_miss(
     client = setup_client["client"]
     user = setup_client["user"]
     global_url = setup_client["global_url"]
+    global_business_area = setup_client["global_business_area"]
+
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+    RoleAssignment.objects.create(user=user, role=role, business_area=global_business_area)
 
     populate_dashboard_cache(setup_client["business_area"])
-    user.is_superuser = True
-    user.save()
-    client.force_authenticate(user=user)
 
     cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
     with (
@@ -259,9 +298,20 @@ def test_dashboard_report_view_global_slug(
     rf: RequestFactory,
 ) -> None:
     """Test DashboardReportView context and template for 'global' slug."""
-    user = UserFactory(is_superuser=True, is_staff=True)
-    assert user.is_superuser, "UserFactory did not create a superuser."
-    assert user.is_authenticated, "UserFactory user is not authenticated."
+    user = UserFactory()
+    global_business_area, _ = BusinessArea.objects.get_or_create(
+        slug="global",
+        defaults={
+            "name": "Global",
+            "code": "GLOBAL",
+            "long_name": "Global Business Area",
+            "region_code": "GLOBAL",
+            "region_name": "GLOBAL",
+            "has_data_sharing_agreement": True,
+        },
+    )
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
+    RoleAssignment.objects.create(user=user, role=role, business_area=global_business_area)
 
     request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": "global"}))
     request.user = user
