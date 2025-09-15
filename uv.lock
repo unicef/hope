@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.13.*"
 resolution-markers = [
     "platform_python_implementation != 'PyPy'",
@@ -1978,7 +1978,7 @@ requires-dist = [
     { name = "django-strategy-field", specifier = ">=3" },
     { name = "django-sysinfo", specifier = ">=2.6" },
     { name = "djangorestframework", specifier = ">=3.13.1" },
-    { name = "drf-extensions", specifier = ">=0.7.1,<0.8" },
+    { name = "drf-extensions", specifier = ">=0.7.1" },
     { name = "drf-jwt", specifier = ">=1.19.2" },
     { name = "drf-nested-routers", specifier = ">=0.94" },
     { name = "drf-spectacular", extras = ["sidecar"], specifier = ">=0.27" },
