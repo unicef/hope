@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from admin_extra_buttons.decorators import button
-from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
@@ -36,7 +36,7 @@ class GroupResource(resources.ModelResource):
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
@@ -84,7 +84,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
 
 @admin.register(account_models.UserGroup)
-class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+class UserGroupAdmin(SyncModelAdmin, HOPEModelAdminBase):
     list_display = ("user", "group", "business_area")
     autocomplete_fields = ("group",)
     raw_id_fields = ("user", "business_area", "group")

@@ -1,6 +1,6 @@
 from typing import Any, Iterator
 
-from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.buttons import ButtonWidget
 from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin
@@ -184,7 +184,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     task_statuses.short_description = "Task Statuses"
 
     @staticmethod
-    def start_universal_update_task_visible(btn: Button) -> bool:
+    def start_universal_update_task_visible(btn: ButtonWidget) -> bool:
         universal_update = get_object_or_404(UniversalUpdate, pk=btn.request.resolver_match.kwargs["object_id"])
         return bool(universal_update.update_file)
 

@@ -1,17 +1,17 @@
-from smart_admin.utils import match, regex
+from smart_admin.utils import MatchString, RegexString
 
 from hope.config.env import env
 
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
         "program",
-        match("household.H*"),
-        regex(r"household\.I.*"),
+        MatchString("household.H*"),
+        RegexString(r"household\.I.*"),
         "targeting",
         "payment",
     ],
     "RDI": [
-        regex(r"registration_data\..*"),
+        RegexString(r"registration_data\..*"),
     ],
     "Grievance": ["grievance"],
     "Configuration": [
