@@ -1016,8 +1016,8 @@ class PaymentPlan(
         return self.acceptance_process_threshold.finance_release_number_required
 
     @property
-    def last_approval_process_date(self) -> datetime | None:
-        return self._get_last_approval_process_data().modified_date
+    def last_approval_process_date(self) -> str | None:
+        return self._get_last_approval_process_data().modified_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def last_approval_process_by(self) -> str | None:
