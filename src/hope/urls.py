@@ -6,6 +6,7 @@ from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 
+from hct_mis_api.views.custom_template_view import CustomTemplateView
 import hope.admin
 import hope.apps.account.views
 import hope.apps.accountability.views
@@ -100,8 +101,6 @@ api_patterns = [
 
 if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
-
-from hct_mis_api.views.custom_template_view import CustomTemplateView
 
 urlpatterns = (
     [

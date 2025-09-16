@@ -79,11 +79,7 @@ MANIFEST_FILE = "web/.vite/manifest.json"
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
-EMAIL_BACKEND = (
-    env("EMAIL_BACKEND")
-    if not DEBUG
-    else "django.core.mail.backends.console.EmailBackend"
-)
+EMAIL_BACKEND = env("EMAIL_BACKEND") if not DEBUG else "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -121,23 +117,26 @@ DATABASE_APPS_MAPPING: dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hope.apps.core.dbrouters.DbRouter",)
 
-MIDDLEWARE = [
-    # "hope.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
-] + [
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "hijack.middleware.HijackUserMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
-    "hope.middlewares.sentry.SentryScopeMiddleware",
-    "hope.middlewares.version.VersionMiddleware",
-]
+MIDDLEWARE = (
+    [
+        # "hope.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
+    ]
+    + [
+        "corsheaders.middleware.CorsMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "hijack.middleware.HijackUserMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+        "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+        "hope.middlewares.sentry.SentryScopeMiddleware",
+        "hope.middlewares.version.VersionMiddleware",
+    ]
+)
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
@@ -253,9 +252,7 @@ OTHER_APPS = [
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         "OPTIONS": {"min_length": 12},
@@ -430,9 +427,7 @@ ADMIN_SYNC_USE_REVERSION = False
 SWAGGER_SETTINGS = {
     "LOGOUT_URL": reverse_lazy("logout"),
     "LOGIN_URL": "/",
-    "SECURITY_DEFINITIONS": {
-        "DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
-    },
+    "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
 MAX_STORAGE_FILE_SIZE = 30
