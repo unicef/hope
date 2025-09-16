@@ -22,13 +22,6 @@ export const DefaultRoute = (): ReactElement | null => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const realError: any = error;
-    if (realError && realError.status === 403) {
-      navigate('/login');
-    }
-  }, [error, navigate]);
-
-  useEffect(() => {
     if (meData) {
       if (meData.businessAreas.length < 1) {
         navigate('/access-denied');
