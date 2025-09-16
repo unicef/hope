@@ -62,7 +62,7 @@ export const uploadSupportingDocument = async (
 
   try {
     const response = await api.post(
-      `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/`,
+      `business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/`,
       formData,
     );
     return response.data;
