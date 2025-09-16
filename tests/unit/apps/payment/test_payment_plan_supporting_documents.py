@@ -28,7 +28,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         self.request.user = self.client  # type: ignore
         self.request.parser_context = {
             "kwargs": {
-                "payment_plan_id": str(self.payment_plan.id),
+                "payment_plan_pk": str(self.payment_plan.id),
             }
         }
         self.context = {"payment_plan": self.payment_plan, "request": self.request}
@@ -120,7 +120,7 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": self.payment_plan.program.slug,
-                "payment_plan_id": str(self.payment_plan.id),
+                "payment_plan_pk": str(self.payment_plan.id),
             },
         )
         self.file = SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf")
@@ -183,7 +183,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": self.payment_plan.program.slug,
-                "payment_plan_id": str(self.payment_plan.id),
+                "payment_plan_pk": str(self.payment_plan.id),
                 "file_id": str(self.document.id),
             },
         )
@@ -199,7 +199,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": self.payment_plan.program.slug,
-                "payment_plan_id": self.payment_plan.pk,
+                "payment_plan_pk": self.payment_plan.pk,
                 "file_id": self.document.id,
             },
         )
