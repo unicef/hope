@@ -1845,6 +1845,7 @@ class TestPaymentPlanActions:
         self.url_pp_split = reverse("api:payments:payment-plans-split", kwargs=url_kwargs)
         self.url_create_follow_up = reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs)
         self.url_funds_commitments = reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs)
+        self.url_pp_close = reverse("api:payments:payment-plans-close", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -2815,3 +2816,33 @@ class TestPaymentPlanActions:
         assert len(response.json()) == 2
         assert response.json()[0]["name"] == "XLSX_1"
         assert response.json()[1]["name"] == "XLSX_2"
+
+    @pytest.mark.parametrize(
+        ("permissions", "expected_status", "pp_status"),
+        [
+            ([Permissions.PM_CLOSE_FINISHED], status.HTTP_200_OK, PaymentPlan.Status.FINISHED),
+            ([Permissions.PM_CLOSE_FINISHED], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
+            ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.FINISHED),
+        ],
+    )
+    def test_pp_close(
+            self,
+            permissions: List,
+            expected_status: int,
+            create_user_role_with_permissions: Any,
+            pp_status: str,
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = pp_status
+        self.pp.save()
+        self.pp.refresh_from_db()
+
+        assert self.pp.status == pp_status
+        response = self.client.get(self.url_pp_close)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan closed"}
+
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            assert response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
