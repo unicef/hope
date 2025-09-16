@@ -311,6 +311,13 @@ export const sendRequest = async (
   try {
     if (response?.status == 403&&content?.detail!=="Authentication credentials were not provided.") {
       window.location.href = '/access-denied/';
+    }else if(response?.status == 403&&content?.detail==="Authentication credentials were not provided."){
+      const pathWithQuery = window.location.pathname + window.location.search;
+      let next = '';
+      if (pathWithQuery){
+        next = `?next=${encodeURIComponent(pathWithQuery)}`;
+      }
+      window.location.href = `/login/${next}`;
     }
   }catch (error) {
     console.error(error);
