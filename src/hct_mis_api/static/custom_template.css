@@ -1,4 +1,3 @@
-/* Shrink drawer width when collapsed */
 .drawer.mini {
   width: 55px !important;
 }
