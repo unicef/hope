@@ -168,7 +168,8 @@ const CreateGrievancePage = (): ReactElement => {
 
   const initialValues = {
     description: '',
-    category: category || null,
+    category:
+      typeof category === 'number' ? category : Number(category) || null,
     language: '',
     consent: false,
     admin: selectedHousehold?.admin2?.id || null,
