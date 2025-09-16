@@ -51,6 +51,11 @@ class TestPDUOnlineEditList:
             status=PDUOnlineEdit.Status.READY,
         )  # Request user is authorized
         self.pdu_edit_other_program = PDUOnlineEditFactory(program=self.other_program, business_area=self.afghanistan)
+        # test on CI sometimes fails because of ordering
+        self.pdu_edit1.created_at = "2022-01-01T01:00:00Z"
+        self.pdu_edit1.save()
+        self.pdu_edit2.created_at = "2022-01-01T02:00:00Z"
+        self.pdu_edit2.save()
 
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-online-edits-list",
@@ -102,7 +107,7 @@ class TestPDUOnlineEditList:
                 "name": self.pdu_edit1.name,
                 "number_of_records": self.pdu_edit1.number_of_records,
                 "created_by": self.pdu_edit1.created_by.get_full_name(),
-                "created_at": f"{self.pdu_edit1.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": str(self.pdu_edit1.created_at),
                 "status": self.pdu_edit1.combined_status,
                 "status_display": self.pdu_edit1.combined_status_display,
                 "is_authorized": False,
@@ -112,7 +117,7 @@ class TestPDUOnlineEditList:
                 "name": self.pdu_edit2.name,
                 "number_of_records": self.pdu_edit2.number_of_records,
                 "created_by": self.pdu_edit2.created_by.get_full_name(),
-                "created_at": f"{self.pdu_edit2.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                "created_at": str(self.pdu_edit2.created_at),
                 "status": self.pdu_edit2.combined_status,
                 "status_display": self.pdu_edit2.combined_status_display,
                 "is_authorized": True,
