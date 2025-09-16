@@ -2826,11 +2826,11 @@ class TestPaymentPlanActions:
         ],
     )
     def test_pp_close(
-            self,
-            permissions: List,
-            expected_status: int,
-            create_user_role_with_permissions: Any,
-            pp_status: str,
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+        pp_status: str,
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = pp_status
@@ -2845,4 +2845,6 @@ class TestPaymentPlanActions:
             assert response.json() == {"message": "Payment Plan closed"}
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
-            assert response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
+            assert (
+                response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
+            )
