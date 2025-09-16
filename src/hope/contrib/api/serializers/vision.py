@@ -6,7 +6,11 @@ from hope.contrib.vision.models import FundsCommitmentItem
 class FundsCommitmentItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = FundsCommitmentItem
-        fields = "__all__"
+        fields = [
+            "id",
+            "rec_serial_number",
+            "funds_commitment_item"
+        ]
 
 
 class FundsCommitmentSerializer(serializers.Serializer):
