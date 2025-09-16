@@ -1763,7 +1763,8 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
     }
 
     def get_queryset(self) -> QuerySet:
-        return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=self.kwargs.get("payment_plan_pk"))
+        payment_plan_id = self.kwargs.get("payment_plan_pk")
+        return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=payment_plan_id)
 
     def get_object(self) -> PaymentPlanSupportingDocument:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_plan_pk"))
