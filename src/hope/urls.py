@@ -101,10 +101,13 @@ api_patterns = [
 if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
 
+from hct_mis_api.views.custom_template_view import CustomTemplateView
+
 urlpatterns = (
     [
         path("_health", homepage),
         path("api/", include(api_patterns)),
+        path("custom-template/", CustomTemplateView.as_view(), name="custom-template"),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

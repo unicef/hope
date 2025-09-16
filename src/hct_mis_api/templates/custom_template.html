@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Django Template</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff00cc 0%, #00ffea 100%);
+            color: #fff;
+        }
+        .root {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+        .drawer {
+            width: 270px;
+            background: #222a36;
+            color: #fff;
+            box-shadow: 2px 0 12px #0006;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+            position: relative;
+        }
+        .appbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 64px;
+            background: #1e2a38;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 2px 8px #0006;
+            padding: 0 32px;
+        }
+        .main-content {
+            flex-grow: 1;
+            margin-left: 270px;
+            margin-top: 64px;
+            padding: 32px;
+            background: rgba(255,255,255,0.04);
+            min-height: calc(100vh - 64px);
+            overflow: auto;
+        }
+        .logo {
+            width: 40px;
+            margin-right: 16px;
+        }
+        .drawer-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-left: 24px;
+        }
+        .drawer-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.2s;
+        }
+        .drawer-link:hover {
+            color: #00ffea;
+        }
+    </style>
+</head>
+<body>
+    <div class="appbar">
+        <div style="display: flex; align-items: center;">
+            <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg" alt="Django Logo" />
+            <span style="font-size: 1.5em; font-weight: bold;">AppBar Title</span>
+        </div>
+        <div>
+            <span style="font-size: 1.1em;">User Menu</span>
+        </div>
+    </div>
+    <div class="root">
+        <div class="drawer">
+            <div class="drawer-title">Drawer</div>
+            <div class="drawer-links">
+                <a href="#" class="drawer-link">Dashboard</a>
+                <a href="#" class="drawer-link">Programs</a>
+                <a href="#" class="drawer-link">Settings</a>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1>Main Content Area</h1>
+            <p>This is where your Django view content will go.<br>Style and extend as needed!</p>
+        </div>
+    </div>
+</body>
+</html>
