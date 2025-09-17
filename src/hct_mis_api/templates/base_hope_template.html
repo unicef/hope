@@ -114,24 +114,13 @@
             <div style="display: flex; align-items: center; flex: 1; gap: 16px;">
                 <div class="mui-select-wrapper" id="muiSelectWrapper">
                     <button type="button" class="mui-select-trigger" id="muiSelectTrigger">
-                        <span id="muiSelectValue">Afghanistan</span>
+                        <span id="muiSelectValue">Select Business Area</span>
                         <span class="mui-select-arrow">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg>
                         </span>
                     </button>
                     <div class="mui-select-menu" id="muiSelectMenu">
-                        <div class="mui-select-option selected">Afghanistan</div>
-                        <div class="mui-select-option">Albania</div>
-                        <div class="mui-select-option">Algeria</div>
-                        <div class="mui-select-option">Angola</div>
-                        <div class="mui-select-option">Argentina</div>
-                        <div class="mui-select-option">Armenia</div>
-                        <div class="mui-select-option">Azerbaijan</div>
-                        <div class="mui-select-option">Bangladesh</div>
-                        <div class="mui-select-option">Barbados</div>
-                        <div class="mui-select-option">Belarus</div>
-                        <div class="mui-select-option">Belize</div>
-                        <div class="mui-select-option">Benin</div>
+                        <!-- Business area options will be rendered here by JS -->
                     </div>
                 </div>
                 <div class="mui-select-wrapper" id="muiProgramWrapper" style="min-width:320px;">
@@ -164,6 +153,94 @@
         </div>
     </div>
     <script>
+        // Business Area Dropdown (API-driven)
+        const muiSelectTrigger = document.getElementById('muiSelectTrigger');
+        const muiSelectMenu = document.getElementById('muiSelectMenu');
+        const muiSelectValue = document.getElementById('muiSelectValue');
+        let muiSelectOpen = false;
+        let businessAreaList = [];
+        let businessAreaSelected = null;
+        let businessAreaLoading = false;
+        let businessAreaError = null;
+
+        function renderBusinessAreaOptions() {
+            muiSelectMenu.innerHTML = '';
+            if (businessAreaLoading) {
+                muiSelectMenu.innerHTML = '<div class="mui-select-option">Loading business areas...</div>';
+                return;
+            }
+            if (businessAreaError) {
+                muiSelectMenu.innerHTML = `<div class="mui-select-option">${businessAreaError}</div>`;
+                return;
+            }
+            if (!businessAreaList.length) {
+                muiSelectMenu.innerHTML = '<div class="mui-select-option">No business areas found.</div>';
+                return;
+            }
+            businessAreaList.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'mui-select-option' + (businessAreaSelected && opt.slug === businessAreaSelected.slug ? ' selected' : '');
+                div.textContent = opt.name;
+                div.addEventListener('click', function(e) {
+                    businessAreaSelected = opt;
+                    muiSelectValue.textContent = opt.name;
+                    muiSelectMenu.classList.remove('open');
+                    muiSelectOpen = false;
+                    window.BUSINESS_AREA_SLUG = opt.slug;
+                    fetchProgramList(); // update programs for selected business area
+                    renderBusinessAreaOptions();
+                });
+                muiSelectMenu.appendChild(div);
+            });
+        }
+
+        function fetchBusinessAreaList() {
+            businessAreaLoading = true;
+            businessAreaError = null;
+            renderBusinessAreaOptions();
+            fetch('/api/rest/business-areas/?limit=50')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch business areas');
+                    return response.json();
+                })
+                .then(data => {
+                    businessAreaList = Array.isArray(data.results) ? data.results : [];
+                    if (businessAreaList.length) {
+                        businessAreaSelected = businessAreaList[0];
+                        muiSelectValue.textContent = businessAreaSelected.name;
+                        window.BUSINESS_AREA_SLUG = businessAreaSelected.slug;
+                    } else {
+                        businessAreaSelected = null;
+                        muiSelectValue.textContent = 'No Business Areas';
+                    }
+                    businessAreaLoading = false;
+                    renderBusinessAreaOptions();
+                    fetchProgramList(); // initial program fetch for first business area
+                })
+                .catch(err => {
+                    businessAreaLoading = false;
+                    businessAreaError = 'Error loading business areas.';
+                    muiSelectValue.textContent = 'Error';
+                    renderBusinessAreaOptions();
+                });
+        }
+
+        muiSelectTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            muiSelectMenu.classList.toggle('open');
+            muiSelectOpen = muiSelectMenu.classList.contains('open');
+            if (muiSelectOpen) {
+                renderBusinessAreaOptions();
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (muiSelectOpen && !muiSelectMenu.contains(e.target) && e.target !== muiSelectTrigger) {
+                muiSelectMenu.classList.remove('open');
+                muiSelectOpen = false;
+            }
+        });
+        // Initial fetch and render for business areas
+        fetchBusinessAreaList();
 
         // Material UI Autocomplete for Program (API-driven)
         const muiProgramTrigger = document.getElementById('muiProgramTrigger');
@@ -294,33 +371,6 @@
         });
         // Initial fetch and render
         fetchProgramList();
-        // Custom Material UI select logic
-        const muiSelectTrigger = document.getElementById('muiSelectTrigger');
-        const muiSelectMenu = document.getElementById('muiSelectMenu');
-        const muiSelectValue = document.getElementById('muiSelectValue');
-        let muiSelectOpen = false;
-        muiSelectTrigger.addEventListener('click', function(e) {
-            e.stopPropagation();
-            muiSelectMenu.classList.toggle('open');
-            muiSelectOpen = muiSelectMenu.classList.contains('open');
-        });
-        Array.from(muiSelectMenu.getElementsByClassName('mui-select-option')).forEach(function(option) {
-            option.addEventListener('click', function(e) {
-                Array.from(muiSelectMenu.getElementsByClassName('mui-select-option')).forEach(function(opt) {
-                    opt.classList.remove('selected');
-                });
-                option.classList.add('selected');
-                muiSelectValue.textContent = option.textContent;
-                muiSelectMenu.classList.remove('open');
-                muiSelectOpen = false;
-            });
-        });
-        document.addEventListener('click', function(e) {
-            if (muiSelectOpen) {
-                muiSelectMenu.classList.remove('open');
-                muiSelectOpen = false;
-            }
-        });
         function matchColorToWindowOrigin() {
             const url = window.location.href;
             if (window.location.hostname === 'localhost') {
