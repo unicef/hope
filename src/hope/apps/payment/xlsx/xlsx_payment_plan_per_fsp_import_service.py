@@ -14,6 +14,7 @@ from hope.apps.payment.models import Payment, PaymentVerification
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
+from hope.apps.payment.signals import payment_reconciled_signal
 from hope.apps.payment.utils import (
     calculate_counts,
     get_payment_delivered_quantity_status_and_value,
@@ -355,6 +356,10 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     exchange_rate=Decimal(exchange_rate),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
+
+                if payment.delivered_quantity_usd:
+                    payment_reconciled_signal.send(sender=payment.__class__, instance=payment)
+
                 payment.status = status
                 if delivery_date:
                     payment.delivery_date = delivery_date

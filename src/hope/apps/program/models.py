@@ -297,6 +297,15 @@ class Program(
     def generate_slug(self) -> str:
         return self.programme_code.lower()
 
+    def get_total_amount_paid(self) -> dict:
+        return (
+            Payment.objects.filter(program=self, payment_items__delivered_quantity__gt=0)
+            .aggregate(
+                delivered_quantity=Sum("delivered_quantity"),
+                delivered_quantity_usd=Sum("delivered_quantity_usd")
+            )
+        )
+
     @staticmethod
     def get_total_number_of_households_from_payments(
         qs: models.QuerySet[PaymentPlan],
