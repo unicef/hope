@@ -135,6 +135,7 @@ class TestPaymentGatewayService(BaseTestCase):
         cls.payments = [
             PaymentFactory(
                 parent=cls.pp,
+                program=cls.pp.program,
                 parent_split=cls.pp_split_1,
                 household=hh1,
                 status=Payment.STATUS_PENDING,
@@ -147,6 +148,7 @@ class TestPaymentGatewayService(BaseTestCase):
             ),
             PaymentFactory(
                 parent=cls.pp,
+                program=cls.pp.program,
                 parent_split=cls.pp_split_2,
                 household=hh2,
                 status=Payment.STATUS_PENDING,
