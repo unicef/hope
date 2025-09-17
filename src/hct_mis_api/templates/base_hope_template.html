@@ -165,29 +165,37 @@
     </div>
     <script>
 
-        // Material UI Autocomplete for Program
+        // Material UI Autocomplete for Program (API-driven)
         const muiProgramTrigger = document.getElementById('muiProgramTrigger');
         const muiProgramMenu = document.getElementById('muiProgramMenu');
         const muiProgramValue = document.getElementById('muiProgramValue');
         const muiProgramSearch = document.getElementById('muiProgramSearch');
         const muiProgramOptions = document.getElementById('muiProgramOptions');
         let muiProgramOpen = false;
-        let muiProgramList = [
-            { name: 'Test Program', status: 'ACTIVE' },
-            { name: 'Pm strategy call review', status: 'DRAFT' },
-            { name: 'Gas tonight almost', status: 'DRAFT' },
-            { name: 'Party section meeting', status: 'DRAFT' },
-            { name: 'Support close account', status: 'DRAFT' },
-            { name: 'Concern customer', status: 'DRAFT' },
-            { name: 'Song who side change', status: 'DRAFT' },
-            { name: 'Initial_Program_', status: 'ACTIVE' }
-        ];
-        let muiProgramSelected = muiProgramList[0];
+        let muiProgramList = [];
+        let muiProgramSelected = null;
+        let muiProgramLoading = false;
+        let muiProgramError = null;
+
         function renderProgramOptions(filter = '') {
             muiProgramOptions.innerHTML = '';
-            muiProgramList.filter(opt => opt.name.toLowerCase().includes(filter.toLowerCase())).forEach(opt => {
+            if (muiProgramLoading) {
+                muiProgramOptions.innerHTML = '<div class="mui-autocomplete-loading">Loading programmes...</div>';
+                return;
+            }
+            if (muiProgramError) {
+                muiProgramOptions.innerHTML = `<div class="mui-autocomplete-error">${muiProgramError}</div>`;
+                return;
+            }
+            if (!muiProgramList.length) {
+                muiProgramOptions.innerHTML = '<div class="mui-autocomplete-empty">No programmes found.</div>';
+                return;
+            }
+            // Show only first 10 programs
+            const filtered = muiProgramList.filter(opt => opt.name.toLowerCase().includes(filter.toLowerCase()));
+            filtered.slice(0, 10).forEach(opt => {
                 const div = document.createElement('div');
-                div.className = 'mui-autocomplete-option' + (opt.name === muiProgramSelected.name ? ' selected' : '');
+                div.className = 'mui-autocomplete-option' + (muiProgramSelected && opt.name === muiProgramSelected.name ? ' selected' : '');
                 div.innerHTML = `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${opt.name.length > 22 ? opt.name.slice(0,19)+'...' : opt.name}</span><span class="mui-status-badge ${opt.status==='ACTIVE'?'mui-status-active':'mui-status-draft'}">${opt.status}</span>`;
                 div.addEventListener('click', function(e) {
                     muiProgramSelected = opt;
@@ -198,7 +206,63 @@
                 });
                 muiProgramOptions.appendChild(div);
             });
+            // No 'Show more...' option; only search icon triggers fetch
         }
+
+        function fetchProgramList() {
+            muiProgramLoading = true;
+            muiProgramError = null;
+            renderProgramOptions();
+            const businessAreaSlug = window.BUSINESS_AREA_SLUG || 'afghanistan';
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?limit=10`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch programmes');
+                    return response.json();
+                })
+                .then(data => {
+                    muiProgramList = Array.isArray(data.results) ? data.results : [];
+                    if (muiProgramList.length) {
+                        muiProgramSelected = muiProgramList[0];
+                        muiProgramValue.textContent = muiProgramSelected.name;
+                    } else {
+                        muiProgramSelected = null;
+                        muiProgramValue.textContent = 'No Programmes';
+                    }
+                    muiProgramLoading = false;
+                    renderProgramOptions();
+                })
+                .catch(err => {
+                    muiProgramLoading = false;
+                    muiProgramError = 'Error loading programmes.';
+                    muiProgramValue.textContent = 'Error';
+                    renderProgramOptions();
+                });
+
+        }
+
+        // Fetch more programs with search param
+        function triggerProgramSearch(searchValue) {
+            muiProgramLoading = true;
+            muiProgramError = null;
+            renderProgramOptions(searchValue);
+            const businessAreaSlug = window.BUSINESS_AREA_SLUG || 'afghanistan';
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?search="${encodeURIComponent(searchValue)}"&limit=50`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch programmes');
+                    return response.json();
+                })
+                .then(data => {
+                    muiProgramList = Array.isArray(data.results) ? data.results : [];
+                    muiProgramLoading = false;
+                    renderProgramOptions(searchValue);
+                })
+                .catch(err => {
+                    muiProgramLoading = false;
+                    muiProgramError = 'Error loading programmes.';
+                    renderProgramOptions(searchValue);
+                });
+        }
+
         muiProgramTrigger.addEventListener('click', function(e) {
             e.stopPropagation();
             muiProgramMenu.classList.toggle('open');
@@ -212,14 +276,24 @@
         muiProgramSearch.addEventListener('input', function(e) {
             renderProgramOptions(muiProgramSearch.value);
         });
+
+        // Add click handler for search icon
+        const muiProgramSearchIcon = muiProgramMenu.querySelector('.mui-autocomplete-search svg');
+        if (muiProgramSearchIcon) {
+            muiProgramSearchIcon.style.cursor = 'pointer';
+            muiProgramSearchIcon.addEventListener('click', function(e) {
+                triggerProgramSearch(muiProgramSearch.value);
+            });
+        }
+
         document.addEventListener('click', function(e) {
             if (muiProgramOpen && !muiProgramMenu.contains(e.target) && e.target !== muiProgramTrigger) {
                 muiProgramMenu.classList.remove('open');
                 muiProgramOpen = false;
             }
         });
-        // Initial render
-        renderProgramOptions();
+        // Initial fetch and render
+        fetchProgramList();
         // Custom Material UI select logic
         const muiSelectTrigger = document.getElementById('muiSelectTrigger');
         const muiSelectMenu = document.getElementById('muiSelectMenu');
