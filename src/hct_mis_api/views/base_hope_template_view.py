@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views import View
 
 
-class CustomTemplateView(View):
+class BaseHopeTemplate(View):
     def get(self, request):
         # You can pass context here if needed
-        return render(request, "custom_template.html", {})
+        return render(request, "example_extended_template.html", {})
