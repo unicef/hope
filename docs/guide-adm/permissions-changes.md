@@ -52,7 +52,7 @@ Also on the Partner, there were **Allowed Business Areas**. Now this logic is **
 
 ```
 • Allowed BAs specified for the Partner
-• Button PERMISSIONS → page for specifying roles in a BA 
+• Button PERMISSIONS → page for specifying roles in a BA
 ```
 
 ![Partner Role - Before-1](images/permissions_changes_partnerrole_before_2.png)
