@@ -952,5 +952,6 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:
             raise ValidationError(f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}")
         self.payment_plan.status_close()
-        self.payment_plan.save(update_fields=("status", "status_date"))
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan
