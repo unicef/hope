@@ -163,6 +163,18 @@
         let businessAreaLoading = false;
         let businessAreaError = null;
 
+        function updateUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (businessAreaSelected && businessAreaSelected.slug) {
+                params.set('business_area', businessAreaSelected.slug);
+            }
+            if (muiProgramSelected && muiProgramSelected.slug) {
+                params.set('program', muiProgramSelected.slug);
+            }
+            const newUrl = window.location.pathname + '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+        }
+
         function renderBusinessAreaOptions() {
             muiSelectMenu.innerHTML = '';
             if (businessAreaLoading) {
@@ -189,6 +201,7 @@
                     window.BUSINESS_AREA_SLUG = opt.slug;
                     fetchProgramList(); // update programs for selected business area
                     renderBusinessAreaOptions();
+                    updateUrlParams();
                 });
                 muiSelectMenu.appendChild(div);
             });
@@ -280,6 +293,7 @@
                     muiProgramMenu.classList.remove('open');
                     muiProgramOpen = false;
                     renderProgramOptions(muiProgramSearch.value);
+                    updateUrlParams();
                 });
                 muiProgramOptions.appendChild(div);
             });
