@@ -169,6 +169,7 @@ TEMPLATES: list[dict[str, Any]] = [
         },
     },
 ]
+LOGIN_REDIRECT_URL = "/"
 PROJECT_APPS = [
     "hope.api",
     "hope.apps.geo.apps.Config",

@@ -80,7 +80,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
+        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
@@ -563,7 +563,7 @@ class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    target_population_id = serializers.UUIDField()
+    target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
     currency = serializers.ChoiceField(choices=CURRENCY_CHOICES)
