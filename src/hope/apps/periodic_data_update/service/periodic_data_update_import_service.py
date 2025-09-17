@@ -250,7 +250,8 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 continue
             if round_number_from_xlsx != round_number:
                 raise ValidationError(
-                    f"Round number mismatch for field {field_name}. Expected: {round_number}, Got: {round_number_from_xlsx}"
+                    f"Round number mismatch for field {field_name}. "
+                    f"Expected: {round_number}, Got: {round_number_from_xlsx}"
                 )
             if not individual:
                 raise ValidationError(f"Individual not found for {individual_unicef_id} ")
