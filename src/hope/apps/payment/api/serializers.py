@@ -485,6 +485,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
 
         return FilteredActionsListSerializer(actions_data).data
 
+
 def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Decimal | None:
     if not payment_plan.financial_service_provider:
         return None

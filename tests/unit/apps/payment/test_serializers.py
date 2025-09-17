@@ -194,8 +194,8 @@ class PaymentPlanDetailSerializerTest(TestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123id",
         )
-        cls.pp.financial_service_provider=cls.fsp_xlsx
-        cls.pp.delivery_mechanism=DeliveryMechanismFactory()
+        cls.pp.financial_service_provider = cls.fsp_xlsx
+        cls.pp.delivery_mechanism = DeliveryMechanismFactory()
         cls.pp.save()
 
     @staticmethod

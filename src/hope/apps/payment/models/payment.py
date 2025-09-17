@@ -1337,6 +1337,7 @@ class PaymentPlan(
     )
     def status_approve(self) -> None:
         from hope.apps.payment.signals import payment_plan_approved_signal
+
         payment_plan_approved_signal.send(sender=self.__class__, instance=self)
 
         self.status_date = timezone.now()

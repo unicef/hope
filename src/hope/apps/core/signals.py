@@ -75,9 +75,9 @@ def rdi_fully_merged(sender: Any, instance: RegistrationDataImport, **kwargs):
             "program": instance.program.name,
             "number_of_hh": instance.number_of_households,
             "number_of_beneficiaries": instance.number_of_individuals,
-        }
+        },
     }
-    transaction.on_commit(lambda : notify_hope_live.delay(data_dict))
+    transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
 
 
 @receiver(payment_reconciled_signal)
@@ -89,9 +89,9 @@ def payment_reconciled(sender: Any, instance: Payment, **kwargs):
             "program": instance.program.name,
             "amount": instance.delivered_quantity_usd,
             "household_admin_area": instance.household.admin_area.name,
-        }
+        },
     }
-    transaction.on_commit(lambda : notify_hope_live.delay(data_dict))
+    transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
 
 
 @receiver(payment_plan_approved_signal)
@@ -103,9 +103,9 @@ def payment_plan_approved(sender: Any, instance: PaymentPlan, **kwargs):
             "program": instance.program.name,
             "amount": instance.total_entitled_quantity_usd,
             # "household_admin_area": "", TODO bulk send all payments?
-        }
+        },
     }
-    transaction.on_commit(lambda : notify_hope_live.delay(data_dict))
+    transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
 
 
 @receiver(program_opened_signal)
@@ -115,9 +115,9 @@ def program_opened(sender: Any, instance: Program, **kwargs):
         "data": {
             "business_area": instance.business_area.slug,
             "program": instance.name,
-        }
+        },
     }
-    transaction.on_commit(lambda : notify_hope_live.delay(data_dict))
+    transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
 
 
 @receiver(program_closed_signal)
@@ -129,6 +129,6 @@ def program_closed(sender: Any, instance: Program, **kwargs):
             "program": instance.name,
             "number_of_beneficiaries": instance.individual_count,
             "total_amount_paid": instance.get_total_amount_paid()["delivered_quantity_usd"],
-        }
+        },
     }
-    transaction.on_commit(lambda : notify_hope_live.delay(data_dict))
+    transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
