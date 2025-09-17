@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const DefaultRoute = (): ReactElement | null => {
   const { businessAreaSlug, programSlug } = useBaseUrl();
-  const { data: meData, error } = useQuery({
+  const { data: meData } = useQuery({
     queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
