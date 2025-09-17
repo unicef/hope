@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'base_hope_template.css' %}">
     <style>
-        /* Fix dropdown overflow for program autocomplete */
         #muiProgramMenu {
             max-height: 320px;
             overflow-y: auto;
@@ -199,7 +198,7 @@
                     muiSelectMenu.classList.remove('open');
                     muiSelectOpen = false;
                     window.BUSINESS_AREA_SLUG = opt.slug;
-                    fetchProgramList(); // update programs for selected business area
+                    fetchProgramList();
                     renderBusinessAreaOptions();
                     updateUrlParams();
                 });
@@ -228,7 +227,7 @@
                     }
                     businessAreaLoading = false;
                     renderBusinessAreaOptions();
-                    fetchProgramList(); // initial program fetch for first business area
+                    fetchProgramList();
                 })
                 .catch(err => {
                     businessAreaLoading = false;
@@ -281,7 +280,6 @@
                 muiProgramOptions.innerHTML = '<div class="mui-autocomplete-empty">No programmes found.</div>';
                 return;
             }
-            // Show only first 10 programs
             const filtered = muiProgramList.filter(opt => opt.name.toLowerCase().includes(filter.toLowerCase()));
             filtered.slice(0, 10).forEach(opt => {
                 const div = document.createElement('div');
@@ -297,7 +295,6 @@
                 });
                 muiProgramOptions.appendChild(div);
             });
-            // No 'Show more...' option; only search icon triggers fetch
         }
 
         function fetchProgramList() {
