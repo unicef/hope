@@ -6,7 +6,7 @@ from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 
-from hct_mis_api.views.custom_template_view import CustomTemplateView
+from hct_mis_api.views.base_hope_template_view import BaseHopeTemplate
 import hope.admin
 import hope.apps.account.views
 import hope.apps.accountability.views
@@ -106,7 +106,7 @@ urlpatterns = (
     [
         path("_health", homepage),
         path("api/", include(api_patterns)),
-        path("custom-template/", CustomTemplateView.as_view(), name="custom-template"),
+        path("base-hope-template/", BaseHopeTemplate.as_view(), name="base-hope-template"),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -5,7 +5,48 @@
     <meta charset="UTF-8">
     <title>HOPE</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'custom_template.css' %}">
+    <link rel="stylesheet" href="{% static 'base_hope_template.css' %}">
+    <style>
+        /* Fix dropdown overflow for program autocomplete */
+        #muiProgramMenu {
+            max-height: 320px;
+            overflow-y: auto;
+            min-width: 320px;
+            z-index: 1000;
+        }
+        #muiProgramOptions {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .mui-autocomplete-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mui-autocomplete-option.selected {
+            background: #e6f7ee;
+        }
+        .mui-status-badge {
+            margin-left: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .mui-status-active {
+            background: #e6f7ee;
+            color: #2e7d32;
+        }
+        .mui-status-draft {
+            background: #eee;
+            color: #888;
+        }
+    </style>
     <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
 </head>
 <body>
@@ -65,9 +106,10 @@
             </div>
             <div class="version-info" id="versionInfo" style="margin-top: 24px;">Version: 3.6.2</div>
         </div>
-        <div class="main-content" style="background: #FFF; color: #233944;">
-           {% comment %} MAIN CONTENT {% endcomment %}
-        </div>
+          <div class="main-content" style="background: #FFF; color: #233944;">
+              {% block main %}
+              {% endblock main %}
+          </div>
         <div class="appbar" id="appbar">
             <div style="display: flex; align-items: center; flex: 1; gap: 16px;">
                 <div class="mui-select-wrapper" id="muiSelectWrapper">
