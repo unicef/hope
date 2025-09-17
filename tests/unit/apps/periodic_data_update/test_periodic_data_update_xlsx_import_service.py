@@ -246,7 +246,7 @@ class TestPDUXlsxImportService(TestCase):
                 {
                     "row": 2,
                     "errors": {
-                        "boolean_attribute__round_value": [{"message": "Invalid boolean value", "code": "invalid"}]
+                        "boolean_attribute__round_value": [{"message": "Enter a boolean value", "code": "invalid"}]
                     },
                 }
             ],
@@ -357,7 +357,7 @@ class TestPDUXlsxImportService(TestCase):
             "form_errors": [
                 {
                     "row": 2,
-                    "errors": {"date_attribute__round_value": [{"message": "Invalid date value", "code": "invalid"}]},
+                    "errors": {"date_attribute__round_value": [{"message": "Enter a date value", "code": "invalid"}]},
                 }
             ],
             "non_form_errors": None,
@@ -567,7 +567,7 @@ class TestPDUXlsxImportService(TestCase):
         }
         with self.assertRaisesMessage(
             ValidationError,
-            f"Round number mismatch for field date_attribute and individual {self.individual.unicef_id}",
+            "Round number mismatch for field date_attribute. Expected: 1, Got: 2",
         ):
             service._import_cleaned_data(cleaned_data)
         not_existing_individual_id = uuid.uuid4()
