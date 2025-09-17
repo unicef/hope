@@ -88,7 +88,7 @@ def payment_reconciled(sender: Any, instance: Payment, **kwargs):
             "business_area": instance.business_area.slug,
             "program": instance.program.name,
             "amount": instance.delivered_quantity_usd,
-            "household_admin_area": instance.household.admin_area.name,
+            "household_admin_area": instance.household.admin_area and instance.household.admin_area.name,
         },
     }
     transaction.on_commit(lambda: notify_hope_live.delay(data_dict))
