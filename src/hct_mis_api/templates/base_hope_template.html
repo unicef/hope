@@ -198,7 +198,7 @@
             businessAreaLoading = true;
             businessAreaError = null;
             renderBusinessAreaOptions();
-            fetch('/api/rest/business-areas/?limit=50')
+            fetch('/api/rest/business-areas/?limit=100')
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to fetch business areas');
                     return response.json();
