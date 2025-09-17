@@ -97,6 +97,11 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["ie_base_change_list_template"] = "admin/change_list.html"
+        return super().changelist_view(request, extra_context=extra_context)
+
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
         return super().get_fields(request, obj)
 
