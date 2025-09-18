@@ -93,7 +93,7 @@ export const BulkSetPriorityModal = ({
         <InputLabel>{t('Priority')}</InputLabel>
         <Select
           value={value}
-          onChange={(e) => setValue(e.target.value as number)}
+          onChange={(e) => setValue(e.target.value)}
           label={t('Priority')}
         >
           {priorityChoices?.map((choice) => (

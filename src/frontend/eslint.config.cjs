@@ -104,7 +104,7 @@ module.exports = defineConfig([
       '@typescript-eslint/semi': 'off',
       semi: ['error', 'always'],
       '@typescript-eslint/space-before-function-paren': 'off',
-      'space-before-function-paren': ['error', 'never'],
+      'space-before-function-paren': 'off',
       '@typescript-eslint/space-infix-ops': 'off',
       'space-infix-ops': ['error'],
       '@typescript-eslint/ban-ts-comment': 'off',

@@ -1,6 +1,6 @@
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';

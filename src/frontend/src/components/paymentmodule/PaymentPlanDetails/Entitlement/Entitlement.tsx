@@ -13,7 +13,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid2 as Grid,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -200,7 +200,7 @@ function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING ||
+      BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -256,11 +256,11 @@ function Entitlement({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"
-                  onClick={async() => {
+                  onClick={async () => {
                     try {
                       await setSteficonRule({
                         programSlug: programId,

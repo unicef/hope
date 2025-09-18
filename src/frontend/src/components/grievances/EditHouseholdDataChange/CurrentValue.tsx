@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
@@ -50,12 +50,11 @@ export function CurrentValue({
         }
         break;
       case 'BOOL':
-         
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
         return (
-          <Grid size={{ xs: 3 }}>
+          <Grid sx={{ gridColumn: 'span 3' }}>
             <GrievanceFlexFieldPhotoModalNewHousehold
               flexField={field}
               householdId={values?.selectedHousehold?.id || null}
@@ -67,7 +66,7 @@ export function CurrentValue({
     }
   }
   return (
-    <Grid size={{ xs: 3 }}>
+    <Grid sx={{ gridColumn: 'span 3' }}>
       <LabelizedField label={t('Current Value')} value={displayValue} />
     </Grid>
   );

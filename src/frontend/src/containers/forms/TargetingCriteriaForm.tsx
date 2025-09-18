@@ -10,7 +10,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -461,7 +461,6 @@ export const TargetingCriteriaForm = ({
                     >
                       {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
-                           
                           key={index}
                           index={index}
                           data={
@@ -550,7 +549,6 @@ export const TargetingCriteriaForm = ({
                           {values.individualsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaIndividualFilterBlocks
-                                 
                                 key={index}
                                 blockIndex={index}
                                 data={individualData}
@@ -599,7 +597,6 @@ export const TargetingCriteriaForm = ({
                           {values.collectorsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaCollectorFilterBlocks
-                                 
                                 key={index}
                                 blockIndex={index}
                                 data={allCollectorFieldsAttributesData}

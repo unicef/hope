@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { EditAccountRow } from './EditAccountRow';
@@ -28,7 +28,7 @@ export function ExistingAccountsFieldArray({
           individual?.accounts?.length > 0 ? (
             <>
               {individual.accounts.map((item) => (
-                <Grid size={{ xs: 12 }} key={item.id}>
+                <Grid sx={{ gridColumn: 'span 12' }} key={item.id}>
                   <Grid
                     container
                     direction="row"

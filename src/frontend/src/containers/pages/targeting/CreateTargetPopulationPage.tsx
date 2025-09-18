@@ -8,7 +8,7 @@ import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCr
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -107,7 +107,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     }),
   });
 
-  const handleSubmit = async(values: any): Promise<void> => {
+  const handleSubmit = async (values: any): Promise<void> => {
     const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
@@ -156,10 +156,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 <Typography variant="h6">{t('Targeting Criteria')}</Typography>
               </Box>
               <Grid container mb={5}>
-                <Grid size={{ xs: 6 }}>
+                <Grid size={6}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
-                    onChange={async(e) => {
+                    onChange={async (e) => {
                       await setFieldValue('programCycleId', e);
                     }}
                     required
@@ -169,7 +169,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 </Grid>
               </Grid>
               <Grid container>
-                <Grid size={{ xs: 6 }}>
+                <Grid size={6}>
                   <Field
                     name="name"
                     label={t('Target Population Name')}

@@ -1,11 +1,11 @@
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
-    camelToUnderscore,
-    getFlexFieldTextValue,
+  camelToUnderscore,
+  getFlexFieldTextValue,
   renderBoolean,
   showApiErrorMessages,
 } from '@utils/utils';
@@ -115,7 +115,11 @@ function AddIndividualGrievanceDetails({
       return (
         <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
-            label={key === 'sex' ? t('GENDER') : camelToUnderscore(key).replace(/_/g, ' ')}
+            label={
+              key === 'sex'
+                ? t('GENDER')
+                : camelToUnderscore(key).replace(/_/g, ' ')
+            }
             value={<span>{textValue as ReactNode}</span>}
           />
         </Grid>
@@ -170,14 +174,14 @@ function AddIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6">
             {t(`${beneficiaryGroup?.memberLabel} Data`)}
           </Typography>
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
-              onClick={async() => {
+              onClick={async () => {
                 try {
                   await confirm({
                     title: t('Warning'),

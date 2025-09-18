@@ -2,12 +2,7 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid2 as Grid,
-} from '@mui/material';
+import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -88,7 +83,7 @@ export const DuplicateTargetPopulation = ({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async(values) => {
+        onSubmit={async (values) => {
           try {
             const programCycleId = values.programCycleId.value;
             const res = (await mutate({
@@ -143,7 +138,7 @@ export const DuplicateTargetPopulation = ({
                 <Grid size={{ xs: 12 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
-                    onChange={async(e) => {
+                    onChange={async (e) => {
                       await setFieldValue('programCycleId', e);
                     }}
                     required

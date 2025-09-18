@@ -1,16 +1,16 @@
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { BulkUpdateGrievanceTicketsUrgency } from '@restgenerated/models/BulkUpdateGrievanceTicketsUrgency';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { BulkBaseModal } from './BulkBaseModal';
-import { ReactElement, useState } from 'react';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BulkUpdateGrievanceTicketsUrgency } from '@restgenerated/models/BulkUpdateGrievanceTicketsUrgency';
-import { showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -71,7 +71,7 @@ export function BulkSetUrgencyModal({
       }),
   });
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
-  const onSave = async(): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     await mutateAsync({
       urgency: value,
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
@@ -90,7 +90,7 @@ export function BulkSetUrgencyModal({
         <InputLabel id="urgency-label">{t('Urgency')}</InputLabel>
         <Select
           value={value}
-          onChange={(e) => setValue(e.target.value as number)}
+          onChange={(e) => setValue(e.target.value)}
           label={t('Urgency')}
         >
           {urgencyChoices.map((choice) => (

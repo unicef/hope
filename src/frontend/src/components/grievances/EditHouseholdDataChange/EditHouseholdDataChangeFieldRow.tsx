@@ -1,4 +1,4 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
@@ -46,7 +46,7 @@ export const EditHouseholdDataChangeFieldRow = ({
 
   return (
     <>
-      <Grid size={{ xs: 4 }}>
+      <Grid sx={{ gridColumn: 'span 4' }}>
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -81,10 +81,10 @@ export const EditHouseholdDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid size={{ xs: 4 }} />
+        <Grid sx={{ gridColumn: 'span 4' }} />
       )}
       {itemValue.fieldName && (
-        <Grid size={{ xs: 1 }}>
+        <Grid sx={{ gridColumn: 'span 1' }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

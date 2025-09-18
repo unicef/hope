@@ -11,7 +11,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { SplitPaymentPlan } from '@restgenerated/models/SplitPaymentPlan';
@@ -92,7 +92,7 @@ export const SplitIntoPaymentLists = ({
     }),
   });
 
-  const handleSplit = async(values): Promise<void> => {
+  const handleSplit = async (values): Promise<void> => {
     try {
       await mutate({
         businessAreaSlug: businessArea,
@@ -114,7 +114,7 @@ export const SplitIntoPaymentLists = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         await handleSplit(values);
       }}
     >
