@@ -83,22 +83,22 @@ export function EditIdentityRow({
     </Grid>
   ) : (
     <Grid container alignItems="center" spacing={3} key={identity.id}>
-      <Grid sx={{ gridColumn: 'span 4' }}>
+      <Grid size={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID AGENCY1')} value={identity.partner} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 4' }}>
+      <Grid size={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Country')} value={identity.country.name} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID Number')} value={identity.number} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 1' }}>
+      <Grid size={1}>
         {!removed ? (
           !isEditTicket && (
             <Box display="flex" alignItems="center">

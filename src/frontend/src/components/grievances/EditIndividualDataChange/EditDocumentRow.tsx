@@ -45,7 +45,7 @@ export function EditDocumentRow({
 
   return isEdited ? (
     <Grid container spacing={3}>
-      <Grid sx={{ gridColumn: 'span 11' }}>
+      <Grid size={11}>
         <DocumentField
           id={id}
           key={`${id}-${document.country}-${document.type.label}`}
@@ -65,7 +65,7 @@ export function EditDocumentRow({
           values={values}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 1' }}>
+      <Grid size={1}>
         <Box display="flex" alignItems="center">
           <IconButton
             onClick={() => {
@@ -86,17 +86,17 @@ export function EditDocumentRow({
     </Grid>
   ) : (
     <Grid container spacing={3} key={document.id}>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID TYPE')} value={document.type.label} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Country')} value={document.country.name} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID Number')}
@@ -104,10 +104,10 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 2' }}>
+      <Grid size={2}>
         <PhotoModal showRotate={false} src={document.photo} />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 1' }}>
+      <Grid size={1}>
         {!removed ? (
           !isEditTicket && (
             <Box display="flex" alignItems="center">

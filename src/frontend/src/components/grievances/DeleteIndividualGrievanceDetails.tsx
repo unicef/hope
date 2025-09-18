@@ -162,7 +162,7 @@ export function DeleteIndividualGrievanceDetails({
           textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
-          <Grid key={key} sx={{ gridColumn: 'span 6' }}>
+          <Grid key={key} size={6}>
             <LabelizedField
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
@@ -177,10 +177,7 @@ export function DeleteIndividualGrievanceDetails({
     documents?.map((doc) => {
       const item = doc;
       return (
-        <Grid
-          key={item.country + item.type.label}
-          sx={{ gridColumn: 'span 6' }}
-        >
+        <Grid key={item.country + item.type.label} size={6}>
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}

@@ -21,7 +21,7 @@ export function ExistingDocumentFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return individual?.documents?.length > 0 ? (
-    <Grid container spacing={3}>
+    <Grid container size={12} spacing={3}>
       <FieldArray
         name="individualDataUpdateDocumentsToEdit"
         render={(arrayHelpers) => (

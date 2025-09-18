@@ -44,7 +44,7 @@ export function DocumentField({
 
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid sx={{ gridColumn: 'span 2' }}>
+      <Grid size={2}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth
@@ -56,7 +56,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 2' }}>
+      <Grid size={2}>
         <Field
           name={`${docFieldName}.country`}
           fullWidth
@@ -68,7 +68,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <Field
           name={`${docFieldName}.number`}
           fullWidth
@@ -79,7 +79,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <GrievanceDocumentPhotoModalEditable
           photoSrc={photoSrc}
           setFieldValue={setFieldValue}
@@ -87,7 +87,7 @@ export function DocumentField({
         />
       </Grid>
       {!isEdited ? (
-        <Grid sx={{ gridColumn: 'span 1' }}>
+        <Grid size={1}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

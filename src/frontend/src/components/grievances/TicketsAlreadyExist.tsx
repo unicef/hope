@@ -79,7 +79,7 @@ export function TicketsAlreadyExist({ values }): ReactElement {
     (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
   return results.length && shouldShowBox ? (
-    <Grid sx={{ gridColumn: 'span 6' }}>
+    <Grid size={6}>
       <StyledBox>
         <OrangeTitle>
           <Typography variant="h6">

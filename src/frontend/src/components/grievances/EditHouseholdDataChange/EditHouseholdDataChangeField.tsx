@@ -118,7 +118,7 @@ export const EditHouseholdDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid sx={{ gridColumn: 'span 4' }}>
+    <Grid size={4}>
       <Field
         name={name}
         fullWidth

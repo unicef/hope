@@ -153,7 +153,7 @@ function EditPeopleDataChange({
                     values={values}
                   />
                 ))}
-                <Grid sx={{ gridColumn: 'span 4' }}>
+                <Grid size={4}>
                   <Button
                     color="primary"
                     onClick={() => {

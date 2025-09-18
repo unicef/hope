@@ -125,7 +125,7 @@ export const EditPeopleDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid sx={{ gridColumn: 'span 4' }}>
+    <Grid size={4}>
       <Field
         name={name}
         variant="outlined"

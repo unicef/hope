@@ -61,7 +61,7 @@ export function EditAccountRow({
     </>
   ) : (
     <Fragment key={account.id}>
-      <Grid sx={{ gridColumn: 'span 4' }} key="type">
+      <Grid size={4} key="type">
         <LabelizedField label="type" value={String(account.accountType)} />
       </Grid>
       {Object.entries(dataFields).map(([key, value]) => {
@@ -81,12 +81,12 @@ export function EditAccountRow({
         }
 
         return (
-          <Grid sx={{ gridColumn: 'span 4' }} key={key}>
+          <Grid size={4} key={key}>
             <LabelizedField label={key} value={displayValue} />
           </Grid>
         );
       })}
-      <Grid sx={{ gridColumn: 'span 1' }}>
+      <Grid size={1}>
         <Box display="flex" alignItems="center">
           <IconButton
             onClick={() => {

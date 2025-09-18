@@ -103,7 +103,7 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid sx={{ gridColumn: 'span 4' }}>
+    <Grid size={12}>
       <Field
         name={name}
         variant="outlined"
