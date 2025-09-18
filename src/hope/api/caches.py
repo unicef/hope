@@ -115,7 +115,7 @@ class RendererKeyBit(KeyBitBase):
         if hasattr(request, "accepted_renderer") and request.accepted_renderer:
             return request.accepted_renderer.__class__.__name__
 
-        return "JSONRenderer" # pragma: no cover
+        return "JSONRenderer"  # pragma: no cover
 
 
 class KeyConstructorMixin(KeyConstructor):
