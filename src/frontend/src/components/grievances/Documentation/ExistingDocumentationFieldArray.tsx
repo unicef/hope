@@ -24,7 +24,7 @@ export function ExistingDocumentationFieldArray({
         render={(arrayHelpers) => (
           <>
             {ticket.documentation?.map((item, index) => (
-              <Grid sx={{ gridColumn: 'span 12' }} key={item.id}>
+              <Grid size={12} key={item.id}>
                 <EditDocumentationRow
                   setFieldValue={setFieldValue}
                   values={values}

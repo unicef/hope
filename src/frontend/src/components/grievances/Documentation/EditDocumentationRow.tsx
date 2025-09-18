@@ -38,12 +38,7 @@ export function EditDocumentationRow({
   const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
-    <Grid
-      container
-      spacing={3}
-      sx={{ gridColumn: 'span 12' }}
-      key={document.id}
-    >
+    <Grid container spacing={3} key={document.id}>
       <DocumentationField
         index={index}
         key={`${index}-documentation-file`}
@@ -52,7 +47,7 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Grid sx={{ gridColumn: 'span 1' }} />
+      <Grid size={1} />
       <Grid>
         <Button
           onClick={() => {
@@ -65,25 +60,25 @@ export function EditDocumentationRow({
       </Grid>
     </Grid>
   ) : (
-    <Grid container sx={{ gridColumn: 'span 12' }} key={document.id}>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+    <Grid container key={document.id}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Name')} value={document.name} />
         </DisabledDiv>
       </Grid>
-      <Grid sx={{ gridColumn: 'span 3' }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('File Type')} value={document.contentType} />
         </DisabledDiv>
       </Grid>
       {document.contentType.includes('image') ? (
-        <Grid sx={{ gridColumn: 'span 1' }}>
+        <Grid size={1}>
           <PhotoModal showRotate={false} src={document.filePath} />
         </Grid>
       ) : (
-        <Grid sx={{ gridColumn: 'span 1' }} />
+        <Grid size={1} />
       )}
-      <Grid sx={{ gridColumn: 'span 1' }}>
+      <Grid size={1}>
         {!removed ? (
           <Box ml={2} display="flex" align-items="center">
             <IconButton

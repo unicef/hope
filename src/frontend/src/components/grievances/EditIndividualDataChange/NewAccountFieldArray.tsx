@@ -48,8 +48,8 @@ export function NewAccountFieldArray({
                 />
               );
             })}
-            <Grid sx={{ gridColumn: 'span 8' }} />
-            <Grid sx={{ gridColumn: 'span 12' }}>
+            <Grid size={8} />
+            <Grid size={12}>
               <Button
                 color="primary"
                 onClick={() => {

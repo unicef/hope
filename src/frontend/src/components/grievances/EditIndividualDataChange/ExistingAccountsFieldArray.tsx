@@ -28,7 +28,7 @@ export function ExistingAccountsFieldArray({
           individual?.accounts?.length > 0 ? (
             <>
               {individual.accounts.map((item) => (
-                <Grid sx={{ gridColumn: 'span 12' }} key={item.id}>
+                <Grid size={12} key={item.id}>
                   <Grid
                     container
                     direction="row"

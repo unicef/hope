@@ -93,7 +93,7 @@ export function AddIndividualDataChangeField({
   }
   return (
     <>
-      <Grid sx={{ gridColumn: 'span 8' }}>
+      <Grid size={8}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -106,7 +106,7 @@ export function AddIndividualDataChangeField({
           {...fieldProps}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 4' }} />
+      <Grid size={4} />
     </>
   );
 }
@@ -188,14 +188,12 @@ function AddIndividualDataChange({
           </Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid sx={{ gridColumn: 'span 12' }}>{t('Core Fields')}</Grid>
+          <Grid size={12}>{t('Core Fields')}</Grid>
 
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
-          {flexFields.length > 0 && (
-            <Grid sx={{ gridColumn: 'span 12' }}>{t('Flex Fields')}</Grid>
-          )}
+          {flexFields.length > 0 && <Grid size={12}>{t('Flex Fields')}</Grid>}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
               key={item.name}
@@ -230,8 +228,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid sx={{ gridColumn: 'span 8' }} />
-                <Grid sx={{ gridColumn: 'span 12' }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -277,8 +275,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid sx={{ gridColumn: 'span 8' }} />
-                <Grid sx={{ gridColumn: 'span 12' }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}

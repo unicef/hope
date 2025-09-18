@@ -150,10 +150,7 @@ function EditIndividualDataChange({
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
-                    <Grid
-                      sx={{ gridColumn: 'span 12' }}
-                      key={`${index}-${item?.fieldName}`}
-                    >
+                    <Grid size={12} key={`${index}-${item?.fieldName}`}>
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
@@ -165,7 +162,7 @@ function EditIndividualDataChange({
                       />
                     </Grid>
                   ))}
-                  <Grid sx={{ gridColumn: 'span 4' }}>
+                  <Grid size={4}>
                     <Button
                       color="primary"
                       onClick={() => {
