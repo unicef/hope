@@ -295,7 +295,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
                 form_fields_dict[f"{value['field']}__round_value"] = form_field
                 form_fields_dict[f"{value['field']}__collection_date"] = StrictDateField(required=False)
             except ValidationError as e:
-                form_errors.append(str(e))
+                form_errors.append(e)
 
         if form_errors:
             raise ValidationError(form_errors)

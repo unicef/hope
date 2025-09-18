@@ -654,3 +654,57 @@ class TestPDUXlsxImportService(TestCase):
             f"Invalid subtype for field {flexible_attribute.name}",
         ):
             service._get_form_field_for_value(flexible_attribute)
+
+    def test_import_data_invalid_subtype_fail(self) -> None:
+        boolean_attribute = self.boolean_attribute
+
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
+            [
+                {
+                    "field": boolean_attribute.name,
+                    "round": 1,
+                    "round_name": boolean_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                },
+            ],
+            [["True", "2021-05-02"]],
+        )
+
+        PeriodicFieldData.objects.filter(id=boolean_attribute.pdu_data.id).update(subtype="INVALID_SUBTYPE")
+
+        service = PDUXlsxImportService(periodic_data_update_upload)
+        service.import_data()
+
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
+        error_data = json.loads(periodic_data_update_upload.error_message)
+        assert [f"Invalid subtype for field {boolean_attribute.name}"] in error_data["non_form_errors"]
+
+    def test_import_data_round_mismatch_validation_error(self) -> None:
+        flexible_attribute = self.date_attribute
+        (
+            periodic_data_update_template,
+            periodic_data_update_upload,
+        ) = self.prepare_test_data(
+            [
+                {
+                    "field": flexible_attribute.name,
+                    "round": 1,
+                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
+                    "number_of_records": 0,
+                }
+            ],
+            [["1996-06-21", "2021-05-02"]],
+        )
+
+        periodic_data_update_template.rounds_data[0]["round"] = 2
+        periodic_data_update_template.save()
+
+        service = PDUXlsxImportService(periodic_data_update_upload)
+        service.import_data()
+
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
+        error_data = json.loads(periodic_data_update_upload.error_message)
+        assert ["Round number mismatch for field date_attribute. Expected: 2, Got: 1"] in error_data["non_form_errors"]
