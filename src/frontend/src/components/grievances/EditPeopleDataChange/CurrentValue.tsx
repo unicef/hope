@@ -52,14 +52,14 @@ export function CurrentValue({
       break;
     case 'IMAGE':
       return isNewTicket ? (
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <GrievanceFlexFieldPhotoModalNewIndividual
             flexField={field}
             individualId={values?.selectedIndividual?.id || null}
           />
         </Grid>
       ) : (
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
         </Grid>
       );
@@ -67,7 +67,7 @@ export function CurrentValue({
       displayValue = value;
   }
   return (
-    <Grid sx={{ gridColumn: 'span 3' }}>
+    <Grid size={3}>
       <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );

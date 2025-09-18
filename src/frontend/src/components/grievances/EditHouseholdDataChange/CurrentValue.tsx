@@ -54,7 +54,7 @@ export function CurrentValue({
         break;
       case 'IMAGE':
         return (
-          <Grid sx={{ gridColumn: 'span 3' }}>
+          <Grid size={3}>
             <GrievanceFlexFieldPhotoModalNewHousehold
               flexField={field}
               householdId={values?.selectedHousehold?.id || null}
@@ -66,7 +66,7 @@ export function CurrentValue({
     }
   }
   return (
-    <Grid sx={{ gridColumn: 'span 3' }}>
+    <Grid size={3}>
       <LabelizedField label={t('Current Value')} value={displayValue} />
     </Grid>
   );

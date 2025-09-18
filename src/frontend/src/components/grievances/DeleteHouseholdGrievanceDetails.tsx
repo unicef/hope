@@ -93,17 +93,17 @@ export function DeleteHouseholdGrievanceDetails({
         </Box>
       </Title>
       <Grid container spacing={6}>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
             {ticket.household.size}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Residence Status')}>
             {residenceChoicesDict[ticket.household.residenceStatus]}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
             <ContentLink
               href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
@@ -112,43 +112,43 @@ export function DeleteHouseholdGrievanceDetails({
             </ContentLink>
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Country')}>
             {ticket.household.country}
           </LabelizedField>
         </Grid>
 
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Country of Origin')}>
             {ticket.household.countryOrigin}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Address')}>
             {ticket.household.address}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Village')}>
             {ticket.household.village}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Administrative Level 1')}>
             {ticket.household.admin1?.name}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Administrative Level 2')}>
             {ticket.household.admin2?.name}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('Geolocation')}>
             {ticket.household?.geopoint || '-'}
           </LabelizedField>
         </Grid>
-        <Grid sx={{ gridColumn: 'span 3' }}>
+        <Grid size={3}>
           <LabelizedField label={t('UNHCR CASE ID')}>
             {ticket.household?.unhcrId}
           </LabelizedField>

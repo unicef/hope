@@ -39,7 +39,7 @@ export const EditPeopleDataChangeFieldRow = ({
   }, [itemValue.fieldName]);
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid sx={{ gridColumn: 'span 4' }}>
+      <Grid size={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -76,10 +76,10 @@ export const EditPeopleDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid sx={{ gridColumn: 'span 4' }} />
+        <Grid size={4} />
       )}
       {itemValue.fieldName && (
-        <Grid sx={{ gridColumn: 'span 1' }}>
+        <Grid size={1}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

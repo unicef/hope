@@ -24,7 +24,7 @@ export function DocumentationField({
 
   return (
     <>
-      <Grid sx={{ gridColumn: 'span 4' }}>
+      <Grid size={4}>
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
@@ -35,7 +35,7 @@ export function DocumentationField({
           maxLength={100}
         />
       </Grid>
-      <Grid sx={{ gridColumn: 'span 4' }}>
+      <Grid size={4}>
         <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
             type="file"
@@ -50,7 +50,7 @@ export function DocumentationField({
         </Box>
       </Grid>
       {!isEdited ? (
-        <Grid sx={{ gridColumn: 'span 4' }}>
+        <Grid size={4}>
           <IconButton onClick={onDelete}>
             <Delete />
           </IconButton>
