@@ -167,6 +167,8 @@ const EditProgramPage = (): ReactElement => {
     registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
+    reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications,
   } = program;
 
   const programHasRdi = registrationImportsTotalCount > 0;
@@ -247,6 +249,8 @@ const EditProgramPage = (): ReactElement => {
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
+        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await updateProgramDetails(programData);
@@ -297,6 +301,8 @@ const EditProgramPage = (): ReactElement => {
     cashPlus: cashPlus,
     frequencyOfPayments: frequencyOfPayments,
     pduFields: pduFields,
+    reconciliationWindowInDays: reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
@@ -335,6 +341,8 @@ const EditProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['partnerAccess'],
   ];

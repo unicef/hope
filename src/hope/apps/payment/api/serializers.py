@@ -324,8 +324,10 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program = serializers.CharField(source="program_cycle.program.name")
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
+    program_slug = serializers.CharField(source="program_cycle.program.slug", read_only=True)
     program_cycle_id = serializers.UUIDField(source="program_cycle.id", read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
+    has_payments_reconciliation_overdue = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentPlan
@@ -347,16 +349,22 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "follow_ups",
             "program",
             "program_id",
+            "program_slug",
             "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
             "admin_url",
             "screen_beneficiary",
+            "has_payments_reconciliation_overdue",
         )
 
     @staticmethod
     def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+    @staticmethod
+    def get_has_payments_reconciliation_overdue(obj: PaymentPlan) -> bool:
+        return obj.has_payments_reconciliation_overdue
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
