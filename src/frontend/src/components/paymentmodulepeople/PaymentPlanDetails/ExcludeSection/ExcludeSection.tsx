@@ -114,7 +114,7 @@ export function ExcludeSection({
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSave = async (values): Promise<void> => {
+  const handleSave = async(values): Promise<void> => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     try {
       await mutate({

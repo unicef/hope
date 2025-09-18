@@ -55,7 +55,7 @@ export function ForceFailedButton({
         console.error(error);
       },
     });
-  const submit = async (): Promise<void> => {
+  const submit = async(): Promise<void> => {
     try {
       await markAsFailed({
         businessAreaSlug: businessArea,

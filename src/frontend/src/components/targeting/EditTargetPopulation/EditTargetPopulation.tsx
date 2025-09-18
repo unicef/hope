@@ -128,7 +128,7 @@ const EditTargetPopulation = ({
     }),
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmit = async(values): Promise<void> => {
     try {
       const requestBody: PatchedTargetPopulationCreate = {
         excludedIds: values.excludedIds,
@@ -191,7 +191,7 @@ const EditTargetPopulation = ({
               <Grid size={{ xs: 6 }}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
-                  onChange={async (e) => {
+                  onChange={async(e) => {
                     await setFieldValue('programCycleId', e);
                   }}
                   required

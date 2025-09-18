@@ -61,7 +61,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
-  const createFeedbackMessage = async (description: string) => {
+  const createFeedbackMessage = async(description: string) => {
     if (!id || !businessAreaSlug) return;
 
     try {
@@ -133,7 +133,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
       <Box p={3}>
         <Formik
           initialValues={initialValues}
-          onSubmit={async (values, { resetForm }) => {
+          onSubmit={async(values, { resetForm }) => {
             await createFeedbackMessage(values.newNote);
             resetForm({});
           }}

@@ -122,7 +122,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING;
+      BackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
@@ -142,20 +142,20 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async () => {
+  const handleExportAPI = async() => {
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async() => {
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };

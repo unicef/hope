@@ -177,7 +177,7 @@ function AddIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
-              onClick={async () => {
+              onClick={async() => {
                 try {
                   await confirm({
                     title: t('Warning'),

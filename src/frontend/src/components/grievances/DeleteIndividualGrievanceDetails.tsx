@@ -209,7 +209,7 @@ export function DeleteIndividualGrievanceDetails({
                 confirm({
                   title: t('Warning'),
                   content: dialogText,
-                }).then(async () => {
+                }).then(async() => {
                   try {
                     await mutation.mutateAsync({
                       grievanceTicketId: ticket.id,

@@ -42,13 +42,13 @@ export const SnackbarProvider = ({ children }): ReactElement => {
     try {
       const errrorWithBody = error as any;
       errorMessage = errrorWithBody.message;
-    } catch (_) {
+    } catch {
       /* empty */
     }
     try {
       const errrorWithBody = error as any;
       errorMessage = errrorWithBody.body.join('\n');
-    } catch (_) {
+    } catch {
       /* empty */
     }
     showMessage(errorMessage);

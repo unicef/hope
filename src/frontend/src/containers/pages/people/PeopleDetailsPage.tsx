@@ -87,7 +87,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
     queryKey: ['fieldsAttributes'],
-    queryFn: async () => {
+    queryFn: async() => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
       return { allIndividualsFlexFieldsAttributes: data };
     },

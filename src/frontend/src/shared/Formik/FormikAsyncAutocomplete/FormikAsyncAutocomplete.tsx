@@ -35,7 +35,7 @@ export function FormikAsyncAutocomplete({
 
   const { data, isLoading } = useQuery({
     queryKey: ['asyncAutocomplete', restEndpoint, inputValue, variables],
-    queryFn: async () => {
+    queryFn: async() => {
       if (restEndpoint === 'adminAreas') {
         return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: variables?.businessArea || '',

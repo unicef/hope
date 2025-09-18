@@ -88,7 +88,7 @@ export const DuplicateTargetPopulation = ({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async (values) => {
+        onSubmit={async(values) => {
           try {
             const programCycleId = values.programCycleId.value;
             const res = (await mutate({
@@ -143,7 +143,7 @@ export const DuplicateTargetPopulation = ({
                 <Grid size={{ xs: 12 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
-                    onChange={async (e) => {
+                    onChange={async(e) => {
                       await setFieldValue('programCycleId', e);
                     }}
                     required

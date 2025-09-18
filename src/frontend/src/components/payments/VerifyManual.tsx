@@ -72,7 +72,7 @@ export function VerifyManual({
     },
   });
 
-  const submit = async (values): Promise<void> => {
+  const submit = async(values): Promise<void> => {
     try {
       await updateVerificationMutation.mutateAsync({
         received: values.status === 'RECEIVED',

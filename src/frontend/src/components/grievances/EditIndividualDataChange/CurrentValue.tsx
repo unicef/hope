@@ -48,7 +48,7 @@ export function CurrentValue({
       }
       break;
     case 'BOOL':
-      /* eslint-disable-next-line no-nested-ternary */
+       
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     case 'IMAGE':

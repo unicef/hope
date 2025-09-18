@@ -259,7 +259,7 @@ export function Entitlement({
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"
-                  onClick={async () => {
+                  onClick={async() => {
                     try {
                       await setSteficonRule({
                         programSlug: programId,

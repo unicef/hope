@@ -461,7 +461,7 @@ export const TargetingCriteriaForm = ({
                     >
                       {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
-                          // eslint-disable-next-line
+                           
                           key={index}
                           index={index}
                           data={
@@ -550,7 +550,7 @@ export const TargetingCriteriaForm = ({
                           {values.individualsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaIndividualFilterBlocks
-                                // eslint-disable-next-line
+                                 
                                 key={index}
                                 blockIndex={index}
                                 data={individualData}
@@ -599,7 +599,7 @@ export const TargetingCriteriaForm = ({
                           {values.collectorsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaCollectorFilterBlocks
-                                // eslint-disable-next-line
+                                 
                                 key={index}
                                 blockIndex={index}
                                 data={allCollectorFieldsAttributesData}

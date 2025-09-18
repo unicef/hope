@@ -23,7 +23,7 @@ interface RegistrationIndividualAdditionalRegistrationInformationProps {
 }
 
 export const RegistrationIndividualAdditionalRegistrationInformation = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   individual,
   flexFieldsData,
 }: RegistrationIndividualAdditionalRegistrationInformationProps): ReactElement => {

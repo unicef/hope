@@ -147,7 +147,7 @@ const CreateCommunicationPage = (): ReactElement => {
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
-    queryFn: async () => {
+    queryFn: async() => {
       return RestService.restAreasList({
         limit: 100,
         areaTypeAreaLevel: 2,
@@ -157,7 +157,7 @@ const CreateCommunicationPage = (): ReactElement => {
     enabled: !!businessArea,
   });
 
-  const loadSampleSize = useCallback(async () => {
+  const loadSampleSize = useCallback(async() => {
     if (!businessArea) return;
 
     try {
@@ -206,7 +206,7 @@ const CreateCommunicationPage = (): ReactElement => {
   const [flowsLoading, setFlowsLoading] = useState(false);
   const [flowsError, setFlowsError] = useState(null);
 
-  const loadAvailableFlows = useCallback(async () => {
+  const loadAvailableFlows = useCallback(async() => {
     if (!businessArea || !programId) return;
 
     try {
@@ -372,7 +372,7 @@ const CreateCommunicationPage = (): ReactElement => {
           confirm({
             title: t('Confirmation'),
             content: t('Are you sure you want to send this message?'),
-          }).then(async () => {
+          }).then(async() => {
             try {
               const response = await mutate(prepareMutationVariables(values));
               showMessage(t('Communication Ticket created.'));

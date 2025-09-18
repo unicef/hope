@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
@@ -161,19 +159,19 @@ export function RequestedIndividualDataChange({
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   const selectedDocumentsToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documents?.length; i++) {
     if (documents[i]?.approveStatus) {
       selectedDocuments.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documentsToRemove?.length; i++) {
     if (documentsToRemove[i]?.approveStatus) {
       selectedDocumentsToRemove.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documentsToEdit?.length; i++) {
     if (documentsToEdit[i]?.approveStatus) {
       selectedDocumentsToEdit.push(i);
@@ -182,19 +180,19 @@ export function RequestedIndividualDataChange({
   const selectedIdentities = [];
   const selectedIdentitiesToRemove = [];
   const selectedIdentitiesToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identities?.length; i++) {
     if (identities[i]?.approveStatus) {
       selectedIdentities.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identitiesToRemove?.length; i++) {
     if (identitiesToRemove[i]?.approveStatus) {
       selectedIdentitiesToRemove.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identitiesToEdit?.length; i++) {
     if (identitiesToEdit[i]?.approveStatus) {
       selectedIdentitiesToEdit.push(i);
@@ -202,14 +200,14 @@ export function RequestedIndividualDataChange({
   }
 
   const selectedAccounts = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < accounts?.length; i++) {
     if (accounts[i]?.approve_status) {
       selectedAccounts.push(i);
     }
   }
   const selectedAccountsToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < accountsToEdit?.length; i++) {
     if (accountsToEdit[i]?.approve_status) {
       selectedAccountsToEdit.push(i);
@@ -320,9 +318,8 @@ export function RequestedIndividualDataChange({
         selectedAccounts,
         selectedAccountsToEdit,
       }}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
           prev[curr] = true;
           return prev;
         }, {});
@@ -337,7 +334,6 @@ export function RequestedIndividualDataChange({
         // Removed unused approvedAccountsToCreate and approvedAccountsToEdit
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
-            // eslint-disable-next-line no-param-reassign
             prev[curr] = true;
             return prev;
           },
@@ -358,7 +354,7 @@ export function RequestedIndividualDataChange({
           });
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (e) {
+        } catch {
           // Error handling is already in the mutation onError callback
         }
       }}

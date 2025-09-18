@@ -249,7 +249,7 @@ export const EditVerificationPlan = ({
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
-    queryFn: async () => {
+    queryFn: async() => {
       return RestService.restAreasList({
         limit: 100,
         areaTypeAreaLevel: 2,
@@ -262,7 +262,7 @@ export const EditVerificationPlan = ({
   // Sample size state management
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
-  const loadSampleSize = useCallback(async () => {
+  const loadSampleSize = useCallback(async() => {
     if (!businessArea || !programSlug) return;
 
     try {
@@ -303,7 +303,7 @@ export const EditVerificationPlan = ({
     }
   }, [open, loadSampleSize, selectedTab]);
 
-  const submit = async (mutationVariables): Promise<void> => {
+  const submit = async(mutationVariables): Promise<void> => {
     try {
       const requestData = prepareUpdateMutationData(
         selectedTab,

@@ -92,7 +92,7 @@ export const SplitIntoPaymentLists = ({
     }),
   });
 
-  const handleSplit = async (values): Promise<void> => {
+  const handleSplit = async(values): Promise<void> => {
     try {
       await mutate({
         businessAreaSlug: businessArea,
@@ -114,7 +114,7 @@ export const SplitIntoPaymentLists = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         await handleSplit(values);
       }}
     >
