@@ -2,3 +2,4 @@ nav:
   - index.md
   - Technologies: dependencies.md
   - Docker: docker.md
+  - Permissions - Changes: permissions-changes.md
