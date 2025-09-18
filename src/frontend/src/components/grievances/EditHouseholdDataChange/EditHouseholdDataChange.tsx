@@ -275,7 +275,7 @@ function EditHouseholdDataChange({
             );
           })}
           {/* Add a New Role button */}
-          <Grid size={12} sx={{ marginTop: 2 }}>
+          <Grid size={12} sx={{ marginTop: 12 }}>
             {(() => {
               const usedIds = (values.roles || []).map((r) => r.individual);
               const availableIndividuals = householdMembers.results.filter(

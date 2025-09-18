@@ -67,7 +67,7 @@ export function CurrentValue({
       displayValue = value;
   }
   return (
-    <Grid size={3}>
+    <Grid size={12}>
       <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );
