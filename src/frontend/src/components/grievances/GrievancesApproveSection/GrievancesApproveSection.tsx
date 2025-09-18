@@ -120,7 +120,7 @@ function GrievancesApproveSection({
   };
 
   return (
-    <Grid container sx={{ gridColumn: 'span 12' }}>
+    <Grid container size={12}>
       <Box sx={{ width: '100%' }} p={3}>
         {matchDetailsComponent()}
       </Box>

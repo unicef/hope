@@ -30,7 +30,7 @@ export function NewDocumentFieldArray({
             {values.individualDataUpdateFieldsDocuments?.map((item) => {
               return (
                 <Grid
-                  sx={{ gridColumn: 'span 12' }}
+                  size={12}
                   key={`${item?.id}-${item?.country}-${item?.type?.key}`}
                 >
                   <DocumentField
@@ -54,8 +54,8 @@ export function NewDocumentFieldArray({
               );
             })}
 
-            <Grid sx={{ gridColumn: 'span 8' }} />
-            <Grid sx={{ gridColumn: 'span 12' }}>
+            <Grid size={8} />
+            <Grid size={12}>
               <Button
                 color="primary"
                 disabled={isEditTicket}

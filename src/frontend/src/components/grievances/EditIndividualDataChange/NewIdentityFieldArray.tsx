@@ -28,7 +28,7 @@ export const NewIdentityFieldArray = ({
             {values.individualDataUpdateFieldsIdentities?.map((item) => {
               return (
                 <Grid
-                  sx={{ gridColumn: 'span 12' }}
+                  size={12}
                   key={`${item?.id}-${item?.country}-${item?.partner}`}
                 >
                   <AgencyField
@@ -51,8 +51,8 @@ export const NewIdentityFieldArray = ({
               );
             })}
 
-            <Grid sx={{ gridColumn: 'span 8' }} />
-            <Grid sx={{ gridColumn: 'span 12' }}>
+            <Grid size={8} />
+            <Grid size={12}>
               <Button
                 color="primary"
                 onClick={() => {

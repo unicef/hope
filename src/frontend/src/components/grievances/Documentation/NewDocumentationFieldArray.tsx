@@ -40,7 +40,7 @@ export function NewDocumentationFieldArray({
                 />
               </Grid>
             ))}
-            <Grid sx={{ gridColumn: 'span 12' }}>
+            <Grid size={12}>
               <Button
                 data-cy="add-documentation"
                 color="primary"

@@ -27,7 +27,7 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.documents.map((item) => (
-              <Grid sx={{ gridColumn: 'span 12' }} key={item.id}>
+              <Grid size={12} key={item.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}
                   values={values}
