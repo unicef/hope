@@ -2,7 +2,7 @@ from typing import Any, Sequence
 import uuid
 from uuid import UUID
 
-from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.buttons import ButtonWidget
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -97,6 +97,11 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["ie_base_change_list_template"] = "admin/change_list.html"
+        return super().changelist_view(request, extra_context=extra_context)
+
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
         return super().get_fields(request, obj)
 
@@ -150,39 +155,39 @@ class BusinessAreaForIndividualCollectionListFilter(BusinessAreaForCollectionsLi
     model_filter_field = "individuals__business_area__id"
 
 
-def is_enabled(btn: Button) -> bool:
+def is_enabled(btn: ButtonWidget) -> bool:
     return btn.request.user.is_superuser
 
 
-def is_payment_plan_in_status(btn: Button, status: str) -> bool:
+def is_payment_plan_in_status(btn: ButtonWidget, status: str) -> bool:
     return btn.original.status == status
 
 
-def is_background_action_in_status(btn: Button, background_status: str) -> bool:
+def is_background_action_in_status(btn: ButtonWidget, background_status: str) -> bool:
     return btn.original.background_action_status == background_status
 
 
-def is_preparing_payment_plan(btn: Button) -> bool:
+def is_preparing_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.OPEN)
 
 
-def is_locked_payment_plan(btn: Button) -> bool:
+def is_locked_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.LOCKED)
 
 
-def is_accepted_payment_plan(btn: Button) -> bool:
+def is_accepted_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.ACCEPTED)
 
 
-def is_importing_entitlements_xlsx_file(btn: Button) -> bool:
+def is_importing_entitlements_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
 
 
-def is_importing_reconciliation_xlsx_file(btn: Button) -> bool:
+def is_importing_reconciliation_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION)
 
 
-def is_exporting_xlsx_file(btn: Button) -> bool:
+def is_exporting_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
 
 
