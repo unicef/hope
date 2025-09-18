@@ -214,11 +214,7 @@ def generate_grievance(
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
-    business_area = (
-        BusinessArea.objects.filter(slug="afghanistan").first()
-        if business_area is None
-        else business_area
-    )
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
     grievance_ticket = GrievanceTicket.objects.create(
         business_area=business_area,
         unicef_id=unicef_id,
@@ -252,9 +248,7 @@ def generate_grievance(
     # list of duplicate Individuals
     selected_individuals = []
 
-    role = IndividualRoleInHouseholdFactory(
-        role="PRIMARY", household=hh, individual=individual_qs[0]
-    )
+    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh, individual=individual_qs[0])
 
     role_data = {
         "HEAD": {
@@ -309,10 +303,7 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
     grievance = [
-        create_grievance_referral(
-            assigned_to="", business_area=afghanistan, program=program
-        )
-        for _ in range(4)
+        create_grievance_referral(assigned_to="", business_area=afghanistan, program=program) for _ in range(4)
     ]
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
     GrievanceTicket._meta.get_field("updated_at").auto_now = True
@@ -321,9 +312,7 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
 
 @pytest.fixture
 def create_grievance_tickets_social_program() -> GrievanceTicket:
-    grievance = create_grievance_referral(
-        assigned_to="", household_unicef_id="HH-20-0000.0001"
-    )
+    grievance = create_grievance_referral(assigned_to="", household_unicef_id="HH-20-0000.0001")
     grievance.programs.add(Program.objects.filter(name="Social Program").first())
     grievance.save()
     return grievance
@@ -344,11 +333,7 @@ def create_grievance_referral(
     created_at: str = "2022-04-30T09:54:07.827000",
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
-    business_area = (
-        BusinessArea.objects.filter(slug="afghanistan").first()
-        if business_area is None
-        else business_area
-    )
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
     if not program:
         program = ProgramFactory(
             business_area=business_area,
@@ -429,9 +414,7 @@ class TestSmokeGrievanceTickets:
             "Total Days",
             "Programmes",
         ]
-        assert expected_labels == [
-            i.text for i in page_grievance_tickets.get_table_label()
-        ]
+        assert expected_labels == [i.text for i in page_grievance_tickets.get_table_label()]
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_system_generated_page(
@@ -479,28 +462,18 @@ class TestSmokeGrievanceTickets:
         assert "Ticket ID" in page_grievance_details_page.get_title().text
         assert "EDIT" in page_grievance_details_page.get_button_edit().text
         assert "SEND BACK" in page_grievance_details_page.get_button_send_back().text
-        assert (
-            "CLOSE TICKET" in page_grievance_details_page.get_button_close_ticket().text
-        )
+        assert "CLOSE TICKET" in page_grievance_details_page.get_button_close_ticket().text
         assert "For Approval" in page_grievance_details_page.get_ticket_status().text
         assert "Medium" in page_grievance_details_page.get_ticket_priority().text
         assert "Urgent" in page_grievance_details_page.get_ticket_urgency().text
         assert "-" in page_grievance_details_page.get_ticket_assigment().text
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
-        assert (
-            "HH-20-0000.0002" in page_grievance_details_page.get_ticket_target_id().text
-        )
+        assert "HH-20-0000.0002" in page_grievance_details_page.get_ticket_target_id().text
         assert "-" in page_grievance_details_page.get_ticket_payment_label().text
         assert "-" in page_grievance_details_page.get_label_payment_plan().text
-        assert (
-            "-"
-            in page_grievance_details_page.get_label_payment_plan_verification().text
-        )
+        assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
         assert "Andarab" in page_grievance_details_page.get_administrative_level().text
-        assert (
-            "English | English"
-            in page_grievance_details_page.get_languages_spoken().text
-        )
+        assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
         assert "" in page_grievance_details_page.get_new_note_field().text
@@ -528,36 +501,20 @@ class TestSmokeGrievanceTickets:
         assert "Ticket ID" in page_grievance_details_page.get_title().text
         assert "EDIT" in page_grievance_details_page.get_button_edit().text
         assert "SEND BACK" in page_grievance_details_page.get_button_send_back().text
-        assert (
-            "CLOSE TICKET" in page_grievance_details_page.get_button_close_ticket().text
-        )
+        assert "CLOSE TICKET" in page_grievance_details_page.get_button_close_ticket().text
         assert "For Approval" in page_grievance_details_page.get_ticket_status().text
         assert "Medium" in page_grievance_details_page.get_ticket_priority().text
         assert "Urgent" in page_grievance_details_page.get_ticket_urgency().text
         assert "-" in page_grievance_details_page.get_ticket_assigment().text
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
-        assert (
-            "HH-20-0000.0002"
-            in page_grievance_details_page.get_ticket_household_id().text
-        )
-        assert (
-            "IND-74-0000.0001"
-            in page_grievance_details_page.get_ticket_individual_id().text
-        )
+        assert "HH-20-0000.0002" in page_grievance_details_page.get_ticket_household_id().text
+        assert "IND-74-0000.0001" in page_grievance_details_page.get_ticket_individual_id().text
         assert "-" in page_grievance_details_page.get_label_payment_plan().text
-        assert (
-            "-"
-            in page_grievance_details_page.get_label_payment_plan_verification().text
-        )
+        assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
-        assert (
-            "Shakardara" in page_grievance_details_page.get_administrative_level().text
-        )
+        assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
         assert "-" in page_grievance_details_page.get_area_village().text
-        assert (
-            "English | English"
-            in page_grievance_details_page.get_languages_spoken().text
-        )
+        assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
         assert "" in page_grievance_details_page.get_new_note_field().text
@@ -582,20 +539,13 @@ class TestSmokeGrievanceTickets:
         page_grievance_details_page.get_ticket_status()
         assert "Ticket ID" in page_grievance_details_page.get_title().text
         assert "EDIT" in page_grievance_details_page.get_button_edit().text
-        assert (
-            "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
-        )
+        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
         assert "New" in page_grievance_details_page.get_label_status().text
         assert "High" in page_grievance_details_page.get_label_priority().text
         assert "Very urgent" in page_grievance_details_page.get_label_urgency().text
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
-        assert (
-            "Social Program" in page_grievance_details_page.get_label_programme().text
-        )
-        assert (
-            "IND-00-0000.0011"
-            in page_grievance_details_page.get_ticket_target_id().text
-        )
+        assert "Social Program" in page_grievance_details_page.get_label_programme().text
+        assert "IND-00-0000.0011" in page_grievance_details_page.get_ticket_target_id().text
 
 
 @pytest.mark.usefixtures("login")
@@ -620,10 +570,7 @@ class TestGrievanceTicketsHappyPath:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_button_next().click()
-        assert (
-            "Happy path test 1234!"
-            in page_grievance_details_page.get_ticket_description().text
-        )
+        assert "Happy path test 1234!" in page_grievance_details_page.get_ticket_description().text
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
@@ -685,10 +632,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_option_by_name(test_data["category"])
         page_grievance_new_ticket.get_issue_type().click()
         page_grievance_new_ticket.select_listbox_element(test_data["type"])
-        assert (
-            test_data["category"]
-            in page_grievance_new_ticket.get_select_category().text
-        )
+        assert test_data["category"] in page_grievance_new_ticket.get_select_category().text
         assert test_data["type"] in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
@@ -705,23 +649,12 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_button_next().click()
-        assert (
-            "Happy path test 1234!"
-            in page_grievance_details_page.get_ticket_description().text
-        )
+        assert "Happy path test 1234!" in page_grievance_details_page.get_ticket_description().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
         user = User.objects.get(email="test@example.com")
-        assert (
-            f"{user.first_name} {user.last_name}"
-            in page_grievance_details_page.get_label_created_by().text
-        )
-        assert (
-            test_data["category"]
-            in page_grievance_details_page.get_ticket_category().text
-        )
-        assert (
-            test_data["type"] in page_grievance_details_page.get_label_issue_type().text
-        )
+        assert f"{user.first_name} {user.last_name}" in page_grievance_details_page.get_label_created_by().text
+        assert test_data["category"] in page_grievance_details_page.get_ticket_category().text
+        assert test_data["type"] in page_grievance_details_page.get_label_issue_type().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
@@ -753,9 +686,7 @@ class TestGrievanceTickets:
 
         for item in items:
             sleep(0.5)
-            assert (
-                str(item.get_attribute("aria-disabled")) in check_list[item.text]
-            ), f"{item.text} - not disabled"
+            assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
     def test_grievance_tickets_create_new_ticket_data_change_add_individual_all_fields(
         self,
@@ -782,23 +713,15 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")
         page_grievance_new_ticket.get_phone_no_alternative().send_keys("999 999 999")
         page_grievance_new_ticket.get_date_picker_filter().click()
-        page_grievance_new_ticket.get_date_picker_filter().send_keys(
-            FormatTime(1, 5, 1986).numerically_formatted_date
-        )
-        page_grievance_new_ticket.get_input_individualdata_blockchainname().send_keys(
-            "TEST"
-        )
-        page_grievance_new_ticket.get_input_individualdata_familyname().send_keys(
-            "Teria"
-        )
+        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+        page_grievance_new_ticket.get_input_individualdata_blockchainname().send_keys("TEST")
+        page_grievance_new_ticket.get_input_individualdata_familyname().send_keys("Teria")
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
         page_grievance_new_ticket.get_estimated_birth_date().click()
         page_grievance_new_ticket.select_listbox_element("Yes")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
         page_grievance_new_ticket.select_listbox_element("Male")
-        page_grievance_new_ticket.get_input_individualdata_givenname().send_keys(
-            "Krato"
-        )
+        page_grievance_new_ticket.get_input_individualdata_givenname().send_keys("Krato")
         page_grievance_new_ticket.get_select_individualdata_commsdisability().click()
         page_grievance_new_ticket.select_listbox_element("A lot of difficulty")
         page_grievance_new_ticket.get_select_individualdata_hearingdisability().click()
@@ -809,43 +732,28 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_listbox_element("Some difficulty")
         page_grievance_new_ticket.get_select_individualdata_physicaldisability().click()
         page_grievance_new_ticket.select_listbox_element("None")
-        page_grievance_new_ticket.get_input_individualdata_email().send_keys(
-            "kridoteria@bukare.cz"
-        )
+        page_grievance_new_ticket.get_input_individualdata_email().send_keys("kridoteria@bukare.cz")
         page_grievance_new_ticket.get_select_individualdata_disability().click()
         page_grievance_new_ticket.select_listbox_element("disabled")
         page_grievance_new_ticket.get_select_individualdata_pregnant().click()
         page_grievance_new_ticket.select_listbox_element("No")
         page_grievance_new_ticket.get_select_individualdata_maritalstatus().click()
         page_grievance_new_ticket.select_listbox_element("Married")
-        page_grievance_new_ticket.get_input_individualdata_middlename().send_keys(
-            "Batu"
-        )
-        page_grievance_new_ticket.get_input_individualdata_phoneno().send_keys(
-            "098 765 432"
-        )
+        page_grievance_new_ticket.get_input_individualdata_middlename().send_keys("Batu")
+        page_grievance_new_ticket.get_input_individualdata_phoneno().send_keys("098 765 432")
         page_grievance_new_ticket.get_select_individualdata_preferredlanguage().click()
         page_grievance_new_ticket.select_listbox_element("English")
         page_grievance_new_ticket.get_select_individualdata_relationship().click()
         page_grievance_new_ticket.select_listbox_element("Wife / Husband")
         # page_grievance_new_ticket.get_select_individualdata_role().click()
         # page_grievance_new_ticket.select_listbox_element("Alternate collector")
-        page_grievance_new_ticket.get_input_individualdata_walletaddress().send_keys(
-            "Wordoki"
-        )
+        page_grievance_new_ticket.get_input_individualdata_walletaddress().send_keys("Wordoki")
         page_grievance_new_ticket.get_input_individualdata_walletname().send_keys("123")
-        page_grievance_new_ticket.get_input_individualdata_whoanswersaltphone().send_keys(
-            "000 000 000"
-        )
-        page_grievance_new_ticket.get_input_individualdata_whoanswersphone().send_keys(
-            "111 11 11"
-        )
+        page_grievance_new_ticket.get_input_individualdata_whoanswersaltphone().send_keys("000 000 000")
+        page_grievance_new_ticket.get_input_individualdata_whoanswersphone().send_keys("111 11 11")
 
         page_grievance_new_ticket.get_button_next().click()
-        assert (
-            "Add Member - TEST"
-            in page_grievance_details_page.get_ticket_description().text
-        )
+        assert "Add Member - TEST" in page_grievance_details_page.get_ticket_description().text
         assert "Data Change" in page_grievance_details_page.get_ticket_category().text
         assert "Add Member" in page_grievance_details_page.get_label_issue_type().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
@@ -877,9 +785,7 @@ class TestGrievanceTickets:
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual - TEST")
         page_grievance_new_ticket.get_date_picker_filter().click()
-        page_grievance_new_ticket.get_date_picker_filter().send_keys(
-            FormatTime(1, 5, 1986).numerically_formatted_date
-        )
+        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
 
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
@@ -893,44 +799,25 @@ class TestGrievanceTickets:
         # page_grievance_new_ticket.get_select_individualdata_role().click()
         # page_grievance_new_ticket.select_listbox_element("Alternate collector")
         page_grievance_new_ticket.get_button_next().click()
-        assert (
-            "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
-        )
+        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
         assert "-" in page_grievance_details_page.get_ticket_assigment().text
         assert "Data Change" in page_grievance_details_page.get_ticket_category().text
         assert "Add Member" in page_grievance_details_page.get_label_issue_type().text
-        assert (
-            household_without_disabilities.unicef_id
-            in page_grievance_details_page.get_ticket_target_id().text
-        )
+        assert household_without_disabilities.unicef_id in page_grievance_details_page.get_ticket_target_id().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
-        assert (
-            datetime.now().strftime("%-d %b %Y")
-            in page_grievance_details_page.get_label_date_creation().text
-        )
-        assert (
-            datetime.now().strftime("%-d %b %Y")
-            in page_grievance_details_page.get_label_last_modified_date().text
-        )
+        assert datetime.now().strftime("%-d %b %Y") in page_grievance_details_page.get_label_date_creation().text
+        assert datetime.now().strftime("%-d %b %Y") in page_grievance_details_page.get_label_last_modified_date().text
         assert "-" in page_grievance_details_page.get_label_documentation().text
-        assert (
-            "Add Individual - TEST"
-            in page_grievance_details_page.get_label_description().text
-        )
+        assert "Add Individual - TEST" in page_grievance_details_page.get_label_description().text
         assert "Male" in page_grievance_details_page.get_label_gender().text
         # assert "Alternate collector" in page_grievance_details_page.get_label_role().text
         assert "Krido" in page_grievance_details_page.get_label_full_name().text
         assert "1986-05-01" in page_grievance_details_page.get_label_birth_date().text
-        assert (
-            "Wife / Husband"
-            in page_grievance_details_page.get_label_relationship().text
-        )
-        assert (
-            "Yes" in page_grievance_details_page.get_label_estimated_birth_date().text
-        )
+        assert "Wife / Husband" in page_grievance_details_page.get_label_relationship().text
+        assert "Yes" in page_grievance_details_page.get_label_estimated_birth_date().text
 
     @pytest.mark.parametrize(
         "test_data",
@@ -957,10 +844,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_option_by_name(str(test_data["category"]))
         page_grievance_new_ticket.get_issue_type().click()
         page_grievance_new_ticket.select_listbox_element(str(test_data["type"]))
-        assert (
-            test_data["category"]
-            in page_grievance_new_ticket.get_select_category().text
-        )
+        assert test_data["category"] in page_grievance_new_ticket.get_select_category().text
         assert test_data["type"] in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
@@ -972,15 +856,11 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Add Group - TEST")
         page_grievance_new_ticket.get_button_add_new_field()
         page_grievance_new_ticket.get_select_field_name().click()
-        page_grievance_new_ticket.select_listbox_element(
-            "Females age 12 - 17 with disability"
-        )
+        page_grievance_new_ticket.select_listbox_element("Females age 12 - 17 with disability")
         page_grievance_new_ticket.get_input_value().send_keys("1")
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_details_page.get_checkbox_household_data()
-        assert (
-            "Female Age Group 12 17" in page_grievance_details_page.get_rows()[0].text
-        )
+        assert "Female Age Group 12 17" in page_grievance_details_page.get_rows()[0].text
         assert "- 1" in page_grievance_details_page.get_rows()[0].text
 
     @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
@@ -1007,14 +887,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name(str(test_data["category"]))
         page_grievance_new_ticket.get_issue_type().click()
-        page_grievance_new_ticket.element_clickable(
-            f'li[data-cy="select-option-{test_data["type"]}"]'
-        )
+        page_grievance_new_ticket.element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
         page_grievance_new_ticket.select_listbox_element(str(test_data["type"]))
-        assert (
-            test_data["category"]
-            in page_grievance_new_ticket.get_select_category().text
-        )
+        assert test_data["category"] in page_grievance_new_ticket.get_select_category().text
         assert test_data["type"] in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
@@ -1025,9 +900,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
 
-        page_grievance_new_ticket.get_description().send_keys(
-            "Add Member Data Update - TEST"
-        )
+        page_grievance_new_ticket.get_description().send_keys("Add Member Data Update - TEST")
         page_grievance_new_ticket.get_button_add_new_field().click()
         page_grievance_new_ticket.get_individual_field_name(0).click()
         page_grievance_new_ticket.select_listbox_element("Gender")
@@ -1035,9 +908,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_listbox_element("Female")
         page_grievance_new_ticket.get_individual_field_name(1).click()
         page_grievance_new_ticket.select_listbox_element("Preferred language")
-        page_grievance_new_ticket.get_input_individual_data(
-            "Preferred language"
-        ).click()
+        page_grievance_new_ticket.get_input_individual_data("Preferred language").click()
         page_grievance_new_ticket.select_listbox_element("English | English")
 
         page_grievance_new_ticket.get_button_next().click()
@@ -1064,14 +935,8 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_option_by_name("Grievance Complaint")
         page_grievance_new_ticket.get_issue_type().click()
         page_grievance_new_ticket.select_listbox_element("Partner Related Complaint")
-        assert (
-            "Grievance Complaint"
-            in page_grievance_new_ticket.get_select_category().text
-        )
-        assert (
-            "Partner Related Complaint"
-            in page_grievance_new_ticket.get_issue_type().text
-        )
+        assert "Grievance Complaint" in page_grievance_new_ticket.get_select_category().text
+        assert "Partner Related Complaint" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_button_next().click()
@@ -1098,30 +963,19 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_option_by_name("Grievance Complaint")
         page_grievance_new_ticket.get_issue_type().click()
         page_grievance_new_ticket.select_listbox_element("Payment Related Complaint")
-        assert (
-            "Grievance Complaint"
-            in page_grievance_new_ticket.get_select_category().text
-        )
-        assert (
-            "Payment Related Complaint"
-            in page_grievance_new_ticket.get_issue_type().text
-        )
+        assert "Grievance Complaint" in page_grievance_new_ticket.get_select_category().text
+        assert "Payment Related Complaint" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_description().send_keys(
-            "TEST Payment Related Complaint"
-        )
+        page_grievance_new_ticket.get_description().send_keys("TEST Payment Related Complaint")
         page_grievance_new_ticket.get_look_up_payment_record().click()
         page_grievance_new_ticket.get_checkbox_select_all().click()
         page_grievance_new_ticket.get_button_submit().click()
-        assert (
-            hh_with_payment_record.unicef_id
-            in page_grievance_details_page.get_payment_record().text
-        )
+        assert hh_with_payment_record.unicef_id in page_grievance_details_page.get_payment_record().text
         page_grievance_new_ticket.get_button_next().click()
         assert payment_id in page_grievance_details_page.get_ticket_payment_label().text
 
@@ -1181,9 +1035,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_add_documentation().click()
         page_grievance_new_ticket.get_input_documentation_name(0).send_keys("example")
-        page_grievance_new_ticket.upload_file(
-            f"{pytest.SELENIUM_PATH}/helpers/document_example.png"
-        )
+        page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         page_grievance_new_ticket.get_button_next().click()
         assert "example" in page_grievance_details_page.get_link_show_photo().text
         page_grievance_details_page.get_link_show_photo().click()
@@ -1210,9 +1062,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_individual_tab().click()
-        individual_unicef_id = page_grievance_new_ticket.get_individual_table_rows(
-            0
-        ).text.split(" ")[0]
+        individual_unicef_id = page_grievance_new_ticket.get_individual_table_rows(0).text.split(" ")[0]
         page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_input_questionnaire_size().click()
@@ -1220,31 +1070,17 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_questionnaire_malechildrencount().click()
         assert "-" in page_grievance_new_ticket.get_label_number_of_male_children().text
         page_grievance_new_ticket.get_input_questionnaire_femalechildrencount().click()
-        assert (
-            "-" in page_grievance_new_ticket.get_label_number_of_female_children().text
-        )
+        assert "-" in page_grievance_new_ticket.get_label_number_of_female_children().text
         page_grievance_new_ticket.get_input_questionnaire_childrendisabledcount().click()
-        assert (
-            "-"
-            in page_grievance_new_ticket.get_label_number_of_disabled_children().text
-        )
+        assert "-" in page_grievance_new_ticket.get_label_number_of_disabled_children().text
         page_grievance_new_ticket.get_input_questionnaire_headofhousehold().click()
         individual = Individual.objects.get(unicef_id=individual_unicef_id)
         household = individual.household
-        assert (
-            individual.full_name
-            in page_grievance_new_ticket.get_label_head_of_household().text
-        )
+        assert individual.full_name in page_grievance_new_ticket.get_label_head_of_household().text
         page_grievance_new_ticket.get_input_questionnaire_countryorigin().click()
-        assert (
-            str(household.country_origin)
-            in page_grievance_new_ticket.get_label_country_of_origin().text
-        )
+        assert str(household.country_origin) in page_grievance_new_ticket.get_label_country_of_origin().text
         page_grievance_new_ticket.get_input_questionnaire_address().click()
-        assert (
-            household.address.replace("\n", " ")
-            in page_grievance_new_ticket.get_label_address().text
-        )
+        assert household.address.replace("\n", " ") in page_grievance_new_ticket.get_label_address().text
         page_grievance_new_ticket.get_input_questionnaire_village().click()
         assert household.village in page_grievance_new_ticket.get_label_village().text
         page_grievance_new_ticket.get_input_questionnaire_admin_1().click()
@@ -1256,15 +1092,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_questionnaire_admin_4().click()
         assert "-" in page_grievance_new_ticket.get_label_administrative_level_4().text
         page_grievance_new_ticket.get_input_questionnaire_months_displaced_h_f().click()
-        assert (
-            "-"
-            in page_grievance_new_ticket.get_label_length_of_time_since_arrival().text
-        )
+        assert "-" in page_grievance_new_ticket.get_label_length_of_time_since_arrival().text
         page_grievance_new_ticket.get_input_questionnaire_fullname().click()
-        assert (
-            individual.full_name
-            in page_grievance_new_ticket.get_label_individual_full_name().text
-        )
+        assert individual.full_name in page_grievance_new_ticket.get_label_individual_full_name().text
         page_grievance_new_ticket.get_input_questionnaire_birthdate().click()
         assert "-" in page_grievance_new_ticket.get_label_birth_date().text
         page_grievance_new_ticket.get_input_questionnaire_sex().click()
@@ -1338,9 +1168,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_issue_type().click()
         page_grievance_new_ticket.select_listbox_element("Household Data Update")
         assert "Data Change" in page_grievance_new_ticket.get_select_category().text
-        assert (
-            "Items Group Data Update" in page_grievance_new_ticket.get_issue_type().text
-        )
+        assert "Items Group Data Update" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
@@ -1380,21 +1208,13 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_input_newnote().send_keys(
-            "Test adding new note."
-        )
+        page_grievance_details_page.get_input_newnote().send_keys("Test adding new note.")
         page_grievance_details_page.get_button_new_note().click()
         user = page_grievance_details_page.get_note_name().text
         assert len(page_grievance_details_page.get_note_rows()) == 1
         assert user in page_grievance_details_page.get_note_rows()[0].text
-        assert (
-            datetime.now().strftime("%-d %b %Y")
-            in page_grievance_details_page.get_note_rows()[0].text
-        )
-        assert (
-            "Test adding new note."
-            in page_grievance_details_page.get_note_rows()[0].text
-        )
+        assert datetime.now().strftime("%-d %b %Y") in page_grievance_details_page.get_note_rows()[0].text
+        assert "Test adding new note." in page_grievance_details_page.get_note_rows()[0].text
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_activity_log(
@@ -1428,10 +1248,7 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_ticket_list_row()[0].click()
         page_grievance_details_page.get_button_admin().click()
         assert "grievance_ticket_1" in page_admin_panel.get_unicef_id().text
-        assert (
-            GrievanceTicket.objects.first().unicef_id
-            in page_admin_panel.get_unicef_id().text
-        )
+        assert GrievanceTicket.objects.first().unicef_id in page_admin_panel.get_unicef_id().text
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_needs_adjudication(
@@ -1451,41 +1268,31 @@ class TestGrievanceTickets:
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0011"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "people-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0022"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "person-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0022"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "people-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0033"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "person-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0033"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         page_grievance_details_page.get_button_clear().click()
         page_grievance_details_page.get_button_confirm().click()
@@ -1496,9 +1303,7 @@ class TestGrievanceTickets:
                 ii.get_attribute("data-cy")
                 for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                     "IND-00-0000.0011"
-                ).find_elements(
-                    By.TAG_NAME, "svg"
-                )
+                ).find_elements(By.TAG_NAME, "svg")
             ]
         except TimeoutException:
             sleep(4)
@@ -1506,87 +1311,69 @@ class TestGrievanceTickets:
                 ii.get_attribute("data-cy")
                 for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                     "IND-00-0000.0011"
-                ).find_elements(
-                    By.TAG_NAME, "svg"
-                )
+                ).find_elements(By.TAG_NAME, "svg")
             ]
         assert "person-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0011"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "people-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0022"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "person-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0022"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "people-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0033"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "person-icon" not in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0033"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
-        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
-            "IND-00-0000.0033"
-        ).find_element(By.CSS_SELECTOR, 'input[type="checkbox"]').click()
+        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id("IND-00-0000.0033").find_element(
+            By.CSS_SELECTOR, 'input[type="checkbox"]'
+        ).click()
         page_grievance_details_page.get_button_mark_distinct().click()
         page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_person_icon()
-        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
-            "IND-00-0000.0011"
-        ).find_element(By.CSS_SELECTOR, 'input[type="checkbox"]').click()
-        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
-            "IND-00-0000.0022"
-        ).find_element(By.CSS_SELECTOR, 'input[type="checkbox"]').click()
+        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id("IND-00-0000.0011").find_element(
+            By.CSS_SELECTOR, 'input[type="checkbox"]'
+        ).click()
+        page_grievance_details_page.get_possible_duplicate_row_by_unicef_id("IND-00-0000.0022").find_element(
+            By.CSS_SELECTOR, 'input[type="checkbox"]'
+        ).click()
         page_grievance_details_page.get_button_mark_duplicate().click()
         page_grievance_details_page.get_people_icon()
         assert "people-icon" in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0011"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "person-icon" in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0033"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         assert "people-icon" in [
             ii.get_attribute("data-cy")
             for ii in page_grievance_details_page.get_possible_duplicate_row_by_unicef_id(
                 "IND-00-0000.0022"
-            ).find_elements(
-                By.TAG_NAME, "svg"
-            )
+            ).find_elements(By.TAG_NAME, "svg")
         ]
         duplicated_individual_unicef_id = "IND-00-0000.0022"
         page_grievance_details_page.get_button_close_ticket().click()
@@ -1599,15 +1386,11 @@ class TestGrievanceTickets:
         page_individuals.get_nav_individuals().click()
         page_individuals.get_individual_table_row()
         assert len(page_individuals.get_individual_table_row()) == 3
-        for icon in page_individuals.get_individual_table_row()[0].find_elements(
-            By.TAG_NAME, "svg"
-        ):
+        for icon in page_individuals.get_individual_table_row()[0].find_elements(By.TAG_NAME, "svg"):
             assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
             break
         else:
-            raise AssertionError(
-                f"Icon for {page_individuals.get_individual_table_row()[0].text} does not appear"
-            )
+            raise AssertionError(f"Icon for {page_individuals.get_individual_table_row()[0].text} does not appear")
         for individual_row in page_individuals.get_individual_table_row():
             if duplicated_individual_unicef_id in individual_row.text:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
