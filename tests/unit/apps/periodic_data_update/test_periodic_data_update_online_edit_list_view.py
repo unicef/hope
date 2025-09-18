@@ -51,6 +51,11 @@ class TestPDUOnlineEditList:
             status=PDUOnlineEdit.Status.READY,
         )  # Request user is authorized
         self.pdu_edit_other_program = PDUOnlineEditFactory(program=self.other_program, business_area=self.afghanistan)
+        # test on CI sometimes fails because of ordering
+        self.pdu_edit1.created_at = "2022-01-01T01:00:00Z"
+        self.pdu_edit1.save()
+        self.pdu_edit2.created_at = "2022-01-01T02:00:00Z"
+        self.pdu_edit2.save()
 
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-online-edits-list",

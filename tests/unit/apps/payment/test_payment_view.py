@@ -42,12 +42,12 @@ class TestPaymentViewSet:
         url_kwargs = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
-            "payment_plan_id": pp_id,
+            "payment_plan_pk": pp_id,
         }
         url_kwargs_with_payment = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
-            "payment_plan_id": pp_id,
+            "payment_plan_pk": pp_id,
             "payment_id": self.payment.pk,
         }
         self.url_list = reverse("api:payments:payments-list", kwargs=url_kwargs)
