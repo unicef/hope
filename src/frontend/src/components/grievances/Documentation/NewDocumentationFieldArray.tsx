@@ -18,7 +18,7 @@ export function NewDocumentationFieldArray({
 }: NewDocumentationFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <Grid container spacing={3}>
+    <Grid container size={12} spacing={3}>
       <FieldArray
         name="documentation"
         render={(arrayHelpers) => (
@@ -26,6 +26,7 @@ export function NewDocumentationFieldArray({
             {values.documentation?.map((_item, index) => (
               <Grid
                 container
+                size={12}
                 direction="row"
                 alignItems="center"
                 spacing={3}

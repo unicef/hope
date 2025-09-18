@@ -38,7 +38,7 @@ export function EditDocumentationRow({
   const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
-    <Grid container spacing={3} key={document.id}>
+    <Grid container size={12} spacing={3} key={document.id}>
       <DocumentationField
         index={index}
         key={`${index}-documentation-file`}
