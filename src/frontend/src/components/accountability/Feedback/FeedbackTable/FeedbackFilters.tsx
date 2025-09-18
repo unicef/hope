@@ -20,14 +20,14 @@ interface FeedbackFiltersProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
-  _filter;
+  filter;
 }
 const FeedbackFilters = ({
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-  _filter,
+  filter,
 }: FeedbackFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const FeedbackFilters = ({
       initialFilter,
       navigate,
       location,
-      _filter,
+      filter,
       setFilter,
       appliedFilter,
       setAppliedFilter,
@@ -71,7 +71,7 @@ const FeedbackFilters = ({
       <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
-            value={_filter.feedbackId}
+            value={filter.feedbackId}
             label="Search"
             onChange={(e) => handleFilterChange('feedbackId', e.target.value)}
             data-cy="filters-search"
@@ -80,9 +80,9 @@ const FeedbackFilters = ({
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
             <ProgramAutocompleteRestFilter
-              filter={_filter}
+              filter={filter}
               name="program"
-              value={_filter.program}
+              value={filter.program}
               setFilter={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
@@ -94,7 +94,7 @@ const FeedbackFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Issue Type')}
-            value={_filter.issueType}
+            value={filter.issueType}
             data-cy="filters-issue-type"
           >
             {choicesData?.feedbackIssueTypeChoices?.map((issueType) => (
@@ -107,8 +107,8 @@ const FeedbackFilters = ({
         <Grid size={{ xs: 3 }}>
           <CreatedByAutocompleteRestFilter
             name="createdBy"
-            filter={_filter}
-            value={_filter.createdBy}
+            filter={filter}
+            value={filter.createdBy}
             label={t('Created by')}
             setFilter={setFilter}
             initialFilter={initialFilter}
@@ -123,7 +123,7 @@ const FeedbackFilters = ({
             topLabel={t('Creation Date')}
             label="From"
             onChange={(date) => handleFilterChange('createdAtBefore', date)}
-            value={_filter.createdAtBefore}
+            value={filter.createdAtBefore}
             dataCy="filters-creation-date-from"
           />
         </Grid>
@@ -131,7 +131,7 @@ const FeedbackFilters = ({
           <DatePickerFilter
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtAfter', date)}
-            value={_filter.createdAtAfter}
+            value={filter.createdAtAfter}
             dataCy="filters-creation-date-to"
           />
         </Grid>
@@ -142,7 +142,7 @@ const FeedbackFilters = ({
                 handleFilterChange('programState', e.target.value)
               }
               label={t('Programme State')}
-              value={_filter.programState}
+              value={filter.programState}
               fullWidth
               disableClearable
               data-cy="filters-program-state"
