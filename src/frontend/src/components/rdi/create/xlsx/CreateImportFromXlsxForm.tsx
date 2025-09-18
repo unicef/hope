@@ -47,7 +47,7 @@ export function CreateImportFromXlsxForm({
 
   // Mutation for creating registration xlsx import
   const createImportMutation = useMutation({
-    mutationFn: async (data: {
+    mutationFn: async(data: {
       importDataId: string;
       name: string;
       screenBeneficiary: boolean;
@@ -92,7 +92,7 @@ export function CreateImportFromXlsxForm({
     validationSchema,
     onSubmit,
   });
-  const saveXlsxInputData = async (): Promise<void> => {
+  const saveXlsxInputData = async(): Promise<void> => {
     if (!formik.values.file) {
       return;
     }

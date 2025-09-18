@@ -61,7 +61,7 @@ export const VolumeByDeliveryMechanismSection: FC<
     (vdm, index) => (
       <Grid
         size={{ xs: 6 }}
-        /* eslint-disable-next-line react/no-array-index-key */
+         
         key={`${vdm.deliveryMechanism.id}-${index}`}
       >
         <FieldBorder

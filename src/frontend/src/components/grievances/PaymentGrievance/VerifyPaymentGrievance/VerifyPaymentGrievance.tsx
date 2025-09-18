@@ -65,10 +65,10 @@ export function VerifyPaymentGrievance({
     },
   });
 
-  const submit = async (values): Promise<void> => {
+  const submit = async(values): Promise<void> => {
     try {
       await mutate(values);
-    } catch (e) {
+    } catch {
       // Error handling is already in the mutation onError callback
     }
   };

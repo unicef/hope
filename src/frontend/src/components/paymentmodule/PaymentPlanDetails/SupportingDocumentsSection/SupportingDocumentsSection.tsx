@@ -172,7 +172,7 @@ export const SupportingDocumentsSection = ({
     });
   };
 
-  const handleRemove = async (
+  const handleRemove = async(
     _businessArea: string,
     _programId: string,
     paymentPlanId: string,

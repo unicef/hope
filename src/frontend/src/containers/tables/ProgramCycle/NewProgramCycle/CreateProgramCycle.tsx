@@ -96,14 +96,14 @@ const CreateProgramCycle = ({
     MutationError,
     ProgramCycleCreate
   >({
-    mutationFn: async (body) => {
+    mutationFn: async(body) => {
       return RestService.restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug: businessArea,
         programSlug: program.slug,
         requestBody: body,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async() => {
       await queryClient.invalidateQueries({
         queryKey: ['programCycles', businessArea, program.slug],
       });
@@ -111,7 +111,7 @@ const CreateProgramCycle = ({
     },
   });
 
-  const handleSubmit = async (values: FormikValues) => {
+  const handleSubmit = async(values: FormikValues) => {
     try {
       await mutateAsync({
         title: values.title,

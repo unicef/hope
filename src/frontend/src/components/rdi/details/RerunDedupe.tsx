@@ -34,7 +34,7 @@ export const RerunDedupe = ({
     RestService.restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate,
     [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
   );
-  const rerunDedupe = async (): Promise<void> => {
+  const rerunDedupe = async(): Promise<void> => {
     try {
       await mutate();
       showMessage('Rerunning Deduplication started');

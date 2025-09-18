@@ -107,7 +107,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     }),
   });
 
-  const handleSubmit = async (values: any): Promise<void> => {
+  const handleSubmit = async(values: any): Promise<void> => {
     const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
@@ -159,7 +159,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 <Grid size={{ xs: 6 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
-                    onChange={async (e) => {
+                    onChange={async(e) => {
                       await setFieldValue('programCycleId', e);
                     }}
                     required

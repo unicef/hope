@@ -81,7 +81,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
     queryKey: ['householdsFieldsAttributes'],
-    queryFn: async () => {
+    queryFn: async() => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
       return { allHouseholdsFlexFieldsAttributes: data };
     },

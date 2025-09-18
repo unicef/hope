@@ -180,7 +180,7 @@ const EditFeedbackPage = (): ReactElement => {
     <Formik
       initialValues={initialValues}
       enableReinitialize={true}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         try {
           await mutate({
             businessAreaSlug: businessArea,

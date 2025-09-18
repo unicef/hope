@@ -10,7 +10,7 @@ import { ReactElement } from 'react';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 
 interface SurveysFiltersProps {
-  filter;
+  filter: Record<string, any>;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

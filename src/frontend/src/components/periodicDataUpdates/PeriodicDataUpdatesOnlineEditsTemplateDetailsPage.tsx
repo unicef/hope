@@ -122,11 +122,11 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   });
 
-  const handleApprove = async () => {
+  const handleApprove = async() => {
     await bulkApprove([numericId]);
   };
 
-  const handleSendBackConfirm = async () => {
+  const handleSendBackConfirm = async() => {
     setSendBackLoading(true);
     try {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendBackCreate(
@@ -159,7 +159,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     }
   };
 
-  const handleSendForApproval = async () => {
+  const handleSendForApproval = async() => {
     setSendForApprovalLoading(true);
     try {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendForApprovalCreate(
@@ -211,7 +211,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   });
 
-  const handleMerge = async () => {
+  const handleMerge = async() => {
     await bulkMerge([numericId]);
   };
 
@@ -315,7 +315,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   }, [individuals]);
 
   // Save handler: call API and exit edit mode for row
-  const handleSaveRow = async (rowIdx: number) => {
+  const handleSaveRow = async(rowIdx: number) => {
     const row = editRows[rowIdx];
     const payload = {
       individualUuid: row.individualUuid,

@@ -11,7 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { ReactElement } from 'react';
 
 interface LookUpRegistrationFiltersCommunicationProps {
-  filter;
+  filter: Record<string, any>;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

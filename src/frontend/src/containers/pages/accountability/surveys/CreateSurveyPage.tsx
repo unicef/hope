@@ -160,7 +160,7 @@ const CreateSurveyPage = (): ReactElement => {
   const { data: adminAreasData, isLoading: adminAreasLoading } =
     useQuery<PaginatedAreaList>({
       queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
-      queryFn: async () => {
+      queryFn: async() => {
         return RestService.restAreasList({
           limit: 100,
           areaTypeAreaLevel: 2,
@@ -174,7 +174,7 @@ const CreateSurveyPage = (): ReactElement => {
   const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
 
-  const loadSampleSize = useCallback(async () => {
+  const loadSampleSize = useCallback(async() => {
     if (!businessArea || !programId) return;
 
     try {
@@ -206,7 +206,7 @@ const CreateSurveyPage = (): ReactElement => {
   const [flowsLoading, setFlowsLoading] = useState(false);
   const [flowsError, setFlowsError] = useState(null);
 
-  const loadAvailableFlows = useCallback(async () => {
+  const loadAvailableFlows = useCallback(async() => {
     if (!businessArea || !programId) return;
 
     try {
@@ -424,7 +424,7 @@ const CreateSurveyPage = (): ReactElement => {
                   : t('Are you sure you want to send this survey?'),
               continueText:
                 category === SurveyCategoryEnum.MANUAL ? t('Save') : t('Send'),
-            }).then(async () => {
+            }).then(async() => {
               try {
                 const variables = prepareMutationVariables(values);
                 const requestBody = {

@@ -270,7 +270,7 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <PermissionDenied />;
 
-  const changeState = async (status): Promise<void> => {
+  const changeState = async(status): Promise<void> => {
     try {
       await changeTicketStatus({
         id: ticket.id,
@@ -287,7 +287,7 @@ const EditGrievancePage = (): ReactElement => {
       );
     }
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const initialValues: any = prepareInitialValues(ticket);
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -344,7 +344,7 @@ const EditGrievancePage = (): ReactElement => {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         try {
           const formData = prepareRestUpdateVariables(
             businessAreaSlug,
@@ -357,7 +357,7 @@ const EditGrievancePage = (): ReactElement => {
           });
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);
-        } catch (e) {
+        } catch (error) {
           showApiErrorMessages(error, showMessage);
         }
         if (

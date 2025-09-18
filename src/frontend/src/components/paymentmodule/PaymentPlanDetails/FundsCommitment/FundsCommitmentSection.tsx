@@ -60,7 +60,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const { businessArea } = useBaseUrl();
   const { mutateAsync: assignFundsCommitment, isPending: loadingAssign } =
     useMutation({
-      mutationFn: async ({
+      mutationFn: async({
         fundCommitmentItemsIds,
       }: {
         fundCommitmentItemsIds: string[];
@@ -131,7 +131,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async() => {
     if (paymentPlan) {
       try {
         await assignFundsCommitment({

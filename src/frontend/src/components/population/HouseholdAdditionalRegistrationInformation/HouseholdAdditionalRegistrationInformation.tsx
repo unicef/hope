@@ -93,7 +93,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
         </Title>
         <Grid container spacing={6}>
           {fields.map((field, i) => (
-            /* eslint-disable-next-line react/no-array-index-key */
+             
             <Grid key={i} size={{ xs: 4 }}>
               {field}
             </Grid>

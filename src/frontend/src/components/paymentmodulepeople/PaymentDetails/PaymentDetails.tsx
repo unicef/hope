@@ -8,6 +8,7 @@ import {
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
+  safeStringify,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -50,8 +51,8 @@ export function PaymentDetails({
   ].includes(payment.status);
 
   const collectorAccountData = payment?.snapshotCollectorAccountData
-  ? JSON.parse(payment.snapshotCollectorAccountData)
-  : {};
+    ? JSON.parse(payment.snapshotCollectorAccountData)
+    : {};
 
   return (
     <>
@@ -225,7 +226,7 @@ export function PaymentDetails({
             <Grid key={key} size={{ xs: 3 }}>
               <LabelizedField
                 label={t(`Account ${key}`)}
-                value={String(value)}
+                value={safeStringify(value)}
               />
             </Grid>
           ))}

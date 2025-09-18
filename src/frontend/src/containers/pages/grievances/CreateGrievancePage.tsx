@@ -361,7 +361,7 @@ const CreateGrievancePage = (): ReactElement => {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
             const requestData = prepareRestVariables(businessArea, values);

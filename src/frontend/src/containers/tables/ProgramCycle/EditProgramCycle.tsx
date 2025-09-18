@@ -51,7 +51,7 @@ const EditProgramCycle = ({
     any,
     { title: string; startDate: string; endDate?: string }
   >({
-    mutationFn: async (body) => {
+    mutationFn: async(body) => {
       return RestService.restBusinessAreasProgramsCyclesPartialUpdate({
         businessAreaSlug: businessArea,
         id: programCycle.id,
@@ -59,7 +59,7 @@ const EditProgramCycle = ({
         requestBody: body,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async() => {
       await queryClient.invalidateQueries({
         queryKey: ['programCycles', businessArea, program.slug],
       });
@@ -69,7 +69,7 @@ const EditProgramCycle = ({
 
   const isEndDateRequired = !!programCycle.endDate;
 
-  const handleUpdate = async (values: any): Promise<void> => {
+  const handleUpdate = async(values: any): Promise<void> => {
     try {
       await mutateAsync({
         title: values.title,

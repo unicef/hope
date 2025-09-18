@@ -117,7 +117,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
         reasonHhId: type === 'edit' ? reasonHousehold?.unicefId : '',
       }}
       validationSchema={validationSchema}
-      onSubmit={async (values, { resetForm }) => {
+      onSubmit={async(values, { resetForm }) => {
         try {
           await mutation.mutateAsync({
             approveStatus: type === 'edit' ? true : !approveStatus,

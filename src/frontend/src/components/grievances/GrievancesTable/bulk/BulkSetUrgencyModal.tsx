@@ -71,7 +71,7 @@ export function BulkSetUrgencyModal({
       }),
   });
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
-  const onSave = async (): Promise<void> => {
+  const onSave = async(): Promise<void> => {
     await mutateAsync({
       urgency: value,
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
