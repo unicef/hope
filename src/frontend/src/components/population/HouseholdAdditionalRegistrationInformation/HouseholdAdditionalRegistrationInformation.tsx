@@ -1,14 +1,13 @@
-import { Theme, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import Paper from '@mui/material/Paper';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useArrayToDict } from '@hooks/useArrayToDict';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
-import { ReactElement } from 'react';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { Grid, Theme, Typography } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -93,8 +92,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
         </Title>
         <Grid container spacing={6}>
           {fields.map((field, i) => (
-             
-            <Grid key={i} size={{ xs: 4 }}>
+            <Grid key={i} size={4}>
               {field}
             </Grid>
           ))}

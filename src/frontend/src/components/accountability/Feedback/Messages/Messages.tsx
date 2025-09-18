@@ -5,7 +5,11 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -61,7 +65,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
-  const createFeedbackMessage = async(description: string) => {
+  const createFeedbackMessage = async (description: string) => {
     if (!id || !businessAreaSlug) return;
 
     try {
@@ -133,7 +137,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
       <Box p={3}>
         <Formik
           initialValues={initialValues}
-          onSubmit={async(values, { resetForm }) => {
+          onSubmit={async (values, { resetForm }) => {
             await createFeedbackMessage(values.newNote);
             resetForm({});
           }}

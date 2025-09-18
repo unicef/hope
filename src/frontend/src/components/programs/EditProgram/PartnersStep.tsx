@@ -4,7 +4,7 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { DividerLine } from '@core/DividerLine';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';

@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect } from 'react';
-import { Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { AddCircleOutline, Delete } from '@mui/icons-material';
@@ -181,7 +181,7 @@ function EditHouseholdDataChange({
                   />
                 ))}
 
-                <Grid size={{ xs: 4 }}>
+                <Grid sx={{ gridColumn: 'span 4' }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -203,16 +203,16 @@ function EditHouseholdDataChange({
           <Typography variant="h6">{t('Roles in Household')}</Typography>
         </Title>
         <Grid container spacing={2} alignItems="center">
-          <Grid size={{ xs: 4 }}>
+          <Grid sx={{ gridColumn: 'span 4' }}>
             <strong>{t('Full Name')}</strong>
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid sx={{ gridColumn: 'span 4' }}>
             <strong>{t('Current Role')}</strong>
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid sx={{ gridColumn: 'span 3' }}>
             <strong>{t('New Role')}</strong>
           </Grid>
-          <Grid size={{ xs: 1 }}></Grid>
+          <Grid sx={{ gridColumn: 'span 1' }}></Grid>
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
             // Find individual details from householdMembers
@@ -231,7 +231,7 @@ function EditHouseholdDataChange({
             const isNewRole = !currentRoleObj;
             return (
               <React.Fragment key={roleItem.individual + '-' + index}>
-                <Grid size={{ xs: 4 }}>
+                <Grid sx={{ gridColumn: 'span 4' }}>
                   <Field
                     name={`roles.${index}.individual`}
                     component={FormikSelectField}
@@ -240,12 +240,12 @@ function EditHouseholdDataChange({
                     fullWidth
                   />
                 </Grid>
-                <Grid size={{ xs: 4 }}>
+                <Grid sx={{ gridColumn: 'span 4' }}>
                   {currentRoleObj
                     ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
                     : 'None'}
                 </Grid>
-                <Grid size={{ xs: 3 }}>
+                <Grid sx={{ gridColumn: 'span 3' }}>
                   <Field
                     name={`roles.${index}.newRole`}
                     component={FormikSelectField}
@@ -254,7 +254,7 @@ function EditHouseholdDataChange({
                     fullWidth
                   />
                 </Grid>
-                <Grid size={{ xs: 1 }}>
+                <Grid sx={{ gridColumn: 'span 1' }}>
                   {isNewRole && (
                     <Button
                       color="secondary"
@@ -275,7 +275,7 @@ function EditHouseholdDataChange({
             );
           })}
           {/* Add a New Role button */}
-          <Grid size={{ xs: 12 }} style={{ marginTop: 16 }}>
+          <Grid sx={{ gridColumn: 'span 12', marginTop: 2 }}>
             {(() => {
               const usedIds = (values.roles || []).map((r) => r.individual);
               const availableIndividuals = householdMembers.results.filter(

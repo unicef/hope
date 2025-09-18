@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -59,11 +59,7 @@ export const VolumeByDeliveryMechanismSection: FC<
 
   const mappedDeliveryMechanism = volumeByDeliveryMechanism?.map(
     (vdm, index) => (
-      <Grid
-        size={{ xs: 6 }}
-         
-        key={`${vdm.deliveryMechanism.id}-${index}`}
-      >
+      <Grid size={{ xs: 6 }} key={`${vdm.deliveryMechanism.id}-${index}`}>
         <FieldBorder
           color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
         >

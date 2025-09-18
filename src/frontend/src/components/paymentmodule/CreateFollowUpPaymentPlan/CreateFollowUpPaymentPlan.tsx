@@ -17,7 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -105,7 +105,7 @@ export function CreateFollowUpPaymentPlan({
     dispersionEndDate: null,
   };
 
-  const handleSubmit = async(values: FormValues): Promise<void> => {
+  const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')

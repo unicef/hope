@@ -1,4 +1,4 @@
-import { Button, Grid2 as Grid } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -28,7 +28,7 @@ export const NewIdentityFieldArray = ({
             {values.individualDataUpdateFieldsIdentities?.map((item) => {
               return (
                 <Grid
-                  size={{ xs: 12 }}
+                  sx={{ gridColumn: 'span 12' }}
                   key={`${item?.id}-${item?.country}-${item?.partner}`}
                 >
                   <AgencyField
@@ -51,8 +51,8 @@ export const NewIdentityFieldArray = ({
               );
             })}
 
-            <Grid size={{ xs: 8 }} />
-            <Grid size={{ xs: 12 }}>
+            <Grid sx={{ gridColumn: 'span 8' }} />
+            <Grid sx={{ gridColumn: 'span 12' }}>
               <Button
                 color="primary"
                 onClick={() => {

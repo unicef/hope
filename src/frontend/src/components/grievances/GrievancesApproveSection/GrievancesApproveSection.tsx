@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import AddIndividualGrievanceDetails from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
@@ -120,7 +120,7 @@ function GrievancesApproveSection({
   };
 
   return (
-    <Grid container size={{ xs: 12 }}>
+    <Grid container sx={{ gridColumn: 'span 12' }}>
       <Box sx={{ width: '100%' }} p={3}>
         {matchDetailsComponent()}
       </Box>

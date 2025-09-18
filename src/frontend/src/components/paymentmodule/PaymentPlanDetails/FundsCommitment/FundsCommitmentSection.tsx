@@ -20,7 +20,7 @@ import {
   styled,
   Tooltip,
   Typography,
-  Grid2 as Grid,
+  Grid,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
@@ -60,7 +60,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const { businessArea } = useBaseUrl();
   const { mutateAsync: assignFundsCommitment, isPending: loadingAssign } =
     useMutation({
-      mutationFn: async({
+      mutationFn: async ({
         fundCommitmentItemsIds,
       }: {
         fundCommitmentItemsIds: string[];
@@ -106,8 +106,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       selectedFundsCommitment?.fundsCommitmentNumber,
   );
 
-  const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value as string[];
+  const handleItemsChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as unknown as string[];
 
     if (value.includes('select-all')) {
       const allItems =
@@ -131,7 +131,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     }
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     if (paymentPlan) {
       try {
         await assignFundsCommitment({
@@ -216,9 +216,12 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   <Select
                     multiple
                     label={t('Funds Commitment Items')}
+                    // @ts-ignore
                     value={selectedItems.map(String)}
                     onChange={handleItemsChange}
-                    renderValue={(selected) => selected.join(', ')}
+                    renderValue={(selected) =>
+                      Array.isArray(selected) ? selected.join(', ') : selected
+                    }
                     endAdornment={
                       <EndInputAdornment position="end">
                         <IconButton

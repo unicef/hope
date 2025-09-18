@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '@core/LabelizedField';
 import { DashboardCard, CardTitle, CardAmountSmaller } from './DashboardCard';
@@ -31,7 +31,7 @@ export function GrievanceDashboardCard({
         </Grid>
       </Grid>
       <Grid container alignItems="center">
-        <Grid size={{ xs: 6 }} >
+        <Grid sx={{ gridColumn: 'span 6' }}>
           <LabelizedField
             dataCy={`${dataCy}-system-generated`}
             label={t('SYSTEM-GENERATED')}
@@ -39,7 +39,7 @@ export function GrievanceDashboardCard({
             {systemGenerated}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 6 }} >
+        <Grid sx={{ gridColumn: 'span 6' }}>
           <LabelizedField
             dataCy={`${dataCy}-user-generated`}
             label={t('USER-GENERATED')}

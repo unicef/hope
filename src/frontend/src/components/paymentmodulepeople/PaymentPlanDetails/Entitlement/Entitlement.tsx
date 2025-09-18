@@ -14,7 +14,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid2 as Grid,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -199,7 +199,7 @@ export function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING ||
+      BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -210,7 +210,7 @@ export function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems="center" container>
+          <Grid container alignItems="center">
             <Grid size={{ xs: 11 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
@@ -255,11 +255,11 @@ export function Entitlement({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"
-                  onClick={async() => {
+                  onClick={async () => {
                     try {
                       await setSteficonRule({
                         programSlug: programId,

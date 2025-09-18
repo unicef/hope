@@ -3,8 +3,8 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
   Typography,
+  Grid,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import {
@@ -84,26 +84,26 @@ function prepareSampleSizeRequest(
   const fullListArguments =
     selectedTab === 0
       ? {
-        excludedAdminAreas: formValues.excludedAdminAreasFull || [],
-      }
+          excludedAdminAreas: formValues.excludedAdminAreasFull || [],
+        }
       : undefined;
 
   const randomSamplingArguments =
     selectedTab === 1
       ? {
-        confidenceInterval: formValues.confidenceInterval * 0.01,
-        marginOfError: formValues.marginOfError * 0.01,
-        excludedAdminAreas: formValues.adminCheckbox
-          ? formValues.excludedAdminAreasRandom || []
-          : [],
-        age: formValues.ageCheckbox
-          ? {
-            min: formValues.filterAgeMin || 0,
-            max: formValues.filterAgeMax || 999,
-          }
-          : null,
-        sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
-      }
+          confidenceInterval: formValues.confidenceInterval * 0.01,
+          marginOfError: formValues.marginOfError * 0.01,
+          excludedAdminAreas: formValues.adminCheckbox
+            ? formValues.excludedAdminAreasRandom || []
+            : [],
+          age: formValues.ageCheckbox
+            ? {
+                min: formValues.filterAgeMin || 0,
+                max: formValues.filterAgeMax || 999,
+              }
+            : null,
+          sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
+        }
       : undefined;
 
   return {
@@ -121,28 +121,31 @@ function prepareMutationData(
   return {
     sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
     verificationChannel: values.verificationChannel,
-    fullListArguments: selectedTab === 0 ? {
-      excludedAdminAreas: values.excludedAdminAreasFull || [],
-    } : null,
+    fullListArguments:
+      selectedTab === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : null,
     randomSamplingArguments:
       selectedTab === 1
         ? {
-          confidenceInterval: values.confidenceInterval * 0.01,
-          marginOfError: values.marginOfError * 0.01,
-          excludedAdminAreas: values.adminCheckbox
-            ? values.excludedAdminAreasRandom
-            : [],
-          age: values.ageCheckbox
-            ? { min: values.filterAgeMin, max: values.filterAgeMax }
-            : null,
-          sex: values.sexCheckbox ? values.filterSex : null,
-        }
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
         : null,
     rapidProArguments:
       values.verificationChannel === 'RAPIDPRO'
         ? {
-          flowId: values.rapidProFlow,
-        }
+            flowId: values.rapidProFlow,
+          }
         : null,
   };
 }
@@ -154,10 +157,10 @@ export interface Props {
 }
 
 export const CreateVerificationPlan = ({
-                                         cashOrPaymentPlanId,
-                                         canCreatePaymentVerificationPlan,
-                                         isPaymentPlan,
-                                       }: Props): ReactElement => {
+  cashOrPaymentPlanId,
+  canCreatePaymentVerificationPlan,
+  isPaymentPlan,
+}: Props): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -210,7 +213,7 @@ export const CreateVerificationPlan = ({
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
-    queryFn: async() => {
+    queryFn: async () => {
       return RestService.restAreasList({
         limit: 100,
         areaTypeAreaLevel: 2,
@@ -223,7 +226,7 @@ export const CreateVerificationPlan = ({
   // Sample size state management
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
-  const loadSampleSize = useCallback(async() => {
+  const loadSampleSize = useCallback(async () => {
     if (!businessArea || !programSlug) return;
 
     try {
@@ -264,7 +267,7 @@ export const CreateVerificationPlan = ({
     }
   }, [open, loadSampleSize, selectedTab]);
 
-  const submit = async(values): Promise<void> => {
+  const submit = async (values): Promise<void> => {
     try {
       const requestData = prepareMutationData(selectedTab, values);
       await createVerificationPlanMutation.mutateAsync(requestData);
@@ -278,9 +281,9 @@ export const CreateVerificationPlan = ({
 
   const mappedAdminAreas = adminAreasData?.results?.length
     ? adminAreasData.results.map((area) => ({
-      value: area.id,
-      name: area.name || '',
-    }))
+        value: area.id,
+        name: area.name || '',
+      }))
     : [];
 
   const handleFormChange = (values): void => {
@@ -614,9 +617,9 @@ export const CreateVerificationPlan = ({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                value: flow.uuid,
-                                name: flow.name,
-                              }))
+                                  value: flow.uuid,
+                                  name: flow.name,
+                                }))
                               : []
                           }
                           component={FormikSelectField}

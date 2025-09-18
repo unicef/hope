@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
 import {
   GRIEVANCE_CATEGORIES,
@@ -147,5 +147,5 @@ export function GrievancesSidebar({
     );
   };
 
-  return <Grid size={{ xs: 4 }}>{renderRightSection()}</Grid>;
+  return <Grid sx={{ width: '100%' }}>{renderRightSection()}</Grid>;
 }

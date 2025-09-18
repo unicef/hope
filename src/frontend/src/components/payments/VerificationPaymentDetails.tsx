@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
@@ -123,10 +123,7 @@ export function VerificationPaymentDetails({
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('FSP')}
-              value={payment.fspName}
-            />
+            <LabelizedField label={t('FSP')} value={payment.fspName} />
           </Grid>
         </Grid>
       </Overview>

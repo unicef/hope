@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
 import { ReactElement } from 'react';
@@ -27,7 +27,7 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.documents.map((item) => (
-              <Grid size={{ xs: 12 }} key={item.id}>
+              <Grid sx={{ gridColumn: 'span 12' }} key={item.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}
                   values={values}

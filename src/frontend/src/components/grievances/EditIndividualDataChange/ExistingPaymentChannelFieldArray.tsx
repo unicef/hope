@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Grid2 as Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ReactElement } from 'react';
 

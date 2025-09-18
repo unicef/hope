@@ -31,13 +31,7 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -270,7 +264,7 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <PermissionDenied />;
 
-  const changeState = async(status): Promise<void> => {
+  const changeState = async (status): Promise<void> => {
     try {
       await changeTicketStatus({
         id: ticket.id,
@@ -344,7 +338,7 @@ const EditGrievancePage = (): ReactElement => {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         try {
           const formData = prepareRestUpdateVariables(
             businessAreaSlug,

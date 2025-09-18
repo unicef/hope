@@ -9,8 +9,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { RestService } from '@restgenerated/index';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { ProgramCycleUpdate } from '@restgenerated/models/ProgramCycleUpdate';
@@ -98,7 +97,7 @@ const UpdateProgramCycle = ({
     },
   });
 
-  const handleSubmit = async(values: FormikValues) => {
+  const handleSubmit = async (values: FormikValues) => {
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,
@@ -141,7 +140,7 @@ const UpdateProgramCycle = ({
               </GreyText>
             </DialogDescription>
             <Grid container spacing={3}>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={6}>
                 <LabelizedField
                   data-cy="previous-program-cycle-title"
                   label={t('Programme Cycle Title')}
@@ -149,7 +148,7 @@ const UpdateProgramCycle = ({
                   {values.title}
                 </LabelizedField>
               </Grid>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={6}>
                 <LabelizedField
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
@@ -157,7 +156,7 @@ const UpdateProgramCycle = ({
                   {values.startDate}
                 </LabelizedField>
               </Grid>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={6}>
                 <Field
                   name="endDate"
                   label={t('End Date')}

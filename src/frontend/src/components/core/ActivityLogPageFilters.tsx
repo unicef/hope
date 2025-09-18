@@ -1,5 +1,5 @@
 import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -63,7 +63,7 @@ export function ActivityLogPageFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="center" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'center' }}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}

@@ -19,7 +19,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   Radio,
   RadioGroup,
   Step,
@@ -147,7 +147,7 @@ const CreateCommunicationPage = (): ReactElement => {
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
-    queryFn: async() => {
+    queryFn: async () => {
       return RestService.restAreasList({
         limit: 100,
         areaTypeAreaLevel: 2,
@@ -157,7 +157,7 @@ const CreateCommunicationPage = (): ReactElement => {
     enabled: !!businessArea,
   });
 
-  const loadSampleSize = useCallback(async() => {
+  const loadSampleSize = useCallback(async () => {
     if (!businessArea) return;
 
     try {
@@ -206,7 +206,7 @@ const CreateCommunicationPage = (): ReactElement => {
   const [flowsLoading, setFlowsLoading] = useState(false);
   const [flowsError, setFlowsError] = useState(null);
 
-  const loadAvailableFlows = useCallback(async() => {
+  const loadAvailableFlows = useCallback(async () => {
     if (!businessArea || !programId) return;
 
     try {
@@ -372,7 +372,7 @@ const CreateCommunicationPage = (): ReactElement => {
           confirm({
             title: t('Confirmation'),
             content: t('Are you sure you want to send this message?'),
-          }).then(async() => {
+          }).then(async () => {
             try {
               const response = await mutate(prepareMutationVariables(values));
               showMessage(t('Communication Ticket created.'));
@@ -402,7 +402,7 @@ const CreateCommunicationPage = (): ReactElement => {
             }
           />
           <PaperContainer>
-            <Grid size={{ xs: 9 }}>
+            <Grid size={9}>
               <Stepper activeStep={activeStep}>
                 {steps.map((label) => {
                   const stepProps: { completed?: boolean } = {};
@@ -660,7 +660,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 <>
                   <Border />
                   <Box my={3}>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid size={12}>
                       <Field
                         name="title"
                         required
@@ -672,7 +672,7 @@ const CreateCommunicationPage = (): ReactElement => {
                       />
                     </Grid>
                   </Box>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid size={12}>
                     <Field
                       name="body"
                       required

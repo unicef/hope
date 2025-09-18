@@ -1,4 +1,4 @@
-import { Box, Button, Grid2 as Grid, IconButton } from '@mui/material';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
@@ -13,7 +13,7 @@ export interface EditAccountRowProps {
   account: Account;
   arrayHelpers;
   id: string;
-  individualChoicesData: IndividualChoices
+  individualChoicesData: IndividualChoices;
 }
 
 export function EditAccountRow({
@@ -37,14 +37,16 @@ export function EditAccountRow({
         account={account}
         values={values}
         accountTypeChoices={individualChoicesData.accountTypeChoices}
-        accountFinancialInstitutionChoices={individualChoicesData.accountFinancialInstitutionChoices}
+        accountFinancialInstitutionChoices={
+          individualChoicesData.accountFinancialInstitutionChoices
+        }
         onDelete={() => {}}
       />
       <Box display="flex" alignItems="center">
         <Button
           variant="outlined"
           color="primary"
-          startIcon={<Close/>}
+          startIcon={<Close />}
           onClick={() => {
             arrayHelpers.remove({
               id: account.id,
@@ -59,44 +61,44 @@ export function EditAccountRow({
     </>
   ) : (
     <Fragment key={account.id}>
-      <Grid size={{ xs: 4 }} key="type">
-        <LabelizedField
-          label="type"
-          value={String(account.accountType)}
-        />
+      <Grid sx={{ gridColumn: 'span 4' }} key="type">
+        <LabelizedField label="type" value={String(account.accountType)} />
       </Grid>
-    {Object.entries(dataFields).map(([key, value]) => {
-      let displayValue = String(value);
+      {Object.entries(dataFields).map(([key, value]) => {
+        let displayValue = String(value);
 
-      if (
-        key === 'financial_institution' &&
-        Array.isArray(individualChoicesData.accountFinancialInstitutionChoices)
-      ) {
-        const choice = individualChoicesData.accountFinancialInstitutionChoices.find(
-          (c: any) => c.value === value,
+        if (
+          key === 'financial_institution' &&
+          Array.isArray(
+            individualChoicesData.accountFinancialInstitutionChoices,
+          )
+        ) {
+          const choice =
+            individualChoicesData.accountFinancialInstitutionChoices.find(
+              (c: any) => c.value === value,
+            );
+          displayValue = choice ? choice.name : String(value);
+        }
+
+        return (
+          <Grid sx={{ gridColumn: 'span 4' }} key={key}>
+            <LabelizedField label={key} value={displayValue} />
+          </Grid>
         );
-        displayValue = choice ? choice.name : String(value);
-      }
-
-      return (
-        <Grid size={{ xs: 4 }} key={key}>
-          <LabelizedField label={key} value={displayValue} />
-        </Grid>
-      );
-    })}
-    <Grid  size={{ xs: 1 }}>
-      <Box display="flex" alignItems="center">
-        <IconButton
-          onClick={() => {
-            arrayHelpers.push({ id: account.id, ...dataFields });
-            setEdit(true);
-          }}
-          disabled={isEditTicket}
-        >
-          <Edit />
-        </IconButton>
-      </Box>
-    </Grid>
-  </Fragment>
+      })}
+      <Grid sx={{ gridColumn: 'span 1' }}>
+        <Box display="flex" alignItems="center">
+          <IconButton
+            onClick={() => {
+              arrayHelpers.push({ id: account.id, ...dataFields });
+              setEdit(true);
+            }}
+            disabled={isEditTicket}
+          >
+            <Edit />
+          </IconButton>
+        </Box>
+      </Grid>
+    </Fragment>
   );
 }

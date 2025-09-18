@@ -1,4 +1,3 @@
- 
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, useFormikContext } from 'formik';
 import { FC, useEffect } from 'react';
@@ -9,7 +8,7 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
@@ -289,7 +288,7 @@ const SubField: FC<SubFieldProps> = ({
       case 'PDU':
         return (
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
+            <Grid size={12}>
               <Field
                 name={`${baseName}.roundNumber`}
                 required
@@ -312,7 +311,7 @@ const SubField: FC<SubFieldProps> = ({
                 data-cy="input-round-number"
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid size={12}>
               <Field
                 name={`${baseName}.isNull`}
                 label={t('Only Empty Values')}
@@ -321,7 +320,7 @@ const SubField: FC<SubFieldProps> = ({
                 data-cy="input-include-null-round"
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid size={12}>
               {renderFieldByType(
                 field.pduData?.subtype ||
                   field.fieldAttribute?.pduData?.subtype,

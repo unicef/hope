@@ -5,7 +5,7 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
@@ -70,7 +70,7 @@ export const ProgramDetails = ({
     return (
       <Grid container spacing={6}>
         {Object.keys(counts).map((level) => (
-          <Grid size={{ xs: 3 }} key={level}>
+          <Grid size={3} key={level}>
             <LabelizedField
               dataCy={`admin-area-${level}-total-count`}
               label={t(`Admin Area ${level}`)}
@@ -96,7 +96,7 @@ export const ProgramDetails = ({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField label={t('status')}>
               <StatusBox
                 status={program.status}
@@ -104,43 +104,43 @@ export const ProgramDetails = ({
               />
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('START DATE')}
               value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('END DATE')}
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Programme Code')}
               value={program.programmeCode}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Data Collecting Type')}
               value={program?.dataCollectingType?.label}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Beneficiary Group')}
               value={program?.beneficiaryGroup?.name}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Frequency of Payment')}
               value={
@@ -150,25 +150,25 @@ export const ProgramDetails = ({
               }
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
               value={program.administrativeAreasOfImplementation}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Description')}
               value={program.description}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('CASH+')}
               value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               label={t('Partner Access')}
               value={PartnerAccess[program.partnerAccess]}
@@ -192,7 +192,7 @@ export const ProgramDetails = ({
           <OverviewContainer>
             <Grid container spacing={6}>
               {partners.map((partner) => (
-                <Grid key={partner.id} size={{ xs: 12 }}>
+                <Grid key={partner.id} size={12}>
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
