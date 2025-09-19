@@ -49,9 +49,6 @@ describe('IndividualsListTable', () => {
         program: {
           id: 'test-program',
           name: 'Test Program',
-          slug: 'test-program',
-          status: ProgramStatusEnum.ACTIVE,
-          screenBeneficiary: true,
         },
         lastRegistrationDate: '2023-01-15T10:30:00Z',
       },

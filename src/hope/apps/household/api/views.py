@@ -359,13 +359,18 @@ class IndividualViewSet(
 
     def get_queryset_list(self) -> QuerySet:
         qs = super().get_queryset()
-        return qs.select_related("household", "household__admin2").prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
-                .only("id", "individual_id", "household_id", "role", "created_at")
-                .order_by("id"),
-                to_attr="prefetched_roles",
+        return (
+            qs.select_related("household", "household__admin2", "program")
+            .prefetch_related("program__sanction_lists")
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                    .only("id", "individual_id", "household_id", "role", "created_at")
+                    .order_by("id"),
+                    to_attr="prefetched_roles",
+                )
             )
         )
 
