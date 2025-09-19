@@ -62,5 +62,7 @@ export type ProgramUpdate = {
     version?: number;
     readonly status: string;
     readonly partnerAccess: string;
+    reconciliationWindowInDays?: number;
+    sendReconciliationWindowExpiryNotifications?: boolean | null;
 };
 

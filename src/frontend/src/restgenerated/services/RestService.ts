@@ -8539,13 +8539,13 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsList({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         limit,
         offset,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         /**
          * Number of results to return per page.
@@ -8558,10 +8558,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             query: {
@@ -8577,21 +8577,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8603,21 +8603,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8629,23 +8629,23 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         requestBody,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         requestBody: RevertMarkPaymentAsFailed,
     }): CancelablePromise<RevertMarkPaymentAsFailed> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/revert-mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/revert-mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             body: requestBody,
@@ -8658,19 +8658,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8681,21 +8681,21 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsCreate({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         requestBody,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         requestBody: PaymentPlanSupportingDocument,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             body: requestBody,
@@ -8709,21 +8709,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDestroy({
         businessAreaSlug,
         fileId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         fileId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8735,21 +8735,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDownloadRetrieve({
         businessAreaSlug,
         fileId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         fileId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/download/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/download/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });

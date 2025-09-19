@@ -174,6 +174,18 @@ export const ProgramDetails = ({
               value={PartnerAccess[program.partnerAccess]}
             />
           </Grid>
+          <Grid size={{ xs: 4 }}>
+            <LabelizedField
+              label={t('Reconciliation Window (in days)')}
+              value={program.reconciliationWindowInDays}
+            />
+          </Grid>
+          <Grid size={{ xs: 4 }}>
+            <LabelizedField
+              label={t('Send reconciliation window expiry notifications')}
+              value={program.sendReconciliationWindowExpiryNotifications ? t('Yes') : t('No')}
+            />
+          </Grid>
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>

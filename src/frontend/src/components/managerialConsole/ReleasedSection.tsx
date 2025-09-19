@@ -50,7 +50,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programId}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programSlug}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
           newTab={true}
         >
           {params.value}
@@ -74,6 +74,12 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'lastApprovalProcessBy',
       headerName: t('Released by'),
       width: 200,
+    },
+    {
+      field: 'hasPaymentsReconciliationOverdue',
+      headerName: t('Payments Reconciliation Overdue'),
+      width: 100,
+      renderCell: (params) => <>{params.value ? <span style={{ color: 'red', fontWeight: 600 }}>YES</span> : ''}</>,
     },
   ];
 

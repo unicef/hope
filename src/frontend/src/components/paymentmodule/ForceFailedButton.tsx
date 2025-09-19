@@ -42,7 +42,7 @@ export function ForceFailedButton({
           {
             businessAreaSlug,
             paymentId: id,
-            paymentPlanId: ppId,
+            paymentPlanPk: ppId,
             programSlug,
           },
         ),

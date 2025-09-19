@@ -259,6 +259,14 @@ class Program(
         related_name="programs",
         help_text="Program sanction lists",
     )
+
+    reconciliation_window_in_days = models.PositiveIntegerField(
+        default=0, help_text="Payment Plan reconciliation window in days"
+    )
+    send_reconciliation_window_expiry_notifications = models.BooleanField(
+        default=False, help_text="Send Payment Plan reconciliation window expiry notifications"
+    )
+
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:

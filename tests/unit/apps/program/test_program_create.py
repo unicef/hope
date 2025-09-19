@@ -82,6 +82,8 @@ class TestProgramCreate:
             "partner_access": Program.ALL_PARTNERS_ACCESS,
             "partners": [],
             "pdu_fields": [],
+            "reconciliation_window_in_days": 0,
+            "send_reconciliation_window_expiry_notifications": False,
         }
         self.expected_response_standard = {
             **self.valid_input_data_standard,

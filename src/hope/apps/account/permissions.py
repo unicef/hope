@@ -125,6 +125,7 @@ class Permissions(Enum):
     PM_PROGRAMME_CYCLE_DELETE = auto()
 
     RECEIVE_PARSED_WU_QCF = auto()
+    RECEIVE_PP_OVERDUE_EMAIL = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()

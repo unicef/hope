@@ -73,5 +73,7 @@ export type ProgramCreate = {
     partnerAccess?: PartnerAccessEnum;
     readonly version: number;
     readonly status: string;
+    reconciliationWindowInDays?: number;
+    sendReconciliationWindowExpiryNotifications?: boolean;
 };
 
