@@ -9,7 +9,7 @@ import type { DeduplicationEngineSimilarityPairIndividual } from './Deduplicatio
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DeduplicationResult } from './DeduplicationResult';
 import type { IndividualListHousehold } from './IndividualListHousehold';
-import type { ProgramSmall } from './ProgramSmall';
+import type { ProgramOnlyName } from './ProgramOnlyName';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type IndividualList = {
@@ -56,7 +56,6 @@ export type IndividualList = {
      * * `NOT_ANSWERED` - Not answered
      */
     sex: SexEnum;
-    readonly role: string;
     relationshipDisplay: string;
     /**
      * Beneficiary date of birth
@@ -108,10 +107,11 @@ export type IndividualList = {
     biometricDeduplicationGoldenRecordStatusDisplay: string;
     readonly deduplicationGoldenRecordResults: Array<DeduplicationResult>;
     readonly biometricDeduplicationGoldenRecordResults: Array<DeduplicationEngineSimilarityPairIndividual>;
-    program: ProgramSmall;
+    program: ProgramOnlyName;
     /**
      * Last registration date [sys]
      */
     lastRegistrationDate: string;
+    readonly role: string;
 };
 

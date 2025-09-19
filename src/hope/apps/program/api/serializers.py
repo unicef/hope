@@ -335,6 +335,11 @@ class ProgramListSerializer(serializers.ModelSerializer):
         return [pdu_field.id for pdu_field in obj.pdu_fields.all()]  # to save queries
 
 
+class ProgramOnlyNameSerializer(serializers.ModelSerializer):
+    class Meta(ProgramListSerializer.Meta):
+        fields = ("id", "name")
+
+
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
     registration_imports_total_count = serializers.SerializerMethodField()
