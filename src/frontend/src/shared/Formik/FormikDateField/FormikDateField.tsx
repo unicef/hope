@@ -32,86 +32,80 @@ export const FormikDateField = ({
   }
 
   const datePickerComponent = (
-    <FullWidthFormControl size="small">
-      <div data-cy={dataCy}>
-        <DesktopDatePicker
-          {...field}
-          {...otherProps}
-          label={required ? `${otherProps.label}*` : otherProps.label}
-          format="yyyy-MM-dd"
-          name={field.name}
-          slotProps={{
-            textField: {
-              size: 'small',
-              error: isInvalid,
-              helperText: isInvalid && get(form.errors, field.name),
-              inputProps: {
+    <FullWidthFormControl data-cy={dataCy} size="small">
+      <DesktopDatePicker
+        {...field}
+        {...otherProps}
+        label={required ? `${otherProps.label}*` : otherProps.label}
+        format="yyyy-MM-dd"
+        name={field.name}
+        slotProps={{
+          textField: {
+            size: 'small',
+            error: isInvalid,
+            helperText: isInvalid && get(form.errors, field.name),
+            inputProps: {
+              'data-cy': `date-input-${field.name}`,
+            },
+          },
+        }}
+        sx={{
+          '& .MuiSvgIcon-root': {
+            outline: 'none',
+          },
+        }}
+        slots={{
+          TextField: (props) => (
+            <TextField
+              {...props}
+              variant="outlined"
+              size="small"
+              fullWidth
+              error={isInvalid}
+              helperText={isInvalid && get(form.errors, field.name)}
+              InputProps={{
+                startAdornment: decoratorStart && (
+                  <InputAdornment position="start">
+                    {decoratorStart}
+                  </InputAdornment>
+                ),
+                endAdornment: decoratorEnd && (
+                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+                ),
+              }}
+              required={required}
+              inputProps={{
+                ...props.inputProps,
                 'data-cy': `date-input-${field.name}`,
+              }}
+            />
+          ),
+        }}
+        value={formattedValue || null}
+        onBlur={() => {
+          setTimeout(() => {
+            form.handleBlur({ target: { name: field.name } });
+          }, 0);
+        }}
+        onChange={(date) => {
+          if (date instanceof Date && !isNaN(date.getTime())) {
+            field.onChange({
+              target: {
+                value: moment(date).format('YYYY-MM-DD'),
+                name: field.name,
               },
-            },
-          }}
-          sx={{
-            '& .MuiSvgIcon-root': {
-              outline: 'none',
-            },
-          }}
-          slots={{
-            TextField: (props) => (
-              <TextField
-                {...props}
-                variant="outlined"
-                size="small"
-                fullWidth
-                error={isInvalid}
-                helperText={isInvalid && get(form.errors, field.name)}
-                required={required}
-                slotProps={{
-                  input: {
-                    startAdornment: decoratorStart && (
-                      <InputAdornment position="start">
-                        {decoratorStart}
-                      </InputAdornment>
-                    ),
-                    endAdornment: decoratorEnd && (
-                      <InputAdornment position="end">
-                        {decoratorEnd}
-                      </InputAdornment>
-                    ),
-                  },
-                  htmlInput: {
-                    ...props.slotProps?.htmlInput,
-                    'data-cy': `date-input-${field.name}`,
-                  },
-                }}
-              />
-            ),
-          }}
-          value={formattedValue || null}
-          onBlur={() => {
-            setTimeout(() => {
-              form.handleBlur({ target: { name: field.name } });
-            }, 0);
-          }}
-          onChange={(date) => {
-            if (date instanceof Date && !isNaN(date.getTime())) {
-              field.onChange({
-                target: {
-                  value: moment(date).format('YYYY-MM-DD'),
-                  name: field.name,
-                },
-              });
-            } else {
-              console.error('Invalid date:', date);
-              field.onChange({
-                target: {
-                  value: null,
-                  name: field.name,
-                },
-              });
-            }
-          }}
-        />
-      </div>
+            });
+          } else {
+            console.error('Invalid date:', date);
+            field.onChange({
+              target: {
+                value: null,
+                name: field.name,
+              },
+            });
+          }
+        }}
+      />
     </FullWidthFormControl>
   );
 
