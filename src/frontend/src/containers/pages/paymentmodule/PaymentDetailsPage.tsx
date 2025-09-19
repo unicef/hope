@@ -32,8 +32,8 @@ function PaymentDetailsPage(): ReactElement {
         businessAreaSlug: businessArea,
         paymentId: paymentId,
         programSlug: programId,
-        paymentPlanId,
-      }),
+        paymentPlanPk: paymentPlanId,
+        }),
   });
 
   const paymentPlanStatus = payment?.parent?.status;
