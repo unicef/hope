@@ -30,7 +30,14 @@ export const DatePickerFilter = ({
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
       <FormControl data-cy={calculatedDataCy} size="small">
         <DesktopDatePicker
-          slotProps={{ textField: { size: 'small' } }}
+          slotProps={{
+            textField: {
+              size: 'small',
+              inputProps: {
+                'data-cy': 'date-picker-filter-input',
+              },
+            },
+          }}
           onChange={(date) => {
             if (date instanceof Date && !isNaN(date.getTime())) {
               // Format as 'yyyy-MM-dd' (date only) using native Date methods
