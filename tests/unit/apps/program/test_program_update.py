@@ -83,7 +83,7 @@ class TestProgramUpdate:
             "frequency_of_payments": Program.REGULAR,
             "administrative_areas_of_implementation": "Areas of Implementation21",
             "reconciliation_window_in_days": 0,
-            "send_reconciliation_window_expiry_notifications": False
+            "send_reconciliation_window_expiry_notifications": False,
         }
         self.program = ProgramFactory(**self.initial_program_data, business_area=self.afghanistan)
         role_with_all_permissions = RoleFactory(name="Role with all permissions")
