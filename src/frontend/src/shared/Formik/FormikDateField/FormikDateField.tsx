@@ -63,20 +63,24 @@ export const FormikDateField = ({
               fullWidth
               error={isInvalid}
               helperText={isInvalid && get(form.errors, field.name)}
-              InputProps={{
-                startAdornment: decoratorStart && (
-                  <InputAdornment position="start">
-                    {decoratorStart}
-                  </InputAdornment>
-                ),
-                endAdornment: decoratorEnd && (
-                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-                ),
-              }}
               required={required}
-              inputProps={{
-                ...props.inputProps,
-                'data-cy': `date-input-${field.name}`,
+              slotProps={{
+                input: {
+                  startAdornment: decoratorStart && (
+                    <InputAdornment position="start">
+                      {decoratorStart}
+                    </InputAdornment>
+                  ),
+                  endAdornment: decoratorEnd && (
+                    <InputAdornment position="end">
+                      {decoratorEnd}
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  ...props.slotProps?.htmlInput,
+                  'data-cy': `date-input-${field.name}`,
+                },
               }}
             />
           ),
