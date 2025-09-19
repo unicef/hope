@@ -3,9 +3,9 @@ import {
   Button,
   Collapse,
   FormHelperText,
-  Grid2 as Grid,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -304,8 +304,8 @@ export function ExcludeSection({
     if (isEdit || numberOfExcluded === 0) {
       return (
         <Box mt={2} display="flex" alignItems="center">
-          <Grid alignItems="flex-start" container spacing={3}>
-            <Grid size={{ xs: 12 }}>
+          <Grid container alignItems="flex-start" spacing={3}>
+            <Grid size={12}>
               <Field
                 name="exclusionReason"
                 fullWidth
@@ -315,7 +315,7 @@ export function ExcludeSection({
                 component={FormikTextField}
               />
             </Grid>
-            <Grid size={{ xs: 6 }}>
+            <Grid size={6}>
               <Box mr={2}>
                 <StyledTextField
                   label={t('Beneficiaries Ids')}
@@ -385,7 +385,7 @@ export function ExcludeSection({
               <Box display="flex" flexDirection="column">
                 {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
-                    <Grid size={{ xs: 8 }}>
+                    <Grid size={8}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
@@ -418,18 +418,18 @@ export function ExcludeSection({
                   </Grid>
                 ) : null}
                 {renderInputAndApply()}
-                <Grid container size={{ xs: 6 }}>
+                <Grid container>
                   {errors?.map((formError) => (
-                    <Grid key={formError} size={{ xs: 12 }}>
+                    <Grid key={formError} size={12}>
                       <FormHelperText key={formError} error>
                         {formError}
                       </FormHelperText>
                     </Grid>
                   ))}
                 </Grid>
-                <Grid container direction="column" size={{ xs: 3 }}>
+                <Grid container direction="column">
                   {excludedIds.map((id) => (
-                    <Grid key={id} size={{ xs: 12 }}>
+                    <Grid key={id} size={12}>
                       <ExcludedItem
                         key={id}
                         id={id}

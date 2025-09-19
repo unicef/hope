@@ -128,7 +128,7 @@ export function LookUpReassignRoleModal({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
@@ -146,7 +146,7 @@ export function LookUpReassignRoleModal({
 
         try {
           await reassignRole(requestBody);
-        } catch (e) {
+        } catch {
           // Error handled in onError callback
         }
       }}

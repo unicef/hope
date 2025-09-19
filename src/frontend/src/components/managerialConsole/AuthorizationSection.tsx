@@ -148,7 +148,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
       <AuthorizePaymentPlansModal
         selectedPlansIds={selectedAuthorized}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
-        onAuthorize={async (_, comment) => {
+        onAuthorize={async(_, comment) => {
           try {
             await bulkAction.mutateAsync({
               ids: selectedAuthorized,

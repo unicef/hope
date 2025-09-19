@@ -130,7 +130,7 @@ function RegistrationDataImportTable({
       programSlug,
       queryVariables,
     ],
-    queryFn: async () => {
+    queryFn: async() => {
       const params = createApiParams(
         { businessAreaSlug: businessArea, programSlug },
         queryVariables,

@@ -140,7 +140,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
     },
   });
 
-  const handleApprove = async () => {
+  const handleApprove = async() => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
     await bulkApprove(ids);
   };

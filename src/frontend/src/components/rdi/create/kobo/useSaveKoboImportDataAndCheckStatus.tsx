@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+ 
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { KoboImportData } from '@restgenerated/models/KoboImportData';
@@ -26,7 +26,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
 
   // Mutation for saving Kobo import data
   const saveMutation = useMutation({
-    mutationFn: async (variables: SaveKoboVariables) => {
+    mutationFn: async(variables: SaveKoboVariables) => {
       return RestService.restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate(
         {
           businessAreaSlug: variables.businessAreaSlug,
@@ -47,7 +47,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   // Query for polling kobo import data status
   const { data: koboImportData } = useQuery({
     queryKey: ['koboImportData', importDataId, businessAreaSlug],
-    queryFn: async () => {
+    queryFn: async() => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasKoboImportDataRetrieve({
         businessAreaSlug: businessAreaSlug,

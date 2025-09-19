@@ -168,7 +168,7 @@ export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
 export const clearField = (arrayHelpers, index): void =>
   arrayHelpers.replace(index, {});
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
   if (filters) {
@@ -290,7 +290,7 @@ export function mapCriteriaToInitialValues(criteria) {
 }
 
 // TODO Marącin make Type to this function
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
@@ -390,7 +390,7 @@ export function formatCriteriaFilters(filters) {
 }
 
 // TODO Marcin make Type to this function
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function formatCriteriaIndividualsFiltersBlocks(
   individualsFiltersBlocks,
 ) {
@@ -449,7 +449,7 @@ function mapFilterToVariable(filter: Filter): Result {
 }
 
 // TODO Marcin make Type to this function
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function getTargetingCriteriaVariables(values) {
   return {
     rules: values.criterias.map((criteria) => ({

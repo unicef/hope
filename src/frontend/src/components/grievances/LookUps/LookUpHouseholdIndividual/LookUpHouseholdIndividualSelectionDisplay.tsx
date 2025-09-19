@@ -1,5 +1,5 @@
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';

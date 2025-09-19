@@ -48,7 +48,7 @@ export const DeleteTargetPopulation = ({
         id,
       }),
   });
-  const handleDelete = async (): Promise<void> => {
+  const handleDelete = async(): Promise<void> => {
     try {
       await mutate({
         businessAreaSlug: businessArea,

@@ -27,7 +27,7 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   TextField,
   Typography,
@@ -259,8 +259,8 @@ export const SupportingDocumentsSection = ({
         <Box mt={2}>
           <Grid container spacing={3}>
             {documents.map((doc) => (
-              <Grid key={doc.id} size={{ xs: 3 }}>
-                <GreyBox p={3} key={doc.id} data-cy="document-item">
+              <Grid size={3} key={doc.id}>
+                <GreyBox p={3} data-cy="document-item">
                   <Box
                     display="flex"
                     justifyContent="space-between"
@@ -364,7 +364,7 @@ export const SupportingDocumentsSection = ({
               />
               <FormHelperText error>{errorMessage}</FormHelperText>
               <Grid container>
-                <Grid size={{ xs: 12 }}>
+                <Grid size={12}>
                   <TextField
                     size="small"
                     label={t('Title')}

@@ -9,7 +9,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';

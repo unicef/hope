@@ -25,7 +25,7 @@ const AddNewProgramCycle = ({
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
 
-  const handleClose = async () => {
+  const handleClose = async() => {
     await queryClient.invalidateQueries({
       queryKey: ['programCycles', businessArea, program.slug],
     });

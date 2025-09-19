@@ -1,4 +1,4 @@
-import { Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -93,7 +93,7 @@ export function AddIndividualDataChangeField({
   }
   return (
     <>
-      <Grid size={{ xs: 8 }}>
+      <Grid size={8}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -106,7 +106,7 @@ export function AddIndividualDataChangeField({
           {...fieldProps}
         />
       </Grid>
-      <Grid size={{ xs: 4 }} />
+      <Grid size={4} />
     </>
   );
 }
@@ -188,14 +188,12 @@ function AddIndividualDataChange({
           </Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12 }}>{t('Core Fields')}</Grid>
+          <Grid size={12}>{t('Core Fields')}</Grid>
 
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
-          {flexFields.length > 0 && (
-            <Grid size={{ xs: 12 }}>{t('Flex Fields')}</Grid>
-          )}
+          {flexFields.length > 0 && <Grid size={12}>{t('Flex Fields')}</Grid>}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
               key={item.name}
@@ -230,8 +228,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid size={{ xs: 8 }} />
-                <Grid size={{ xs: 12 }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -277,8 +275,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid size={{ xs: 8 }} />
-                <Grid size={{ xs: 12 }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}

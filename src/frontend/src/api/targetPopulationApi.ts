@@ -1,7 +1,7 @@
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { api, handleApiResponse } from './api';
 
-export const fetchTargetPopulations = async (
+export const fetchTargetPopulations = async(
   businessAreaSlug: string,
   programId: string,
   params = {},

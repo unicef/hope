@@ -23,7 +23,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
 
-  const handleNextClick = async (): Promise<void> => {
+  const handleNextClick = async(): Promise<void> => {
     if (handleNext) {
       await handleNext();
     }

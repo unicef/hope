@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Collapse,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
@@ -48,7 +42,7 @@ function Exclusions({
       <Collapse in={isExclusionsOpen}>
         <Box mt={2}>
           <Grid container>
-            <Grid size={{ xs: 6 }}>
+            <Grid size={6}>
               <Field
                 data-cy="input-excluded-ids"
                 name="excludedIds"
@@ -68,7 +62,7 @@ function Exclusions({
         </Box>
         <Box mt={2}>
           <Grid container>
-            <Grid size={{ xs: 6 }}>
+            <Grid size={6}>
               <Field
                 data-cy="input-exclusion-reason"
                 name="exclusionReason"

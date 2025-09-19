@@ -70,7 +70,7 @@ export function ImportXlsxPaymentPlanPaymentList({
     },
   });
 
-  const handleImport = async (): Promise<void> => {
+  const handleImport = async(): Promise<void> => {
     if (fileToImport) {
       await importEntitlementXlsx({
         businessAreaSlug: businessArea,

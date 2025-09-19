@@ -65,7 +65,7 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
             ...params.InputProps,
           }}
           // https://github.com/mui-org/material-ui/issues/12805
-          // eslint-disable-next-line react/jsx-no-duplicate-props
+           
           inputProps={{
             ...params.inputProps,
             'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,

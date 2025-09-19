@@ -1,4 +1,4 @@
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -81,16 +81,23 @@ function EditIndividualDataChange({
   });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
-    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
+    queryKey: [
+      'individual',
+      businessAreaSlug,
+      programSlug,
+      individual?.id,
+      individual?.program?.slug,
+    ],
     queryFn: () => {
       if (!individual?.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug: programSlug,
+        programSlug: individual?.program?.slug,
         id: individual?.id,
       });
     },
-    enabled: !!individual?.id && !!programSlug && !!businessAreaSlug,
+    enabled:
+      !!individual?.id && individual?.program?.slug && !!businessAreaSlug,
   });
 
   useEffect(() => {
@@ -150,7 +157,7 @@ function EditIndividualDataChange({
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
-                    <Grid size={{ xs: 12 }} key={`${index}-${item?.fieldName}`}>
+                    <Grid size={12} key={`${index}-${item?.fieldName}`}>
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
@@ -162,7 +169,7 @@ function EditIndividualDataChange({
                       />
                     </Grid>
                   ))}
-                  <Grid size={{ xs: 4 }}>
+                  <Grid size={4}>
                     <Button
                       color="primary"
                       onClick={() => {

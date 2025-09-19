@@ -7,7 +7,7 @@ interface BulkActionPaymentPlansManagerialProps {
   comment?: string;
 }
 
-export const bulkActionPaymentPlansManagerial = async ({
+export const bulkActionPaymentPlansManagerial = async({
   businessAreaSlug,
   ids,
   action,
@@ -33,7 +33,7 @@ export const bulkActionPaymentPlansManagerial = async ({
   }
 };
 
-export const deleteSupportingDocument = async (
+export const deleteSupportingDocument = async(
   businessArea: string,
   programId: string,
   paymentPlanId: string,
@@ -49,7 +49,7 @@ export const deleteSupportingDocument = async (
   }
 };
 
-export const uploadSupportingDocument = async (
+export const uploadSupportingDocument = async(
   businessArea: string,
   programId: string,
   paymentPlanId: string,
@@ -71,7 +71,7 @@ export const uploadSupportingDocument = async (
   }
 };
 
-export const fetchSupportingDocument = async (
+export const fetchSupportingDocument = async(
   businessAreaSlug: string,
   programId: string,
   paymentPlanId: string,

@@ -27,7 +27,6 @@ export const useConfirmation = (): ((
   options: ConfirmationDialogOptions,
 ) => Promise<void>) => useContext(ConfirmationDialogContext);
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function ConfirmationDialogProvider({
   children,
 }: {
@@ -36,10 +35,10 @@ export function ConfirmationDialogProvider({
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationDialogOptions | null>(null);
 
-    const awaitingPromiseRef = useRef<{
-      resolve: () => void;
-      reject: () => void;
-    } | null>(null);
+  const awaitingPromiseRef = useRef<{
+    resolve: () => void;
+    reject: () => void;
+  } | null>(null);
 
   const openConfirmation = ({
     catchOnCancel = false,

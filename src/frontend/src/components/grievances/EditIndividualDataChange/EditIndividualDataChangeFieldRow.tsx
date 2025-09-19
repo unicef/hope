@@ -1,4 +1,4 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import camelCase from 'lodash/camelCase';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
@@ -38,8 +38,8 @@ export const EditIndividualDataChangeFieldRow = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
   return (
-    <Grid container alignItems="center" spacing={3}>
-      <Grid size={{ xs: 4 }}>
+    <Grid container spacing={2} alignItems="center">
+      <Grid size={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -60,31 +60,32 @@ export const EditIndividualDataChangeFieldRow = ({
             }))}
         />
       </Grid>
-
-      <CurrentValue
-        field={field}
-        value={
-          !field?.isFlexField
-            ? individual[camelCase(itemValue.fieldName)]
-            : individual.flexFields[itemValue.fieldName]
-        }
-        values={values}
-      />
-      {itemValue.fieldName ? (
-        <EditIndividualDataChangeField
-          name={`individualDataUpdateFields[${index}].fieldValue`}
+      <Grid size={4}>
+        <CurrentValue
           field={field}
+          value={
+            !field?.isFlexField
+              ? individual[camelCase(itemValue.fieldName)]
+              : individual.flexFields[itemValue.fieldName]
+          }
+          values={values}
         />
-      ) : (
-        <Grid size={{ xs: 4 }} />
-      )}
-      {itemValue.fieldName && (
-        <Grid size={{ xs: 1 }}>
+      </Grid>
+      <Grid size={3}>
+        {itemValue.fieldName ? (
+          <EditIndividualDataChangeField
+            name={`individualDataUpdateFields[${index}].fieldValue`}
+            field={field}
+          />
+        ) : null}
+      </Grid>
+      <Grid size={1}>
+        {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
-        </Grid>
-      )}
+        )}
+      </Grid>
     </Grid>
   );
 };

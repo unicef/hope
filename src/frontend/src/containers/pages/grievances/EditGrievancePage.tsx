@@ -31,13 +31,7 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -287,7 +281,7 @@ const EditGrievancePage = (): ReactElement => {
       );
     }
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const initialValues: any = prepareInitialValues(ticket);
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -357,7 +351,7 @@ const EditGrievancePage = (): ReactElement => {
           });
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);
-        } catch (e) {
+        } catch (error) {
           showApiErrorMessages(error, showMessage);
         }
         if (

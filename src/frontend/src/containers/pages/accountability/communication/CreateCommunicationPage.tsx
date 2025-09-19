@@ -19,7 +19,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   Radio,
   RadioGroup,
   Step,
@@ -402,7 +402,7 @@ const CreateCommunicationPage = (): ReactElement => {
             }
           />
           <PaperContainer>
-            <Grid size={{ xs: 9 }}>
+            <Grid size={9}>
               <Stepper activeStep={activeStep}>
                 {steps.map((label) => {
                   const stepProps: { completed?: boolean } = {};
@@ -660,7 +660,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 <>
                   <Border />
                   <Box my={3}>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid size={12}>
                       <Field
                         name="title"
                         required
@@ -672,7 +672,7 @@ const CreateCommunicationPage = (): ReactElement => {
                       />
                     </Grid>
                   </Box>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid size={12}>
                     <Field
                       name="body"
                       required

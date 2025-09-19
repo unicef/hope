@@ -101,7 +101,7 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
     dispersionEndDate: null,
   };
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
+  const handleSubmit = async(values: FormValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')

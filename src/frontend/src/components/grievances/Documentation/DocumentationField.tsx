@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,7 @@ export function DocumentationField({
 
   return (
     <>
-      <Grid size={{ xs: 4 }}>
+      <Grid size={4}>
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
@@ -35,7 +35,7 @@ export function DocumentationField({
           maxLength={100}
         />
       </Grid>
-      <Grid size={{ xs: 4 }}>
+      <Grid size={4}>
         <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
             type="file"
@@ -50,7 +50,7 @@ export function DocumentationField({
         </Box>
       </Grid>
       {!isEdited ? (
-        <Grid size={{ xs: 4 }}>
+        <Grid size={4}>
           <IconButton onClick={onDelete}>
             <Delete />
           </IconButton>

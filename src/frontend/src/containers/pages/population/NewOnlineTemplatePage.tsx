@@ -164,7 +164,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
     return false;
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async(values) => {
     // Build filters object
     const filters = {
       registration_data_import_id: filter.registrationDataImportId ?? null,

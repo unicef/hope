@@ -148,7 +148,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
       <ReleasePaymentPlansModal
         selectedPlansIds={selectedInReview}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
-        onRelease={async (_, comment) => {
+        onRelease={async(_, comment) => {
           try {
             await bulkAction.mutateAsync({
               ids: selectedInReview,

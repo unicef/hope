@@ -134,7 +134,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
     },
   });
 
-  const handleMerge = async () => {
+  const handleMerge = async() => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
     await bulkMerge(ids);
   };

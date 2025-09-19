@@ -9,7 +9,7 @@ import { theme } from './theme';
 import { ProgramProvider } from './programContext';
 import { SnackbarProvider } from '@hooks/useSnackBar';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface ProvidersProps {
   children: ReactNode[];
@@ -18,22 +18,20 @@ interface ProvidersProps {
 const queryClient = new QueryClient();
 
 export const Providers: FC<ProvidersProps> = ({ children }) => {
-
-
   return (
     <QueryClientProvider client={queryClient}>
-        <MuiThemeProvider theme={theme}>
-          <StyledThemeProvider theme={theme}>
-            <ConfirmationDialogProvider>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <CssBaseline />
-                <ProgramProvider>
-                  <SnackbarProvider>{children}</SnackbarProvider>
-                </ProgramProvider>
-              </LocalizationProvider>
-            </ConfirmationDialogProvider>
-          </StyledThemeProvider>
-        </MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
+        <StyledThemeProvider theme={theme}>
+          <ConfirmationDialogProvider>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <CssBaseline />
+              <ProgramProvider>
+                <SnackbarProvider>{children}</SnackbarProvider>
+              </ProgramProvider>
+            </LocalizationProvider>
+          </ConfirmationDialogProvider>
+        </StyledThemeProvider>
+      </MuiThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

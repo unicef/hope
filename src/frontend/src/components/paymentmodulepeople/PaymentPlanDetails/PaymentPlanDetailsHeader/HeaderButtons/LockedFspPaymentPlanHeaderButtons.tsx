@@ -33,7 +33,7 @@ export function LockedFspPaymentPlanHeaderButtons({
         programSlug: programId,
         id: paymentPlan.id,
       }),
-    onSuccess: async () => {
+    onSuccess: async() => {
       showMessage(t('Payment Plan FSPs have been unlocked.'));
       await queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
@@ -55,7 +55,7 @@ export function LockedFspPaymentPlanHeaderButtons({
             id: paymentPlan.id,
           },
         ),
-      onSuccess: async () => {
+      onSuccess: async() => {
         showMessage(t('Payment Plan has been sent for approval.'));
         await queryClient.invalidateQueries({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],

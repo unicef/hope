@@ -1,3 +1,13 @@
+export function safeStringify(value) {
+  if (typeof value === 'object' && value !== null) {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '[object Object]';
+    }
+  }
+  return String(value);
+}
 // Status color for periodic data updates online edits
 export function periodicDataUpdatesOnlineEditsStatusToColor(
   theme: typeof themeObj,
@@ -162,7 +172,6 @@ export function populationStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-
 
 export function paymentStatusToColor(
   theme: typeof themeObj,
@@ -535,7 +544,6 @@ export function programCycleStatusToColor(
 export function selectFields(
   fullObject,
   keys: string[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): { [key: string]: any } {
   return keys.reduce((acc, current) => {
     acc[current] = fullObject[current];
@@ -547,17 +555,14 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-//eslint-disable-next-line @typescript-eslint/no-use-before-define
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
   if (!Array.isArray(arr)) {
     return arr;
   }
-  //eslint-disable-next-line @typescript-eslint/no-use-before-define
+
   return arr.map(camelizeObjectKeys);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeObjectKeys(obj): { [key: string]: any } {
   if (!obj) {
     return obj;
@@ -618,13 +623,11 @@ function isBase64(str) {
   return /^[A-Za-z0-9+/]+={0,2}$/.test(str);
 }
 
-
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
-  if (!isBase64(idString))
-      return idString;
+  if (!isBase64(idString)) return idString;
   if (idString.includes(':')) {
     // Already decoded
     return idString.split(':')[1];
@@ -717,7 +720,6 @@ export function paymentPlanBackgroundActionStatusMapping(status): string {
   return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -776,7 +778,6 @@ const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function thingForSpecificGrievanceType(
   ticket: { category: number | string; issueType?: number | string },
   thingDict,
@@ -818,7 +819,6 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getFullNodeFromEdgesById = (edges, id) => {
   if (!edges) return null;
   return edges.find((edge) => edge.node.id === id)?.node || null;
@@ -1189,12 +1189,11 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
     const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
     const decodedId = atob(base64);
     return regex.test(decodedId);
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
@@ -1216,8 +1215,6 @@ export function adjustHeadCells<T>(
   });
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars,
-              @typescript-eslint/no-shadow */
 export const filterEmptyParams = (params) => {
   if (!params) return {};
 
@@ -1258,7 +1255,7 @@ export const filterEmptyParams = (params) => {
             );
             return hasNonEmptyValue;
           }
-        } catch (e) {
+        } catch {
           // If parsing fails, keep the value
           return true;
         }
@@ -1269,8 +1266,6 @@ export const filterEmptyParams = (params) => {
   );
 };
 
-/* eslint-enable @typescript-eslint/no-unused-vars,
-                 @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
   const notCalizedKeys = ['form_errors', 'household_data'];
   if (_.isArray(data)) {

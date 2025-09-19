@@ -4,7 +4,7 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { DividerLine } from '@core/DividerLine';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
@@ -75,16 +75,18 @@ export const PartnersStep: FC<PartnersStepProps> = ({
   return (
     <>
       <Box display="flex" justifyContent="space-between" mt={2}>
-        <Grid size={{ xs: 6 }}>
-          <Field
-            name="partnerAccess"
-            label={t('Who should have access to the program?')}
-            color="primary"
-            choices={partnerAccessChoices}
-            component={FormikSelectField}
-            required
-            disableClearable
-          />
+        <Grid container spacing={2}>
+          <Grid size={6}>
+            <Field
+              name="partnerAccess"
+              label={t('Who should have access to the program?')}
+              color="primary"
+              choices={partnerAccessChoices}
+              component={FormikSelectField}
+              required
+              disableClearable
+            />
+          </Grid>
         </Grid>
       </Box>
       {values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' && (

@@ -218,7 +218,7 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={initialValues}
       enableReinitialize={true}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
@@ -258,7 +258,7 @@ export function RequestedHouseholdDataChange({
           await mutate(mutationPayload);
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (error) {
+        } catch {
           // Error handling is done in the mutation's onError callback
         }
       }}

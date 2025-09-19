@@ -6,13 +6,7 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid2 as Grid,
-} from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';

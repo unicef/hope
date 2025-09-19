@@ -51,7 +51,7 @@ export function LockFspPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: async () => {
+    onSuccess: async() => {
       showMessage(t('Payment Plan FSPs are locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({

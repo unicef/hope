@@ -43,7 +43,7 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
       },
     });
 
-  const finishProgram = async (): Promise<void> => {
+  const finishProgram = async(): Promise<void> => {
     try {
       await finishProgramMutation();
       setSelectedProgram({

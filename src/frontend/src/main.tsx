@@ -40,7 +40,7 @@ ChartJS.defaults.plugins.legend.labels.usePointStyle = true;
 ChartJS.defaults.plugins.legend.labels.boxWidth = 8;
 
 setupInternalization();
-// eslint-disable-next-line no-undef
+ 
 if (process.env.NODE_ENV !== 'development' && window.SENTRY_DSN) {
   Sentry.init({
     dsn: window.SENTRY_DSN,

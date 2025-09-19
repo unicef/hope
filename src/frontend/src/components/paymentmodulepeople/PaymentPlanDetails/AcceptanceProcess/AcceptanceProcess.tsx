@@ -57,7 +57,7 @@ export function AcceptanceProcess({
   if (!approvalProcess.length) {
     return null;
   }
-  const handleExportPdf = async (): Promise<void> => {
+  const handleExportPdf = async(): Promise<void> => {
     try {
       await exportPdfMutation.mutateAsync();
       showMessage(t('PDF generated. Please check your email.'));

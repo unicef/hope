@@ -86,7 +86,7 @@ const Root: FC = () => (
 );
 
 const sentryCreateBrowserRouter =
-  Sentry.wrapCreateBrowserRouter(createBrowserRouter);
+  Sentry.wrapCreateBrowserRouterV6(createBrowserRouter);
 const router = sentryCreateBrowserRouter([
   {
     path: '*',

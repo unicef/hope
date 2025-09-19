@@ -47,7 +47,7 @@ export function LockPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: async () => {
+    onSuccess: async() => {
       showMessage(t('Payment Plan has been locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({

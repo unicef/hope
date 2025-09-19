@@ -1,4 +1,4 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';

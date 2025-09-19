@@ -55,7 +55,7 @@ const DeleteProgramCycle = ({
     },
   });
 
-  const handleDelete = async (): Promise<void> => {
+  const handleDelete = async(): Promise<void> => {
     try {
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));

@@ -94,7 +94,7 @@ export const api = {
       try {
         // @ts-ignore
         error.data = await response.json();
-      } catch (e) {
+      } catch {
         // @ts-ignore
         error.data = null;
       }
@@ -124,7 +124,7 @@ export const api = {
       try {
         // @ts-ignore
         error.data = await response.json();
-      } catch (e) {
+      } catch {
         // @ts-ignore
         error.data = null;
       }
@@ -156,7 +156,7 @@ export const api = {
 
 export type Params = Record<string, any>;
 
-export const handleApiResponse = async (apiCall) => {
+export const handleApiResponse = async(apiCall) => {
   try {
     const response = await apiCall;
     return response;
@@ -171,7 +171,7 @@ export const handleMutationError = (error: any, action: string): never => {
   throw new Error(`Failed to ${action}: ${errorMessage}`);
 };
 
-export const postRequest = async (
+export const postRequest = async(
   url: string,
   body: any,
   errorMessage: string,

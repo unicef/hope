@@ -87,7 +87,7 @@ export const CreateProgramPage = (): ReactElement => {
         requestBody: programData,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async() => {
       await queryClient.invalidateQueries({
         queryKey: ['programs', businessArea],
       });
@@ -97,7 +97,7 @@ export const CreateProgramPage = (): ReactElement => {
     },
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmit = async(values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -301,7 +301,7 @@ export const CreateProgramPage = (): ReactElement => {
           values.partners,
         );
 
-        const handleNextStep = async () => {
+        const handleNextStep = async() => {
           await handleNext({
             validateForm,
             stepFields,

@@ -1,4 +1,5 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -78,7 +79,7 @@ const RegistrationFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}

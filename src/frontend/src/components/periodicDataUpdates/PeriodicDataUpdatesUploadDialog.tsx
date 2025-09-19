@@ -43,7 +43,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
   const queryClient = useQueryClient();
 
-  const handleFileUpload = async (): Promise<void> => {
+  const handleFileUpload = async(): Promise<void> => {
     if (fileToImport) {
       setIsLoading(true);
       setError(null);

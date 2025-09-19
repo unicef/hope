@@ -36,7 +36,7 @@ export function KoboProjectSelect(): ReactElement {
     error,
   } = useQuery({
     queryKey: ['koboProjects', businessArea],
-    queryFn: async () => {
+    queryFn: async() => {
       return RestService.restBusinessAreasAllKoboProjectsCreate({
         slug: businessArea,
       });

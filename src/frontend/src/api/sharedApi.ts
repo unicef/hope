@@ -1,7 +1,7 @@
 import { api, handleApiResponse } from './api';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 
-export const fetchAreas = async (
+export const fetchAreas = async(
   businessArea: string,
   queryParams: string,
 ): Promise<PaginatedAreaList> => {
@@ -10,6 +10,6 @@ export const fetchAreas = async (
   );
 };
 
-export const fetchMe = async () => {
+export const fetchMe = async() => {
   return handleApiResponse(api.get('profile'));
 };

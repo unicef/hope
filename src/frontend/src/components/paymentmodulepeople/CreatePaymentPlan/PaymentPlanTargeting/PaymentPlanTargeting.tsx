@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import styled from 'styled-components';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';

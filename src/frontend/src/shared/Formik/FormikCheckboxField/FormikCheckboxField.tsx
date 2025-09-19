@@ -3,7 +3,7 @@ import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
 } from '@mui/material';
 import get from 'lodash/get';
 import { LabelizedField } from '@components/core/LabelizedField';
@@ -55,7 +55,7 @@ export function Check({
         style={{ whiteSpace: 'nowrap' }}
       />
       {displayValue && (
-        <Grid size={{ xs:9 }}>
+        <Grid size={9}>
           <LabelizedField label={label}>{displayValue}</LabelizedField>
         </Grid>
       )}

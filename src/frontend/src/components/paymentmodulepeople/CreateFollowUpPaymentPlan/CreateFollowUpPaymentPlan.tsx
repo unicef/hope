@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -191,21 +191,21 @@ export function CreateFollowUpPaymentPlan({
                     )}
                   </Box>
                   <Grid container spacing={3}>
-                    <Grid size={{ xs: 6 }}>
+                    <Grid size={6}>
                       <Box mt={2}>
                         <Typography>
                           {t('Main Payment Plan Details')}
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid size={{ xs: 6 }} />
+                    <Grid size={6} />
                     {/* //TODO: Figure it out */}
                     {/* <Grid size={{xs:6}}>
                       <Typography>
                         {t('Follow-up Payment Plan Details')}
                       </Typography>
                     </Grid> */}
-                    <Grid size={{ xs: 6 }}>
+                    <Grid size={6}>
                       <LabelizedField label={t('Unsuccessful payments')}>
                         {unsuccessfulPaymentsCount}
                       </LabelizedField>
@@ -217,7 +217,7 @@ export function CreateFollowUpPaymentPlan({
                         <Missing />
                       </LabelizedField>
                     </Grid> */}
-                    <Grid size={{ xs: 6 }}>
+                    <Grid size={6}>
                       <LabelizedField
                         label={t(
                           `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
@@ -228,14 +228,14 @@ export function CreateFollowUpPaymentPlan({
                       </LabelizedField>
                     </Grid>
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid size={12}>
                     <DividerLine />
                   </Grid>
                   <Box mb={3}>
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>
                   <Grid container spacing={3}>
-                    <Grid size={{ xs: 6 }}>
+                    <Grid size={6}>
                       <Field
                         name="dispersionStartDate"
                         label={t('Dispersion Start Date')}
@@ -252,7 +252,7 @@ export function CreateFollowUpPaymentPlan({
                         )}
                       />
                     </Grid>
-                    <Grid size={{ xs: 6 }}>
+                    <Grid size={6}>
                       <Field
                         name="dispersionEndDate"
                         label={t('Dispersion End Date')}

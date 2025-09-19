@@ -18,7 +18,7 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
   let formattedDate = date;
   try {
     formattedDate = format(new Date(date), 'yyyy-MM-dd HH:mm');
-  } catch (e) {
+  } catch {
     // fallback to original date string if parsing fails
   }
   return (

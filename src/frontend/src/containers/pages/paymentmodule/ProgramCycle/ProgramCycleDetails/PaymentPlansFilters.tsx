@@ -5,12 +5,11 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
+import { Grid, MenuItem, Typography } from '@mui/material';
+import { Box } from '@mui/system';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { MenuItem, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { Box } from '@mui/system';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import moment from 'moment';
 import { ReactElement } from 'react';
@@ -78,7 +77,7 @@ export const PaymentPlansFilters = ({
         <Typography variant="h6">{t('Payment Plans Filters')}</Typography>
       </Title>
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -86,7 +85,7 @@ export const PaymentPlansFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -104,7 +103,7 @@ export const PaymentPlansFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <Box display="flex" flexDirection="column">
             <NumberTextField
               id="totalEntitledQuantityFromFilter"
@@ -117,7 +116,7 @@ export const PaymentPlansFilters = ({
             />
           </Box>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
@@ -132,7 +131,7 @@ export const PaymentPlansFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -156,7 +155,7 @@ export const PaymentPlansFilters = ({
             value={filter.dispersionStartDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>

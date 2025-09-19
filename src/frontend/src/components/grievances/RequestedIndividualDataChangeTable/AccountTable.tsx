@@ -16,6 +16,7 @@ import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { safeStringify } from '@utils/utils';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -89,7 +90,7 @@ export function AccountTable({
             <TableCell align="left">{t('Value')}</TableCell>
           </TableRow>
         </TableHead>
-       <TableBody>
+        <TableBody>
           {Object.entries(account.value.data_fields).map(([key, value]) => {
             if (key === 'financial_institution') {
               value = accountFinancialInstitutionsDict[value as string];
@@ -98,7 +99,7 @@ export function AccountTable({
               <TableRow key={key}>
                 <TableCell align="left"></TableCell>
                 <TableCell align="left">{key}</TableCell>
-                <TableCell align="left">{String(value)}</TableCell>
+                <TableCell align="left">{safeStringify(value)}</TableCell>
                 <TableCell align="left"></TableCell>
               </TableRow>
             );

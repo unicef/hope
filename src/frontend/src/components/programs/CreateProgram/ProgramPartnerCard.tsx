@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  Collapse,
-  Grid2 as Grid,
-  IconButton,
-} from '@mui/material';
+import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -166,7 +160,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
             ) && (
               <Grid container>
                 {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
-                  <Grid key={level} size={{ xs: 4 }}>
+                  <Grid key={level} size={4}>
                     <LabelizedField
                       dataCy={`Admin-Areas-${level}-field`}
                       label={`Admin Areas ${level}`}
@@ -224,7 +218,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   return (
     <Grid container direction="column">
       <Box display="flex" justifyContent="space-between">
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name={`partners[${index}].id`}
             label={t('Partner')}
@@ -246,7 +240,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
       <Box mt={2}>
         <BiggestText>{t('Area Access')}</BiggestText>
       </Box>
-      <Grid size={{ xs: 6 }}>
+      <Grid size={6}>
         <Field
           name={`partners[${index}].areaAccess`}
           required={values.partners[index]?.id !== ''}

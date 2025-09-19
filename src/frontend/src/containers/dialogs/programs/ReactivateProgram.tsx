@@ -34,7 +34,7 @@ export function ReactivateProgram({
   const queryClient = useQueryClient();
 
   const { mutate, isPending: loading } = useMutation({
-    mutationFn: async () =>
+    mutationFn: async() =>
       RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug,
         slug: program.slug,

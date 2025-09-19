@@ -1,4 +1,4 @@
-import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';

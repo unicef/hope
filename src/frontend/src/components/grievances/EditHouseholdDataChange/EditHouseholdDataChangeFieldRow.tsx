@@ -1,4 +1,4 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
@@ -45,8 +45,8 @@ export const EditHouseholdDataChangeFieldRow = ({
   }, [itemValue.fieldName]);
 
   return (
-    <>
-      <Grid size={{ xs: 4 }}>
+    <Grid container size={12} spacing={2} alignItems="center">
+      <Grid size={4}>
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -67,29 +67,30 @@ export const EditHouseholdDataChangeFieldRow = ({
           disabled={isEditTicket}
         />
       </Grid>
-
-      <CurrentValue
-        field={field}
-        value={
-          !field?.isFlexField ? household[name] : household.flexFields[name]
-        }
-        values={values}
-      />
-      {itemValue.fieldName ? (
-        <EditHouseholdDataChangeField
-          name={`householdDataUpdateFields[${index}].fieldValue`}
+      <Grid size={4}>
+        <CurrentValue
           field={field}
+          value={
+            !field?.isFlexField ? household[name] : household.flexFields[name]
+          }
+          values={values}
         />
-      ) : (
-        <Grid size={{ xs: 4 }} />
-      )}
-      {itemValue.fieldName && (
-        <Grid size={{ xs: 1 }}>
+      </Grid>
+      <Grid size={3}>
+        {itemValue.fieldName ? (
+          <EditHouseholdDataChangeField
+            name={`householdDataUpdateFields[${index}].fieldValue`}
+            field={field}
+          />
+        ) : null}
+      </Grid>
+      <Grid size={1}>
+        {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
-        </Grid>
-      )}
-    </>
+        )}
+      </Grid>
+    </Grid>
   );
 };

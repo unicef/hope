@@ -68,11 +68,11 @@ export function BulkBaseModal({
       {buttonTitle}
     </Button>
   );
-  const onAccept = async (): Promise<void> => {
+  const onAccept = async(): Promise<void> => {
     try {
       await onSave(selectedTickets);
       setDialogOpen(false);
-    } catch (e) {
+    } catch {
       // handled by inner function
     }
   };

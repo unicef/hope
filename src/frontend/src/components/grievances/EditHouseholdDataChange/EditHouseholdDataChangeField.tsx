@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
@@ -118,7 +118,7 @@ export const EditHouseholdDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid size={{ xs: 4 }}>
+    <Grid size={12}>
       <Field
         name={name}
         fullWidth

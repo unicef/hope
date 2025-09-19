@@ -48,7 +48,7 @@ export function CreateImportFromKoboForm({
 
   // Mutation for creating registration kobo import
   const createImportMutation = useMutation({
-    mutationFn: async (data: { 
+    mutationFn: async(data: { 
       importDataId: string; 
       name: string; 
       screenBeneficiary: boolean;

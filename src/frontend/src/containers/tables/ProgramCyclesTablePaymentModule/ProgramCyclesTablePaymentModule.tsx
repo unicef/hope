@@ -92,7 +92,7 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.slug],
           exact: false,
@@ -121,7 +121,7 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.slug],
           exact: false,
@@ -142,7 +142,7 @@ export const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async (programCycle: ProgramCycleList) => {
+  const finishAction = async(programCycle: ProgramCycleList) => {
     try {
       await finishMutation({
         businessAreaSlug: businessArea,
@@ -155,7 +155,7 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const reactivateAction = async (programCycle: ProgramCycleList) => {
+  const reactivateAction = async(programCycle: ProgramCycleList) => {
     try {
       await reactivateMutation({
         businessAreaSlug: businessArea,

@@ -8,7 +8,7 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validate(
   values,
   addIndividualFieldsData: Array<any> | null,
@@ -224,7 +224,7 @@ export function validate(
   return errors;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validateUsingSteps(
   values,
   addIndividualFieldsData: Array<any> | null,

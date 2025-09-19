@@ -8,7 +8,8 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { MenuItem } from '@mui/material';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -151,7 +152,7 @@ export const GrievancesFilters = ({
             />
           </Grid>
         )}
-        <Grid container size={{ xs: 3 }}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -254,7 +255,7 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid container size={{ xs: 6 }} spacing={3} alignItems="flex-end">
+          <Grid container spacing={3} alignItems="flex-end">
             <Grid size={{ xs: 6 }}>
               <NumberTextField
                 topLabel={t('Similarity Score')}
@@ -301,7 +302,7 @@ export const GrievancesFilters = ({
             dataCy="filters-preferred-language"
           />
         </Grid>
-        <Grid container size={{ xs: 3 }}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
@@ -316,7 +317,7 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid container size={{ xs: 2 }}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
@@ -331,7 +332,7 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid container size={{ xs: 2 }}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('grievanceStatus', e.target.value)

@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -65,19 +65,11 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('START DATE'),
-                value: (
-                  <UniversalMoment>
-                    {planNode.startDate}
-                  </UniversalMoment>
-                ),
+                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
               },
               {
                 label: t('END DATE'),
-                value: (
-                  <UniversalMoment>
-                    {planNode.endDate}
-                  </UniversalMoment>
-                ),
+                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
               },
             ].map((el) => (
               <Grid size={{ xs: 3 }} key={el.label}>

@@ -150,7 +150,7 @@ function LinkedTicketsModal({
               <Bold>
                 Ticket ID
                 {ticket.unicefId}
-              </Bold>
+              </Bold>{' '}
               is related to the following tickets.
             </Typography>
           </Box>

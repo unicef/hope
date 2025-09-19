@@ -1,4 +1,5 @@
-import { Grid2 as Grid } from '@mui/material';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import Grid from '@mui/material/Grid';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ReactElement } from 'react';
 
@@ -9,9 +10,9 @@ export interface ExistingPaymentChannelFieldArrayProps {
 }
 
 export function ExistingPaymentChannelFieldArray({
-  setFieldValue, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
-  values, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
-  individual, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setFieldValue,
+  values,
+  individual,
 }: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
 

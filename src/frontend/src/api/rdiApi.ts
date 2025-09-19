@@ -1,7 +1,7 @@
 import { api, handleApiResponse, handleMutationError } from './api';
 import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
-export const fetchRegistrationDataImports = async (
+export const fetchRegistrationDataImports = async(
   businessAreaSlug: string,
   programId: string,
   params = {},
@@ -14,7 +14,7 @@ export const fetchRegistrationDataImports = async (
   );
 };
 
-export const runDeduplicationDataImports = async (
+export const runDeduplicationDataImports = async(
   businessAreaSlug: string,
   programId: string,
 ): Promise<any> => {

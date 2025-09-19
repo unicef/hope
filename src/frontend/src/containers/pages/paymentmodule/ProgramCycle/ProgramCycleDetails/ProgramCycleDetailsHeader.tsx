@@ -44,7 +44,7 @@ export const ProgramCycleDetailsHeader = ({
           id,
           programSlug,
         }),
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
@@ -77,7 +77,7 @@ export const ProgramCycleDetailsHeader = ({
           id,
           programSlug,
         }),
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
@@ -100,7 +100,7 @@ export const ProgramCycleDetailsHeader = ({
     },
   ];
 
-  const finishAction = async () => {
+  const finishAction = async() => {
     try {
       await finishMutation({
         businessAreaSlug: businessArea,
@@ -113,7 +113,7 @@ export const ProgramCycleDetailsHeader = ({
     }
   };
 
-  const reactivateAction = async () => {
+  const reactivateAction = async() => {
     try {
       await reactivateMutation({
         businessAreaSlug: businessArea,

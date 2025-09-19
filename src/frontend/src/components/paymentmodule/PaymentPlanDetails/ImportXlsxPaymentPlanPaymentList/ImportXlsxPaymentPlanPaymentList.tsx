@@ -48,7 +48,7 @@ export function ImportXlsxPaymentPlanPaymentList({
       businessAreaSlug,
       id,
       programSlug,
-                   formData,
+      formData,
     }: {
       businessAreaSlug: string;
       id: string;
@@ -76,7 +76,7 @@ export function ImportXlsxPaymentPlanPaymentList({
     },
   });
 
-  const handleImport = async (): Promise<void> => {
+  const handleImport = async(): Promise<void> => {
     if (fileToImport) {
       try {
         const formData = {
@@ -89,7 +89,7 @@ export function ImportXlsxPaymentPlanPaymentList({
           programSlug: programId,
           formData: formData as any,
         });
-      } catch (e) {
+      } catch {
         // Error is already handled by onError in mutation
       }
     }

@@ -77,7 +77,7 @@ export function ReassignRoleUnique({
           // role: individualRole.role, // Not needed if passed directly in onSubmit
         }
       }
-      onSubmit={async () => {
+      onSubmit={async() => {
         const requestBody: GrievanceReassignRole = {
           householdId: household.id, // Directly use prop
           individualId: individual.id, // Directly use prop

@@ -10,7 +10,10 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, Divider, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { PatchedFeedbackUpdate } from '@restgenerated/models/PatchedFeedbackUpdate';
@@ -208,8 +211,8 @@ const EditFeedbackPage = (): ReactElement => {
                 : null
             }
           >
-            <Box display="flex" alignContent="center">
-              <Box mr={3}>
+            <Box sx={{ display: 'flex', alignContent: 'center' }}>
+              <Box sx={{ mr: 3 }}>
                 <Button
                   component={Link}
                   to={`/${baseUrl}/grievance/feedback/${feedback.id}`}
@@ -230,10 +233,10 @@ const EditFeedbackPage = (): ReactElement => {
           </PageHeader>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12 }}>
-              <Box p={3}>
+              <Box sx={{ p: 3 }}>
                 <ContainerColumnWithBorder>
-                  <Box p={3}>
-                    <Box mb={3}>
+                  <Box sx={{ p: 3 }}>
+                    <Box sx={{ mb: 3 }}>
                       <Grid container size={{ xs: 6 }} spacing={6}>
                         <Grid size={{ xs: 6 }}>
                           <LabelizedField label={t('Category')}>
@@ -294,7 +297,7 @@ const EditFeedbackPage = (): ReactElement => {
                           </LabelizedField>
                         </Grid>
                       </Grid>
-                      <Box mt={6} mb={6}>
+                      <Box sx={{ mt: 6, mb: 6 }}>
                         <Divider />
                       </Box>
                     </Box>

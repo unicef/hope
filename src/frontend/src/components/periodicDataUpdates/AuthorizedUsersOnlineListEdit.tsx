@@ -22,7 +22,7 @@ import {
   Box,
   OutlinedInput,
   Chip,
-  Grid2 as Grid,
+  Grid,
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';

@@ -65,7 +65,7 @@ export const ImportXlsx = ({
     },
   });
 
-  const handleImport = async (): Promise<void> => {
+  const handleImport = async(): Promise<void> => {
     if (fileToImport) {
       try {
 

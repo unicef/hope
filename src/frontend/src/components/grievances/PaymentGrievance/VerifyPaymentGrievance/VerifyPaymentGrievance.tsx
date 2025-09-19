@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid2 as Grid,
-} from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -68,7 +62,7 @@ export function VerifyPaymentGrievance({
   const submit = async (values): Promise<void> => {
     try {
       await mutate(values);
-    } catch (e) {
+    } catch {
       // Error handling is already in the mutation onError callback
     }
   };

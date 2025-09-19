@@ -73,10 +73,10 @@ export const ManagerialConsoleBaseModal = ({
       {buttonTitle}
     </Button>
   );
-  const onAccept = async (): Promise<void> => {
+  const onAccept = async(): Promise<void> => {
     try {
       await onSave(selectedPlansIds, comment);
-    } catch (e) {
+    } catch {
       // handled by inner function
     } finally {
       setDialogOpen(false);

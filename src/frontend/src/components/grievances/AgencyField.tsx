@@ -1,4 +1,4 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -38,7 +38,7 @@ export function AgencyField({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container alignItems="center" spacing={3}>
+    <Grid container spacing={3} sx={{ alignItems: 'center' }}>
       <Grid size={{ xs: 4 }}>
         <Field
           name={`${agencyFieldName}.partner`}

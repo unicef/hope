@@ -44,7 +44,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
 
   const { mutateAsync: approve, isPending: isApproving } = useMutation({
-    mutationFn: async (formData: Record<string, any>) => {
+    mutationFn: async(formData: Record<string, any>) => {
       return RestService.restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate(
         {
           businessAreaSlug: businessArea,
@@ -112,7 +112,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                 confirm({
                   content:
                     'Are you sure you want to mark this record as distinct?',
-                }).then(async () => {
+                }).then(async() => {
                   try {
                     await approve({
                       distinctIndividualIds: selectedIndividualIds,
@@ -136,7 +136,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                   content: t(
                     'Are you sure you want to mark this record as a duplicate?',
                   ),
-                }).then(async () => {
+                }).then(async() => {
                   try {
                     await approve({
                       duplicateIndividualIds: selectedIndividualIds,
@@ -165,7 +165,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
             content: t(
               "Are you sure you want to clear the selected ids? They won't be marked as a duplicate or distinct anymore.",
             ),
-          }).then(async () => {
+          }).then(async() => {
             try {
               await approve({ clearIndividualIds: selectedIndividualIds });
             } catch (e: any) {

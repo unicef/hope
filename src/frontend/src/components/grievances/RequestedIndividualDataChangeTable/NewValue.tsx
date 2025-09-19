@@ -34,7 +34,7 @@ export function NewValue({ field, value }: NewValueProps): ReactElement {
       }
       break;
     case 'BOOL':
-      /* eslint-disable-next-line no-nested-ternary */
+       
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
     case 'IMAGE':

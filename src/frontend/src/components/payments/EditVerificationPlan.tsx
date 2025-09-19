@@ -3,8 +3,8 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
   Typography,
+  Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';

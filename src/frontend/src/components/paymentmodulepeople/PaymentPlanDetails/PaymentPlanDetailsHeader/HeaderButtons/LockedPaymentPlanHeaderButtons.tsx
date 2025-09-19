@@ -34,7 +34,7 @@ export function LockedPaymentPlanHeaderButtons({
         programSlug: programId,
         id: paymentPlan.id,
       }),
-    onSuccess: async () => {
+    onSuccess: async() => {
       showMessage(t('Payment Plan has been unlocked.'));
       await queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],

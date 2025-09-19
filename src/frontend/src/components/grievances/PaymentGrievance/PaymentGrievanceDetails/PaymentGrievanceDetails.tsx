@@ -114,7 +114,7 @@ export function PaymentGrievanceDetails({
                 confirm({
                   title: t('Approve'),
                   content: dialogText,
-                }).then(async () => {
+                }).then(async() => {
                   try {
                     await mutate({
                       grievanceTicketId: ticket.id,
@@ -126,7 +126,7 @@ export function PaymentGrievanceDetails({
                     if (!approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
-                  } catch (e) {
+                  } catch {
                     // Error is handled in the mutation's onError callback
                   }
                 })

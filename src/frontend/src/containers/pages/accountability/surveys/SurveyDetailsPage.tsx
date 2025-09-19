@@ -65,7 +65,7 @@ function SurveyDetailsPage(): ReactElement {
     },
   ];
 
-  const exportSurveySample = async (): Promise<void> => {
+  const exportSurveySample = async(): Promise<void> => {
     try {
       await exportSurveyMutation.mutateAsync();
       showMessage(t('Survey sample exported.'));

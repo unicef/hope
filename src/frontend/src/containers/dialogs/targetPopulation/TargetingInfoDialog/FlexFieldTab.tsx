@@ -1,4 +1,6 @@
-import { Box, Grid2 as Grid, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import { MenuItem } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
@@ -40,7 +42,7 @@ export function FlexFieldTab(): ReactElement {
   }
 
   return (
-    <Box p={3}>
+    <Box sx={{ p: 3 }}>
       <Grid container spacing={3}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField

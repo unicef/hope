@@ -17,7 +17,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   Radio,
   RadioGroup,
   Step,
@@ -471,7 +471,7 @@ const CreateSurveyPage = (): ReactElement => {
               }
             />
             <PaperContainer>
-              <Grid size={{ xs: 12 }}>
+              <Grid size={12}>
                 <Stepper activeStep={activeStep}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
@@ -708,7 +708,7 @@ const CreateSurveyPage = (): ReactElement => {
                   <>
                     <Border />
                     <Box my={3}>
-                      <Grid size={{ xs: 12 }}>
+                      <Grid size={12}>
                         {category === SurveyCategoryEnum.RAPID_PRO ? (
                           <Field
                             name="title"
@@ -734,7 +734,7 @@ const CreateSurveyPage = (): ReactElement => {
                     </Box>
                     {category === SurveyCategoryEnum.SMS && (
                       <Box my={3}>
-                        <Grid size={{ xs: 12 }}>
+                        <Grid size={12}>
                           <Field
                             name="body"
                             required
@@ -748,7 +748,7 @@ const CreateSurveyPage = (): ReactElement => {
                         </Grid>
                       </Box>
                     )}
-                    <Grid size={{ xs: 12 }}>
+                    <Grid size={12}>
                       <Box
                         pb={3}
                         pt={3}

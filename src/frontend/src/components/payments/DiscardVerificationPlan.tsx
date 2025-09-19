@@ -55,7 +55,7 @@ export function DiscardVerificationPlan({
     },
   });
 
-  const discard = async (): Promise<void> => {
+  const discard = async(): Promise<void> => {
     try {
       await discardVerificationPlanMutation.mutateAsync();
       setDiscardDialogOpen(false);
