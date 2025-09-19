@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import GrievanceTicket
 
