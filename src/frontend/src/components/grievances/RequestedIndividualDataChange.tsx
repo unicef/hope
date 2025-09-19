@@ -318,7 +318,7 @@ export function RequestedIndividualDataChange({
         selectedAccounts,
         selectedAccountsToEdit,
       }}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
           prev[curr] = true;
           return prev;
@@ -341,7 +341,7 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            individualApproveData: JSON.stringify(individualApproveData),
+            individualApproveData: individualApproveData,
             approvedDocumentsToCreate,
             approvedDocumentsToRemove,
             approvedDocumentsToEdit,
@@ -350,7 +350,7 @@ export function RequestedIndividualDataChange({
             approvedIdentitiesToEdit,
             approvedAccountsToCreate,
             approvedAccountsToEdit,
-            flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
+            flexFieldsApproveData: flexFieldsApproveData,
           });
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
