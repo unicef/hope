@@ -14,6 +14,7 @@ from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
+    IndividualListHouseholdSerializer,
     LinkedGrievanceTicketSerializer,
 )
 from hope.apps.household.api.serializers.registration_data_import import (
@@ -228,7 +229,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
 
 
 class IndividualListSerializer(serializers.ModelSerializer):
-    household = HouseholdSimpleSerializer()
+    household = IndividualListHouseholdSerializer()
     relationship_display = serializers.CharField(source="get_relationship_display")
     role = serializers.SerializerMethodField()
     deduplication_batch_status_display = serializers.CharField(source="get_deduplication_batch_status_display")

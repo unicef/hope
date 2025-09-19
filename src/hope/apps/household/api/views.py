@@ -1,7 +1,7 @@
 from typing import Any
 
 from constance import config
-from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
+from django.db.models import Exists, F, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -25,7 +25,6 @@ from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
-    IndividualListKeyConstructor,
 )
 from hope.apps.household.api.serializers.household import (
     HouseholdChoicesSerializer,
@@ -358,10 +357,23 @@ class IndividualViewSet(
         "household__admin3",
     ]
 
+    def get_queryset_list(self) -> QuerySet:
+        qs = super().get_queryset()
+        return qs.select_related("household", "household__admin2").prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                .only("id", "individual_id", "household_id", "role", "created_at")
+                .order_by("id"),
+                to_attr="prefetched_roles",
+            )
+        )
+
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
-
+        if self.action == "list":
+            return self.get_queryset_list()
         return (
             super()
             .get_queryset()
@@ -380,8 +392,8 @@ class IndividualViewSet(
             .order_by("created_at")
         )
 
-    @etag_decorator(IndividualListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
+    # @etag_decorator(IndividualListKeyConstructor)
+    # @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
