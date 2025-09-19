@@ -28,31 +28,33 @@ export const DatePickerFilter = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <FormControl data-cy={calculatedDataCy} size="small">
-        <DesktopDatePicker
-          slotProps={{
-            textField: {
-              size: 'small',
-              inputProps: {
-                'data-cy': 'date-picker-filter-input',
+      <FormControl size="small">
+        <div data-cy={calculatedDataCy}>
+          <DesktopDatePicker
+            slotProps={{
+              textField: {
+                size: 'small',
+                inputProps: {
+                  'data-cy': calculatedDataCy,
+                },
               },
-            },
-          }}
-          onChange={(date) => {
-            if (date instanceof Date && !isNaN(date.getTime())) {
-              // Format as 'yyyy-MM-dd' (date only) using native Date methods
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              onChange(`${year}-${month}-${day}`);
-            } else {
-              onChange(null);
-            }
-          }}
-          value={datePickerValue || null}
-          format="yyyy-MM-dd"
-          {...props}
-        />
+            }}
+            onChange={(date) => {
+              if (date instanceof Date && !isNaN(date.getTime())) {
+                // Format as 'yyyy-MM-dd' (date only) using native Date methods
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                onChange(`${year}-${month}-${day}`);
+              } else {
+                onChange(null);
+              }
+            }}
+            value={datePickerValue || null}
+            format="yyyy-MM-dd"
+            {...props}
+          />
+        </div>
       </FormControl>
     </Box>
   );
