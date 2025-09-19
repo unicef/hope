@@ -1,0 +1,453 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HOPE</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'base_hope_template.css' %}">
+    <style>
+        #muiProgramMenu {
+            max-height: 320px;
+            overflow-y: auto;
+            min-width: 320px;
+            z-index: 1000;
+        }
+        #muiProgramOptions {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .mui-autocomplete-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mui-autocomplete-option.selected {
+            background: #e6f7ee;
+        }
+        .mui-status-badge {
+            margin-left: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .mui-status-active {
+            background: #e6f7ee;
+            color: #2e7d32;
+        }
+        .mui-status-draft {
+            background: #eee;
+            color: #888;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+</head>
+<body>
+    <div class="root">
+        <div class="drawer" id="drawer">
+            <div class="drawer-header" style="background: #A1E4B6; display: flex; align-items: center; justify-content: center; padding-left: 0; height: 64px; min-height: 64px; max-height: 64px;">
+                <img class="drawer-logo" src="{% static 'logo-transparent.png' %}" alt="HOPE Logo" id="drawerLogo" />
+                <button id="collapseBtn" class="collapse-btn chevron-overlay">
+                    <span>
+                        <svg id="chevron" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor">
+                            <path id="chevronPath" d="M17 9L12 14L17 19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <div id="inactiveBar" class="inactive-bar" style="display:none;">Programme Inactive</div>
+            <div class="drawer-links">
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Dashboard icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg> </span><span>Country Dashboard</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Sync icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.39-.47 2.68-1.25 3.71l1.46 1.46C20.07 15.07 21 13.13 21 11c0-4.42-3.58-8-8-8zm-6.25 2.29l-1.46 1.46C3.93 8.93 3 10.87 3 13c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.39.47-2.68 1.25-3.71z"/></svg> </span><span>Registration Data Import</span></a>
+                <a href="#" class="drawer-link" id="householdLink"><span class="drawer-icon"> <!-- Material UI Group icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05C15.64 13.36 17 14.28 17 15.5V19h6v-2.5c0-2.22-3.58-3.5-7-3.5z"/></svg> </span><span>Household</span><span class="drawer-chevron" id="householdChevron"><svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path id="householdChevronPath" d="M7 10l5 5 5-5"/></svg></span></a>
+                <div class="drawer-suboptions" id="householdSuboptions" style="display:none;">
+                    <ul style="list-style:none;padding:0;margin:0;width:100%;">
+                        <li class="drawer-suboption" id="subHouseholds" onclick="window.location='/households';" style="width:100%;">
+                            <div class="drawer-suboption-flex">
+                                <span class="drawer-icon"> <!-- Material UI Group icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="22" width="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05C15.64 13.36 17 14.28 17 15.5V19h6v-2.5c0-2.22-3.58-3.5-7-3.5z"/></svg>
+                                </span>
+                                <span class="drawer-suboption-label">Households</span>
+                            </div>
+                        </li>
+                        <li class="drawer-suboption" id="subIndividuals" onclick="window.location='/individuals';" style="width:100%;">
+                            <div class="drawer-suboption-flex">
+                                <span class="drawer-icon"> <!-- Material UI Face icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="22" width="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M12 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg>
+                                </span>
+                                <span class="drawer-suboption-label">Individuals</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Assignment icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1zm7 18H5V5h14v16z"/></svg> </span><span>Programme Details</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Table icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v10H7V7z"/></svg> </span><span>Targeting</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Credit Card icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M2 11h20"/></svg> </span><span>Payment Module</span><span class="drawer-chevron"><svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg></span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Attach Money icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 17c-2.76 0-5-2.24-5-5h2c0 1.65 1.35 3 3 3s3-1.35 3-3c0-1.65-1.35-3-3-3s-3-1.35-3-3c0-2.76 2.24-5 5-5s5 2.24 5 5h-2c0-1.65-1.35-3-3-3s-3 1.35-3 3c0 1.65 1.35 3 3 3s3 1.35 3 3c0 2.76-2.24 5-5 5z"/></svg> </span><span>Payment Verification</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Forum icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 2h20v16H6l-4 4V2zm2 2v12h16V4H4z"/></svg> </span><span>Grievance</span><span class="drawer-chevron"><svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg></span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Security icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l9 4v6c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V6l9-4z"/></svg> </span><span>Accountability</span><span class="drawer-chevron"><svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg></span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Supervised User Circle icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M12 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg> </span><span>Programme Users</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <!-- Material UI Assessment icon --> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-6h2v6zm4 0h-2v-10h2v10zm-8 0H7v-4h2v4z"/></svg> </span><span>Programme Log</span></a>
+            </div>
+            <div class="resources-text" style="margin-top: 24px;">Resources</div>
+            <div class="drawer-links">
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/><circle cx="12" cy="7" r="4"/></svg> </span><span>Reporting</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19h16M4 15h16M4 11h16M4 7h16"/></svg> </span><span>Knowledge Base</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/></svg> </span><span>Conversations</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> </span><span>Tools and Materials</span></a>
+                <a href="#" class="drawer-link"><span class="drawer-icon"> <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> </span><span>Release Note</span></a>
+            </div>
+            <div class="version-info" id="versionInfo" style="margin-top: 24px;">Version: 3.6.2</div>
+        </div>
+          <div class="main-content" style="background: #FFF; color: #233944;">
+              {% block main %}
+              {% endblock main %}
+          </div>
+        <div class="appbar" id="appbar">
+            <div style="display: flex; align-items: center; flex: 1; gap: 16px;">
+                <div class="mui-select-wrapper" id="muiSelectWrapper">
+                    <button type="button" class="mui-select-trigger" id="muiSelectTrigger">
+                        <span id="muiSelectValue">Select Business Area</span>
+                        <span class="mui-select-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+                        </span>
+                    </button>
+                    <div class="mui-select-menu" id="muiSelectMenu">
+                        <!-- Business area options will be rendered here by JS -->
+                    </div>
+                </div>
+                <div class="mui-select-wrapper" id="muiProgramWrapper" style="min-width:320px;">
+                    <button type="button" class="mui-select-trigger" id="muiProgramTrigger">
+                        <span id="muiProgramValue">Test Program</span>
+                        <span class="mui-select-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+                        </span>
+                    </button>
+                    <div class="mui-autocomplete-menu" id="muiProgramMenu">
+                        <div class="mui-autocomplete-search">
+                            <input type="text" id="muiProgramSearch" placeholder="Search programmes" autocomplete="off" />
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+                        <div class="mui-autocomplete-label">All Programmes</div>
+                        <div id="muiProgramOptions">
+                            <!-- Options will be rendered here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <span style="display: flex; align-items: center; gap: 8px; color: #fff; font-size: 1em;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/></svg>
+                    SUPPORT
+                </span>
+                <span style="background: #888; color: #fff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; font-weight: 500;">R</span>
+                <span style="font-size: 1em; font-weight: 500;">ROOT@ROOT.COM</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Business Area Dropdown (API-driven)
+        const muiSelectTrigger = document.getElementById('muiSelectTrigger');
+        const muiSelectMenu = document.getElementById('muiSelectMenu');
+        const muiSelectValue = document.getElementById('muiSelectValue');
+        let muiSelectOpen = false;
+        let businessAreaList = [];
+        let businessAreaSelected = null;
+        let businessAreaLoading = false;
+        let businessAreaError = null;
+
+        function updateUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (businessAreaSelected && businessAreaSelected.slug) {
+                params.set('business_area', businessAreaSelected.slug);
+            }
+            if (muiProgramSelected && muiProgramSelected.slug) {
+                params.set('program', muiProgramSelected.slug);
+            }
+            const newUrl = window.location.pathname + '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        function renderBusinessAreaOptions() {
+            muiSelectMenu.innerHTML = '';
+            if (businessAreaLoading) {
+                muiSelectMenu.innerHTML = '<div class="mui-select-option">Loading business areas...</div>';
+                return;
+            }
+            if (businessAreaError) {
+                muiSelectMenu.innerHTML = `<div class="mui-select-option">${businessAreaError}</div>`;
+                return;
+            }
+            if (!businessAreaList.length) {
+                muiSelectMenu.innerHTML = '<div class="mui-select-option">No business areas found.</div>';
+                return;
+            }
+            businessAreaList.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'mui-select-option' + (businessAreaSelected && opt.slug === businessAreaSelected.slug ? ' selected' : '');
+                div.textContent = opt.name;
+                div.addEventListener('click', function(e) {
+                    businessAreaSelected = opt;
+                    muiSelectValue.textContent = opt.name;
+                    muiSelectMenu.classList.remove('open');
+                    muiSelectOpen = false;
+                    window.BUSINESS_AREA_SLUG = opt.slug;
+                    fetchProgramList();
+                    renderBusinessAreaOptions();
+                    updateUrlParams();
+                });
+                muiSelectMenu.appendChild(div);
+            });
+        }
+
+        function fetchBusinessAreaList() {
+            businessAreaLoading = true;
+            businessAreaError = null;
+            renderBusinessAreaOptions();
+            fetch('/api/rest/business-areas/?limit=100&ordering=name')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch business areas');
+                    return response.json();
+                })
+                .then(data => {
+                    businessAreaList = Array.isArray(data.results) ? data.results : [];
+                    if (businessAreaList.length) {
+                        businessAreaSelected = businessAreaList[0];
+                        muiSelectValue.textContent = businessAreaSelected.name;
+                        window.BUSINESS_AREA_SLUG = businessAreaSelected.slug;
+                    } else {
+                        businessAreaSelected = null;
+                        muiSelectValue.textContent = 'No Business Areas';
+                    }
+                    businessAreaLoading = false;
+                    renderBusinessAreaOptions();
+                    fetchProgramList();
+                })
+                .catch(err => {
+                    businessAreaLoading = false;
+                    businessAreaError = 'Error loading business areas.';
+                    muiSelectValue.textContent = 'Error';
+                    renderBusinessAreaOptions();
+                });
+        }
+
+        muiSelectTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            muiSelectMenu.classList.toggle('open');
+            muiSelectOpen = muiSelectMenu.classList.contains('open');
+            if (muiSelectOpen) {
+                renderBusinessAreaOptions();
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (muiSelectOpen && !muiSelectMenu.contains(e.target) && e.target !== muiSelectTrigger) {
+                muiSelectMenu.classList.remove('open');
+                muiSelectOpen = false;
+            }
+        });
+        // Initial fetch and render for business areas
+        fetchBusinessAreaList();
+
+        // Material UI Autocomplete for Program (API-driven)
+        const muiProgramTrigger = document.getElementById('muiProgramTrigger');
+        const muiProgramMenu = document.getElementById('muiProgramMenu');
+        const muiProgramValue = document.getElementById('muiProgramValue');
+        const muiProgramSearch = document.getElementById('muiProgramSearch');
+        const muiProgramOptions = document.getElementById('muiProgramOptions');
+        let muiProgramOpen = false;
+        let muiProgramList = [];
+        let muiProgramSelected = null;
+        let muiProgramLoading = false;
+        let muiProgramError = null;
+
+        function renderProgramOptions(filter = '') {
+            muiProgramOptions.innerHTML = '';
+            if (muiProgramLoading) {
+                muiProgramOptions.innerHTML = '<div class="mui-autocomplete-loading">Loading programmes...</div>';
+                return;
+            }
+            if (muiProgramError) {
+                muiProgramOptions.innerHTML = `<div class="mui-autocomplete-error">${muiProgramError}</div>`;
+                return;
+            }
+            if (!muiProgramList.length) {
+                muiProgramOptions.innerHTML = '<div class="mui-autocomplete-empty">No programmes found.</div>';
+                return;
+            }
+            const filtered = muiProgramList.filter(opt => opt.name.toLowerCase().includes(filter.toLowerCase()));
+            filtered.slice(0, 10).forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'mui-autocomplete-option' + (muiProgramSelected && opt.name === muiProgramSelected.name ? ' selected' : '');
+                div.innerHTML = `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${opt.name.length > 22 ? opt.name.slice(0,19)+'...' : opt.name}</span><span class="mui-status-badge ${opt.status==='ACTIVE'?'mui-status-active':'mui-status-draft'}">${opt.status}</span>`;
+                div.addEventListener('click', function(e) {
+                    muiProgramSelected = opt;
+                    muiProgramValue.textContent = opt.name;
+                    muiProgramMenu.classList.remove('open');
+                    muiProgramOpen = false;
+                    renderProgramOptions(muiProgramSearch.value);
+                    updateUrlParams();
+                });
+                muiProgramOptions.appendChild(div);
+            });
+        }
+
+        function fetchProgramList() {
+            muiProgramLoading = true;
+            muiProgramError = null;
+            renderProgramOptions();
+            const businessAreaSlug = window.BUSINESS_AREA_SLUG;
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?limit=10&ordering=name`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch programmes');
+                    return response.json();
+                })
+                .then(data => {
+                    muiProgramList = Array.isArray(data.results) ? data.results : [];
+                    if (muiProgramList.length) {
+                        muiProgramSelected = muiProgramList[0];
+                        muiProgramValue.textContent = muiProgramSelected.name;
+                    } else {
+                        muiProgramSelected = null;
+                        muiProgramValue.textContent = 'No Programmes';
+                    }
+                    muiProgramLoading = false;
+                    renderProgramOptions();
+                })
+                .catch(err => {
+                    muiProgramLoading = false;
+                    muiProgramError = 'Error loading programmes.';
+                    muiProgramValue.textContent = 'Error';
+                    renderProgramOptions();
+                });
+
+        }
+
+        // Fetch more programs with search param
+        function triggerProgramSearch(searchValue) {
+            muiProgramLoading = true;
+            muiProgramError = null;
+            renderProgramOptions(searchValue);
+            const businessAreaSlug = window.BUSINESS_AREA_SLUG;
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?search="${encodeURIComponent(searchValue)}"&limit=50&ordering=name`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch programmes');
+                    return response.json();
+                })
+                .then(data => {
+                    muiProgramList = Array.isArray(data.results) ? data.results : [];
+                    muiProgramLoading = false;
+                    renderProgramOptions(searchValue);
+                })
+                .catch(err => {
+                    muiProgramLoading = false;
+                    muiProgramError = 'Error loading programmes.';
+                    renderProgramOptions(searchValue);
+                });
+        }
+
+        muiProgramTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            muiProgramMenu.classList.toggle('open');
+            muiProgramOpen = muiProgramMenu.classList.contains('open');
+            if (muiProgramOpen) {
+                muiProgramSearch.value = '';
+                renderProgramOptions();
+                setTimeout(function(){muiProgramSearch.focus();}, 100);
+            }
+        });
+        muiProgramSearch.addEventListener('input', function(e) {
+            renderProgramOptions(muiProgramSearch.value);
+        });
+
+        // Add click handler for search icon
+        const muiProgramSearchIcon = muiProgramMenu.querySelector('.mui-autocomplete-search svg');
+        if (muiProgramSearchIcon) {
+            muiProgramSearchIcon.style.cursor = 'pointer';
+            muiProgramSearchIcon.addEventListener('click', function(e) {
+                triggerProgramSearch(muiProgramSearch.value);
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (muiProgramOpen && !muiProgramMenu.contains(e.target) && e.target !== muiProgramTrigger) {
+                muiProgramMenu.classList.remove('open');
+                muiProgramOpen = false;
+            }
+        });
+        // Initial fetch and render
+        fetchProgramList();
+        function matchColorToWindowOrigin() {
+            const url = window.location.href;
+            if (window.location.hostname === 'localhost') {
+                return '#A1E4B6';
+            }
+            if (url.includes('trn')) {
+                return '#BF360C';
+            }
+            if (url.includes('stg')) {
+                return '#673AB7';
+            }
+            if (url.includes('dev')) {
+                return '#00796B';
+            }
+            if (url.includes('eph')) {
+                return '#CC00EF';
+            }
+            if (url.includes('tst')) {
+                return '#EF00A7';
+            }
+            return '#00ADEF';
+        }
+        document.documentElement.style.setProperty('--drawer-header-bg', matchColorToWindowOrigin());
+        // Logo transparency logic
+        const drawerLogo = document.getElementById('drawerLogo');
+        if (drawerLogo && matchColorToWindowOrigin() !== '#00ADEF') {
+            drawerLogo.style.opacity = '0.7';
+        }
+        // Collapse/restore logic
+        const drawer = document.getElementById('drawer');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const chevron = document.getElementById('chevron');
+
+        let mini = false;
+        function toggleDrawer() {
+            mini = !mini;
+            if (mini) {
+                drawer.classList.add('mini');
+                appbar.classList.add('mini');
+                document.querySelector('.main-content').classList.add('mini');
+                // Change chevron direction to right
+                document.getElementById('chevronPath').setAttribute('d', 'M11 9L16 14L11 19');
+            } else {
+                drawer.classList.remove('mini');
+                appbar.classList.remove('mini');
+                document.querySelector('.main-content').classList.remove('mini');
+                // Change chevron direction to left
+                document.getElementById('chevronPath').setAttribute('d', 'M17 9L12 14L17 19');
+            }
+        }
+        collapseBtn.addEventListener('click', toggleDrawer);
+        // Ensure chevron works if drawer is mini on page load
+        if (drawer.classList.contains('mini')) {
+            appbar.classList.add('mini');
+            document.querySelector('.main-content').classList.add('mini');
+            document.getElementById('chevronPath').setAttribute('d', 'M11 9L16 14L11 19');
+            mini = true;
+        }
+        // Programme Inactive bar logic (simulate, can be dynamic)
+        // Set to true to show bar
+        const showInactiveBar = false;
+        if (showInactiveBar) {
+            document.getElementById('inactiveBar').style.display = '';
+        }
+        // Version info (simulate, can be dynamic)
+        document.getElementById('versionInfo').textContent = 'Version: 1.0.0';
+    </script>
+</body>
+</html>
