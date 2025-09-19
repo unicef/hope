@@ -28,6 +28,7 @@ from hope.apps.payment.models.payment import (
     WesternUnionPaymentPlanReport,
 )
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.utils import get_link
 
 logger = logging.getLogger(__name__)
 
@@ -269,10 +270,10 @@ class QCFReportsService:
             payment_plan_id = str(payment_plan.id)
             program_slug = report.payment_plan.program.slug
 
-            payment_plan_link = self.get_link(
+            payment_plan_link = get_link(
                 f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
             )
-            download_link = self.get_link(reverse(path_name, args=[report_id]))
+            download_link = get_link(reverse(path_name, args=[report_id]))
 
         for user in users:
             context = {

@@ -518,8 +518,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     slug = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     partner_access = serializers.CharField(read_only=True)
-    reconciliation_window_in_days = serializers.IntegerField(allow_null=True)
-    send_reconciliation_window_expiry_notifications = serializers.BooleanField(allow_null=True)
+    reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(allow_null=True, required=False)
 
     class Meta:
         model = Program
