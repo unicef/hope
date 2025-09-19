@@ -67,6 +67,7 @@ from hope.apps.program.celery_tasks import (
     populate_pdu_new_rounds_with_null_values_task,
 )
 from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.apps.program.signals import program_closed_signal, program_opened_signal
 from hope.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
@@ -229,6 +230,8 @@ class ProgramViewSet(
             program,
         )
 
+        program_closed_signal.send(sender=program.__class__, instance=program)
+
         return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
 
     @transaction.atomic
@@ -275,6 +278,8 @@ class ProgramViewSet(
         )
 
         serializer.instance = program
+
+        program_opened_signal.send(sender=program.__class__, instance=program)
 
     @transaction.atomic
     def perform_update(self, serializer: BaseSerializer[Any]) -> None:
@@ -386,6 +391,8 @@ class ProgramViewSet(
             None,
             program,
         )
+
+        program_opened_signal.send(sender=program.__class__, instance=program)
 
         return Response(
             status=status.HTTP_201_CREATED,

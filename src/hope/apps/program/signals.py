@@ -73,3 +73,7 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
     get_or_create_cache_key(version_key, 0)
 
     cache.incr(version_key)
+
+
+program_opened_signal = Signal()
+program_closed_signal = Signal()

@@ -4,6 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
+from django.db import transaction
 from django.utils.timezone import now
 from rest_framework import serializers
 
@@ -20,6 +21,7 @@ from hope.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hope.apps.payment.models.payment import FinancialInstitutionMapping
+from hope.apps.payment.signals import payment_reconciled_signal
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -579,7 +581,10 @@ class PaymentGatewayService:
             )
 
         payment.save(update_fields=update_fields)
+        if delivered_quantity:
+            payment_reconciled_signal.send(sender=payment.__class__, instance=payment)
 
+    @transaction.atomic
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.filter(
             splits__sent_to_payment_gateway=True,
@@ -617,6 +622,7 @@ class PaymentGatewayService:
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
+    @transaction.atomic
     def sync_record(self, payment: Payment) -> None:
         if not payment.parent.is_payment_gateway:
             return  # pragma: no cover
@@ -631,6 +637,7 @@ class PaymentGatewayService:
                 payment.parent.exchange_rate,
             )
 
+    @transaction.atomic
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate
 
