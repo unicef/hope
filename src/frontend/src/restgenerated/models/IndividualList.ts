@@ -8,7 +8,7 @@ import type { DeduplicationBatchStatusEnum } from './DeduplicationBatchStatusEnu
 import type { DeduplicationEngineSimilarityPairIndividual } from './DeduplicationEngineSimilarityPairIndividual';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DeduplicationResult } from './DeduplicationResult';
-import type { HouseholdSimple } from './HouseholdSimple';
+import type { IndividualListHousehold } from './IndividualListHousehold';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
@@ -19,7 +19,7 @@ export type IndividualList = {
      * Full Name of the Beneficiary
      */
     fullName: string;
-    household: HouseholdSimple;
+    household: IndividualListHousehold;
     readonly status: string;
     /**
      * This represents the MEMBER relationship. can be blank
