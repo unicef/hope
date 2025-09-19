@@ -26,7 +26,6 @@ from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from hope.apps.utils.security import is_root
 from hope.models.business_area import BusinessArea
-from hope.models.file_temp import FileTemp
 from hope.models.payment_plan import PaymentPlan
 
 
@@ -372,8 +371,15 @@ class PaymentPlanCeleryTasksMixin:
 
         if request.method == "POST":
             task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx
-            file_id = FileTemp.objects.get(object_id=pk).pk
-            args = [uuid.UUID(pk), file_id]
+            pp = PaymentPlan.objects.get(pk=pk)
+            file = pp.reconciliation_import_file
+            if not file:
+                messages.add_message(
+                    request, messages.ERROR, "There is no reconciliation_import_file for this payment plan"
+                )
+                return redirect(reverse(self.url, args=[pk]))
+
+            args = [uuid.UUID(pk), file.pk]
             task_data = get_task_in_queue_or_running(name=task_name, args=args)
             if task_data:
                 task_id = task_data["id"]

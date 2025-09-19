@@ -11,11 +11,12 @@ from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
+from django.db import Error, transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from kombu.exceptions import OperationalError
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.grievance.models import GrievanceTicket
@@ -91,15 +92,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_datahub.celery_tasks import (
-                    registration_xlsx_import_task,
-                )
+                from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 
                 celery_task = registration_xlsx_import_task
             else:
-                from hope.apps.registration_datahub.celery_tasks import (
-                    registration_kobo_import_task,
-                )
+                from hope.apps.registration_datahub.celery_tasks import registration_kobo_import_task
 
                 celery_task = registration_kobo_import_task
 
@@ -113,7 +110,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
 
             self.message_user(request, "RDI task has started")
-        except Exception as e:
+        except OperationalError as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI task", messages.ERROR)
 
@@ -127,7 +124,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             merge_registration_data_import_task.delay(registration_data_import_id=pk)
 
             self.message_user(request, "RDI Merge task has started")
-        except Exception as e:
+        except OperationalError as e:
             logger.warning(e)
             self.message_user(
                 request,
@@ -176,7 +173,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     """,
                     "Successfully executed",
                 )
-        except Exception as e:
+        except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
@@ -263,7 +260,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     """,
                     "Successfully executed",
                 )
-        except Exception as e:
+        except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
             return None

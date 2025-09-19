@@ -18,8 +18,6 @@ from hope.models.kobo_imported_submission import KoboImportedSubmission
 
 
 class TestMarkSubmissions(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

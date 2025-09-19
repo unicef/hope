@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -168,6 +169,6 @@ class Targeting(BaseComponents):
     def disappear_loading_rows(self) -> WebElement:
         try:
             self.get_loading_rows()
-        except BaseException:
+        except (TimeoutException, NoSuchElementException):
             self.get_status_container()
         return self.wait_for_disappear(self.loading_rows)

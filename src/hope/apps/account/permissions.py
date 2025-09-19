@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(  # type: ignore # https://github.com/python/mypy/issues/7591
-        name: str, start: int, count: int, last_values: list[Any]
-    ) -> Any:
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
         return name
 
     # RDI
@@ -125,6 +124,8 @@ class Permissions(Enum):
     PM_PROGRAMME_CYCLE_UPDATE = auto()
     PM_PROGRAMME_CYCLE_DELETE = auto()
 
+    RECEIVE_PARSED_WU_QCF = auto()
+
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
 
@@ -208,6 +209,11 @@ class Permissions(Enum):
     PDU_TEMPLATE_CREATE = auto()
     PDU_TEMPLATE_DOWNLOAD = auto()
     PDU_UPLOAD = auto()
+
+    # Periodic Data Update specific for Online Edit
+    PDU_ONLINE_SAVE_DATA = auto()
+    PDU_ONLINE_APPROVE = auto()
+    PDU_ONLINE_MERGE = auto()
 
     # All
     ALL_VIEW_PII_DATA_ON_LISTS = auto()

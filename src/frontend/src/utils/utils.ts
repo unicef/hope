@@ -1,3 +1,21 @@
+// Status color for periodic data updates online edits
+export function periodicDataUpdatesOnlineEditsStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'NEW':
+      return theme.hctPalette.gray;
+    case 'READY':
+      return theme.hctPalette.orange;
+    case 'APPROVED':
+      return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.darkerBlue;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Choice } from '@restgenerated/models/Choice';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
@@ -145,36 +163,6 @@ export function populationStatusToColor(
   }
 }
 
-export function cashPlanStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'DISTRIBUTION_COMPLETED':
-      return theme.hctPalette.green;
-    case 'TRANSACTION_COMPLETED':
-      return theme.hctPalette.green;
-    default:
-      return theme.palette.error.main;
-  }
-}
-
-export function paymentRecordStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'PENDING':
-      return theme.hctPalette.orange;
-    case 'DISTRIBUTION_SUCCESSFUL':
-    case 'TRANSACTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'PARTIALLY_DISTRIBUTED':
-      return theme.hctPalette.lightBlue;
-    default:
-      return theme.palette.error.main;
-  }
-}
 
 export function paymentStatusToColor(
   theme: typeof themeObj,
@@ -373,6 +361,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    NEW: theme.hctPalette.gray,
     EXPORTED: theme.hctPalette.green,
     FAILED: theme.hctPalette.red,
     TO_EXPORT: theme.hctPalette.gray,
@@ -622,10 +611,20 @@ export function programStatusToPriority(status: string): number {
   }
 }
 
+function isBase64(str) {
+  if (typeof str !== 'string') return false;
+  if (!str.length || str.length % 4 !== 0) return false;
+  // Regex covers pure base64 (no mime or data: prefix)
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(str);
+}
+
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
+  if (!isBase64(idString))
+      return idString;
   if (idString.includes(':')) {
     // Already decoded
     return idString.split(':')[1];

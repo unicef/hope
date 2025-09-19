@@ -776,6 +776,14 @@ class Household(
         app_label = "household"
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
+
+        indexes = [
+            models.Index(
+                name="hh_prog_cre_active_merged",
+                fields=["program", "created_at"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=["unicef_id", "program"],

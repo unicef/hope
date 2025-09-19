@@ -91,7 +91,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
 
 class PaymentPayloadSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
+    amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
@@ -211,7 +211,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     _hope_status,
                     _quantity,
                 ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
-            except Exception:
+            except ValueError:
                 logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
@@ -444,18 +444,21 @@ class PaymentGatewayService:
             Payment.objects.bulk_update(_payments, ["status"])
 
         def _add_records(_payments: list[Payment], _container: PaymentPlanSplit) -> None:
-            add_records_error = False
+            add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
-                    payments_chunk, _container.id, validate_response=False
+                    payments_chunk, _container.id, validate_response=True
                 )
                 if response.errors:
-                    add_records_error = True
+                    add_records_error = response.errors
                     _handle_errors(response, payments_chunk)
                 else:
                     _handle_success(response, payments_chunk)
 
-            if not add_records_error and _payments:
+            if add_records_error:
+                logger.error(f"Sent to Payment Gateway add records error: {add_records_error}")
+
+            elif _payments:
                 _container.sent_to_payment_gateway = True
                 _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
@@ -463,7 +466,9 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments_qs = split.split_payment_items.eligible()
+                payments_qs = split.split_payment_items.eligible().filter(
+                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                )
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
@@ -582,7 +587,7 @@ class PaymentGatewayService:
         ).distinct()
 
         for payment_plan in payment_plans:
-            exchange_rate = payment_plan.get_exchange_rate()
+            exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
@@ -605,7 +610,6 @@ class PaymentGatewayService:
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
-                    # TODO: MB to check if we need it here
                     payment_plan.status_finished()
                     payment_plan.save()
                     for instruction in payment_instructions:
@@ -622,11 +626,11 @@ class PaymentGatewayService:
                 [pg_payment_record],
                 payment.parent_split,
                 payment.parent,
-                payment.parent.get_exchange_rate(),
+                payment.parent.exchange_rate,
             )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
-        exchange_rate = payment_plan.get_exchange_rate()
+        exchange_rate = payment_plan.exchange_rate
 
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover

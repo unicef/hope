@@ -76,7 +76,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
+        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
@@ -559,7 +559,7 @@ class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    target_population_id = serializers.UUIDField()
+    target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
     currency = serializers.ChoiceField(choices=CURRENCY_CHOICES)
@@ -714,7 +714,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count(
                 "id",
-                filter=Q(status__in=Payment.FAILED_STATUSES),
+                filter=Q(status__in=tuple(set(Payment.FAILED_STATUSES) - {Payment.STATUS_NOT_DISTRIBUTED})),
             ),
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
@@ -993,11 +993,11 @@ class PaymentListSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
     household_status = serializers.SerializerMethodField()
-    hoh_full_name = serializers.CharField(source="head_of_household.full_name")
-    hoh_phone_no = serializers.CharField(source="head_of_household.phone_no")
-    hoh_phone_no_alternative = serializers.CharField(source="head_of_household.phone_no_alternative")
-    collector_phone_no = serializers.CharField(source="collector.phone_no")
-    collector_phone_no_alt = serializers.CharField(source="collector.phone_no_alternative")
+    hoh_full_name = serializers.SerializerMethodField()
+    hoh_phone_no = serializers.SerializerMethodField()
+    hoh_phone_no_alternative = serializers.SerializerMethodField()
+    collector_phone_no = serializers.SerializerMethodField()
+    collector_phone_no_alt = serializers.SerializerMethodField()
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
@@ -1106,6 +1106,29 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return []
         conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
+
+    def _safe_get(self, obj, path, default=None):
+        cur = obj
+        for attr in path.split("."):
+            if cur is None:
+                return default
+            cur = getattr(cur, attr, None)
+        return cur
+
+    def get_hoh_full_name(self, obj):
+        return self._safe_get(obj, "head_of_household.full_name")
+
+    def get_hoh_phone_no(self, obj):
+        return str(self._safe_get(obj, "head_of_household.phone_no"))
+
+    def get_hoh_phone_no_alternative(self, obj):
+        return str(self._safe_get(obj, "head_of_household.phone_no_alternative"))
+
+    def get_collector_phone_no(self, obj):
+        return str(self._safe_get(obj, "collector.phone_no"))
+
+    def get_collector_phone_no_alt(self, obj):
+        return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):

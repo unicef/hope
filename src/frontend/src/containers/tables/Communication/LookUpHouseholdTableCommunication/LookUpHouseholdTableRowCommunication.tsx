@@ -67,7 +67,7 @@ export function LookUpHouseholdTableRowCommunication({
             onClick={(event) => checkboxClickHandler(event, household.id)}
             checked={isItemSelected}
             data-cy="input-checkbox-household"
-            inputProps={{ 'aria-labelledby': household.id }}
+            slotProps={{ input: { 'aria-labelledby': household.id } }}
             disabled={isSelectionDisabled}
           />
         ) : (
@@ -79,7 +79,7 @@ export function LookUpHouseholdTableRowCommunication({
             }}
             value={household.id}
             name="radio-button-household"
-            inputProps={{ 'aria-label': household.id }}
+            slotProps={{ input: { 'aria-label': household.id } }}
             data-cy="input-radio-household"
             disabled={isSelectionDisabled}
           />

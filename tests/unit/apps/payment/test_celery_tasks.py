@@ -1,3 +1,4 @@
+from decimal import Decimal
 import logging.config
 from unittest.mock import Mock, patch
 
@@ -23,8 +24,11 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_qcf_report_email_notifications,
+    update_exchange_rate_on_release_payments,
 )
 from hope.apps.payment.utils import generate_cache_key
 from hope.models.delivery_mechanism import DeliveryMechanism
@@ -32,6 +36,8 @@ from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.payment_plan import PaymentPlan
 from hope.models.rule import Rule
+from hope.models.western_union_invoice import WesternUnionInvoice
+from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -308,3 +314,125 @@ class TestPaymentCeleryTask(TestCase):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
+
+    @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
+    def test_update_exchange_rate_on_release_payments_success(
+        self,
+        mock_get_exchange_rate: Mock,
+        mock_update_money_fields: Mock,
+        mock_get_quantity_in_usd: Mock,
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+            exchange_rate=0.1,
+        )
+        payment_plan.refresh_from_db()
+        assert payment_plan.exchange_rate == Decimal("0.10000000")
+        payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
+
+        mock_get_exchange_rate.return_value = 1.25
+        mock_get_quantity_in_usd.return_value = 125.0
+
+        update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+        payment_plan.refresh_from_db()
+        assert payment_plan.exchange_rate == 1.25
+
+        payment.refresh_from_db()
+        assert payment.entitlement_quantity_usd == 125.0
+
+        mock_update_money_fields.assert_called_once()
+
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
+    def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
+        self, mock_retry: Mock, mock_logger: Mock
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+        )
+        mock_retry.side_effect = Retry("force retry just for testing")
+
+        with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
+            with pytest.raises(Retry):
+                update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+
+        mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
+        mock_retry.assert_called_once()
+
+
+class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_runs_service_process_files_since(self, mock_service_cls: Mock) -> None:
+        mock_service = mock_service_cls.return_value
+        periodic_sync_payment_plan_invoices_western_union_ftp()
+        mock_service.process_files_since.assert_called_once()
+
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_runs_service_process_files_since_retries_on_exception(
+        self,
+        mock_service_cls: Mock,
+        mock_retry: Mock,
+        mock_logger_exception: Mock,
+    ) -> None:
+        mock_service = mock_service_cls.return_value
+        mock_service.process_files_since.side_effect = Exception("test")
+        mock_retry.side_effect = Retry("forced retry test")
+        with pytest.raises(Retry):
+            periodic_sync_payment_plan_invoices_western_union_ftp()
+        mock_logger_exception.assert_called_once()
+        mock_retry.assert_called_once()
+
+
+class SendQCFReportEmailNotificationsTests(TestCase):
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_sends_email_and_marks_sent(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        create_afghanistan()
+        wu_qcf_file = WesternUnionInvoice.objects.create(
+            name="TEST",
+        )
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
+            qcf_file=wu_qcf_file,
+            payment_plan=PaymentPlanFactory(),
+        )
+        mock_service = mock_service_cls.return_value
+        send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
+        mock_service.send_notification_emails.assert_called_once_with(qcf_report)
+        qcf_report.refresh_from_db()
+        assert qcf_report.sent
+
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_sends_email_and_marks_sent_retries_on_exception(
+        self,
+        mock_service_cls: Mock,
+        mock_retry: Mock,
+        mock_logger_exception: Mock,
+    ) -> None:
+        create_afghanistan()
+        wu_qcf_file = WesternUnionInvoice.objects.create(name="TEST")
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
+            qcf_file=wu_qcf_file,
+            payment_plan=PaymentPlanFactory(),
+        )
+        mock_service = mock_service_cls.return_value
+        mock_service.send_notification_emails.side_effect = Exception("test abc")
+
+        mock_retry.side_effect = Retry("forced retry test")
+        with pytest.raises(Retry):
+            send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
+        mock_logger_exception.assert_called_once()
+        mock_retry.assert_called_once()

@@ -6,16 +6,14 @@ from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.periodic_data_update_template import (
-    PeriodicDataUpdateTemplate,
-)
-from hope.models.periodic_data_update_update import PeriodicDataUpdateUpload
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models.pdu_xlsx_upload import PDUXlsxUpload
 
 
-@receiver(post_save, sender=PeriodicDataUpdateTemplate)
-@receiver(pre_delete, sender=PeriodicDataUpdateUpload)
+@receiver(post_save, sender=PDUXlsxTemplate)
+@receiver(pre_delete, sender=PDUXlsxTemplate)
 def increment_periodic_data_update_template_version_cache(
-    sender: Any, instance: PeriodicDataUpdateTemplate, **kwargs: dict
+    sender: Any, instance: PDUXlsxTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
     program_slug = instance.program.slug
@@ -30,11 +28,9 @@ def increment_periodic_data_update_template_version_cache_function(business_area
     cache.incr(version_key)
 
 
-@receiver(post_save, sender=PeriodicDataUpdateUpload)
-@receiver(pre_delete, sender=PeriodicDataUpdateUpload)
-def increment_periodic_data_update_upload_version_cache(
-    sender: Any, instance: PeriodicDataUpdateUpload, **kwargs: dict
-) -> None:
+@receiver(post_save, sender=PDUXlsxUpload)
+@receiver(pre_delete, sender=PDUXlsxUpload)
+def increment_periodic_data_update_upload_version_cache(sender: Any, instance: PDUXlsxUpload, **kwargs: dict) -> None:
     business_area_slug = instance.template.business_area.slug
     business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
     program_slug = instance.template.program.slug

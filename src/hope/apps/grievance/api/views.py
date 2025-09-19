@@ -291,6 +291,7 @@ class GrievanceTicketViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    program_model_field_is_many = True
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -395,6 +396,8 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
@@ -465,9 +468,9 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_urgency": [Permissions.GRIEVANCES_UPDATE],
         "bulk_add_note": [Permissions.GRIEVANCES_UPDATE],
-        "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE],
-        "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE],
-        "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE],
+        "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
+        "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
+        "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "dashboard": [
             Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
@@ -482,6 +485,8 @@ class GrievanceTicketGlobalViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    program_model_field_is_many = True
+
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_queryset(self) -> QuerySet:

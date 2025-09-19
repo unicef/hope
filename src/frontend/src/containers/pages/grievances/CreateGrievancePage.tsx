@@ -168,7 +168,8 @@ const CreateGrievancePage = (): ReactElement => {
 
   const initialValues = {
     description: '',
-    category: category || null,
+    category:
+      typeof category === 'number' ? category : Number(category) || null,
     language: '',
     consent: false,
     admin: selectedHousehold?.admin2?.id || null,
@@ -209,11 +210,11 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
       queryFn: () =>
         RestService.restBusinessAreasProgramsList(
           createApiParams(
-            { businessAreaSlug: businessArea, first: 100 },
+            { businessAreaSlug: businessArea, limit: 100 },
             {
               withPagination: false,
             },

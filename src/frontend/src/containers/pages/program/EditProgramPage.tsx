@@ -32,6 +32,7 @@ import {
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
   showApiErrorMessages,
+  deepUnderscore,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -91,23 +92,24 @@ const EditProgramPage = (): ReactElement => {
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: updateProgramDetails } = useMutation({
-    mutationFn: (programData: ProgramUpdate) => {
-      return RestService.restBusinessAreasProgramsUpdate({
-        businessAreaSlug: businessArea,
-        slug: id,
-        requestBody: programData,
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['businessAreaProgram', businessArea, id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
-      });
-    },
-  });
+  const { mutateAsync: updateProgramDetails, isPending: loadingUpdateProgram } =
+    useMutation({
+      mutationFn: (programData: ProgramUpdate) => {
+        return RestService.restBusinessAreasProgramsUpdate({
+          businessAreaSlug: businessArea,
+          slug: id,
+          requestBody: programData,
+        });
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaProgram', businessArea, id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaPrograms', businessArea],
+        });
+      },
+    });
 
   const {
     mutateAsync: updateProgramPartners,
@@ -182,25 +184,23 @@ const EditProgramPage = (): ReactElement => {
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
-      .map(({ pduData, ...rest }) => {
-        let newPduData = pduData;
-        if (pduData) {
+      .map(({ pdu_data, ...rest }) => {
+        let newPduData = pdu_data;
+        if (pdu_data) {
           const filteredPduData = Object.fromEntries(
-            Object.entries(pduData).filter(
-              ([key]) => key !== '__typename' && key !== 'id',
-            ),
+            Object.entries(pdu_data).filter(([key]) => key !== 'id'),
           );
-          filteredPduData.roundsNames = (() => {
-            if (!pduData.roundsNames) {
-              pduData.roundsNames = [];
+          filteredPduData.rounds_names = (() => {
+            if (!pdu_data.rounds_names) {
+              pdu_data.rounds_names = [];
             }
             if (
-              pduData.numberOfRounds === 1 &&
-              pduData.roundsNames.length === 0
+              pdu_data.number_of_rounds === 1 &&
+              pdu_data.rounds_names.length === 0
             ) {
               return [''];
             }
-            return pduData.roundsNames.map((roundName) => roundName || '');
+            return pdu_data.rounds_names.map((roundName) => roundName || '');
           })();
           newPduData = filteredPduData;
         }
@@ -217,9 +217,6 @@ const EditProgramPage = (): ReactElement => {
         'partnerAccess',
         'pduFields',
       ]);
-      const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
-        omit(pduField, ['__typename']),
-      );
 
       // Build the base programData object
       const programData: ProgramUpdate = {
@@ -246,7 +243,7 @@ const EditProgramPage = (): ReactElement => {
           requestValuesDetails.endDate === undefined
             ? null
             : requestValuesDetails.endDate,
-        pduFields: pduFieldsToSendWithoutTypename,
+        pduFields: deepUnderscore(pduFieldsToSend),
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
@@ -450,6 +447,7 @@ const EditProgramPage = (): ReactElement => {
                             program={program}
                             setFieldValue={setFieldValue}
                             submitForm={submitForm}
+                            loading={loadingUpdateProgram}
                           />
                         )}
                       </div>

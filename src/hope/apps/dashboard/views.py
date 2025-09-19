@@ -3,6 +3,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
+from django.db import OperationalError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -23,7 +24,6 @@ from hope.apps.dashboard.services import (
 )
 from hope.apps.utils.sentry import sentry_tags
 from hope.models.business_area import BusinessArea
-from hope.models.role_assignment import RoleAssignment
 
 log = logging.getLogger(__name__)
 
@@ -42,24 +42,10 @@ class DashboardDataView(APIView):
 
         If data is not cached or needs updating, refresh it.
         """
-        is_global = business_area_slug.lower() == "global"
-        data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
-
-        has_permission = False
-
-        if is_global:
-            if request.user.is_superuser or request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
-                has_permission = True
-        else:
-            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
-            if check_permissions(
-                request.user,
-                [Permissions.DASHBOARD_VIEW_COUNTRY],
-                business_area=business_area_obj,
-            ):
-                has_permission = True
-
-        if not has_permission:
+        slug = business_area_slug.lower()
+        is_global = slug == GLOBAL_SLUG
+        business_area_obj = get_object_or_404(BusinessArea, slug=slug)
+        if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj):
             return Response(
                 {
                     "detail": _(
@@ -71,10 +57,10 @@ class DashboardDataView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        cache_identifier = GLOBAL_SLUG if is_global else business_area_slug
-        data = data_cache.get_data(cache_identifier)
+        data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        data = data_cache.get_data(slug)
         if data is None:
-            generate_dash_report_task.delay(cache_identifier)
+            generate_dash_report_task.delay(slug)
             data = []
         return Response(data, status=status.HTTP_200_OK)
 
@@ -89,46 +75,31 @@ class CreateOrUpdateDashReportView(APIView):
 
     @sentry_tags
     def post(self, request: Any, business_area_slug: str) -> Response:
-        is_global = business_area_slug.lower() == GLOBAL_SLUG
-        has_permission = False
-        business_area_obj = None
-
-        if is_global:
-            if (
-                request.user.is_superuser
-                or RoleAssignment.objects.filter(
-                    user=request.user,
-                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
-                    business_area__active=True,
-                ).exists()
-            ):
-                has_permission = True
-        else:
-            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
-            if request.user.is_superuser or check_permissions(
+        slug = business_area_slug.lower()
+        is_global = slug == GLOBAL_SLUG
+        business_area_obj = get_object_or_404(BusinessArea, slug=slug)
+        if not (
+            request.user.is_superuser
+            or check_permissions(
                 request.user,
                 [Permissions.DASHBOARD_VIEW_COUNTRY],
                 business_area=business_area_obj,
-            ):
-                has_permission = True
-
-        if not has_permission:
+            )
+        ):
             raise PermissionDenied(_("You do not have permission to trigger DashReport generation for this scope."))
 
         try:
-            task_identifier = GLOBAL_SLUG if is_global else business_area_slug
-
             data_cache_class: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
-            data_cache_key_to_clear = data_cache_class.get_cache_key(task_identifier)
+            data_cache_key_to_clear = data_cache_class.get_cache_key(slug)
             cache.delete(data_cache_key_to_clear)
 
-            generate_dash_report_task.delay(task_identifier)
+            generate_dash_report_task.delay(slug)
 
             return Response(
                 {"detail": _("DashReport generation task has been triggered.")},
                 status=status.HTTP_202_ACCEPTED,
             )
-        except Exception as e:
+        except OperationalError as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -140,21 +111,15 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
-        is_global = business_area_slug.lower() == "global"
+        slug = business_area_slug.lower()
+        is_global = slug == GLOBAL_SLUG
 
-        has_permission = False
-
-        if is_global:
-            if self.request.user.is_superuser or self.request.user.has_perm(Permissions.DASHBOARD_VIEW_COUNTRY.value):
-                has_permission = True
-        else:
-            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
-            if check_permissions(
-                self.request.user,
-                [Permissions.DASHBOARD_VIEW_COUNTRY],
-                business_area=business_area_obj,
-            ):
-                has_permission = True
+        business_area_obj = get_object_or_404(BusinessArea, slug=slug)
+        has_permission = check_permissions(
+            self.request.user,
+            [Permissions.DASHBOARD_VIEW_COUNTRY],
+            business_area=business_area_obj,
+        )
 
         if not has_permission:
             context["error_message"] = _(

@@ -22,7 +22,7 @@ def run_dev() -> None:
         processes.append(start(f"{sys.executable} manage.py runserver 127.0.0.1:8080"))
         processes.append(
             start(
-                f"{sys.executable} -m celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler"
+                f"{sys.executable} -m celery -A hope.apps.core.celery beat -l INFO --scheduler hope.models.custom_model_entry:CustomDatabaseScheduler"
             )
         )
         processes.append(

@@ -115,6 +115,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "data_fields",
+            "account_type",
         )
 
     def get_name(self, obj: Account) -> str:

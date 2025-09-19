@@ -3,8 +3,10 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Union
 
+import black
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db import Error
 from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
@@ -81,7 +83,7 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     def clean_results(self) -> dict:
         try:
             return self.cleaned_data["results"].split(",")
-        except Exception as e:
+        except KeyError as e:
             raise ValidationError(str(e))
 
 
@@ -98,13 +100,13 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     def clean_fields(self) -> list | None:
         try:
             return self.cleaned_data["fields"].split(",")
-        except Exception as e:
+        except KeyError as e:
             raise ValidationError(str(e))
 
     def clean_data(self) -> dict | None:
         try:
             return json.loads(self.cleaned_data["data"])
-        except Exception as e:
+        except json.JSONDecodeError as e:
             raise ValidationError(str(e))
 
 
@@ -164,7 +166,7 @@ class RuleTestForm(forms.Form):
         if original:
             try:
                 return json.loads(original)
-            except Exception as e:
+            except json.JSONDecodeError as e:
                 raise ValidationError(str(e))
         return None
 
@@ -173,7 +175,7 @@ class RuleTestForm(forms.Form):
         if original:
             try:
                 return json.loads(original.read())
-            except Exception as e:
+            except json.JSONDecodeError as e:
                 raise ValidationError(str(e))
         return None
 
@@ -195,7 +197,7 @@ class RuleTestForm(forms.Form):
             try:
                 filters = json.loads(self.cleaned_data.get("content_type_filters") or "{}")
                 model.objects.filter(**filters)
-            except Exception as e:
+            except (json.JSONDecodeError, Error) as e:
                 raise ValidationError({"content_type_filters": str(e)})
 
 
@@ -228,12 +230,12 @@ class RuleForm(forms.ModelForm):
         i: Interpreter = interpreter(code)
         try:
             i.validate()
-        except Exception as e:
+        except ValidationError as e:
             raise ValidationError({"definition": str(e)})
         if config.USE_BLACK:
             try:
                 self.cleaned_data["definition"] = format_code(code)
-            except Exception as e:
+            except (ImportError, black.InvalidInput) as e:
                 raise ValidationError({"definition": str(e)})
         if self.instance.pk:
             pass

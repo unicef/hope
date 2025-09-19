@@ -84,7 +84,7 @@ class TestGrievanceUtils(TestCase):
         to_phone_number_str(data, "other_field_name")
         assert data["phone_number"] == 123456789
 
-    @patch("hope.apps.core.models.FlexibleAttribute.objects.filter")
+    @patch("hope.models.flexible_attribute.FlexibleAttribute.objects.filter")
     def test_cast_flex_fields(self, mock_filter: Any) -> None:
         mock_filter.side_effect = [
             MagicMock(values_list=MagicMock(return_value=["decimal_field"])),

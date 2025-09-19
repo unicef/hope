@@ -213,7 +213,7 @@ class HouseholdWithDrawnMixin:
                         self._toggle_withdraw_status(request, obj, tickets, tag=form.cleaned_data["tag"])
                         self.message_user(request, msg, messages.SUCCESS)
                         return HttpResponseRedirect(request.path)
-                except Exception as e:
+                except (ValueError, ObjectDoesNotExist) as e:
                     self.message_user(request, str(e), messages.ERROR)
         else:
             context["form"] = (
@@ -574,7 +574,7 @@ class HouseholdAdmin(
                     f"Household {household.unicef_id} erased.",
                     messages.SUCCESS,
                 )
-            except Exception as e:
+            except ObjectDoesNotExist as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
         return confirm_action(
@@ -599,7 +599,7 @@ class HouseholdAdmin(
                     f"Household {household.unicef_id} was soft removed.",
                     messages.SUCCESS,
                 )
-            except Exception as e:
+            except ObjectDoesNotExist as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
         return confirm_action(

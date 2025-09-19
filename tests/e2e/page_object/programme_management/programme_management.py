@@ -1,6 +1,6 @@
 from time import sleep
 
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -281,7 +281,7 @@ class ProgrammeManagement(BaseComponents):
                 self.wait_for(self.header_title)
                 self.wait_for_text("Programme Management", self.header_title)
                 break
-            except BaseException:
+            except TimeoutException:
                 sleep(0.1)
         else:
             raise NoSuchElementException(

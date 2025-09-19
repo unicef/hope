@@ -308,7 +308,7 @@ class RecordAdmin(HOPEModelAdminBase):
                                 f"Adding to RDI Import with name: <a href='{url}'>{rdi.name}</a>",
                                 messages.SUCCESS,
                             )
-                        except Exception as e:
+                        except Exception as e:  # noqa
                             self.message_error_to_user(request, e)
 
                     else:

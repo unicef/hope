@@ -172,7 +172,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualAccounts individual={individual} />
+        <IndividualAccounts
+          individual={individual}
+          choicesData={choicesData}
+        />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}

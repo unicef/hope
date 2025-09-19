@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
-    AccountSerializer,
+    AccountSerializerUpload,
     BirthDateValidator,
-    DocumentSerializer,
+    DocumentSerializerUpload,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models.area import Area
@@ -54,8 +54,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
-    documents = DocumentSerializer(many=True, required=False)
-    accounts = AccountSerializer(many=True, required=False)
+    documents = DocumentSerializerUpload(many=True, required=False)
+    accounts = AccountSerializerUpload(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     photo = serializers.CharField(allow_blank=True, required=False)
 
@@ -182,6 +182,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
+            doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)
 
         for account in accounts:

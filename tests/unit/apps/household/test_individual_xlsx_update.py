@@ -50,8 +50,6 @@ def invalid_phone_no_file() -> File:
 
 
 class TestIndividualXlsxUpdate(BaseTestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

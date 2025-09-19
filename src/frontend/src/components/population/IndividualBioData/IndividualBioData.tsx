@@ -69,8 +69,8 @@ export const IndividualBioData = ({
     <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={doc.type}>
-            {doc.image ? (
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
               <DocumentPopulationPhotoModal
                 documentNumber={doc.documentNumber}
                 documentId={doc.id}
@@ -81,7 +81,7 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{doc.country}</LabelizedField>
+        <LabelizedField label="issued">{doc.country.name}</LabelizedField>
       </Box>
     </Grid>
   ));

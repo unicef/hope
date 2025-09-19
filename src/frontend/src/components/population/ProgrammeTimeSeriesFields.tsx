@@ -52,10 +52,10 @@ export const ProgrammeTimeSeriesFields = ({
           if (
             roundData &&
             pduDataDict[fieldName] &&
-            pduDataDict[fieldName].pdu_data.rounds_names
+            pduDataDict[fieldName].pduData.roundsNames
           ) {
             const roundName =
-              pduDataDict[fieldName].pdu_data.rounds_names[
+              pduDataDict[fieldName].pduData.roundsNames[
                 parseInt(roundNumber) - 1
               ];
             const value = roundData.value;
@@ -105,7 +105,7 @@ export const ProgrammeTimeSeriesFields = ({
             <TableBody>
               {rows.length > 0 ? (
                 rows.map((row) => (
-                  <TableRow key={row.key}>
+                  <TableRow key={row.fieldName}>
                     <TableCell component="th" scope="row">
                       {row.fieldName}
                     </TableCell>

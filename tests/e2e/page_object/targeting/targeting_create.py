@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -105,7 +106,7 @@ class TargetingCreate(BaseComponents):
             try:
                 self.wait_for_disappear(self.button_target_population_create)
                 break
-            except BaseException:
+            except TimeoutException:
                 pass
         else:
             raise Exception(f"Element {self.button_target_population_create} not found")

@@ -172,11 +172,16 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service.validate()
         assert service.errors == error_msg
 
-    def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(
+    def test_import_invalid_file_without_required_columns(self) -> None:
+        error_msg_1 = XlsxError(
             sheet="Payment Plan - Payment List",
-            coordinates="N3",
-            message="Unexpected value",
+            coordinates=None,
+            message="Header entitlement_quantity is required",
+        )
+        error_msg_2 = XlsxError(
+            sheet="Payment Plan - Payment List",
+            coordinates=None,
+            message="Header entitlement_quantity is required",
         )
         content = Path(
             f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx"
@@ -186,7 +191,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, file)
         service.open_workbook()
         service.validate()
-        assert error_msg in service.errors
+
+        assert error_msg_1 in service.errors
+        assert error_msg_2 in service.errors
 
     @patch("hope.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
@@ -520,7 +527,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert value == ""
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
-        required_fields_for_account = ["name", "number", "uba_code", "holder_name"]
+        required_fields_for_account = ["name", "number", "uba_code", "holder_name", "financial_institution"]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
         # add Accounts for collectors
@@ -557,15 +564,16 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=[], flex_fields=[])
 
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-4:] == required_fields_for_account
+        assert headers[-5:] == required_fields_for_account
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row
             payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
-            assert payment_row[-4] == "Union Bank"
-            assert payment_row[-3] == str(payment.id)
-            assert payment_row[-2] == "123456"
-            assert payment_row[-1] == f"Admin {payment.collector.given_name}"
+            assert payment_row[-5] == "Union Bank"
+            assert payment_row[-4] == str(payment.id)
+            assert payment_row[-3] == "123456"
+            assert payment_row[-2] == f"Admin {payment.collector.given_name}"
+            assert payment_row[-1] == ""
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
@@ -573,3 +581,23 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             self.payment_plan.eligible_payments.first(), fsp_xlsx_template
         )
         assert payment_row_without_snapshot[-4] == ""
+
+    def test_headers_for_social_worker_program(self) -> None:
+        program = self.payment_plan.program
+        program.beneficiary_group.master_detail = False
+        program.beneficiary_group.name = "People"
+        program.beneficiary_group.save()
+        program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        program.save()
+
+        assert self.payment_plan.is_social_worker_program is True
+
+        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        assert len(export_service.headers) == 11
+        assert "household_size" not in export_service.headers
+        assert "household_id" not in export_service.headers
+
+        import_service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
+        assert len(import_service.headers) == 11
+        assert "household_size" not in import_service.headers
+        assert "household_id" not in import_service.headers

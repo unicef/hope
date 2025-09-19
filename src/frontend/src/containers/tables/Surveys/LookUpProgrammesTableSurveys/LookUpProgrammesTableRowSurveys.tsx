@@ -51,7 +51,7 @@ export function LookUpProgrammesTableRowSurveys({
           }}
           value={program.id}
           name="radio-button-program"
-          inputProps={{ 'aria-label': program.id }}
+          slotProps={{ input: { 'aria-label': program.id } }}
           data-cy="input-radio-program"
         />
       </TableCell>

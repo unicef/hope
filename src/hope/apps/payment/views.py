@@ -10,10 +10,12 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
         HttpRequest,
+        HttpResponse,
         HttpResponsePermanentRedirect,
         HttpResponseRedirect,
     )
@@ -112,3 +114,14 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         error_type=FileNotFoundError,
     )
     return None
+
+
+@login_required
+def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: str) -> "HttpResponse":
+    report = WesternUnionPaymentPlanReport.objects.get(id=report_id)
+    payment_plan = report.payment_plan
+
+    if not request.user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.value, payment_plan.program):
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    return redirect(report.report_file.file.url)

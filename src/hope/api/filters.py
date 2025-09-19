@@ -42,6 +42,7 @@ class AreaFilter(UpdatedAtFilter):
             "valid_until",
             "parent_id",
             "parent_p_code",
+            "id",
         )
 
 

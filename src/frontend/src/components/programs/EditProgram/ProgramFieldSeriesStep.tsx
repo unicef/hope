@@ -1,5 +1,6 @@
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { DividerLine } from '@components/core/DividerLine';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,6 +32,7 @@ interface ProgramFieldSeriesStepProps {
   program?;
   setStep: (step: number) => void;
   step: number;
+  loading: boolean;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -44,6 +46,7 @@ export const ProgramFieldSeriesStep = ({
   program,
   setStep,
   step,
+  loading,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -86,7 +89,7 @@ export const ProgramFieldSeriesStep = ({
                         </Grid>
                         <Grid size={{ xs: 3 }}>
                           <Field
-                            name={`pduFields.${index}.pduData.subtype`}
+                            name={`pduFields.${index}.pdu_data.subtype`}
                             required
                             fullWidth
                             variant="outlined"
@@ -99,10 +102,10 @@ export const ProgramFieldSeriesStep = ({
                         <Grid size={{ xs: 3 }}>
                           <Field
                             key={
-                              values.pduFields[index]?.pduData
-                                ?.numberOfRounds || 0
+                              values.pduFields[index]?.pdu_data
+                                ?.number_of_rounds || 0
                             }
-                            name={`pduFields.${index}.pduData.numberOfRounds`}
+                            name={`pduFields.${index}.pdu_data.number_of_rounds`}
                             fullWidth
                             required
                             variant="outlined"
@@ -113,8 +116,8 @@ export const ProgramFieldSeriesStep = ({
                                 10,
                               );
                               const updatedRoundsNames = [
-                                ...(values.pduFields[index]?.pduData
-                                  ?.roundsNames || []),
+                                ...(values.pduFields[index]?.pdu_data
+                                  ?.rounds_names || []),
                               ];
 
                               if (updatedRoundsNames.length < numberOfRounds) {
@@ -132,30 +135,30 @@ export const ProgramFieldSeriesStep = ({
                               }
 
                               // Make sure pduData exists before setting values
-                              if (!values.pduFields[index].pduData) {
-                                setFieldValue(`pduFields.${index}.pduData`, {
+                              if (!values.pduFields[index].pdu_data) {
+                                setFieldValue(`pduFields.${index}.pdu_data`, {
                                   subtype: '',
-                                  roundsNames: updatedRoundsNames,
+                                  rounds_names: updatedRoundsNames,
                                 });
                               }
 
                               setFieldValue(
-                                `pduFields.${index}.pduData.numberOfRounds`,
+                                `pduFields.${index}.pdu_data.number_of_rounds`,
                                 numberOfRounds,
                               );
                               setFieldValue(
-                                `pduFields.${index}.pduData.roundsNames`,
+                                `pduFields.${index}.pdu_data.rounds_names`,
                                 updatedRoundsNames,
                               );
                             }}
                             component={FormikSelectField}
-                            choices={[...Array(20).keys()].map((n) => {
+                            choices={[...Array(100).keys()].map((n) => {
                               const isDisabled =
                                 values.editMode &&
                                 fieldDisabled &&
                                 n + 2 <=
-                                  (program?.pduFields[index]?.pduData
-                                    ?.numberOfRounds || 0);
+                                  (program?.pduFields[index]?.pdu_data
+                                    ?.number_of_rounds || 0);
 
                               return {
                                 value: n + 1,
@@ -179,15 +182,15 @@ export const ProgramFieldSeriesStep = ({
                             <DeleteIcon />
                           </IconButton>
                         </Grid>
-                        {_field?.pduData?.numberOfRounds &&
+                        {_field?.pdu_data?.number_of_rounds &&
                           [
                             ...Array(
-                              Number(_field?.pduData?.numberOfRounds),
+                              Number(_field?.pdu_data?.number_of_rounds),
                             ).keys(),
                           ].map((round) => {
                             const selectedNumberOfRounds =
-                              program?.pduFields?.[index]?.pduData
-                                ?.numberOfRounds || 0;
+                              program?.pduFields?.[index]?.pdu_data
+                                ?.number_of_rounds || 0;
                             const isDisabled =
                               fieldDisabled &&
                               values.editMode &&
@@ -196,7 +199,7 @@ export const ProgramFieldSeriesStep = ({
                               <Grid size={{ xs: 12 }} key={round}>
                                 <FormControl fullWidth variant="outlined">
                                   <Field
-                                    name={`pduFields.${index}.pduData.roundsNames.${round}`}
+                                    name={`pduFields.${index}.pdu_data.rounds_names.${round}`}
                                     fullWidth
                                     variant="outlined"
                                     label={`${t('Round')} ${round + 1} ${t('Name')}`}
@@ -222,10 +225,10 @@ export const ProgramFieldSeriesStep = ({
                 onClick={() =>
                   arrayHelpers.push({
                     label: '',
-                    pduData: {
+                    pdu_data: {
                       subtype: '',
-                      numberOfRounds: 1, // Set a default value to avoid null/undefined
-                      roundsNames: [''], // Initialize with at least one empty string
+                      number_of_rounds: 1, // Set a default value to avoid null/undefined
+                      rounds_names: [''], // Initialize with at least one empty string
                     },
                   })
                 }
@@ -261,14 +264,15 @@ export const ProgramFieldSeriesStep = ({
               {t('Back')}
             </Button>
           </Box>
-          <Button
+          <LoadingButton
             data-cy="button-save"
             variant="contained"
             color="primary"
             onClick={submitForm}
+            loading={loading}
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </Box>
       </Box>
     </>

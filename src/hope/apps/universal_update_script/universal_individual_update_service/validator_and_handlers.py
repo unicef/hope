@@ -83,7 +83,7 @@ def validate_date(
         return None
     try:
         timezone_datetime(value).date()
-    except Exception:
+    except ValueError:
         return f"{value} for column {name} is not a valid date"
     return None
 
@@ -99,7 +99,7 @@ def validate_integer(
         return None
     try:
         int(value)
-    except Exception:
+    except (ValueError, TypeError):
         return f"{value} for column {name} is not a valid integer"
     return None
 

@@ -1,10 +1,14 @@
 from contextlib import contextmanager
+import json
 import logging
 from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.db import Error, transaction
 from django.utils import timezone
+from openpyxl.utils.exceptions import InvalidFileException
+from requests.exceptions import RequestException
 
 from hope.apps.core.celery import app
 from hope.apps.registration_datahub.exceptions import (
@@ -114,7 +118,7 @@ def registration_xlsx_import_task(
     except (WrongStatusError, AlreadyRunningError) as e:
         logger.info(str(e))
         return True
-    except Exception as e:
+    except (InvalidFileException, Error, ValidationError) as e:
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
 
@@ -157,7 +161,7 @@ def registration_program_population_import_task(
         return True
     except RegistrationDataImport.DoesNotExist:
         raise
-    except Exception as e:  # pragma: no cover
+    except (Error, ValidationError) as e:  # pragma: no cover
         logger.warning(e)
 
         handle_rdi_exception(registration_data_import_id, e)
@@ -189,7 +193,7 @@ def registration_kobo_import_task(
             import_data_id=import_data_id,
             program_id=str(program_id),
         )
-    except Exception as e:  # pragma: no cover
+    except (RequestException, json.JSONDecodeError, Error, ValidationError) as e:  # pragma: no cover
         logger.warning(e)  # pragma: no cover
 
         handle_rdi_exception(registration_data_import_id, e)  # pragma: no cover
@@ -221,7 +225,8 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
             import_data_id=str(not_started_rdi.import_data.id),
             program_id=str(program_id),
         )
-    except Exception as e:  # pragma: no cover
+    except (RequestException, json.JSONDecodeError, Error, ValidationError) as e:  # pragma: no cover
+        logger.warning(e)  # pragma: no cover
         raise self.retry(exc=e)  # pragma: no cover
 
 
@@ -249,7 +254,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
             business_area_id=str(business_area.id),
             program_id=str(program_id),
         )
-    except Exception as e:  # pragma: no cover
+    except (InvalidFileException, Error, ValidationError) as e:  # pragma: no cover
         raise self.retry(exc=e)  # pragma: no cover
 
 
@@ -275,7 +280,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             )
 
             RdiMergeTask().execute(registration_data_import_id)
-        except Exception as e:
+        except (Error, ValidationError) as e:
             logger.exception(e)
             from hope.models.registration_data_import import RegistrationDataImport
 
@@ -304,7 +309,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
             DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
                 registration_data_import=rdi_obj
             )
-    except Exception as e:
+    except (InvalidFileException, Error, ValidationError) as e:
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
 
@@ -324,7 +329,8 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data, program)
-    except Exception as e:  # pragma: no cover
+    except (RequestException, json.JSONDecodeError, Error, ValidationError) as e:  # pragma: no cover
+        logger.warning(e)  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
@@ -346,7 +352,8 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
         return ValidateXlsxImport().execute(import_data, program)
-    except Exception as e:  # pragma: no cover
+    except (InvalidFileException, Error, ValidationError) as e:  # pragma: no cover
+        logger.warning(e)  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
@@ -366,7 +373,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> dict:
                     break
             results["processed"].append(record.pk)
 
-        except Exception as e:
+        except (KeyError, Error, ValidationError) as e:
             results["errors"].append(f"Record: {record.pk} - {e.__class__.__name__}: {str(e)}")
     return results
 
@@ -413,7 +420,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = N
             manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
             manager.execute()
             return True
-        except Exception as e:
+        except (Error, ValidationError) as e:
             logger.warning(e)
             raise self.retry(exc=e)
 
@@ -453,8 +460,8 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
             i += 1
 
         logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
-    except Exception:  # pragma: no cover
-        logger.warning("Removing old RDI objects failed")
+    except Error as e:  # pragma: no cover
+        logger.warning(f"Removing old RDI objects failed: {e}")
         raise
 
 
@@ -472,7 +479,7 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
     try:
         program = Program.objects.get(id=program_id)
         BiometricDeduplicationService().upload_and_process_deduplication_set(program)
-    except Exception as e:
+    except (Program.DoesNotExist, Error) as e:
         logger.warning(e)
         raise
 
@@ -495,6 +502,6 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
     try:
         service = BiometricDeduplicationService()
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
-    except Exception as e:
+    except (Program.DoesNotExist, Error) as e:
         logger.warning(e)
         raise

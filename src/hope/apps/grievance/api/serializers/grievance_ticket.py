@@ -596,7 +596,7 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     urgency = serializers.IntegerField()
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
     program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
-    comments = serializers.CharField(required=False, allow_null=True)
+    comments = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     documentation = CreateGrievanceDocumentSerializer(many=True, required=False, allow_null=True)
     documentation_to_update = UpdateGrievanceDocumentSerializer(many=True, required=False, allow_null=True)
     documentation_to_delete = serializers.ListField(

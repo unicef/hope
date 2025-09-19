@@ -17,6 +17,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.account_type import AccountType
+from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
 from hope.models.household import (
     FEMALE,
@@ -376,3 +377,34 @@ class TestIndividualBlockFilter(TestCase):
         query = query.filter(payment_plan.get_query())
         assert query.count() == 1
         assert query.first().id == self.household_1_indiv.id
+
+    def test_exclude_by_ids(self) -> None:
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+
+        empty_basic_query = payment_plan.get_basic_query()
+        assert str(empty_basic_query) == "(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', []))))"
+
+        payment_plan.excluded_ids = f"{self.household_1_indiv.unicef_id}, {self.household_2_indiv.unicef_id}"
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+
+        basic_query_1 = payment_plan.get_basic_query()
+        assert not payment_plan.is_social_worker_program
+        assert str(basic_query_1) == (
+            f"(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', "
+            f"['{self.household_1_indiv.unicef_id}', "
+            f"'{self.household_2_indiv.unicef_id}']))))"
+        )
+
+        self.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        self.program.data_collecting_type.save()
+        payment_plan.excluded_ids = f"{self.household_1_indiv.unicef_id}, {self.household_2_indiv.unicef_id}"
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+
+        assert payment_plan.is_social_worker_program
+        basic_query_2 = payment_plan.get_basic_query()
+        assert (
+            str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', "
+            f"['{self.household_1_indiv.unicef_id}', '{self.household_2_indiv.unicef_id}']))))"
+        )

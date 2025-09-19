@@ -3,20 +3,20 @@
 exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
 <div>
   <div
-    class="sc-hjsuWn hQErrm"
+    class="sc-jJLAfE hXhKzp"
   >
     <div
-      class="sc-kvnevz bIBVRY"
+      class="sc-dFVmKS gFPfJz"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dFVmKS hPqdCJ css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kCuUfV cetaFo css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-gGKoUb css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-hwddKA css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-hwddKA kxvGLi MuiBox-root css-0"
+            class="sc-jaXbil BXjZb MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -29,11 +29,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
               </h6>
             </div>
             <div
-              class="sc-hwddKA kxvGLi MuiBox-root css-1ruxp1v"
+              class="sc-jaXbil BXjZb MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-kCuUfV sc-jaXbil bA-dfzX bQMtkL css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-dNdcvo sc-eqNDNG cCcgVT MmSOE css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -47,7 +47,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -71,7 +71,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -96,7 +96,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -121,7 +121,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -146,7 +146,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -171,7 +171,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -196,7 +196,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -221,7 +221,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -246,7 +246,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kcLKEh dfaWPW css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-dntSTA kIkcZI css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -271,11 +271,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-fbQrwq QxMVp css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq gjScuk css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-gGKoUb cBeZRC css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -285,11 +285,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-fbQrwq QxMVp css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq gjScuk css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-gGKoUb cBeZRC css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -299,11 +299,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-fbQrwq QxMVp css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq gjScuk css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-gGKoUb cBeZRC css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -313,11 +313,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-fbQrwq QxMVp css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq gjScuk css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-gGKoUb cBeZRC css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -327,11 +327,11 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-dNdcvo YldHQ css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-fbQrwq QxMVp css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fbQrwq gjScuk css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-gGKoUb cBeZRC css-1dc80h3-MuiTableCell-root"
                   colspan="9"
                 >
                   <span

@@ -93,6 +93,7 @@ const Icon = styled(FindInPageIcon)`
 `;
 
 interface TableRestComponentProps<T extends { [key: string]: any }> {
+  customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   data: T[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
@@ -112,6 +113,7 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event: ChangeEvent<HTMLInputElement>, rows: T[]) => void;
   numSelected?: number;
+  hidePagination?: boolean;
 }
 
 export function TableRestComponent<T>({
@@ -134,11 +136,14 @@ export function TableRestComponent<T>({
   isOnPaper = true,
   actions = [],
   numSelected = 0,
+  hidePagination = false,
+  customHeadRenderer,
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
-  const emptyRows =
+  let emptyRows =
     rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage);
+  if (isNaN(emptyRows) || emptyRows < 0) emptyRows = 0;
 
   let body;
 
@@ -152,7 +157,10 @@ export function TableRestComponent<T>({
     ));
   } else if (!data.length) {
     body = (
-      <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
+      <StyledTableRow
+        data-cy="table-row"
+        style={{ height: 70 * emptyRows || 70 }}
+      >
         <StyledTableCell colSpan={headCells.length}>
           <EmptyMessage>
             <IconContainer>
@@ -190,31 +198,53 @@ export function TableRestComponent<T>({
         </StyledBox>
 
         <StyledTable>
-          <EnhancedTableHead<T>
-            order={order}
-            headCells={headCells}
-            orderBy={orderBy}
-            onRequestSort={handleRequestSort}
-            rowCount={data.length}
-            allowSort={allowSort}
-            onSelectAllClick={onSelectAllClick}
-            data={data}
-            numSelected={numSelected}
-          />
+          {customHeadRenderer ? (
+            typeof customHeadRenderer === 'function' ? (
+              customHeadRenderer({
+                order,
+                headCells,
+                orderBy,
+                onRequestSort: handleRequestSort,
+                rowCount: data.length,
+                allowSort,
+                onSelectAllClick,
+                data,
+                numSelected,
+              })
+            ) : (
+              customHeadRenderer
+            )
+          ) : (
+            <EnhancedTableHead<T>
+              order={order}
+              headCells={headCells}
+              orderBy={orderBy}
+              onRequestSort={handleRequestSort}
+              rowCount={data.length}
+              allowSort={allowSort}
+              onSelectAllClick={onSelectAllClick}
+              data={data}
+              numSelected={numSelected}
+            />
+          )}
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>
-      <TablePagination
-        rowsPerPageOptions={rowsPerPageOptions}
-        component="div"
-        count={itemsCount == null || itemsCount === undefined ? -1 : itemsCount}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePageProp}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        ActionsComponent={TablePaginationActions}
-        data-cy="table-pagination"
-      />
+      {!hidePagination && (
+        <TablePagination
+          rowsPerPageOptions={rowsPerPageOptions}
+          component="div"
+          count={
+            itemsCount == null || itemsCount === undefined ? -1 : itemsCount
+          }
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePageProp}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          ActionsComponent={TablePaginationActions}
+          data-cy="table-pagination"
+        />
+      )}
     </>
   );
 

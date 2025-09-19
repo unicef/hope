@@ -21,12 +21,12 @@ export function EditAccountRow({
   account,
   arrayHelpers,
   id,
-                                 individualChoicesData,
+  individualChoicesData,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
-  const dataFields = JSON.parse(account.data);
+  const dataFields = account.dataFields;
   return isEdited ? (
     <>
       <AccountField
@@ -48,7 +48,7 @@ export function EditAccountRow({
           onClick={() => {
             arrayHelpers.remove({
               id: account.id,
-              ...account.data,
+              ...account.dataFields,
             });
             setEdit(false);
           }}
@@ -65,14 +65,25 @@ export function EditAccountRow({
           value={String(account.accountType)}
         />
       </Grid>
-    {Object.entries(dataFields).map(([key, value]) => (
-      <Grid size={{ xs: 4 }} key={key}>
-        <LabelizedField
-          label={key}
-          value={String(value)}
-        />
-      </Grid>
-    ))}
+    {Object.entries(dataFields).map(([key, value]) => {
+      let displayValue = String(value);
+
+      if (
+        key === 'financial_institution' &&
+        Array.isArray(individualChoicesData.accountFinancialInstitutionChoices)
+      ) {
+        const choice = individualChoicesData.accountFinancialInstitutionChoices.find(
+          (c: any) => c.value === value,
+        );
+        displayValue = choice ? choice.name : String(value);
+      }
+
+      return (
+        <Grid size={{ xs: 4 }} key={key}>
+          <LabelizedField label={key} value={displayValue} />
+        </Grid>
+      );
+    })}
     <Grid  size={{ xs: 1 }}>
       <Box display="flex" alignItems="center">
         <IconButton

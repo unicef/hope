@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING, Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin, messages
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.db import Error, transaction
 from django.db.models.query import QuerySet
 from django.forms import Form
 from django.http import HttpRequest, HttpResponseRedirect
@@ -111,7 +112,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
             if form.is_valid():
                 try:
                     return self.xlsx_update_stage2(request, form)
-                except Exception as e:
+                except InvalidColumnsError as e:
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
@@ -123,7 +124,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
             if form.is_valid():
                 try:
                     return self.xlsx_update_stage3(request, form)
-                except Exception as e:
+                except InvalidColumnsError as e:
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
 
@@ -136,7 +137,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
                     updater.update_individuals()
                 self.message_user(request, "Done", messages.SUCCESS)
                 return HttpResponseRedirect(reverse("admin:household_individual_changelist"))
-            except Exception as e:
+            except (ValidationError, Error) as e:
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
                 report = updater.report_dict
                 context = self.get_common_context(

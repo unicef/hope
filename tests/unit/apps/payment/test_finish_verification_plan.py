@@ -4,6 +4,8 @@ from unittest import mock
 from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
+import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import (
     RoleAssignmentFactory,
@@ -30,6 +32,7 @@ from hope.apps.payment.services.verification_plan_status_change_services import 
 )
 from hope.models.area import Area
 from hope.models.household import Household
+from hope.models.payment import Payment
 from hope.models.payment_verification import PaymentVerification
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 
@@ -86,6 +89,7 @@ class TestFinishVerificationPlan(TestCase):
                 head_of_household=household.head_of_household,
                 delivered_quantity_usd=200,
                 currency="PLN",
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
             )
 
             PaymentVerificationFactory(
@@ -111,3 +115,9 @@ class TestFinishVerificationPlan(TestCase):
         assert ticket.admin2_id == household.admin2_id
 
         assert mocked_requests_post.call_count == 10
+
+    def test_finish_verification_if_pp_not_finished_yet(self) -> None:
+        Payment.objects.all().update(status=Payment.STATUS_PENDING)
+        assert not self.verification.payment_plan.is_reconciled
+        with pytest.raises(ValidationError, match="You can finish only if reconciliation is finalized"):
+            VerificationPlanStatusChangeServices(self.verification).finish()

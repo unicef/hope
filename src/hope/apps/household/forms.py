@@ -2,6 +2,7 @@ from typing import Any
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db import Error
 from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
@@ -186,7 +187,7 @@ class CreateTargetPopulationTextForm(forms.Form):
                 self.cleaned_data["target_field"],
                 self.cleaned_data["separator"],
             )
-        except Exception as e:
+        except (KeyError, Error) as e:
             raise ValidationError(str(e))
 
 

@@ -34,8 +34,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
-    databases = "__all__"
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

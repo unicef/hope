@@ -73,8 +73,6 @@ ignore = [
     "PLC0415",  # `import` should be at the top-level of a file
     "ERA001",  # e2e comments..
 
-    "N805",  #  First argument of a method should be named `self`
-    "BLE001",  # Do not catch blind exception: `BaseException`
 ]
 
 [format]

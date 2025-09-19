@@ -34,7 +34,7 @@ def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records
         else:
             logger.warning("Not Implemented Service for Registration")
             raise NotImplementedError
-    except Exception as e:
+    except NotImplementedError as e:
         logger.warning("Process Flex Records Task error")
         raise self.retry(exc=e)
 
