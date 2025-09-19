@@ -67,7 +67,7 @@ function PaymentsTable({
           {
             businessAreaSlug: businessArea,
             programSlug: programId,
-            paymentPlanId: paymentPlan.id,
+            paymentPlanPk: paymentPlan.id,
           },
           queryVariables,
           { withPagination: true },

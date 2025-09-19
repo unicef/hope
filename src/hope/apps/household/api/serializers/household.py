@@ -89,6 +89,14 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualListHouseholdSerializer(serializers.ModelSerializer):
+    admin2 = AreaSimpleSerializer()
+
+    class Meta:
+        model = Household
+        fields = ("id", "unicef_id", "admin2")
+
+
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
     admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()

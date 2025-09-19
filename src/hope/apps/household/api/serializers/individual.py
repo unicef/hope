@@ -14,6 +14,7 @@ from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
+    IndividualListHouseholdSerializer,
     LinkedGrievanceTicketSerializer,
 )
 from hope.apps.household.api.serializers.registration_data_import import (
@@ -30,7 +31,7 @@ from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import Account
-from hope.apps.program.api.serializers import ProgramSmallSerializer
+from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -228,9 +229,8 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
 
 
 class IndividualListSerializer(serializers.ModelSerializer):
-    household = HouseholdSimpleSerializer()
+    household = IndividualListHouseholdSerializer()
     relationship_display = serializers.CharField(source="get_relationship_display")
-    role = serializers.SerializerMethodField()
     deduplication_batch_status_display = serializers.CharField(source="get_deduplication_batch_status_display")
     biometric_deduplication_batch_status_display = serializers.CharField(
         source="get_biometric_deduplication_batch_status_display"
@@ -248,7 +248,8 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
     deduplication_golden_record_results = serializers.SerializerMethodField()
     biometric_deduplication_golden_record_results = serializers.SerializerMethodField()
-    program = ProgramSmallSerializer()
+    program = ProgramOnlyNameSerializer()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -261,7 +262,6 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "relationship",
             "age",
             "sex",
-            "role",
             "relationship_display",
             "birth_date",
             "deduplication_batch_status",
@@ -278,13 +278,14 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "biometric_deduplication_golden_record_results",
             "program",
             "last_registration_date",
+            "role",
         )
 
-    def get_role(self, obj: Individual) -> str:
-        role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
-        if role:
-            return role.get_role_display()
-        return "-"
+    def get_role(self, obj: dict) -> str:
+        roles = obj.prefetched_roles
+        if roles:
+            return roles[0].get_role_display()
+        return ROLE_NO_ROLE
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))
     def get_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
