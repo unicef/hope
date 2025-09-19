@@ -4,6 +4,7 @@ from typing import Any
 
 from django.db.models import Q
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
@@ -162,7 +163,9 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
         allow_blank=True,
         help_text="String of Ind or HH ids separated by comma",
     )
-    name = serializers.CharField(required=True)
+    name = serializers.CharField(
+        required=True, validators=[UniqueValidator(queryset=RegistrationDataImport.objects.all())]
+    )
     screen_beneficiary = serializers.BooleanField(required=True)
     exclude_external_collectors = serializers.BooleanField(required=False, default=False)
 
@@ -287,12 +290,16 @@ class SaveKoboImportDataSerializer(serializers.Serializer):
 
 class RegistrationXlsxImportSerializer(serializers.Serializer):
     import_data_id = serializers.CharField(required=True)
-    name = serializers.CharField(required=True)
+    name = serializers.CharField(
+        required=True, validators=[UniqueValidator(queryset=RegistrationDataImport.objects.all())]
+    )
     screen_beneficiary = serializers.BooleanField(required=True)
 
 
 class RegistrationKoboImportSerializer(serializers.Serializer):
     import_data_id = serializers.CharField(required=True)
-    name = serializers.CharField(required=True)
+    name = serializers.CharField(
+        required=True, validators=[UniqueValidator(queryset=RegistrationDataImport.objects.all())]
+    )
     pull_pictures = serializers.BooleanField(required=True)
     screen_beneficiary = serializers.BooleanField(required=True)
