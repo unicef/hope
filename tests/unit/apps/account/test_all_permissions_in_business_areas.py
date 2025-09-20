@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from hope.apps.account.models import Role, RoleAssignment
+
+from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program
@@ -41,7 +42,7 @@ class AllPermissionsInBusinessAreasTest(TransactionTestCase):
         self.partner = PartnerFactory(name="Test Partner")
         self.user = UserFactory(partner=self.partner)
 
-    def clear_user_cache(self, user):
+    def clear_user_cache(self, user: User) -> None:
         """Clear cached properties for the user."""
         if hasattr(user, "_all_permissions_in_business_areas"):
             delattr(user, "_all_permissions_in_business_areas")
@@ -295,7 +296,7 @@ class AllPermissionsInBusinessAreasTest(TransactionTestCase):
         assert Permissions.RDI_VIEW_LIST.value in afg_permissions
 
     @patch("hope.apps.account.models.timezone.now")
-    def test_expiry_date_edge_case(self, mock_now) -> None:
+    def test_expiry_date_edge_case(self, mock_now: "MagicMock") -> None:
         """Test expiry date filtering on exact boundary."""
         # Set current time - beginning of next day so that today's date is < timezone.now()
         current_time = timezone.datetime(2024, 1, 16, 0, 0, 1, tzinfo=timezone.utc)

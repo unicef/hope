@@ -1402,8 +1402,8 @@ class PaymentPlan(
 class FlexFieldArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: Any | None = None,
+        choices_form_class: Any | None = None,
         **kwargs: Any,
     ) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
@@ -1411,12 +1411,11 @@ class FlexFieldArrayField(ArrayField):
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
         flexible_choices = ((x, x) for x in flexible_attributes)
         defaults = {
-            "form_class": forms.MultipleChoiceField,
             "widget": widget,
             "choices": flexible_choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super(ArrayField, self).formfield(forms.MultipleChoiceField, **defaults)
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -2272,7 +2271,7 @@ class PaymentDataCollector(Account):
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
         collector_country = collector.household and collector.household.country
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
+            dm_config: DeliveryMechanismConfig | None = country_config
         else:
             dm_config = dm_configs.first()
         if not dm_config:
@@ -2319,7 +2318,7 @@ class PaymentDataCollector(Account):
 
         collector_country = collector.household and collector.household.country
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
+            dm_config: DeliveryMechanismConfig | None = country_config
         else:
             dm_config = dm_configs.first()
         if not dm_config:
@@ -2349,7 +2348,7 @@ class PaymentDataCollector(Account):
 
 
 class PendingAccount(Account):
-    objects: PendingManager = PendingManager()  # type: ignore
+    objects: PendingManager = PendingManager()
 
     class Meta:
         proxy = True
