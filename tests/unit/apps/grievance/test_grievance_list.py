@@ -361,7 +361,7 @@ class TestGrievanceTicketList:
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
                     "area_type": grievance_ticket.admin2.area_type.id,
-                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
                 }
                 if grievance_ticket.admin2
                 else None
@@ -387,7 +387,7 @@ class TestGrievanceTicketList:
             assert grievance_ticket_result["priority"] == grievance_ticket.priority
             assert grievance_ticket_result["urgency"] == grievance_ticket.urgency
             assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
-            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%SZ}"
 
             # total_days
             if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:

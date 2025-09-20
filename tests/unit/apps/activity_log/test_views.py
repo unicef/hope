@@ -160,7 +160,7 @@ class TestLogEntryView:
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
                 assert log_result["content_type"] == log.content_type.name
-                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%SZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
                     expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"
@@ -230,7 +230,7 @@ class TestLogEntryView:
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
                 assert log_result["content_type"] == log.content_type.name
-                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%SZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
                     expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"

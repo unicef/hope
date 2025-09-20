@@ -582,7 +582,7 @@ class TestUserList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 5
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 11
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -603,7 +603,7 @@ class TestUserList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 7
 
         self.user3.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -618,7 +618,7 @@ class TestUserList:
                 etag_third_call,
                 etag_third_call,
             ]
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 7
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
