@@ -35,11 +35,6 @@ from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
 )
-from hope.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
 
 
 class TestNigeriaPeopleRegistrationService(TestCase):
@@ -185,18 +180,15 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert primary_role.household == household
 
         account = PendingAccount.objects.first()
-        self.assertEqual(
-            account.account_data,
-            {
-                "number": "2087008012",
-                "name": "United Bank for Africa",
-                "code": "000004",
-                "holder_name": "xxxx",
-                "financial_institution": str(self.fi.id),
-            },
-        )
-        self.assertEqual(account.account_type.key, "bank")
-        self.assertEqual(account.financial_institution, self.fi)
+        assert account.account_data == {
+            "number": "2087008012",
+            "name": "United Bank for Africa",
+            "code": "000004",
+            "holder_name": "xxxx",
+            "financial_institution": str(self.fi.id),
+        }
+        assert account.account_type.key == "bank"
+        assert account.financial_institution == self.fi
         assert account.account_data == {
             "number": "2087008012",
             "name": "United Bank for Africa",
