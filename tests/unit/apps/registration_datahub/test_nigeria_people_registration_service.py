@@ -25,10 +25,20 @@ from hope.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PendingAccount
+from hope.apps.payment.models import (
+    FinancialInstitution,
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+)
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
+)
+from hope.contrib.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
 )
 
 
@@ -122,6 +132,14 @@ class TestNigeriaPeopleRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
+        cls.fi = FinancialInstitution.objects.create(
+            name="Nigeria Bank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+        FinancialInstitutionMapping.objects.create(
+            financial_service_provider=FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria"),
+            financial_institution=cls.fi,
+            code="000004",
+        )
 
     def test_import_data_to_datahub(self) -> None:
         service = NigeriaPeopleRegistrationService(self.registration)
@@ -167,6 +185,18 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert primary_role.household == household
 
         account = PendingAccount.objects.first()
+        self.assertEqual(
+            account.account_data,
+            {
+                "number": "2087008012",
+                "name": "United Bank for Africa",
+                "code": "000004",
+                "holder_name": "xxxx",
+                "financial_institution": str(self.fi.id),
+            },
+        )
+        self.assertEqual(account.account_type.key, "bank")
+        self.assertEqual(account.financial_institution, self.fi)
         assert account.account_data == {
             "number": "2087008012",
             "name": "United Bank for Africa",
