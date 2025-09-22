@@ -11,6 +11,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
+from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
     AccountSerializerUpload,
@@ -61,9 +62,9 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
-    country_origin = serializers.ChoiceField(choices=Countries(), required=False)
-    country = serializers.ChoiceField(choices=Countries())
-    residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
+    country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
+    country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
+    residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE, required=False, allow_blank=True)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
 
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
@@ -73,7 +74,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin2 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin3 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
-    disability = serializers.ChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
+    disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
