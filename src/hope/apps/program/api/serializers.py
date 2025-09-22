@@ -440,6 +440,12 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "status",
         )
 
+    def validate_name(self, value: str) -> str:
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        if Program.objects.filter(business_area__slug=business_area_slug, name=value, is_removed=False).exists():
+            raise serializers.ValidationError("Programme with this name already exists in this business area.")
+        return value
+
     def validate_programme_code(self, value: str | None) -> str | None:
         if value:
             value = validate_programme_code(value)
@@ -533,6 +539,15 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "status",
             "partner_access",
         )
+
+    def validate_name(self, value: str) -> str:
+        if (
+            Program.objects.filter(business_area=self.instance.business_area, name=value, is_removed=False)
+            .exclude(id=self.instance.id)
+            .exists()
+        ):
+            raise serializers.ValidationError("Programme with this name already exists in this business area.")
+        return value
 
     def validate_programme_code(self, value: str | None) -> str | None:
         if value:

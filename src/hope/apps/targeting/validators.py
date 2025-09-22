@@ -1,6 +1,6 @@
 import logging
 
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope

@@ -1592,6 +1592,48 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
         mock_registration_task.assert_not_called()
 
+    def test_rdi_name_not_unique(self) -> None:
+        self.client.force_authenticate(user=self.user)
+
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=self.program,
+            name="Test Unique Name",
+            status=RegistrationDataImport.IN_REVIEW,
+        )
+
+        import_data = ImportDataFactory(
+            status=ImportData.STATUS_FINISHED,
+            business_area_slug=self.business_area.slug,
+            data_type=ImportData.XLSX,
+            number_of_households=2,
+            number_of_individuals=5,
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-registration-xlsx-import",
+            args=["afghanistan", self.program.slug],
+        )
+
+        data = {
+            "import_data_id": str(import_data.id),
+            "name": "Test Unique Name",  # Same as existing RDI
+            "screen_beneficiary": False,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.data
+        assert "This field must be unique." in response.data["name"]
+        assert RegistrationDataImport.objects.filter(name="Test Unique Name").count() == 1
+
 
 @contextmanager
 def capture_on_commit_callbacks(

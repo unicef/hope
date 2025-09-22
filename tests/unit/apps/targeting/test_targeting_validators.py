@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock, patch
 
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
