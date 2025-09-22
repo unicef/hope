@@ -13,12 +13,12 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -66,6 +66,11 @@ const PeoplePage = (): ReactElement => {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
 
   const tabParam = new URLSearchParams(location.search).get('tab');
@@ -161,12 +166,16 @@ const PeoplePage = (): ReactElement => {
                 setFilter={setFilter}
                 initialFilter={initialFilter}
                 appliedFilter={appliedFilter}
-                setAppliedFilter={setAppliedFilter}
+                setAppliedFilter={(newFilter) => {
+                  setAppliedFilter(newFilter);
+                  setShouldScroll(true);
+                }}
               />
               <Box
                 display="flex"
                 flexDirection="column"
                 data-cy="page-details-container"
+                ref={tableRef}
               >
                 <PeopleListTable
                   filter={appliedFilter}
