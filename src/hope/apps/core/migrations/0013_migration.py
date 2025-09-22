@@ -5,27 +5,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0012_migration'),
+        ("core", "0012_migration"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='businessarea',
-            name='idx_ba_active',
+            model_name="businessarea",
+            name="idx_ba_active",
         ),
         migrations.RemoveIndex(
-            model_name='businessarea',
-            name='idx_ba_slug_active',
+            model_name="businessarea",
+            name="idx_ba_slug_active",
         ),
         migrations.RemoveField(
-            model_name='periodicfielddata',
-            name='rounds_covered',
+            model_name="periodicfielddata",
+            name="rounds_covered",
         ),
         migrations.AlterField(
-            model_name='periodicfielddata',
-            name='rounds_names',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=255), default=list, size=None),
+            model_name="periodicfielddata",
+            name="rounds_names",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=255), default=list, size=None
+            ),
         ),
     ]
