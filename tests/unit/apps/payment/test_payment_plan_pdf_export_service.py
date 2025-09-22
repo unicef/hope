@@ -135,14 +135,10 @@ class TestPaymentPlanPDFExportService(TestCase):
         assert pdf_reconciliation_qs["failed_usd"] == 210.0
         assert pdf_reconciliation_qs["failed_local"] == 105.0
         assert self.payment_plan.total_entitled_quantity == (
-            pdf_reconciliation_qs["failed_local"]
-            + pdf_reconciliation_qs["reconciled_local"]
-            + 10
+            pdf_reconciliation_qs["failed_local"] + pdf_reconciliation_qs["reconciled_local"] + 10
         )
         assert self.payment_plan.total_entitled_quantity_usd == (
-            pdf_reconciliation_qs["failed_usd"]
-            + pdf_reconciliation_qs["reconciled_usd"]
-            + 20
+            pdf_reconciliation_qs["failed_usd"] + pdf_reconciliation_qs["reconciled_usd"] + 20
         )
 
     def test_get_email_context(self) -> None:

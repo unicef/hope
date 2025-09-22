@@ -20,8 +20,8 @@ from hope.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hope.apps.payment.models.payment import (
-    FinancialInstitutionMapping,
     FinancialInstitution,
+    FinancialInstitutionMapping,
 )
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
