@@ -209,6 +209,7 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+        CLOSED = "CLOSED", "Closed"
 
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
@@ -229,6 +230,7 @@ class PaymentPlan(
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.CLOSED,
     )
 
     CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
@@ -1385,6 +1387,14 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.FINISHED,
+        target=Status.CLOSED,
+    )
+    def status_close(self) -> None:
         self.status_date = timezone.now()
 
     @transition(

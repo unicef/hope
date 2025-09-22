@@ -58,7 +58,7 @@ export const selectedIssueType = (formValues, issueTypeDict): string => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function preparePositiveFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
@@ -78,7 +78,7 @@ function preparePositiveFeedbackVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareNegativeFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
@@ -98,7 +98,7 @@ function prepareNegativeFeedbackVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareReferralVariables(requiredVariables, values) {
   return {
     variables: {
@@ -118,7 +118,7 @@ function prepareReferralVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareGrievanceComplaintVariables(requiredVariables, values) {
   return {
     variables: {
@@ -141,7 +141,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareSensitiveVariables(requiredVariables, values) {
   return {
     variables: {
@@ -163,7 +163,7 @@ function prepareSensitiveVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareAddIndividualVariables(requiredVariables, values) {
   let { flexFields } = values.individualData;
   if (flexFields) {
@@ -207,7 +207,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareDeleteIndividualVariables(requiredVariables, values) {
   return {
     variables: {
@@ -245,7 +245,7 @@ export function customSnakeCase(str: string): string {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareDeleteHouseholdVariables(requiredVariables, values) {
   return {
     variables: {
@@ -265,19 +265,19 @@ function prepareDeleteHouseholdVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareEditIndividualVariables(requiredVariables, values) {
   const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
   const flexFields = values.individualDataUpdateFields
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
@@ -366,19 +366,19 @@ export const roleDisplayMap = {
   NO_ROLE: 'No Role',
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
   const flexFields = values.householdDataUpdateFields
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
@@ -411,7 +411,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareDefaultVariables(requiredVariables, values) {
   return {
     variables: {
@@ -446,7 +446,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function prepareVariables(businessArea, values) {
   const requiredVariables = {
     businessArea,

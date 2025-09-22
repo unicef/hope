@@ -1,7 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Grid2 as Grid, Tooltip } from '@mui/material';
+import { Grid, Tooltip } from '@mui/material';
 import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
@@ -144,7 +144,7 @@ const ProgramForm = ({
   return (
     <Form>
       <Grid container spacing={3}>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="name"
             label={t('Programme Name')}
@@ -156,7 +156,7 @@ const ProgramForm = ({
             data-cy="input-programme-name"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="programmeCode"
             label={t('Programme Code')}
@@ -169,7 +169,7 @@ const ProgramForm = ({
             data-cy="input-programme-code"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="startDate"
             label={t('Start Date')}
@@ -180,7 +180,7 @@ const ProgramForm = ({
             data-cy="input-start-date"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="endDate"
             label={t('End Date')}
@@ -193,7 +193,7 @@ const ProgramForm = ({
             data-cy="input-end-date"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="sector"
             label={t('Sector')}
@@ -205,7 +205,7 @@ const ProgramForm = ({
             data-cy="input-sector"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="dataCollectingTypeCode"
             label={t('Data Collecting Type')}
@@ -225,7 +225,7 @@ const ProgramForm = ({
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Tooltip
             title={
               isCopyProgramPage
@@ -261,7 +261,7 @@ const ProgramForm = ({
             </span>
           </Tooltip>
         </Grid>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={12}>
           <Field
             name="description"
             label={t('Description')}
@@ -273,7 +273,7 @@ const ProgramForm = ({
             data-cy="input-description"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="budget"
             label={t('Budget (USD)')}
@@ -285,7 +285,7 @@ const ProgramForm = ({
             data-cy="input-budget"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -296,7 +296,7 @@ const ProgramForm = ({
             data-cy="input-admin-area"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6}>
           <Field
             name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
@@ -307,8 +307,8 @@ const ProgramForm = ({
             data-cy="input-population-goal"
           />
         </Grid>
-        <Grid size={{ xs: 6 }} />
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6} />
+        <Grid size={6}>
           <Field
             name="cashPlus"
             label={t('Cash+')}
@@ -317,8 +317,8 @@ const ProgramForm = ({
             data-cy="input-cash-plus"
           />
         </Grid>
-        <Grid size={{ xs: 6 }} />
-        <Grid size={{ xs: 12 }}>
+        <Grid size={6} />
+        <Grid size={12}>
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}
@@ -328,7 +328,7 @@ const ProgramForm = ({
             alignItems="center"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6} >
           <Field
             name="reconciliationWindowInDays"
             label={t('Reconciliation window (in days)')}
@@ -340,7 +340,7 @@ const ProgramForm = ({
             data-cy="input-reconciliation-window"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={6} >
           <Field
             name="sendReconciliationWindowExpiryNotifications"
             label={t('Send reconciliation window expiry notifications')}

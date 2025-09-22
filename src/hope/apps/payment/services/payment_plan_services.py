@@ -953,6 +953,14 @@ class PaymentPlanService:
         send_payment_plan_payment_list_xlsx_per_fsp_password.delay(str(self.payment_plan.pk), str(self.user.pk))
         return self.payment_plan
 
+    def close(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.FINISHED:
+            raise ValidationError(f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}")
+        self.payment_plan.status_close()
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        return self.payment_plan
+
     @classmethod
     def send_reconciliation_overdue_emails(cls) -> None:
         today = datetime.date.today()

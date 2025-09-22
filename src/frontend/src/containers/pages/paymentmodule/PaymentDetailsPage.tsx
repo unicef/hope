@@ -33,7 +33,7 @@ function PaymentDetailsPage(): ReactElement {
         paymentId: paymentId,
         programSlug: programId,
         paymentPlanPk: paymentPlanId,
-        }),
+      }),
   });
 
   const paymentPlanStatus = payment?.parent?.status;

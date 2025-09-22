@@ -328,6 +328,61 @@ class TestProgramCreate:
         }
         assert response.json() == expected_response
 
+    def test_create_program_with_duplicate_name_same_business_area(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        ProgramFactory(
+            business_area=self.afghanistan,
+            name="Duplicate Program Name",
+            status=Program.DRAFT,
+        )
+
+        duplicate_input_data = {
+            **self.valid_input_data_standard,
+            "name": "Duplicate Program Name",
+        }
+
+        response = self.client.post(self.list_url, duplicate_input_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.json()
+        assert "Programme with this name already exists in this business area" in str(response.json()["name"])
+
+    def test_create_program_with_duplicate_name_different_business_area(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_CREATE],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        ukraine = create_ukraine()
+        ProgramFactory(
+            business_area=ukraine,
+            name="Same Program Name",
+            status=Program.DRAFT,
+        )
+
+        same_name_input_data = {
+            **self.valid_input_data_standard,
+            "name": "Same Program Name",
+        }
+
+        response = self.client.post(self.list_url, same_name_input_data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        assert Program.objects.filter(name="Same Program Name").count() == 2
+        assert Program.objects.filter(name="Same Program Name", business_area=self.afghanistan).exists()
+        assert Program.objects.filter(name="Same Program Name", business_area=ukraine).exists()
+
     def test_create_program_with_partners_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,

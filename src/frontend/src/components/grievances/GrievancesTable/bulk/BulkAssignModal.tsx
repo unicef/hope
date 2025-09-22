@@ -83,7 +83,7 @@ export function BulkAssignModal({
   const onFilterChange = (data: User | null): void => {
     setValue(data);
   };
-  const onSave = async (): Promise<void> => {
+  const onSave = async(): Promise<void> => {
     await mutateAsync({
       assignedTo: value?.id || '',
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),

@@ -52,7 +52,7 @@ export function ActivateVerificationPlan({
     },
   });
 
-  const activate = async (): Promise<void> => {
+  const activate = async(): Promise<void> => {
     try {
       await activateVerificationPlanMutation.mutateAsync();
       setActivateDialogOpen(false);

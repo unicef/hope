@@ -61,7 +61,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     refetch,
   } = useQuery<PaginatedAreaList>({
     queryKey: ['areas', businessArea, queryVariables],
-    queryFn: async () => {
+    queryFn: async() => {
       try {
         const result = await RestService.restAreasList({
           ...queryVariables,
@@ -141,7 +141,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     }
   }, [businessArea, refetch]);
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+   
   const handleChange = (event, newValue) => {
     setNewValue(newValue);
     onChange(event, newValue);

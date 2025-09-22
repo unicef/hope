@@ -2,7 +2,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { Theme, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ReactElement } from 'react';
@@ -23,7 +23,6 @@ interface RegistrationIndividualAdditionalRegistrationInformationProps {
 }
 
 export const RegistrationIndividualAdditionalRegistrationInformation = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   individual,
   flexFieldsData,
 }: RegistrationIndividualAdditionalRegistrationInformationProps): ReactElement => {

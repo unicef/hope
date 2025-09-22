@@ -1,4 +1,5 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -89,7 +90,7 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="total-number-of-tickets"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
                 topNumber={numberOfClosedTickets}
@@ -98,7 +99,7 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="total-number-of-closed-tickets"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
                 topNumber={`${
@@ -114,15 +115,15 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="tickets-average-resolution"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Box ml={3}>
+            <Box sx={{ ml: 3 }}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
-            <Box ml={3} mt={5}>
+            <Box sx={{ ml: 3, mt: 5 }}>
               <TicketsByLocationAndCategorySection
                 data={ticketsByLocationAndCategory}
               />

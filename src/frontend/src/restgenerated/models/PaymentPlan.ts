@@ -32,6 +32,7 @@ export type PaymentPlan = {
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
      * * `FINISHED` - Finished
+     * * `CLOSED` - Closed
      */
     status?: PaymentPlanStatusEnum;
     statusDisplay: string;

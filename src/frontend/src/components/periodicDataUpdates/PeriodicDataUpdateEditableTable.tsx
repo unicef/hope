@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { Box } from '@mui/system';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -178,43 +179,47 @@ const PeriodicDataUpdateEditableTable: React.FC<
                       {field ? (
                         isEditing && field.isEditable ? (
                           field.subtype === 'DATE' ? (
-                            <DatePicker
-                              value={field.value ? new Date(field.value) : null}
-                              onChange={(newValue) => {
-                                setEditRows((prev) => {
-                                  const updated = [...prev];
-                                  const pduFieldsObj = {
-                                    ...updated[idx].pduFields,
-                                  };
-                                  let formattedValue = null;
-                                  if (
-                                    newValue instanceof Date &&
-                                    !isNaN(newValue.getTime())
-                                  ) {
-                                    formattedValue = format(
-                                      newValue,
-                                      'yyyy-MM-dd',
-                                    );
-                                  }
-                                  pduFieldsObj[fieldKey] = {
-                                    ...pduFieldsObj[fieldKey],
-                                    value: formattedValue,
-                                  };
-                                  updated[idx] = {
-                                    ...updated[idx],
-                                    pduFields: pduFieldsObj,
-                                  };
-                                  return updated;
-                                });
-                              }}
-                              format="yyyy-MM-dd"
-                              slotProps={{
-                                textField: {
-                                  fullWidth: true,
-                                  inputProps: { mask: '____-__-__' },
-                                },
-                              }}
-                            />
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                              <DatePicker
+                                value={
+                                  field.value ? new Date(field.value) : null
+                                }
+                                onChange={(newValue) => {
+                                  setEditRows((prev) => {
+                                    const updated = [...prev];
+                                    const pduFieldsObj = {
+                                      ...updated[idx].pduFields,
+                                    };
+                                    let formattedValue = null;
+                                    if (
+                                      newValue instanceof Date &&
+                                      !isNaN(newValue.getTime())
+                                    ) {
+                                      formattedValue = format(
+                                        newValue,
+                                        'yyyy-MM-dd',
+                                      );
+                                    }
+                                    pduFieldsObj[fieldKey] = {
+                                      ...pduFieldsObj[fieldKey],
+                                      value: formattedValue,
+                                    };
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      pduFields: pduFieldsObj,
+                                    };
+                                    return updated;
+                                  });
+                                }}
+                                format="yyyy-MM-dd"
+                                slotProps={{
+                                  textField: {
+                                    fullWidth: true,
+                                    inputProps: { mask: '____-__-__' },
+                                  },
+                                }}
+                              />
+                            </LocalizationProvider>
                           ) : field.subtype === 'BOOL' ? (
                             <div
                               style={{
