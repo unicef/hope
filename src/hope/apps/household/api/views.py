@@ -25,6 +25,7 @@ from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
+    IndividualListKeyConstructor,
 )
 from hope.apps.household.api.serializers.household import (
     HouseholdChoicesSerializer,
@@ -397,8 +398,8 @@ class IndividualViewSet(
             .order_by("created_at")
         )
 
-    # @etag_decorator(IndividualListKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
+    @etag_decorator(IndividualListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
