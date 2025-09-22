@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
 import { ReactElement } from 'react';
@@ -28,7 +28,7 @@ export function ExistingIdentityFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.identities.map((item) => (
-              <Grid size={{ xs: 12 }} key={item.id}>
+              <Grid size={12} key={item.id}>
                 <EditIdentityRow
                   setFieldValue={setFieldValue}
                   values={values}

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -59,7 +59,7 @@ export const ProgramCyclesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -67,7 +67,7 @@ export const ProgramCyclesFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -84,30 +84,24 @@ export const ProgramCyclesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
             value={filter.totalEntitledQuantityUsdFrom}
             placeholder={t('From')}
             onChange={(e) =>
-              handleFilterChange(
-                'totalEntitledQuantityUsdFrom',
-                e.target.value,
-              )
+              handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
             value={filter.totalEntitledQuantityUsdTo}
             placeholder={t('To')}
             onChange={(e) =>
-              handleFilterChange(
-                'totalEntitledQuantityUsdTo',
-                e.target.value,
-              )
+              handleFilterChange('totalEntitledQuantityUsdTo', e.target.value)
             }
             error={
               filter.totalEntitledQuantityUsdFrom &&
@@ -117,7 +111,7 @@ export const ProgramCyclesFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel="Date"
             onChange={(date) =>
@@ -129,7 +123,7 @@ export const ProgramCyclesFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(

@@ -59,7 +59,7 @@ const StyledAutocompletePopper = styled('div')`
 `;
 
 const PopperComponent = (props: PopperComponentProps) => {
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { disablePortal, anchorEl, open, ...other } = props;
   return <StyledAutocompletePopper {...other} />;
 };
@@ -250,7 +250,6 @@ export const GlobalProgramSelect = () => {
       );
       setPrograms(newProgramsList);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programsData, inputValue]);
 
   const handleClose = () => {

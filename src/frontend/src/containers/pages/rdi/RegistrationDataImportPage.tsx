@@ -57,14 +57,14 @@ function RegistrationDataImportPage(): ReactElement {
   );
 
   const { mutateAsync } = useMutation({
-    mutationFn: async () =>
+    mutationFn: async() =>
       runDeduplicationDataImports(businessArea, programId),
     onSuccess: ({ data }) => {
       showMessage(data.message);
     },
   });
 
-  const runDeduplication = async () => {
+  const runDeduplication = async() => {
     try {
       await mutateAsync();
     } catch (error) {

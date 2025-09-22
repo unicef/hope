@@ -54,7 +54,7 @@ export function DeleteVerificationPlan({
     },
   });
 
-  const handleDeleteVerificationPlan = async (): Promise<void> => {
+  const handleDeleteVerificationPlan = async(): Promise<void> => {
     try {
       await deleteVerificationPlanMutation.mutateAsync();
 
