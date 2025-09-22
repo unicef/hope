@@ -1040,7 +1040,7 @@ class PaymentPlan(
             return False
 
         due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
-        is_overdue = due_date < now().date()
+        is_overdue = due_date <= now().date()
 
         return (
             self.status == PaymentPlan.Status.ACCEPTED

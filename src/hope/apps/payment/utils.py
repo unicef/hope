@@ -182,9 +182,6 @@ def generate_cache_key(data: dict[str, Any]) -> str:
     return hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
-def get_link(api_url: str | None = None) -> str:
+def get_link(api_url: str) -> str:
     protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-    link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-    if api_url:
-        return link
-    return ""
+    return f"{protocol}://{settings.FRONTEND_HOST}{api_url}"

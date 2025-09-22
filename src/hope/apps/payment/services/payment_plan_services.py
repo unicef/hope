@@ -976,7 +976,7 @@ class PaymentPlanService:
 
         for pp in overdue_payment_plans:
             if pp.has_payments_reconciliation_overdue:
-                send_payment_plan_reconciliation_overdue_email.delay(pp.pk)
+                send_payment_plan_reconciliation_overdue_email.delay(str(pp.pk))
 
     def send_reconciliation_overdue_email_for_pp(self) -> None:
         business_area = self.payment_plan.business_area
