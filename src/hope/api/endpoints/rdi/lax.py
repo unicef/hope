@@ -22,7 +22,9 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import (
     DATA_SHARING_CHOICES,
+    DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
+    NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
@@ -103,6 +105,12 @@ class IndividualSerializer(serializers.ModelSerializer):
     accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
+    disability = serializers.ChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
+
+    def validate_disability(self, value):
+        if value == "":
+            return NOT_DISABLED
+        return value
 
     class Meta:
         model = PendingIndividual

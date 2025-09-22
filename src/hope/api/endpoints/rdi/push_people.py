@@ -22,8 +22,10 @@ from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
+    DISABILITY_CHOICES,
     HEAD,
     NON_BENEFICIARY,
+    NOT_DISABLED,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
     PendingHousehold,
@@ -71,7 +73,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin2 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin3 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
-
+    disability = serializers.ChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -80,6 +82,11 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin2"].choices = Area.objects.filter(area_type__area_level=2).values_list("p_code", "name")
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
+
+    def validate_disability(self, value):
+        if value == "":
+            return NOT_DISABLED
+        return value
 
     class Meta:
         model = PendingIndividual
