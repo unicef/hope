@@ -55,7 +55,7 @@ export const DeleteProgram = ({
           businessAreaSlug: businessArea,
           slug: program.slug,
         }),
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: ['businessAreasProgramsList', businessArea, programId],
         });

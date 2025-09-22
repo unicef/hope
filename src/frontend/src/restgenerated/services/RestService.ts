@@ -4813,8 +4813,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -8467,8 +8468,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -8954,6 +8956,32 @@ export class RestService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCloseRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/close/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
         });
     }
     /**
@@ -9533,8 +9561,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9660,8 +9689,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9789,8 +9819,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9921,8 +9952,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10106,8 +10138,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10545,8 +10578,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -12425,9 +12459,10 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
@@ -12862,9 +12897,10 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,

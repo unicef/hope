@@ -64,6 +64,8 @@ export function PaymentPlanDetailsHeader({
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
@@ -137,6 +139,7 @@ export function PaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
+          canClose={canClose}
         />
       );
       break;

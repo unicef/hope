@@ -8,7 +8,7 @@ import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/Grie
 import { Notes } from '@components/grievances/Notes/Notes';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Grid2 as Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';

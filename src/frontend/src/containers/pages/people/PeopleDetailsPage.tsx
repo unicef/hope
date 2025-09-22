@@ -17,7 +17,10 @@ import { Title } from '@core/Title';
 import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import { Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -160,7 +163,7 @@ const PeopleDetailsPage = (): ReactElement => {
           </>
         }
       >
-        <Box mr={2}>
+        <Box sx={{ mr: 2 }}>
           {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
           ) : null}
@@ -183,7 +186,7 @@ const PeopleDetailsPage = (): ReactElement => {
           flexFieldsData={flexFieldsData}
           individual={individual}
         />
-        <Box mb={4}>
+        <Box sx={{ mb: 4 }}>
           <ProgrammeTimeSeriesFields
             individual={individual}
             periodicFieldsData={periodicFieldsData}
@@ -197,10 +200,10 @@ const PeopleDetailsPage = (): ReactElement => {
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Cash received')}>
                 {household?.deliveredQuantities?.length ? (
-                  <Box mb={2}>
+                  <Box sx={{ mb: 2 }}>
                     <Grid container>
                       <Grid size={{ xs: 6 }}>
-                        <Box display="flex" flexDirection="column">
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                           {household?.deliveredQuantities?.map((item) => (
                             <Box
                               key={`${item.currency}-${item.totalDeliveredQuantity}`}

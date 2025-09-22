@@ -1,6 +1,6 @@
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -9,11 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface CommunicationFiltersProps {
-  filter;
-  setFilter: (filter) => void;
-  initialFilter;
-  appliedFilter;
-  setAppliedFilter: (filter) => void;
+  filter: Record<string, any>;
+  setFilter: (filter: Record<string, any>) => void;
+  initialFilter: Record<string, any>;
+  appliedFilter: Record<string, any>;
+  setAppliedFilter: (filter: Record<string, any>) => void;
 }
 export function CommunicationFilters({
   filter,

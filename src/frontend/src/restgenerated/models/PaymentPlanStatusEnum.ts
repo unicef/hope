@@ -4,6 +4,7 @@
 /* eslint-disable */
 /**
  * * `ACCEPTED` - Accepted
+ * * `CLOSED` - Closed
  * * `DRAFT` - Draft
  * * `FINISHED` - Finished
  * * `IN_APPROVAL` - In Approval
@@ -23,6 +24,7 @@
  */
 export enum PaymentPlanStatusEnum {
     ACCEPTED = 'ACCEPTED',
+    CLOSED = 'CLOSED',
     DRAFT = 'DRAFT',
     FINISHED = 'FINISHED',
     IN_APPROVAL = 'IN_APPROVAL',

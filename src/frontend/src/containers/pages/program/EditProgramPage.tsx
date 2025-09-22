@@ -101,7 +101,7 @@ const EditProgramPage = (): ReactElement => {
           requestBody: programData,
         });
       },
-      onSuccess: async () => {
+      onSuccess: async() => {
         await queryClient.invalidateQueries({
           queryKey: ['businessAreaProgram', businessArea, id],
         });
@@ -122,7 +122,7 @@ const EditProgramPage = (): ReactElement => {
         requestBody: partnerData,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async() => {
       await queryClient.invalidateQueries({
         queryKey: ['businessAreaProgram', businessArea, id],
       });
@@ -171,7 +171,7 @@ const EditProgramPage = (): ReactElement => {
   const programHasRdi = registrationImportsTotalCount > 0;
   const programHasTp = targetPopulationsCount > 0;
 
-  const handleSubmitProgramDetails = async (values): Promise<void> => {
+  const handleSubmitProgramDetails = async(values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -256,7 +256,7 @@ const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const handleSubmitPartners = async (values): Promise<void> => {
+  const handleSubmitPartners = async(values): Promise<void> => {
     const partnersToSet =
       values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
@@ -392,7 +392,7 @@ const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
-            const handleNextStep = async () => {
+            const handleNextStep = async() => {
               await handleNext({
                 validateForm,
                 stepFields,

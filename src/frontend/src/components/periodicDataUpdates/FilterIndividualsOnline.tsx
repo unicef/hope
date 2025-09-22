@@ -2,7 +2,7 @@ import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
@@ -31,7 +31,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
   return (
     <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <RdiAutocompleteRestFilter
             value={filter.registrationDataImportId}
             onChange={(selectedItem) =>
@@ -39,7 +39,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <TargetPopulationAutocompleteRestFilter
             value={filter.targetPopulationId}
             onChange={(selectedItem) =>
@@ -47,7 +47,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleStateFilterChange('gender', e.target.value)}
             label={t('Gender')}
@@ -71,7 +71,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             topLabel={t('Age')}
             value={filter.ageFrom}
@@ -81,7 +81,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             data-cy="hh-filters-age-from"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             value={filter.ageTo}
             placeholder={t('To')}
@@ -90,7 +90,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             data-cy="hh-filters-age-to"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -101,7 +101,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -111,7 +111,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             dataCy="ind-filters-reg-date-to"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleStateFilterChange('hasGrievanceTicket', e.target.value)
@@ -128,7 +128,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <AdminAreaAutocompleteMultipleRestFilter
             value={filter.admin1 || []}
             onChange={(_, option) => {
@@ -139,7 +139,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             disabled={filter.admin2?.length > 0}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <AdminAreaAutocompleteMultipleRestFilter
             value={filter.admin2 || []}
             onChange={(_, option) => {
@@ -150,7 +150,7 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             disabled={filter.admin1?.length > 0}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleStateFilterChange('receivedAssistance', e.target.value)

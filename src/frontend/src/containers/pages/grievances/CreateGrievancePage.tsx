@@ -30,7 +30,10 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import FormHelperText from '@mui/material/FormHelperText';
+import Grid from '@mui/material/Grid';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -497,7 +500,9 @@ const CreateGrievancePage = (): ReactElement => {
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
+                          <Box
+                            sx={{ display: 'flex', flexDirection: 'column' }}
+                          >
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -536,8 +541,10 @@ const CreateGrievancePage = (): ReactElement => {
                         </>
                       )}
                       {dataChangeErrors(errors)}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
+                      <Box
+                        sx={{ pt: 3, display: 'flex', flexDirection: 'row' }}
+                      >
+                        <Box sx={{ mr: 3 }}>
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/tickets/user-generated`}
@@ -545,7 +552,7 @@ const CreateGrievancePage = (): ReactElement => {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display="flex" ml="auto">
+                        <Box sx={{ display: 'flex', ml: 'auto' }}>
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}

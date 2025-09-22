@@ -6,7 +6,7 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsMember } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';

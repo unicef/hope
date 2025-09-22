@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+ 
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { ImportData } from '@restgenerated/models/ImportData';
@@ -24,7 +24,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
 
   // Mutation for uploading XLSX file
   const uploadMutation = useMutation({
-    mutationFn: async (variables: SaveXlsxVariables) => {
+    mutationFn: async(variables: SaveXlsxVariables) => {
       const formData = {
         file: variables.file,
       } as any;
@@ -44,7 +44,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
   // Query for polling import data status
   const { data: xlsxImportData } = useQuery({
     queryKey: ['importData', importDataId, businessAreaSlug],
-    queryFn: async () => {
+    queryFn: async() => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasImportDataRetrieve({
         businessAreaSlug: businessAreaSlug,
@@ -68,7 +68,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     },
   });
 
-  const saveAndStartPolling = async (
+  const saveAndStartPolling = async(
     variables: SaveXlsxVariables,
   ): Promise<void> => {
     await uploadMutation.mutateAsync(variables);

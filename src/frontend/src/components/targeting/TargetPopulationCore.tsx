@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
@@ -101,12 +101,12 @@ export const TargetPopulationCore = ({
           </Typography>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs: 6 }}>{targetPopulation?.excludedIds}</Grid>
+              <Grid size={6}>{targetPopulation?.excludedIds}</Grid>
             </Grid>
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs: 6 }}>{targetPopulation?.exclusionReason}</Grid>
+              <Grid size={6}>{targetPopulation?.exclusionReason}</Grid>
             </Grid>
           </Box>
         </PaperContainer>

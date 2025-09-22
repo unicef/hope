@@ -48,6 +48,7 @@ describe('IndividualsListTable', () => {
         },
         program: {
           id: 'test-program',
+          slug: 'test-program',
           name: 'Test Program',
         },
         lastRegistrationDate: '2023-01-15T10:30:00Z',
