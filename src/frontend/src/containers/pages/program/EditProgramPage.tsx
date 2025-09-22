@@ -138,13 +138,12 @@ const EditProgramPage = (): ReactElement => {
 
   if (
     loadingProgram ||
-    treeLoading ||
     userPartnerChoicesLoading ||
     choicesLoading
   )
     return <LoadingComponent />;
 
-  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
+  if (!program || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
