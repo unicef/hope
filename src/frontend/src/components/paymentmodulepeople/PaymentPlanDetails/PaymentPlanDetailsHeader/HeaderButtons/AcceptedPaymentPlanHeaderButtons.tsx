@@ -162,20 +162,20 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async () => {
+  const handleExportAPI = async() => {
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async() => {
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };

@@ -94,7 +94,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
     },
   });
 
-  const handleImport = async (): Promise<void> => {
+  const handleImport = async(): Promise<void> => {
     if (fileToImport) {
       await importReconciliationXlsx({
         businessAreaSlug: businessArea,

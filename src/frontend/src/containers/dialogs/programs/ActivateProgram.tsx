@@ -55,7 +55,7 @@ export const ActivateProgram = ({
     },
   });
 
-  const handleActivateProgram = async (): Promise<void> => {
+  const handleActivateProgram = async(): Promise<void> => {
     await activateProgram();
   };
   return (

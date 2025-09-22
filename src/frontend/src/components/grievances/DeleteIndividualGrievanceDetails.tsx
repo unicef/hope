@@ -1,4 +1,4 @@
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -162,7 +162,7 @@ export function DeleteIndividualGrievanceDetails({
           textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
-          <Grid key={key} size={{ xs: 6 }}>
+          <Grid key={key} size={6}>
             <LabelizedField
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
@@ -177,7 +177,7 @@ export function DeleteIndividualGrievanceDetails({
     documents?.map((doc) => {
       const item = doc;
       return (
-        <Grid key={item.country + item.type.label} size={{ xs: 6 }}>
+        <Grid key={item.country + item.type.label} size={6}>
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}

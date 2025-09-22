@@ -65,7 +65,7 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const { data, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
-    queryFn: async () => {
+    queryFn: async() => {
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
         {
           businessAreaSlug: businessArea,
@@ -97,7 +97,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   );
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
+    mutationFn: async(variables: { fspXlsxTemplateId?: string }) => {
       const requestBody: PaymentPlanExportAuthCode = {
         fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
       };
@@ -168,7 +168,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async () => {
+  const handleExportAPI = async() => {
     try {
       await mutateExport({
         fspXlsxTemplateId: selectedTemplate,
@@ -179,7 +179,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async() => {
     try {
       await mutateExport({
         fspXlsxTemplateId: '',

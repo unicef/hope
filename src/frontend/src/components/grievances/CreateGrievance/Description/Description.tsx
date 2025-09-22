@@ -5,13 +5,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  Box,
-  FormHelperText,
-  Grid2 as Grid,
-  GridSize,
-  Typography,
-} from '@mui/material';
+import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -287,11 +281,11 @@ function Description({
             />
           </Grid>
         </Grid>
-        <Box pt={5}>
+        <Box sx={{ pt: 5 }}>
           <BoxWithBorders>
             <Grid container spacing={4}>
               <Grid size={{ xs: 6 }}>
-                <Box py={3}>
+                <Box sx={{ py: 3 }}>
                   <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
@@ -301,7 +295,7 @@ function Description({
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                 <Grid size={{ xs: 6 }}>
-                  <Box py={3}>
+                  <Box sx={{ py: 3 }}>
                     <LookUpPaymentRecord
                       values={values}
                       onValueChange={setFieldValue}
@@ -317,7 +311,7 @@ function Description({
         </Box>
       </BoxPadding>
       {canAddDocumentation && (
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <BoxWithBorderBottom>
             <Title>
               <Typography variant="h6">

@@ -19,7 +19,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string; userId?: string } = {};
   if (filters.userId !== '') {
