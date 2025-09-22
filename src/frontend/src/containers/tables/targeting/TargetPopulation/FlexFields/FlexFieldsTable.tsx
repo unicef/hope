@@ -40,7 +40,7 @@ export function FlexFieldsTable({
       filteredByFieldType = fields.filter((el) => el.isFlexField === false);
     }
     return filteredByFieldType.filter((each) => {
-      // eslint-disable-next-line
+       
       for (const key in filters) {
         if (
           each[key] === undefined ||

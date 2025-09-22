@@ -8,7 +8,7 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,

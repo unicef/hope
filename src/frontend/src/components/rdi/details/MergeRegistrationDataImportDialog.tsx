@@ -37,7 +37,7 @@ function MergeRegistrationDataImportDialog({
     RestService.restBusinessAreasProgramsRegistrationDataImportsMergeCreate,
     [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
   );
-  const merge = async (): Promise<void> => {
+  const merge = async(): Promise<void> => {
     const { errors } = await mutateAsync();
     if (errors) {
       showMessage(t('Error while merging Registration Data Import'));

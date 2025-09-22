@@ -18,7 +18,9 @@ import { FieldsAttributesService } from '@restgenerated/services/FieldsAttribute
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { Theme } from '@mui/material/styles';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
@@ -158,7 +160,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <Box mr={2}>
+            <Box sx={{ mr: 2 }}>
               {household?.hasDuplicates && (
                 <WarningTooltip
                   confirmed
@@ -166,12 +168,12 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                 />
               )}
             </Box>
-            <Box mr={2}>
+            <Box sx={{ mr: 2 }}>
               {household?.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
-            <Box mr={2}>
+            <Box sx={{ mr: 2 }}>
               {household?.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}

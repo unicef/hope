@@ -52,7 +52,7 @@ export function RevertForceFailedButton({
         {
           businessAreaSlug,
           paymentId: id,
-          paymentPlanId: ppId,
+          paymentPlanPk: ppId,
           programSlug,
           requestBody,
         },

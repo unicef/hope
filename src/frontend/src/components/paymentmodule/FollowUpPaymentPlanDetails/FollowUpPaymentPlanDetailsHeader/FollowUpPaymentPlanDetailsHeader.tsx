@@ -64,6 +64,8 @@ export function FollowUpPaymentPlanDetailsHeader({
     permissions,
   );
 
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
@@ -143,6 +145,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
+          canClose={canClose}
         />
       );
       break;

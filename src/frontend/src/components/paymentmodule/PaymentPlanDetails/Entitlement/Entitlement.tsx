@@ -13,7 +13,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid2 as Grid,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -200,7 +200,7 @@ function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING ||
+      BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -211,8 +211,8 @@ function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems="center" container>
-            <Grid size={{ xs: 11 }}>
+          <Grid container alignItems="center">
+            <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -246,42 +246,40 @@ function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid>
-              <Box ml={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    loadingSetSteficonRule ||
-                    !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
-                    paymentPlan.backgroundActionStatus ===
+            <Grid size={{ xs: 1 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={
+                  loadingSetSteficonRule ||
+                  !steficonRuleValue ||
+                  paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                  paymentPlan.backgroundActionStatus ===
                     BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
-                    !isActiveProgram
+                  !isActiveProgram
+                }
+                data-cy="button-apply-steficon"
+                onClick={async () => {
+                  try {
+                    await setSteficonRule({
+                      programSlug: programId,
+                      businessAreaSlug: businessArea,
+                      id: paymentPlan.id,
+                      requestBody: {
+                        engineFormulaRuleId: steficonRuleValue,
+                        version: paymentPlan.version,
+                      },
+                    });
+                    showMessage(
+                      t('Formula is executing, please wait until completed'),
+                    );
+                  } catch (e) {
+                    showApiErrorMessages(e, showMessage);
                   }
-                  data-cy="button-apply-steficon"
-                  onClick={async () => {
-                    try {
-                      await setSteficonRule({
-                        programSlug: programId,
-                        businessAreaSlug: businessArea,
-                        id: paymentPlan.id,
-                        requestBody: {
-                          engineFormulaRuleId: steficonRuleValue,
-                          version: paymentPlan.version,
-                        },
-                      });
-                      showMessage(
-                        t('Formula is executing, please wait until completed'),
-                      );
-                    } catch (e) {
-                      showApiErrorMessages(e, showMessage);
-                    }
-                  }}
-                >
-                  {t('Apply')}
-                </Button>
-              </Box>
+                }}
+              >
+                {t('Apply')}
+              </Button>
             </Grid>
           </Grid>
           <Box display="flex" alignItems="center">
