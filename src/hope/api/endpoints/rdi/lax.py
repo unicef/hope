@@ -336,8 +336,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 class HouseholdSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    country = serializers.ChoiceField(choices=Countries())
-    country_origin = serializers.ChoiceField(choices=Countries(), required=False)
+    country = serializers.ChoiceField(choices=Countries(), required=False, allow_blank=True)
+    country_origin = serializers.ChoiceField(choices=Countries(), required=False, allow_blank=True)
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
