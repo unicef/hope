@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -112,7 +112,7 @@ function Selection({
     issueTypeDescriptions[GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]] || '';
 
   return (
-    <Grid container spacing={3}>
+    <Grid container columnSpacing={3}>
       <Grid size={{ xs: 6 }}>
         <Field
           name="category"

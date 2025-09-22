@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
 import { ReactElement } from 'react';
@@ -21,13 +21,13 @@ export function ExistingDocumentFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return individual?.documents?.length > 0 ? (
-    <Grid container spacing={3}>
+    <Grid container size={12} spacing={3}>
       <FieldArray
         name="individualDataUpdateDocumentsToEdit"
         render={(arrayHelpers) => (
           <>
             {individual.documents.map((item) => (
-              <Grid size={{ xs: 12 }} key={item.id}>
+              <Grid size={12} key={item.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}
                   values={values}

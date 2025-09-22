@@ -59,7 +59,7 @@ export function FinishVerificationPlan({
     },
   });
 
-  const finish = async (): Promise<void> => {
+  const finish = async(): Promise<void> => {
     try {
       await finishVerificationPlanMutation.mutateAsync();
       setFinishDialogOpen(false);

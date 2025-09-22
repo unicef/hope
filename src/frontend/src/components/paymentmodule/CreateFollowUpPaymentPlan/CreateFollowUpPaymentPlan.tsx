@@ -17,7 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';

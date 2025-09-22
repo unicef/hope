@@ -13,7 +13,7 @@ interface ProgramStepperProps {
   stepsData: StepData[];
 }
 
-export const handleNext = async ({
+export const handleNext = async({
   validateForm,
   stepFields,
   step,
