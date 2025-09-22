@@ -2,7 +2,7 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -188,7 +188,7 @@ const EditTargetPopulation = ({
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
             <Grid container mb={5}>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={6}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -202,7 +202,7 @@ const EditTargetPopulation = ({
               </Grid>
             </Grid>
             <Grid container>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={6}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}

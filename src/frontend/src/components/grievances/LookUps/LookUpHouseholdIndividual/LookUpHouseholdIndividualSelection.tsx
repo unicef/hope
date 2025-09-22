@@ -1,4 +1,4 @@
-import { Box, FormHelperText, Grid2 as Grid } from '@mui/material';
+import { Box, FormHelperText, Grid } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';

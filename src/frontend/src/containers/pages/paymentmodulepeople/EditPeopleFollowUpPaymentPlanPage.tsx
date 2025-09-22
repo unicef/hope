@@ -134,7 +134,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmit = async(values): Promise<void> => {
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,

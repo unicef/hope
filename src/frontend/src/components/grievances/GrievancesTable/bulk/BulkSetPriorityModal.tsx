@@ -74,7 +74,7 @@ export const BulkSetPriorityModal = ({
   });
 
   const priorityChoices = choices?.grievanceTicketPriorityChoices;
-  const onSave = async (): Promise<void> => {
+  const onSave = async(): Promise<void> => {
     await mutateAsync({
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
       priority: value,
@@ -93,7 +93,7 @@ export const BulkSetPriorityModal = ({
         <InputLabel>{t('Priority')}</InputLabel>
         <Select
           value={value}
-          onChange={(e) => setValue(e.target.value as number)}
+          onChange={(e) => setValue(e.target.value)}
           label={t('Priority')}
         >
           {priorityChoices?.map((choice) => (

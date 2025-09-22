@@ -67,7 +67,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
     queryKey: ['fieldsAttributes', businessArea, programId],
-    queryFn: async () => {
+    queryFn: async() => {
       const data =
         await RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList(
           {

@@ -38,7 +38,7 @@ const RefuseRdiForm = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values) => {
+      onSubmit={async(values) => {
         try {
           await refuseMutate({
             reason: values.refuseReason,
