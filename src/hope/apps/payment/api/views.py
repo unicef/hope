@@ -679,6 +679,7 @@ class PaymentPlanViewSet(
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        "close": [Permissions.PM_CLOSE_FINISHED],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1139,7 +1140,6 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    # TODO:
     @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
     @transaction.atomic
     def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1380,6 +1380,22 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).close()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
 
 
 class TargetPopulationViewSet(

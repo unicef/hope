@@ -30,7 +30,7 @@ export const getIndexForId = (array, id?: string): number => {
   return index !== -1 ? index : 0;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export const removeIdPropertyFromObjects = (objects) => objects?.map((obj) => {
   const rest = { ...obj };
   delete rest.id;

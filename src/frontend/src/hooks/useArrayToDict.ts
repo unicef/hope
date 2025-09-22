@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
@@ -35,7 +35,7 @@ export function useArrayToDict<T>(
           ? currentValue
           : get(currentValue, valueExtractor);
     }
-    // eslint-disable-next-line no-param-reassign
+     
     previousValue[key] = value;
     return previousValue;
   };

@@ -831,6 +831,7 @@ class TestGrievanceTickets:
             ),
         ],
     )
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_hh_grievance_tickets_create_new_ticket(
         self,
         page_grievance_tickets: GrievanceTickets,

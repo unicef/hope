@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
