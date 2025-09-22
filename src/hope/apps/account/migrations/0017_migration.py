@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0016_migration'),
+        ("account", "0016_migration"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='roleassignment',
-            name='idx_ra_user_exp',
+            model_name="roleassignment",
+            name="idx_ra_user_exp",
         ),
         migrations.RemoveIndex(
-            model_name='roleassignment',
-            name='idx_ra_partner_ba_exp',
+            model_name="roleassignment",
+            name="idx_ra_partner_ba_exp",
         ),
         migrations.RemoveIndex(
-            model_name='roleassignment',
-            name='idx_ra_ba_exp',
+            model_name="roleassignment",
+            name="idx_ra_ba_exp",
         ),
         migrations.RemoveIndex(
-            model_name='user',
-            name='idx_user_partner_id',
+            model_name="user",
+            name="idx_user_partner_id",
         ),
     ]
