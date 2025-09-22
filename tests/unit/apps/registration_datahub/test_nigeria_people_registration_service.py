@@ -65,8 +65,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         files = {
             "individual-details": [
                 {
-                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
-                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////////"
+                    "/////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAA"
+                    "AAAAAAAAP/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP///////////////////////////////////"
+                    "///////////////////////////////////////////////////wgALCAABAAEBAREA/8QAF"
+                    "BABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
@@ -145,7 +149,10 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert primary_collector.full_name == "Giulio D Franco"
         assert primary_collector.relationship == HEAD
         assert primary_collector.phone_no_alternative is not None
-        assert primary_collector.flex_fields == {"frontline_worker_designation_i_f": "H2HCL", "national_id_no": "01234567891"}
+        assert primary_collector.flex_fields == {
+            "frontline_worker_designation_i_f": "H2HCL",
+            "national_id_no": "01234567891",
+        }
         assert primary_collector.rdi_merge_status == "PENDING"
         assert primary_collector.photo.url is not None
         assert PendingIndividualRoleInHousehold.objects.count() == 1
@@ -155,7 +162,13 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert primary_role.household == household
 
         account = PendingAccount.objects.first()
-        assert account.account_data == {"number": "2087008012", "name": "United Bank for Africa", "code": "000004", "holder_name": "xxxx", "financial_institution": str(self.fi.id)}
+        assert account.account_data == {
+            "number": "2087008012",
+            "name": "United Bank for Africa",
+            "code": "000004",
+            "holder_name": "xxxx",
+            "financial_institution": str(self.fi.id),
+        }
         assert account.account_type.key == "bank"
         assert account.financial_institution == self.fi
 
