@@ -35,7 +35,7 @@ class StrictBooleanField(forms.Field):
             return True
         if value in (False, "False", "false", "FALSE", "0"):
             return False
-        raise ValidationError("Invalid boolean value", code="invalid")
+        raise ValidationError("Enter a boolean value", code="invalid")
 
 
 class StrictDateField(forms.DateField):
@@ -49,7 +49,7 @@ class StrictDateField(forms.DateField):
             return value
         if isinstance(value, str):
             return super().to_python(value)
-        raise ValidationError("Invalid date value", code="invalid")
+        raise ValidationError("Enter a date value", code="invalid")
 
 
 class RowValidationError(ValidationError):
@@ -215,37 +215,54 @@ class PDUXlsxImportService(PDURoundValueMixin):
 
     def _update_individuals(self, cleaned_data_list: list[dict]) -> None:
         individuals = []
-        for cleaned_data in cleaned_data_list:
-            individual = self._import_cleaned_data(cleaned_data)
-            individuals.append(individual)
+        validation_errors = []
+
+        for _index, cleaned_data in enumerate(cleaned_data_list):
+            try:
+                individual = self._import_cleaned_data(cleaned_data)
+                if individual:
+                    individuals.append(individual)
+            except ValidationError as e:
+                validation_errors.append(validation_error_to_json(e))
+
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
         Individual.objects.bulk_update(individuals, ["flex_fields"])
 
     def _import_cleaned_data(self, cleaned_data: dict) -> Individual | None:
         individual_uuid = cleaned_data["individual__uuid"]
         individual_unicef_id = cleaned_data["individual_unicef_id"]
         individual = Individual.objects.filter(id=individual_uuid).first()
+
+        individual_errors = []
+
         for round_data in self.periodic_data_update_template.rounds_data:
             field_name = round_data["field"]
             round_number = round_data["round"]
             round_number_from_xlsx = cleaned_data[f"{field_name}__round_number"]
             value_from_xlsx = cleaned_data[f"{field_name}__round_value"]
             collection_date_from_xlsx = cleaned_data[f"{field_name}__collection_date"]
+
             if value_from_xlsx is None:  # pragma: no cover
                 continue
             if value_from_xlsx == "":  # pragma: no cover
                 continue
             if round_number_from_xlsx != round_number:
                 raise ValidationError(
-                    f"Round number mismatch for field {field_name} and individual {individual_unicef_id}"
+                    f"Round number mismatch for field {field_name}. "
+                    f"Expected: {round_number}, Got: {round_number_from_xlsx}"
                 )
             if not individual:
                 raise ValidationError(f"Individual not found for {individual_unicef_id} ")
             current_value = self._get_round_value(individual, field_name, round_number)
-            if current_value and value_from_xlsx:
-                raise ValidationError(
+            if current_value is not None and value_from_xlsx is not None:
+                individual_errors.append(
                     f"Value already exists for field {field_name} for round {round_number} "
                     f"and individual {individual_unicef_id}"
                 )
+                continue
+
             self.set_round_value(
                 individual,
                 field_name,
@@ -257,18 +274,31 @@ class PDUXlsxImportService(PDURoundValueMixin):
                     else self.periodic_data_update_template.created_at.date()
                 ),
             )
+
+        if individual_errors:
+            raise ValidationError(individual_errors)
+
         return individual
 
     def _build_form(self) -> type[forms.Form]:
         form_fields_dict: dict[str, forms.Field] = {}
+        form_errors = []
+
         for value in self.periodic_data_update_template.rounds_data:
             flexible_attribute = self.flexible_attributes_dict.get(value["field"])
             if not flexible_attribute:
                 raise ValidationError(f"Flexible Attribute for field {round['field']} not found")
-            form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()
-            form_fields_dict[f"{value['field']}__round_name"] = forms.CharField(required=False)
-            form_fields_dict[f"{value['field']}__round_value"] = self._get_form_field_for_value(flexible_attribute)
-            form_fields_dict[f"{value['field']}__collection_date"] = StrictDateField(required=False)
+            try:
+                form_field = self._get_form_field_for_value(flexible_attribute)
+                form_fields_dict[f"{value['field']}__round_number"] = forms.IntegerField()
+                form_fields_dict[f"{value['field']}__round_name"] = forms.CharField(required=False)
+                form_fields_dict[f"{value['field']}__round_value"] = form_field
+                form_fields_dict[f"{value['field']}__collection_date"] = StrictDateField(required=False)
+            except ValidationError as e:
+                form_errors.append(e)
+
+        if form_errors:
+            raise ValidationError(form_errors)
 
         return type("PDUForm", (PDUBaseForm,), form_fields_dict)
 

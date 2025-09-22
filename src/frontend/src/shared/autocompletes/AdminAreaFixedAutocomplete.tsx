@@ -93,7 +93,7 @@ export const AdminAreaFixedAutocomplete = ({
             : value
         }
         getOptionLabel={(option: any) => (option ? `${option.name}` : '')}
-        // eslint-disable-next-line
+         
         isOptionEqualToValue={(option: any, value: any) =>
           typeof value === 'string'
             ? option?.id === value

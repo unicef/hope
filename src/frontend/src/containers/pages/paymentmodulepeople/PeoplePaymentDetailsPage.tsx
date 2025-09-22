@@ -37,7 +37,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
         businessAreaSlug: businessArea,
         paymentId: paymentId,
         programSlug: programId,
-        paymentPlanPk:paymentPlanId,
+        paymentPlanPk: paymentPlanId,
       }),
   });
   const paymentPlanStatus = payment?.parent?.status;

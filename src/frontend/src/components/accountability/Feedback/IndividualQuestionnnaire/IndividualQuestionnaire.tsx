@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';

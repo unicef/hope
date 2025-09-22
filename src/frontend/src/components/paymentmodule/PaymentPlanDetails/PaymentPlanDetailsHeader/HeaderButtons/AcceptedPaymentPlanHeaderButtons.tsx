@@ -28,12 +28,14 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
+  canClose: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
+  canClose,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -41,9 +43,29 @@ export function AcceptedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
+  const { mutateAsync: closePaymentPlan, isPending: loadingClose } =
+    useMutation({
+      mutationFn: async () => {
+        return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+        });
+      },
+      onSuccess: () => {
+        showMessage(t('Payment plan closed successfully'));
+      },
+      onError: (error) => {
+        showMessage(
+          error?.message ||
+            t('An error occurred while closing the payment plan'),
+        );
+      },
+    });
+
   const { data, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
-    queryFn: async () => {
+    queryFn: async() => {
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
         {
           businessAreaSlug: businessArea,
@@ -75,7 +97,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   );
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
+    mutationFn: async(variables: { fspXlsxTemplateId?: string }) => {
       const requestBody: PaymentPlanExportAuthCode = {
         fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
       };
@@ -127,7 +149,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING;
+      BackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
@@ -146,7 +168,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async () => {
+  const handleExportAPI = async() => {
     try {
       await mutateExport({
         fspXlsxTemplateId: selectedTemplate,
@@ -157,7 +179,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async() => {
     try {
       await mutateExport({
         fspXlsxTemplateId: '',
@@ -200,6 +222,19 @@ export function AcceptedPaymentPlanHeaderButtons({
               }
             >
               {t('Export Xlsx')}
+            </LoadingButton>
+          </Box>
+        )}
+        {canClose && (
+          <Box m={2}>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              data-cy="button-close"
+              onClick={() => closePaymentPlan()}
+              loading={loadingClose}
+            >
+              {t('Close')}
             </LoadingButton>
           </Box>
         )}

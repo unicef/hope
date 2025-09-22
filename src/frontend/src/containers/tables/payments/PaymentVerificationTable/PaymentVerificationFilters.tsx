@@ -4,7 +4,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -66,7 +66,7 @@ const PaymentVerificationFilters = ({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-start" spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.search}
             data-cy="filter-search"
@@ -75,10 +75,13 @@ const PaymentVerificationFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('paymentVerificationSummaryStatus', e.target.value)
+              handleFilterChange(
+                'paymentVerificationSummaryStatus',
+                e.target.value,
+              )
             }
             label="Status"
             multiple
@@ -93,7 +96,7 @@ const PaymentVerificationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.serviceProvider}
             data-cy="filter-fsp"
@@ -104,7 +107,7 @@ const PaymentVerificationFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('deliveryTypes', e.target.value)
@@ -123,7 +126,7 @@ const PaymentVerificationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             label="Start Date"
             fullWidth
@@ -132,7 +135,7 @@ const PaymentVerificationFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             label="End Date"
             fullWidth

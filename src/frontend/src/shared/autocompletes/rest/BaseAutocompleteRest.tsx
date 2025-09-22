@@ -91,7 +91,7 @@ export function BaseAutocompleteRest({
         }
       }}
       isOptionEqualToValue={(option, selectedValue) =>
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+         
         handleOptionSelected(option as any, selectedValue as any)
       }
       getOptionLabel={handleOptionLabel}

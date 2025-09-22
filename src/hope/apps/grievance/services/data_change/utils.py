@@ -410,7 +410,7 @@ def prepare_edit_identities(identities: list[dict]) -> list[dict]:
 
 
 def generate_filename() -> str:
-    file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits, k=3))
+    file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits))
     return f"{file_name}-{timezone.now()}"
 
 
@@ -710,7 +710,7 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
 
         if flex_field["type"] == TYPE_IMAGE:
             if isinstance(value, InMemoryUploadedFile):
-                file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits, k=3))
+                file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits))
                 flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
             elif isinstance(value, str):
                 file_name = value.replace(default_storage.base_url, "")

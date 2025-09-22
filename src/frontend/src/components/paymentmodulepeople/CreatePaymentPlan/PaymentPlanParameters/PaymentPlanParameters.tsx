@@ -1,6 +1,6 @@
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { tomorrow } from '@utils/utils';

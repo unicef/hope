@@ -4,7 +4,7 @@
 /* eslint-disable */
 /**
  * * `Aruba` - ABW
- * * `Afghanistan` - AFG
+ * * `Afghanistan1` - AFG
  * * `Angola` - AGO
  * * `Anguilla` - AIA
  * * `Åland Islands` - ALA
@@ -256,7 +256,7 @@
  */
 export enum CountriesEnum {
     ARUBA = 'Aruba',
-    AFGHANISTAN = 'Afghanistan',
+    AFGHANISTAN1 = 'Afghanistan1',
     ANGOLA = 'Angola',
     ANGUILLA = 'Anguilla',
     _LAND_ISLANDS = 'Åland Islands',

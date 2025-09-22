@@ -2,12 +2,7 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid2 as Grid,
-} from '@mui/material';
+import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';

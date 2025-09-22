@@ -1,4 +1,4 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -81,7 +81,7 @@ export const TargetPopulationForPeopleFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -90,7 +90,7 @@ export const TargetPopulationForPeopleFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -106,7 +106,7 @@ export const TargetPopulationForPeopleFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             topLabel={t('Number of People')}
             value={filter.totalHouseholdsCountMin}
@@ -118,7 +118,7 @@ export const TargetPopulationForPeopleFilters = ({
             data-cy="filters-total-households-count-min"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
@@ -129,7 +129,7 @@ export const TargetPopulationForPeopleFilters = ({
             data-cy="filters-total-households-count-max"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
@@ -137,7 +137,7 @@ export const TargetPopulationForPeopleFilters = ({
             value={filter.createdAtRangeMin}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
