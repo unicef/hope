@@ -1,10 +1,11 @@
 import contextlib
 from dataclasses import dataclass, field
-from functools import cached_property, lru_cache, partial
+from functools import cached_property, partialmethod
 from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.core.files import File
+from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
@@ -47,44 +48,6 @@ if TYPE_CHECKING:
     from hope.apps.core.models import BusinessArea
 
 BATCH_SIZE = 100
-
-
-@lru_cache
-def get_registered_flex_fields(associated_with: int):
-    suffix_mapping = {
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: "_i_f",
-        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: "_h_f",
-    }
-    flex_fields = FlexibleAttribute.objects.filter(
-        associated_with=associated_with,
-        is_removed=False,
-    ).values_list("name", flat=True)
-
-    return {name.removesuffix(suffix_mapping[associated_with]) for name in flex_fields}
-
-
-def get_matching_flex_fields(flex_field_candidates: set, associated_with: int):
-    registered_flex_fields = get_registered_flex_fields(associated_with=associated_with)
-    return flex_field_candidates & set(registered_flex_fields)
-
-
-def handle_flex_fields(associated_with: int, raw_data: dict, custom_fields: set = None) -> None:
-    if raw_data.get("flex_fields"):
-        return
-
-    if not custom_fields:
-        custom_fields = set()
-
-    model_fields = {f.name for f in PendingIndividual._meta.get_fields()}
-    flex_field_candidates = raw_data.keys() - model_fields - custom_fields
-    flex_fields = get_matching_flex_fields(flex_field_candidates, associated_with)
-    raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
-
-
-handle_individual_flex_fields = partial(
-    handle_flex_fields, associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-)
-handle_household_flex_fields = partial(handle_flex_fields, associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
 
 
 @dataclass
@@ -165,7 +128,61 @@ class IndividualSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxBaseView(HOPEAPIBusinessAreaView):
+class HandleFlexFieldsMixin:
+    suffix_mapping = {
+        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: "_i_f",
+        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: "_h_f",
+    }
+
+    def _ensure_flex_fields_cache(self) -> None:
+        if not hasattr(self, "registered_flex_fields_cache"):
+            self.registered_flex_fields_cache = {
+                FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
+                FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
+            }
+
+    def get_registered_flex_fields(self, associated_with: int) -> set[str]:
+        self._ensure_flex_fields_cache()
+        if self.registered_flex_fields_cache[associated_with] is None:
+            flex_fields = FlexibleAttribute.objects.filter(
+                associated_with=associated_with,
+                is_removed=False,
+            ).values_list("name", flat=True)
+            self.registered_flex_fields_cache[associated_with] = {
+                name.removesuffix(self.suffix_mapping[associated_with]) for name in flex_fields
+            }
+        return self.registered_flex_fields_cache[associated_with]
+
+    def get_matching_flex_fields(self, flex_field_candidates: set, associated_with: int) -> set[str]:
+        registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
+        return flex_field_candidates & registered_flex_fields
+
+    def handle_flex_fields(
+        self, associated_with: int, model: Model, raw_data: dict, reserved_fields: set = None
+    ) -> None:
+        if raw_data.get("flex_fields"):
+            return
+
+        reserved_fields = reserved_fields or set()
+
+        model_fields = {f.name for f in model._meta.get_fields() if isinstance(f, Field)}
+        flex_field_candidates = raw_data.keys() - model_fields - reserved_fields
+        flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
+        raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
+
+    handle_individual_flex_fields = partialmethod(
+        handle_flex_fields,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        model=PendingIndividual,
+    )
+    handle_household_flex_fields = partialmethod(
+        handle_flex_fields,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        model=PendingHousehold,
+    )
+
+
+class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     permission = Grant.API_RDI_CREATE
 
     @cached_property
@@ -321,7 +338,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
-                handle_individual_flex_fields(individual_raw_data)
+                self.handle_individual_flex_fields(individual_raw_data)
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -459,7 +476,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
         for household_data in request.data:
             total_households += 1
-            handle_household_flex_fields(household_data)
+            self.handle_household_flex_fields(household_data)
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
