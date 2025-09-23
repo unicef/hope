@@ -951,7 +951,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     try:
         PaymentPlanService.send_reconciliation_overdue_emails()
 
-    except Exception as e:
+    except Exception as e:  # pragma no cover
         logger.exception(e)
         raise self.retry(exc=e)
 
@@ -972,6 +972,6 @@ def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: s
         try:
             service = PaymentPlanService(payment_plan)
             service.send_reconciliation_overdue_email_for_pp()
-        except Exception as e:
+        except Exception as e:  # pragma no cover
             logger.exception(f"Failed to send PP reconciliation overdue email for {payment_plan}")
             raise self.retry(exc=e)
