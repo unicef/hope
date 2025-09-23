@@ -74,9 +74,11 @@ export const TargetPopulationTableFilters = ({
       { name: 'Assigned', value: 'ASSIGNED' },
       { name: 'Ready for Payment Module', value: PaymentPlanStatusEnum.DRAFT },
       ...(statusChoicesData || []),
-    ]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
-    ) || [];
+    ]
+      ?.filter((el) =>
+        allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
+      )
+      ?.filter((el) => el.name !== 'Draft') || [];
 
   return (
     <FiltersSection
