@@ -1,6 +1,6 @@
 import contextlib
 from dataclasses import dataclass, field
-from functools import cached_property, partialmethod
+from functools import cached_property
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -158,7 +158,7 @@ class HandleFlexFieldsMixin:
         return flex_field_candidates & registered_flex_fields
 
     def handle_flex_fields(
-        self, associated_with: int, model: Model, raw_data: dict, reserved_fields: set = None
+        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set = None
     ) -> None:
         if raw_data.get("flex_fields"):
             return
@@ -170,16 +170,21 @@ class HandleFlexFieldsMixin:
         flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
         raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
 
-    handle_individual_flex_fields = partialmethod(
-        handle_flex_fields,
-        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        model=PendingIndividual,
-    )
-    handle_household_flex_fields = partialmethod(
-        handle_flex_fields,
-        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-        model=PendingHousehold,
-    )
+    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+        self.handle_flex_fields(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            model=PendingIndividual,
+            raw_data=raw_data,
+            reserved_fields=reserved_fields,
+        )
+
+    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+        self.handle_flex_fields(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            model=PendingIndividual,
+            raw_data=raw_data,
+            reserved_fields=reserved_fields,
+        )
 
 
 class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
@@ -338,7 +343,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
-                self.handle_individual_flex_fields(individual_raw_data)
+                self.handle_individual_flex_fields(individual_raw_data, reserved_fields={"documents", "accounts"})
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -476,7 +481,10 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
         for household_data in request.data:
             total_households += 1
-            self.handle_household_flex_fields(household_data)
+            self.handle_household_flex_fields(
+                household_data,
+                reserved_fields={"members", "primary_collector", "alternate_collector"},
+            )
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
