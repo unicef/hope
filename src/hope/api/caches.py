@@ -173,6 +173,8 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     The cache is based also on the business area, program and their version.
     """
 
+    # TODO This is a bad approach. On large tables this will cause performance issues. Count and Max are very expensive.
+
     specific_view_cache_key = ""
 
     def _get_queryset(

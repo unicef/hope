@@ -248,42 +248,19 @@ class TestIndividualList:
             assert individual_result["relationship"] == individual.relationship
             assert individual_result["age"] == individual.age
             assert individual_result["sex"] == individual.sex
+
             assert individual_result["household"] == {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
-                "admin1": {
-                    "id": str(individual.household.admin1.id),
-                    "name": individual.household.admin1.name,
-                },
                 "admin2": {
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
-                "admin3": None,
-                "admin4": None,
-                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "total_cash_received": None,
-                "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "zip_code": None,
-                "residence_status": individual.household.get_residence_status_display(),
-                "country_origin": individual.household.country_origin.name,
-                "country": individual.household.country.name,
-                "address": individual.household.address,
-                "village": individual.household.village,
-                "geopoint": None,
-                "import_id": individual.household.unicef_id,
-                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
                 "name": individual.program.name,
                 "slug": individual.program.slug,
-                "programme_code": individual.program.programme_code,
-                "status": individual.program.status,
-                "screen_beneficiary": individual.program.screen_beneficiary,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
@@ -381,7 +358,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 36
+            assert len(ctx.captured_queries) == 20
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -400,7 +377,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 31
+            assert len(ctx.captured_queries) == 15
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -410,7 +387,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 31
+            assert len(ctx.captured_queries) == 15
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -425,7 +402,7 @@ class TestIndividualList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 27
+            assert len(ctx.captured_queries) == 15
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -1257,45 +1234,15 @@ class TestIndividualGlobalViewSet:
             assert individual_result["household"] == {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
-                "admin1": {
-                    "id": str(individual.household.admin1.id),
-                    "name": individual.household.admin1.name,
-                },
                 "admin2": {
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
-                "admin3": {
-                    "id": str(individual.household.admin3.id),
-                    "name": individual.household.admin3.name,
-                },
-                "admin4": {
-                    "id": str(individual.household.admin4.id),
-                    "name": individual.household.admin4.name,
-                },
-                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "total_cash_received": None,
-                "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
-                "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "zip_code": None,
-                "residence_status": individual.household.get_residence_status_display(),
-                "country_origin": individual.household.country_origin.name,
-                "country": individual.household.country.name,
-                "address": individual.household.address,
-                "village": individual.household.village,
-                "geopoint": None,
-                "import_id": individual.household.unicef_id,
-                "program_slug": individual.program.slug,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
                 "name": individual.program.name,
                 "slug": individual.program.slug,
-                "programme_code": individual.program.programme_code,
-                "status": individual.program.status,
-                "screen_beneficiary": individual.program.screen_beneficiary,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
