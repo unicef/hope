@@ -1715,7 +1715,7 @@ wheels = [
 
 [[package]]
 name = "hope"
-version = "3.6.2"
+version = "3.6.3"
 source = { editable = "." }
 dependencies = [
     { name = "black" },
