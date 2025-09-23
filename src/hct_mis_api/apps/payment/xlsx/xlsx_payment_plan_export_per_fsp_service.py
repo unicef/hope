@@ -75,15 +75,18 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.account_fields_headers = self.get_account_fields_headers()
 
     def get_account_fields_headers(self) -> List[str]:
-        # get Account headers from first payment
-        first_payment = self.payment_plan.eligible_payments.first()
-        snapshot = getattr(first_payment, "household_snapshot", None)
-        snapshot_data = snapshot.snapshot_data if snapshot else dict()
-        collector_data = (
-            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
-        )
-        account_data = collector_data.get("account_data", {})
-        return list(account_data.keys()) if first_payment and snapshot else []
+        # Iterate over eligible payments to find the first with valid account_data
+        for payment in self.payment_plan.eligible_payments.all():
+            snapshot = getattr(payment, "household_snapshot", None)
+            snapshot_data = snapshot.snapshot_data if snapshot else {}
+            collector_data = (
+                snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
+            )
+            account_data = collector_data.get("account_data", {})
+            if account_data:
+                return list(account_data.keys())
+
+        return []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
