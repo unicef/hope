@@ -6,6 +6,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.core.management import call_command
+from django.test import testcases
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
@@ -15,11 +16,12 @@ from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models.account_type import AccountType
 from hope.models.document import PendingDocument
 from hope.models.grant import Grant
-from hope.models.household import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hope.models.household import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
 from hope.models.individual import PendingIndividual
 from hope.models.program import Program
 from hope.models.registration_data_import import RegistrationDataImport
@@ -339,3 +341,24 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+
+class TestIndividualSerializer(testcases.TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.common_data = {
+            "birth_date": "2000-01-01",
+            "full_name": "John Doe",
+            "sex": "MALE",
+            "individual_id": "IND001",
+        }
+
+    def test_individual_serializer_empty_disability(self):
+        serializer = IndividualSerializer(data={**self.common_data, "disability": ""})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == NOT_DISABLED
+
+    def test_individual_serializer_disability(self):
+        serializer = IndividualSerializer(data={**self.common_data, "disability": "disabled"})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == DISABLED

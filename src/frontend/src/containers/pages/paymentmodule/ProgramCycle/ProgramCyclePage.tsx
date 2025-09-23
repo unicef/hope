@@ -1,4 +1,5 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesFilters';
@@ -37,6 +38,11 @@ export const ProgramCyclePage = (): ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
@@ -63,15 +69,20 @@ export const ProgramCyclePage = (): ReactElement => {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <TableWrapper>
-        <ProgramCyclesTablePaymentModule
-          program={selectedProgram}
-          filters={appliedFilter}
-          adjustedHeadCells={adjustedHeadCells}
-        />
-      </TableWrapper>
+      <div ref={tableRef}>
+        <TableWrapper>
+          <ProgramCyclesTablePaymentModule
+            program={selectedProgram}
+            filters={appliedFilter}
+            adjustedHeadCells={adjustedHeadCells}
+          />
+        </TableWrapper>
+      </div>
     </>
   );
 };

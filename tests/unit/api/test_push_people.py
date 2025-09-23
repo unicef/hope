@@ -1,6 +1,7 @@
 import base64
 from io import BytesIO
 
+from django.test import testcases
 from parameterized import parameterized
 from PIL import Image
 import pytest
@@ -14,18 +15,20 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.api.endpoints.rdi.push_people import PeopleUploadMixin
+from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
 from hope.models.grant import Grant
 from hope.models.household import (
+    DISABLED,
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
     NOT_COLLECTED,
+    NOT_DISABLED,
     PendingHousehold,
 )
 from hope.models.individual import PendingIndividual
@@ -397,3 +400,25 @@ class TestPeopleUploadMixin:
         photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
         assert photo_saved.startswith(prefix) is False
         assert photo_saved == photo_data
+
+
+class TestPeopleSerializer(testcases.TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.common_data = {
+            "type": "",
+            "birth_date": "2000-01-01",
+            "full_name": "John Doe",
+            "sex": "MALE",
+            "country_origin": "",
+        }
+
+    def test_people_serializer_empty_disability(self):
+        serializer = PushPeopleSerializer(data={**self.common_data, "disability": ""})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == NOT_DISABLED
+
+    def test_people_serializer_disability(self):
+        serializer = PushPeopleSerializer(data={**self.common_data, "disability": "disabled"})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == DISABLED

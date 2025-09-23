@@ -345,12 +345,6 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
-                            {touched.issueType &&
-                              typeof errors.issueType === 'string' && (
-                                <FormHelperText error>
-                                  {errors.issueType}
-                                </FormHelperText>
-                              )}
                           </Grid>
                         </Grid>
                       )}

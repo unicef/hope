@@ -5,7 +5,7 @@ import { HouseholdFilters } from '@components/population/HouseholdFilter';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
@@ -15,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
@@ -50,6 +51,11 @@ function PopulationHouseholdPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const permissions = usePermissions();
 
@@ -70,12 +76,16 @@ function PopulationHouseholdPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(newFilter) => {
+          setAppliedFilter(newFilter);
+          setShouldScroll(true);
+        }}
       />
       <Box
         display="flex"
         flexDirection="column"
         data-cy="page-details-container"
+        ref={tableRef}
       >
         <HouseholdTable
           filter={appliedFilter}

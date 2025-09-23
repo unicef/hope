@@ -24,6 +24,9 @@ from hope.models.area_type import AreaType
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
+from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import (
     HEAD,
     MALE,
@@ -36,15 +39,12 @@ from hope.models.individual_role_in_household import PendingIndividualRoleInHous
 class TestNigeriaPeopleRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init_geo_fixtures")
+        call_command("loadcountries")
         generate_delivery_mechanisms()
         country = geo_models.Country.objects.create(name="Nigeria")
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)
         area_type_2 = AreaType.objects.create(
-            name="Local government area",
-            area_level=2,
-            country=country,
-            parent=area_type_1,
+            name="Local government area", area_level=2, country=country, parent=area_type_1
         )
         area_type_3 = AreaType.objects.create(name="Ward", area_level=3, country=country, parent=area_type_2)
         area_1 = Area.objects.create(name="Borno", p_code="NG002", area_type=area_type_1)
@@ -56,9 +56,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
         cls.program = ProgramFactory(
-            status="ACTIVE",
-            data_collecting_type=cls.data_collecting_type,
-            biometric_deduplication_enabled=True,
+            status="ACTIVE", data_collecting_type=cls.data_collecting_type, biometric_deduplication_enabled=True
         )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
@@ -66,12 +64,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         files = {
             "individual-details": [
                 {
-                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////////////"
-                    "/////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP"
-                    "/aAAgBAQABPxA=",
-                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////"
-                    "/////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFB"
-                    "ABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP/////////////////////////////////////////////"
+                    "/////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAA"
+                    "AAAAAAAAP/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP///////////////////////////////////"
+                    "///////////////////////////////////////////////////wgALCAABAAEBAREA/8QAF"
+                    "BABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
                 }
             ]
         }
@@ -82,19 +80,9 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                 source_id=1,
                 files=json.dumps(files).encode(),
                 fields={
-                    "household-info": [
-                        {
-                            "admin1_h_c": "NG002",
-                            "admin2_h_c": "NG002001",
-                            "admin3_h_c": "NG002001007",
-                        }
-                    ],
+                    "household-info": [{"admin1_h_c": "NG002", "admin2_h_c": "NG002001", "admin3_h_c": "NG002001007"}],
                     "intro-and-consent": [
-                        {
-                            "consent_h_c": True,
-                            "enumerator_code": "SHEAbi5350",
-                            "who_to_register": "myself",
-                        }  # ff  # ff
+                        {"consent_h_c": True, "enumerator_code": "SHEAbi5350", "who_to_register": "myself"}  # ff  # ff
                     ],
                     "individual-details": [
                         {
@@ -123,6 +111,14 @@ class TestNigeriaPeopleRegistrationService(TestCase):
 
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
+        cls.fi = FinancialInstitution.objects.create(
+            name="Nigeria Bank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+        FinancialInstitutionMapping.objects.create(
+            financial_service_provider=FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria"),
+            financial_institution=cls.fi,
+            code="000004",
+        )
 
     def test_import_data_to_datahub(self) -> None:
         service = NigeriaPeopleRegistrationService(self.registration)
@@ -135,15 +131,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert PendingHousehold.objects.filter(program=rdi.program).count() == 1
 
         household = PendingHousehold.objects.first()
-        assert household.consent is True
+        assert household.consent
         assert household.country == geo_models.Country.objects.get(iso_code2="NG")
         assert household.country_origin == geo_models.Country.objects.get(iso_code2="NG")
         assert household.head_of_household == PendingIndividual.objects.get(given_name="Giulio")
         assert household.rdi_merge_status == "PENDING"
-        assert household.flex_fields == {
-            "enumerator_code": "SHEAbi5350",
-            "who_to_register": "myself",
-        }
+        assert household.flex_fields == {"enumerator_code": "SHEAbi5350", "who_to_register": "myself"}
 
         registration_data_import = household.registration_data_import
         assert registration_data_import.program == self.program
@@ -171,11 +164,12 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         assert account.account_data == {
             "number": "2087008012",
             "name": "United Bank for Africa",
-            "uba_code": "000004",
+            "code": "000004",
             "holder_name": "xxxx",
-            "financial_institution": "",
+            "financial_institution": str(self.fi.id),
         }
         assert account.account_type.key == "bank"
+        assert account.financial_institution == self.fi
 
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
         assert national_id.individual == primary_collector

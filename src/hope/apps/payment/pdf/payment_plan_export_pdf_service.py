@@ -61,10 +61,7 @@ class PaymentPlanPDFExportService:
 
     def generate_pdf_summary(self) -> Any:
         self.generate_web_links()
-        if self.is_social_worker_program:
-            template_name = "payment/people_payment_plan_summary_pdf_template.html"
-        else:
-            template_name = "payment/payment_plan_summary_pdf_template.html"
+        template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
         fsp = self.payment_plan.financial_service_provider
         delivery_mechanism = self.payment_plan.delivery_mechanism
@@ -86,21 +83,15 @@ class PaymentPlanPDFExportService:
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
-            pending_usd=Sum(
-                "entitlement_quantity_usd",
-                filter=Q(status__in=Payment.PENDING_STATUSES),
-            ),
-            pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=Q(status__in=Payment.DELIVERED_STATUSES)),  # Redeemed
             reconciled_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
             reconciled_local=Sum("delivered_quantity", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
-            failed=Count("id", filter=failed_base),
             failed_usd=Sum("entitlement_quantity_usd", filter=failed_base),
             failed_local=Sum("entitlement_quantity", filter=failed_base),
         )
 
         # Normalize None → 0
-        for key in ["pending_usd", "pending_local", "reconciled_usd", "reconciled_local", "failed_usd", "failed_local"]:
+        for key in ["reconciled_usd", "reconciled_local", "failed_usd", "failed_local"]:
             reconciliation_qs[key] = reconciliation_qs[key] or 0
 
         # Add partials in Python (cannot mix inside aggregate)
@@ -110,6 +101,7 @@ class PaymentPlanPDFExportService:
         pdf_context_data = {
             "title": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
+            "is_social_worker_program": self.is_social_worker_program,
             "fsp": fsp,
             "delivery_mechanism_per_payment_plan": delivery_mechanism,
             "approval_process": self.payment_plan.approval_process.first(),

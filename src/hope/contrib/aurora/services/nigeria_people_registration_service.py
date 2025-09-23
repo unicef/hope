@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from hope.apps.core.utils import (
@@ -8,9 +9,12 @@ from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
     mergedicts,
 )
+from hope.models.account import PendingAccount
 from hope.models.country import Country
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
+from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import (
     HEAD,
     ROLE_PRIMARY,
@@ -18,6 +22,8 @@ from hope.models.household import (
 from hope.models.individual import PendingIndividual
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.registration_data_import import RegistrationDataImport
+
+logger = logging.getLogger(__name__)
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):
@@ -99,3 +105,24 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
             country=Country.objects.get(iso_code2="NG"),
             photo=photo,
         )
+
+    def create_account(self, account_data: dict, individual: PendingIndividual) -> PendingAccount:
+        account = super().create_account(account_data, individual)
+        if financial_institution_code := account.data.get("uba_code"):
+            uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
+            try:
+                uba_mapping = FinancialInstitutionMapping.objects.get(
+                    code=financial_institution_code,
+                    financial_service_provider=uba_fsp,
+                )
+                account.financial_institution = uba_mapping.financial_institution
+                account.data["code"] = account.data.pop("uba_code")
+                account.save(update_fields=["financial_institution", "data"])
+
+            except FinancialInstitutionMapping.DoesNotExist:  # pragma: no cover
+                logger.error(
+                    f"FinancialInstitutionMapping for {uba_fsp} uba code {financial_institution_code} not found"
+                )
+
+        return account

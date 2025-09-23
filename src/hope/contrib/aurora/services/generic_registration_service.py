@@ -247,7 +247,15 @@ class GenericRegistrationService(BaseRegistrationService):
             household_data.update(constances)
         return self._create_object_and_validate(household_data, PendingHousehold)
 
-    def create_individuals(  # noqa
+    def create_account(self, account_data: dict, individual: PendingIndividual) -> PendingAccount:
+        return PendingAccount.objects.create(
+            individual_id=individual.id,
+            account_type=AccountType.objects.get(key="bank"),
+            number=account_data["data"].pop("number", None),
+            **account_data,
+        )
+
+    def create_individuals(
         self,
         record: Any,
         household: PendingHousehold,
@@ -293,7 +301,9 @@ class GenericRegistrationService(BaseRegistrationService):
                 )
             if not self.master_detail:
                 individual_dict["relationship"] = HEAD
-            individual = self._create_object_and_validate(individual_dict, PendingIndividual, IndividualForm)
+            individual: PendingIndividual = self._create_object_and_validate(
+                individual_dict, PendingIndividual, IndividualForm
+            )
 
             if individual.relationship == HEAD:
                 if head:
@@ -314,12 +324,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                PendingAccount.objects.create(
-                    individual_id=individual.id,
-                    account_type=AccountType.objects.get(key="bank"),
-                    number=account_data["data"].pop("number", None),
-                    **account_data,
-                )
+                self.create_account(account_data, individual)
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
                 if pr_collector:

@@ -10,7 +10,8 @@ import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useLocation, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
@@ -47,6 +48,11 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   if (isLoading) return null;
 
@@ -60,19 +66,24 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
           setFilter={setFilter}
           initialFilter={initialFilter}
           appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+          setAppliedFilter={(f) => {
+            setAppliedFilter(f);
+            setShouldScroll(true);
+          }}
         />
       </TableWrapper>
-      <TableWrapper>
-        <PaymentPlansTable
-          programCycle={data}
-          filter={appliedFilter}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.PM_VIEW_DETAILS,
-            permissions,
-          )}
-        />
-      </TableWrapper>
+      <div ref={tableRef}>
+        <TableWrapper>
+          <PaymentPlansTable
+            programCycle={data}
+            filter={appliedFilter}
+            canViewDetails={hasPermissions(
+              PERMISSIONS.PM_VIEW_DETAILS,
+              permissions,
+            )}
+          />
+        </TableWrapper>
+      </div>
     </>
   );
 };
