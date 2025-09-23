@@ -54,7 +54,7 @@ export function OpenTargetPopulationHeaderButtons({
     }) =>
       RestService.restBusinessAreasProgramsTargetPopulationsRebuildRetrieve({
         businessAreaSlug,
-        programSlug,
+        programSlug,``
         id,
       }),
     onSuccess: () => {
