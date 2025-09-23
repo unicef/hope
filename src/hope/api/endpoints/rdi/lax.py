@@ -1,6 +1,6 @@
 import contextlib
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, lru_cache, partial
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -19,6 +19,7 @@ from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceF
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.models import Grant
+from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import (
@@ -45,8 +46,45 @@ from hope.apps.utils.phone import calculate_phone_numbers_validity
 if TYPE_CHECKING:
     from hope.apps.core.models import BusinessArea
 
-
 BATCH_SIZE = 100
+
+
+@lru_cache
+def get_registered_flex_fields(associated_with: int):
+    suffix_mapping = {
+        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: "_i_f",
+        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: "_h_f",
+    }
+    flex_fields = FlexibleAttribute.objects.filter(
+        associated_with=associated_with,
+        is_removed=False,
+    ).values_list("name", flat=True)
+
+    return {name.removesuffix(suffix_mapping[associated_with]) for name in flex_fields}
+
+
+def get_matching_flex_fields(flex_field_candidates: set, associated_with: int):
+    registered_flex_fields = get_registered_flex_fields(associated_with=associated_with)
+    return flex_field_candidates & set(registered_flex_fields)
+
+
+def handle_flex_fields(associated_with: int, raw_data: dict, custom_fields: set = None) -> None:
+    if raw_data.get("flex_fields"):
+        return
+
+    if not custom_fields:
+        custom_fields = set()
+
+    model_fields = {f.name for f in PendingIndividual._meta.get_fields()}
+    flex_field_candidates = raw_data.keys() - model_fields - custom_fields
+    flex_fields = get_matching_flex_fields(flex_field_candidates, associated_with)
+    raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
+
+
+handle_individual_flex_fields = partial(
+    handle_flex_fields, associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+)
+handle_household_flex_fields = partial(handle_flex_fields, associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
 
 
 @dataclass
@@ -283,6 +321,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
+                handle_individual_flex_fields(individual_raw_data)
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -420,6 +459,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
         for household_data in request.data:
             total_households += 1
+            handle_household_flex_fields(household_data)
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
