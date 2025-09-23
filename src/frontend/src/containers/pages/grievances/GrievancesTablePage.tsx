@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -23,6 +24,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 
 export const GrievancesTablePage = (): ReactElement => {
+  // Scroll down by 500px after filters are applied
+  const [shouldScroll, setShouldScroll] = useState(false);
   const { businessArea, baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
@@ -78,6 +81,12 @@ export const GrievancesTablePage = (): ReactElement => {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+
+  // Ref for GrievancesTable container
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
@@ -155,10 +164,15 @@ export const GrievancesTablePage = (): ReactElement => {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
         selectedTab={selectedTab}
       />
-      <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
+      <div ref={tableRef}>
+        <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
+      </div>
     </>
   );
 };
