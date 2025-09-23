@@ -15,6 +15,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
+from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.models import Grant
@@ -22,6 +23,7 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import (
     DATA_SHARING_CHOICES,
+    DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -103,6 +105,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
+    disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
 
     class Meta:
         model = PendingIndividual
@@ -336,8 +339,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
 class HouseholdSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    country = serializers.ChoiceField(choices=Countries(), required=False, allow_blank=True)
-    country_origin = serializers.ChoiceField(choices=Countries(), required=False, allow_blank=True)
+    country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
+    country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
