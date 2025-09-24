@@ -11,7 +11,7 @@ import such data:Registration
 
    a) Beneficiary registration using KOBO Toolbox on UNICEF cloud instance – Available in online and offline settings
 
-   b) Aurora available in online settings Import
+   b) Aurora is available in online settings Import
 
    a) Import data directly from Kobo and Aurora
 
