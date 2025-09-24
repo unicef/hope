@@ -31,7 +31,7 @@ function AddIndividualGrievanceDetails({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, businessAreaSlug } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { data, isLoading: loading } = useQuery({
@@ -62,7 +62,11 @@ function AddIndividualGrievanceDetails({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });

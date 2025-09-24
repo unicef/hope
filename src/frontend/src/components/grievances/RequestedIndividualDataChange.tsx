@@ -35,6 +35,7 @@ export function RequestedIndividualDataChange({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
+  const { businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const queryClient = useQueryClient();
@@ -141,7 +142,11 @@ export function RequestedIndividualDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
     onError: (error: any) => {
