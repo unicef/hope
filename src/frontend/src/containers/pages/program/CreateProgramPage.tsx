@@ -45,7 +45,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: treeData, isLoading: treeLoading } =
+  const { data: treeData } =
     useQuery<PaginatedAreaTreeList>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
@@ -260,10 +260,10 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if (treeLoading || userPartnerChoicesLoading || choicesLoading)
+  if ( userPartnerChoicesLoading || choicesLoading)
     return <LoadingComponent />;
 
-  if (!treeData || !userPartnerChoicesData || !choicesData) return null;
+  if (!userPartnerChoicesData || !choicesData) return null;
 
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 

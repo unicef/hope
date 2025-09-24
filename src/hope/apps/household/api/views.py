@@ -1,7 +1,7 @@
 from typing import Any
 
 from constance import config
-from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
+from django.db.models import Exists, F, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -358,10 +358,28 @@ class IndividualViewSet(
         "household__admin3",
     ]
 
+    def get_queryset_list(self) -> QuerySet:
+        qs = super().get_queryset()
+        return (
+            qs.select_related("household", "household__admin2", "program")
+            .prefetch_related("program__sanction_lists")
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                    .only("id", "individual_id", "household_id", "role", "created_at")
+                    .order_by("id"),
+                    to_attr="prefetched_roles",
+                )
+            )
+        )
+
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
-
+        if self.action == "list":
+            return self.get_queryset_list()
         return (
             super()
             .get_queryset()
@@ -431,7 +449,22 @@ class IndividualGlobalViewSet(
     ]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
+        return (
+            super()
+            .get_queryset()
+            .select_related("household", "household__admin2", "program")
+            .prefetch_related("program__sanction_lists")
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                    .only("id", "individual_id", "household_id", "role", "created_at")
+                    .order_by("id"),
+                    to_attr="prefetched_roles",
+                )
+            )
+        )
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:

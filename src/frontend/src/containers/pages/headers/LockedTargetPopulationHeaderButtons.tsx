@@ -65,6 +65,10 @@ export function LockedTargetPopulationHeaderButtons({
           programId,
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
+
       showMessage(t('Target Population Unlocked'));
     },
     onError: (error) => {
