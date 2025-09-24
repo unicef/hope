@@ -370,6 +370,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "blockchain_name",
             "wallet_address",
             "status",
+            "deduplication_golden_record_status",
             "flex_fields",
             "linked_grievances",
             "photo",
