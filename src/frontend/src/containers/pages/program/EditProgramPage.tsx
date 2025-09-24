@@ -52,7 +52,7 @@ const EditProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: treeData, isLoading: treeLoading } =
+  const { data: treeData } =
     useQuery<PaginatedAreaTreeList>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
@@ -138,13 +138,12 @@ const EditProgramPage = (): ReactElement => {
 
   if (
     loadingProgram ||
-    treeLoading ||
     userPartnerChoicesLoading ||
     choicesLoading
   )
     return <LoadingComponent />;
 
-  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
+  if (!program || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {

@@ -14,7 +14,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import BaseViewSet, BusinessAreaMixin, PermissionsMixin
-from hope.apps.geo.api.caches import AreaKeyConstructor
+from hope.apps.geo.api.caches import AreasKeyConstructor
 from hope.apps.geo.api.filters import AreaFilter
 from hope.apps.geo.api.serializers import AreaListSerializer, AreaTreeSerializer
 from hope.models.area import Area
@@ -35,8 +35,8 @@ class AreaViewSet(
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter
 
-    @etag_decorator(AreaKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=AreaKeyConstructor())
+    @etag_decorator(AreasKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=AreasKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -45,6 +45,8 @@ class AreaViewSet(
             200: AreaTreeSerializer(many=True),
         },
     )
+    @etag_decorator(AreasKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=AreasKeyConstructor())
     @action(detail=False, methods=["get"], url_path="all-areas-tree")
     def all_areas_tree(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         # get Area max level 3

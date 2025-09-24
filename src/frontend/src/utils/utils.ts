@@ -1327,24 +1327,64 @@ export function showApiErrorMessages(
   showMessage: (msg: string) => void,
   fallbackMsg: string = 'An error occurred',
 ): void {
-  function traverseErrors(obj: any, path: string = '') {
+  // Helper to convert field names to readable labels and remove array indexes
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  // Collect errors per field
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
     if (Array.isArray(obj)) {
-      obj.forEach((item, idx) => {
-        traverseErrors(item, `${path}[${idx}]`);
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
       });
     } else if (obj && typeof obj === 'object') {
       Object.entries(obj).forEach(([key, value]) => {
         const newPath = path ? `${path}.${key}` : key;
-        traverseErrors(value, newPath);
+        collectErrors(value, newPath, errors);
       });
     } else if (typeof obj === 'string') {
-      showMessage(path ? `${path}: ${obj}` : obj);
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
     }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  // Handle plain array of strings (e.g. ["msg1", "msg2"])
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    showMessage(error.join('  \n'));
+    return;
   }
 
   // Handle array of errors in error.body
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
-    traverseErrors(error.body);
+    // If error.body is a plain array of strings
+    if (error.body.every((item) => typeof item === 'string')) {
+      showMessage(error.body.join('  \n'));
+      return;
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle string error in error.body
@@ -1359,12 +1399,24 @@ export function showApiErrorMessages(
     typeof error.body === 'object' &&
     error.body !== null
   ) {
-    traverseErrors(error.body);
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle top-level object of arrays (field errors)
   if (error && typeof error === 'object' && error !== null) {
-    traverseErrors(error);
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle string error in error.message
