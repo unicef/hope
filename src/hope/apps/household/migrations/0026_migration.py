@@ -56,42 +56,6 @@ class Migration(migrations.Migration):
                 max_length=85,
             ),
         ),
-        migrations.RunSQL(
-            sql=[
-                "DROP TRIGGER vector_column_trigger ON household_individual;",
-                'ALTER TABLE household_individual ALTER COLUMN full_name TYPE varchar(255) COLLATE "und-ci-det";',
-                """
-                CREATE TRIGGER vector_column_trigger
-                    BEFORE INSERT OR
-                UPDATE OF observed_disability, full_name, vector_column
-                ON household_individual
-                    FOR EACH ROW EXECUTE PROCEDURE
-                    tsvector_update_trigger(
-                    vector_column, 'pg_catalog.english', observed_disability, full_name
-                    );
-
-                UPDATE household_individual
-                SET vector_column = NULL;
-                """,
-            ],
-            reverse_sql=[
-                "DROP TRIGGER vector_column_trigger ON household_individual;",
-                "ALTER TABLE household_individual ALTER COLUMN full_name TYPE varchar(255);",
-                """
-                CREATE TRIGGER vector_column_trigger
-                    BEFORE INSERT OR
-                UPDATE OF observed_disability, full_name, vector_column
-                ON household_individual
-                    FOR EACH ROW EXECUTE PROCEDURE
-                    tsvector_update_trigger(
-                    vector_column, 'pg_catalog.english', observed_disability, full_name
-                    );
-
-                UPDATE household_individual
-                SET vector_column = NULL;
-                """,
-            ],
-        ),
         migrations.AlterField(
             model_name="individual",
             name="full_name",
