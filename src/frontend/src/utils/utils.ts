@@ -1363,7 +1363,7 @@ export function showApiErrorMessages(
     return errors;
   }
 
-  let messages: string[] = [];
+  const messages: string[] = [];
 
   // Handle plain array of strings (e.g. ["msg1", "msg2"])
   if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
