@@ -112,16 +112,16 @@ class BiometricDeduplicationService:
         if not program.biometric_deduplication_enabled:
             raise self.BiometricDeduplicationServiceError("Biometric deduplication is not enabled for this program")
 
-        deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
-        if not deduplication_set_id:
-            with transaction.atomic():
-                deduplication_set_id = self.create_deduplication_set(program)
-
         if RegistrationDataImport.objects.filter(
             program=program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         ).exists():
             raise self.BiometricDeduplicationServiceError("Deduplication is already in progress for some RDIs")
+
+        deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
+        if not deduplication_set_id:
+            with transaction.atomic():
+                deduplication_set_id = self.create_deduplication_set(program)
 
         pending_rdis = RegistrationDataImport.objects.filter(
             program=program,

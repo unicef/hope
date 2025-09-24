@@ -1,4 +1,5 @@
 class HopeLiveService:
+    # TODO MB REMOVE
     API_URL = ""
     API_KEY = ""
 

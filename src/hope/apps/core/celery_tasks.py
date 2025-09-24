@@ -52,16 +52,3 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def notify_hope_live(self: Any, data_dict: dict) -> None:
-    try:
-        from hope.apps.core.services.hope_live import HopeLiveService
-
-        HopeLiveService().notify(data_dict)
-    except Exception as e:
-        logger.exception(e)
-        raise self.retry(exc=e)
