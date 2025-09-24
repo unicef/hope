@@ -63,7 +63,11 @@ export function RequestedHouseholdDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
       });
     },
     onError: (err: any) => {
@@ -218,7 +222,7 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={initialValues}
       enableReinitialize={true}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
