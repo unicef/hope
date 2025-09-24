@@ -62,6 +62,10 @@ export function OpenTargetPopulationHeaderButtons({
       queryClient.invalidateQueries({
         queryKey: ['targetPopulation', businessArea, targetPopulation.id, programId],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
     },
     onError: (e) => showApiErrorMessages(e, showMessage),
   });

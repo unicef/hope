@@ -144,6 +144,7 @@ export type { IndividualDocument as IndividualDocumentCamelCase } from './models
 export type { IndividualIdentity as IndividualIdentityCamelCase } from './models/IndividualIdentity';
 export type { IndividualIdentityGT as IndividualIdentityGTCamelCase } from './models/IndividualIdentityGT';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
+export type { IndividualListHousehold as IndividualListHouseholdCamelCase } from './models/IndividualListHousehold';
 export type { IndividualPhotoDetail as IndividualPhotoDetailCamelCase } from './models/IndividualPhotoDetail';
 export type { IndividualSimple as IndividualSimpleCamelCase } from './models/IndividualSimple';
 export type { IndividualUpdateData as IndividualUpdateDataCamelCase } from './models/IndividualUpdateData';
@@ -286,6 +287,7 @@ export type { ProgramCycleUpdate as ProgramCycleUpdateCamelCase } from './models
 export type { ProgramDetail as ProgramDetailCamelCase } from './models/ProgramDetail';
 export type { ProgramGlobal as ProgramGlobalCamelCase } from './models/ProgramGlobal';
 export type { ProgramList as ProgramListCamelCase } from './models/ProgramList';
+export type { ProgramOnlyName as ProgramOnlyNameCamelCase } from './models/ProgramOnlyName';
 export type { ProgramSmall as ProgramSmallCamelCase } from './models/ProgramSmall';
 export { ProgramStatusEnum as ProgramStatusEnumCamelCase } from './models/ProgramStatusEnum';
 export type { ProgramUpdate as ProgramUpdateCamelCase } from './models/ProgramUpdate';
