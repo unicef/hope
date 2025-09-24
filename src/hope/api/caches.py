@@ -78,11 +78,7 @@ def etag_decorator(
 
 def get_or_create_cache_key(key: str, default: Any) -> Any:
     """Get value from cache by key or create it with default value."""
-    value = cache.get(key)
-    if value is None:
-        cache.set(key, default, timeout=None)
-        return default
-    return value
+    return cache.get_or_set(key, default)
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
@@ -176,6 +172,8 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     the latest `updated_at` value and object count.
     The cache is based also on the business area, program and their version.
     """
+
+    # TODO This is a bad approach. On large tables this will cause performance issues. Count and Max are very expensive.
 
     specific_view_cache_key = ""
 

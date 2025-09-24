@@ -168,7 +168,7 @@ class PaymentPlanService:
 
     def tp_lock(self) -> PaymentPlan:
         self.payment_plan.status_tp_lock()
-        self.payment_plan.save(update_fields=("status", "status_date"))
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
 
         return self.payment_plan
 
@@ -176,7 +176,7 @@ class PaymentPlanService:
         self.payment_plan.status_tp_open()
 
         self.payment_plan.build_status_pending()
-        self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date"))
+        self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date", "updated_at"))
         transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
 
         return self.payment_plan
@@ -189,7 +189,7 @@ class PaymentPlanService:
             raise ValidationError("Can only Rebuild Population for Locked or Open Population status")
 
         self.payment_plan.build_status_pending()
-        self.payment_plan.save(update_fields=("build_status", "built_at"))
+        self.payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
         transaction.on_commit(lambda: payment_plan_full_rebuild.delay(str(self.payment_plan.id)))
         return self.payment_plan
 
@@ -197,7 +197,7 @@ class PaymentPlanService:
         if not self.payment_plan.financial_service_provider:
             raise ValidationError("Can only promote to Payment Plan if DM/FSP is chosen.")
         self.payment_plan.status_draft()
-        self.payment_plan.save(update_fields=("status_date", "status"))
+        self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
         return self.payment_plan
 
     def open(self, input_data: dict) -> PaymentPlan:
@@ -219,6 +219,7 @@ class PaymentPlanService:
                 "dispersion_start_date",
                 "dispersion_end_date",
                 "exchange_rate",
+                "updated_at",
             )
         )
         self.payment_plan.program_cycle.set_active()
@@ -506,7 +507,7 @@ class PaymentPlanService:
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
                 payment_plan.delivery_mechanism = delivery_mechanism
-                payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism"])
+                payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism", "updated_at"])
 
             targeting_criteria_data = {
                 "rules": input_data["rules"],
@@ -724,7 +725,7 @@ class PaymentPlanService:
 
     def create_follow_up_payments(self) -> None:
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        self.payment_plan.save(update_fields=["exchange_rate"])
+        self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
         if not (split := self.payment_plan.splits.first()):
@@ -893,7 +894,7 @@ class PaymentPlanService:
     ) -> None:
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
         payment_plan.build_status_pending()
-        payment_plan.save(update_fields=("build_status", "built_at"))
+        payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
 
         if rebuild_full_list:
             payment_plan_full_rebuild.delay(str(payment_plan.id))
