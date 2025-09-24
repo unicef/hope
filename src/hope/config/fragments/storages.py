@@ -1,15 +1,14 @@
 # noqa
 from hope.config.env import env
 
-# TODO update when upgrading django: secrets are already in place
-# STORAGES = {
-#     "default": {
-#         "BACKEND": env.storage("FILE_STORAGE_MEDIA"),
-#     },
-#     "staticfiles": {
-#         "BACKEND": env.storage("FILE_STORAGE_STATIC"),
-#     },
-# }
+STORAGES = {
+    "default": {
+        "BACKEND": env("FILE_STORAGE_MEDIA"),
+    },
+    "staticfiles": {
+        "BACKEND": env("FILE_STORAGE_STATIC"),
+    },
+}
 
 AZURE_URL_EXPIRATION_SECS = 10800
 

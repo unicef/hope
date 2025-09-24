@@ -1,10 +1,11 @@
 import calendar
+from datetime import timezone
 from decimal import Decimal
 import json
 from typing import Any, Callable, Dict, Optional, Type
 
 from django.core.cache import cache
-from django.utils import timezone
+from django.utils import timezone as dj_timezone
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
@@ -34,9 +35,9 @@ CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
     ("DashboardGlobalDataCache", DashboardGlobalDataCache, "global"),
 ]
-CURRENT_YEAR = timezone.now().year
+CURRENT_YEAR = dj_timezone.now().year
 TEST_COUNTRY_SLUG = "afghanistan"
-TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
+TEST_DATE = dj_timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
 
 
 def _create_test_payment_for_queryset(
@@ -50,7 +51,7 @@ def _create_test_payment_for_queryset(
     payment_conflicted: bool = False,
     payment_excluded: bool = False,
     payment_status: str = "Transaction Successful",
-    delivery_date: Optional[timezone.datetime] = None,
+    delivery_date: Optional[dj_timezone.datetime] = None,
 ) -> tuple[Payment, PaymentPlan]:
     program_obj.is_visible = prog_is_visible
     program_obj.save()
@@ -68,7 +69,7 @@ def _create_test_payment_for_queryset(
         conflicted=payment_conflicted,
         excluded=payment_excluded,
         status=payment_status,
-        delivery_date=delivery_date or timezone.now(),
+        delivery_date=delivery_date or dj_timezone.now(),
     )
     return payment, pp
 
@@ -483,32 +484,32 @@ def test_payment_plan_counts() -> None:
     PaymentFactory(
         parent=pp1,
         program=prog_a_sector_x,
-        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(2023, 1, 10, tzinfo=dj_timezone.utc),
     )
     PaymentFactory(
         parent=pp3,
         program=prog_b_sector_y,
-        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(2023, 3, 10, tzinfo=dj_timezone.utc),
     )
     PaymentFactory(
         parent=pp5,
         program=prog_a_sector_x,
-        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(2023, 1, 15, tzinfo=dj_timezone.utc),
     )
     Payment.objects.filter(parent=pp1, business_area=ba).update(
-        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+        delivery_date=dj_timezone.datetime(2023, 1, 10, tzinfo=dj_timezone.utc)
     )
     Payment.objects.filter(parent=pp2, business_area=ba).update(
-        delivery_date=timezone.datetime(2023, 6, 1, tzinfo=timezone.utc)
+        delivery_date=dj_timezone.datetime(2023, 6, 1, tzinfo=dj_timezone.utc)
     )
     Payment.objects.filter(parent=pp3, business_area=ba).update(
-        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+        delivery_date=dj_timezone.datetime(2023, 3, 10, tzinfo=dj_timezone.utc)
     )
     Payment.objects.filter(parent=pp4, business_area=ba).update(
-        delivery_date=timezone.datetime(2024, 6, 1, tzinfo=timezone.utc)
+        delivery_date=dj_timezone.datetime(2024, 6, 1, tzinfo=dj_timezone.utc)
     )
     Payment.objects.filter(parent=pp5, business_area=ba).update(
-        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+        delivery_date=dj_timezone.datetime(2023, 1, 15, tzinfo=dj_timezone.utc)
     )
 
     base_payments_qs = Payment.objects.filter(business_area=ba)
@@ -625,7 +626,7 @@ def test_partial_refresh_empty_cache_fallback(
         household=hh,
         program=prog,
         business_area=afghanistan,
-        delivery_date=timezone.datetime(CURRENT_YEAR - 1, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(CURRENT_YEAR - 1, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("100.00"),
     )
     PaymentFactory.create(
@@ -633,7 +634,7 @@ def test_partial_refresh_empty_cache_fallback(
         household=hh,
         program=prog,
         business_area=afghanistan,
-        delivery_date=timezone.datetime(CURRENT_YEAR, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(CURRENT_YEAR, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("200.00"),
     )
 
@@ -692,7 +693,7 @@ def test_partial_refresh_combines_data(
         household=hh,
         program=prog,
         business_area=payment_ba,
-        delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(year_old, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("100.00"),
         status="Transaction Successful",
         financial_service_provider=common_fsp,
@@ -714,7 +715,7 @@ def test_partial_refresh_combines_data(
         household=hh,
         program=prog,
         business_area=payment_ba,
-        delivery_date=timezone.datetime(year_mid, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(year_mid, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("200.00"),
         status="Transaction Successful",
         financial_service_provider=common_fsp,
@@ -726,7 +727,7 @@ def test_partial_refresh_combines_data(
         household=hh,
         program=prog,
         business_area=payment_ba,
-        delivery_date=timezone.datetime(year_new, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(year_new, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("300.00"),
         status="Transaction Successful",
         financial_service_provider=common_fsp,
@@ -764,7 +765,7 @@ def test_partial_refresh_global_no_new_payments(
         household=hh,
         program=prog,
         business_area=afghanistan,
-        delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("50.00"),
     )
     DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
@@ -798,7 +799,7 @@ def test_partial_refresh_ba_no_new_payments(
         household=hh,
         program=prog,
         business_area=afghanistan,
-        delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
+        delivery_date=dj_timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("50.00"),
     )
     DashboardDataCache.refresh_data(ba_slug)
