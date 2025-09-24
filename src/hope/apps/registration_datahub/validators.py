@@ -468,6 +468,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         selected_choices = value.split(" ")
                 else:
                     selected_choices = [value]
+
                 for unstrip_choice in selected_choices:
                     if isinstance(unstrip_choice, str):
                         choice = unstrip_choice.strip()
@@ -558,7 +559,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             }
 
             invalid_rows = []
-            current_household_id = None
+
+            household_id_col_idx = None
+            relationship_col_idx = None
+            for idx, header_cell in enumerate(first_row):
+                if header_cell.value == "household_id":
+                    household_id_col_idx = idx
+                elif header_cell.value == "relationship_i_c":
+                    relationship_col_idx = idx
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
@@ -634,7 +642,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
                 if not any(has_value(cell) for cell in row):
                     continue
-                row_number = 0
+
+                current_household_id = None
+                if household_id_col_idx is not None:
+                    household_id_cell = row[household_id_col_idx]
+                    if value := household_id_cell.value:
+                        if isinstance(value, float) and value.is_integer():
+                            value = int(value)
+                        current_household_id = value
+                        if sheet.title == "Households":
+                            self.household_ids.append(current_household_id)
+                            self.head_of_household_count[current_household_id] = 0
+
+                if relationship_col_idx is not None and current_household_id is not None:
+                    relationship_cell = row[relationship_col_idx]
+                    if relationship_cell.value == "HEAD":
+                        self.head_of_household_count[current_household_id] += 1
+
                 for cell, header in zip(row, first_row, strict=True):
                     current_field = combined_fields.get(header.value)
                     if not current_field:
@@ -646,17 +670,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if isinstance(value, float) and value.is_integer():
                         value = int(value)
 
-                    household_id_can_be_empty = False
-                    if header.value == "household_id":
-                        current_household_id = value
-                        if sheet.title == "Households":
-                            self.household_ids.append(current_household_id)
-                            self.head_of_household_count[current_household_id] = 0
-                        else:
-                            household_id_can_be_empty = True
-
-                    if header.value == "relationship_i_c" and cell.value == "HEAD":
-                        self.head_of_household_count[current_household_id] += 1
+                    household_id_can_be_empty = header.value == "household_id" and sheet.title != "Households"
 
                     people_admin_columns = (
                         "pp_admin1_i_c",
@@ -969,17 +983,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             individuals_sheet = wb["Individuals"]
             households_sheet = wb["Households"]
-            first_row = individuals_sheet[1]
+            individuals_first_row = individuals_sheet[1]
+            households_first_row = households_sheet[1]
 
-            household_ids = {
-                str(int(cell.value)) if isinstance(cell.value, float) and cell.value.is_integer() else str(cell.value)
-                for cell in households_sheet["A"][2:]
-                if cell.value
-            }
+            household_ids = set()
+            self._households_count = 0
+            for cell in households_first_row:
+                if cell.value == "household_id":
+                    household_ids = {
+                        str(int(c.value)) if isinstance(c.value, float) and c.value.is_integer() else str(c.value)
+                        for c in households_sheet[cell.column_letter][2:]
+                        if c.value
+                    }
+                    break
 
             primary_collectors_data = {}
             alternate_collectors_data = {}
-            for cell in first_row:
+            for cell in individuals_first_row:
                 if cell.value == "primary_collector_id":
                     primary_collectors_data = {c.row: c for c in individuals_sheet[cell.column_letter][2:] if c.value}
                 elif cell.value == "alternate_collector_id":
@@ -1230,11 +1250,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         return individuals_count
 
     def _count_households(self, households_sheet: Worksheet) -> int:
-        household_count = 0
-        for cell in households_sheet["A"][2:]:
-            if cell.value:
-                household_count += 1
-        return household_count
+        first_row = households_sheet[1]
+        for cell in first_row:
+            if cell.value == "household_id":
+                return sum(1 for c in households_sheet[cell.column_letter][2:] if c.value)
+        return 0
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
