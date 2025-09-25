@@ -30,11 +30,9 @@ from hope.apps.utils.exceptions import log_and_raise
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
     from django.http import HttpHeaders
-    from openpyxl.cell import Cell
-    from openpyxl.worksheet.worksheet import Worksheet
+    from openpyxl.worksheet.worksheet import Cell, Worksheet
 
-    from hope.apps.account.models import User
-
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +202,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models.flexible_attribute import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -451,7 +449,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
 
 
 def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None:
-    from hope.apps.payment.models import Payment
+    from hope.models.payment import Payment
 
     if required or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
@@ -612,8 +610,8 @@ def chart_permission_decorator(chart_resolve: Callable | None = None, permission
 
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
-        from hope.apps.core.models import BusinessArea
-        from hope.apps.program.models import Program
+        from hope.models.business_area import BusinessArea
+        from hope.models.program import Program
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
@@ -670,7 +668,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
 
 
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models.flexible_attribute import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -749,13 +747,13 @@ def fix_flex_type_fields(items: Any, flex_fields: dict) -> list[dict]:
 
 
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
-    excluded_ids_array = excluded_ids_string.split(",")
+    excluded_ids_array = excluded_ids_string.split(",") if excluded_ids_string else []
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
-    from hope.apps.household.models import Household
+    from hope.models.household import Household
 
     excluded_household_ids_from_individuals_array = Household.objects.filter(
         individuals__unicef_id__in=excluded_individuals_ids_array
@@ -926,7 +924,7 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.apps.core.models import BusinessArea
+    from hope.models.business_area import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
@@ -950,8 +948,8 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.apps.core.models import FlexibleAttribute
-    from hope.apps.program.models import Program
+    from hope.models.flexible_attribute import FlexibleAttribute
+    from hope.models.program import Program
 
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(

@@ -1,11 +1,11 @@
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
-from hope.apps.program.models import Program
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.program import Program
 
 
 class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMixin):

@@ -6,13 +6,13 @@ from django.db import transaction
 import openpyxl
 from openpyxl.packaging.custom import StringProperty
 
-from hope.apps.core.models import FileTemp
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUXlsxTemplate
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
+from hope.models.file_temp import FileTemp
+from hope.models.individual import Individual
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
 
 
 class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin):

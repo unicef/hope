@@ -15,11 +15,11 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.payment.models import Payment
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program
+from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models.payment import Payment
+from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -123,7 +123,7 @@ class TestPDUOnlineEditCreate:
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
         )
 
-    @patch("hope.apps.periodic_data_update.models.PDUOnlineEdit.queue")
+    @patch("from hope.models.pdu_online_edit import PDUOnlineEdit.PDUOnlineEdit.queue")
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [

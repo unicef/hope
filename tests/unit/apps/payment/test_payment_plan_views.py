@@ -37,18 +37,17 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hope.apps.payment.models import (
-    Approval,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.steficon.models import Rule
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.models.approval import Approval
+from hope.models.file_temp import FileTemp
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.rule import Rule
 
 pytestmark = pytest.mark.django_db()
 

@@ -7,10 +7,11 @@ from django.utils import timezone
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.program import Program
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 
 class AllPermissionsInBusinessAreasTest(TransactionTestCase):

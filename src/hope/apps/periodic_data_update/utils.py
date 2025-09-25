@@ -2,10 +2,11 @@ import re
 
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.household.models import Individual
-from hope.apps.periodic_data_update.models import PDUOnlineEdit, PDUXlsxTemplate
-from hope.apps.program.models import Program
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.individual import Individual
+from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models.program import Program
 
 
 def field_label_to_field_name(input_string: str) -> str:

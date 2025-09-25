@@ -16,13 +16,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    NOT_PROCESSED,
-    UNIQUE,
-)
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
@@ -34,7 +27,14 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.household import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    NOT_PROCESSED,
+    UNIQUE,
+)
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.utils import MergeStatusModel
 
 
 @pytest.fixture(autouse=True)

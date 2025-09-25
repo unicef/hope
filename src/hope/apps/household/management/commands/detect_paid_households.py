@@ -8,9 +8,10 @@ from django.conf import settings
 from django.core.management import BaseCommand, CommandParser
 from django.db.models import Q, QuerySet
 
-from hope.apps.core.models import StorageFile
-from hope.apps.household.models import Document, Household
-from hope.apps.payment.models import Payment
+from hope.models.document import Document
+from hope.models.household import Household
+from hope.models.payment import Payment
+from hope.models.storage_file import StorageFile
 
 
 def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> dict[str, list[str]]:

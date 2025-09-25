@@ -19,7 +19,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_steficon_hh_selection,
@@ -31,15 +30,14 @@ from hope.apps.payment.celery_tasks import (
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-    WesternUnionInvoice,
-    WesternUnionPaymentPlanReport,
-)
 from hope.apps.payment.utils import generate_cache_key
-from hope.apps.steficon.models import Rule
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.file_temp import FileTemp
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.payment_plan import PaymentPlan
+from hope.models.rule import Rule
+from hope.models.western_union_invoice import WesternUnionInvoice
+from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
 
 
 class TestPaymentCeleryTask(TestCase):

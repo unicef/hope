@@ -32,37 +32,35 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from hope.apps.account.models import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
-from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialInstitution,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
-from hope.apps.program.models import Program
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.approval import Approval
+from hope.models.approval_process import ApprovalProcess
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.fsp_xlsx_template_per_delivery_mechanism import FspXlsxTemplatePerDeliveryMechanism
+from hope.models.household import MALE, ROLE_PRIMARY, Household
+from hope.models.individual import Individual
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.payment_verification_summary import PaymentVerificationSummary
+from hope.models.program import Program
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.user import User
+from hope.models.utils import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:

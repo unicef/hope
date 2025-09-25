@@ -1,4 +1,4 @@
-from hope.apps.household.models import (
+from hope.models.household import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_ELECTORAL_CARD,
@@ -8,8 +8,8 @@ from hope.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
-    Individual,
 )
+from hope.models.individual import Individual
 
 
 def get_birth_certificate_no(individual: Individual) -> str:

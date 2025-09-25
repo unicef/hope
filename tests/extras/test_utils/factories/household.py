@@ -11,8 +11,11 @@ from pytz import utc
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.models import country as geo_models
+from hope.models.document import Document, PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.entitlement_card import EntitlementCard
+from hope.models.household import (
     HUMANITARIAN_PARTNER,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
@@ -24,22 +27,14 @@ from hope.apps.household.models import (
     ROLE_PRIMARY,
     SEX_CHOICE,
     UNICEF,
-    Document,
-    DocumentType,
-    EntitlementCard,
     Household,
     HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.individual import Individual, IndividualCollection, PendingIndividual
+from hope.models.individual_identity import IndividualIdentity, PendingIndividualIdentity
+from hope.models.individual_role_in_household import IndividualRoleInHousehold, PendingIndividualRoleInHousehold
+from hope.models.utils import MergeStatusModel
 
 faker = Faker()
 

@@ -6,12 +6,13 @@ from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
 
 from hope.apps.core.utils import encode_id_base64
-from hope.apps.payment.models import Approval, Payment, PaymentPlan
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
+from hope.models.approval import Approval
+from hope.models.payment import Payment
+from hope.models.payment_plan import PaymentPlan
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
-
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

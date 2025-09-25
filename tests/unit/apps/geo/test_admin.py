@@ -16,10 +16,10 @@ import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
-from hope.apps.account.models import User
-from hope.apps.geo.models import Area, AreaType, Country
-
-pytestmark = pytest.mark.django_db
+from hope.models.area import Area
+from hope.models.area_type import AreaType
+from hope.models.country import Country
+from hope.models.user import User
 
 
 @pytest.fixture

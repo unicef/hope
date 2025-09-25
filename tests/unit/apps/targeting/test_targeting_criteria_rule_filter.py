@@ -24,24 +24,24 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.household.models import (
+from hope.apps.targeting.choices import FlexFieldClassification
+from hope.models.account_type import AccountType
+from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models.household import (
     ROLE_PRIMARY,
     Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import AccountType
-from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import (
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.targeting_collector_block_rule_filter import (
     TargetingCollectorBlockRuleFilter,
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models.utils import MergeStatusModel
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

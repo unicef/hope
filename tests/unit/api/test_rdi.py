@@ -10,19 +10,21 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.models.account import PendingAccount
+from hope.models.account_type import AccountType
+from hope.models.document_type import DocumentType
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.grant import Grant
+from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
-    DocumentType,
     PendingHousehold,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import UserFactory
 

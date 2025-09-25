@@ -5,4 +5,4 @@ class Config(AppConfig):
     name = "hope.apps.universal_update_script"
 
     def ready(self) -> None:
-        pass
+        import hope.models  # noqa
