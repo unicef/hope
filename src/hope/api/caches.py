@@ -78,7 +78,7 @@ def etag_decorator(
 
 def get_or_create_cache_key(key: str, default: Any) -> Any:
     """Get value from cache by key or create it with default value."""
-    return cache.get_or_set(key, default)
+    return cache.get_or_set(key, default, timeout=None)
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
