@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockFspPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -51,7 +52,7 @@ export function LockFspPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: async() => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan FSPs are locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({
@@ -59,8 +60,8 @@ export function LockFspPaymentPlan({
         exact: false,
       });
     },
-    onError: (error) => {
-      showRestApiError(error);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

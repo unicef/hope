@@ -135,7 +135,7 @@ export function Entitlement({
         });
       },
       onError: (e) => {
-        showMessage(e.message);
+        showApiErrorMessages(e, showMessage);
       },
     });
 
@@ -171,7 +171,7 @@ export function Entitlement({
       showMessage(t('Exporting XLSX started. Please check your email.'));
     },
     onError: (e) => {
-      showMessage(e.message);
+      showApiErrorMessages(e, showMessage);
     },
   });
 
