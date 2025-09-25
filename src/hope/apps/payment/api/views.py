@@ -915,6 +915,7 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            payment_plan.refresh_from_db(fields=["background_action_status"])
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
