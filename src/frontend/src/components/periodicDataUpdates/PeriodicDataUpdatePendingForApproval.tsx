@@ -140,7 +140,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
     },
   });
 
-  const handleApprove = async() => {
+  const handleApprove = async () => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
     await bulkApprove(ids);
   };
@@ -278,6 +278,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={pendingHeadCells}
       data={data ?? []}

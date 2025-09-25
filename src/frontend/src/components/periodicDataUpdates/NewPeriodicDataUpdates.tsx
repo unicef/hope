@@ -156,6 +156,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={onlineEditsHeadCells}
       data={data ?? []}
