@@ -185,7 +185,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
     duplicate = serializers.SerializerMethodField()
     distinct = serializers.SerializerMethodField()
 
-    def get_unicef_id(self, obj: dict) -> str:
+    def get_unicef_id(self, obj: dict) -> str | None:
         hit_id = obj.get("hit_id")
         # If hit_id is a valid UUID string, use it directly as the PK
         try:
@@ -194,7 +194,10 @@ class DeduplicationResultSerializer(serializers.Serializer):
         except (ValueError, TypeError):
             # otherwise decode the opaque ID
             pk = decode_id_string(hit_id)
-        individual = Individual.all_objects.get(id=pk)
+        try:
+            individual = Individual.all_objects.get(id=pk)
+        except Individual.DoesNotExist:
+            return None
         return str(individual.unicef_id)
 
     def get_location(self, obj: dict) -> str:
