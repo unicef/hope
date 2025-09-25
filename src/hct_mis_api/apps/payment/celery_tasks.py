@@ -25,7 +25,11 @@ from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd, normalize_score
+from hct_mis_api.apps.payment.utils import (
+    generate_cache_key,
+    get_quantity_in_usd,
+    normalize_score,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )

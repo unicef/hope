@@ -3,7 +3,7 @@ import hashlib
 import json
 import typing
 from base64 import b64decode
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from math import ceil
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -142,7 +142,7 @@ def get_quantity_in_usd(
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
 
 
-def normalize_score(value):
+def normalize_score(value: Optional[float, str, Decimal]) -> Optional[Decimal]:
     if value is None:
         return None
     return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
