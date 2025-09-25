@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 import json
 from typing import Any
 from unittest import mock
@@ -75,7 +75,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_in_approval(self, afghanistan: BusinessAreaFactory) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=PaymentPlan.Status.IN_APPROVAL)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
@@ -140,7 +140,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_other_status(self, afghanistan: BusinessAreaFactory, status: str) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=status)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
