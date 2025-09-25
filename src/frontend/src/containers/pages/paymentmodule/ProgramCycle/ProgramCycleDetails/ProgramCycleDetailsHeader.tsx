@@ -44,7 +44,7 @@ export const ProgramCycleDetailsHeader = ({
           id,
           programSlug,
         }),
-      onSuccess: async() => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
@@ -56,8 +56,7 @@ export const ProgramCycleDetailsHeader = ({
         showMessage(t('Programme Cycle Finished'));
       },
       onError: (error) => {
-        showMessage(t('Failed to finish the programme cycle.'));
-        console.error(error);
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -77,7 +76,7 @@ export const ProgramCycleDetailsHeader = ({
           id,
           programSlug,
         }),
-      onSuccess: async() => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
             'programCyclesDetails',
@@ -100,7 +99,7 @@ export const ProgramCycleDetailsHeader = ({
     },
   ];
 
-  const finishAction = async() => {
+  const finishAction = async () => {
     try {
       await finishMutation({
         businessAreaSlug: businessArea,
@@ -113,7 +112,7 @@ export const ProgramCycleDetailsHeader = ({
     }
   };
 
-  const reactivateAction = async() => {
+  const reactivateAction = async () => {
     try {
       await reactivateMutation({
         businessAreaSlug: businessArea,

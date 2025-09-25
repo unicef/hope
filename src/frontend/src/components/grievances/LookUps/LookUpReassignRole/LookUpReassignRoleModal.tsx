@@ -17,7 +17,7 @@ import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRo
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -76,9 +76,7 @@ export function LookUpReassignRoleModal({
       showMessage(t('Role Reassigned'));
     },
     onError: (error: any) => {
-      const errorMessage =
-        error?.body?.errors || error?.message || 'An error occurred';
-      showMessage(errorMessage);
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -128,7 +126,7 @@ export function LookUpReassignRoleModal({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);

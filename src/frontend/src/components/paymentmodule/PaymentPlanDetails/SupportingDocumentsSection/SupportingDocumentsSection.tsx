@@ -39,6 +39,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -128,8 +129,8 @@ export const SupportingDocumentsSection = ({
           { id: doc.id, title: doc.title, file: doc.file, uploadedAt: null },
         ]);
       },
-      onError: (err: Error) => {
-        setErrorMessage(err.message);
+      onError: (e: Error) => {
+        showApiErrorMessages(e, showMessage);
         setIsLoading(false);
       },
     });

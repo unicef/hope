@@ -12,6 +12,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +62,7 @@ export function RevertForceFailedButton({
       showMessage(t('Force failed has been reverted.'));
     },
     onError: (error) => {
-      showMessage(t('Failed to mark the payment as failed.'));
+      showApiErrorMessages(error, showMessage);
       console.error(error);
     },
   });

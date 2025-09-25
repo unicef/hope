@@ -171,6 +171,7 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   onSelectAllClick?: (event: ChangeEvent<HTMLInputElement>, rows: T[]) => void;
   numSelected?: number;
   hidePagination?: boolean;
+  noEmptyMessage?: boolean;
 }
 
 export function TableRestComponent<T>({
@@ -195,6 +196,7 @@ export function TableRestComponent<T>({
   numSelected = 0,
   hidePagination = false,
   customHeadRenderer,
+  noEmptyMessage = false,
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
@@ -213,26 +215,37 @@ export function TableRestComponent<T>({
       </StyledTableRow>
     ));
   } else if (!data.length) {
-    body = (
-      <StyledTableRow
-        data-cy="table-row"
-        style={{ height: 70 * emptyRows || 70 }}
-      >
-        <StyledTableCell colSpan={headCells.length}>
-          <EmptyMessage>
-            <IconContainer>
-              <Icon fontSize="inherit" />
-            </IconContainer>
-            <MuiBox mt={2}>{t('No results')}</MuiBox>
-            <SmallerText mt={2}>
-              {t(
-                'Try adjusting your search or your filters to find what you are looking for.',
-              )}
-            </SmallerText>
-          </EmptyMessage>
-        </StyledTableCell>
-      </StyledTableRow>
-    );
+    if (noEmptyMessage) {
+      body = (
+        <StyledTableRow
+          data-cy="table-row"
+          style={{ height: 70 * emptyRows || 70 }}
+        >
+          <StyledTableCell colSpan={headCells.length} />
+        </StyledTableRow>
+      );
+    } else {
+      body = (
+        <StyledTableRow
+          data-cy="table-row"
+          style={{ height: 70 * emptyRows || 70 }}
+        >
+          <StyledTableCell colSpan={headCells.length}>
+            <EmptyMessage>
+              <IconContainer>
+                <Icon fontSize="inherit" />
+              </IconContainer>
+              <MuiBox mt={2}>{t('No results')}</MuiBox>
+              <SmallerText mt={2}>
+                {t(
+                  'Try adjusting your search or your filters to find what you are looking for.',
+                )}
+              </SmallerText>
+            </EmptyMessage>
+          </StyledTableCell>
+        </StyledTableRow>
+      );
+    }
   } else {
     body = (
       <>
