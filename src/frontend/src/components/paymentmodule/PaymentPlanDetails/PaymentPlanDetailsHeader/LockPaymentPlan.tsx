@@ -29,7 +29,7 @@ export function LockPaymentPlan({
   paymentPlan,
 }: LockPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();

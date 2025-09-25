@@ -31,7 +31,7 @@ export function LockFspPaymentPlan({
   permissions,
 }: LockFspPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
