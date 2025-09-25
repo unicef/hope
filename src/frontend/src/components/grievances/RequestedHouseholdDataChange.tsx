@@ -14,6 +14,7 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -66,16 +67,8 @@ export function RequestedHouseholdDataChange({
         queryKey: ['GrievanceTicketDetail', ticket.id],
       });
     },
-    onError: (err: any) => {
-      if (err?.body?.errors) {
-        Object.values(err.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage(err?.message || 'An error occurred');
-      }
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
   const householdData = React.useMemo(
@@ -218,7 +211,7 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={initialValues}
       enableReinitialize={true}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         // Build householdApproveData as a flat object
         const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields

@@ -13,6 +13,7 @@ import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -54,16 +55,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
     },
     onError: (error) => {
-      let backendMessage: string = null;
-      const backendError = error as any;
-      if (backendError?.body && Array.isArray(backendError?.body)) {
-        backendMessage = backendError.body.join('\n');
-      }
-      showMessage(
-        backendMessage ||
-          error.message ||
-          t('An error occurred while marking target population as ready.'),
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 

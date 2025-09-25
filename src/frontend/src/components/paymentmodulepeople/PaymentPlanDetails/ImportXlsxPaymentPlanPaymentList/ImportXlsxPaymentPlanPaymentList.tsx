@@ -15,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
+import { showApiErrorMessages } from '@utils/utils';
+import { error } from 'console';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -66,11 +68,11 @@ export function ImportXlsxPaymentPlanPaymentList({
       showMessage(t('Your import was successful!'));
     },
     onError: (e) => {
-      showMessage(e.message);
+      showApiErrorMessages(e, showMessage);
     },
   });
 
-  const handleImport = async(): Promise<void> => {
+  const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       await importEntitlementXlsx({
         businessAreaSlug: businessArea,

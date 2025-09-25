@@ -55,17 +55,14 @@ export function AcceptedPaymentPlanHeaderButtons({
       onSuccess: () => {
         showMessage(t('Payment plan closed successfully'));
       },
-      onError: (error) => {
-        showMessage(
-          error?.message ||
-            t('An error occurred while closing the payment plan'),
-        );
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     });
 
   const { data, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
-    queryFn: async() => {
+    queryFn: async () => {
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
         {
           businessAreaSlug: businessArea,
@@ -88,16 +85,14 @@ export function AcceptedPaymentPlanHeaderButtons({
       onSuccess: () => {
         showMessage(t('Password has been sent.'));
       },
-      onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while sending the password'),
-        );
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     },
   );
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: async(variables: { fspXlsxTemplateId?: string }) => {
+    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
       const requestBody: PaymentPlanExportAuthCode = {
         fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
       };
@@ -114,11 +109,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       showMessage(t('Exporting XLSX started'));
     },
     onError: (error: any) => {
-      showMessage(
-        error?.body?.errors ||
-          error?.message ||
-          'An error occurred while exporting',
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -137,11 +128,8 @@ export function AcceptedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
     },
-    onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while sending to payment gateway'),
-      );
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -168,7 +156,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async() => {
+  const handleExportAPI = async () => {
     try {
       await mutateExport({
         fspXlsxTemplateId: selectedTemplate,
@@ -179,7 +167,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     }
   };
 
-  const handleExport = async() => {
+  const handleExport = async () => {
     try {
       await mutateExport({
         fspXlsxTemplateId: '',

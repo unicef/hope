@@ -17,6 +17,7 @@ import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
 import { KoboProjectSelect } from './KoboProjectSelect';
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
+import { showApiErrorMessages } from '@utils/utils';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -48,31 +49,33 @@ export function CreateImportFromKoboForm({
 
   // Mutation for creating registration kobo import
   const createImportMutation = useMutation({
-    mutationFn: async(data: { 
-      importDataId: string; 
-      name: string; 
+    mutationFn: async (data: {
+      importDataId: string;
+      name: string;
       screenBeneficiary: boolean;
       pullPictures: boolean;
     }) => {
-      return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        requestBody: data,
-      });
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsRegistrationKoboImportCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody: data,
+        },
+      );
     },
     onSuccess: (data) => {
       navigate(`/${baseUrl}/registration-data-import/${data.id}`);
     },
-    onError: (error: any) => {
-      showMessage(error.message || 'Error creating kobo import');
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
-  const onSubmit =  (values): void => {
+  const onSubmit = (values): void => {
     if (!koboImportData?.id) {
       return;
     }
-    
+
     createImportMutation.mutate({
       importDataId: koboImportData.id,
       name: values.name,
@@ -115,8 +118,7 @@ export function CreateImportFromKoboForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (
-      koboImportData?.status === Status753Enum.FINISHED) {
+    if (koboImportData?.status === Status753Enum.FINISHED) {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);
