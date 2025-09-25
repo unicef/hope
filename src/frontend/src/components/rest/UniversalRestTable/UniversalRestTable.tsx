@@ -38,6 +38,7 @@ interface UniversalRestTableProps<T = any, K = any> {
   itemsCount?: number;
   initialRowsPerPage?: number;
   hidePagination?: boolean;
+  noEmptyMessage?: boolean;
 }
 type QueryVariables = {
   offset: number;
@@ -67,6 +68,7 @@ export const UniversalRestTable = <T, K>({
   initialRowsPerPage,
   hidePagination,
   customHeadRenderer,
+  noEmptyMessage = false,
 }: UniversalRestTableProps<T, K>): ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(
@@ -167,6 +169,7 @@ export const UniversalRestTable = <T, K>({
       allowSort={allowSort}
       hidePagination={hidePagination}
       customHeadRenderer={customHeadRenderer}
+      noEmptyMessage={noEmptyMessage}
     />
   );
 };
