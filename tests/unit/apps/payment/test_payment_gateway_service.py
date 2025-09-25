@@ -159,6 +159,8 @@ class TestPaymentGatewayService(BaseTestCase):
             ),
         ]
         create_payment_plan_snapshot_data(cls.pp)
+        for payment in cls.payments:
+            payment.refresh_from_db()
 
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
