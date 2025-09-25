@@ -51,11 +51,11 @@ export function ForceFailedButton({
         showMessage(t('Payment has been marked as failed successfully.'));
       },
       onError: (error) => {
-        showMessage(t('Failed to mark the payment as failed.'));
+        showApiErrorMessages(error, showMessage);
         console.error(error);
       },
     });
-  const submit = async(): Promise<void> => {
+  const submit = async (): Promise<void> => {
     try {
       await markAsFailed({
         businessAreaSlug: businessArea,

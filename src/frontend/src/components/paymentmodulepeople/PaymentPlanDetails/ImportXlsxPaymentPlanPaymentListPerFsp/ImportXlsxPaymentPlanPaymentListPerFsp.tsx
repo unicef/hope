@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -89,12 +90,12 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       setOpenImport(false);
       showMessage(t('Your import was successful!'));
     },
-    onError: (e) => {
-      showMessage(e.message);
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
-  const handleImport = async(): Promise<void> => {
+  const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       await importReconciliationXlsx({
         businessAreaSlug: businessArea,

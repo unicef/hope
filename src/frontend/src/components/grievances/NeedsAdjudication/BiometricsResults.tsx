@@ -19,6 +19,8 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { RestService } from 'src/restgenerated';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
@@ -66,6 +68,7 @@ export const BiometricsResults = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessAreaSlug } = useBaseUrl();
+  const { showMessage } = useSnackbar();
 
   const { mutateAsync: loadData } = useMutation({
     mutationFn: () =>
@@ -73,8 +76,8 @@ export const BiometricsResults = ({
         businessAreaSlug,
         id: ticketId,
       }),
-    onError: (error) => {
-      console.error('Failed to load grievance ticket data:', error);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
