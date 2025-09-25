@@ -142,7 +142,7 @@ def get_quantity_in_usd(
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
 
 
-def normalize_score(value: Optional[float, str, Decimal]) -> Optional[Decimal]:
+def normalize_score(value: Optional[Union[float, str, Decimal]]) -> Optional[Decimal]:
     if value is None:
         return None
     return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
