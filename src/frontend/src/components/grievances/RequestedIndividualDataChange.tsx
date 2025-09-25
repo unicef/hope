@@ -20,6 +20,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
+import { showApiErrorMessages } from '@utils/utils';
 
 export type RoleReassignData = {
   role: string;
@@ -145,15 +146,7 @@ export function RequestedIndividualDataChange({
       });
     },
     onError: (error: any) => {
-      if (error?.body?.errors) {
-        Object.values(error.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage('An error occurred while approving changes');
-      }
+      showApiErrorMessages(error, showMessage);
     },
   });
   const selectedDocuments = [];
