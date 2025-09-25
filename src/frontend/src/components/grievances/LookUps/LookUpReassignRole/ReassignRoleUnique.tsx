@@ -59,12 +59,7 @@ export function ReassignRoleUnique({
         showMessage(t('Role Reassigned'));
       },
       onError: (error: any) => {
-        const errorMessage =
-          error?.body?.errors?.[0]?.message ||
-          error?.body?.errors ||
-          error?.message ||
-          'An error occurred while reassigning role.';
-        showMessage(errorMessage);
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -77,7 +72,7 @@ export function ReassignRoleUnique({
           // role: individualRole.role, // Not needed if passed directly in onSubmit
         }
       }
-      onSubmit={async() => {
+      onSubmit={async () => {
         const requestBody: GrievanceReassignRole = {
           householdId: household.id, // Directly use prop
           individualId: individual.id, // Directly use prop

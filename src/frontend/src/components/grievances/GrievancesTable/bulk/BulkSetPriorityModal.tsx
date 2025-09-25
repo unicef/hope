@@ -10,6 +10,7 @@ import { BulkUpdateGrievanceTicketsPriority } from '@restgenerated/models/BulkUp
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -67,14 +68,12 @@ export const BulkSetPriorityModal = ({
       setSelected([]);
     },
     onError: (error: any) => {
-      const errorMessage =
-        error?.body?.errors || error?.message || 'An error occurred';
-      showMessage(errorMessage);
+      showApiErrorMessages(error, showMessage);
     },
   });
 
   const priorityChoices = choices?.grievanceTicketPriorityChoices;
-  const onSave = async(): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     await mutateAsync({
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
       priority: value,

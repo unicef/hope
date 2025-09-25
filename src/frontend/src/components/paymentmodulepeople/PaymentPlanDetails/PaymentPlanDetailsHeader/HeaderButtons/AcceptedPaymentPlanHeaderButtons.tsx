@@ -71,9 +71,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         showMessage(t('Password has been sent.'));
       },
       onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while sending the password'),
-        );
+        showApiErrorMessages(error, showMessage);
       },
     },
   );
@@ -92,9 +90,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         showMessage(t('Exporting XLSX started'));
       },
       onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while exporting XLSX'),
-        );
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -114,10 +110,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       showMessage(t('Sending to Payment Gateway started'));
     },
     onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while sending to payment gateway'),
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -162,7 +155,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExportAPI = async() => {
+  const handleExportAPI = async () => {
     try {
       await exportReconciliationXlsx();
       handleClose();
@@ -171,7 +164,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     }
   };
 
-  const handleExport = async() => {
+  const handleExport = async () => {
     try {
       await exportReconciliationXlsx();
       handleClose();
