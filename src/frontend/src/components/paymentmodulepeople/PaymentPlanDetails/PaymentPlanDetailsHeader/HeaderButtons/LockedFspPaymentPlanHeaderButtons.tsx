@@ -22,7 +22,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   canSendForApproval,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
