@@ -167,6 +167,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
       )}
       <UniversalRestTable
         isOnPaper={true}
+        noEmptyMessage={true}
         renderRow={renderUpdateRow}
         headCells={updatesHeadCells}
         data={updatesData ?? {}}

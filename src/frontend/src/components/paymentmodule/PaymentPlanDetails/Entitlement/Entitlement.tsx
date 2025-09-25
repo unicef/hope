@@ -135,8 +135,8 @@ function Entitlement({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         });
       },
-      onError: (e) => {
-        showMessage(e.message);
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -171,8 +171,8 @@ function Entitlement({
     onSuccess: () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
     },
-    onError: (e) => {
-      showMessage(e.message);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

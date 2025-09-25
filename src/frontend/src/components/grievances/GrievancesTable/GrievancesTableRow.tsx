@@ -11,6 +11,7 @@ import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
@@ -76,7 +77,7 @@ export function GrievancesTableRow({
       );
     },
     onSuccess: () => {
-       queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ['businessAreasProgramsGrievanceTickets'],
       });
       queryClient.invalidateQueries({
@@ -87,13 +88,11 @@ export function GrievancesTableRow({
       });
     },
     onError: (error: any) => {
-      const errorMessage =
-        error?.body?.errors || error?.message || 'An error occurred';
-      showMessage(errorMessage);
+      showApiErrorMessages(error, showMessage);
     },
   });
 
-  const onFilterChange = async(assignee, ids): Promise<void> => {
+  const onFilterChange = async (assignee, ids): Promise<void> => {
     if (assignee) {
       await mutateAsync({
         assignedTo: assignee.id,

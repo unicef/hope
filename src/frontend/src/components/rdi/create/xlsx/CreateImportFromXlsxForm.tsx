@@ -16,6 +16,7 @@ import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { showApiErrorMessages } from '@utils/utils';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -47,7 +48,7 @@ export function CreateImportFromXlsxForm({
 
   // Mutation for creating registration xlsx import
   const createImportMutation = useMutation({
-    mutationFn: async(data: {
+    mutationFn: async (data: {
       importDataId: string;
       name: string;
       screenBeneficiary: boolean;
@@ -64,7 +65,7 @@ export function CreateImportFromXlsxForm({
       navigate(`/${baseUrl}/registration-data-import/${data.id}`);
     },
     onError: (error: any) => {
-      showMessage(error.message || 'Error creating import');
+      showApiErrorMessages(error, showMessage);
       setSubmitDisabled(false);
     },
   });
@@ -92,7 +93,7 @@ export function CreateImportFromXlsxForm({
     validationSchema,
     onSubmit,
   });
-  const saveXlsxInputData = async(): Promise<void> => {
+  const saveXlsxInputData = async (): Promise<void> => {
     if (!formik.values.file) {
       return;
     }
