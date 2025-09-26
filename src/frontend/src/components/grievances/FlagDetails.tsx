@@ -38,7 +38,7 @@ export const FlagDetails = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, businessAreaSlug } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -59,7 +59,11 @@ export const FlagDetails = ({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });
@@ -161,7 +165,9 @@ export const FlagDetails = ({
                 .map((item) => item.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
-            <TableCell align="left">{details.sanctionListIndividual.sanctionList.name}</TableCell>
+            <TableCell align="left">
+              {details.sanctionListIndividual.sanctionList.name}
+            </TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>
