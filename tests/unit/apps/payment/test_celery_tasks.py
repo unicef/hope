@@ -25,9 +25,11 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
@@ -368,6 +370,28 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
         mock_retry.assert_called_once()
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_periodic_send_payment_plan_reconciliation_overdue_emails(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        periodic_send_payment_plan_reconciliation_overdue_emails()
+        mock_service_cls.send_reconciliation_overdue_emails.assert_called_once()
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_send_payment_plan_reconciliation_overdue_email(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        create_afghanistan()
+        pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+
+        mock_service = mock_service_cls.return_value
+        send_payment_plan_reconciliation_overdue_email(str(pp.id))
+        mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

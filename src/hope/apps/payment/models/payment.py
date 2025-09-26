@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
 import hashlib
@@ -26,6 +26,7 @@ from django.db.models.functions import Coalesce
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.text import Truncator
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils import Choices
@@ -1033,6 +1034,25 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+
+    @property
+    def has_payments_reconciliation_overdue(self) -> bool:
+        reconciliation_window_in_days = self.program.reconciliation_window_in_days
+        if not reconciliation_window_in_days:
+            return False
+
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
+        is_overdue = due_date <= now().date()
+
+        return (
+            self.status == PaymentPlan.Status.ACCEPTED
+            and is_overdue
+            and self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
+            .filter(
+                delivered_quantity__isnull=True,
+            )
+            .exists()
+        )
 
     # @transitions #####################################################################
 

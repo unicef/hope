@@ -104,5 +104,7 @@ export type ProgramDetail = {
     readonly registrationImportsTotalCount: number;
     readonly targetPopulationsCount: number;
     readonly screenBeneficiary: boolean;
+    reconciliationWindowInDays?: number;
+    sendReconciliationWindowExpiryNotifications?: boolean;
 };
 
