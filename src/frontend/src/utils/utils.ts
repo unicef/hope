@@ -22,6 +22,14 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.green;
     case 'MERGED':
       return theme.hctPalette.darkerBlue;
+    case 'MERGING':
+      return theme.hctPalette.blue;
+    case 'CREATING':
+      return theme.hctPalette.blue;
+    case 'FAILED_MERGE':
+      return theme.hctPalette.red;
+    case 'FAILED_CREATE':
+      return theme.hctPalette.red;
     default:
       return theme.hctPalette.gray;
   }
