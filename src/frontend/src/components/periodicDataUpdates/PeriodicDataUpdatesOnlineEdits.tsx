@@ -4,6 +4,9 @@ import PeriodicDataUpdatePendingForApproval from './PeriodicDataUpdatePendingFor
 import { Box } from '@mui/material';
 import PeriodicDataUpdatePendingForMerge from './PeriodicDataUpdatePendingForMerge';
 import MergedPeriodicDataUpdates from './MergedPeriodicDataUpdates';
+import FailedPeriodicDataUpdates from '@components/periodicDataUpdates/FailedPeriodicDataUpdates';
+import ProcessedPeriodicDataUpdates from '@components/periodicDataUpdates/OtherPeriodicDataUpdates';
+import OtherPeriodicDataUpdates from '@components/periodicDataUpdates/OtherPeriodicDataUpdates';
 
 function PeriodicDataUpdatesOnlineEdits() {
   return (
@@ -19,6 +22,9 @@ function PeriodicDataUpdatesOnlineEdits() {
       </Box>
       <Box p={3}>
         <MergedPeriodicDataUpdates />
+      </Box>
+      <Box p={3}>
+        <OtherPeriodicDataUpdates />
       </Box>
     </>
   );
