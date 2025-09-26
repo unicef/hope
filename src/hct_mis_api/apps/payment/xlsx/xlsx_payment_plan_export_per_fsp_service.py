@@ -70,7 +70,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.flexible_attributes = {
             flexible_attribute.name: flexible_attribute for flexible_attribute in flexible_attributes
         }
-        self.export_fsp_auth_code = bool(fsp_xlsx_template_id)
+        self.export_fsp_auth_code = self.payment_plan.can_create_xlsx_with_fsp_auth_code
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
         self.account_fields_headers = self.get_account_fields_headers()
 
@@ -98,10 +98,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def get_template(
         self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
-        if (
-            self.fsp_xlsx_template_id
-            and fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-        ):
+        if self.fsp_xlsx_template_id:
             return get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=self.fsp_xlsx_template_id)
 
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
@@ -178,7 +175,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
-        # remove fsp_auth_code if fsp_xlsx_template_id not provided
+        # remove fsp_auth_code if exporting is not allowed
         if not self.export_fsp_auth_code and "fsp_auth_code" in fsp_template_columns:
             fsp_template_columns.remove("fsp_auth_code")
         fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
