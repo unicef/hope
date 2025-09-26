@@ -126,6 +126,7 @@ const OtherPeriodicDataUpdates = () => {
         <TableCell>
           <StatusBox
             status={row.status}
+            statusDisplay={row.statusDisplay}
             statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
           />
         </TableCell>
