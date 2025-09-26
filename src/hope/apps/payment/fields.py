@@ -16,7 +16,7 @@ class DynamicChoiceField(forms.MultipleChoiceField):
         else:
             choices = choices_callable or ()
 
-        super().__init__(choices=choices, *args, **kwargs)
+        super().__init__(*args, choices=choices, **kwargs)
 
 
 class DynamicChoiceArrayField(ArrayField):
