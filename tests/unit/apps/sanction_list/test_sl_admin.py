@@ -35,5 +35,6 @@ def test_sanction_list_empty(
     res = django_app.get(url, user=admin_user)
     res = res.click("Empty")
     assert res.status_code == 200
-    res = res.form.submit()
+    form = res.forms[1]
+    res = form.submit()
     assert res.status_code == 302

@@ -57,6 +57,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "registration_data_import",
         "partner",
         "copied_from",
+        "linked_tickets",
     )
     search_fields = ("unicef_id",)
     date_hierarchy = "created_at"
@@ -81,7 +82,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
 
     readonly_fields = ("unicef_id",)
-    filter_horizontal = ("linked_tickets", "programs")
+    filter_horizontal = ("programs",)
     inlines = [GrievanceTicketCopiedToInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:

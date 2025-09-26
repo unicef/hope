@@ -34,15 +34,16 @@ class UserImportCSVTest(WebTest):
     def test_import_csv(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = (
+        form = res.forms["load_users"]
+        form["file"] = (
             "users.csv",
             (Path(__file__).parent / "users.csv").read_bytes(),
         )
-        res.form["business_area"] = self.business_area.id
-        res.form["partner"] = self.partner.id
-        res.form["role"] = self.role.id
-        res.form["enable_kobo"] = False
-        res = res.form.submit()
+        form["business_area"] = self.business_area.id
+        form["partner"] = self.partner.id
+        form["role"] = self.role.id
+        form["enable_kobo"] = False
+        res = form.submit()
         assert res.status_code == 200
 
         u = User.objects.filter(email="test@example.com", partner=self.partner).first()
@@ -59,15 +60,16 @@ class UserImportCSVTest(WebTest):
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = (
+        form = res.forms["load_users"]
+        form["file"] = (
             "users.csv",
             (Path(__file__).parent / "users.csv").read_bytes(),
         )
-        res.form["business_area"] = self.business_area.id
-        res.form["partner"] = self.partner.id
-        res.form["role"] = self.role.id
-        res.form["enable_kobo"] = True
-        res = res.form.submit()
+        form["business_area"] = self.business_area.id
+        form["partner"] = self.partner.id
+        form["role"] = self.role.id
+        form["enable_kobo"] = True
+        res = form.submit()
         assert res.status_code == 200
 
         u = User.objects.filter(email="test@example.com", partner=self.partner).first()
@@ -80,15 +82,16 @@ class UserImportCSVTest(WebTest):
         RoleAssignmentFactory(user=u, role=self.role_2, business_area=self.business_area)
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = (
+        form = res.forms["load_users"]
+        form["file"] = (
             "users.csv",
             (Path(__file__).parent / "users.csv").read_bytes(),
         )
-        res.form["business_area"] = self.business_area.id
-        res.form["partner"] = self.partner.id
-        res.form["role"] = self.role.id
-        res.form["enable_kobo"] = False
-        res = res.form.submit()
+        form["business_area"] = self.business_area.id
+        form["partner"] = self.partner.id
+        form["role"] = self.role.id
+        form["enable_kobo"] = False
+        res = form.submit()
         assert res.status_code == 200
 
         assert not u.role_assignments.filter(role=self.role, business_area=self.business_area).exists()
@@ -100,15 +103,16 @@ class UserImportCSVTest(WebTest):
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = (
+        form = res.forms["load_users"]
+        form["file"] = (
             "users.csv",
             (Path(__file__).parent / "users.csv").read_bytes(),
         )
-        res.form["business_area"] = self.business_area.id
-        res.form["partner"] = partner2.id
-        res.form["role"] = self.role.id
-        res.form["enable_kobo"] = False
-        res = res.form.submit()
+        form["business_area"] = self.business_area.id
+        form["partner"] = partner2.id
+        form["role"] = self.role.id
+        form["enable_kobo"] = False
+        res = form.submit()
         assert res.status_code == 200
         assert not User.objects.filter(email="test@example.com", partner=partner2).exists()
 
@@ -116,15 +120,16 @@ class UserImportCSVTest(WebTest):
     def test_import_csv_with_username(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = (
+        form = res.forms["load_users"]
+        form["file"] = (
             "users2.csv",
             (Path(__file__).parent / "users2.csv").read_bytes(),
         )
-        res.form["business_area"] = self.business_area.id
-        res.form["partner"] = self.partner.id
-        res.form["role"] = self.role.id
-        res.form["enable_kobo"] = False
-        res = res.form.submit()
+        form["business_area"] = self.business_area.id
+        form["partner"] = self.partner.id
+        form["role"] = self.role.id
+        form["enable_kobo"] = False
+        res = form.submit()
         assert res.status_code == 200
         assert User.objects.filter(email="test@example.com", username="test_example1", partner=self.partner).exists()
 

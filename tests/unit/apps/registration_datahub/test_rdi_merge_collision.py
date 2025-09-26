@@ -30,13 +30,16 @@ def capture_on_commit_callbacks(
         yield callbacks
     finally:
         while True:
-            callback_count = len(connections[using].run_on_commit)
-            for _, callback in connections[using].run_on_commit[start_count:]:
+            run_on_commit = connections[using].run_on_commit
+            callback_count = len(run_on_commit)
+
+            for item in run_on_commit[start_count:]:
+                callback = item.func
                 callbacks.append(callback)
                 if execute:
                     callback()
 
-            if callback_count == len(connections[using].run_on_commit):
+            if callback_count == len(run_on_commit):
                 break
             start_count = callback_count
 

@@ -10,7 +10,7 @@ class AdminPanel(BaseComponents):
     permission_text = "content-main"
     login_button = '//*[@id="login-form"]/div[3]/input'
     logged_name = '//*[@class="changelink"]/a'
-    button_logout = '//*[@id="user-tools"]/a[3]'
+    button_logout = '//*[@id="logout-form"]/button'
     logged_out = '//*[@id="content"]'
     error_note = '//*[@class="errornote"]'
     unicef_id = '//*[@id="content"]/h2'

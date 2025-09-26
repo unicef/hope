@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -125,7 +124,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (DEDUP_ENGINE_ERROR, _("Error")),
         (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
     )
-    name = CICharField(
+    name = models.CharField(
         max_length=255,
         unique=True,
         db_index=True,
@@ -136,6 +135,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
         ],
+        db_collation="und-ci-det",
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
     deduplication_engine_status = models.CharField(
