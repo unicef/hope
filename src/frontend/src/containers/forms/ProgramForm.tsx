@@ -206,24 +206,39 @@ const ProgramForm = ({
           />
         </Grid>
         <Grid size={6}>
-          <Field
-            name="dataCollectingTypeCode"
-            label={t('Data Collecting Type')}
-            fullWidth
-            variant="outlined"
-            required
-            disabled={programHasRdi || isCopyProgramPage} // Disable on copy page
-            onChange={(e) => {
-              // Only clear Beneficiary Group if NOT copying a program
-              if (!isCopyProgramPage) {
-                setFieldValue('beneficiaryGroup', '');
-              }
-              setFieldValue('dataCollectingTypeCode', e.target.value);
-            }}
-            choices={filteredDataCollectionTypeChoicesData || []}
-            component={FormikSelectField}
-            data-cy="input-data-collecting-type"
-          />
+          <Tooltip
+            title={
+              values.isActive
+                ? 'Cannot update Data Collecting Type when program is Active'
+                : programHasRdi
+                  ? 'Field disabled because Programme has RDI'
+                  : isCopyProgramPage
+                    ? 'Field disabled on Copy Programme page'
+                    : ''
+            }
+            placement="top"
+          >
+            <span>
+              <Field
+                name="dataCollectingTypeCode"
+                label={t('Data Collecting Type')}
+                fullWidth
+                variant="outlined"
+                required
+                disabled={programHasRdi || isCopyProgramPage || values.isActive}
+                onChange={(e) => {
+                  // Only clear Beneficiary Group if NOT copying a program
+                  if (!isCopyProgramPage) {
+                    setFieldValue('beneficiaryGroup', '');
+                  }
+                  setFieldValue('dataCollectingTypeCode', e.target.value);
+                }}
+                choices={filteredDataCollectionTypeChoicesData || []}
+                component={FormikSelectField}
+                data-cy="input-data-collecting-type"
+              />
+            </span>
+          </Tooltip>
         </Grid>
         <Grid size={6}>
           <Tooltip
