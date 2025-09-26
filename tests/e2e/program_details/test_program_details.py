@@ -133,7 +133,8 @@ def standard_active_program_with_draft_program_cycle() -> Program:
         "LILI",
         status=Program.ACTIVE,
         program_cycle_status=ProgramCycle.DRAFT,
-        cycle_end_date=datetime.now(),
+        cycle_start_date=datetime.now(),
+        cycle_end_date=datetime.now() + relativedelta(days=1),
     )
 
 
