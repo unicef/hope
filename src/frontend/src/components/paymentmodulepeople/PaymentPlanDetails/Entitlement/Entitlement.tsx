@@ -104,7 +104,9 @@ export function Entitlement({
   const queryClient = useQueryClient();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.id ? String(paymentPlan.steficonRule.id) : '',
+    paymentPlan.steficonRule?.rule?.id
+      ? String(paymentPlan.steficonRule.rule.id)
+      : '',
   );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
