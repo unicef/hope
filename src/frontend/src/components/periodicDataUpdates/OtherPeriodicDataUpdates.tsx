@@ -136,6 +136,7 @@ const OtherPeriodicDataUpdates = () => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={otherHeadCells}
       data={data ?? []}
