@@ -7,6 +7,7 @@ from math import ceil
 import typing
 from typing import TYPE_CHECKING, Any, Optional
 
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
@@ -179,3 +180,8 @@ def get_payment_delivered_quantity_status_and_value(
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
     return hashlib.sha256(task_params_str.encode()).hexdigest()
+
+
+def get_link(api_url: str) -> str:
+    protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+    return f"{protocol}://{settings.FRONTEND_HOST}{api_url}"

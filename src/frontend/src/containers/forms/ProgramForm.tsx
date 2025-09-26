@@ -333,7 +333,7 @@ const ProgramForm = ({
           />
         </Grid>
         <Grid size={6} />
-        <Grid size={6}>
+        <Grid size={12}>
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}
@@ -341,6 +341,27 @@ const ProgramForm = ({
             component={FormikRadioGroup}
             data-cy="input-frequency-of-payment"
             alignItems="center"
+          />
+        </Grid>
+        <Grid size={6} >
+          <Field
+            name="reconciliationWindowInDays"
+            label={t('Reconciliation window (in days)')}
+            type="number"
+            fullWidth
+            integer
+            variant="outlined"
+            component={FormikTextField}
+            data-cy="input-reconciliation-window"
+          />
+        </Grid>
+        <Grid size={6} >
+          <Field
+            name="sendReconciliationWindowExpiryNotifications"
+            label={t('Send reconciliation window expiry notifications')}
+            color="primary"
+            component={FormikCheckboxField}
+            data-cy="input-reconciliation-window-notifications"
           />
         </Grid>
       </Grid>

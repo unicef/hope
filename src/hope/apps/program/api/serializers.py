@@ -346,6 +346,8 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     target_populations_count = serializers.SerializerMethodField()
     screen_beneficiary = serializers.BooleanField(read_only=True)
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
+    reconciliation_window_in_days = serializers.IntegerField(default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
 
     class Meta(ProgramListSerializer.Meta):
         fields = ProgramListSerializer.Meta.fields + (  # type: ignore
@@ -359,6 +361,8 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "target_populations_count",
             "population_goal",
             "screen_beneficiary",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
@@ -419,6 +423,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     slug = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
     status = serializers.CharField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
 
     class Meta:
         model = Program
@@ -443,6 +449,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "partner_access",
             "version",
             "status",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
 
     def validate_name(self, value: str) -> str:
@@ -521,6 +529,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     slug = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     partner_access = serializers.CharField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(allow_null=True, required=False)
 
     class Meta:
         model = Program
@@ -543,6 +553,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "version",
             "status",
             "partner_access",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
 
     def validate_name(self, value: str) -> str:
