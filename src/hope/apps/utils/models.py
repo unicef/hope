@@ -12,13 +12,13 @@ from celery.contrib.abortable import AbortableAsyncResult
 from celery.exceptions import TimeoutError as CeleryTimeoutError
 from concurrency.fields import IntegerVersionField
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
-from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
+from model_utils.managers import SoftDeletableManagerMixin, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
@@ -34,18 +34,40 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+class BulkSignalsManagerMixin:
+    def bulk_create(self, objs, *args, **kwargs):
+        val = super().bulk_create(*args, **kwargs)
+        from hope.apps.core.signals import post_bulk_create
+
+        post_bulk_create(sender=self.model, instances=objs, **kwargs)
+        return val
+
+    def bulk_update(self, objs, *args, **kwargs):
+        val = super().bulk_update(*args, **kwargs)
+        from hope.apps.core.signals import post_bulk_update
+
+        transaction.on_commit(
+            lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db)
+        )
+        return val
+
+class BaseManager(BulkSignalsManagerMixin, models.Manager):
+    pass
+
+class SoftDeletableManager(BulkSignalsManagerMixin,SoftDeletableManagerMixin, models.Manager):
+    pass
 
 class SoftDeletableIsVisibleManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_visible=True)
 
 
-class MergedManager(models.Manager):
+class MergedManager(BulkSignalsManagerMixin,models.Manager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class PendingManager(models.Manager):
+class PendingManager(BulkSignalsManagerMixin, models.Manager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
@@ -58,34 +80,6 @@ class SoftDeletableMergedManager(SoftDeletableManager):
 class SoftDeletablePendingManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
-
-
-class SoftDeletableManagerMixin:
-    """Manager that limits the queryset by default to show only not removed instances of model."""
-
-    _queryset_class = SoftDeletableQuerySet
-
-    def __init__(self, *args: Any, _emit_deprecation_warnings: bool = False, **kwargs: Any) -> None:
-        self.emit_deprecation_warnings = _emit_deprecation_warnings
-        super().__init__(*args, **kwargs)
-
-    def get_queryset(self) -> "QuerySet":
-        """Return queryset limited to not removed entries."""
-        if self.emit_deprecation_warnings:
-            warning_message = (
-                f"{self.model.__class__.__name__}.objects model manager will include soft-deleted objects in an "
-                f"upcoming release; please use {self.model.__class__.__name__}.available_objects to continue "
-                "excluding soft-deleted objects. See "
-                "https://django-model-utils.readthedocs.io/en/stable/models.html"
-                "#softdeletablemodel for more information."
-            )
-            warnings.warn(warning_message, stacklevel=DeprecationWarning)
-
-        kwargs = {"model": self.model, "using": self._db}
-        if hasattr(self, "_hints"):
-            kwargs["hints"] = self._hints
-
-        return self._queryset_class(**kwargs).filter(is_removed=False)
 
 
 class MergeStatusModel(models.Model):
@@ -119,7 +113,7 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
     available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
     all_merge_status_objects: models.Manager = SoftDeletableManager()  # MERGED + PENDING - is_removed
-    all_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
+    all_objects: models.Manager = BaseManager()  # MERGED + PENDING + is_removed
 
     def delete(
         self,
@@ -185,7 +179,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
         abstract = True
 
     objects = SoftDeletionTreeManager()
-    all_objects = models.Manager()
+    all_objects = BaseManager()
 
     def delete(
         self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
@@ -297,7 +291,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     is_removed = models.BooleanField(default=False)
 
     active_objects = SoftDeletableManager()
-    objects = models.Manager()
+    objects = BaseManager()
 
     class Meta:
         abstract = True

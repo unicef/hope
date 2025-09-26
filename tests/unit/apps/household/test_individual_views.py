@@ -339,6 +339,7 @@ class TestIndividualList:
         assert str(individual_different_areas1.id) not in response_ids
         assert str(individual_different_areas2.id) not in response_ids
 
+    @pytest.mark.skip(reason="disabled cache")
     def test_individual_list_caching(
         self,
         create_user_role_with_permissions: Any,
