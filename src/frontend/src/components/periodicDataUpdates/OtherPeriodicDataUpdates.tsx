@@ -13,7 +13,7 @@ import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedP
 import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
 
-const mergedHeadCells: HeadCell<any>[] = [
+const otherHeadCells: HeadCell<any>[] = [
   {
     id: 'templateId',
     numeric: false,
@@ -58,20 +58,31 @@ const mergedHeadCells: HeadCell<any>[] = [
   },
 ];
 
-const MergedPeriodicDataUpdates = () => {
+const OtherPeriodicDataUpdates = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
     programSlug: programId,
-    status: ['MERGED' as const],
+    status: [
+      'CREATING',
+      'MERGING',
+      'PENDING_CREATE',
+      'NOT_SCHEDULED_CREATE',
+      'CANCELED_CREATE',
+      'NOT_SCHEDULED_MERGE',
+      'CANCELED_MERGE',
+      'MERGED',
+      'FAILED_MERGE',
+      'FAILED_CREATE',
+    ] as const,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: [
-      'mergedPeriodicDataUpdates',
+      'otherPeriodicDataUpdates',
       queryVariables,
       businessAreaSlug,
       programId,
@@ -81,61 +92,63 @@ const MergedPeriodicDataUpdates = () => {
         businessAreaSlug,
         programSlug: programId,
         ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        status: [...queryVariables.status],
       }),
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
-  const renderRow = (row: any): ReactElement => (
-    <ClickableTableRow
-      key={row.id}
-      data-cy={`merged-row-${row.id}`}
-      onClick={() =>
-        navigate(
-          `/${baseUrl}/population/individuals/online-templates/${row.id}`,
-        )
-      }
-      style={{ cursor: 'pointer' }}
-    >
-      <TableCell>
-        <BlackLink
-          to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
-          data-cy={`template-id-link-${row.id}`}
-        >
-          {row.id}
-        </BlackLink>
-      </TableCell>
-      <TableCell>{row.name}</TableCell>
-      <TableCell>{row.numberOfRecords}</TableCell>
-      <TableCell>
-        <UniversalMoment>{row.createdAt}</UniversalMoment>
-      </TableCell>
-      <TableCell>{row.createdBy}</TableCell>
-      <TableCell>
-        <StatusBox
-          status={row.status}
-          statusDisplay={row.statusDisplay}
-          statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
-        />
-      </TableCell>
-    </ClickableTableRow>
-  );
+  const renderRow = (row: any): ReactElement => {
+    return (
+      <ClickableTableRow
+        key={row.id}
+        data-cy={`other-row-${row.id}`}
+        onClick={() =>
+          navigate(
+            `/${baseUrl}/population/individuals/online-templates/${row.id}`,
+          )
+        }
+        style={{ cursor: 'pointer' }}
+      >
+        <TableCell>
+          <BlackLink
+            to={`/${baseUrl}/population/individuals/online-templates/${row.id}`}
+            data-cy={`template-id-link-${row.id}`}
+          >
+            {row.id}
+          </BlackLink>
+        </TableCell>
+        <TableCell>{row.name}</TableCell>
+        <TableCell>{row.numberOfRecords}</TableCell>
+        <TableCell>
+          <UniversalMoment>{row.createdAt}</UniversalMoment>
+        </TableCell>
+        <TableCell>{row.createdBy}</TableCell>
+        <TableCell>
+          <StatusBox
+            status={row.status}
+            statusDisplay={row.statusDisplay}
+            statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
+          />
+        </TableCell>
+      </ClickableTableRow>
+    );
+  };
 
   return (
     <UniversalRestTable
       isOnPaper={true}
       noEmptyMessage={true}
       renderRow={renderRow}
-      headCells={mergedHeadCells}
+      headCells={otherHeadCells}
       data={data ?? []}
       isLoading={isLoading}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      title="Merged Periodic Data Updates"
+      title="Other Periodic Data Updates"
       hidePagination={true}
     />
   );
 };
 
-export default MergedPeriodicDataUpdates;
+export default OtherPeriodicDataUpdates;
