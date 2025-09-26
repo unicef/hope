@@ -64,7 +64,11 @@ export function RequestedHouseholdDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
       });
     },
     onError: (error: any) => {

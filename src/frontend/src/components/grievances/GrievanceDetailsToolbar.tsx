@@ -135,6 +135,9 @@ export const GrievanceDetailsToolbar = ({
       const householdData = ticket.ticketDetails?.householdData || {};
       const individualData = ticket.ticketDetails?.individualData || {};
 
+      console.log('householdData', householdData);
+      console.log('individualData', individualData);
+
       const allData = {
         ...householdData,
         ...individualData,
@@ -250,7 +253,7 @@ export const GrievanceDetailsToolbar = ({
         )
       : null;
 
-  const changeState = async(status: number): Promise<void> => {
+  const changeState = async (status: number): Promise<void> => {
     await mutateAsync({ status });
   };
 
@@ -325,7 +328,7 @@ export const GrievanceDetailsToolbar = ({
           content: getClosingConfirmationText(),
           warningContent: closingWarningText,
           continueText: t('close ticket'),
-        }).then(async() => {
+        }).then(async () => {
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
           } catch {

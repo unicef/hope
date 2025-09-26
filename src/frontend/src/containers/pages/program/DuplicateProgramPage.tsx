@@ -55,7 +55,7 @@ const DuplicateProgramPage = (): ReactElement => {
         requestBody: programData,
       });
     },
-    onSuccess: async() => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['businessAreaPrograms', businessArea],
       });
@@ -99,7 +99,7 @@ const DuplicateProgramPage = (): ReactElement => {
       gcTime: 1000 * 60 * 30,
     });
 
-  const handleSubmit = async(values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -113,7 +113,11 @@ const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode', 'beneficiaryGroup']);
+    const requestValues = omit(values, [
+      'editMode',
+      'beneficiaryGroup',
+      'isActive',
+    ]);
     const initialPduFieldState = {
       label: '',
       pduData: {
@@ -259,6 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const initialValues = {
     editMode: false,
+    isActive: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: null,
     startDate,
@@ -361,7 +366,7 @@ const DuplicateProgramPage = (): ReactElement => {
           userPartnerChoices,
           values.partners,
         );
-        const handleNextStep = async() => {
+        const handleNextStep = async () => {
           await handleNext({
             validateForm,
             stepFields,

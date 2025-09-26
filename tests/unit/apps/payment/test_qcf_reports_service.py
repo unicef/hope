@@ -21,6 +21,7 @@ from hope.apps.payment.models import (
 )
 from hope.apps.payment.services.qcf_reports_service import QCFReportsService
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.utils import get_link
 from hope.apps.program.models import Program
 
 
@@ -210,8 +211,8 @@ class TestQCFReportsService(TestCase):
                         f"/{report.payment_plan.business_area.slug}/"
                         f"programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
                     )
-                    plan_link = QCFReportsService.get_link(plan_path)
-                    report_link = QCFReportsService.get_link(
+                    plan_link = get_link(plan_path)
+                    report_link = get_link(
                         reverse(
                             "download-payment-plan-invoice-report-pdf",
                             args=[report.id],

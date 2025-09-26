@@ -87,7 +87,7 @@ export const CreateProgramPage = (): ReactElement => {
         requestBody: programData,
       });
     },
-    onSuccess: async() => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['programs', businessArea],
       });
@@ -97,7 +97,7 @@ export const CreateProgramPage = (): ReactElement => {
     },
   });
 
-  const handleSubmit = async(values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -114,7 +114,7 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode']);
+    const requestValues = omit(values, ['editMode', 'isActive']);
 
     const initialPduFieldState = {
       label: '',
@@ -210,6 +210,8 @@ export const CreateProgramPage = (): ReactElement => {
         pduFields: pduFieldsToSend || [],
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
+        reconciliationWindowInDays: values.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: values.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await createProgram(programData);
@@ -222,6 +224,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    isActive: false,
     editMode: false,
     name: '',
     programmeCode: '',
@@ -237,6 +240,8 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    reconciliationWindowInDays: 0,
+    sendReconciliationWindowExpiryNotifications: false,
     partnerAccess: 'ALL_PARTNERS_ACCESS',
     pduFields: [],
   };
@@ -255,6 +260,8 @@ export const CreateProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['pduField'],
     ['partnerAccess'],
@@ -301,7 +308,7 @@ export const CreateProgramPage = (): ReactElement => {
           values.partners,
         );
 
-        const handleNextStep = async() => {
+        const handleNextStep = async () => {
           await handleNext({
             validateForm,
             stepFields,

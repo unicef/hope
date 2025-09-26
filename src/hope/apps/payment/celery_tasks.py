@@ -940,3 +940,38 @@ def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
         except Exception as e:
             logger.exception(f"Failed to send QCF report emails for {qcf_report}")
             raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+
+    try:
+        PaymentPlanService.send_reconciliation_overdue_emails()
+
+    except Exception as e:  # pragma no cover
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+
+    with cache.lock(
+        f"send_payment_plan_reconciliation_overdue_email_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        try:
+            service = PaymentPlanService(payment_plan)
+            service.send_reconciliation_overdue_email_for_pp()
+        except Exception as e:  # pragma no cover
+            logger.exception(f"Failed to send PP reconciliation overdue email for {payment_plan}")
+            raise self.retry(exc=e)
