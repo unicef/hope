@@ -905,7 +905,9 @@ class PaymentPlanViewSet(
                     raise ValidationError("Rule Engine run in progress")
                 payment_plan.background_action_status_steficon_run()
                 payment_plan.save()
-                payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                transaction.on_commit(
+                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                )
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -915,6 +917,7 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            payment_plan.refresh_from_db(fields=["background_action_status"])
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1655,6 +1658,7 @@ class TargetPopulationViewSet(
             old_object=old_tp,
             new_object=tp,
         )
+        tp.refresh_from_db(fields=["background_action_status"])
         response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
         return Response(
             data=response_serializer.data,
