@@ -210,6 +210,8 @@ export const CreateProgramPage = (): ReactElement => {
         pduFields: pduFieldsToSend || [],
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
+        reconciliationWindowInDays: values.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: values.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await createProgram(programData);
@@ -238,6 +240,8 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    reconciliationWindowInDays: 0,
+    sendReconciliationWindowExpiryNotifications: false,
     partnerAccess: 'ALL_PARTNERS_ACCESS',
     pduFields: [],
   };
@@ -256,6 +260,8 @@ export const CreateProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['pduField'],
     ['partnerAccess'],
