@@ -888,7 +888,7 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             msg = "Export failed: The Payment List is empty."
             raise GraphQLError(msg)
 
-        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
             msg = (
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
             )

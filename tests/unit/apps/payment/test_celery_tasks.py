@@ -267,10 +267,10 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        with patch.object(type(payment_plan), "can_create_xlsx_with_fsp_auth_code", new_callable=property):
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
-            type(payment_plan).can_create_xlsx_with_fsp_auth_code = property(lambda _: True)
-            self.assertTrue(payment_plan.can_create_xlsx_with_fsp_auth_code)
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
@@ -300,10 +300,10 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        with patch.object(type(payment_plan), "can_create_xlsx_with_fsp_auth_code", new_callable=property):
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
-            type(payment_plan).can_create_xlsx_with_fsp_auth_code = property(lambda _: True)
-            self.assertTrue(payment_plan.can_create_xlsx_with_fsp_auth_code)
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
