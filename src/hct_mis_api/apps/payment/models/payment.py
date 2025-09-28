@@ -792,7 +792,7 @@ class PaymentPlan(
         return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     @property
-    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
+    def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
         """
         export MTCN file
         xlsx file with password
