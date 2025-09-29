@@ -179,17 +179,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         request = self.context.get("request", {})
         if user.is_superuser:
             return {e.value for e in Permissions}
+
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.query_params.get("program")
-
-        if program_slug:
-            if not hasattr(user, '_cached_program_id'):
-                program = Program.objects.filter(slug=program_slug).first()
-                user._cached_program_id = program.id if program else None
-
-            if user._cached_program_id:
-                return user.permissions_in_business_area(business_area_slug, user._cached_program_id)
-            return set()
+        if program_slug := request.query_params.get("program"):
+            program = self.context.get("program") or Program.objects.filter(slug=program_slug).first()
+            return user.permissions_in_business_area(business_area_slug, program.id)
 
         return user.permissions_in_business_area(business_area_slug)
 
@@ -202,18 +196,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
         request = self.context.get("request", {})
-        program_slug = request.query_params.get("program")
-
-        if program_slug:
-            if not hasattr(user, '_cached_program_id'):
-                program = Program.objects.filter(slug=program_slug).first()
-                user._cached_program_id = program.id if program else None
-
-            if user._cached_program_id:
-                program = Program.objects.get(id=user._cached_program_id)
-                return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(user._cached_program_id)
-            return False
-
+        if program_slug:=self.context.get("program"):
+            program = self.context.get("program") or Program.objects.filter(slug=program_slug).first()
+            return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug != "undefined" else None
 

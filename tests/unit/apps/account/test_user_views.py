@@ -893,7 +893,7 @@ class TestProgramUsers:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 79
+            assert len(ctx.captured_queries) == 63
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -914,7 +914,7 @@ class TestProgramUsers:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # Should benefit from cached permissions calculations and prefetch optimization
-            assert len(ctx.captured_queries) == 50
+            assert len(ctx.captured_queries) == 34
 
         self.user3.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -924,7 +924,7 @@ class TestProgramUsers:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 5
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 39
+            assert len(ctx.captured_queries) == 26
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:

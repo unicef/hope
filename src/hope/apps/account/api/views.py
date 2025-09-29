@@ -75,6 +75,14 @@ class UserViewSet(
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UsersFilter
 
+    def get_serializer_context(self) -> dict[str, Any]:
+        context = super().get_serializer_context()
+
+        if self.request and (program_slug := self.request.query_params.get("program")):
+            context["program"] = Program.objects.filter(slug=program_slug, business_area__slug=self.kwargs.get("business_area_slug")).first()
+
+        return context
+
     def get_queryset(self) -> QuerySet[User]:
         business_area_slug = self.kwargs.get("business_area_slug")
 
