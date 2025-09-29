@@ -39,11 +39,16 @@ def migrate_user_roles(apps, schema_editor):
     After model update, existing UserRoles would have program=null, granting users access to all programs by default.
     This migration will fetch the programs for specific Business Areas from UserRole
     and create RoleAssignment entries for each program to preserve the original access.
+
+    For UNICEF partner users, role assignments will have program=None (access to all programs in the business area).
     """
     RoleAssignment = apps.get_model("account", "RoleAssignment")
     ProgramPartnerThrough = apps.get_model("program", "ProgramPartnerThrough")
+    Partner = apps.get_model("account", "Partner")
 
     expiration_time = timezone.now()
+
+    unicef_partner = Partner.objects.filter(name="UNICEF").first()
 
     # do not change UserRoles for Global as it can stay with program=None
     user_roles = (
@@ -79,6 +84,10 @@ def migrate_user_roles(apps, schema_editor):
             user = user_role.user
             partner = user.partner
             business_area = user_role.business_area
+
+            # Special handling for UNICEF partner users - keep program=None
+            if partner == unicef_partner:
+                continue
 
             programs = program_access_mapping.get((partner.id, business_area.id), []) if partner else []
 
