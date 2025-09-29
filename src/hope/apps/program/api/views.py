@@ -126,11 +126,9 @@ class ProgramViewSet(
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
         user = self.request.user
-        allowed_programs = list(
-            queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id)).values_list(
-                "id", flat=True
-            )
-        )
+
+        allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
@@ -473,7 +471,7 @@ class ProgramCycleViewSet(
     ModelViewSet,
     BaseViewSet,
 ):
-    queryset = ProgramCycle.objects.all()
+    queryset = ProgramCycle.objects.all().select_related("created_by", "program__business_area")
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
         "retrieve": ProgramCycleListSerializer,
