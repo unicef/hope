@@ -8,6 +8,7 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -24,6 +25,7 @@ from hope.apps.dashboard.services import (
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
+    get_fertility_rate,
     get_pwd_count_expression,
 )
 from hope.apps.household.models import Household
@@ -945,3 +947,103 @@ def test_get_base_payment_queryset_with_without_ba() -> None:
     qs_all = DashboardCacheBase._get_base_payment_queryset()
     assert qs_all.filter(pk=payment1.pk).exists()
     assert qs_all.filter(pk=payment2.pk).exists()
+
+
+CHILDREN_COUNT_SCENARIOS = [
+    ("social_program", "SOCIAL", 10, 2.6, 3),
+    ("children_count_none", "STANDARD", None, 3.8, 4),
+    ("children_count_value", "STANDARD", 7, 1.1, 7),
+]
+
+
+@pytest.mark.parametrize(
+    ("test_id", "dct_type", "household_children_count", "fertility_rate", "expected_children"),
+    CHILDREN_COUNT_SCENARIOS,
+)
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_children_count_calculation_scenarios(
+    test_id: str,
+    dct_type: str,
+    household_children_count: Optional[int],
+    fertility_rate: float,
+    expected_children: int,
+    mocker: Any,
+    afghanistan: BusinessArea,
+) -> None:
+    """Test various scenarios for children_count calculation in dashboard data."""
+    mocker.patch("hope.apps.dashboard.services.get_fertility_rate", return_value=fertility_rate)
+    cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
+    cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
+
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct, sector=f"Sector-{test_id}")
+    household, _ = create_household(
+        household_args={
+            "program": program,
+            "business_area": afghanistan,
+            "children_count": household_children_count,
+        }
+    )
+    status_map = {
+        "social_program": Payment.STATUS_SUCCESS,
+        "children_count_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
+        "children_count_value": Payment.STATUS_PENDING,
+    }
+    status = status_map[test_id]
+
+    PaymentFactory.create(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        delivery_date=TEST_DATE,
+        status=status,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert len(result) == 1
+    assert result[0]["children_counts"] == expected_children
+
+    global_result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
+    global_agg_group = [
+        item
+        for item in global_result
+        if item["country"] == afghanistan.name and item["sector"] == f"Sector-{test_id}" and item["status"] == status
+    ]
+    assert len(global_agg_group) == 1
+    assert global_agg_group[0]["children_counts"] == expected_children
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_success(mocker: Any) -> None:
+    """Test get_fertility_rate successfully retrieves a rate."""
+    mock_data = {"2023": {"Testland": 5.5}}
+    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
+    rate = get_fertility_rate("Testland", 2023)
+    assert rate == 5.5
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_fallback_to_latest_year(mocker: Any) -> None:
+    """Test get_fertility_rate falls back to the most recent year's data."""
+    mock_data = {"2022": {"Testland": 5.2}, "2021": {"Testland": 5.1}}
+    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
+    rate = get_fertility_rate("Testland", 2023)  # Year not in data
+    assert rate == 5.2  # Should use 2022 data
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_country_not_found(mocker: Any) -> None:
+    """Test get_fertility_rate returns 0.0 if country is not found."""
+    mock_data = {"2023": {"Otherland": 4.0}}
+    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
+    rate = get_fertility_rate("Testland", 2023)
+    assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_no_data(mocker: Any) -> None:
+    """Test get_fertility_rate returns 0.0 if no data is loaded."""
+    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value={})
+    rate = get_fertility_rate("Testland", 2023)
+    assert rate == 0.0

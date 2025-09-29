@@ -11,7 +11,6 @@ from typing import (
 )
 from uuid import UUID
 
-from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
@@ -25,6 +24,7 @@ from hope.apps.payment.models import Payment, PaymentPlan
 logger = logging.getLogger(__name__)
 
 
+CACHE_TIMEOUT = 60 * 60 * 24
 FERTILITY_DATA_CACHE_KEY = "fertility_data"
 
 
@@ -45,7 +45,7 @@ def _load_fertility_data() -> dict[str, dict[str, float]]:
         if country.iso_code3
     }
 
-    file_path = Path(settings.BASE_DIR) / "hct_mis_api" / "apps" / "dashboard" / "data" / "fertility_rates.json"
+    file_path = Path(__file__).parent / "data" / "fertility_rates.json"
     transformed_data: dict[str, dict[str, float]] = defaultdict(dict)
 
     try:
@@ -97,7 +97,6 @@ def get_fertility_rate(country: str, year: int) -> float:
     return 0.0
 
 
-CACHE_TIMEOUT = 60 * 60 * 24
 GLOBAL_SLUG = "global"
 DEFAULT_ITERATOR_CHUNK_SIZE = 2500
 HOUSEHOLD_BATCH_SIZE = 2500
