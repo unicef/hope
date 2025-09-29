@@ -25,7 +25,11 @@ from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import (
+    generate_cache_key,
+    get_quantity_in_usd,
+    normalize_score,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -769,7 +773,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
                         "payment_plan": payment_plan,
                     }
                 )
-                payment.vulnerability_score = result.value
+                payment.vulnerability_score = normalize_score(result.value)
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["vulnerability_score"])
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED

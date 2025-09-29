@@ -74,7 +74,7 @@ def automate_rdi_creation_task(
                 return []
             output = []
             try:
-                registration = Registration.objects.get(id=registration_id)
+                registration = Registration.objects.get(source_id=registration_id)
             except Registration.DoesNotExist:
                 raise NotImplementedError
             project = registration.project

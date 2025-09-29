@@ -545,13 +545,15 @@ class TestAutomatingRDICreationTask(TestCase):
         cls.registration.save()
 
     def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
-        result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)
+        result = run_automate_rdi_creation_task(registration_id=self.registration.source_id, page_size=1)
         assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
-        record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
+        record = create_record(
+            fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_ERROR
+        )
 
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
@@ -568,14 +570,16 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 3
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
         assert PendingIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=self.registration.id, page_size=page_size, template="some template {date} {records}"
+            registration_id=self.registration.source_id, page_size=page_size, template="some template {date} {records}"
         )
 
         assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
@@ -593,7 +597,9 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 3
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -603,7 +609,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=self.registration.id,
+                registration_id=self.registration.source_id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 auto_merge=True,
@@ -619,7 +625,9 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 3
 
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -629,7 +637,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=self.registration.id,
+                registration_id=self.registration.source_id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 fix_tax_id=True,
