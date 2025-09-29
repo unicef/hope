@@ -93,23 +93,22 @@ class UserViewSet(
         )
 
         if self.request and self.request.query_params.get("serializer") == "program_users":
+            role_assignments_queryset = (
+                RoleAssignment.objects
+                .select_related("business_area", "role", "program")
+                .exclude(expiry_date__lt=timezone.now())
+                .order_by("business_area__slug", "role__name")
+            )
+
             queryset = queryset.prefetch_related(
                 models.Prefetch(
                     "role_assignments",
-                    queryset=RoleAssignment.objects.select_related(
-                        "business_area", "role", "program"
-                    ).exclude(
-                        expiry_date__lt=timezone.now()
-                    ).order_by("business_area__slug", "role__name"),
+                    queryset=role_assignments_queryset,
                     to_attr="cached_user_role_assignments"
                 ),
                 models.Prefetch(
                     "partner__role_assignments",
-                    queryset=RoleAssignment.objects.select_related(
-                        "business_area", "role", "program"
-                    ).exclude(
-                        expiry_date__lt=timezone.now()
-                    ).order_by("business_area__slug", "role__name"),
+                    queryset=role_assignments_queryset,
                     to_attr="cached_partner_role_assignments"
                 ),
             )

@@ -37,9 +37,37 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
 
     def get_permissions(self, obj: BusinessArea) -> list:
         user = self.context["user_obj"]
-        if user:
-            return user.all_permissions_in_business_areas[str(obj.id)]
-        return []
+        if not user:
+            return []
+
+        cached_user_roles = getattr(user, "cached_user_role_assignments", None)
+        cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None) if user.partner else []
+
+        if cached_user_roles is not None:
+            permissions_set = set()
+
+            relevant_assignments = [
+                assignment for assignment in cached_user_roles
+                if assignment.business_area.id == obj.id
+            ]
+
+            if cached_partner_roles:
+                relevant_assignments.extend([
+                    assignment for assignment in cached_partner_roles
+                    if assignment.business_area.id == obj.id
+                ])
+
+            for assignment in relevant_assignments:
+                if assignment.role and assignment.role.permissions:
+                    permissions_set.update(assignment.role.permissions)
+                if hasattr(assignment, 'group') and assignment.group:
+                    for perm in getattr(assignment.group, 'permissions', []):
+                        if hasattr(perm, 'content_type') and hasattr(perm, 'codename'):
+                            permissions_set.add(f"{perm.content_type.app_label}.{perm.codename}")
+
+            return permissions_set
+
+        return user.all_permissions_in_business_areas[str(obj.id)]
 
     def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
         return all(
@@ -130,18 +158,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         cached_user_roles = getattr(user, "cached_user_role_assignments", None)
         if cached_user_roles is not None:
             for assignment in cached_user_roles:
-                if hasattr(assignment, 'business_area'):
-                    business_areas.add(assignment.business_area)
+                business_areas.add(assignment.business_area)
 
         if user.partner:
             cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None)
             if cached_partner_roles is not None:
                 for assignment in cached_partner_roles:
-                    if hasattr(assignment, 'business_area'):
-                        business_areas.add(assignment.business_area)
+                    business_areas.add(assignment.business_area)
 
-        if not business_areas:
-            business_areas = user.business_areas
+        if cached_user_roles is None:
+            business_areas = set(user.business_areas.all())
 
         return UserBusinessAreaSerializer(
             list(business_areas),
@@ -154,9 +180,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         if user.is_superuser:
             return {e.value for e in Permissions}
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        if program_slug := request.query_params.get("program"):  # scope program
-            if program := Program.objects.filter(slug=program_slug).first():
-                return user.permissions_in_business_area(business_area_slug, program.id)
+        program_slug = request.query_params.get("program")
+
+        if program_slug:
+            if not hasattr(user, '_cached_program_id'):
+                program = Program.objects.filter(slug=program_slug).first()
+                user._cached_program_id = program.id if program else None
+
+            if user._cached_program_id:
+                return user.permissions_in_business_area(business_area_slug, user._cached_program_id)
             return set()
 
         return user.permissions_in_business_area(business_area_slug)
@@ -171,9 +203,16 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         request = self.context.get("request", {})
         program_slug = request.query_params.get("program")
-        program = Program.objects.filter(slug=program_slug).first()
-        if program_slug and program:
-            return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
+
+        if program_slug:
+            if not hasattr(user, '_cached_program_id'):
+                program = Program.objects.filter(slug=program_slug).first()
+                user._cached_program_id = program.id if program else None
+
+            if user._cached_program_id:
+                program = Program.objects.get(id=user._cached_program_id)
+                return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(user._cached_program_id)
+            return False
 
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug != "undefined" else None
