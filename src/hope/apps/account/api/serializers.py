@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -98,24 +99,52 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_login",
         )
 
-    @staticmethod
-    def get_partner_roles(user: User) -> ReturnDict:
-        role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name").select_related(
-            "business_area", "role"
-        )
+    def get_partner_roles(self, user: User) -> ReturnDict:
+        """Use prefetched data when available to avoid additional queries."""
+        cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None)
+
+        if cached_partner_roles is not None:
+            role_assignments = cached_partner_roles
+        else:
+            role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name").select_related(
+                "business_area", "role"
+            ).exclude(expiry_date__lt=timezone.now())
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
-    @staticmethod
-    def get_user_roles(user: User) -> ReturnDict:
-        role_assignments = user.role_assignments.order_by("business_area__slug", "role__name").select_related(
-            "business_area", "role"
-        )
+    def get_user_roles(self, user: User) -> ReturnDict:
+        """Use prefetched data when available to avoid additional queries."""
+        cached_user_roles = getattr(user, "cached_user_role_assignments", None)
+
+        if cached_user_roles is not None:
+            role_assignments = cached_user_roles
+        else:
+            role_assignments = user.role_assignments.order_by("business_area__slug", "role__name").select_related(
+                "business_area", "role"
+            ).exclude(expiry_date__lt=timezone.now())
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
-    @staticmethod
-    def get_business_areas(user: User) -> ReturnDict:
+    def get_business_areas(self, user: User) -> ReturnDict:
+        """Use prefetched data when available to avoid additional queries."""
+        business_areas = set()
+
+        cached_user_roles = getattr(user, "cached_user_role_assignments", None)
+        if cached_user_roles is not None:
+            for assignment in cached_user_roles:
+                if hasattr(assignment, 'business_area'):
+                    business_areas.add(assignment.business_area)
+
+        if user.partner:
+            cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None)
+            if cached_partner_roles is not None:
+                for assignment in cached_partner_roles:
+                    if hasattr(assignment, 'business_area'):
+                        business_areas.add(assignment.business_area)
+
+        if not business_areas:
+            business_areas = user.business_areas
+
         return UserBusinessAreaSerializer(
-            user.business_areas,
+            list(business_areas),
             context={"user_obj": user, "allow_accountability_module": bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE"))},
             many=True,
         ).data

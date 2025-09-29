@@ -566,7 +566,6 @@ class TestUserList:
     def test_user_list_caching(
         self,
         create_user_role_with_permissions: Any,
-        set_admin_area_limits_in_program: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -876,6 +875,66 @@ class TestProgramUsers:
         assert response_results[5]["permissions_in_scope"] == {
             str(perm) for perm in [*self.role_p2.permissions, *self.role3.permissions]
         }
+
+    def test_program_users_caching(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(response.json()["results"]) == 6
+            assert len(ctx.captured_queries) == 91
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_second_call = response.headers["etag"]
+            assert etag == etag_second_call
+            assert len(ctx.captured_queries) == 4
+
+        self.user2.first_name = "Zoe"
+        self.user2.save()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_third_call = response.headers["etag"]
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
+            assert etag_third_call not in [etag, etag_second_call]
+            # Should benefit from cached permissions calculations and prefetch optimization
+            assert len(ctx.captured_queries) == 62
+
+        self.user3.delete()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fourth_call = response.headers["etag"]
+            assert len(response.json()["results"]) == 5
+            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
+            assert len(ctx.captured_queries) == 49
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fifth_call = response.headers["etag"]
+            assert etag_fifth_call == etag_fourth_call
+            assert len(ctx.captured_queries) == 4
 
 
 class TestUserFilter:

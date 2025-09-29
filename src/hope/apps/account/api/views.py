@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING, Any
 
 from constance import config
+from django.db import models
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
@@ -19,7 +21,7 @@ from hope.apps.account.api.serializers import (
     UserSerializer,
 )
 from hope.apps.account.filters import UsersFilter
-from hope.apps.account.models import Partner, User
+from hope.apps.account.models import Partner, User, RoleAssignment
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.account.profile_cache import ProfileEtagKey, ProfileKeyConstructor
 from hope.apps.core.api.mixins import (
@@ -75,16 +77,44 @@ class UserViewSet(
 
     def get_queryset(self) -> QuerySet[User]:
         business_area_slug = self.kwargs.get("business_area_slug")
-        return (
+
+        queryset = (
             super()
             .get_queryset()
             .filter(
-                Q(role_assignments__business_area__slug=business_area_slug)
-                | Q(partner__role_assignments__business_area__slug=business_area_slug)
+                Q(role_assignments__business_area__slug=business_area_slug, role_assignments__expiry_date__gte=timezone.now())
+                | Q(role_assignments__business_area__slug=business_area_slug, role_assignments__expiry_date__isnull=True)
+                | Q(partner__role_assignments__business_area__slug=business_area_slug, partner__role_assignments__expiry_date__gte=timezone.now())
+                | Q(partner__role_assignments__business_area__slug=business_area_slug, partner__role_assignments__expiry_date__isnull=True)
             )
             .distinct()
             .order_by("first_name")
+            .select_related("partner")
         )
+
+        if self.request and self.request.query_params.get("serializer") == "program_users":
+            queryset = queryset.prefetch_related(
+                models.Prefetch(
+                    "role_assignments",
+                    queryset=RoleAssignment.objects.select_related(
+                        "business_area", "role", "program"
+                    ).exclude(
+                        expiry_date__lt=timezone.now()
+                    ).order_by("business_area__slug", "role__name"),
+                    to_attr="cached_user_role_assignments"
+                ),
+                models.Prefetch(
+                    "partner__role_assignments",
+                    queryset=RoleAssignment.objects.select_related(
+                        "business_area", "role", "program"
+                    ).exclude(
+                        expiry_date__lt=timezone.now()
+                    ).order_by("business_area__slug", "role__name"),
+                    to_attr="cached_partner_role_assignments"
+                ),
+            )
+
+        return queryset
 
     @extend_schema(parameters=[OpenApiParameter(name="program")])
     @action(detail=False, methods=["get"], url_path="profile", url_name="profile")
