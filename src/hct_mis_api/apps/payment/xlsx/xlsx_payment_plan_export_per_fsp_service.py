@@ -140,6 +140,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         # get headers
+        add_accounts_fields = False
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         if fsp_xlsx_template and fsp_xlsx_template.columns:
             template_column_list = fsp_xlsx_template.columns
@@ -153,21 +154,24 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if not self.allow_export_fsp_auth_code and "fsp_auth_code" in column_list:
             column_list.remove("fsp_auth_code")
 
-        column_list = self._remove_column_for_people(column_list)
-        self.template_columns = column_list
+        if "account_data" in column_list:
+            column_list.remove("account_data")
+            add_accounts_fields = True
 
-        self.core_fields = self._remove_column_for_people(fsp_xlsx_template.core_fields)
+        column_list = self._remove_column_for_people(column_list)
+        self.template_columns = column_list.copy()
+
+        self.core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
         column_list.extend(self.core_fields)
 
-        self.flex_fields = fsp_xlsx_template.flex_fields
+        self.flex_fields = list(fsp_xlsx_template.flex_fields)
         column_list.extend(self.flex_fields)
 
-        self.document_fields = fsp_xlsx_template.document_types
+        self.document_fields = list(fsp_xlsx_template.document_types)
         column_list.extend(self.document_fields)
 
         # add headers for Account from FSP in PaymentPlan
-        if "account_data" in column_list:
-            column_list.remove("account_data")
+        if add_accounts_fields:
             column_list.extend(self.account_fields_headers)
 
         self.header_list = column_list
