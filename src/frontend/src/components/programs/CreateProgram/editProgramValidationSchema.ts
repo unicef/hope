@@ -48,7 +48,7 @@ export const editProgramDetailsValidationSchema = (
       .test({
         name: 'conditional-required',
         message: t('Beneficiary Group is required'),
-        test: function (value) {
+        test: function(value) {
           // Get parent values from the validation context
           const { dataCollectingTypeCode } = this.parent;
 

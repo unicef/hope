@@ -58,7 +58,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
       setSelectedIndividualIds([]);
     },
     onError: (error: any) => {
-      showMessage(error?.body?.errors || error?.message || 'An error occurred');
+      showApiErrorMessages(error, showMessage);
     },
   });
 

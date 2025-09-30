@@ -15,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -52,6 +54,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
   const canUploadReconciliation =
+    paymentPlan.status !== PaymentPlanStatusEnum.CLOSED &&
     hasPermissions(
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
@@ -87,8 +90,8 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       setOpenImport(false);
       showMessage(t('Your import was successful!'));
     },
-    onError: (e) => {
-      showMessage(e.message);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

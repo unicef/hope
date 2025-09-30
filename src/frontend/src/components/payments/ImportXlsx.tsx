@@ -11,6 +11,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -30,7 +31,7 @@ export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
 }: ImportXlsxProps): ReactElement => {
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { businessArea, programId: programSlug } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
@@ -68,14 +69,13 @@ export const ImportXlsx = ({
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-
         await importMutation.mutateAsync({
           file: fileToImport,
         });
         setOpenImport(false);
         showMessage(t('Your import was successful!'));
-      } catch (e) {
-        showRestApiError(e);
+      } catch (error) {
+        showApiErrorMessages(error, showMessage);
       }
     }
   };

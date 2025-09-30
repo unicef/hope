@@ -15,14 +15,14 @@ export const useActionMutation = <TData, TOptions>(
   const { businessAreaSlug, programSlug } = useBaseUrl();
   const client = useQueryClient();
   return useMutation({
-    mutationFn: async () =>
+    mutationFn: async() =>
       mutationFn({
         businessAreaSlug,
         programSlug,
         id: id,
       } as TOptions),
     ...options,
-    onSuccess: async () => {
+    onSuccess: async() => {
       if (options?.onSuccess) {
         await options.onSuccess();
       }

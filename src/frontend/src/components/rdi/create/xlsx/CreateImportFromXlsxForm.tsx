@@ -16,6 +16,7 @@ import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
 import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { showApiErrorMessages } from '@utils/utils';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -64,7 +65,7 @@ export function CreateImportFromXlsxForm({
       navigate(`/${baseUrl}/registration-data-import/${data.id}`);
     },
     onError: (error: any) => {
-      showMessage(error.message || 'Error creating import');
+      showApiErrorMessages(error, showMessage);
       setSubmitDisabled(false);
     },
   });

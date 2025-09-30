@@ -1,5 +1,4 @@
 import { api, handleApiResponse } from './api';
-// import { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 
 //TODO: Add generated types
 //TODO: MOVE to useQuery
@@ -14,7 +13,7 @@ interface Program {
   updated_at: string;
 }
 
-export const fetchProgram = async (
+export const fetchProgram = async(
   businessArea: string,
   programId: string,
 ): Promise<Program> => {
@@ -46,10 +45,6 @@ interface ProgramsParams {
   updated_at_before?: string;
 }
 
-interface Program {
-  // Define the properties of a Program here
-}
-
 interface PaginatedListResponse<T> {
   count: number;
   next?: string;
@@ -57,7 +52,7 @@ interface PaginatedListResponse<T> {
   results: T[];
 }
 
-export const fetchPrograms = async (
+export const fetchPrograms = async(
   params: ProgramsParams,
 ): Promise<PaginatedListResponse<Program>> => {
   const queryString = new URLSearchParams(params as any).toString();

@@ -108,6 +108,7 @@ class Permissions(Enum):
     PM_ASSIGN_FUNDS_COMMITMENTS = auto()
     PM_SYNC_PAYMENT_PLAN_WITH_PG = auto()
     PM_SYNC_PAYMENT_WITH_PG = auto()
+    PM_CLOSE_FINISHED = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()
@@ -125,6 +126,7 @@ class Permissions(Enum):
     PM_PROGRAMME_CYCLE_DELETE = auto()
 
     RECEIVE_PARSED_WU_QCF = auto()
+    RECEIVE_PP_OVERDUE_EMAIL = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()

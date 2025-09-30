@@ -681,6 +681,7 @@ class PaymentPlanViewSet(
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        "close": [Permissions.PM_CLOSE_FINISHED],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -904,7 +905,9 @@ class PaymentPlanViewSet(
                     raise ValidationError("Rule Engine run in progress")
                 payment_plan.background_action_status_steficon_run()
                 payment_plan.save()
-                payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                transaction.on_commit(
+                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                )
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -914,6 +917,7 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            payment_plan.refresh_from_db(fields=["background_action_status"])
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1141,7 +1145,6 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    # TODO:
     @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
     @transaction.atomic
     def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1382,6 +1385,22 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).close()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
 
 
 class TargetPopulationViewSet(
@@ -1639,6 +1658,7 @@ class TargetPopulationViewSet(
             old_object=old_tp,
             new_object=tp,
         )
+        tp.refresh_from_db(fields=["background_action_status"])
         response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
         return Response(
             data=response_serializer.data,
@@ -1763,11 +1783,11 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
     }
 
     def get_queryset(self) -> QuerySet:
-        payment_plan_id = self.kwargs.get("payment_plan_id")
+        payment_plan_id = self.kwargs.get("payment_plan_pk")
         return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=payment_plan_id)
 
     def get_object(self) -> PaymentPlanSupportingDocument:
-        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_plan_pk"))
         return get_object_or_404(
             PaymentPlanSupportingDocument,
             id=self.kwargs.get("file_id"),
@@ -1826,7 +1846,7 @@ class PaymentViewSet(
         return get_object_or_404(Payment, id=payment_id)
 
     def get_queryset(self) -> QuerySet:
-        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_id"])
+        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_pk"])
 
     @action(
         detail=True,

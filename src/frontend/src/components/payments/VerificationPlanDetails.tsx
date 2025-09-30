@@ -3,7 +3,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { paymentVerificationStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -32,7 +32,7 @@ interface VerificationPlanDetailsProps {
 
 export function VerificationPlanDetails({
   verificationPlan,
-                                          paymentPlanNode,
+  paymentPlanNode,
 }: VerificationPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
 

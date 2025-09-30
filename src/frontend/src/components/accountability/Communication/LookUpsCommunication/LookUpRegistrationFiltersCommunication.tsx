@@ -1,5 +1,5 @@
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -11,7 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { ReactElement } from 'react';
 
 interface LookUpRegistrationFiltersCommunicationProps {
-  filter;
+  filter: Record<string, any>;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -54,7 +54,7 @@ export function LookUpRegistrationFiltersCommunication({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}

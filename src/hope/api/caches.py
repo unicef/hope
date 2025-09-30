@@ -78,11 +78,7 @@ def etag_decorator(
 
 def get_or_create_cache_key(key: str, default: Any) -> Any:
     """Get value from cache by key or create it with default value."""
-    value = cache.get(key)
-    if value is None:
-        cache.set(key, default, timeout=None)
-        return default
-    return value
+    return cache.get_or_set(key, default)
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
@@ -100,12 +96,31 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
         return str(business_area_version)
 
 
+class RendererKeyBit(KeyBitBase):
+    """Key bit that includes renderer class information in cache keys."""
+
+    def get_data(
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
+    ) -> str:
+        if hasattr(request, "accepted_renderer") and request.accepted_renderer:
+            return request.accepted_renderer.__class__.__name__
+
+        return "JSONRenderer"  # pragma: no cover
+
+
 class KeyConstructorMixin(KeyConstructor):
     business_area_version = BusinessAreaVersionKeyBit()
     unique_method_id = bits.UniqueMethodIdKeyBit()
     querystring = bits.QueryParamsKeyBit()
     params = bits.KwargsKeyBit()
     pagination = bits.PaginationKeyBit()
+    renderer = RendererKeyBit()
 
 
 class BusinessAreaKeyBitMixin(KeyBitBase):
@@ -157,6 +172,8 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     the latest `updated_at` value and object count.
     The cache is based also on the business area, program and their version.
     """
+
+    # TODO This is a bad approach. On large tables this will cause performance issues. Count and Max are very expensive.
 
     specific_view_cache_key = ""
 

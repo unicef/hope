@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -35,6 +36,11 @@ function PaymentVerificationPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
@@ -48,18 +54,23 @@ function PaymentVerificationPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <TableWrapper>
-        <PaymentVerificationTable
-          filter={appliedFilter}
-          businessArea={businessArea}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
-            permissions,
-          )}
-        />
-      </TableWrapper>
+      <div ref={tableRef}>
+        <TableWrapper>
+          <PaymentVerificationTable
+            filter={appliedFilter}
+            businessArea={businessArea}
+            canViewDetails={hasPermissions(
+              PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+              permissions,
+            )}
+          />
+        </TableWrapper>
+      </div>
     </>
   );
 }

@@ -335,12 +335,19 @@ class ProgramListSerializer(serializers.ModelSerializer):
         return [pdu_field.id for pdu_field in obj.pdu_fields.all()]  # to save queries
 
 
+class ProgramOnlyNameSerializer(serializers.ModelSerializer):
+    class Meta(ProgramListSerializer.Meta):
+        fields = ("id", "name", "slug")
+
+
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
     registration_imports_total_count = serializers.SerializerMethodField()
     target_populations_count = serializers.SerializerMethodField()
     screen_beneficiary = serializers.BooleanField(read_only=True)
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
+    reconciliation_window_in_days = serializers.IntegerField(default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
 
     class Meta(ProgramListSerializer.Meta):
         fields = ProgramListSerializer.Meta.fields + (  # type: ignore
@@ -354,6 +361,8 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "target_populations_count",
             "population_goal",
             "screen_beneficiary",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
@@ -414,6 +423,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     slug = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
     status = serializers.CharField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(default=False)
 
     class Meta:
         model = Program
@@ -438,7 +449,15 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "partner_access",
             "version",
             "status",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
+
+    def validate_name(self, value: str) -> str:
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        if Program.objects.filter(business_area__slug=business_area_slug, name=value, is_removed=False).exists():
+            raise serializers.ValidationError("Programme with this name already exists in this business area.")
+        return value
 
     def validate_programme_code(self, value: str | None) -> str | None:
         if value:
@@ -510,6 +529,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     slug = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     partner_access = serializers.CharField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
+    send_reconciliation_window_expiry_notifications = serializers.BooleanField(allow_null=True, required=False)
 
     class Meta:
         model = Program
@@ -532,7 +553,18 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "version",
             "status",
             "partner_access",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
         )
+
+    def validate_name(self, value: str) -> str:
+        if (
+            Program.objects.filter(business_area=self.instance.business_area, name=value, is_removed=False)
+            .exclude(id=self.instance.id)
+            .exists()
+        ):
+            raise serializers.ValidationError("Programme with this name already exists in this business area.")
+        return value
 
     def validate_programme_code(self, value: str | None) -> str | None:
         if value:

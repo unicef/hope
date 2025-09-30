@@ -82,6 +82,8 @@ class TestProgramUpdate:
             "cash_plus": False,
             "frequency_of_payments": Program.REGULAR,
             "administrative_areas_of_implementation": "Areas of Implementation21",
+            "reconciliation_window_in_days": 0,
+            "send_reconciliation_window_expiry_notifications": False,
         }
         self.program = ProgramFactory(**self.initial_program_data, business_area=self.afghanistan)
         role_with_all_permissions = RoleFactory(name="Role with all permissions")
@@ -714,6 +716,53 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program.start_date.strftime("%Y-%m-%d") == self.initial_program_data["start_date"]
         assert self.program.end_date.strftime("%Y-%m-%d") == self.initial_program_data["end_date"]
+
+    def test_update_program_with_duplicate_name_same_business_area(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        ProgramFactory(
+            business_area=self.afghanistan,
+            name="Program Two",
+            status=Program.DRAFT,
+        )
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "name": "Program Two",
+        }
+
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.json()
+        assert "Programme with this name already exists in this business area" in str(response.json()["name"])
+
+    def test_update_program_with_same_name_same_program(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_UPDATE],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "name": self.program.name,  # Same name as current program
+            "budget": 200000,
+        }
+
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.name == self.initial_program_data["name"]
+        assert self.program.budget == 200000
 
     def test_update_multiple_fields(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
