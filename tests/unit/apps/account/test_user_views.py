@@ -758,7 +758,6 @@ class TestProgramUsers:
                 "id": user.partner.id,
                 "name": user.partner.name,
             }
-            assert user_result["cross_area_filter_available"] is False
             assert user_result["status"] == user.status
             assert user_result["last_login"] == (f"{user.last_login:%Y-%m-%dT%H:%M:%SZ}" if user.last_login else None)
 
@@ -771,15 +770,6 @@ class TestProgramUsers:
                 "role": get_role_data(role_with_user_management_permissions),
             }
         ]
-        assert response_results[0]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in role_with_user_management_permissions.permissions},
-            }
-        ]
-        assert response_results[0]["permissions_in_scope"] == {
-            str(perm) for perm in role_with_user_management_permissions.permissions
-        }
 
         # self.user1
         assert response_results[1]["partner_roles"] == []
@@ -790,13 +780,6 @@ class TestProgramUsers:
                 "role": get_role_data(self.role1),
             },
         ]
-        assert response_results[1]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in self.role1.permissions},
-            }
-        ]
-        assert response_results[1]["permissions_in_scope"] == {str(perm) for perm in self.role1.permissions}
 
         # self.user2
         assert response_results[2]["partner_roles"] == []
@@ -808,14 +791,6 @@ class TestProgramUsers:
             },
         ]
 
-        assert response_results[2]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in self.role2.permissions},
-            }
-        ]
-        assert response_results[2]["permissions_in_scope"] == {str(perm) for perm in self.role2.permissions}
-
         # self.user3
         assert response_results[3]["partner_roles"] == [
             {
@@ -825,13 +800,6 @@ class TestProgramUsers:
             },
         ]
         assert response_results[3]["user_roles"] == []
-        assert response_results[3]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in self.role_p1.permissions},
-            }
-        ]
-        assert response_results[3]["permissions_in_scope"] == {str(perm) for perm in self.role_p1.permissions}
 
         # self.user4
         assert response_results[4]["partner_roles"] == [
@@ -842,13 +810,6 @@ class TestProgramUsers:
             },
         ]
         assert response_results[4]["user_roles"] == []
-        assert response_results[4]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in self.role_p2.permissions},
-            }
-        ]
-        assert response_results[4]["permissions_in_scope"] == {str(perm) for perm in self.role_p2.permissions}
 
         # self.user5
         assert response_results[5]["partner_roles"] == [
@@ -865,15 +826,6 @@ class TestProgramUsers:
                 "role": get_role_data(self.role3),
             },
         ]
-        assert response_results[5]["business_areas"] == [
-            {
-                **get_business_area_data(self.afghanistan),
-                "permissions": {str(perm) for perm in [*self.role_p2.permissions, *self.role3.permissions]},
-            }
-        ]
-        assert response_results[5]["permissions_in_scope"] == {
-            str(perm) for perm in [*self.role_p2.permissions, *self.role3.permissions]
-        }
 
     def test_program_users_caching(
         self,
@@ -893,7 +845,7 @@ class TestProgramUsers:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 63
+            assert len(ctx.captured_queries) == 13
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -913,8 +865,8 @@ class TestProgramUsers:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            # Should benefit from cached permissions calculations and prefetch optimization
-            assert len(ctx.captured_queries) == 34
+            # 4 queries are saved because of cached permissions calculations
+            assert len(ctx.captured_queries) == 9
 
         self.user3.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -924,7 +876,7 @@ class TestProgramUsers:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 5
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 9
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
