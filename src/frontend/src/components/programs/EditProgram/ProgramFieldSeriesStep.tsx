@@ -1,15 +1,10 @@
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { DividerLine } from '@components/core/DividerLine';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Box,
-  Button,
-  FormControl,
-  Grid2 as Grid,
-  IconButton,
-} from '@mui/material';
+import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -31,6 +26,7 @@ interface ProgramFieldSeriesStepProps {
   program?;
   setStep: (step: number) => void;
   step: number;
+  loading: boolean;
 }
 
 export const ProgramFieldSeriesStep = ({
@@ -44,6 +40,7 @@ export const ProgramFieldSeriesStep = ({
   program,
   setStep,
   step,
+  loading,
 }: ProgramFieldSeriesStepProps) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -73,7 +70,7 @@ export const ProgramFieldSeriesStep = ({
                   return (
                     <Box key={index} pt={3} pb={3}>
                       <Grid container spacing={3} alignItems="flex-start">
-                        <Grid size={{ xs: 3 }}>
+                        <Grid size={3}>
                           <Field
                             name={`pduFields.${index}.label`}
                             required
@@ -84,7 +81,7 @@ export const ProgramFieldSeriesStep = ({
                             disabled={fieldDisabled}
                           />
                         </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        <Grid size={3}>
                           <Field
                             name={`pduFields.${index}.pdu_data.subtype`}
                             required
@@ -96,7 +93,7 @@ export const ProgramFieldSeriesStep = ({
                             disabled={fieldDisabled}
                           />
                         </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        <Grid size={3}>
                           <Field
                             key={
                               values.pduFields[index]?.pdu_data
@@ -165,7 +162,7 @@ export const ProgramFieldSeriesStep = ({
                             })}
                           />
                         </Grid>
-                        <Grid size={{ xs: 1 }}>
+                        <Grid size={1}>
                           <IconButton
                             onClick={() =>
                               confirm({
@@ -193,7 +190,7 @@ export const ProgramFieldSeriesStep = ({
                               values.editMode &&
                               round + 1 <= selectedNumberOfRounds;
                             return (
-                              <Grid size={{ xs: 12 }} key={round}>
+                              <Grid size={12} key={round}>
                                 <FormControl fullWidth variant="outlined">
                                   <Field
                                     name={`pduFields.${index}.pdu_data.rounds_names.${round}`}
@@ -261,14 +258,15 @@ export const ProgramFieldSeriesStep = ({
               {t('Back')}
             </Button>
           </Box>
-          <Button
+          <LoadingButton
             data-cy="button-save"
             variant="contained"
             color="primary"
             onClick={submitForm}
+            loading={loading}
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </Box>
       </Box>
     </>

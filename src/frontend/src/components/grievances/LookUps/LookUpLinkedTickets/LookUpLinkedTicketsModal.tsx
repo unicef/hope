@@ -6,7 +6,8 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik, FormikValues } from 'formik';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -53,6 +54,11 @@ export const LookUpLinkedTicketsModal = ({
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   if (!choicesData) return null;
   if (choicesLoading) {
@@ -90,14 +96,19 @@ export const LookUpLinkedTicketsModal = ({
               setFilter={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
+              setAppliedFilter={(f) => {
+                setAppliedFilter(f);
+                setShouldScroll(true);
+              }}
             />
-            <LookUpLinkedTicketsTable
-              filter={appliedFilter}
-              businessArea={businessArea}
-              setFieldValue={setFieldValue}
-              initialValues={initialValues}
-            />
+            <div ref={tableRef}>
+              <LookUpLinkedTicketsTable
+                filter={appliedFilter}
+                businessArea={businessArea}
+                setFieldValue={setFieldValue}
+                initialValues={initialValues}
+              />
+            </div>
           </DialogContent>
           <DialogFooter>
             <DialogActions>

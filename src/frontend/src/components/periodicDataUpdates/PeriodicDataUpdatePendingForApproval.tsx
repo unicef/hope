@@ -278,6 +278,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={pendingHeadCells}
       data={data ?? []}

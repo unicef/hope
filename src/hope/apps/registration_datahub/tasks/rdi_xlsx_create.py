@@ -513,7 +513,34 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create = obj()
                 obj_to_create.id = str(uuid.uuid4())
 
+                household_id_col_idx = None
+                relationship_col_idx = None
+                for idx, header_cell in enumerate(first_row):
+                    if header_cell.value == "household_id":
+                        household_id_col_idx = idx
+                    elif header_cell.value == "relationship_i_c":
+                        relationship_col_idx = idx
+
                 household_id = None
+                if household_id_col_idx is not None:
+                    household_id_cell = row[household_id_col_idx]
+                    if temp_value := household_id_cell.value:
+                        if isinstance(temp_value, float) and temp_value.is_integer():
+                            temp_value = int(temp_value)
+                        household_id = str(temp_value)
+                        if sheet_title == "individuals":
+                            obj_to_create.household = self.households.get(household_id)
+
+                if relationship_col_idx is not None and household_id is not None:
+                    relationship_cell = row[relationship_col_idx]
+                    if relationship_value := relationship_cell.value:
+                        if isinstance(relationship_value, str):
+                            relationship_value = relationship_value.strip()
+                        if relationship_value == HEAD:
+                            household = self.households.get(household_id)
+                            if household is not None:
+                                household.head_of_household = obj_to_create
+                                households_to_update.append(household)
 
                 excluded = ("age",)
                 for cell, header_cell in zip(row, first_row, strict=True):
@@ -543,14 +570,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         if is_not_required_and_empty:
                             continue
 
-                        if header == "household_id":
-                            temp_value = cell_value
-                            if isinstance(temp_value, float) and temp_value.is_integer():
-                                temp_value = int(temp_value)
-                            household_id = str(temp_value)
-                            if sheet_title == "individuals":
-                                obj_to_create.household = self.households.get(household_id)
-
                         if header in complex_fields[sheet_title]:
                             fn_complex: Callable = complex_fields[sheet_title][header]
                             value = fn_complex(
@@ -578,12 +597,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             value = self._cast_value(cell_value, header)
                             if value in (None, ""):
                                 continue
-
-                            if header == "relationship_i_c" and value == HEAD:
-                                household = self.households.get(household_id)
-                                if household is not None:
-                                    household.head_of_household = obj_to_create
-                                    households_to_update.append(household)
 
                             if header == "org_enumerator_h_c":
                                 obj_to_create.flex_fields["enumerator_id"] = cell.value

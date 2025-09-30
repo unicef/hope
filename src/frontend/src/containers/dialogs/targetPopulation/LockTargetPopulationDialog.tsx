@@ -12,6 +12,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockTargetPopulationDialogProps {
   open: boolean;
@@ -57,7 +58,9 @@ export const LockTargetPopulationDialog = ({
       });
       showMessage(t('Payment Plan has been locked.'));
     },
-    onError: (e) => showMessage(e.message),
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
+    },
   });
 
   return (

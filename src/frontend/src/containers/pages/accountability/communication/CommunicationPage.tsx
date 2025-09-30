@@ -11,7 +11,8 @@ import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -39,6 +40,11 @@ export const CommunicationPage = (): ReactElement => {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
 
   const { data: choicesData, isLoading: choicesLoading } =
@@ -81,15 +87,20 @@ export const CommunicationPage = (): ReactElement => {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <CommunicationTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissionInModule(
-          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
-          permissions,
-        )}
-      />
+      <div ref={tableRef}>
+        <CommunicationTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissionInModule(
+            PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            permissions,
+          )}
+        />
+      </div>
     </>
   );
 };

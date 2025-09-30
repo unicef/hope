@@ -1,12 +1,12 @@
-import { useNavigate } from 'react-router-dom';
 import { ReactElement, useEffect } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 export const DefaultRoute = (): ReactElement | null => {
   const { businessAreaSlug, programSlug } = useBaseUrl();
-  const { data: meData, error } = useQuery({
+  const { data: meData } = useQuery({
     queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
@@ -20,13 +20,6 @@ export const DefaultRoute = (): ReactElement | null => {
     retry: false,
   });
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const realError: any = error;
-    if (realError && realError.status === 403) {
-      navigate('/login');
-    }
-  }, [error, navigate]);
 
   useEffect(() => {
     if (meData) {

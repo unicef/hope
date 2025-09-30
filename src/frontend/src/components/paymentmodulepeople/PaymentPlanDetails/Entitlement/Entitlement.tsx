@@ -14,7 +14,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid2 as Grid,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -104,7 +104,9 @@ export function Entitlement({
   const queryClient = useQueryClient();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.id ? String(paymentPlan.steficonRule.id) : '',
+    paymentPlan.steficonRule?.rule?.id
+      ? String(paymentPlan.steficonRule.rule.id)
+      : '',
   );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
@@ -135,7 +137,7 @@ export function Entitlement({
         });
       },
       onError: (e) => {
-        showMessage(e.message);
+        showApiErrorMessages(e, showMessage);
       },
     });
 
@@ -171,7 +173,7 @@ export function Entitlement({
       showMessage(t('Exporting XLSX started. Please check your email.'));
     },
     onError: (e) => {
-      showMessage(e.message);
+      showApiErrorMessages(e, showMessage);
     },
   });
 
@@ -199,7 +201,7 @@ export function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING ||
+      BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -210,8 +212,8 @@ export function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems="center" container>
-            <Grid size={{ xs: 11 }}>
+          <Grid container alignItems="center">
+            <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -255,7 +257,7 @@ export function Entitlement({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"

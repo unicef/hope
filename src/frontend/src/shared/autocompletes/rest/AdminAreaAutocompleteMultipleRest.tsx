@@ -34,7 +34,7 @@ export function AdminAreaAutocompleteMultipleRest({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async() => {
       if (!businessArea || !level) {
         return;
       }
@@ -82,7 +82,7 @@ export function AdminAreaAutocompleteMultipleRest({
     value: area.id,
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+   
   const handleChange = (event, newValue) => {
     setNewValue(newValue);
     onChange(event, newValue);

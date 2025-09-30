@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { showApiErrorMessages } from '@utils/utils';
 
 const IconContainer = styled.span`
   button {
@@ -65,13 +66,14 @@ export function LockedTargetPopulationHeaderButtons({
           programId,
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
+
       showMessage(t('Target Population Unlocked'));
     },
     onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while unlocking the target population.'),
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 

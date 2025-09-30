@@ -2,7 +2,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AddCircleOutline } from '@mui/icons-material';
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -113,8 +113,11 @@ function EditPeopleDataChange({
     !fullIndividual ||
     !editPeopleFieldsData
   ) {
-
-    return <div><LoadingComponent /></div>;
+    return (
+      <div>
+        <LoadingComponent />
+      </div>
+    );
   }
 
   const combinedData = {
@@ -140,7 +143,6 @@ function EditPeopleDataChange({
               <>
                 {values.individualDataUpdateFields.map((item, index) => (
                   <EditPeopleDataChangeFieldRow
-                    // eslint-disable-next-line react/no-array-index-key
                     key={`${index}-${item?.fieldName}`}
                     itemValue={item}
                     index={index}
@@ -151,7 +153,7 @@ function EditPeopleDataChange({
                     values={values}
                   />
                 ))}
-                <Grid size={{ xs: 4 }}>
+                <Grid size={4}>
                   <Button
                     color="primary"
                     onClick={() => {

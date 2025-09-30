@@ -3,7 +3,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   Typography,
 } from '@mui/material';
@@ -72,7 +72,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });
@@ -143,7 +147,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     >
       {({ values, submitForm, resetForm }) => (
         <>
-          <Box p={2}>
+          <Box sx={{ p: 2 }}>
             {type === 'edit' ? (
               <IconButton
                 data-cy="edit-button"
@@ -175,8 +179,8 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box display="flex" flexDirection="column">
-                  <Box mt={2}>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Box sx={{ mt: 2 }}>
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(

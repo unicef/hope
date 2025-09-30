@@ -28,18 +28,37 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
+  canClose: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
+  canClose,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: closePaymentPlan, isPending: loadingClose } =
+    useMutation({
+      mutationFn: async () => {
+        return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+        });
+      },
+      onSuccess: () => {
+        showMessage(t('Payment plan closed successfully'));
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
 
   const { data, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
@@ -66,10 +85,8 @@ export function AcceptedPaymentPlanHeaderButtons({
       onSuccess: () => {
         showMessage(t('Password has been sent.'));
       },
-      onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while sending the password'),
-        );
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     },
   );
@@ -92,11 +109,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       showMessage(t('Exporting XLSX started'));
     },
     onError: (error: any) => {
-      showMessage(
-        error?.body?.errors ||
-          error?.message ||
-          'An error occurred while exporting',
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -115,11 +128,8 @@ export function AcceptedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
     },
-    onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while sending to payment gateway'),
-      );
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -127,7 +137,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING;
+      BackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
@@ -200,6 +210,19 @@ export function AcceptedPaymentPlanHeaderButtons({
               }
             >
               {t('Export Xlsx')}
+            </LoadingButton>
+          </Box>
+        )}
+        {canClose && (
+          <Box m={2}>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              data-cy="button-close"
+              onClick={() => closePaymentPlan()}
+              loading={loadingClose}
+            >
+              {t('Close')}
             </LoadingButton>
           </Box>
         )}

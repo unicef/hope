@@ -13,6 +13,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { showApiErrorMessages } from '@utils/utils';
 
 const RemoveButton = styled(Button)`
   && {
@@ -68,7 +69,7 @@ export const DeleteProgram = ({
           showMessage(t('Programme removed'));
           navigate(`/${businessArea}/programs/all/list`);
         } else {
-          showMessage(e.message);
+          showApiErrorMessages(e, showMessage);
         }
       },
     });
