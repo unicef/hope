@@ -120,7 +120,8 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
             "last_login",
         )
 
-    def get_partner_roles(self, user: User) -> ReturnDict:
+    @staticmethod
+    def get_partner_roles(user: User) -> ReturnDict:
         """Use prefetched data when available to avoid additional queries."""
         cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None)
 
@@ -134,7 +135,8 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
             )
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
-    def get_user_roles(self, user: User) -> ReturnDict:
+    @staticmethod
+    def get_user_roles(user: User) -> ReturnDict:
         """Use prefetched data when available to avoid additional queries."""
         cached_user_roles = getattr(user, "cached_user_role_assignments", None)
 
@@ -162,7 +164,8 @@ class ProfileSerializer(ProgramUsersSerializer):
             "cross_area_filter_available",
         )
 
-    def get_business_areas(self, user: User) -> ReturnDict:
+    @staticmethod
+    def get_business_areas(user: User) -> ReturnDict:
         """Use prefetched data when available to avoid additional queries."""
         business_areas = set()
 
