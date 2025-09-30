@@ -146,7 +146,6 @@ class ProfileSerializer(ProgramUsersSerializer):
             many=True,
         ).data
 
-
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
         if user.is_superuser:
