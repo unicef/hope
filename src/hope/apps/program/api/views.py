@@ -141,9 +141,7 @@ class ProgramViewSet(
                     When(status=Program.ACTIVE, then=Value(2)),
                     When(status=Program.FINISHED, then=Value(3)),
                     output_field=IntegerField(),
-                )
-            )
-            .annotate(
+                ),
                 annotate_number_of_households_with_tp_in_program=Count(
                     "payment__household_id",
                     filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
@@ -156,7 +154,7 @@ class ProgramViewSet(
                     queryset=FlexibleAttribute.objects.order_by("created_at"),
                 )
             )
-            .select_related("beneficiary_group", "data_collecting_type")
+            .select_related("beneficiary_group", "data_collecting_type", "business_area")
             .order_by("custom_order", "start_date")
         )
 
