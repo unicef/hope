@@ -9,6 +9,7 @@ import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -1016,34 +1017,68 @@ def test_children_count_calculation_scenarios(
 
 @pytest.mark.django_db
 def test_get_fertility_rate_success(mocker: Any) -> None:
-    """Test get_fertility_rate successfully retrieves a rate."""
-    mock_data = {"2023": {"Testland": 5.5}}
-    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
-    rate = get_fertility_rate("Testland", 2023)
-    assert rate == 5.5
+    """Test get_fertility_rate successfully retrieves a rate using the real data file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2020)
+    assert rate == 5.145
+    mock_open = mocker.patch("builtins.open")
+    rate2 = get_fertility_rate("Afghanistan", 2021)
+    assert rate2 == 5.039
+    mock_open.assert_not_called()
 
 
 @pytest.mark.django_db
-def test_get_fertility_rate_fallback_to_latest_year(mocker: Any) -> None:
-    """Test get_fertility_rate falls back to the most recent year's data."""
-    mock_data = {"2022": {"Testland": 5.2}, "2021": {"Testland": 5.1}}
-    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
-    rate = get_fertility_rate("Testland", 2023)  # Year not in data
-    assert rate == 5.2  # Should use 2022 data
+def test_get_fertility_rate_fallback_to_latest_year() -> None:
+    """Test get_fertility_rate falls back to the most recent year's data using the real file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2025)
+    assert rate == 4.84
 
 
 @pytest.mark.django_db
-def test_get_fertility_rate_country_not_found(mocker: Any) -> None:
-    """Test get_fertility_rate returns 0.0 if country is not found."""
-    mock_data = {"2023": {"Otherland": 4.0}}
-    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value=mock_data)
-    rate = get_fertility_rate("Testland", 2023)
+def test_get_fertility_rate_country_not_found() -> None:
+    """Test get_fertility_rate returns 0.0 if country is not found in the real file."""
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("Wonderland", 2023)
     assert rate == 0.0
 
 
 @pytest.mark.django_db
 def test_get_fertility_rate_no_data(mocker: Any) -> None:
-    """Test get_fertility_rate returns 0.0 if no data is loaded."""
-    mocker.patch("hope.apps.dashboard.services._load_fertility_data", return_value={})
-    rate = get_fertility_rate("Testland", 2023)
+    """Test get_fertility_rate returns 0.0 if the data file is empty."""
+    mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("AnyCountry", 2023)
     assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_file_not_found(mocker: Any) -> None:
+    """Test _load_fertility_data raises FileNotFoundError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", side_effect=FileNotFoundError("File not found"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(FileNotFoundError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
+    """Test _load_fertility_data raises JSONDecodeError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="invalid json"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(json.JSONDecodeError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()

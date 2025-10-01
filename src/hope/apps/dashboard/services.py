@@ -15,6 +15,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
+import sentry_sdk
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
@@ -45,7 +46,7 @@ def _load_fertility_data() -> dict[str, dict[str, float]]:
         if country.iso_code3
     }
 
-    file_path = Path(__file__).parent / "data" / "fertility_rates.json"
+    file_path = Path(__file__).parent / "rates" / "fertility_rates.json"
     transformed_data: dict[str, dict[str, float]] = defaultdict(dict)
 
     try:
@@ -68,8 +69,8 @@ def _load_fertility_data() -> dict[str, dict[str, float]]:
 
     except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
         logger.error(f"Could not load or process fertility data file: {e}")
-        cache.set(FERTILITY_DATA_CACHE_KEY, {}, CACHE_TIMEOUT)
-        return {}
+        sentry_sdk.capture_exception(e)
+        raise
 
     final_data = dict(transformed_data)
     cache.set(FERTILITY_DATA_CACHE_KEY, final_data, CACHE_TIMEOUT)
