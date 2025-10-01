@@ -146,7 +146,7 @@ class ProgramViewSet(
                     "payment__household_id",
                     filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
                     distinct=True,
-                )
+                ),
             )
             .prefetch_related(
                 Prefetch(
