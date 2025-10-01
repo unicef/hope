@@ -86,21 +86,21 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: List[str]) -> Optional[List[str]]:
+    def _parse_json_urns_error(self, e: Any, phone_numbers: List[str]) -> Optional[Dict]:
         if not getattr(e, "response", None) or e.response.status_code != 400:
             return None
         try:
             error = e.response.json()
             urns = error.get("urns")
             if not urns:
-                return None
+                return {"error": error}
             errors: List[str] = []
             for index in urns.keys():
                 try:
                     errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
                 except (ValueError, IndexError):
                     continue
-            return errors or None
+            return {"phone_numbers": errors}
         except Exception:
             return None
 
@@ -127,12 +127,10 @@ class RapidProAPI:
                     data,
                 )
             except requests.exceptions.HTTPError as e:
-                response = getattr(e, "response", None)
-                if response is not None and response.status_code == 400:
-                    batch_phone_numbers = [urn.split(":")[-1] for urn in data.get("urns", [])]
-                    errors = self._parse_json_urns_error(e, batch_phone_numbers)
-                    if errors:
-                        raise ValidationError(message={"phone_numbers": errors}) from e
+                batch_phone_numbers = [urn.split(":")[-1] for urn in data.get("urns", [])]
+                errors = self._parse_json_urns_error(e, batch_phone_numbers)
+                if errors:
+                    raise ValidationError(message=errors) from e
                 raise
 
         successful_flows: List = []
@@ -269,9 +267,8 @@ class RapidProAPI:
         try:
             self._handle_post_request(f"{RapidProAPI.BROADCAST_START_ENDPOINT}", data)
         except requests.exceptions.HTTPError as e:
-            print(e.response.json())
             errors = self._parse_json_urns_error(e, phone_numbers)
             if errors:
                 logger.warning("wrong phone numbers " + str(errors))
-                raise ValidationError(message={"phone_numbers": errors}) from e
+                raise ValidationError(message=errors) from e
             raise
