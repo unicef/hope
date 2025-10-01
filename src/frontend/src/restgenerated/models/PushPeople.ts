@@ -34,9 +34,9 @@ export type PushPeople = {
     birthDate: string;
     photo?: string;
     type: PushPeopleTypeEnum;
-    countryOrigin?: CountryOriginEnum;
-    country: CountryEnum;
-    residenceStatus: ResidenceStatusEnum;
+    countryOrigin?: CountryOriginEnum | null;
+    country?: CountryEnum | null;
+    residenceStatus?: ResidenceStatusEnum;
     village?: string | null;
     phoneNo?: string | null;
     phoneNoAlternative?: string | null;
@@ -44,6 +44,7 @@ export type PushPeople = {
     admin2?: string | null;
     admin3?: string | null;
     admin4?: string | null;
+    disability?: DisabilityEnum;
     consentSharing?: Array<ConsentSharingEnum>;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
@@ -140,13 +141,6 @@ export type PushPeople = {
      * Child is Head of Household flag
      */
     childHoh?: boolean;
-    /**
-     * Disability status
-     *
-     * * `disabled` - disabled
-     * * `not disabled` - not disabled
-     */
-    disability?: DisabilityEnum;
     /**
      * Disability certificate picture
      */

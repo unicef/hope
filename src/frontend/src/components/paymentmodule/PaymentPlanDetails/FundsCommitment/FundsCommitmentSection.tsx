@@ -140,6 +140,10 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
           ),
         });
         showMessage(t('Funds commitment items assigned successfully'));
+        await queryClient.invalidateQueries({
+          queryKey: ['paymentPlan'],
+        });
+//        TODO: Maciej please check it
       } catch (error: any) {
         const errorMessages = error?.data.state.data?.map(
           (x: any) => x.message,
