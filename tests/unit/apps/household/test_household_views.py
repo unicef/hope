@@ -265,7 +265,6 @@ class TestHouseholdList:
 
         assert str(household_different_areas.id) not in response_ids
 
-    @pytest.mark.skip(reason="disabled cache")
     def test_household_list_caching(
         self,
         create_user_role_with_permissions: Any,

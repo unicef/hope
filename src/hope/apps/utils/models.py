@@ -4,7 +4,6 @@ import json
 import logging
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
-import warnings
 
 import celery
 from celery import states
@@ -18,7 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
-from model_utils.managers import SoftDeletableManagerMixin, SoftDeletableQuerySet
+from model_utils.managers import SoftDeletableManagerMixin
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
@@ -34,35 +33,37 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class BulkSignalsManagerMixin:
     def bulk_create(self, objs, *args, **kwargs):
-        val = super().bulk_create(*args, **kwargs)
+        val = super().bulk_create(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_create
 
-        post_bulk_create(sender=self.model, instances=objs, **kwargs)
+        post_bulk_create.send(sender=self.model, instances=objs, **kwargs)
         return val
 
     def bulk_update(self, objs, *args, **kwargs):
-        val = super().bulk_update(*args, **kwargs)
+        val = super().bulk_update(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_update
 
-        transaction.on_commit(
-            lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db)
-        )
+        transaction.on_commit(lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db))
         return val
+
 
 class BaseManager(BulkSignalsManagerMixin, models.Manager):
     pass
 
-class SoftDeletableManager(BulkSignalsManagerMixin,SoftDeletableManagerMixin, models.Manager):
+
+class SoftDeletableManager(BulkSignalsManagerMixin, SoftDeletableManagerMixin, models.Manager):
     pass
+
 
 class SoftDeletableIsVisibleManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_visible=True)
 
 
-class MergedManager(BulkSignalsManagerMixin,models.Manager):
+class MergedManager(BulkSignalsManagerMixin, models.Manager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
