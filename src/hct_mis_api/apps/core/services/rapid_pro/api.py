@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 
 import requests
 from constance import config
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -45,6 +47,15 @@ class RapidProAPI:
 
     def __init__(self, business_area_slug: str, mode: str) -> None:
         self._client = requests.session()
+        retry = Retry(
+            total=3,
+            backoff_factor=0.5,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=frozenset(["GET"]),
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        self._client.mount(self._get_url(), adapter)
+        self._timeout = 10  # seconds
         self._init_token(business_area_slug, mode)
 
     def _init_token(self, business_area_slug: str, mode: str) -> None:
@@ -58,7 +69,7 @@ class RapidProAPI:
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> Dict:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
-        response = self._client.get(url)
+        response = self._client.get(url, timeout=self._timeout)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -67,30 +78,31 @@ class RapidProAPI:
         return response.json()
 
     def _handle_post_request(self, url: str, data: Dict) -> Dict:
-        response = self._client.post(url=f"{self._get_url()}{url}", json=data)
+        response = self._client.post(url=f"{self._get_url()}{url}", json=data, timeout=self._timeout)
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.warning(e.response.text)
-
+        except requests.exceptions.HTTPError:
+            logger.exception("RapidPro API post request failed")
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: List[str]) -> Union[bool, List]:
-        if e.response and e.response.status_code != 400:
-            return False
+    def _parse_json_urns_error(self, e: Any, phone_numbers: List[str]) -> Optional[List[str]]:
+        if not getattr(e, "response", None) or e.response.status_code != 400:
+            return None
         try:
             error = e.response.json()
             urns = error.get("urns")
             if not urns:
-                return False
-            errors = []
+                return None
+            errors: List[str] = []
             for index in urns.keys():
-                errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
-            return errors
-
+                try:
+                    errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
+                except (ValueError, IndexError):
+                    continue
+            return errors or None
         except Exception:
-            return False
+            return None
 
     def _get_url(self) -> str:
         return f"{self.url}/api/v2"
@@ -115,10 +127,12 @@ class RapidProAPI:
                     data,
                 )
             except requests.exceptions.HTTPError as e:
-                errors = self._parse_json_urns_error(e, phone_numbers)
-                if errors:
-                    logger.warning("wrong phone numbers " + str(errors))
-                    raise ValidationError(message={"phone_numbers": errors}) from e
+                response = getattr(e, "response", None)
+                if response is not None and response.status_code == 400:
+                    batch_phone_numbers = [urn.split(":")[-1] for urn in data.get("urns", [])]
+                    errors = self._parse_json_urns_error(e, batch_phone_numbers)
+                    if errors:
+                        raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
         successful_flows: List = []
@@ -165,10 +179,10 @@ class RapidProAPI:
         variable_received_name = "cash_received_text"
         variable_received_positive_string = "YES"
         variable_amount_name = "cash_received_amount"
-        phone_number = run.get("contact").get("urn").split(":")[1]
+        phone_number = run.get("contact", {}).get("urn", "").split(":")[1]
         values = run.get("values")
-        received = None
-        received_amount = None
+        received: Optional[bool] = None
+        received_amount: Optional[Decimal] = None
         if not values:
             return {
                 "phone_number": phone_number,

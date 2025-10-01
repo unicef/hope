@@ -155,8 +155,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
 
-    def can_activate(self) -> bool:
-        return self.status not in (
+    def can_activate_rapid_pro(self) -> bool:
+        return self.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO and self.status in (
             PaymentVerificationPlan.STATUS_PENDING,
             PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
         )

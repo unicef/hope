@@ -173,7 +173,6 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
 
     @classmethod
     @is_authenticated
-    @transaction.atomic
     def processed_mutate(
         cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
     ) -> "ActivatePaymentVerificationPlan":
