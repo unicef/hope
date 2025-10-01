@@ -29,6 +29,7 @@ export type Individual = {
     accounts?: Array<AccountLax>;
     photo?: string | null;
     individualId: string;
+    disability?: DisabilityEnum;
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
@@ -122,13 +123,6 @@ export type Individual = {
      * Child is Head of Household flag
      */
     childHoh?: boolean;
-    /**
-     * Disability status
-     *
-     * * `disabled` - disabled
-     * * `not disabled` - not disabled
-     */
-    disability?: DisabilityEnum;
     /**
      * Disability certificate picture
      */

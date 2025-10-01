@@ -18,10 +18,18 @@ export type Profile = {
      */
     isSuperuser?: boolean;
     partner: Partner;
+    /**
+     * Use prefetched data when available to avoid additional queries.
+     */
+    readonly userRoles: Record<string, any>;
+    /**
+     * Use prefetched data when available to avoid additional queries.
+     */
+    readonly partnerRoles: Record<string, any>;
+    status?: ProfileStatusEnum;
+    lastLogin?: string | null;
     readonly businessAreas: Record<string, any>;
     readonly permissionsInScope: string;
-    readonly userRoles: Record<string, any>;
-    readonly partnerRoles: Record<string, any>;
     /**
      * Check if the cross area filter is available for the user.
      *
@@ -29,7 +37,5 @@ export type Profile = {
      * is available only if user does not have ANY area limits in the program (has full-area-access)
      */
     readonly crossAreaFilterAvailable: boolean;
-    status?: ProfileStatusEnum;
-    lastLogin?: string | null;
 };
 
