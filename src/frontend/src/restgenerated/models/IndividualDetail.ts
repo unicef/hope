@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { Account } from './Account';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
+import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { Document } from './Document';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
@@ -242,6 +243,16 @@ export type IndividualDetail = {
      */
     walletAddress?: string;
     readonly status: string;
+    /**
+     * Deduplication golden record status [sys]
+     *
+     * * `DUPLICATE` - Duplicate
+     * * `NEEDS_ADJUDICATION` - Needs Adjudication
+     * * `NOT_PROCESSED` - Not Processed
+     * * `POSTPONE` - Postpone
+     * * `UNIQUE` - Unique
+     */
+    deduplicationGoldenRecordStatus?: DeduplicationGoldenRecordStatusEnum;
     readonly flexFields: Record<string, any>;
     readonly linkedGrievances: Record<string, any>;
     /**

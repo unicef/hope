@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils import timezone
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hope.apps.account.models import USER_STATUS_CHOICES, Partner, Role
@@ -72,15 +73,41 @@ class UsersFilter(FilterSet):
     def program_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         business_area = Program.objects.get(slug=value).business_area
         return qs.filter(
-            Q(partner__role_assignments__program__slug=value)
+            Q(
+                partner__role_assignments__program__slug=value,
+                partner__role_assignments__expiry_date__gte=timezone.now(),
+            )
+            | Q(
+                partner__role_assignments__program__slug=value,
+                partner__role_assignments__expiry_date__isnull=True,
+            )
             | Q(
                 partner__role_assignments__program=None,
                 partner__role_assignments__business_area=business_area,
+                partner__role_assignments__expiry_date__gte=timezone.now(),
             )
-            | Q(role_assignments__program__slug=value)
+            | Q(
+                partner__role_assignments__program=None,
+                partner__role_assignments__business_area=business_area,
+                partner__role_assignments__expiry_date__isnull=True,
+            )
+            | Q(
+                role_assignments__program__slug=value,
+                role_assignments__expiry_date__gte=timezone.now(),
+            )
+            | Q(
+                role_assignments__program__slug=value,
+                role_assignments__expiry_date__isnull=True,
+            )
             | Q(
                 role_assignments__program=None,
                 role_assignments__business_area=business_area,
+                role_assignments__expiry_date__gte=timezone.now(),
+            )
+            | Q(
+                role_assignments__program=None,
+                role_assignments__business_area=business_area,
+                role_assignments__expiry_date__isnull=True,
             )
         )
 
@@ -94,11 +121,26 @@ class UsersFilter(FilterSet):
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         q_obj = Q()
         for value in values:
-            q_obj |= Q(
-                role_assignments__role__id=value,
-                role_assignments__business_area__slug=business_area_slug,
-            ) | Q(
-                partner__role_assignments__role__id=value,
-                partner__role_assignments__business_area__slug=business_area_slug,
+            q_obj |= (
+                Q(
+                    role_assignments__role__id=value,
+                    role_assignments__business_area__slug=business_area_slug,
+                    role_assignments__expiry_date__gte=timezone.now(),
+                )
+                | Q(
+                    role_assignments__role__id=value,
+                    role_assignments__business_area__slug=business_area_slug,
+                    role_assignments__expiry_date__isnull=True,
+                )
+                | Q(
+                    partner__role_assignments__role__id=value,
+                    partner__role_assignments__business_area__slug=business_area_slug,
+                    partner__role_assignments__expiry_date__gte=timezone.now(),
+                )
+                | Q(
+                    partner__role_assignments__role__id=value,
+                    partner__role_assignments__business_area__slug=business_area_slug,
+                    partner__role_assignments__expiry_date__isnull=True,
+                )
             )
         return qs.filter(q_obj)

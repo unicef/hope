@@ -2,6 +2,8 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -71,13 +73,10 @@ class PartnerSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProgramUsersSerializer(serializers.ModelSerializer):
     partner = PartnerSerializer()
     partner_roles = serializers.SerializerMethodField()
     user_roles = serializers.SerializerMethodField()
-    business_areas = serializers.SerializerMethodField()
-    permissions_in_scope = serializers.SerializerMethodField()
-    cross_area_filter_available = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -89,28 +88,55 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "is_superuser",
             "partner",
-            "business_areas",
-            "permissions_in_scope",
             "user_roles",
             "partner_roles",
-            "cross_area_filter_available",
             "status",
             "last_login",
         )
 
     @staticmethod
     def get_partner_roles(user: User) -> ReturnDict:
-        role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name").select_related(
-            "business_area", "role"
-        )
+        """Use prefetched data when available to avoid additional queries."""
+        cached_partner_roles = getattr(user.partner, "cached_partner_role_assignments", None)
+
+        if cached_partner_roles is not None:
+            role_assignments = cached_partner_roles
+        else:
+            role_assignments = (
+                user.partner.role_assignments.order_by("business_area__slug", "role__name")
+                .select_related("business_area", "role")
+                .exclude(expiry_date__lt=timezone.now())
+            )
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_user_roles(user: User) -> ReturnDict:
-        role_assignments = user.role_assignments.order_by("business_area__slug", "role__name").select_related(
-            "business_area", "role"
-        )
+        """Use prefetched data when available to avoid additional queries."""
+        cached_user_roles = getattr(user, "cached_user_role_assignments", None)
+
+        if cached_user_roles is not None:
+            role_assignments = cached_user_roles
+        else:
+            role_assignments = (
+                user.role_assignments.order_by("business_area__slug", "role__name")
+                .select_related("business_area", "role")
+                .exclude(expiry_date__lt=timezone.now())
+            )
         return RoleAssignmentSerializer(role_assignments, many=True).data
+
+
+class ProfileSerializer(ProgramUsersSerializer):
+    business_areas = serializers.SerializerMethodField()
+    permissions_in_scope = serializers.SerializerMethodField()
+    cross_area_filter_available = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ProgramUsersSerializer.Meta.fields + (
+            "business_areas",
+            "permissions_in_scope",
+            "cross_area_filter_available",
+        )
 
     @staticmethod
     def get_business_areas(user: User) -> ReturnDict:
@@ -124,11 +150,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         request = self.context.get("request", {})
         if user.is_superuser:
             return {e.value for e in Permissions}
+
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         if program_slug := request.query_params.get("program"):  # scope program
-            if program := Program.objects.filter(slug=program_slug).first():
-                return user.permissions_in_business_area(business_area_slug, program.id)
-            return set()
+            program = self.context.get("program") or get_object_or_404(
+                Program, slug=program_slug, business_area__slug=business_area_slug
+            )
+            return user.permissions_in_business_area(business_area_slug, program.id)
 
         return user.permissions_in_business_area(business_area_slug)
 
@@ -141,14 +169,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
         request = self.context.get("request", {})
-        program_slug = request.query_params.get("program")
-        program = Program.objects.filter(slug=program_slug).first()
-        if program_slug and program:
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+
+        if program_slug := request.query_params.get("program"):
+            program = self.context.get("program") or get_object_or_404(
+                Program, slug=program_slug, business_area__slug=business_area_slug
+            )
             return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
 
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug != "undefined" else None
-
         return user.has_perm(perm, business_area)
 
 
