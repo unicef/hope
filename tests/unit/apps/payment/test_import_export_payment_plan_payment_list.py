@@ -377,7 +377,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payment_plan)
 
-        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        payment_row = export_service.get_payment_row(payment)
         self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
         self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
 
@@ -393,7 +393,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp = self.payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
-        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)  # type: ignore
         self.assertEqual(
             len(template_column_list),
             len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 3,
@@ -424,7 +424,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
 
-        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)  # type: ignore
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
         self.assertEqual(
@@ -435,7 +435,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertIn("individual_id", template_column_list)
         # check core fields
         self.assertListEqual(
-            fsp_xlsx_template.core_fields, ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+            fsp_xlsx_template.core_fields, ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]  # type: ignore
         )
         self.assertIn("age", template_column_list)
         self.assertIn("zip_code", template_column_list)
@@ -503,10 +503,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             label={"English(EN)": "value"},
         )
         flex_field.save()
-        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
+        FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         payment = PaymentFactory(parent=self.payment_plan)
-        empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        empty_payment_row = export_service.get_payment_row(payment)
         for value in empty_payment_row:
             self.assertEqual(value, "")
 
@@ -552,7 +552,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row
-            payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+            payment_row = export_service.get_payment_row(payment)
             assert payment_row[-5] == "Union Bank"
             assert payment_row[-4] == str(payment.id)
             assert payment_row[-3] == "123456"
@@ -561,7 +561,5 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
-        payment_row_without_snapshot = export_service.get_payment_row(
-            self.payment_plan.eligible_payments.first(), fsp_xlsx_template
-        )
+        payment_row_without_snapshot = export_service.get_payment_row(self.payment_plan.eligible_payments.first())
         assert payment_row_without_snapshot[-4] == ""
