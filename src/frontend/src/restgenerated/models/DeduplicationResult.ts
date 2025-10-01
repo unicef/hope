@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type DeduplicationResult = {
-    readonly unicefId: string;
+    readonly unicefId: string | null;
     hitId?: string;
     fullName?: string;
     score?: number;
