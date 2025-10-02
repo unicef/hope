@@ -54,9 +54,9 @@ class RapidProAPI:
             allowed_methods=frozenset(["GET"]),
         )
         adapter = HTTPAdapter(max_retries=retry)
-        self._client.mount(self._get_url(), adapter)
-        self._timeout = 10  # seconds
         self._init_token(business_area_slug, mode)
+        self._client.mount(self._get_url(), adapter)
+        self._timeout = 30  # seconds
 
     def _init_token(self, business_area_slug: str, mode: str) -> None:
         business_area = BusinessArea.objects.get(slug=business_area_slug)

@@ -378,6 +378,23 @@ class TestRapidProVerificationTask(TestCase):
             {"phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]},
         )
 
+        self.assertEqual(
+            api._parse_json_urns_error(e, []),
+            {"phone_numbers": []},
+        )
+
+        e.response.json.return_value = {"error": "error"}
+        self.assertEqual(
+            api._parse_json_urns_error(e, ["a", "b"]),
+            {"error": {"error": "error"}},
+        )
+
+        e.response.json.side_effect = Exception("test")
+        self.assertEqual(
+            api._parse_json_urns_error(e, ["a", "b"]),
+            None,
+        )
+
 
 class TestPhoneNumberVerification(TestCase):
     def test_phone_numbers(self) -> None:
