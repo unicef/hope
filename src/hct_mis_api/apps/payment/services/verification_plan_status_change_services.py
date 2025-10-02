@@ -80,7 +80,7 @@ class VerificationPlanStatusChangeServices:
             timeout=60 * 5,
         ) as locked:
             if not locked:
-                raise GraphQLError("RapidPro activation already in progress")
+                raise GraphQLError("RapidPro activation already in progress")  # pragma: no cover
 
             if not self.payment_verification_plan.can_activate_rapid_pro():
                 raise GraphQLError("You can activate only PENDING/ERROR RapidPro verifications")

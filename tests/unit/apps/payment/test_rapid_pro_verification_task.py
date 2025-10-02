@@ -1,10 +1,11 @@
 import uuid
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
+import requests
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -20,6 +21,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from requests import HTTPError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
@@ -314,6 +316,67 @@ class TestRapidProVerificationTask(TestCase):
 
         self.assertNotEqual(first_phone, second_phone)
         self.assertFalse(ind.phone_no_valid)
+
+    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    def test_requests(self, mock_parent_init: Any) -> None:
+        mock_parent_init.return_value = None
+        api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+        api.url = ""
+        api._timeout = 10
+
+        api._client = MagicMock()
+
+        class DummyResponse:
+            def __init__(
+                self, status_code: int = 200, payload: Optional[dict] = None, raise_http_error: bool = False
+            ) -> None:
+                self.status_code = status_code
+                self._payload = payload or {}
+                self._raise_http_error = raise_http_error
+                self.ok = 200 <= status_code < 400
+                self.url = "http://example.com/"
+
+            def raise_for_status(self) -> None:
+                if self._raise_http_error:
+                    e = requests.exceptions.HTTPError("boom", response=self)  # type: ignore
+                    raise e
+
+            def json(self) -> dict:
+                return self._payload
+
+        api._client.get = MagicMock(
+            return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
+        )
+        self.assertEqual(api._handle_get_request("/endpoint"), {"a": 1})
+
+        api._client.get = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
+        with self.assertRaises(HTTPError):
+            api._handle_get_request("/endpoint")
+
+        api._client.post = MagicMock(
+            return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
+        )
+        self.assertEqual(api._handle_post_request("/endpoint", {"b": 2}), {"a": 1})
+
+        api._client.post = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
+        with self.assertRaises(HTTPError):
+            api._handle_post_request("/endpoint", {"b": 2})
+
+    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    def test_parse_json_urns_error(self, mock_parent_init: Any) -> None:
+        mock_parent_init.return_value = None
+        api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+        self.assertEqual(api._parse_json_urns_error(None, []), None)
+
+        e = MagicMock()
+        e.response = MagicMock()
+        e.response.status_code = 400
+        e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
+
+        self.assertEqual(
+            api._parse_json_urns_error(e, ["a", "b"]),
+            {"phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]},
+        )
 
 
 class TestPhoneNumberVerification(TestCase):
