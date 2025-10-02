@@ -3,6 +3,9 @@ import datetime
 from decimal import Decimal
 import hashlib
 import json
+import typing
+from base64 import b64decode
+from decimal import ROUND_HALF_UP, Decimal
 from math import ceil
 import typing
 from typing import TYPE_CHECKING, Any, Optional
@@ -140,6 +143,12 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def normalize_score(value: Optional[Union[float, str, Decimal]]) -> Optional[Decimal]:
+    if value is None:
+        return None
+    return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
 def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":

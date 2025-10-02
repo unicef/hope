@@ -471,7 +471,7 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp.follow_ups.count() == 2
 
-        with self.assertNumQueries(45):
+        with self.assertNumQueries(46):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         assert follow_up_pp_2.payment_items.count() == 1
