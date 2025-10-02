@@ -362,38 +362,42 @@ class TestRapidProVerificationTask(TestCase):
         with self.assertRaises(HTTPError):
             api._handle_post_request("/endpoint", {"b": 2})
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_parse_json_urns_error(self, mock_parent_init: Any) -> None:
-        mock_parent_init.return_value = None
-        api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-        self.assertEqual(api._parse_json_urns_error(None, []), None)
+    def test_parse_json_urns_error(self) -> None:
+        ba = BusinessArea.objects.get(slug="afghanistan")
+        ba.rapid_pro_payment_verification_token = "TEST_TOKEN"
+        ba.rapid_pro_host = "http://rapidpro.local"
+        ba.save(update_fields=["rapid_pro_payment_verification_token", "rapid_pro_host"])
 
-        e = MagicMock()
-        e.response = MagicMock()
-        e.response.status_code = 400
-        e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
+        with patch.object(requests.Session, "mount", autospec=True):
+            api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+            self.assertEqual(api._parse_json_urns_error(None, []), None)
 
-        self.assertEqual(
-            api._parse_json_urns_error(e, ["a", "b"]),
-            {"phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]},
-        )
+            e = MagicMock()
+            e.response = MagicMock()
+            e.response.status_code = 400
+            e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
 
-        self.assertEqual(
-            api._parse_json_urns_error(e, []),
-            {"phone_numbers": []},
-        )
+            self.assertEqual(
+                api._parse_json_urns_error(e, ["a", "b"]),
+                {"phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]},
+            )
 
-        e.response.json.return_value = {"error": "error"}
-        self.assertEqual(
-            api._parse_json_urns_error(e, ["a", "b"]),
-            {"error": {"error": "error"}},
-        )
+            self.assertEqual(
+                api._parse_json_urns_error(e, []),
+                {"phone_numbers": []},
+            )
 
-        e.response.json.side_effect = Exception("test")
-        self.assertEqual(
-            api._parse_json_urns_error(e, ["a", "b"]),
-            None,
-        )
+            e.response.json.return_value = {"error": "error"}
+            self.assertEqual(
+                api._parse_json_urns_error(e, ["a", "b"]),
+                {"error": {"error": "error"}},
+            )
+
+            e.response.json.side_effect = Exception("test")
+            self.assertEqual(
+                api._parse_json_urns_error(e, ["a", "b"]),
+                None,
+            )
 
 
 class TestPhoneNumberVerification(TestCase):
