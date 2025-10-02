@@ -27,25 +27,30 @@ def increment_individual_list_cache_version(sender, instance, **kwargs):
     increment_individual_list_program_key(instance.program.id)
 
 
-@receiver(post_bulk_update, sender="household.Household")
-@receiver(post_bulk_create, sender="household.Household")
-@receiver(post_bulk_update, sender="household.Individual")
-@receiver(post_bulk_create, sender="household.Individual")
 def increment_household_list_cache_version_from_bulk(sender, instances, **kwargs):
     from hope.apps.household.api.caches import increment_household_list_program_key
-    from hope.apps.household.models import Household, Individual
 
-    program_ids = {instance.program_id for instance in instances if isinstance(instance, Household | Individual)}
+    program_ids = {instance.program_id for instance in instances}
     for program_id in program_ids:
         increment_household_list_program_key(program_id)
 
 
-@receiver(post_bulk_update, sender="household.Individual")
-@receiver(post_bulk_create, sender="household.Individual")
 def increment_individual_list_cache_version_from_bulk(sender, instances, **kwargs):
     from hope.apps.household.api.caches import increment_individual_list_program_key
-    from hope.apps.household.models import Individual
 
-    program_ids = {instance.program_id for instance in instances if isinstance(instance, Individual)}
+    program_ids = {instance.program_id for instance in instances}
     for program_id in program_ids:
         increment_individual_list_program_key(program_id)
+
+
+# Register signals - use lazy import to avoid circular dependency
+def register_bulk_signals():
+    from hope.apps.household.models import Household, Individual
+
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=Household)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=Household)
+    post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=Individual)
+    post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=Individual)
+
+    post_bulk_update.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)
+    post_bulk_create.connect(increment_individual_list_cache_version_from_bulk, sender=Individual)

@@ -44,9 +44,14 @@ class BulkSignalsManagerMixin:
 
     def bulk_update(self, objs, *args, **kwargs):
         val = super().bulk_update(objs, *args, **kwargs)
+        from django.db import connection
+
         from hope.apps.core.signals import post_bulk_update
 
-        transaction.on_commit(lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db))
+        if connection.in_atomic_block:
+            transaction.on_commit(lambda: post_bulk_update.send(sender=self.model, instances=objs, using=self.db))
+        else:
+            post_bulk_update.send(sender=self.model, instances=objs, **kwargs)
         return val
 
 
