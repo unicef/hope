@@ -630,7 +630,8 @@ class PaymentGatewayService:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
     def sync_record(self, payment: Payment) -> None:
-        if not payment.parent.is_payment_gateway:
+        payment_plan = payment.parent
+        if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
@@ -639,9 +640,19 @@ class PaymentGatewayService:
                 payment,
                 [pg_payment_record],
                 payment.parent_split,
-                payment.parent,
-                payment.parent.exchange_rate,
+                payment_plan,
+                payment_plan.exchange_rate,
             )
+
+            if payment_plan.is_reconciled:
+                payment_plan.status_finished()
+                payment_plan.save()
+                for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
+                    self.change_payment_instruction_status(
+                        PaymentInstructionStatus.FINALIZED,
+                        instruction,
+                        validate_response=False,
+                    )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate
