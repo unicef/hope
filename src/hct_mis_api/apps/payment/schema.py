@@ -635,7 +635,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_can_create_xlsx_with_fsp_auth_code(parent: PaymentPlan, info: Any) -> bool:
-        return parent.can_create_xlsx_with_fsp_auth_code
+        return parent.is_payment_gateway_and_all_sent_to_fsp
 
     @staticmethod
     def resolve_fsp_communication_channel(parent: PaymentPlan, info: Any) -> str:
@@ -726,7 +726,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
                     Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area
                 ):
                     return False
-                return parent.can_create_xlsx_with_fsp_auth_code
+                return parent.is_payment_gateway_and_all_sent_to_fsp
 
             if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
                 if not info.context.user.has_permission(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, parent.business_area):

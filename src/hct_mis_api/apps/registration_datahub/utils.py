@@ -92,11 +92,14 @@ def get_rdi_program_population(
     list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
     if list_of_ids:
         # add Individuals who can have any role in household
-        ind_ids_with_role = list(
-            IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
-            .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
-            .values_list("individual__unicef_id", flat=True)
-        )
+        if not program.is_social_worker_program:
+            ind_ids_with_role = list(
+                IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
+                .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
+                .values_list("individual__unicef_id", flat=True)
+            )
+        else:
+            ind_ids_with_role = []
 
         individual_ids_q = (
             Q(unicef_id__in=list_of_ids + ind_ids_with_role)
