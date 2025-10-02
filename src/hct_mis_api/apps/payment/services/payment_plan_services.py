@@ -5,6 +5,7 @@ from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Dict, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
@@ -33,6 +34,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_payment_notification_emails,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_to_payment_gateway,
+    update_exchange_rate_on_release_payments,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -372,7 +374,8 @@ class PaymentPlanService:
             if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
-                # remove imported and export files
+                # AB#272790
+                transaction.on_commit(lambda: update_exchange_rate_on_release_payments.delay(str(self.payment_plan.id)))
 
             if approval_type == Approval.REJECT:
                 self.payment_plan.status_reject()
@@ -441,10 +444,13 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments = payment_plan.payment_items.select_related("household_snapshot").all()
-        for payment in payments:
-            payment.update_signature_hash()
-        Payment.objects.bulk_update(payments, ["signature_hash"])
+        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
+        paginator = Paginator(payments_queryset, 500)
+        for page_number in paginator.page_range:
+            payments = paginator.page(page_number).object_list
+            for payment in payments:
+                payment.update_signature_hash()
+            Payment.objects.bulk_update(payments, ["signature_hash"])
 
     def create_targeting_criteria(self, targeting_criteria_input: Dict, program: Program) -> None:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)

@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, Optional
 
 from hct_mis_api.apps.core.utils import (
@@ -13,11 +14,18 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import (
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
     mergedicts,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):
@@ -99,3 +107,24 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
             country=Country.objects.get(iso_code2="NG"),
             photo=photo,
         )
+
+    def create_account(self, account_data: dict, individual: PendingIndividual) -> PendingAccount:
+        account = super().create_account(account_data, individual)
+        if financial_institution_code := account.data.get("uba_code"):
+            uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
+            try:
+                uba_mapping = FinancialInstitutionMapping.objects.get(
+                    code=financial_institution_code,
+                    financial_service_provider=uba_fsp,
+                )
+                account.financial_institution = uba_mapping.financial_institution
+                account.data["code"] = account.data.pop("uba_code")
+                account.save(update_fields=["financial_institution", "data"])
+
+            except FinancialInstitutionMapping.DoesNotExist:  # pragma: no cover
+                logger.error(
+                    f"FinancialInstitutionMapping for {uba_fsp} uba code {financial_institution_code} not found"
+                )
+
+        return account

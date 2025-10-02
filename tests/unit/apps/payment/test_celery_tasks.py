@@ -1,4 +1,5 @@
 import logging.config
+from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -28,6 +29,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_qcf_report_email_notifications,
+    update_exchange_rate_on_release_payments,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
@@ -144,17 +146,20 @@ class TestPaymentCeleryTask(TestCase):
             status=PaymentPlan.Status.TP_STEFICON_WAIT,
             steficon_rule_targeting=RuleCommitFactory(version=33),
         )
-        PaymentFactory(parent=payment_plan)
+        payment = PaymentFactory(parent=payment_plan)
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_WAIT)
 
         engine_rule = RuleFactory(name="Rule-test", type=Rule.TYPE_TARGETING)
-        RuleCommitFactory(definition="result.value=Decimal('500')", rule=engine_rule, version=11)
+        RuleCommitFactory(definition="result.value=Decimal('500.33333333')", rule=engine_rule, version=11)
 
         payment_plan_apply_steficon_hh_selection(str(payment_plan.pk), str(engine_rule.id))
 
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_COMPLETED)
+
+        payment.refresh_from_db(fields=["vulnerability_score"])
+        self.assertEqual(payment.vulnerability_score, Decimal("500.333"))
 
     @patch("hct_mis_api.apps.steficon.models.RuleCommit.execute")
     @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
@@ -262,20 +267,27 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        # create zip file with passwords
-        create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
+            # override property to always return True
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
 
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+            # create zip file with passwords
+            create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
 
-        self.assertIsNone(payment_plan.background_action_status)
-        self.assertTrue(payment_plan.has_export_file)
-        self.assertTrue(
-            payment_plan.export_file_per_fsp.file.name.startswith(f"payment_plan_payment_list_{payment_plan.unicef_id}")
-        )
-        self.assertTrue(payment_plan.export_file_per_fsp.file.name.endswith(".zip"))
-        self.assertIsNotNone(file_obj.password)
-        self.assertIsNotNone(file_obj.xlsx_password)
+            payment_plan.refresh_from_db()
+            file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+
+            self.assertIsNone(payment_plan.background_action_status)
+            self.assertTrue(payment_plan.has_export_file)
+            self.assertTrue(
+                payment_plan.export_file_per_fsp.file.name.startswith(
+                    f"payment_plan_payment_list_{payment_plan.unicef_id}"
+                )
+            )
+            self.assertTrue(payment_plan.export_file_per_fsp.file.name.endswith(".zip"))
+            self.assertIsNotNone(file_obj.password)
+            self.assertIsNotNone(file_obj.xlsx_password)
 
     @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password(self, mock_mailjet_send: Mock) -> None:
@@ -288,24 +300,29 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        # create zip file with passwords
-        create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
+            # override property to always return True
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
 
-        self.assertIsNone(payment_plan.background_action_status)
-        self.assertEqual(payment_plan.export_file_per_fsp, file_obj)
-        self.assertIsNotNone(file_obj.password)
-        self.assertIsNotNone(file_obj.xlsx_password)
+            # create zip file with passwords
+            create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
+            payment_plan.refresh_from_db()
+            file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-        send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
+            self.assertIsNone(payment_plan.background_action_status)
+            self.assertEqual(payment_plan.export_file_per_fsp, file_obj)
+            self.assertIsNotNone(file_obj.password)
+            self.assertIsNotNone(file_obj.xlsx_password)
 
-        # first call from > create_payment_plan_payment_list_xlsx_per_fsp
-        # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
-        self.assertEqual(
-            mock_mailjet_send.call_count,
-            2,
-        )
+            send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
+
+            # first call from > create_payment_plan_payment_list_xlsx_per_fsp
+            # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
+            self.assertEqual(
+                mock_mailjet_send.call_count,
+                2,
+            )
 
     @patch("hct_mis_api.apps.payment.celery_tasks.logger")
     @patch("hct_mis_api.apps.payment.celery_tasks.get_user_model")
@@ -317,6 +334,58 @@ class TestPaymentCeleryTask(TestCase):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
+
+    @patch("hct_mis_api.apps.payment.celery_tasks.get_quantity_in_usd")
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_money_fields")
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate")
+    def test_update_exchange_rate_on_release_payments_success(
+        self,
+        mock_get_exchange_rate: Mock,
+        mock_update_money_fields: Mock,
+        mock_get_quantity_in_usd: Mock,
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+            exchange_rate=0.1,
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.exchange_rate, Decimal("0.10000000"))
+        payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
+
+        mock_get_exchange_rate.return_value = 1.25
+        mock_get_quantity_in_usd.return_value = 125.0
+
+        update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.exchange_rate, 1.25)
+
+        payment.refresh_from_db()
+        self.assertEqual(payment.entitlement_quantity_usd, 125.0)
+
+        mock_update_money_fields.assert_called_once()
+
+    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hct_mis_api.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
+    def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
+        self, mock_retry: Mock, mock_logger: Mock
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            currency="PLN",
+        )
+        mock_retry.side_effect = Retry("force retry just for testing")
+
+        with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
+            with self.assertRaises(Retry):
+                update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
+
+        mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
+        mock_retry.assert_called_once()
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

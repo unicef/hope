@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "3.6.1",
+  "version": "3.6.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -54,7 +54,7 @@
     "date-fns": "^4.1.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "formik": "^2.4.5",
-    "glob": "^11.0.1",
+    "glob": "^11.0.3",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "helmet": "^8.0.0",
@@ -79,11 +79,12 @@
     "react-zoom-pan-pinch": "^3.7.0",
     "string.prototype.replaceall": "^1.0.9",
     "styled-components": "^6.1.8",
+    "tmp": "^0.2.5",
     "tough-cookie": "^5.1.0",
     "ts-node": "^10.9.2",
     "use-deep-compare-effect": "^1.8.1",
     "uuid": "^11.0.5",
-    "vite": "^6.1.6",
+    "vite": "^7.1.5",
     "vite-tsconfig-paths": "^4.3.1",
     "waait": "^1.0.5",
     "yup": "^1.6.1"
@@ -110,8 +111,8 @@
     "@typescript-eslint/eslint-plugin": "6.x",
     "@typescript-eslint/parser": "6.x",
     "babel-jest": "^29.7.0",
-    "braces": "3.0.3",
-    "esbuild": "0.24.2",
+    "braces": "^3.0.3",
+    "esbuild": "^0.25.9",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -128,10 +129,16 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-resolve": "^29.7.0",
     "jest-watch-typeahead": "^2.2.2",
-    "micromatch": "4.0.8",
+    "micromatch": "^4.0.8",
     "prettier": "3.4.2",
     "react-test-renderer": "^19.0.0",
     "ts-jest": "^29.1.2",
     "typescript": "~5.3.0"
+  },
+  "resolutions": {
+    "brace-expansion": "^2.0.2",
+    "micromatch": "^4.0.8",
+    "tmp": "^0.2.5",
+    "braces": "^3.0.3"
   }
 }

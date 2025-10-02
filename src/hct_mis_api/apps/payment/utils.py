@@ -3,7 +3,7 @@ import hashlib
 import json
 import typing
 from base64 import b64decode
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from math import ceil
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -120,7 +120,7 @@ def get_payment_items_for_dashboard(
 def get_quantity_in_usd(
     amount: Decimal,
     currency: str,
-    exchange_rate: Decimal,
+    exchange_rate: Union[Decimal, float],
     currency_exchange_date: datetime.datetime,
     exchange_rates_client: Optional["ExchangeRateClient"] = None,
 ) -> Optional[Decimal]:
@@ -140,6 +140,12 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def normalize_score(value: Optional[Union[float, str, Decimal]]) -> Optional[Decimal]:
+    if value is None:
+        return None
+    return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
 def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
