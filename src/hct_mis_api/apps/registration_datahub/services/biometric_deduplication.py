@@ -361,7 +361,7 @@ class BiometricDeduplicationService:
                         second=item["second"]["reference_pk"] or None,
                     )
                     for item in data
-                    if item["status_code"]
+                    if str(item["status_code"])
                     in [
                         DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value,
                         DeduplicationEngineSimilarityPair.StatusCode.STATUS_412.value,
