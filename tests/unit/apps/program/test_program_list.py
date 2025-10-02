@@ -248,8 +248,8 @@ class TestProgramList:
         assert response_data[3]["id"] == str(program_finished.id)
 
     def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
-        no_queries_not_cached_no_permissions = 12
-        no_queries_not_cached_with_permissions = 8
+        no_queries_not_cached_no_permissions = 11
+        no_queries_not_cached_with_permissions = 7
         no_queries_cached = 5
 
         program_afghanistan2 = ProgramFactory(business_area=self.afghanistan)
