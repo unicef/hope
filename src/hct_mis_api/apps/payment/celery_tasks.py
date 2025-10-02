@@ -319,7 +319,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         pp_exchange_rate = payment_plan.exchange_rate
         pp_currency_exchange_date = payment_plan.currency_exchange_date
 
-        updates = []
+        updates_buffer = []
         with transaction.atomic():
             for payment in qs.iterator(chunk_size=BULK_SIZE):
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
@@ -332,11 +332,18 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                     currency_exchange_date=pp_currency_exchange_date,
                 )
                 payment.entitlement_date = now
-                updates.append(payment)
+                updates_buffer.append(payment)
+                # Flush in chunks to keep memory and row locks under control
+                if len(updates_buffer) >= BULK_SIZE:
+                    Payment.signature_manager.bulk_update_with_signature(
+                        updates_buffer,
+                        ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
+                    )
+                    updates_buffer.clear()
 
-            if updates:
+            if updates_buffer:
                 Payment.signature_manager.bulk_update_with_signature(
-                    updates,
+                    updates_buffer,
                     ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
                 )
 
