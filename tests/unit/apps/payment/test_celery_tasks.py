@@ -161,7 +161,7 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_COMPLETED
 
         payment.refresh_from_db(fields=["vulnerability_score"])
-        self.assertEqual(payment.vulnerability_score, Decimal("500.333"))
+        assert payment.vulnerability_score == Decimal("500.333")
 
     @patch("hope.apps.steficon.models.RuleCommit.execute")
     @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
@@ -272,7 +272,7 @@ class TestPaymentCeleryTask(TestCase):
         with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
             type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
-            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
@@ -303,7 +303,7 @@ class TestPaymentCeleryTask(TestCase):
         with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
             type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
-            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))

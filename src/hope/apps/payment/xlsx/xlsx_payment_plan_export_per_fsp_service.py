@@ -71,7 +71,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         }
         self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
-        self.fsp_xlsx_template: Optional[FinancialServiceProviderXlsxTemplate] = None
+        self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = None
         self.account_fields_headers = self.get_account_fields_headers()
         self.header_list = []
         self.template_columns = []
@@ -101,7 +101,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def get_template(
         self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
-    ) -> Optional[FinancialServiceProviderXlsxTemplate]:
+    ) -> FinancialServiceProviderXlsxTemplate | None:
         if self.fsp_xlsx_template_id:
             self.fsp_xlsx_template = get_object_or_404(
                 FinancialServiceProviderXlsxTemplate, pk=self.fsp_xlsx_template_id
