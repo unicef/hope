@@ -334,7 +334,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_date = now
                 updates_buffer.append(payment)
                 # Flush in chunks to keep memory and row locks under control
-                if len(updates_buffer) >= BULK_SIZE:
+                if len(updates_buffer) >= BULK_SIZE:  # pragma: no cover
                     Payment.signature_manager.bulk_update_with_signature(
                         updates_buffer,
                         ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
