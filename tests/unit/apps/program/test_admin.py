@@ -61,12 +61,12 @@ class ProgramAdminTest(WebTest):
         assert "program_area_formset" in response.context
         assert "business_area" in response.context
         assert "areas" in response.context
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             response.context["areas"],
             Area.objects.filter(area_type__country__business_areas__id=self.program.business_area.id),
         )
         assert "partners" in response.context
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             response.context["partners"],
             Partner.objects.filter(id=self.partner_with_role.id),
         )
@@ -85,7 +85,7 @@ class ProgramAdminTest(WebTest):
         )
 
         assert AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             AdminAreaLimitedTo.objects.get(partner=self.partner_with_role, program=self.program).areas.all(),
             Area.objects.filter(id__in=[self.admin_area1.id, self.admin_area2.id]),
         )
@@ -104,7 +104,7 @@ class ProgramAdminTest(WebTest):
             },
         )
         assert AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             AdminAreaLimitedTo.objects.get(partner=self.partner_with_role, program=self.program).areas.all(),
             Area.objects.filter(id__in=[self.admin_area1.id]),
         )

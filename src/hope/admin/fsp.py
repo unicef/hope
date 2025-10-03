@@ -205,6 +205,11 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     raw_id_fields = ("financial_service_provider",)
 
 
+class FSPXlsxTemplateInline(admin.TabularInline):
+    model = FinancialServiceProvider.xlsx_templates.through
+    extra = 1
+
+
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     form = FinancialServiceProviderAdminForm
@@ -221,7 +226,6 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     filter_horizontal = (
         "allowed_business_areas",
         "delivery_mechanisms",
-        "xlsx_templates",
     )
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
@@ -239,7 +243,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("payment_gateway_id",),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
-    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline, FspNameMappingInline)
+    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline, FspNameMappingInline, FSPXlsxTemplateInline)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
