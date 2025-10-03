@@ -342,7 +342,7 @@ class Program(
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     @property
-    def screen_beneficiary(self) -> None:
+    def screen_beneficiary(self) -> bool:
         """Return if program will be screened against the sanction lists.
 
         :return:
@@ -441,7 +441,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
         end_date = parse_date(self.end_date) if isinstance(self.end_date, str) else self.end_date
 
-        if end_date and end_date < start_date:
+        if end_date and start_date and end_date < start_date:
             raise ValidationError("End date cannot be before start date.")
 
         if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():

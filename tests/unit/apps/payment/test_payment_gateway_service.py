@@ -215,7 +215,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock
 
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 2
@@ -289,7 +289,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock
 
         assert self.pp.splits.exists() is True
         assert self.pp.is_reconciled is False
@@ -411,7 +411,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock
 
         pg_service.sync_payment_plan(self.pp)
         assert get_records_for_payment_instruction_mock.call_count == 2
@@ -461,7 +461,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_record = get_record_mock  # type: ignore
+        pg_service.api.get_record = get_record_mock
 
         pg_service.sync_record(self.payments[0])
         assert get_record_mock.call_count == 1
@@ -986,7 +986,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
+        pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock
 
         pg_service.sync_delivery_mechanisms()
         dm_cash = DeliveryMechanism.objects.get(code="cash")
@@ -1052,7 +1052,7 @@ class TestPaymentGatewayService(BaseTestCase):
         ]
 
         pg_service = PaymentGatewayService()
-        pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+        pg_service.api.get_fsps = get_fsps_mock
 
         pg_service.sync_fsps()
 
@@ -1104,7 +1104,7 @@ class TestPaymentGatewayService(BaseTestCase):
             None,  # second Record not in PG
         ]
         pg_service = PaymentGatewayService()
-        pg_service.api.get_record = get_record_mock  # type: ignore
+        pg_service.api.get_record = get_record_mock
         change_payment_instruction_status_mock.side_effect = [
             PaymentInstructionStatus.CLOSED.value,
             PaymentInstructionStatus.READY.value,

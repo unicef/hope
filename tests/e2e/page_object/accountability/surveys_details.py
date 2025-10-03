@@ -82,6 +82,6 @@ class AccountabilitySurveysDetails(BaseComponents):
     def get_table_pagination(self) -> WebElement:
         return self.wait_for(self.table_pagination)
 
-    def get_rows(self) -> [WebElement]:
+    def get_rows(self) -> list[WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)

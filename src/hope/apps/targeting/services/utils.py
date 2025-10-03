@@ -39,18 +39,17 @@ def from_input_to_targeting_criteria(
         if individual_ids:
             individual_ids = get_existing_unicef_ids(individual_ids, Individual, program)
 
-        tc_rule = TargetingCriteriaRule(
-            payment_plan=payment_plan,
-            household_ids=household_ids,
-            individual_ids=individual_ids,
-        )
+        tc_rule = TargetingCriteriaRule(payment_plan=payment_plan)
+        tc_rule.household_ids = household_ids
+        tc_rule.individual_ids = individual_ids
         tc_rule.save()
         for hh_filter in households_filters_blocks:
             tc_rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=tc_rule, **hh_filter)
             tc_rule_filter.save()
 
         for ind_filter_block in individuals_filters_blocks:
-            ind_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=tc_rule)
+            ind_block = TargetingIndividualRuleFilterBlock()
+            ind_block.targeting_criteria_rule = tc_rule
             ind_block.save()
             for ind_filter in ind_filter_block.get("individual_block_filters", []):
                 individual_filter = TargetingIndividualBlockRuleFilter(
@@ -59,7 +58,8 @@ def from_input_to_targeting_criteria(
                 individual_filter.save()
 
         for collector_filter_block in collectors_filters_blocks:
-            collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
+            collector_block = TargetingCollectorRuleFilterBlock()
+            collector_block.targeting_criteria_rule = tc_rule
             collector_block.save()
             for collectors_filter in collector_filter_block.get("collector_block_filters", []):
                 collector_block_filters = TargetingCollectorBlockRuleFilter(
