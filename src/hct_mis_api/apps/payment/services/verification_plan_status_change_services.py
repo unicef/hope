@@ -82,19 +82,18 @@ class VerificationPlanStatusChangeServices:
             if not locked:
                 raise GraphQLError("RapidPro activation already in progress")  # pragma: no cover
 
-            if not self.payment_verification_plan.can_activate_rapid_pro():
-                raise GraphQLError("You can activate only PENDING/ERROR RapidPro verifications")
+            if not self.payment_verification_plan.can_activate:
+                raise GraphQLError("You can activate only PENDING/ERROR verifications")
 
-            exception = self._activate_rapidpro()
+            if self.payment_verification_plan.is_rapid_pro:
+                if exception := self._activate_rapidpro():
+                    self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
+                    self.payment_verification_plan.error = str(exception)
+                    self.payment_verification_plan.save()
+                    raise exception
 
-            if exception:
-                self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
-                self.payment_verification_plan.error = str(exception)
-                self.payment_verification_plan.save()
-                raise exception
-            else:
-                self.payment_verification_plan.set_active()
-                self.payment_verification_plan.save()
+            self.payment_verification_plan.set_active()
+            self.payment_verification_plan.save()
 
             return self.payment_verification_plan
 
