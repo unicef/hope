@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
@@ -32,6 +33,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
 )
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     get_generator_handler,
+    handler_role_update,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
@@ -348,11 +350,21 @@ class UniversalIndividualUpdateService:
         if self.household_fields:
             household_fields_to_update.extend([field for _, (field, _, _) in self.household_fields.items()])
         if self.individual_fields:
-            individual_fields_to_update.extend([field for _, (field, _, _) in self.individual_fields.items()])
+            individual_fields_to_update.extend(
+                [field for _, (field, _, _) in self.individual_fields.items() if field != "role"]
+            )
         individuals_to_update = []
         households_to_update = []
         documents_to_update = []
         documents_to_create = []
+        roles_to_update = []
+        roles_to_create = []
+
+        # TODO: fix it
+        print("Check Role Header = ", headers.index("role"), headers.index("invalid_header"))
+        header_index_role = headers.index("role")
+        update_roles = True if header_index_role == 12 else False
+
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
@@ -362,7 +374,7 @@ class UniversalIndividualUpdateService:
             unicef_id = row[headers.index("unicef_id")]
             individual = (
                 Individual.objects.select_related("household")
-                .prefetch_related("documents", "accounts")
+                .prefetch_related("documents", "accounts", "households_and_roles")
                 .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
             )
             individual_ids.append(str(individual.id))
@@ -377,6 +389,14 @@ class UniversalIndividualUpdateService:
             self.handle_account_update(row, headers, individual)
             households_to_update.append(household)
             individuals_to_update.append(individual)
+
+            if update_roles:
+                create_role, update_role = handler_role_update(individual, household, row[header_index_role])
+                if create_role:
+                    roles_to_create.append(create_role)
+                if update_role:
+                    roles_to_update.append(update_role)
+
             if len(individuals_to_update) == self.batch_size:
                 self.batch_update(
                     document_fields_to_update,
@@ -386,6 +406,8 @@ class UniversalIndividualUpdateService:
                     households_to_update,
                     individual_fields_to_update,
                     individuals_to_update,
+                    roles_to_update,
+                    roles_to_create,
                 )
         self.batch_update(
             document_fields_to_update,
@@ -395,6 +417,8 @@ class UniversalIndividualUpdateService:
             households_to_update,
             individual_fields_to_update,
             individuals_to_update,
+            roles_to_update,
+            roles_to_create,
         )
         return individual_ids
 
@@ -407,6 +431,8 @@ class UniversalIndividualUpdateService:
         households_to_update: list,
         individual_fields_to_update: list,
         individuals_to_update: list,
+        roles_to_update: list,
+        roles_to_create: list,
     ) -> None:
         Document.objects.bulk_update(documents_to_update, document_fields_to_update)
         Document.objects.bulk_create(documents_to_create)
@@ -419,10 +445,16 @@ class UniversalIndividualUpdateService:
         populate_index(
             Household.objects.filter(id__in=[household.id for household in households_to_update]), HouseholdDocument
         )
+        if roles_to_update:
+            IndividualRoleInHousehold.objects.bulk_update(roles_to_update, ["role"])
+        if roles_to_create:
+            IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
         documents_to_update.clear()
         documents_to_create.clear()
         households_to_update.clear()
         individuals_to_update.clear()
+        roles_to_update.clear()
+        roles_to_create.clear()
 
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
@@ -469,6 +501,8 @@ class UniversalIndividualUpdateService:
         columns = ["unicef_id"]
 
         for column_name in self.individual_fields.keys():
+            # if column_name == "role":
+            #     columns.append("household__unicef_id")
             columns.append(column_name)
 
         for column_name in self.individual_flex_fields.keys():

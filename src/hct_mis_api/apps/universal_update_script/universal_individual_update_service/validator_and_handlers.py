@@ -8,7 +8,15 @@ from phonenumber_field.phonenumber import PhoneNumber
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_CHOICE,
+    ROLE_NO_ROLE,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
@@ -116,6 +124,47 @@ def validate_choices(
     if value not in choices:
         return f"Invalid value {value} for column {name} allowed values are {choices}"
     return None
+
+
+def validate_roles(
+    value: Any, name: str, individual: Any, business_area: BusinessArea, program: Program
+) -> Optional[str]:
+    # validate role choices
+    if value is None or value == "" or value.capitalize() == "NONE":
+        value = ROLE_NO_ROLE
+    if value not in ROLE_CHOICE:
+        return f"Invalid value {value} for column Role allowed values are {ROLE_CHOICE}"
+
+    # validate Role for Individual
+    household = individual.household
+
+    individual_current_role = IndividualRoleInHousehold.objects.filter(
+        household=household, individual=individual
+    ).first()
+
+    if value == ROLE_ALTERNATE and individual_current_role.role == ROLE_PRIMARY:
+        raise f"Cannot reassign the role for HH {household.unicef_id}. Selected Individual {individual.unicef_id} has primary collector role."
+
+    return None
+
+
+def handler_role_update(individual: Any, household: Any, role_value: Any) -> Any:
+    create_role, update_role = None, None
+    update_role = IndividualRoleInHousehold.objects.filter(household=household, individual=individual).first()
+
+    if update_role:
+        # update Role
+        update_role.role = role_value
+
+    if not update_role:
+        # create new Role
+        create_role = IndividualRoleInHousehold(
+            household=household,
+            role=role_value,
+            individual=individual,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+    return create_role, update_role
 
 
 def validate_boolean(

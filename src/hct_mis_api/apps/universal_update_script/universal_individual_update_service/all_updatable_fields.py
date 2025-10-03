@@ -14,6 +14,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     handle_date_field,
     handle_integer_field,
     handle_simple_field,
+    handler_role_update,
     validate_admin,
     validate_boolean,
     validate_choices,
@@ -21,6 +22,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     validate_flex_field_string,
     validate_integer,
     validate_phone_number,
+    validate_roles,
     validate_string,
 )
 
@@ -59,6 +61,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "child_hoh": ("child_hoh", validate_boolean, handle_boolean_field),
     "preferred_language": ("preferred_language", validate_string, handle_simple_field),
     "age_at_registration": ("age_at_registration", validate_string, handle_simple_field),
+    "role": ("role", validate_roles, handler_role_update),
 }
 household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
