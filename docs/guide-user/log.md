@@ -12,4 +12,4 @@ The Activity Log shows all actions performed by all users across the system. Eac
 1. Select Activity Log from the main menu.
 
     A list of the of all activities in the Programme will be displayed, including a search box with filters for the activity logs.
-    ![Image](_screenshots/log/1.png)
+    ![Image](_screenshots/log/log_58.png)
