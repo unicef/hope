@@ -192,6 +192,7 @@ class Program(
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
+    status_rank = models.PositiveSmallIntegerField(help_text="Auto-generated field for faster sorting")
     slug = models.CharField(max_length=4, db_index=True, help_text="Program slug [sys]")
     description = models.CharField(
         blank=True,
