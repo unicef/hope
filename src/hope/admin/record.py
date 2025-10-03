@@ -6,8 +6,8 @@ from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
-from adminfilters.json import JsonFieldFilter
-from adminfilters.numbers import NumberFilter
+from adminfilters.json_filter import JsonFieldFilter
+from adminfilters.num import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages

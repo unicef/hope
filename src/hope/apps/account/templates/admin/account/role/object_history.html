@@ -31,15 +31,15 @@
                             <th scope="row">{{ action.action_time|date:"DATETIME_FORMAT" }}</th>
                             <td>{{ action.user.get_username }}{% if action.user.get_full_name %} ({{ action.user.get_full_name }}){% endif %}</td>
                             <td>{{ action.get_change_message }}</td>
-                            <td>
-                                {% get_changed action.change_message "permissions" as perms %}
-                                {% if perms.added %}
-                                <div><b>Added permissions</b>: {{ perms.added|join:", " }}</div>
-                                {% endif %}
-                                {% if perms.removed %}
-                                <div><b>Removed permissions</b>: {{ perms.removed|join:", " }}</div>
-                                {% endif %}
-                            </td>
+{# <td> #}
+{# {% get_changed action.change_message "permissions" as perms %} #}
+{# {% if perms.added %} #}
+{# <div><b>Added permissions</b>: {{ perms.added|join:", " }}</div> #}
+{# {% endif %} #}
+{# {% if perms.removed %} #}
+{# <div><b>Removed permissions</b>: {{ perms.removed|join:", " }}</div> #}
+{# {% endif %} #}
+{# </td> #}
                         </tr>
                     {% endfor %}
                     </tbody>
