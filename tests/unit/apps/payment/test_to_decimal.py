@@ -22,4 +22,4 @@ class TestToDecimal(TestCase):
         assert normalize_score(None) is None
         assert normalize_score("123.444111") == Decimal("123.444")
         assert normalize_score("222.111") == Decimal("222.111")
-        assert normalize_score("111.2") is Decimal("111.2")
+        assert normalize_score("111.2") == Decimal("111.2")
