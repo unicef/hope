@@ -72,7 +72,7 @@ export function LookUpProgrammesTableRowSurveys({
         {programSectorChoiceDict[program.sector]}
       </TableCell>
       <TableCell align="right">
-        {program.numberOfHouseholdsWithTpInProgram}
+        {program.householdCount}
       </TableCell>
       <TableCell align="right">
         {formatCurrency(Number(program.budget))}

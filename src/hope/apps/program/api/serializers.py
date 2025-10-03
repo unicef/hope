@@ -304,9 +304,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
-    number_of_households_with_tp_in_program = serializers.IntegerField(
-        source="annotate_number_of_households_with_tp_in_program"
-    )
 
     class Meta:
         model = Program
@@ -327,7 +324,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
             "status",
             "pdu_fields",
             "household_count",
-            "number_of_households_with_tp_in_program",
         )
         extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
 

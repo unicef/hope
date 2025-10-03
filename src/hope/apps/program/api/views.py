@@ -4,7 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
+from django.db.models import Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -135,19 +135,6 @@ class ProgramViewSet(
                 id__in=allowed_programs,
             )
             .exclude(data_collecting_type__code="unknown")
-            .annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                ),
-                annotate_number_of_households_with_tp_in_program=Count(
-                    "payment__household_id",
-                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
-                    distinct=True,
-                ),
-            )
             .prefetch_related(
                 Prefetch(
                     "pdu_fields",
@@ -155,7 +142,7 @@ class ProgramViewSet(
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
-            .order_by("custom_order", "start_date")
+            .order_by("status_rank", "start_date")
         )
 
     @etag_decorator(ProgramListKeyConstructor)
