@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             """
             ALTER TABLE program_program
-            ADD COLUMN status_rank smallint GENERATED ALWAYS AS (
+            ADD COLUMN IF NOT EXISTS status_rank smallint GENERATED ALWAYS AS (
               CASE status
                 WHEN 'DRAFT' THEN 1
                 WHEN 'ACTIVE' THEN 2
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 migrations.AddField(
                     "program",
                     "status_rank",
-                    models.PositiveSmallIntegerField(help_text="Auto-generated field for faster sorting"),
+                    models.PositiveSmallIntegerField(help_text="Auto-generated field for faster sorting", default=99),
                 ),
             ],
         )
