@@ -45,10 +45,11 @@ def migrate_user_roles(apps, schema_editor):
     RoleAssignment = apps.get_model("account", "RoleAssignment")
     ProgramPartnerThrough = apps.get_model("program", "ProgramPartnerThrough")
     Partner = apps.get_model("account", "Partner")
+    register(Partner)
 
     expiration_time = timezone.now()
 
-    unicef_partner = Partner._default_manager.filter(name="UNICEF").first()
+    unicef_partner = Partner.objects.filter(name="UNICEF").first()
 
     # do not change UserRoles for Global as it can stay with program=None
     user_roles = (
@@ -247,7 +248,7 @@ def migrate_unicef_partners(apps, schema_editor):
 
     new_assignments = []
 
-    unicef_partner = Partner._default_manager.filter(name="UNICEF").first()
+    unicef_partner = Partner.objects.filter(name="UNICEF").first()
 
     # update Role with all permissions with is_available_for_partner=False
     role_with_all_permissions = Role.objects.get(name="Role with all permissions")
@@ -262,11 +263,11 @@ def migrate_unicef_partners(apps, schema_editor):
     )
     role_for_unicef_subpartners.refresh_from_db()
 
-    unicef_hq, _ = Partner._default_manager.get_or_create(name=settings.UNICEF_HQ_PARTNER)
+    unicef_hq, _ = Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER)
     unicef_hq.allowed_business_areas.set(BusinessArea.objects.all())
 
     for business_area in BusinessArea.objects.exclude(slug="global"):
-        unicef_subpartner, _ = Partner._default_manager.get_or_create(name=f"UNICEF Partner for {business_area.slug}")
+        unicef_subpartner, _ = Partner.objects.get_or_create(name=f"UNICEF Partner for {business_area.slug}")
         unicef_subpartner.allowed_business_areas.add(business_area)
 
         new_assignments.append(
@@ -295,7 +296,7 @@ def migrate_unicef_partners(apps, schema_editor):
     # handle UNICEF users
 
     # UNICEF users with no roles or role only in GLOBAL will be assigned to default empty partner
-    empty_partner, _ = Partner._default_manager.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
+    empty_partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
     User.objects.filter(partner=unicef_partner).annotate(
         ba_count=Count("role_assignments__business_area", distinct=True)
     ).filter(Q(ba_count=0) | Q(ba_count=1, role_assignments__business_area__slug="global")).update(
