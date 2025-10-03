@@ -54,7 +54,19 @@ class UserViewSet(
         "profile": [IsAuthenticated],
     }
     permissions_by_action = {
-        "list": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "list": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+        ],
         "choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
