@@ -549,7 +549,7 @@ class TestAutomatingRDICreationTask(TestCase):
         AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
     def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
-        result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)
+        result = run_automate_rdi_creation_task(registration_id=self.registration.source_id, page_size=1)
         assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
@@ -557,7 +557,7 @@ class TestAutomatingRDICreationTask(TestCase):
         create_imported_document_types()
         record = create_record(
             fields=UKRAINE_FIELDS,
-            registration=self.registration.id,
+            registration=self.registration.source_id,
             status=Record.STATUS_ERROR,
         )
 
@@ -578,7 +578,7 @@ class TestAutomatingRDICreationTask(TestCase):
         for _ in range(amount_of_records):
             create_record(
                 fields=UKRAINE_FIELDS,
-                registration=self.registration.id,
+                registration=self.registration.source_id,
                 status=Record.STATUS_TO_IMPORT,
             )
 
@@ -587,7 +587,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert PendingIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=self.registration.id,
+            registration_id=self.registration.source_id,
             page_size=page_size,
             template="some template {date} {records}",
         )
@@ -609,7 +609,7 @@ class TestAutomatingRDICreationTask(TestCase):
         for _ in range(amount_of_records):
             create_record(
                 fields=UKRAINE_FIELDS,
-                registration=self.registration.id,
+                registration=self.registration.source_id,
                 status=Record.STATUS_TO_IMPORT,
             )
 
@@ -621,7 +621,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=self.registration.id,
+                registration_id=self.registration.source_id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 auto_merge=True,
@@ -639,7 +639,7 @@ class TestAutomatingRDICreationTask(TestCase):
         for _ in range(amount_of_records):
             create_record(
                 fields=UKRAINE_FIELDS,
-                registration=self.registration.id,
+                registration=self.registration.source_id,
                 status=Record.STATUS_TO_IMPORT,
             )
 
@@ -651,7 +651,7 @@ class TestAutomatingRDICreationTask(TestCase):
             "hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
-                registration_id=self.registration.id,
+                registration_id=self.registration.source_id,
                 page_size=page_size,
                 template="some template {date} {records}",
                 fix_tax_id=True,

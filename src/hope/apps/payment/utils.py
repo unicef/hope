@@ -1,11 +1,10 @@
 from base64 import b64decode
 import datetime
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
-import typing
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, no_type_check
 
 from django.conf import settings
 from django.db.models import Q
@@ -67,7 +66,7 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
     return Decimal(f"{round(received_amount, 2):.2f}")
 
 
-@typing.no_type_check
+@no_type_check
 def from_received_yes_no_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
     received_bool = None
     if received == "YES":
@@ -140,6 +139,12 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def normalize_score(value: float | str | Decimal | None) -> Decimal | None:
+    if value is None:
+        return None
+    return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
 def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
