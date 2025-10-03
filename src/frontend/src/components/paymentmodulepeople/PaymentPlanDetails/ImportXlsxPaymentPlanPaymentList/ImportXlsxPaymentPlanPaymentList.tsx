@@ -16,7 +16,6 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { showApiErrorMessages } from '@utils/utils';
-import { error } from 'console';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
