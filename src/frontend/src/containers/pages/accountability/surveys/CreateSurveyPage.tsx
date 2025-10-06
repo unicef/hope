@@ -116,11 +116,6 @@ const CreateSurveyPage = (): ReactElement => {
   const parts = pathname.split('/');
   const categoryIndex = parts.indexOf('create') + 1;
   const categoryFromUrl = parts[categoryIndex];
-  const isCategoryValid = [
-    SurveyCategoryEnum.SMS,
-    SurveyCategoryEnum.MANUAL,
-    SurveyCategoryEnum.RAPID_PRO,
-  ].includes(categoryFromUrl as SurveyCategoryEnum);
   const [category, setCategory] = useState<string | undefined>(categoryFromUrl);
   useEffect(() => {
     setCategory(categoryFromUrl);
