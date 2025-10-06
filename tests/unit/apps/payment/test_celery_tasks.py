@@ -161,7 +161,7 @@ class TestPaymentCeleryTask(TestCase):
         payment.refresh_from_db(fields=["vulnerability_score"])
         assert payment.vulnerability_score == Decimal("500.333")
 
-    @patch("hope.apps.steficon.models.RuleCommit.execute")
+    @patch("hope.models.rule.RuleCommit.execute")
     @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
     def test_payment_plan_apply_steficon_hh_selection_exception_handling(
         self, mock_retry: Mock, mock_rule_execute: Mock
@@ -320,7 +320,7 @@ class TestPaymentCeleryTask(TestCase):
             assert mock_mailjet_send.call_count == 2
 
     @patch("hope.apps.payment.celery_tasks.logger")
-    @patch("hope.apps.payment.celery_tasks.get_user_model")
+    @patch("hope.models.user.User")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:

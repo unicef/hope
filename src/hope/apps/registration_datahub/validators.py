@@ -141,7 +141,7 @@ class ImportDataInstanceValidator:
         }
 
     def serialize_flex_attributes(self) -> dict:
-        from hope.models.business_area import FlexibleAttribute
+        from hope.models.flexible_attribute import FlexibleAttribute
 
         flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
 
