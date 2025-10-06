@@ -134,7 +134,7 @@ class PDUXlsxUploadSerializer(serializers.ModelSerializer):
 class PeriodicFieldDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicFieldData
-        fields = ("subtype", "number_of_rounds", "rounds_names", "rounds_covered")
+        fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):

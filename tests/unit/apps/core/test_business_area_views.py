@@ -448,7 +448,6 @@ class TestAllFieldsAttributes:
                         "subtype": attr.pdu_data.subtype,
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
-                        "rounds_covered": attr.pdu_data.rounds_covered,
                     }
                 )
                 if attr.pdu_data
@@ -516,7 +515,6 @@ class TestAllFieldsAttributes:
                         "subtype": attr.pdu_data.subtype,
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
-                        "rounds_covered": attr.pdu_data.rounds_covered,
                     }
                 )
                 if attr.pdu_data
