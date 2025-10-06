@@ -131,6 +131,15 @@ class ProgramFactory(DjangoModelFactory):
             return
         ProgramCycleFactory(program=self, **kwargs)
 
+    @factory.post_generation
+    def refresh_generated_fields(self, create, extracted, **kwargs):
+        """
+        Refresh DB-generated columns after creation.
+        Ensures status_rank is correctly populated.
+        """
+        if create:
+            self.refresh_from_db(fields=["status_rank"])
+
 
 def get_program_with_dct_type_and_name(
     dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE, **kwargs: dict
