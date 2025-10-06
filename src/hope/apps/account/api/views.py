@@ -54,7 +54,19 @@ class UserViewSet(
         "profile": [IsAuthenticated],
     }
     permissions_by_action = {
-        "list": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "list": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+        ],
         "choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
@@ -90,25 +102,18 @@ class UserViewSet(
     def get_queryset(self) -> QuerySet[User]:
         business_area_slug = self.kwargs.get("business_area_slug")
 
+        role_assignments_queryset = (
+            RoleAssignment.objects.select_related("business_area", "role", "program")
+            .filter(business_area__slug=business_area_slug)
+            .exclude(expiry_date__lt=timezone.now())
+        )
+
         queryset = (
             super()
             .get_queryset()
             .filter(
-                Q(
-                    role_assignments__business_area__slug=business_area_slug,
-                    role_assignments__expiry_date__gte=timezone.now(),
-                )
-                | Q(
-                    role_assignments__business_area__slug=business_area_slug, role_assignments__expiry_date__isnull=True
-                )
-                | Q(
-                    partner__role_assignments__business_area__slug=business_area_slug,
-                    partner__role_assignments__expiry_date__gte=timezone.now(),
-                )
-                | Q(
-                    partner__role_assignments__business_area__slug=business_area_slug,
-                    partner__role_assignments__expiry_date__isnull=True,
-                )
+                Q(role_assignments__in=role_assignments_queryset)
+                | Q(partner__role_assignments__in=role_assignments_queryset)
             )
             .distinct()
             .order_by("first_name")
@@ -116,12 +121,7 @@ class UserViewSet(
         )
 
         if self.request and self.request.query_params.get("serializer") == "program_users":
-            role_assignments_queryset = (
-                RoleAssignment.objects.select_related("business_area", "role", "program")
-                .exclude(expiry_date__lt=timezone.now())
-                .order_by("business_area__slug", "role__name")
-            )
-
+            role_assignments_queryset = role_assignments_queryset.order_by("business_area__slug", "role__name")
             queryset = queryset.prefetch_related(
                 models.Prefetch(
                     "role_assignments", queryset=role_assignments_queryset, to_attr="cached_user_role_assignments"

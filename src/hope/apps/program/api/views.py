@@ -126,11 +126,9 @@ class ProgramViewSet(
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
         user = self.request.user
-        allowed_programs = list(
-            queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id)).values_list(
-                "id", flat=True
-            )
-        )
+
+        allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
@@ -143,14 +141,12 @@ class ProgramViewSet(
                     When(status=Program.ACTIVE, then=Value(2)),
                     When(status=Program.FINISHED, then=Value(3)),
                     output_field=IntegerField(),
-                )
-            )
-            .annotate(
+                ),
                 annotate_number_of_households_with_tp_in_program=Count(
                     "payment__household_id",
                     filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
                     distinct=True,
-                )
+                ),
             )
             .prefetch_related(
                 Prefetch(
@@ -158,7 +154,7 @@ class ProgramViewSet(
                     queryset=FlexibleAttribute.objects.order_by("created_at"),
                 )
             )
-            .select_related("beneficiary_group", "data_collecting_type")
+            .select_related("beneficiary_group", "data_collecting_type", "business_area")
             .order_by("custom_order", "start_date")
         )
 
@@ -473,7 +469,7 @@ class ProgramCycleViewSet(
     ModelViewSet,
     BaseViewSet,
 ):
-    queryset = ProgramCycle.objects.all()
+    queryset = ProgramCycle.objects.all().select_related("created_by", "program__business_area")
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
         "retrieve": ProgramCycleListSerializer,

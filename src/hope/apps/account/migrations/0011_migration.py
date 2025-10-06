@@ -45,6 +45,7 @@ def migrate_user_roles(apps, schema_editor):
     RoleAssignment = apps.get_model("account", "RoleAssignment")
     ProgramPartnerThrough = apps.get_model("program", "ProgramPartnerThrough")
     Partner = apps.get_model("account", "Partner")
+    register(Partner)
 
     expiration_time = timezone.now()
 
