@@ -131,6 +131,7 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+        CLOSED = "CLOSED", "Closed"
 
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
@@ -602,10 +603,9 @@ class PaymentPlan(
         )
 
     def get_criteria_string(self) -> str:
-        try:
-            return self.get_criteria_string()
-        except (AttributeError, ValueError):
-            return ""
+        rules = self.get_rules()
+        rules_string = [x.get_criteria_string() for x in rules]
+        return " OR ".join(rules_string).strip()
 
     def remove_export_file_entitlement(self) -> None:
         self.export_file_entitlement.file.delete(save=False)
@@ -1291,6 +1291,14 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.FINISHED,
+        target=Status.CLOSED,
+    )
+    def status_close(self) -> None:
         self.status_date = timezone.now()
 
     @transition(

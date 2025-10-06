@@ -929,8 +929,8 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
-    from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+    from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
 
     with cache.lock(
         f"send_qcf_email_notifications_{qcf_report_id}",

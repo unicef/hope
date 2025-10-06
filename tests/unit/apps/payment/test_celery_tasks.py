@@ -187,7 +187,7 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_ERROR
 
     @patch(
-        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.models.payment_plan.PaymentPlan.get_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -202,7 +202,7 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan_rebuild_stats(pp_id_str)
 
-    @patch("hope.apps.payment.models.PaymentPlan.update_population_count_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.update_population_count_fields")
     @patch("hope.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
     def test_payment_plan_rebuild_stats_exception_handling(
         self, mock_retry: Mock, mock_update_population_count_fields: Mock
@@ -331,8 +331,8 @@ class TestPaymentCeleryTask(TestCase):
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
 
     @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
-    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,

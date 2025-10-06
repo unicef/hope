@@ -162,7 +162,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -242,7 +242,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -353,7 +353,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -428,7 +428,7 @@ class TestPaymentGatewayService(BaseTestCase):
         self.pp.refresh_from_db()
         assert self.pp.status == PaymentPlan.Status.FINISHED
 
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
