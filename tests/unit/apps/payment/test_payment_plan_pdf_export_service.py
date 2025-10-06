@@ -83,7 +83,7 @@ class TestPaymentPlanPDFExportService(TestCase):
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
 
     @patch(
-        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_web_links(self, get_link_mock: Any) -> None:
@@ -93,7 +93,7 @@ class TestPaymentPlanPDFExportService(TestCase):
         assert self.pdf_export_service.payment_plan_link == expected_download_link
 
     @patch(
-        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.utils.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary(self, get_link_mock: Any) -> None:
@@ -114,7 +114,7 @@ class TestPaymentPlanPDFExportService(TestCase):
         assert filename2 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
     @patch(
-        "hope.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.utils.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     @patch(

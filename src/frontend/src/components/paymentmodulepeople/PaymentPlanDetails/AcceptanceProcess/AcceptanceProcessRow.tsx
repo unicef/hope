@@ -1,7 +1,6 @@
 import { Box, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { renderUserName } from '@utils/utils';
 import { DividerLine } from '@core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
@@ -56,64 +55,41 @@ export function AcceptanceProcessRow({
         <Grid size={4}>
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
-              topMessage={`Sent for approval by ${renderUserName(
-                sentForApprovalBy,
-              )}`}
+              topMessage={`Sent for approval by ${sentForApprovalBy}`}
               topDate={sentForApprovalDate}
               approvals={actions.approval}
+              author={sentForApprovalBy}
             />
           )}
         </Grid>
         <Grid size={4}>
           {actions.authorization.length > 0 && (
             <GreyInfoCard
-              topMessage={`Sent for authorization by ${renderUserName(
-                sentForAuthorizationBy,
-              )}`}
+              topMessage={`Sent for authorization by ${sentForAuthorizationBy}`}
               topDate={sentForAuthorizationDate}
               approvals={actions.authorization}
+              author={sentForAuthorizationBy}
             />
           )}
         </Grid>
         <Grid size={4}>
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
-              topMessage={`Sent for review by ${renderUserName(
-                sentForFinanceReleaseBy,
-              )}`}
+              topMessage={`Sent for review by ${sentForFinanceReleaseBy}`}
               topDate={sentForFinanceReleaseDate}
               approvals={actions.financeRelease}
+              author={sentForFinanceReleaseBy}
             />
           )}
         </Grid>
         {actions.reject.length > 0 && (
           <Grid container>
-            <Grid size={4}>
-              {rejectedOn === 'IN_APPROVAL' && (
-                <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
-                  approvals={actions.reject}
-                />
-              )}
-            </Grid>
-            <Grid size={4}>
-              {rejectedOn === 'IN_AUTHORIZATION' && (
-                <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
-                  approvals={actions.reject}
-                />
-              )}
-            </Grid>
-            <Grid size={4}>
-              {rejectedOn === 'IN_REVIEW' && (
-                <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
-                  approvals={actions.reject}
-                />
-              )}
+            <Grid size={12}>
+              <GreyInfoCard
+                topMessage={getRejectedOnString(rejectedOn)}
+                topDate={actions.reject[0]?.createdAt}
+                approvals={actions.reject}
+              />
             </Grid>
           </Grid>
         )}

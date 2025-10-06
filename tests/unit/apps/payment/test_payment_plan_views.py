@@ -646,7 +646,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["can_send_to_payment_gateway"] is False
         assert payment_plan["can_split"] is False
         assert payment_plan["total_households_count_with_valid_phone_no"] == 0
-        assert payment_plan["can_create_xlsx_with_fsp_auth_code"] is False
+        assert payment_plan["is_payment_gateway_and_all_sent_to_fsp"] is False
         assert payment_plan["fsp_communication_channel"] == "XLSX"
         assert payment_plan["can_export_xlsx"] is False
         assert payment_plan["can_download_xlsx"] is False
@@ -1614,6 +1614,7 @@ class TestTargetPopulationActions:
             resp_data = response.json()
             assert "id" in resp_data
             assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
+            assert "STEFICON_WAIT" in resp_data["status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -2057,6 +2058,8 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
+            self.pp.refresh_from_db(fields=["background_action_status"])
+            assert self.pp.background_action_status == "RULE_ENGINE_RUN"
             assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:

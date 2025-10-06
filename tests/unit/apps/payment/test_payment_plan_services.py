@@ -7,6 +7,7 @@ from unittest.mock import patch
 from aniso8601 import parse_date
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from django.utils.timezone import now
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
@@ -14,7 +15,7 @@ import pytest
 from pytz import utc
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
@@ -34,6 +35,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.payment.celery_tasks import (
@@ -326,7 +328,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(96):
+        with self.assertNumQueries(97):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -469,7 +471,7 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp.follow_ups.count() == 2
 
-        with self.assertNumQueries(45):
+        with self.assertNumQueries(46):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         assert follow_up_pp_2.payment_items.count() == 1
@@ -788,7 +790,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(69):
+        with self.assertNumQueries(70):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1257,3 +1259,64 @@ class TestPaymentPlanServices(BaseTestCase):
         # Check flags
         assert payment_plan.flag_exclude_if_on_sanction_list
         assert not payment_plan.flag_exclude_if_active_adjudication_ticket
+
+    def test_send_reconciliation_overdue_emails(self) -> None:
+        pp = PaymentPlanFactory(
+            dispersion_start_date=now() - timedelta(days=10),
+            dispersion_end_date=now(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        pp.refresh_from_db()
+        program = pp.program
+        program.reconciliation_window_in_days = 10
+        program.send_reconciliation_window_expiry_notifications = True
+        program.save()
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
+        assert pp.has_payments_reconciliation_overdue is True
+
+        with mock.patch(
+            "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email.delay"
+        ) as mock_send_payment_plan_reconciliation_overdue_email_task:
+            PaymentPlanService.send_reconciliation_overdue_emails()
+            mock_send_payment_plan_reconciliation_overdue_email_task.assert_called_once_with(str(pp.id))
+
+    def test_send_reconciliation_overdue_email(self) -> None:
+        partner_unicef = PartnerFactory(name="UNICEF")
+        partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        user = UserFactory.create(partner=partner_unicef_hq)
+        role, _ = Role.objects.update_or_create(
+            name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
+        )
+        RoleAssignment.objects.create(
+            user=user,
+            role=role,
+            business_area=self.business_area,
+        )
+
+        pp = PaymentPlanFactory(
+            dispersion_start_date=now() - timedelta(days=10),
+            dispersion_end_date=now(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        pp.refresh_from_db()
+        program = pp.program
+        program.reconciliation_window_in_days = 10
+        program.send_reconciliation_window_expiry_notifications = True
+        program.save()
+
+        with mock.patch.object(User, "email_user") as mock_email_user:
+            with mock.patch(
+                "hope.apps.payment.services.payment_plan_services.render_to_string"
+            ) as mock_render_to_string:
+                PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+                mock_email_user.assert_called_once()
+                assert mock_render_to_string.call_count == 2
+                args, kwargs = mock_render_to_string.call_args
+                context = kwargs["context"]
+                assert context["message"] == (
+                    f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
+                    f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
+                    " Please take the necessary steps to complete the reconciliation process timely."
+                )
+                assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"

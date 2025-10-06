@@ -359,7 +359,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 20
+            assert len(ctx.captured_queries) == 18
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -367,7 +367,7 @@ class TestIndividualList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 8
 
         self.individual1_1.given_name = "Jane"
         self.individual1_1.save()
@@ -378,7 +378,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 13
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -388,7 +388,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 13
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -403,7 +403,7 @@ class TestIndividualList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 13
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -411,7 +411,7 @@ class TestIndividualList:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 8
 
     def test_individual_list_deduplication_result_serializer(self, create_user_role_with_permissions: Any) -> None:
         _, (duplicate_individual,) = create_household_and_individuals(

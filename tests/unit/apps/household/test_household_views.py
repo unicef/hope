@@ -284,7 +284,7 @@ class TestHouseholdList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 18
+            assert len(ctx.captured_queries) == 16
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -293,7 +293,7 @@ class TestHouseholdList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 8
 
         self.household1.children_count = 100
         self.household1.save()
@@ -305,7 +305,7 @@ class TestHouseholdList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 11
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -315,7 +315,7 @@ class TestHouseholdList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 11
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -330,7 +330,7 @@ class TestHouseholdList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 11
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -339,7 +339,7 @@ class TestHouseholdList:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 8
 
     def test_household_all_flex_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)

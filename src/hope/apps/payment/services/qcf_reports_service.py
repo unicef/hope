@@ -8,7 +8,6 @@ from tempfile import NamedTemporaryFile
 from typing import IO
 import zipfile
 
-from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -28,6 +27,7 @@ from hope.models.payment_plan import PaymentPlan
 from hope.models.western_union_invoice import WesternUnionInvoice
 from hope.models.western_union_invoice_payment import WesternUnionInvoicePayment
 from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
+from hope.apps.payment.utils import get_link
 
 logger = logging.getLogger(__name__)
 
@@ -258,45 +258,33 @@ class QCFReportsService:
         users = [
             user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
+        if users:
+            text_template = "payment/qcf_report_email.txt"
+            html_template = "payment/qcf_report_email.html"
+
+            path_name = "download-payment-plan-invoice-report-pdf"
+            payment_plan = report.payment_plan
+
+            report_id = str(report.id)
+            payment_plan_id = str(payment_plan.id)
+            program_slug = report.payment_plan.program.slug
+
+            payment_plan_link = get_link(
+                f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+            )
+            download_link = get_link(reverse(path_name, args=[report_id]))
 
         for user in users:
-            self.send_report_email_to_user(user, report)
-
-    @staticmethod
-    def get_link(api_url: str | None = None) -> str:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-        if api_url:
-            return link
-        return ""
-
-    def send_report_email_to_user(self, user: User, report: WesternUnionPaymentPlanReport) -> None:
-        text_template = "payment/qcf_report_email.txt"
-        html_template = "payment/qcf_report_email.html"
-
-        path_name = "download-payment-plan-invoice-report-pdf"
-        payment_plan = report.payment_plan
-
-        report_id = str(report.id)
-        payment_plan_id = str(payment_plan.id)
-        program_slug = report.payment_plan.program.slug
-
-        payment_plan_link = self.get_link(
-            f"/{payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
-        )
-        download_link = self.get_link(reverse(path_name, args=[report_id]))
-
-        context = {
-            "first_name": getattr(user, "first_name", ""),
-            "last_name": getattr(user, "last_name", ""),
-            "email": getattr(user, "email", ""),
-            "message": f"Payment Plan: {payment_plan_link}",
-            "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-            "link": f"Western Union QCF Report file: {download_link}",
-        }
-
-        user.email_user(
-            subject=context["title"],
-            html_body=render_to_string(html_template, context=context),
-            text_body=render_to_string(text_template, context=context),
-        )
+            context = {
+                "first_name": getattr(user, "first_name", ""),
+                "last_name": getattr(user, "last_name", ""),
+                "email": getattr(user, "email", ""),
+                "message": f"Payment Plan: {payment_plan_link}",
+                "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
+                "link": f"Western Union QCF Report file: {download_link}",
+            }
+            user.email_user(
+                subject=context["title"],
+                html_body=render_to_string(html_template, context=context),
+                text_body=render_to_string(text_template, context=context),
+            )

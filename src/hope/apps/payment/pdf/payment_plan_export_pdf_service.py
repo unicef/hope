@@ -1,11 +1,11 @@
 import logging
 from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
 from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
 
 from hope.apps.core.utils import encode_id_base64
+from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
 from hope.models.approval import Approval
 from hope.models.payment import Payment
@@ -27,20 +27,12 @@ class PaymentPlanPDFExportService:
         self.payment_plan_link: str = ""
         self.is_social_worker_program = payment_plan.program.is_social_worker_program
 
-    @staticmethod
-    def get_link(api_url: str | None = None) -> str:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-        if api_url:
-            return link
-        return ""
-
     def generate_web_links(self) -> None:
         payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         program_id = encode_id_base64(self.payment_plan.program.id, "Program")
         path_name = "download-payment-plan-summary-pdf"
-        self.download_link = self.get_link(reverse(path_name, args=[payment_plan_id]))
-        self.payment_plan_link = self.get_link(
+        self.download_link = get_link(reverse(path_name, args=[payment_plan_id]))
+        self.payment_plan_link = get_link(
             f"/{self.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{str(payment_plan_id)}"
         )
 

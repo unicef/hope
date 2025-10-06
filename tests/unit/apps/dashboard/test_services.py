@@ -8,6 +8,8 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -23,6 +25,7 @@ from hope.apps.dashboard.services import (
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
+    get_fertility_rate,
     get_pwd_count_expression,
 )
 from hope.models.business_area import BusinessArea
@@ -946,3 +949,137 @@ def test_get_base_payment_queryset_with_without_ba() -> None:
     qs_all = DashboardCacheBase._get_base_payment_queryset()
     assert qs_all.filter(pk=payment1.pk).exists()
     assert qs_all.filter(pk=payment2.pk).exists()
+
+
+CHILDREN_COUNT_SCENARIOS = [
+    ("social_program", "SOCIAL", 10, 2.6, 3),
+    ("children_count_none", "STANDARD", None, 3.8, 4),
+    ("children_count_value", "STANDARD", 7, 1.1, 7),
+]
+
+
+@pytest.mark.parametrize(
+    ("test_id", "dct_type", "household_children_count", "fertility_rate", "expected_children"),
+    CHILDREN_COUNT_SCENARIOS,
+)
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_children_count_calculation_scenarios(
+    test_id: str,
+    dct_type: str,
+    household_children_count: Optional[int],
+    fertility_rate: float,
+    expected_children: int,
+    mocker: Any,
+    afghanistan: BusinessArea,
+) -> None:
+    """Test various scenarios for children_count calculation in dashboard data."""
+    mocker.patch("hope.apps.dashboard.services.get_fertility_rate", return_value=fertility_rate)
+    cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
+    cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
+
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct, sector=f"Sector-{test_id}")
+    household, _ = create_household(
+        household_args={
+            "program": program,
+            "business_area": afghanistan,
+            "children_count": household_children_count,
+        }
+    )
+    status_map = {
+        "social_program": Payment.STATUS_SUCCESS,
+        "children_count_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
+        "children_count_value": Payment.STATUS_PENDING,
+    }
+    status = status_map[test_id]
+
+    PaymentFactory.create(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        delivery_date=TEST_DATE,
+        status=status,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert len(result) == 1
+    assert result[0]["children_counts"] == expected_children
+
+    global_result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
+    global_agg_group = [
+        item
+        for item in global_result
+        if item["country"] == afghanistan.name and item["sector"] == f"Sector-{test_id}" and item["status"] == status
+    ]
+    assert len(global_agg_group) == 1
+    assert global_agg_group[0]["children_counts"] == expected_children
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_success(mocker: Any) -> None:
+    """Test get_fertility_rate successfully retrieves a rate using the real data file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2020)
+    assert rate == 5.145
+    mock_open = mocker.patch("builtins.open")
+    rate2 = get_fertility_rate("Afghanistan", 2021)
+    assert rate2 == 5.039
+    mock_open.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_fallback_to_latest_year() -> None:
+    """Test get_fertility_rate falls back to the most recent year's data using the real file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2025)
+    assert rate == 4.84
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_country_not_found() -> None:
+    """Test get_fertility_rate returns 0.0 if country is not found in the real file."""
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("Wonderland", 2023)
+    assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_no_data(mocker: Any) -> None:
+    """Test get_fertility_rate returns 0.0 if the data file is empty."""
+    mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("AnyCountry", 2023)
+    assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_file_not_found(mocker: Any) -> None:
+    """Test _load_fertility_data raises FileNotFoundError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", side_effect=FileNotFoundError("File not found"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(FileNotFoundError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
+    """Test _load_fertility_data raises JSONDecodeError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="invalid json"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(json.JSONDecodeError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()

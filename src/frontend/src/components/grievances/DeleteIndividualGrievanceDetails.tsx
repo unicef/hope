@@ -34,6 +34,7 @@ export function DeleteIndividualGrievanceDetails({
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { businessAreaSlug } = useBaseUrl();
   const confirm = useConfirmation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -95,7 +96,11 @@ export function DeleteIndividualGrievanceDetails({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });

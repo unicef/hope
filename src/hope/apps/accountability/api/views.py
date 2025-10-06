@@ -293,7 +293,11 @@ class MessageViewSet(
         "list": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
         "retrieve": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
         "create": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-        "sample_size": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+        "sample_size": [
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+            Permissions.PAYMENT_VERIFICATION_CREATE,
+            Permissions.PAYMENT_VERIFICATION_UPDATE,
+        ],
     }
 
     @transaction.atomic

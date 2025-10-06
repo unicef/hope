@@ -72,7 +72,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });

@@ -442,6 +442,7 @@ class IndividualGlobalViewSet(
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = IndividualFilter

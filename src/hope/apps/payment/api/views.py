@@ -903,7 +903,9 @@ class PaymentPlanViewSet(
                     raise ValidationError("Rule Engine run in progress")
                 payment_plan.background_action_status_steficon_run()
                 payment_plan.save()
-                payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                transaction.on_commit(
+                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                )
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -913,6 +915,7 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            payment_plan.refresh_from_db(fields=["background_action_status"])
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1156,7 +1159,7 @@ class PaymentPlanViewSet(
             )
         if payment_plan.export_file_per_fsp is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
             raise ValidationError(
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
             )
@@ -1653,6 +1656,7 @@ class TargetPopulationViewSet(
             old_object=old_tp,
             new_object=tp,
         )
+        tp.refresh_from_db(fields=["background_action_status"])
         response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
         return Response(
             data=response_serializer.data,

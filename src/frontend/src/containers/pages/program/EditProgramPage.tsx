@@ -101,7 +101,7 @@ const EditProgramPage = (): ReactElement => {
           requestBody: programData,
         });
       },
-      onSuccess: async() => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['businessAreaProgram', businessArea, id],
         });
@@ -122,7 +122,7 @@ const EditProgramPage = (): ReactElement => {
         requestBody: partnerData,
       });
     },
-    onSuccess: async() => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['businessAreaProgram', businessArea, id],
       });
@@ -166,12 +166,14 @@ const EditProgramPage = (): ReactElement => {
     registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
+    reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications,
   } = program;
 
   const programHasRdi = registrationImportsTotalCount > 0;
   const programHasTp = targetPopulationsCount > 0;
 
-  const handleSubmitProgramDetails = async(values): Promise<void> => {
+  const handleSubmitProgramDetails = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -215,6 +217,7 @@ const EditProgramPage = (): ReactElement => {
         'partners',
         'partnerAccess',
         'pduFields',
+        'isActive',
       ]);
 
       // Build the base programData object
@@ -246,6 +249,8 @@ const EditProgramPage = (): ReactElement => {
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
+        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await updateProgramDetails(programData);
@@ -256,7 +261,7 @@ const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const handleSubmitPartners = async(values): Promise<void> => {
+  const handleSubmitPartners = async (values): Promise<void> => {
     const partnersToSet =
       values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
@@ -281,6 +286,7 @@ const EditProgramPage = (): ReactElement => {
   };
 
   const initialValuesProgramDetails = {
+    isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
     programmeCode: programmeCode,
@@ -296,6 +302,8 @@ const EditProgramPage = (): ReactElement => {
     cashPlus: cashPlus,
     frequencyOfPayments: frequencyOfPayments,
     pduFields: pduFields,
+    reconciliationWindowInDays: reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
@@ -334,6 +342,8 @@ const EditProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['partnerAccess'],
   ];
@@ -392,7 +402,7 @@ const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
-            const handleNextStep = async() => {
+            const handleNextStep = async () => {
               await handleNext({
                 validateForm,
                 stepFields,

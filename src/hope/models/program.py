@@ -150,6 +150,7 @@ class Program(
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
+    status_rank = models.PositiveSmallIntegerField(help_text="Auto-generated field for faster sorting", default=99)
     slug = models.CharField(max_length=4, db_index=True, help_text="Program slug [sys]")
     description = models.CharField(
         blank=True,
@@ -217,6 +218,14 @@ class Program(
         related_name="programs",
         help_text="Program sanction lists",
     )
+
+    reconciliation_window_in_days = models.PositiveIntegerField(
+        default=0, help_text="Payment Plan reconciliation window in days"
+    )
+    send_reconciliation_window_expiry_notifications = models.BooleanField(
+        default=False, help_text="Send Payment Plan reconciliation window expiry notifications"
+    )
+
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:

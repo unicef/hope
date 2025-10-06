@@ -4,7 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
+from django.db.models import Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -129,40 +129,23 @@ class ProgramViewSet(
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
         user = self.request.user
-        allowed_programs = list(
-            queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id)).values_list(
-                "id", flat=True
-            )
-        )
+
+        allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
                 id__in=allowed_programs,
             )
             .exclude(data_collecting_type__code="unknown")
-            .annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                )
-            )
-            .annotate(
-                annotate_number_of_households_with_tp_in_program=Count(
-                    "payment__household_id",
-                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
-                    distinct=True,
-                )
-            )
             .prefetch_related(
                 Prefetch(
                     "pdu_fields",
                     queryset=FlexibleAttribute.objects.order_by("created_at"),
                 )
             )
-            .select_related("beneficiary_group", "data_collecting_type")
-            .order_by("custom_order", "start_date")
+            .select_related("beneficiary_group", "data_collecting_type", "business_area")
+            .order_by("status_rank", "start_date")
         )
 
     @etag_decorator(ProgramListKeyConstructor)
@@ -476,7 +459,7 @@ class ProgramCycleViewSet(
     ModelViewSet,
     BaseViewSet,
 ):
-    queryset = ProgramCycle.objects.all()
+    queryset = ProgramCycle.objects.all().select_related("created_by", "program__business_area")
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
         "retrieve": ProgramCycleListSerializer,
