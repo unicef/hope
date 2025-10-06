@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -34,6 +34,9 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -391,17 +394,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         ]
 
     @classmethod
-    def remove_pairs(cls, deduplication_set_id: str) -> None:
-        from hct_mis_api.apps.program.models import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        cls.objects.filter(program=program).delete()
-
-    @classmethod
-    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
-        from hct_mis_api.apps.program.models import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+    def bulk_add_pairs(cls, program: "Program", duplicates_data: List[SimilarityPair]) -> None:
         duplicates = []
         for pair in duplicates_data:
             if pair.first and pair.second:
