@@ -328,7 +328,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(96):
+        with self.assertNumQueries(97):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -471,7 +471,7 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp.follow_ups.count() == 2
 
-        with self.assertNumQueries(45):
+        with self.assertNumQueries(46):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         assert follow_up_pp_2.payment_items.count() == 1
@@ -790,7 +790,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(69):
+        with self.assertNumQueries(70):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN

@@ -6,6 +6,7 @@ from typing import IO, TYPE_CHECKING, Callable, Union
 
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import DateField, ExpressionWrapper, F, OuterRef
 from django.shortcuts import get_object_or_404
@@ -454,10 +455,13 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments = payment_plan.payment_items.select_related("household_snapshot").all()
-        for payment in payments:
-            payment.update_signature_hash()
-        Payment.objects.bulk_update(payments, ["signature_hash"])
+        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
+        paginator = Paginator(payments_queryset, 500)
+        for page_number in paginator.page_range:
+            payments = paginator.page(page_number).object_list
+            for payment in payments:
+                payment.update_signature_hash()
+            Payment.objects.bulk_update(payments, ["signature_hash"])
 
     def create_targeting_criteria(self, targeting_criteria_input: dict, program: Program) -> None:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
