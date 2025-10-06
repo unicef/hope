@@ -12,7 +12,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models import PeriodicFieldData
+from hope.models.flexible_attribute import PeriodicFieldData
 from hope.models.pdu_online_edit import PDUOnlineEdit
 from hope.models.program import Program
 

@@ -2,7 +2,9 @@ import pytest
 
 from extras.test_utils.factories.geo import CountryFactory
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models.area import Area
+from hope.models.area_type import  AreaType
+from hope.models.country import Country
 
 pytestmark = pytest.mark.django_db
 

@@ -35,7 +35,9 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import Role, RoleAssignment, User
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.payment.celery_tasks import (

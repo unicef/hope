@@ -9,7 +9,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.api.serializers import PDU_ONLINE_EDIT_RELATED_PERMISSIONS
-from hope.apps.program.models import Program
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
