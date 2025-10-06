@@ -1083,4 +1083,4 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
 
         fetch_biometric_deduplication_results_and_process(deduplication_set_id)
 
-        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(deduplication_set_id)
+        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(self.program)
