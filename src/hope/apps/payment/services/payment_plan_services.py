@@ -15,7 +15,6 @@ from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
@@ -59,6 +58,7 @@ from hope.models.program_cycle import ProgramCycle
 from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models.user import User
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -66,15 +66,13 @@ if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AbstractUser, AnonymousUser
 
-    from hope.models.user import User
-
 
 class PaymentPlanService:
     def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
 
         self.action: str | None = None
-        self.user: "User" | None = None
+        self.user: "User | None" = None
         self.input_data: dict | None = None
 
     @property

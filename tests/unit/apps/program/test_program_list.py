@@ -24,9 +24,7 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

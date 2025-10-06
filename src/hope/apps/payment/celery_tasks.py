@@ -349,7 +349,8 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
-    from hope.apps.payment.models import Payment, PaymentPlan
+    from hope.models.payment import Payment
+    from hope.models.payment_plan import PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -969,6 +970,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
 @sentry_tags
 def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: str) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models.payment_plan import PaymentPlan
 
     with cache.lock(
         f"send_payment_plan_reconciliation_overdue_email_{payment_plan_id}",

@@ -2,6 +2,7 @@ from io import BytesIO
 import logging
 import string
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -19,13 +20,16 @@ from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseServic
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.file_temp import FileTemp
-from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.fsp_xlsx_template_per_delivery_mechanism import FspXlsxTemplatePerDeliveryMechanism
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 from hope.models.user import User
+
+if TYPE_CHECKING:
+    from hope.models.financial_service_provider import FinancialServiceProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +278,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
+        fsp: "FinancialServiceProvider" = self.payment_plan.financial_service_provider
         delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()
