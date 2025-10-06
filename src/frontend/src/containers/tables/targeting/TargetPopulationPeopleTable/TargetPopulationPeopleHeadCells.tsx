@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentPlanNode } from '@generated/graphql';
+import { PendingPayment } from '@restgenerated/models/PendingPayment';
 
-export const headCells: HeadCell<PaymentPlanNode>[] = [
+export const headCells: HeadCell<PendingPayment>[] = [
   {
     disablePadding: false,
     label: 'ID',
@@ -18,6 +18,12 @@ export const headCells: HeadCell<PaymentPlanNode>[] = [
     disablePadding: false,
     label: 'Administrative Level 2',
     id: 'admin_area__name',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Size',
+    id: 'household_size',
     numeric: false,
   },
   {

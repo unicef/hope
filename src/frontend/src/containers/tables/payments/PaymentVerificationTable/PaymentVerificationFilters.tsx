@@ -1,14 +1,16 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '@utils/utils';
-import { FiltersSection } from '@components/core/FiltersSection';
-import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { Grid, MenuItem } from '@mui/material';
+import { Choice } from '@restgenerated/models/Choice';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -44,10 +46,17 @@ const PaymentVerificationFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentVerificationSummaryStatusList'],
+    queryFn: () =>
+      RestService.restChoicesPaymentVerificationSummaryStatusList(),
+  });
+  const { data: deliveryTypeChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentRecordDeliveryTypeList'],
+    queryFn: () => RestService.restChoicesPaymentRecordDeliveryTypeList(),
+  });
 
-  if (!statusChoicesData) {
+  if (!statusChoicesData || !deliveryTypeChoicesData) {
     return null;
   }
 
@@ -57,7 +66,7 @@ const PaymentVerificationFilters = ({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-start" spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.search}
             data-cy="filter-search"
@@ -66,25 +75,28 @@ const PaymentVerificationFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
-              handleFilterChange('verificationStatus', e.target.value)
+              handleFilterChange(
+                'paymentVerificationSummaryStatus',
+                e.target.value,
+              )
             }
             label="Status"
             multiple
             fullWidth
             data-cy="filter-status"
-            value={filter.verificationStatus}
+            value={filter.paymentVerificationSummaryStatus}
           >
-            {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => (
+            {statusChoicesData.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.serviceProvider}
             data-cy="filter-fsp"
@@ -95,7 +107,7 @@ const PaymentVerificationFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('deliveryTypes', e.target.value)
@@ -107,14 +119,14 @@ const PaymentVerificationFilters = ({
             fullWidth
             icon={<MonetizationOnIcon />}
           >
-            {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
+            {deliveryTypeChoicesData.map((item) => (
               <MenuItem key={item.name} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             label="Start Date"
             fullWidth
@@ -123,7 +135,7 @@ const PaymentVerificationFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             label="End Date"
             fullWidth

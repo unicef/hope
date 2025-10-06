@@ -29,7 +29,6 @@ function Verification({ values }: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   return (
     <BoxWithBorders>
       <>

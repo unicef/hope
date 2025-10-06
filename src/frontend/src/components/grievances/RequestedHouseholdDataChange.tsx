@@ -1,69 +1,131 @@
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { useProgramContext } from '../../programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
+import { RestService } from '@restgenerated/services/RestService';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { Title } from '@core/Title';
+import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  useApproveHouseholdDataChangeMutation,
-} from '@generated/graphql';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useProgramContext } from '../../programContext';
-import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { useConfirmation } from '@core/ConfirmationDialog';
-import { Title } from '@core/Title';
-import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export function RequestedHouseholdDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const confirm = useConfirmation();
+  const confirmation = useConfirmation();
   const { isActiveProgram } = useProgramContext();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
 
-  const getConfirmationText = (values): string => {
+  const getConfirmationText = (vals): string => {
     const allSelected =
-      values.selected.length + values.selectedFlexFields.length || 0;
+      vals.selectedRoles.length +
+        vals.selected.length +
+        vals.selectedFlexFields.length || 0;
     return `You approved ${allSelected} change${
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
-  const [mutate] = useApproveHouseholdDataChangeMutation();
-  const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
-  };
+
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: ({
+      householdApproveData,
+      flexFieldsApproveData,
+    }: {
+      householdApproveData: any;
+      flexFieldsApproveData?: any;
+    }) => {
+      const formData: GrievanceHouseholdDataChangeApprove = {
+        householdApproveData,
+        flexFieldsApproveData,
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          formData,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Changes Approved');
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+  const householdData = React.useMemo(
+    () => ({
+      ...ticket.ticketDetails.householdData,
+    }),
+    [ticket.ticketDetails.householdData],
+  );
+  const rolesArr = React.useMemo(
+    () => householdData.roles || [],
+    [householdData.roles],
+  );
   let allApprovedCount = 0;
-  const flexFields = householdData?.flex_fields || {};
-  delete householdData.flex_fields;
+  const flexFields = householdData?.flexFields || {};
+  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
+  // Count approved top-level fields
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
   ).length;
+  // Count approved flex fields
   allApprovedCount += flexFieldsEntries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
+  ).length;
+  // Count approved roles
+  allApprovedCount += rolesArr.filter(
+    (role) =>
+      role &&
+      typeof role === 'object' &&
+      'approve_status' in role &&
+      role.approve_status === true,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const shouldShowEditButton = (values): boolean =>
-    (values.selected.length || values.selectedFlexFields.length) &&
+  const shouldShowEditButton = (vals): boolean =>
+    (vals.selected.length ||
+      vals.selectedFlexFields.length ||
+      vals.selectedRoles.length) &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
-  const areAllApproved = (values): boolean => {
+  const areAllApproved = (vals): boolean => {
     const selectedCount =
-      values.selected.length + values.selectedFlexFields.length;
+      vals.selected.length +
+      vals.selectedFlexFields.length +
+      vals.selectedRoles.length;
     const countAll = entries.length + flexFieldsEntries.length;
     return selectedCount === countAll;
   };
 
-  const getApprovalButton = (values, submitForm): ReactElement => {
-    if (areAllApproved(values)) {
+  const getApprovalButton = (vals, submitForm): ReactElement => {
+    if (areAllApproved(vals)) {
       return (
         <Button
           onClick={submitForm}
@@ -82,9 +144,9 @@ export function RequestedHouseholdDataChange({
     return (
       <Button
         onClick={() =>
-          confirm({
+          confirmation({
             title: t('Warning'),
-            content: getConfirmationText(values),
+            content: getConfirmationText(vals),
           }).then(() => {
             submitForm();
           })
@@ -104,49 +166,97 @@ export function RequestedHouseholdDataChange({
       </Button>
     );
   };
+  const initialValues = React.useMemo(() => {
+    // Use householdData from upper scope
+    // Top-level fields (exclude roles and flex_fields)
+    const selected = Object.entries(householdData)
+      .filter(
+        ([key, val]) =>
+          key !== 'roles' &&
+          key !== 'flex_fields' &&
+          val &&
+          typeof val === 'object' &&
+          'approve_status' in val &&
+          (val as any).approve_status === true,
+      )
+      .map(([key]) => key);
+
+    // Flex fields
+    const flexFieldsObj = householdData.flex_fields || {};
+    const selectedFlexFields = Object.entries(flexFieldsObj)
+      .filter(
+        ([, val]) =>
+          val &&
+          typeof val === 'object' &&
+          'approve_status' in val &&
+          (val as any).approve_status === true,
+      )
+      .map(([key]) => key);
+
+    // Roles
+    const selectedRoles = rolesArr
+      .filter(
+        (role) =>
+          role &&
+          typeof role === 'object' &&
+          'approve_status' in role &&
+          role.approve_status === true,
+      )
+      .map((role) => role.individual_id);
+
+    return {
+      selected,
+      selectedFlexFields,
+      selectedRoles,
+    };
+  }, [householdData, rolesArr]);
+
   return (
     <Formik
-      initialValues={{
-        selected: entries
-          .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
-          )
-          .map((row) => row[0]),
-        selectedFlexFields: flexFieldsEntries
-          .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
-          )
-          .map((row) => row[0]),
-      }}
+      initialValues={initialValues}
+      enableReinitialize={true}
       onSubmit={async (values) => {
-        const householdApproveData = values.selected.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
-          return prev;
-        }, {});
-        const flexFieldsApproveData = values.selectedFlexFields.reduce(
-          (prev, curr) => {
-            // eslint-disable-next-line no-param-reassign
-            prev[curr] = true;
-            return prev;
-          },
-          {},
+        // Build householdApproveData as a flat object
+        const householdApproveData: { [key: string]: boolean | any } = {};
+        // Top-level fields
+        values.selected.forEach((key) => {
+          householdApproveData[key] = true;
+        });
+        // Flex fields
+        const flexFieldsApproveData: { [key: string]: boolean } = {};
+        flexFieldsEntries.forEach(([key]) => {
+          if (typeof flexFields[key] === 'object' && flexFields[key] !== null) {
+            flexFieldsApproveData[key] =
+              values.selectedFlexFields.includes(key);
+          }
+        });
+        // Only add flex_fields to householdApproveData if not empty
+        if (Object.keys(flexFieldsApproveData).length > 0) {
+          householdApproveData.flex_fields = flexFieldsApproveData;
+        } else if ('flex_fields' in householdApproveData) {
+          delete householdApproveData.flex_fields;
+        }
+        // Roles: add each as roles__<individual_id>: boolean
+        householdApproveData.roles = values.selectedRoles.map(
+          (individualId) => ({
+            individual_id: individualId,
+            approve_status: true,
+          }),
         );
+
+        // Build mutation payload
+        const mutationPayload: {
+          householdApproveData: any;
+        } = {
+          householdApproveData,
+        };
+
         try {
-          await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              householdApproveData: JSON.stringify(householdApproveData),
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
-            },
-          });
-          showMessage('Changes Approved');
+          await mutate(mutationPayload);
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+        } catch {
+          // Error handling is done in the mutation's onError callback
         }
       }}
     >

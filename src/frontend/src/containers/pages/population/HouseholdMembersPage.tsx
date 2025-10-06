@@ -1,41 +1,44 @@
-import { Box, Fade, Tooltip } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import {
-  useHouseholdChoiceDataQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 import { IndividualsFilter } from '@components/population/IndividualsFilter';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { Tab, Tabs } from '@core/Tabs';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box, Fade, Tooltip } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
-import { Tabs, Tab } from '@core/Tabs';
-import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
+import { ReactElement, useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { programHasPdu, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessArea } = useBaseUrl();
-  const isNewTemplateJustCreated =
-    location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilter = {
     search: '',
@@ -58,10 +61,29 @@ export const HouseholdMembersPage = (): ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-
-  const [currentTab, setCurrentTab] = useState(
-    isNewTemplateJustCreated ? 1 : 0,
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
+
+  // Tab index: 0 = individuals, 1 = periodic-data-updates
+  const tabParam = new URLSearchParams(location.search).get('tab');
+  const initialTab = tabParam === 'periodic-data-updates' ? 1 : 0;
+  const [currentTab, setCurrentTab] = useState(initialTab);
+
+  useEffect(() => {
+    // Sync tab with URL param on location change
+    const tabParamEffect = new URLSearchParams(location.search).get('tab');
+    if (tabParamEffect === 'periodic-data-updates' && currentTab !== 1) {
+      setCurrentTab(1);
+    } else if (
+      (tabParamEffect === 'individuals' || !tabParamEffect) &&
+      currentTab !== 0
+    ) {
+      setCurrentTab(0);
+    }
+  }, [location.search, currentTab]);
 
   const canViewPDUListAndDetails = hasPermissions(
     PERMISSIONS.PDU_VIEW_LIST_AND_DETAILS,
@@ -73,11 +95,28 @@ export const HouseholdMembersPage = (): ReactElement => {
     permissions,
   );
 
-  if (householdChoicesLoading || individualChoicesLoading)
-    return <LoadingComponent />;
+  const handleTabChange = (newValue: number): void => {
+    setCurrentTab(newValue);
+    if (newValue === 0) {
+      navigate(
+        {
+          search: '?tab=individuals',
+        },
+        { replace: true },
+      );
+    } else if (newValue === 1) {
+      navigate(
+        {
+          search: '?tab=periodic-data-updates',
+        },
+        { replace: true },
+      );
+    }
+  };
 
-  if (!individualChoicesData || !householdChoicesData || permissions === null)
-    return null;
+  if (individualChoicesLoading) return <LoadingComponent />;
+
+  if (!individualChoicesData || permissions === null) return null;
 
   if (!canViewHouseholdMembersPage) return <PermissionDenied />;
 
@@ -89,7 +128,7 @@ export const HouseholdMembersPage = (): ReactElement => {
           <Tabs
             value={currentTab}
             onChange={(_, newValue) => {
-              setCurrentTab(newValue);
+              handleTabChange(newValue);
             }}
           >
             <Tab
@@ -141,17 +180,21 @@ export const HouseholdMembersPage = (): ReactElement => {
                 setFilter={setFilter}
                 initialFilter={initialFilter}
                 appliedFilter={appliedFilter}
-                setAppliedFilter={setAppliedFilter}
+                setAppliedFilter={(newFilter) => {
+                  setAppliedFilter(newFilter);
+                  setShouldScroll(true);
+                }}
               />
               <Box
                 display="flex"
                 flexDirection="column"
                 data-cy="page-details-container"
+                ref={tableRef}
               >
                 <IndividualsListTable
                   filter={appliedFilter}
                   businessArea={businessArea}
-                  choicesData={householdChoicesData}
+                  choicesData={individualChoicesData}
                   canViewDetails={hasPermissions(
                     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                     permissions,

@@ -1,11 +1,6 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import {
-  useAllCollectorFieldsAttributesQuery,
-  useAvailableFspsForDeliveryMechanismsQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import {
   Box,
@@ -15,7 +10,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -38,6 +33,7 @@ import {
   ReactElement,
   ReactNode,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -53,6 +49,10 @@ import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaColle
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
+import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -73,6 +73,11 @@ const requiredSchema = Yup.object().shape({
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
+  householdsFiltersBlocks: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
     }),
@@ -123,6 +128,11 @@ const optionalSchema = Yup.object().shape({
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
+  householdsFiltersBlocks: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
     }),
@@ -191,7 +201,6 @@ interface TargetingCriteriaFormPropTypes {
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
   collectorsFiltersAvailable: boolean;
-  isSocialWorkingProgram: boolean;
   criteriaIndex: number;
 }
 
@@ -206,11 +215,11 @@ export const TargetingCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   collectorsFiltersAvailable,
-  isSocialWorkingProgram,
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const confirm = useConfirmation();
   const confirmationText = t(
@@ -219,16 +228,39 @@ export const TargetingCriteriaForm = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data, loading } = useCachedIndividualFieldsQuery(
-    businessArea,
-    programId,
-  );
   const { data: allCollectorFieldsAttributesData } =
-    useAllCollectorFieldsAttributesQuery({
-      fetchPolicy: 'cache-first',
+    useQuery<PaginatedCollectorAttributeList>({
+      queryKey: ['collectorFieldsAttributes'],
+      queryFn: () =>
+        RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
+      staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     });
-  const { data: availableFspsForDeliveryMechanismData } =
-    useAvailableFspsForDeliveryMechanismsQuery();
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
+  const { data, isLoading: loading } = useQuery({
+    queryKey: [
+      'businessAreasAllFieldsAttributesList',
+      businessArea,
+      selectedProgram?.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!businessArea && !!selectedProgram?.id && !isAllPrograms,
+  });
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -252,42 +284,55 @@ export const TargetingCriteriaForm = ({
     setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
   };
 
-  useEffect(() => {
-    if (loading) return;
-
-    const filteredIndividualData = {
-      allFieldsAttributes: data?.allFieldsAttributes
+  const filteredIndividualData = useMemo(
+    () => ({
+      allFieldsAttributes: data
+        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
-    };
-    setIndividualData(filteredIndividualData);
+    }),
+    [data],
+  );
 
-    const filteredHouseholdData = {
-      allFieldsAttributes: data?.allFieldsAttributes?.filter(
-        associatedWith('Household'),
-      ),
-    };
-    setHouseholdData(filteredHouseholdData);
+  const filteredHouseholdData = useMemo(
+    () => ({
+      //@ts-ignore
+      allFieldsAttributes: data?.filter(associatedWith('Household')),
+    }),
+    [data],
+  );
 
-    const allDataChoicesDictTmp = data?.allFieldsAttributes?.reduce(
-      (acc, item) => {
+  const allDataChoicesDictTmp = useMemo(
+    () =>
+      // @ts-ignore
+      data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;
-      },
-      {},
-    );
-    setAllDataChoicesDict(allDataChoicesDictTmp);
+      }, {}),
+    [data],
+  );
 
-    const allCollectorFieldsChoicesDictTmp =
-      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
-        (acc, item) => {
-          acc[item.name] = item.choices;
-          return acc;
-        },
-        {},
-      );
+  const allCollectorFieldsChoicesDictTmp = useMemo(
+    () =>
+      // @ts-ignore
+      allCollectorFieldsAttributesData?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {}),
+    [allCollectorFieldsAttributesData],
+  );
+
+  useEffect(() => {
+    setIndividualData(filteredIndividualData);
+    setHouseholdData(filteredHouseholdData);
+    setAllDataChoicesDict(allDataChoicesDictTmp);
     setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
-  }, [data, loading, allCollectorFieldsAttributesData]);
+  }, [
+    filteredIndividualData,
+    filteredHouseholdData,
+    allDataChoicesDictTmp,
+    allCollectorFieldsChoicesDictTmp,
+  ]);
 
   if (!data || !allCollectorFieldsAttributesData) return null;
 
@@ -335,9 +380,7 @@ export const TargetingCriteriaForm = ({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, setFieldValue, errors }) => {
-          const fsps =
-            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms ||
-            [];
+          const fsps = availableFspsForDeliveryMechanismData || [];
           const mappedDeliveryMechanisms = fsps.map((el) => ({
             name: el.deliveryMechanism.name,
             value: el.deliveryMechanism.code,
@@ -383,7 +426,7 @@ export const TargetingCriteriaForm = ({
                   )
                 }
                 <DialogDescription>
-                  {isSocialWorkingProgram
+                  {isSocialDctType
                     ? ''
                     : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabelPlural}.`}{' '}
                 </DialogDescription>
@@ -418,10 +461,13 @@ export const TargetingCriteriaForm = ({
                     >
                       {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
-                          // eslint-disable-next-line
                           key={index}
                           index={index}
-                          data={isSocialWorkingProgram ? data : householdData}
+                          data={
+                            isSocialDctType
+                              ? data
+                              : householdData.allFieldsAttributes
+                          }
                           choicesDict={allDataChoicesDict}
                           each={each}
                           onChange={(e, object) => {
@@ -441,7 +487,7 @@ export const TargetingCriteriaForm = ({
                     </ArrayFieldWrapper>
                   )}
                 />
-                {householdFiltersAvailable || isSocialWorkingProgram ? (
+                {householdFiltersAvailable || isSocialDctType ? (
                   <Box display="flex" flexDirection="column">
                     <ButtonBox>
                       <Button
@@ -455,7 +501,7 @@ export const TargetingCriteriaForm = ({
                         data-cy="button-household-rule"
                       >
                         ADD{' '}
-                        {isSocialWorkingProgram
+                        {isSocialDctType
                           ? 'PEOPLE'
                           : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
                         RULE
@@ -503,7 +549,6 @@ export const TargetingCriteriaForm = ({
                           {values.individualsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaIndividualFilterBlocks
-                                // eslint-disable-next-line
                                 key={index}
                                 blockIndex={index}
                                 data={individualData}
@@ -552,7 +597,6 @@ export const TargetingCriteriaForm = ({
                           {values.collectorsFiltersBlocks.map(
                             (_each, index) => (
                               <TargetingCriteriaCollectorFilterBlocks
-                                // eslint-disable-next-line
                                 key={index}
                                 blockIndex={index}
                                 data={allCollectorFieldsAttributesData}

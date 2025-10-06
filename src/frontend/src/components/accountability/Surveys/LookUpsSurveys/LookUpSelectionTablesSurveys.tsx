@@ -1,4 +1,4 @@
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { LookUpProgrammesTableSurveys } from '@containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
 import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
@@ -9,7 +9,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   values;
   filtersProgramApplied;
   filtersTargetPopulationApplied;
@@ -17,7 +17,7 @@ interface LookUpSelectionTablesSurveysProps {
   onValueChange;
   handleChange;
 }
-function LookUpSelectionTablesSurveys({
+const LookUpSelectionTablesSurveys = ({
   selectedTab,
   choicesData,
   values,
@@ -26,7 +26,7 @@ function LookUpSelectionTablesSurveys({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesSurveysProps): ReactElement {
+}: LookUpSelectionTablesSurveysProps): ReactElement => {
   const permissions = usePermissions();
 
   return (
@@ -61,7 +61,7 @@ function LookUpSelectionTablesSurveys({
       )}
     </>
   );
-}
+};
 
 export default withErrorBoundary(
   LookUpSelectionTablesSurveys,

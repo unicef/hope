@@ -1,3 +1,12 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { ErrorButton } from '@core/ErrorButton';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,21 +15,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { Action } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { ErrorButton } from '@core/ErrorButton';
-import { GreyText } from '@core/GreyText';
-import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
 
 export interface RejectPaymentPlanProps {
@@ -34,13 +36,35 @@ export function RejectPaymentPlan({
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { mutatePaymentPlanAction: reject, loading: loadingReject } =
-    usePaymentPlanAction(
-      Action.Reject,
-      paymentPlanId,
-      () => showMessage(t('Payment Plan has been rejected.')),
-      () => setRejectDialogOpen(false),
-    );
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: reject, isPending: loadingReject } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: AcceptanceProcess;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansRejectCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been rejected.'));
+      setRejectDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      });
+    },
+  });
 
   const initialValues = {
     comment: '',
@@ -54,7 +78,14 @@ export function RejectPaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        reject(values.comment);
+        reject({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         setRejectDialogOpen(false);
         resetForm({});
       }}

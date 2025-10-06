@@ -3,15 +3,15 @@ from typing import Callable
 from unittest.mock import Mock, call, patch
 
 import pytest
-from extras.test_utils.factories.account import BusinessAreaFactory
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.celery_tasks import (
+from extras.test_utils.factories.account import BusinessAreaFactory
+from hope.apps.core.models import BusinessArea
+from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
     update_dashboard_figures,
     update_recent_dashboard_figures,
 )
-from hct_mis_api.apps.dashboard.services import DashboardDataCache
+from hope.apps.dashboard.services import DashboardDataCache
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
@@ -26,8 +26,8 @@ def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-@patch("hct_mis_api.apps.dashboard.celery_tasks.logger.error")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.logger.error")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_generate_dash_report_task_business_area_not_found(mock_refresh_data: Mock, mock_logger_error: Mock) -> None:
     """
     Test that generate_dash_report_task logs an error and does not call refresh_data
@@ -52,7 +52,7 @@ def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) ->
     mocked_error_message = "Mocked error"
 
     with patch(
-        "hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
+        "hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
         side_effect=Exception(mocked_error_message),
     ) as mock_data_refresh:
         if not BusinessArea.objects.filter(slug=afghanistan.slug, active=True).exists():
@@ -67,15 +67,20 @@ def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) ->
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-def test_update_dashboard_figures_retry_on_global_failure(afghanistan: BusinessArea) -> None:
+def test_update_dashboard_figures_retry_on_global_failure(
+    afghanistan: BusinessArea,
+) -> None:
     """
     Test that update_dashboard_figures retries on failure of global data refresh.
     """
     mocked_error_message = "Mocked global error"
-    with patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data") as mock_ba_refresh, patch(
-        "hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data",
-        side_effect=Exception(mocked_error_message),
-    ) as mock_global_refresh:
+    with (
+        patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data") as mock_ba_refresh,
+        patch(
+            "hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data",
+            side_effect=Exception(mocked_error_message),
+        ) as mock_global_refresh,
+    ):
         if not BusinessArea.objects.filter(slug=afghanistan.slug, active=True).exists():
             afghanistan.active = True
             afghanistan.save()
@@ -97,7 +102,7 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
     """
     mocked_error_message = "Mocked task error"
     with patch(
-        "hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
+        "hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
         side_effect=Exception(mocked_error_message),
     ) as mock_refresh:
         with pytest.raises(Exception, match=mocked_error_message):
@@ -106,8 +111,8 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_success(
     mock_ba_refresh: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea
 ) -> None:
@@ -137,9 +142,9 @@ def test_update_recent_dashboard_figures_success(
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-@patch("hct_mis_api.apps.dashboard.celery_tasks.logger.error")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.logger.error")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_ba_error_continues(
     mock_ba_refresh: Mock,
     mock_global_refresh: Mock,
@@ -162,7 +167,6 @@ def test_update_recent_dashboard_figures_ba_error_continues(
         if slug == afghanistan.slug:
             raise Exception("BA refresh error for afghanistan")
         # For other BAs (e.g., iraq), the mock should behave normally (return None)
-        return None
 
     mock_ba_refresh.side_effect = ba_refresh_side_effect_func
 
@@ -183,11 +187,14 @@ def test_update_recent_dashboard_figures_ba_error_continues(
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-@patch("hct_mis_api.apps.dashboard.celery_tasks.logger.error")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.logger.error")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_global_error_continues(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock, mock_logger_error: Mock, afghanistan: BusinessArea
+    mock_ba_refresh: Mock,
+    mock_global_refresh: Mock,
+    mock_logger_error: Mock,
+    afghanistan: BusinessArea,
 ) -> None:
     """
     Test that update_recent_dashboard_figures logs error if global refresh fails but BAs were processed.
@@ -207,13 +214,14 @@ def test_update_recent_dashboard_figures_global_error_continues(
     mock_ba_refresh.assert_called_once_with(afghanistan.slug, years_to_refresh=years_to_refresh)
     mock_global_refresh.assert_called_once_with(years_to_refresh=years_to_refresh)
     mock_logger_error.assert_called_once_with(
-        "Error refreshing recent global dashboard data: Global refresh error", exc_info=True
+        "Error refreshing recent global dashboard data: Global refresh error",
+        exc_info=True,
     )
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:
     """
     Test update_dashboard_figures when there are no active business areas.
@@ -228,8 +236,8 @@ def test_update_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_glob
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
-@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:
     """
     Test update_recent_dashboard_figures when there are no active business areas.

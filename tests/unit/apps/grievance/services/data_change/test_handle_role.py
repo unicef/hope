@@ -3,15 +3,14 @@ from django.test import TestCase
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
-from hct_mis_api.apps.household.models import (
+from hope.apps.grievance.services.data_change.utils import handle_role
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.program.models import Program
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestHandleRole(TestCase):
@@ -37,12 +36,8 @@ class TestHandleRole(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 1
-        )
+        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
 
         handle_role(ROLE_NO_ROLE, household, individual)
 
-        self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 0
-        )
+        assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 0

@@ -2,17 +2,16 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from django.urls import reverse
-
 import pytest
 from webtest import Upload
 
-from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
+from hope.apps.sanction_list.models import UploadedXLSXFile
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
 
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.sanction_list.models import SanctionList
+    from hope.apps.account.models import User
+    from hope.apps.sanction_list.models import SanctionList
 
 
 @pytest.fixture
@@ -21,7 +20,10 @@ def sample_file() -> bytes:
 
 
 def test_upload(
-    django_app: "DjangoTestApp", admin_user: "User", sample_file: bytes, sanction_list: "SanctionList"
+    django_app: "DjangoTestApp",
+    admin_user: "User",
+    sample_file: bytes,
+    sanction_list: "SanctionList",
 ) -> None:
     url = reverse("sanction:upload")
     res = django_app.get(url, user=admin_user)

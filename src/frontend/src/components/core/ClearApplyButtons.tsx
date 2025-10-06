@@ -1,4 +1,4 @@
-import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 import { ReactElement, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,8 +34,8 @@ export function ClearApplyButtons({
   }, [handleKeyPress]);
 
   return (
-    <Grid container justifyContent="flex-end" spacing={3}>
-      <Box mt={6}>
+    <Grid container spacing={3} sx={{ justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 6 }}>
         <Button
           color="primary"
           data-cy="button-filters-clear"

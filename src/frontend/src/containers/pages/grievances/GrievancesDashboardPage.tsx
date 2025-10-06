@@ -1,4 +1,5 @@
-import { Box, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -10,18 +11,41 @@ import { TicketsByLocationAndCategorySection } from '@components/grievances/Grie
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
-  const { data, loading } = useAllGrievanceDashboardChartsQuery({
-    variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'network-only',
+
+  // Use program-specific dashboard if we're in a specific program context,
+  // otherwise use global dashboard
+  const { data, isLoading: loading } = useQuery({
+    queryKey: [
+      'grievanceDashboard',
+      businessAreaSlug,
+      programSlug,
+      isAllPrograms,
+    ],
+    queryFn: () => {
+      if (isAllPrograms) {
+        return RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({
+          businessAreaSlug,
+        });
+      } else {
+        return RestService.restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve(
+          {
+            businessAreaSlug,
+            programSlug,
+          },
+        );
+      }
+    },
+    refetchOnMount: 'always',
   });
 
   if (!data || permissions === null) return null;
@@ -66,7 +90,7 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="total-number-of-tickets"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
                 topNumber={numberOfClosedTickets}
@@ -75,7 +99,7 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="total-number-of-closed-tickets"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
                 topNumber={`${
@@ -91,15 +115,15 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="tickets-average-resolution"
               />
             </Box>
-            <Box mt={5}>
+            <Box sx={{ mt: 5 }}>
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
-          <Grid size={{ xs:8 }}>
-            <Box ml={3}>
+          <Grid size={{ xs: 8 }}>
+            <Box sx={{ ml: 3 }}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
-            <Box ml={3} mt={5}>
+            <Box sx={{ ml: 3, mt: 5 }}>
               <TicketsByLocationAndCategorySection
                 data={ticketsByLocationAndCategory}
               />

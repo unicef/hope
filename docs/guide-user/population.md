@@ -9,7 +9,7 @@ tags:
 # Population Management
 
 
-The Population module provides an overview of households and individuals which have been imported into the system. On each screen in the Population module users can search by Household and Individuals. Additionally, one can search by different categories of data on the Household or individual. 
+The Population module provides an overview of households and individuals which have been imported into the system. On each screen in the Population module users can search by Household and Individuals. Additionally, one can search by different categories of data on the Household or individual.
 
 ## What Can I Do in The Population Module?
 
@@ -19,7 +19,7 @@ When imported households and individuals are merged with the overall population 
 
 Possible matches will continue to receive cash transfers until a decision has been made on whether the beneficiary is unique or duplicated through the Grievance and Feedback Module. The population screen for Households provides searchable data both by different categories and by the Household ID.
 
-## How to navigate the population module 
+## How to navigate the population module
 
 1. The household view page displays a search bar with several filters and a list of households.
    ![Image](_screenshots/population/1.png)

@@ -5,14 +5,14 @@ from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
+import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.models import (
     FEMALE,
     HEAD,
     MALE,
@@ -21,7 +21,7 @@ from hct_mis_api.apps.household.models import (
     WIFE_HUSBAND,
     XlsxUpdateFile,
 )
-from hct_mis_api.apps.household.services.individual_xlsx_update import (
+from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
@@ -49,9 +49,7 @@ def invalid_phone_no_file() -> File:
     return File(BytesIO(content), name="invalid_updated_phone_no_test_file.xlsx")
 
 
-class TestIndividualXlsxUpdate(APITestCase):
-    databases = "__all__"
-
+class TestIndividualXlsxUpdate(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -149,9 +147,9 @@ class TestIndividualXlsxUpdate(APITestCase):
         report = updater.get_matching_report()
 
         # Then
-        self.assertEqual(len(report[IndividualXlsxUpdate.STATUS_UNIQUE]), 2)
-        self.assertEqual(len(report[IndividualXlsxUpdate.STATUS_NO_MATCH]), 1)
-        self.assertEqual(len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH]), 1)
+        assert len(report[IndividualXlsxUpdate.STATUS_UNIQUE]) == 2
+        assert len(report[IndividualXlsxUpdate.STATUS_NO_MATCH]) == 1
+        assert len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH]) == 1
 
     def test_update_individuals(self) -> None:
         # Given
@@ -163,16 +161,16 @@ class TestIndividualXlsxUpdate(APITestCase):
         # Then
         [individual.refresh_from_db() for individual in self.individuals]
 
-        self.assertEqual(self.individuals[0].family_name, "Dąbrowski")
-        self.assertEqual(self.individuals[1].family_name, "Dąbrowska")
-        self.assertEqual(self.individuals[2].family_name, "Kowalska")
-        self.assertEqual(self.individuals[3].family_name, "Dąbrowska")
+        assert self.individuals[0].family_name == "Dąbrowski"
+        assert self.individuals[1].family_name == "Dąbrowska"
+        assert self.individuals[2].family_name == "Kowalska"
+        assert self.individuals[3].family_name == "Dąbrowska"
 
     def test_raise_error_when_invalid_columns(self) -> None:
-        with self.assertRaises(InvalidColumnsError) as context:
+        with pytest.raises(InvalidColumnsError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_file)
 
-        self.assertTrue("Invalid columns" in str(context.exception))
+        assert "Invalid columns" in str(context.value)
 
     def test_complex_update_individual(self) -> None:
         # Given
@@ -184,36 +182,33 @@ class TestIndividualXlsxUpdate(APITestCase):
         # Then
         [individual.refresh_from_db() for individual in self.individuals]
 
-        self.assertEqual(self.individuals[0].family_name, "Kowalski")
-        self.assertEqual(self.individuals[1].family_name, "Kowalska")
-        self.assertEqual(self.individuals[2].family_name, "Kowalska")
-        self.assertEqual(self.individuals[3].family_name, "Dąbrowska")
+        assert self.individuals[0].family_name == "Kowalski"
+        assert self.individuals[1].family_name == "Kowalska"
+        assert self.individuals[2].family_name == "Kowalska"
+        assert self.individuals[3].family_name == "Dąbrowska"
 
-        self.assertEqual(self.individuals[0].given_name, "Patryk")
-        self.assertEqual(self.individuals[1].given_name, "Karolina")
-        self.assertEqual(self.individuals[2].given_name, "Angela")
-        self.assertEqual(self.individuals[3].given_name, "Angela")
+        assert self.individuals[0].given_name == "Patryk"
+        assert self.individuals[1].given_name == "Karolina"
+        assert self.individuals[2].given_name == "Angela"
+        assert self.individuals[3].given_name == "Angela"
 
-        self.assertEqual(self.individuals[0].full_name, "Patryk Kowalski")
-        self.assertEqual(self.individuals[1].full_name, "Karolina Kowalska")
-        self.assertEqual(self.individuals[2].full_name, "Angela Kowalska")
-        self.assertEqual(self.individuals[3].full_name, "Angela Dąbrowska")
+        assert self.individuals[0].full_name == "Patryk Kowalski"
+        assert self.individuals[1].full_name == "Karolina Kowalska"
+        assert self.individuals[2].full_name == "Angela Kowalska"
+        assert self.individuals[3].full_name == "Angela Dąbrowska"
 
-        self.assertEqual(self.individuals[0].phone_no, "934-25-25-197")
-        self.assertEqual(self.individuals[1].phone_no, "934-25-25-198")
-        self.assertEqual(self.individuals[2].phone_no, "934-25-25-199")
-        self.assertEqual(self.individuals[3].phone_no, "934-25-25-121")
+        assert self.individuals[0].phone_no == "934-25-25-197"
+        assert self.individuals[1].phone_no == "934-25-25-198"
+        assert self.individuals[2].phone_no == "934-25-25-199"
+        assert self.individuals[3].phone_no == "934-25-25-121"
 
-        self.assertEqual(self.individuals[0].birth_date, datetime.date(1965, 8, 5))
-        self.assertEqual(self.individuals[1].birth_date, datetime.date(1965, 8, 6))
-        self.assertEqual(self.individuals[2].birth_date, datetime.date(1965, 8, 7))
-        self.assertEqual(self.individuals[3].birth_date, datetime.date(1985, 8, 12))
+        assert self.individuals[0].birth_date == datetime.date(1965, 8, 5)
+        assert self.individuals[1].birth_date == datetime.date(1965, 8, 6)
+        assert self.individuals[2].birth_date == datetime.date(1965, 8, 7)
+        assert self.individuals[3].birth_date == datetime.date(1985, 8, 12)
 
     def test_raise_error_when_invalid_phone_number(self) -> None:
-        with self.assertRaises(ValidationError) as context:
+        with pytest.raises(ValidationError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_phone_no_file).update_individuals()
 
-        self.assertEqual(
-            str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}),
-            str(context.exception),
-        )
+        assert str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}) == str(context.value)

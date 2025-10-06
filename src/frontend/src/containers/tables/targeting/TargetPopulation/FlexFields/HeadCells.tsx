@@ -1,7 +1,6 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { FieldAttributeNode } from '@generated/graphql';
 
-export const headCells: HeadCell<FieldAttributeNode>[] = [
+export const headCells: HeadCell<any>[] = [
   {
     disablePadding: false,
     label: 'Name',

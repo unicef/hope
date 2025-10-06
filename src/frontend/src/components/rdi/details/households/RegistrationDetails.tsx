@@ -1,14 +1,16 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Theme, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { useRegistrationDataImportQuery } from '@generated/graphql';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
@@ -32,61 +34,65 @@ export function RegistrationDetails({
   detailId,
 }: RegistrationDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { data } = useRegistrationDataImportQuery({
-    variables: {
-      id: hctId,
-    },
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['registrationDataImport', businessArea, programId, hctId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
+        businessAreaSlug: businessArea,
+        id: hctId,
+        programSlug: programId,
+      }),
+    enabled: !!businessArea && !!programId && !!hctId,
   });
-  if (!data) {
+
+  if (isLoading || !data) {
     return null;
   }
-  const { registrationDataImport } = data;
+
   return (
     <Overview>
       <Title>
         <Typography variant="h6">{t('Registration Details')}</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid size={{ xs: 4 }}>
-          <LabelizedField label={t('Source')}>
-            {registrationDataImport.dataSource}
-          </LabelizedField>
+        <Grid size={4}>
+          <LabelizedField label={t('Source')}>{data.dataSource}</LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          <LabelizedField label={t('Title')}>
-            {registrationDataImport.name}
-          </LabelizedField>
+        <Grid size={4}>
+          <LabelizedField label={t('Title')}>{data.name}</LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={4}>
           <LabelizedField label={t('Registered Date')}>
             <UniversalMoment>{registrationDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>
-      {registrationDataImport.dataSource === 'XLS' ? null : (
+      {data.dataSource === 'XLS' ? null : (
         <>
           <hr />
           <Typography variant="h6">{t('Data Collection')}</Typography>
           <Grid container spacing={6}>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={4}>
               <LabelizedField label={t('Start time')}>
                 <UniversalMoment>{start}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={4}>
               <LabelizedField label={t('End time')}>
                 <UniversalMoment>{registrationDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={4}>
               <LabelizedField label={t('Device ID')}>{deviceid}</LabelizedField>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={4}>
               <LabelizedField label={t('Detail ID')}>{detailId}</LabelizedField>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={4}>
               <LabelizedField label={t('User name')}>
-                {`${registrationDataImport.importedBy?.firstName} ${registrationDataImport.importedBy?.lastName}`}
+                {data.importedBy || ''}
               </LabelizedField>
             </Grid>
           </Grid>

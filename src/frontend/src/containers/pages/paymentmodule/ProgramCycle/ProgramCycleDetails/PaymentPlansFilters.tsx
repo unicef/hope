@@ -5,30 +5,16 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanStatus,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
-import { MenuItem, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Grid, MenuItem, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import moment from 'moment';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
 
 interface PaymentPlansFilterProps {
   filter;
@@ -68,15 +54,18 @@ export const PaymentPlansFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = useQuery({
+    queryKey: ['choicesPaymentPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   if (!statusChoicesData) {
     return null;
   }
 
   const preparedStatusChoices =
-    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    [...(statusChoicesData || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
     ) || [];
 
   return (
@@ -88,7 +77,7 @@ export const PaymentPlansFilters = ({
         <Typography variant="h6">{t('Payment Plans Filters')}</Typography>
       </Title>
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -96,7 +85,7 @@ export const PaymentPlansFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -114,7 +103,7 @@ export const PaymentPlansFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <Box display="flex" flexDirection="column">
             <NumberTextField
               id="totalEntitledQuantityFromFilter"
@@ -127,7 +116,7 @@ export const PaymentPlansFilters = ({
             />
           </Box>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
@@ -142,7 +131,7 @@ export const PaymentPlansFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -166,7 +155,7 @@ export const PaymentPlansFilters = ({
             value={filter.dispersionStartDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>

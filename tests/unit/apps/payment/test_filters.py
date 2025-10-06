@@ -8,9 +8,8 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     generate_delivery_mechanisms,
 )
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -52,7 +51,9 @@ class TestFinancialServiceProviderXlsxTemplateFilter(TestCase):
             name="FSP_template_1", columns=["column_1", "column_2"]
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash, xlsx_template=cls.fsp_xlsx_template_1
+            financial_service_provider=cls.fsp_1,
+            delivery_mechanism=cls.dm_cash,
+            xlsx_template=cls.fsp_xlsx_template_1,
         )
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=cls.fsp_1,
@@ -66,9 +67,7 @@ class TestFinancialServiceProviderXlsxTemplateFilter(TestCase):
         )
 
     def test_xlsx_template_business_area_filter_distinct(self) -> None:
-        from hct_mis_api.apps.payment.filters import (
-            FinancialServiceProviderXlsxTemplateFilter,
-        )
+        from hope.apps.payment.filters import FinancialServiceProviderXlsxTemplateFilter
 
         """
         even if FSP has multiple DM and the same xlsx template assigned

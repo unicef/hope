@@ -1,17 +1,21 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.program import ProgramFactory
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,
     PendingDocument,
@@ -19,22 +23,16 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
 
 
 class TestSriLankaRegistrationService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUp(cls) -> None:
+        call_command("init_geo_fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -66,7 +64,12 @@ class TestSriLankaRegistrationService(TestCase):
         admin2.save()
         admin3 = geo_models.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
         admin3.save()
-        admin4 = geo_models.Area(name="SriLanka admin4", p_code="LK1163020", area_type=area_type4, parent=admin3)
+        admin4 = geo_models.Area(
+            name="SriLanka admin4",
+            p_code="LK1163020",
+            area_type=area_type4,
+            parent=admin3,
+        )
         admin4.save()
         geo_models.Area.objects.rebuild()
 
@@ -150,46 +153,37 @@ class TestSriLankaRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
 
         self.records[0].refresh_from_db()
-        self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
-        )
+        assert Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count() == 2
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.filter(program=rdi.program).count(), 1)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 1
+        assert PendingIndividualRoleInHousehold.objects.count() == 1
+        assert PendingDocument.objects.count() == 1
+        assert PendingDocument.objects.filter(program=rdi.program).count() == 1
 
         household = PendingHousehold.objects.first()
-        self.assertEqual(household.admin1.p_code, "LK1")
-        self.assertEqual(household.admin2.p_code, "LK11")
-        self.assertEqual(household.admin3.p_code, "LK1163")
-        self.assertEqual(household.admin4.p_code, "LK1163020")
-        self.assertEqual(household.admin_area.p_code, "LK1163020")
+        assert household.admin1.p_code == "LK1"
+        assert household.admin2.p_code == "LK11"
+        assert household.admin3.p_code == "LK1163"
+        assert household.admin4.p_code == "LK1163020"
+        assert household.admin_area.p_code == "LK1163020"
 
         registration_data_import = household.registration_data_import
 
-        self.assertEqual(registration_data_import.program, self.program)
+        assert registration_data_import.program == self.program
 
-        self.assertEqual(
-            PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
-        )
+        assert PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields == {"has_nic_number_i_c": "n"}
 
-        self.assertEqual(
-            PendingIndividual.objects.filter(full_name="Dome").first().flex_fields,
-            {
-                "confirm_nic_number": "123456789V",
-                "branch_or_branch_code": "7472_002",
-                "who_answers_this_phone": "alternate collector",
-                "confirm_alternate_collector_phone_number": "+94788908046",
-                "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
-            },
-        )
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
-        self.assertEqual(
-            PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration, 43
-        )
+        assert PendingIndividual.objects.filter(full_name="Dome").first().flex_fields == {
+            "confirm_nic_number": "123456789V",
+            "branch_or_branch_code": "7472_002",
+            "who_answers_this_phone": "alternate collector",
+            "confirm_alternate_collector_phone_number": "+94788908046",
+            "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
+        }
+        assert PendingIndividual.objects.filter(full_name="Dome").first().email == "email999@mail.com"
+        assert PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration == 43
+        assert PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration == 43
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -198,10 +192,10 @@ class TestSriLankaRegistrationService(TestCase):
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
 
-        self.assertEqual(Record.objects.first().status, Record.STATUS_IMPORTED)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert Record.objects.first().status == Record.STATUS_IMPORTED
+        assert PendingHousehold.objects.count() == 1
 
         # Process again, but no new household created
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert PendingHousehold.objects.count() == 1

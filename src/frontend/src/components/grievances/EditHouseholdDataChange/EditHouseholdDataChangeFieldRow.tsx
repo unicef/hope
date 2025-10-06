@@ -1,4 +1,4 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
@@ -6,19 +6,13 @@ import camelCase from 'lodash/camelCase';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-  HouseholdQuery,
-} from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
-  household: HouseholdQuery['household'];
+  fields;
+  household: HouseholdDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
@@ -37,7 +31,8 @@ export const EditHouseholdDataChangeFieldRow = ({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const field = fields.find((item) => item.name === itemValue.fieldName);
+
+  const field = fields?.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );
@@ -48,9 +43,10 @@ export const EditHouseholdDataChangeFieldRow = ({
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
+
   return (
-    <>
-      <Grid size={{ xs: 4 }}>
+    <Grid container size={12} spacing={2} alignItems="center">
+      <Grid size={4}>
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -59,41 +55,42 @@ export const EditHouseholdDataChangeFieldRow = ({
           required
           component={FormikSelectField}
           choices={fields
-            .filter(
+            ?.filter(
               (item) =>
                 !notAvailableFields.includes(item.name) ||
                 item.name === itemValue?.fieldName,
             )
-            .map((item) => ({
+            ?.map((item) => ({
               value: item.name,
               name: item.labelEn,
             }))}
           disabled={isEditTicket}
         />
       </Grid>
-
-      <CurrentValue
-        field={field}
-        value={
-          !field?.isFlexField ? household[name] : household.flexFields[name]
-        }
-        values={values}
-      />
-      {itemValue.fieldName ? (
-        <EditHouseholdDataChangeField
-          name={`householdDataUpdateFields[${index}].fieldValue`}
+      <Grid size={4}>
+        <CurrentValue
           field={field}
+          value={
+            !field?.isFlexField ? household[name] : household.flexFields[name]
+          }
+          values={values}
         />
-      ) : (
-        <Grid size={{ xs:4 }} />
-      )}
-      {itemValue.fieldName && (
-        <Grid size={{ xs:1 }}>
+      </Grid>
+      <Grid size={3}>
+        {itemValue.fieldName ? (
+          <EditHouseholdDataChangeField
+            name={`householdDataUpdateFields[${index}].fieldValue`}
+            field={field}
+          />
+        ) : null}
+      </Grid>
+      <Grid size={1}>
+        {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
-        </Grid>
-      )}
-    </>
+        )}
+      </Grid>
+    </Grid>
   );
 };

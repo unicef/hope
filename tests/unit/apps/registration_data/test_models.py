@@ -1,7 +1,8 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
+from freezegun import freeze_time
 
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -16,19 +17,16 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from freezegun import freeze_time
-
-from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.household.models import Household, Individual, IndividualIdentity
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         partner = PartnerFactory()
@@ -38,10 +36,12 @@ class TestRegistrationDataModels(TestCase):
             status=RegistrationDataImport.IN_REVIEW, program=cls.program
         )
         cls.imported_individual_1 = IndividualFactory(
-            registration_data_import_id=cls.registration_data_import.id, rdi_merge_status=Individual.PENDING
+            registration_data_import_id=cls.registration_data_import.id,
+            rdi_merge_status=Individual.PENDING,
         )
         cls.imported_individual_2 = IndividualFactory(
-            registration_data_import_id=cls.registration_data_import.id, rdi_merge_status=Individual.PENDING
+            registration_data_import_id=cls.registration_data_import.id,
+            rdi_merge_status=Individual.PENDING,
         )
 
         # ImportedHousehold
@@ -73,33 +73,34 @@ class TestRegistrationDataModels(TestCase):
         )
 
     def test_rdi_can_be_merged(self) -> None:
-        self.assertTrue(self.registration_data_import.can_be_merged())
+        assert self.registration_data_import.can_be_merged()
 
     def test_imported_household_str(self) -> None:
-        self.assertEqual(str(self.imported_household), self.imported_household.unicef_id)
+        assert str(self.imported_household) == self.imported_household.unicef_id
 
     @freeze_time("2024-05-27")
     def test_imported_individual_age(self) -> None:
-        self.assertEqual(self.imported_individual_3.age, 33)
+        assert self.imported_individual_3.age == 33
 
     def test_imported_individual_str(self) -> None:
-        self.assertEqual(str(self.imported_individual_3), self.imported_individual_3.unicef_id)
+        assert str(self.imported_individual_3) == self.imported_individual_3.unicef_id
 
     def test_imported_document_type_str(self) -> None:
-        self.assertEqual(str(self.imported_document_type), self.imported_document_type.label)
+        assert str(self.imported_document_type) == self.imported_document_type.label
 
     def test_imported_individual_identity_str(self) -> None:
-        self.assertEqual(
-            str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
+        assert (
+            str(self.imported_individual_identity)
+            == f"UNICEF HQ [Sub-Partner of UNICEF] {self.imported_individual_3.unicef_id} 123456789"
         )
 
     def test_bulk_update_household_size(self) -> None:
         self.imported_household.refresh_from_db(fields=["size"])
-        self.assertEqual(self.imported_household.size, 99)
+        assert self.imported_household.size == 99
 
         self.registration_data_import.bulk_update_household_size()
         self.imported_household.refresh_from_db(fields=["size"])
-        self.assertEqual(self.imported_household.size, 99)
+        assert self.imported_household.size == 99
 
         # upd DCT recalculate_composition
         self.program.data_collecting_type.recalculate_composition = True
@@ -107,7 +108,7 @@ class TestRegistrationDataModels(TestCase):
 
         self.registration_data_import.bulk_update_household_size()
         self.imported_household.refresh_from_db(fields=["size"])
-        self.assertEqual(self.imported_household.size, 1)
+        assert self.imported_household.size == 1
 
 
 class TestRegistrationDataImportDatahub(TestCase):
@@ -127,10 +128,7 @@ class TestRegistrationDataImportDatahub(TestCase):
         )
 
     def test_str(self) -> None:
-        self.assertEqual(str(self.rdi_datahub), self.rdi_datahub.name)
+        assert str(self.rdi_datahub) == self.rdi_datahub.name
 
     def test_business_area(self) -> None:
-        self.assertEqual(
-            self.rdi_datahub.business_area,
-            self.business_area_slug,
-        )
+        assert self.rdi_datahub.business_area == self.business_area_slug

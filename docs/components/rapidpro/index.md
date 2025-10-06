@@ -6,7 +6,7 @@ Docs: <https://rapidpro.github.io/rapidpro/>
 
 App: <https://app.rapidpro.io/>
 
- 
+
 ## Use cases
 
 -  <glossary:Payment Verification> Payment Verification

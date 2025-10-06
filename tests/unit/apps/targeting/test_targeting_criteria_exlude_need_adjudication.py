@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetailsFactory
 from extras.test_utils.factories.household import (
@@ -5,17 +7,13 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from parameterized import parameterized
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCriteriaQueryingBase,
-)
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import Household
+from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 
 
-class TestTargetingCriteriaFlags(APITestCase):
+class TestTargetingCriteriaFlags(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -100,13 +98,13 @@ class TestTargetingCriteriaFlags(APITestCase):
             self.ticket_needs_adjudication_details_for_representative.ticket.status = ticket_status
             self.ticket_needs_adjudication_details_for_representative.ticket.save()
             self.ticket_needs_adjudication_details_for_representative.possible_duplicates.set([self.representative2])
-        self.assertEqual(Household.objects.count(), 2)
+        assert Household.objects.count() == 2
         targeting_criteria = TargetingCriteriaQueryingBase()
         targeting_criteria.flag_exclude_if_active_adjudication_ticket = True
         household_filtered = Household.objects.filter(
             targeting_criteria.apply_flag_exclude_if_active_adjudication_ticket()
         )
-        self.assertEqual(household_filtered.count(), household_count)
+        assert household_filtered.count() == household_count
 
     @parameterized.expand(
         [
@@ -141,22 +139,22 @@ class TestTargetingCriteriaFlags(APITestCase):
             self.ticket_needs_adjudication_details_for_representative.ticket.save()
             self.ticket_needs_adjudication_details_for_representative.golden_records_individual = self.representative2
             self.ticket_needs_adjudication_details_for_representative.save()
-        self.assertEqual(Household.objects.count(), 2)
+        assert Household.objects.count() == 2
         targeting_criteria = TargetingCriteriaQueryingBase()
         targeting_criteria.flag_exclude_if_active_adjudication_ticket = True
         household_filtered = Household.objects.filter(
             targeting_criteria.apply_flag_exclude_if_active_adjudication_ticket()
         )
-        self.assertEqual(household_filtered.count(), household_count)
+        assert household_filtered.count() == household_count
 
     def test_flag_exclude_if_active_adjudication_ticket_no_ticket(self) -> None:
-        self.assertEqual(Household.objects.count(), 2)
+        assert Household.objects.count() == 2
         targeting_criteria = TargetingCriteriaQueryingBase()
         targeting_criteria.flag_exclude_if_active_adjudication_ticket = True
         household_filtered = Household.objects.filter(
             targeting_criteria.apply_flag_exclude_if_active_adjudication_ticket()
         )
-        self.assertEqual(household_filtered.count(), 2)
+        assert household_filtered.count() == 2
 
     @parameterized.expand(
         [
@@ -178,8 +176,8 @@ class TestTargetingCriteriaFlags(APITestCase):
         if representative_is_sanctioned:
             self.representative2.sanction_list_confirmed_match = True
             self.representative2.save()
-        self.assertEqual(Household.objects.count(), 2)
+        assert Household.objects.count() == 2
         targeting_criteria = TargetingCriteriaQueryingBase()
         targeting_criteria.flag_exclude_if_on_sanction_list = True
         household_filtered = Household.objects.filter(targeting_criteria.apply_flag_exclude_if_on_sanction_list())
-        self.assertEqual(household_filtered.count(), household_count)
+        assert household_filtered.count() == household_count

@@ -5,10 +5,10 @@ from typing import Any, List, Optional, Union
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hct_mis_api.apps.targeting.models import (
+from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hope.apps.core.field_attributes.fields_types import Scope
+from hope.apps.household.models import RESIDENCE_STATUS_CHOICE
+from hope.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
@@ -19,7 +19,16 @@ def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
     if core_field_attr.get("type") == "INTEGER":
-        return random.choice(["EQUALS", "NOT_EQUALS", "RANGE", "NOT_IN_RANGE", "GREATER_THAN", "LESS_THAN"])
+        return random.choice(
+            [
+                "EQUALS",
+                "NOT_EQUALS",
+                "RANGE",
+                "NOT_IN_RANGE",
+                "GREATER_THAN",
+                "LESS_THAN",
+            ]
+        )
 
     if core_field_attr.get("type") == "SELECT_ONE":
         return random.choice(["EQUALS", "NOT_EQUALS"])
@@ -30,19 +39,19 @@ def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
 
 @typing.no_type_check
 def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
-    min = None
-    max = None
+    minimum = None
+    maximum = None
     if obj.field_name == "age":
-        min = random.randint(1, 100)
-        max = random.randint(min, random.randint(min + 1, 116))
+        minimum = random.randint(1, 100)
+        maximum = random.randint(minimum, random.randint(minimum + 1, 116))
     if obj.field_name == "size":
-        min = random.randint(1, 5)
-        max = random.randint(min, random.randint(min + 1, 10))
+        minimum = random.randint(1, 5)
+        maximum = random.randint(minimum, random.randint(minimum + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
-    if obj.comparison_method == "RANGE" or obj.comparison_method == "NOT_IN_RANGE":
-        return [min, max]
-    return [min]
+    if obj.comparison_method in ["RANGE", "NOT_IN_RANGE"]:
+        return [minimum, maximum]
+    return [minimum]
 
 
 class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):

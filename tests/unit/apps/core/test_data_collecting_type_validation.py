@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
-
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.core.models import DataCollectingType
 
 
 class TestDCTValidation(TestCase):
@@ -16,8 +16,6 @@ class TestDCTValidation(TestCase):
     def test_change_type_without_compatible_with_different_type(self) -> None:
         dct_full = DataCollectingTypeFactory(label="Full", code="full", business_areas=[self.business_area])
 
-        dct_full.compatible_types.add(dct_full)
-
         dct_full.type = DataCollectingType.Type.SOCIAL
         dct_full.save()
 
@@ -25,16 +23,14 @@ class TestDCTValidation(TestCase):
         dct_full = DataCollectingTypeFactory(label="Full", code="full", business_areas=[self.business_area])
         dct_partial = DataCollectingTypeFactory(label="Partial", code="partial", business_areas=[self.business_area])
 
-        dct_full.compatible_types.add(dct_full)
         dct_full.compatible_types.add(dct_partial)
 
         dct_full.type = DataCollectingType.Type.SOCIAL
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.save()
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Type of DCT cannot be changed if it has compatible DCTs of different type.",
+        assert (
+            str(error.value.messages[0]) == "Type of DCT cannot be changed if it has compatible DCTs of different type."
         )
 
     def test_add_compatible_type_with_different_type(self) -> None:
@@ -46,10 +42,6 @@ class TestDCTValidation(TestCase):
             type=DataCollectingType.Type.SOCIAL,
         )
 
-        dct_full.compatible_types.add(dct_full)
-
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
-        self.assertEqual(
-            str(error.exception.messages[0]), "DCTs of different types cannot be compatible with each other."
-        )
+        assert str(error.value.messages[0]) == "DCTs of different types cannot be compatible with each other."

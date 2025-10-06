@@ -1,59 +1,62 @@
 import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
-from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.celery_tasks import (
+from hope.apps.core.models import FlexibleAttribute
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Document, DocumentType, Individual
+from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.universal_update_script.models import UniversalUpdate
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def germany() -> Country:
     return Country.objects.create(name="Germany", iso_code2="DE", iso_code3="DEU", iso_num="276")
 
 
-@pytest.fixture()
+@pytest.fixture
 def state(poland: Country) -> AreaType:
     return AreaType.objects.create(name="State", country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def district(poland: Country, state: AreaType) -> AreaType:
     return AreaType.objects.create(name="District", parent=state, country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin1(state: AreaType) -> Area:
     return Area.objects.create(name="Kabul", area_type=state, p_code="AF11")
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin2(district: AreaType) -> Area:
     return Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -120,7 +123,7 @@ def individual(
     return ind
 
 
-@pytest.fixture()
+@pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
     return Account.objects.create(
         individual=individual,

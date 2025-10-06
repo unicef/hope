@@ -1,15 +1,14 @@
 from typing import TYPE_CHECKING
 
 from django.urls import reverse
-
 import responses
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
     from responses import RequestsMock
 
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.sanction_list.models import SanctionList
+    from hope.apps.account.models import User
+    from hope.apps.sanction_list.models import SanctionList
 
 
 def test_sanction_list_refresh(
@@ -27,7 +26,10 @@ def test_sanction_list_refresh(
 
 
 def test_sanction_list_empty(
-    django_app: "DjangoTestApp", admin_user: "User", sanction_list: "SanctionList", mocked_responses: "RequestsMock"
+    django_app: "DjangoTestApp",
+    admin_user: "User",
+    sanction_list: "SanctionList",
+    mocked_responses: "RequestsMock",
 ) -> None:
     url = reverse("admin:sanction_list_sanctionlist_change", args=(sanction_list.id,))
     res = django_app.get(url, user=admin_user)

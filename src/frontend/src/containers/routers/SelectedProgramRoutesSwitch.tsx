@@ -11,22 +11,12 @@ import { AccountabilityRoutes } from './AccountabilityRoutes';
 import { ReactElement } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 import UsersPage from '@containers/pages/core/UsersPage';
-import ReportingDetailsPage from '@containers/pages/reporting/ReportingDetailsPage';
-import ReportingPage from '@containers/pages/reporting/ReportingPage';
 
 export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([
     {
       path: 'country-dashboard',
       element: <NewDashboardPage />,
-    },
-    {
-      path: 'reporting/:id',
-      element: <ReportingDetailsPage />,
-    },
-    {
-      path: 'reporting',
-      element: <ReportingPage />,
     },
     {
       path: 'users-list',

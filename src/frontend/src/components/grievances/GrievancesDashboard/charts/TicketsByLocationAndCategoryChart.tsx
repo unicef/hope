@@ -4,11 +4,11 @@ import { FC, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { DetailedChartData } from '@restgenerated/models/DetailedChartData';
 import { categoriesAndColors } from '@components/grievances/utils/createGrievanceUtils';
 
 interface TicketsByLocationAndCategoryChartProps {
-  data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
+  data: DetailedChartData;
 }
 
 export const TicketsByLocationAndCategoryChart: FC<

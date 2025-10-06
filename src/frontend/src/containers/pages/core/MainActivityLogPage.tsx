@@ -1,9 +1,11 @@
 import { Paper } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState, useRef, ChangeEvent } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { LogEntryNode, useAllLogEntriesQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { ActivityLogPageFilters } from '@components/core/ActivityLogPageFilters';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -18,7 +20,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string; userId?: string } = {};
   if (filters.userId !== '') {
@@ -60,50 +62,93 @@ export function ActivityLogPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data, refetch, loading } = useAllLogEntriesQuery({
-    variables: {
-      businessArea,
-      programId: isAllPrograms ? null : programId,
-      first: rowsPerPage,
-      last: undefined,
-      after: undefined,
-      before: undefined,
-      ...filtersToVariables(appliedFilter),
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: 'network-only',
-  });
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
-  useEffect(() => {
-    // we need to check for permission before refetch, otherwise returned permission denied error
-    // breaks the page
-    if (
+  // Query for activity logs based on whether it's all programs or a specific program
+  const { data: logsData, isLoading: logsLoading } = useQuery({
+    queryKey: [
+      'activityLogs',
+      businessArea,
+      programId,
+      isAllPrograms,
+      page,
+      rowsPerPage,
+      appliedFilter,
+    ],
+    queryFn: () => {
+      const variables = {
+        businessAreaSlug: businessArea,
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+        ...filtersToVariables(appliedFilter),
+      };
+
+      if (isAllPrograms) {
+        return RestService.restBusinessAreasActivityLogsList(variables);
+      } else {
+        return RestService.restBusinessAreasProgramsActivityLogsList({
+          ...variables,
+          programSlug: programId,
+        });
+      }
+    },
+    enabled: !!(
+      businessArea &&
       permissions &&
       hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
-    ) {
-      setPage(0);
-      refetch({
-        businessArea,
-        first: rowsPerPage,
-        last: undefined,
-        after: undefined,
-        before: undefined,
-        ...filtersToVariables(appliedFilter),
-      });
-    }
-  }, [appliedFilter, businessArea, refetch, permissions, rowsPerPage]);
+    ),
+  });
+
+  const { data: countData } = useQuery({
+    queryKey: ['activityLogsCount', businessArea, programId, isAllPrograms],
+    queryFn: () => {
+      if (isAllPrograms) {
+        return RestService.restBusinessAreasActivityLogsCountRetrieve({
+          businessAreaSlug: businessArea,
+        });
+      } else {
+        return RestService.restBusinessAreasProgramsActivityLogsCountRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
+      }
+    },
+    enabled: !!(
+      businessArea &&
+      permissions &&
+      hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
+    ),
+  });
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
     return <PermissionDenied />;
 
-  if (!data && !loading) {
+  if (!logsData && !logsLoading) {
     return <EmptyTable />;
   }
-  if (!data && loading) return <LoadingComponent />;
-  const { edges } = data.allLogEntries;
-  const { logEntryActionChoices } = data;
-  const logEntries = edges.map((edge) => edge.node as LogEntryNode);
+  if (!logsData && logsLoading) return <LoadingComponent />;
+
+  // Use REST API LogEntry data directly
+  const logEntries = logsData.results;
+
+  // Get total count for pagination
+  const totalCount = countData?.count ?? 0;
+
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value, 10);
+    setRowsPerPage(value);
+    setPage(0);
+  };
+
   return (
     <>
       <PageHeader title={t('Activity Log')} />
@@ -112,51 +157,24 @@ export function ActivityLogPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <StyledPaper>
-        <MainActivityLogTable
-          totalCount={data.allLogEntries.totalCount ?? 0}
-          rowsPerPage={rowsPerPage}
-          logEntries={logEntries}
-          actionChoices={logEntryActionChoices}
-          page={page}
-          loading={loading}
-          onChangePage={(_event, newPage) => {
-            const variables = {
-              businessArea,
-              first: undefined,
-              last: undefined,
-              after: undefined,
-              before: undefined,
-              ...filtersToVariables(appliedFilter),
-            };
-            if (newPage < page) {
-              variables.last = rowsPerPage;
-              variables.before = edges[0].cursor;
-            } else {
-              variables.after = edges[edges.length - 1].cursor;
-              variables.first = rowsPerPage;
-            }
-            setPage(newPage);
-            refetch(variables);
-          }}
-          onChangeRowsPerPage={(event) => {
-            const value = parseInt(event.target.value, 10);
-            setRowsPerPage(value);
-            setPage(0);
-            const variables = {
-              businessArea,
-              first: rowsPerPage,
-              after: undefined,
-              last: undefined,
-              before: undefined,
-              ...filtersToVariables(appliedFilter),
-            };
-            refetch(variables);
-          }}
-        />
-      </StyledPaper>
+      <div ref={tableRef}>
+        <StyledPaper>
+          <MainActivityLogTable
+            totalCount={totalCount}
+            rowsPerPage={rowsPerPage}
+            logEntries={logEntries}
+            page={page}
+            loading={logsLoading}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
+          />
+        </StyledPaper>
+      </div>
     </>
   );
 }

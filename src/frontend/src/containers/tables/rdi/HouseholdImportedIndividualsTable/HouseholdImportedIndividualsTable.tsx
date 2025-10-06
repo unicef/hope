@@ -1,12 +1,13 @@
 import { ReactElement, useState } from 'react';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { IndividualMinimalFragment } from '@generated/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { Individual } from '@restgenerated/models/Individual';
 
-const headCells: HeadCell<IndividualMinimalFragment>[] = [
+const headCells: HeadCell<Individual>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
@@ -57,10 +58,7 @@ const headCells: HeadCell<IndividualMinimalFragment>[] = [
   },
 ];
 
-export function HouseholdImportedIndividualsTable({
-  household,
-  choicesData,
-}): ReactElement {
+export function HouseholdImportedIndividualsTable({ household }): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
@@ -68,7 +66,7 @@ export function HouseholdImportedIndividualsTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const allIndividuals = household.individuals.edges.map((edge) => edge.node);
+  const allIndividuals = household.individuals.map((el) => el);
   if (orderBy) {
     if (orderDirection === 'asc') {
       allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
@@ -94,7 +92,7 @@ export function HouseholdImportedIndividualsTable({
 
   const totalCount = allIndividuals.length;
   return (
-    <TableComponent<IndividualMinimalFragment>
+    <TableComponent<IndividualList>
       title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
@@ -104,7 +102,6 @@ export function HouseholdImportedIndividualsTable({
       renderRow={(row) => (
         <ImportedIndividualsTableRow
           key={row.id}
-          choices={choicesData}
           individual={row}
           rdi={household.rdi}
         />

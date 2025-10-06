@@ -2,7 +2,7 @@
 description: ""
 template: term.html
 terms:
-  - glossary: 
+  - glossary:
     - Registration Data Import
     - Enumerator
 ---

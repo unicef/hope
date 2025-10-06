@@ -2,25 +2,24 @@ from typing import List
 from uuid import UUID
 
 from django.core.management import call_command
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.models import Grant
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     DocumentType,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestDelegatePeople(HOPEApiTestCase):
@@ -32,7 +31,8 @@ class TestDelegatePeople(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
@@ -42,7 +42,9 @@ class TestDelegatePeople(HOPEApiTestCase):
             type=DataCollectingType.Type.SOCIAL.value,
         )
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
         )
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -58,21 +60,21 @@ class TestDelegatePeople(HOPEApiTestCase):
         people_ids = self._create_people()
         households_count = PendingHousehold.objects.filter(registration_data_import=self.rdi).count()
         individuals_count = PendingIndividual.objects.filter(registration_data_import=self.rdi).count()
-        self.assertEqual(households_count, 2)
-        self.assertEqual(individuals_count, 3)
+        assert households_count == 2
+        assert individuals_count == 3
 
         data = {"delegates": [{"delegate_id": people_ids[2], "delegated_for": [people_ids[1]]}]}
 
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, str(response.json()))
+        assert response.status_code == status.HTTP_200_OK, str(response.json())
         data = response.json()
-        self.assertEqual(data["updated"], 1)
+        assert data["updated"] == 1
 
         hh1 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village1")
         hh2 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village2")
 
-        self.assertEqual(hh1.primary_collector.full_name, "John Doe")
-        self.assertEqual(hh2.primary_collector.full_name, "Jack Jones")
+        assert hh1.primary_collector.full_name == "John Doe"
+        assert hh2.primary_collector.full_name == "Jack Jones"
 
     def _create_people(self) -> List[UUID]:
         data = [
@@ -115,6 +117,6 @@ class TestDelegatePeople(HOPEApiTestCase):
         ]
         url = reverse("api:rdi-push-people", args=[self.business_area.slug, str(self.rdi.id)])
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
         return response_json["people"]

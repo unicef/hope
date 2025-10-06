@@ -1,11 +1,10 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 import { getIndexForId } from './utils/helpers';
 import { ReactElement } from 'react';
@@ -15,8 +14,8 @@ export interface DocumentFieldProps {
   baseName: string;
   baseNameArray?;
   onDelete;
-  countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
-  documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
+  countryChoices: any[];
+  documentTypeChoices: any[];
   isEdited?: boolean;
   setFieldValue?;
   photoSrc?: string;
@@ -45,7 +44,7 @@ export function DocumentField({
 
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid size={{ xs: 2 }}>
+      <Grid size={2}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth
@@ -57,7 +56,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid size={{ xs: 2 }}>
+      <Grid size={2}>
         <Field
           name={`${docFieldName}.country`}
           fullWidth
@@ -69,7 +68,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={3}>
         <Field
           name={`${docFieldName}.number`}
           fullWidth
@@ -80,7 +79,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={3}>
         <GrievanceDocumentPhotoModalEditable
           photoSrc={photoSrc}
           setFieldValue={setFieldValue}
@@ -88,7 +87,7 @@ export function DocumentField({
         />
       </Grid>
       {!isEdited ? (
-        <Grid size={{ xs: 1 }}>
+        <Grid size={1}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

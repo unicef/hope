@@ -1,11 +1,8 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -13,17 +10,8 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
+import { Choice } from '@restgenerated/models/Choice';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface PeoplePaymentPlansFiltersProps {
   filter;
@@ -61,7 +49,10 @@ export const PeoplePaymentPlansFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   if (!statusChoicesData) {
     return null;
@@ -73,7 +64,7 @@ export const PeoplePaymentPlansFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -81,7 +72,7 @@ export const PeoplePaymentPlansFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -90,14 +81,14 @@ export const PeoplePaymentPlansFilters = ({
             value={filter.status}
             fullWidth
           >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+            {statusChoicesData?.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
@@ -109,7 +100,7 @@ export const PeoplePaymentPlansFilters = ({
             data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
@@ -126,7 +117,7 @@ export const PeoplePaymentPlansFilters = ({
             data-cy="filters-total-entitled-quantity-to"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -150,7 +141,7 @@ export const PeoplePaymentPlansFilters = ({
             value={filter.dispersionStartDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -164,7 +155,8 @@ export const PeoplePaymentPlansFilters = ({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid size={{ xs: 12 }}>
+        isFollowUp
+        <Grid size={12}>
           <Box ml={2}>
             <FormControlLabel
               control={

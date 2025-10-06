@@ -1,0 +1,785 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LookUpHouseholdTableCommunication renders correctly after data is fetched 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-FEMpB kLrWFX"
+  >
+    <div
+      class="sc-cSaEAk kJYmQU"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jZTQcj kABknU css-1gtchvp-MuiPaper-root"
+        style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+      >
+        <div
+          class="MuiTableContainer-root sc-dPKAra css-70zvr5-MuiTableContainer-root"
+        >
+          <div
+            class="sc-fuExOL bbOAQW MuiBox-root css-0"
+          >
+            <div
+              class="sc-fuExOL bbOAQW MuiBox-root css-1ruxp1v"
+            />
+          </div>
+          <table
+            class="MuiTable-root sc-dkBYrC sc-gjXmFk fHbEae glLVtK css-14k3lwa-MuiTable-root"
+          >
+            <thead
+              class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head css-1o8lslm-MuiTableRow-root"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="radio-id"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  />
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="household-id"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  >
+                    Household ID
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="household-full-name"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  >
+                    Head of Household
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="household-size"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  >
+                    Household Size
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="household-admin-level-2"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  >
+                    Administrative Level 2
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                  data-cy="household-last-registration-date"
+                  scope="col"
+                >
+                  <span
+                    class="sc-jHswkR gERsSf"
+                    data-cy="table-label"
+                  >
+                    Registration Date
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTo1ZGIzMTI2OS1mNzNhLTRmN2EtOWViNS1lNTQ1MTkzZTFlOGM="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTo1ZGIzMTI2OS1mNzNhLTRmN2EtOWViNS1lNTQ1MTkzZTFlOGM="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo1ZGIzMTI2OS1mNzNhLTRmN2EtOWViNS1lNTQ1MTkzZTFlOGM="
+                  >
+                    HH-0
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  3
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1736940739000"
+                  >
+                    15 Jan 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTozY2IxYWFmYi03NWZhLTQxYTItODQ3OS02Njc0NTkyZGQ0NmI="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTozY2IxYWFmYi03NWZhLTQxYTItODQ3OS02Njc0NTkyZGQ0NmI="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTozY2IxYWFmYi03NWZhLTQxYTItODQ3OS02Njc0NTkyZGQ0NmI="
+                  >
+                    HH-1
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  4
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1738732311000"
+                  >
+                    5 Feb 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTowN2FmNzUxNi0wN2QwLTQ3ZWEtOGYzZC05NjBiMDQ2ZWE1NDY="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTowN2FmNzUxNi0wN2QwLTQ3ZWEtOGYzZC05NjBiMDQ2ZWE1NDY="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowN2FmNzUxNi0wN2QwLTQ3ZWEtOGYzZC05NjBiMDQ2ZWE1NDY="
+                  >
+                    HH-2
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  5
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1736457069000"
+                  >
+                    9 Jan 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE="
+                  >
+                    HH-24-0000.0003
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  4
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1741039992346"
+                  >
+                    3 Mar 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI="
+                  >
+                    HH-24-0000.0004
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  4
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1741039992346"
+                  >
+                    3 Mar 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTo0MGYwMmU1ZC01YjgxLTRiZDUtYjI0NC1mYTE3ZmI5YTVkODU="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTo0MGYwMmU1ZC01YjgxLTRiZDUtYjI0NC1mYTE3ZmI5YTVkODU="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo0MGYwMmU1ZC01YjgxLTRiZDUtYjI0NC1mYTE3ZmI5YTVkODU="
+                  >
+                    HH-3
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  6
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1738035349000"
+                  >
+                    28 Jan 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover sc-gQJZgv hFNTXo css-1o8lslm-MuiTableRow-root"
+                data-cy="household-table-row"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-paddingCheckbox MuiTableCell-sizeMedium css-mfzv8e-MuiTableCell-root"
+                >
+                  <span
+                    class="MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-176o1f5-MuiButtonBase-root-MuiRadio-root"
+                    data-cy="input-radio-household"
+                  >
+                    <input
+                      aria-label="SG91c2Vob2xkTm9kZTo1ZjE4NmRiMS03ZjZhLTRlZjktOWQzMC1jYTAzYmRkMWI3YTM="
+                      class="PrivateSwitchBase-input css-j8yymo"
+                      name="radio-button-household"
+                      type="radio"
+                      value="SG91c2Vob2xkTm9kZTo1ZjE4NmRiMS03ZjZhLTRlZjktOWQzMC1jYTAzYmRkMWI3YTM="
+                    />
+                    <span
+                      class="css-1qiat4j"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1bz1rr0-MuiSvgIcon-root"
+                        data-testid="RadioButtonUncheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                        />
+                      </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-o8rdeq-MuiSvgIcon-root"
+                        data-testid="RadioButtonCheckedIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <a
+                    class="sc-hUAZgl cuZRrl"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo1ZjE4NmRiMS03ZjZhLTRlZjktOWQzMC1jYTAzYmRkMWI3YTM="
+                  >
+                    HH-4
+                  </a>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  3
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
+                >
+                  <time
+                    datetime="1737427784000"
+                  >
+                    21 Jan 2025
+                  </time>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-kXOizl dtXroT css-1o8lslm-MuiTableRow-root"
+                style="height: 350px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eiwqOE hVrGqY css-1dc80h3-MuiTableCell-root"
+                  colspan="6"
+                />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="MuiTablePagination-root css-7mt0f-MuiTablePagination-root"
+          data-cy="table-pagination"
+        >
+          <div
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-nphfye-MuiToolbar-root-MuiTablePagination-toolbar"
+          >
+            <div
+              class="MuiTablePagination-spacer css-1wtxofq-MuiTablePagination-spacer"
+            />
+            <p
+              class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
+              id=":r1:"
+            >
+              Rows per page:
+            </p>
+            <div
+              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-select MuiSelect-root MuiTablePagination-input css-oegngy-MuiInputBase-root-MuiTablePagination-select"
+            >
+              <div
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-labelledby=":r1: :r0:"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
+                id=":r0:"
+                role="combobox"
+                tabindex="0"
+              >
+                5
+              </div>
+              <input
+                aria-hidden="true"
+                aria-invalid="false"
+                class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
+                tabindex="-1"
+                value="5"
+              />
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
+                data-testid="ArrowDropDownIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M7 10l5 5 5-5z"
+                />
+              </svg>
+            </div>
+            <p
+              class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
+            >
+              0–0 of 0
+            </p>
+            <div
+              class="MuiTablePagination-actions"
+            >
+              <button
+                aria-label="Go to previous page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+                disabled=""
+                tabindex="-1"
+                title="Go to previous page"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                  data-testid="KeyboardArrowLeftIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Go to next page"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
+                disabled=""
+                tabindex="-1"
+                title="Go to next page"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                  data-testid="KeyboardArrowRightIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,49 @@
+{% extends "admin/change_form.html" %}{% load admin_modify admin_urls engine i18n static %}
+{# {% block branding %}xxx{% endblock %} #}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'import_file' %}">Import file</a>
+    </div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    {% if form %}
+        <div>
+            Load csv file.
+            Allowed formats are:
+        <ul>
+            <li>area_name(char); area_code(char); parent_area_code(char); area_level(int),</li>
+            <li>area_name(char); area_code(char); arent_area_code(char);  area_level(int); level_name(char)</li>
+        </ul>
+        <table>
+            <tr><td>area_name;area_code;parent_area_code;area_level</td></tr>
+            <tr><td>Bangladesh;BD;;0</td></tr>
+            <tr><td>Barisal;BD10;BD;1</td></tr>
+            <tr><td>Barguna;BD1004;BD10;2</td></tr>
+        </table>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>{{ form.as_table }}</table>
+            <input type="submit" value="Import">
+        </form>
+    {% else %}
+        <h1>{{ country }}</h1>
+        {{ infos }}
+        <table>
+            <th>area_code</th>
+            <th>area_level</th>
+            <th>area_name </tr>
+            <th>level_name</th>
+        {% for line in lines %}<tr>
+            <td>{{ line.area_code }}</td>
+            <td>{{ line.area_level }}</td>
+            <td>{{ line.area_name }}</td>
+            <td>{{ line.level_name }}</td>
+        </tr>{% endfor %}
+        </table>
+    {% endif %}
+{% endblock content %}

@@ -12,10 +12,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -28,7 +28,7 @@ const StyledTable = styled(Table)`
 export interface IdentitiesTableProps {
   values;
   isEdit;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   documentTypeDict;
   countriesDict;

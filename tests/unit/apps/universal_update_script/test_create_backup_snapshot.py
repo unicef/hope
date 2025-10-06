@@ -1,65 +1,67 @@
-import json
 from io import BytesIO
+import json
 from typing import Callable, Tuple
 
-from django.core.files.base import ContentFile
-
-import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from django.core.files.base import ContentFile
+from openpyxl import Workbook
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from openpyxl import Workbook
-
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Individual
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Individual
+from hope.apps.program.models import Program
+from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
     create_snapshot_content,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def germany() -> Country:
     return Country.objects.create(name="Germany", iso_code2="DE", iso_code3="DEU", iso_num="276")
 
 
-@pytest.fixture()
+@pytest.fixture
 def state(poland: Country) -> AreaType:
     return AreaType.objects.create(name="State", country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def district(poland: Country, state: AreaType) -> AreaType:
     return AreaType.objects.create(name="District", parent=state, country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin1(state: AreaType) -> Area:
     return Area.objects.create(name="Kabul", area_type=state, p_code="AF11")
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin2(district: AreaType) -> Area:
     return Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
 @pytest.fixture
@@ -131,7 +133,7 @@ def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program
         return '{"dummy": "snapshot"}'
 
     monkeypatch.setattr(
-        "hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
+        "hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
         dummy_create_snapshot_content,
     )
     create_and_save_snapshot_chunked(uu)
@@ -142,11 +144,12 @@ def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program
 
 def test_snapshot_json_too_many_unicef_ids(program: Program, individuals: Tuple[Individual]) -> None:
     log_message: Callable[[str], None] = lambda message_log: None
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception, match="Some unicef ids are not in the program"):
         create_snapshot_content(
-            log_message, str(program.id), ["IND-00-0000.0022", "IND-00-0000.0033", "IND-00-0000.0044"]
+            log_message,
+            str(program.id),
+            ["IND-00-0000.0022", "IND-00-0000.0033", "IND-00-0000.0044"],
         )
-    assert "Some unicef ids are not in the program" in str(exc_info.value)
 
 
 def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program: Program) -> None:
@@ -167,10 +170,9 @@ def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program
         return '{"dummy": "snapshot"}'
 
     monkeypatch.setattr(
-        "hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
+        "hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot.create_snapshot_content",
         dummy_create_snapshot_content,
     )
 
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception, match="The column 'unicef_id' was not found in the header row."):
         create_and_save_snapshot_chunked(uu)
-    assert "The column 'unicef_id' was not found in the header row." in str(exc_info.value)

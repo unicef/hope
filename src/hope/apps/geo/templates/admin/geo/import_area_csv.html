@@ -1,0 +1,60 @@
+{% extends "admin/change_form.html" %}
+{% load admin_modify admin_urls i18n static %}
+
+
+{% block content %}
+
+{% if form %}
+    <h2>Upload a csv file with headers in the format below:</h2>
+
+    <p>
+        <table>
+             <thead>
+                 <tr>
+                     <td><strong>Country</strong></td>
+                     <td><strong>Province</strong></td>
+                     <td><strong>District</strong></td>
+                     <td><strong>Commune</strong></td>
+                     <td><strong>Admin0</strong></td>
+                     <td><strong>Admin1</strong></td>
+                     <td><strong>Admin2</strong></td>
+                     <td><strong>Admin3</strong></td>
+                 </tr>
+             </thead>
+             <tbody>
+                 <tr>
+                     <td>Afghanistan</td>
+                     <td>Kandahar</td>
+                     <td>Dand</td>
+                     <td>Shorabak</td>
+                     <td>AF</td>
+                     <td>AF33</td>
+                     <td>AF3301</td>
+                     <td>AF330101</td>
+                 </tr>
+             </tbody>
+        </table>
+    </p>
+
+
+
+    <p>
+        <ul>
+            <li> Use <b>comma (,) </b> as separator (other chars like <b>; / |</b> would not work) </li>
+            <li> Ensure file does not have special characters (like <b>' , -</b>)</li>
+            <li> Up to 7 area levels </li>
+            <li> The names of Area types must appear in the descending order, starting by the country, ... E.g: Country -> Province -> District -> Commune
+            <li> The same apply to Admin level denomination. E.g: Admin0 -> Admin1 -> Admin2 -> Admin3
+            <li> In the above sample, <strong>Country</strong>&nbsp; correspond to <strong>Admin0</strong>, <strong>Province</strong> correspond to <strong>Admin1</strong>, <strong>District</strong> correspond to <strong>Admin2 </strong>... and so on.</li>
+        </ul>
+    </p>
+
+    <hr>
+    <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form }}
+        <div><input type="submit" value="Import"></div>
+    </form>
+{% endif %}
+
+{% endblock content %}

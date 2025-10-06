@@ -12,8 +12,8 @@ include *.py
 include uv.lock
 
 
-recursive-include src/hct_mis_api *
-recursive-include src/hct_mis_api *.html
-recursive-include src/hct_mis_api *.json
+recursive-include src/hope *
+recursive-include src/hope *.html
+recursive-include src/hope *.json
 
 recursive-exclude src/**/node_modules *.*

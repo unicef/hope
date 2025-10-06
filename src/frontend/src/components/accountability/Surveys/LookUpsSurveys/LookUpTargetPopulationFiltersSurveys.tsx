@@ -1,8 +1,8 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import {
   createHandleApplyFilterChange,
   paymentPlanStatusMapping,
@@ -56,8 +56,8 @@ function LookUpTargetPopulationFiltersSurveys({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
-    : Object.values(PaymentPlanStatus);
+    ? Object.values(PaymentPlanStatusEnum).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentPlanStatusEnum);
 
   return (
     <FiltersSection
@@ -65,7 +65,7 @@ function LookUpTargetPopulationFiltersSurveys({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}

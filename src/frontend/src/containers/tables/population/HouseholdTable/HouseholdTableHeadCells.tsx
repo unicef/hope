@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { HouseholdNode } from '@generated/graphql';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
-export const headCells: HeadCell<HouseholdNode>[] = [
+export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: '',

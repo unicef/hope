@@ -1,22 +1,19 @@
 from operator import itemgetter
 from typing import Dict, Tuple
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_datahub.validators import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.program.models import Program
+from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     VALID_JSON = [
         {
             "_notes": [],
@@ -496,6 +493,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=cls.business_area)
 
@@ -534,7 +532,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
         ]
         validator = KoboProjectImportDataInstanceValidator(self.program)
         result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", valid_attachments)
-        self.assertIsNone(result, None)
+        assert result is None
 
         # test for invalid value
         invalid_attachments = [
@@ -569,28 +567,31 @@ class TestKoboSaveValidatorsMethods(TestCase):
             }
         ]
         result = validator.image_validator("signature-17_10_32.png", "test_field", invalid_attachments)
-        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
-        self.assertEqual(result, expected)
+        expected = "Specified image signature-17_10_32.png for field test_field is not in attachments"
+        assert result == expected
 
         # test for empty value
         result = validator.image_validator("signature-17_10_32.png", "test_field", [])
-        expected = "Specified image signature-17_10_32.png for field " "test_field is not in attachments"
-        self.assertEqual(result, expected)
+        expected = "Specified image signature-17_10_32.png for field test_field is not in attachments"
+        assert result == expected
 
         # test invalid file extension
         result = validator.image_validator("signature-17_10_32.txt", "test_field", [])
-        expected = "Specified image signature-17_10_32.txt for field " "test_field is not a valid image file"
-        self.assertEqual(result, expected)
+        expected = "Specified image signature-17_10_32.txt for field test_field is not a valid image file"
+        assert result == expected
 
         # Kobo not always returns consent_sign_h_c in attachments, according to AB#168823 we should skip it
         result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
-        self.assertIsNone(result)
+        assert result is None
 
         # skip image validation
         result = validator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments, skip_validate_pictures=True
+            "signature-17_10_32.png",
+            "consent_sign_h_c",
+            invalid_attachments,
+            skip_validate_pictures=True,
         )
-        self.assertIsNone(result)
+        assert result is None
 
     def test_geopoint_validator(self) -> None:
         valid_geolocations = (
@@ -607,25 +608,29 @@ class TestKoboSaveValidatorsMethods(TestCase):
         )
         validator = KoboProjectImportDataInstanceValidator(self.program)
         for valid_option in valid_geolocations:
-            self.assertIsNone(
+            assert (
                 validator.geopoint_validator(
                     valid_option,
                     "hh_geopoint_h_c",
                 )
+                is None
             )
 
         for invalid_option in invalid_geolocations:
-            self.assertEqual(
+            assert (
                 validator.geopoint_validator(
                     invalid_option,
                     "hh_geopoint_h_c",
-                ),
-                f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
+                )
+                == f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c"
             )
 
     def test_date_validator(self) -> None:
         test_data: Tuple = (
-            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {
+                "args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"),
+                "expected": None,
+            },
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
@@ -647,7 +652,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
         validator = KoboProjectImportDataInstanceValidator(self.program)
         for data in test_data:
             result = validator.date_validator(*data["args"])
-            self.assertEqual(result, data["expected"])
+            assert result == data["expected"]
 
     def test_get_field_type_error(self) -> None:
         attachments = self.VALID_JSON[0]["_attachments"]
@@ -659,7 +664,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("size_h_c", "four", attachments),
                 "expected": {
                     "header": "size_h_c",
-                    "message": "Invalid value four of type str for field " "size_h_c of type int",
+                    "message": "Invalid value four of type str for field size_h_c of type int",
                 },
             },
             # STRING
@@ -678,21 +683,24 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("returnee_h_c", "123", attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type str for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type str for field returnee_h_c of type bool",
                 },
             },
             {
                 "args": ("returnee_h_c", 123, attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type int for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type int for field returnee_h_c of type bool",
                 },
             },
             # SELECT ONE
             {"args": ("gender_i_c", "MALE", attachments), "expected": None},
             {
                 "args": ("gender_i_c", "YES", attachments),
-                "expected": {"header": "gender_i_c", "message": "Invalid choice YES for field gender_i_c"},
+                "expected": {
+                    "header": "gender_i_c",
+                    "message": "Invalid choice YES for field gender_i_c",
+                },
             },
             # DATE
             {
@@ -713,7 +721,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
-            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
+            {
+                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
+                "expected": None,
+            },
             {
                 "args": (
                     "hh_geopoint_h_c",
@@ -722,48 +733,60 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
                 "expected": {
                     "header": "hh_geopoint_h_c",
-                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
+                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 for field hh_geopoint_h_c",
                 },
             },
         )
         validator = KoboProjectImportDataInstanceValidator(self.program)
         for data in test_data:
             result = validator._get_field_type_error(*data["args"])
-            self.assertEqual(result, data["expected"])
+            assert result == data["expected"]
 
     def test_validate_everything(self) -> None:
         validator = KoboProjectImportDataInstanceValidator(self.program)
         business_area = BusinessArea.objects.first()
 
         result = validator.validate_everything(self.VALID_JSON, business_area, True)
-        self.assertEqual(result, [])
+        assert result == []
 
         result = validator.validate_everything(self.VALID_JSON, business_area, False)
-        self.assertEqual(result, [])
+        assert result == []
 
         result = validator.validate_everything(self.INVALID_JSON, business_area)
         result.sort(key=itemgetter("header"))
         expected = [
-            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
-            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
-                "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
+            },
+            {
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is required, "
+                "when any document data are provided",
             },
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
-            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
+            },
             {
                 "header": "role_i_c",
                 "message": "The same individual cannot be a primary and alternate collector for the same household.",
             },
         ]
-        self.assertEqual(result, expected)
+        assert result == expected

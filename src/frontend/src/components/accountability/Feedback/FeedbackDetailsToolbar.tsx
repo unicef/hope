@@ -1,19 +1,19 @@
-import { Box } from '@mui/material';
-import EditIcon from '@mui/icons-material/EditRounded';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { FeedbackQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@core/ButtonTooltip';
-import { useProgramContext } from '../../../programContext';
-import { AdminButton } from '@core/AdminButton';
+import EditIcon from '@mui/icons-material/EditRounded';
+import { Box } from '@mui/material';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useProgramContext } from '../../../programContext';
 
 interface FeedbackDetailsToolbarProps {
-  feedback: FeedbackQuery['feedback'];
+  feedback: FeedbackDetail;
   canEdit: boolean;
 }
 
@@ -34,9 +34,9 @@ function FeedbackDetailsToolbar({
     },
   ];
 
-  const hasLinkedGrievance = Boolean(feedback.linkedGrievance?.id);
+  const hasLinkedGrievance = Boolean(feedback.linkedGrievanceId);
   const isFeedbackWithHouseholdOnly = Boolean(
-    feedback.householdLookup?.id && !feedback.individualLookup?.id,
+    feedback.householdId && !feedback.individualId,
   );
 
   return (
@@ -68,8 +68,8 @@ function FeedbackDetailsToolbar({
               onClick={() =>
                 navigate(`/${baseUrl}/grievance/new-ticket`, {
                   state: {
-                    selectedHousehold: feedback?.householdLookup,
-                    selectedIndividual: feedback?.individualLookup,
+                    selectedHousehold: feedback?.householdId,
+                    selectedIndividual: feedback?.individualId,
                     linkedFeedbackId: id,
                     isFeedbackWithHouseholdOnly,
                   },

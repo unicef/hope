@@ -1,1 +1,0 @@
-export { HouseholdDetails } from './HouseholdDetails';

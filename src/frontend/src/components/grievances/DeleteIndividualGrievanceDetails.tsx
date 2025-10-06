@@ -1,17 +1,11 @@
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  HouseholdNode,
-  IndividualNode,
-  IndividualRoleInHouseholdRole,
-  useAllAddIndividualFieldsQuery,
-  useApproveDeleteIndividualDataChangeMutation,
-} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -20,22 +14,27 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { Individual } from '@restgenerated/models/Individual';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 export type RoleReassignData = {
-  role: IndividualRoleInHouseholdRole | string;
-  individual: IndividualNode;
-  household: HouseholdNode;
+  role: string;
+  individual: Individual;
+  household: HouseholdDetail;
 };
 
 export function DeleteIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { businessAreaSlug } = useBaseUrl();
   const confirm = useConfirmation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -45,14 +44,12 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
   const primaryCollectorRolesCount =
-    ticket?.individual?.householdsAndRoles.filter(
-      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-    ).length + (isHeadOfHousehold ? 1 : 0);
+    ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
+      .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+    ticket.ticketDetails.roleReassignData,
   )?.filter(
-    (el: RoleReassignData) =>
-      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
   ).length;
 
   const approveEnabled = (): boolean => {
@@ -68,12 +65,50 @@ export function DeleteIndividualGrievanceDetails({
     return false;
   };
 
-  const { data, loading } = useAllAddIndividualFieldsQuery();
-  const [mutate] = useApproveDeleteIndividualDataChangeMutation();
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+
+  const { data: addIndividualFieldsData, isLoading } = useQuery({
+    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
+
+  const mutation = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        formData: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
+      });
+    },
+  });
+  if (isLoading) return <LoadingComponent />;
+  if (!addIndividualFieldsData) return null;
   const documents = ticket.individual?.documents;
-  const fieldsDict = data.allAddIndividualsFieldsAttributes?.reduce(
+  //@ts-ignore
+  const fieldsDict = addIndividualFieldsData?.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue?.name]: currentValue,
@@ -84,7 +119,7 @@ export function DeleteIndividualGrievanceDetails({
   const excludedFields = [
     'household',
     'documents',
-    'householdsAndRoles',
+    'rolesInHouseholds',
     'identities',
     'headingHousehold',
     'flexFields',
@@ -95,6 +130,7 @@ export function DeleteIndividualGrievanceDetails({
     'typeName',
     'commsDisability',
   ];
+
   const labels =
     Object.entries(ticket.individual || {})
       .filter(([key]) => {
@@ -128,25 +164,25 @@ export function DeleteIndividualGrievanceDetails({
           }
         }
         if (fieldAttribute?.type === 'DATE') {
-          textValue = <UniversalMoment>{textValue}</UniversalMoment>;
+          textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
-          <Grid key={key} size={{ xs: 6 }}>
+          <Grid key={key} size={6}>
             <LabelizedField
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
-              value={textValue}
+              value={<>{textValue}</>}
             />
           </Grid>
         );
       }) || [];
 
   const documentLabels =
-    documents?.edges?.map((edge) => {
-      const item = edge.node;
+    documents?.map((doc) => {
+      const item = doc;
       return (
-        <Grid key={item.country + item.type.label} size={{ xs: 6 }}>
+        <Grid key={item.country + item.type.label} size={6}>
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}
@@ -159,7 +195,7 @@ export function DeleteIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
-  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+  if (!ticket.ticketDetails.approveStatus) {
     dialogText = t(
       `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
@@ -180,39 +216,28 @@ export function DeleteIndividualGrievanceDetails({
                   content: dialogText,
                 }).then(async () => {
                   try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus:
-                          !ticket.deleteIndividualTicketDetails?.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
+                    await mutation.mutateAsync({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !ticket.ticketDetails?.approveStatus,
                     });
-                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  } catch (error) {
+                    showApiErrorMessages(error, showMessage);
                   }
                 })
               }
               variant={
-                ticket.deleteIndividualTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
+                ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
               color="primary"
               disabled={!approveEnabled}
             >
-              {ticket.deleteIndividualTicketDetails?.approveStatus
+              {ticket.ticketDetails?.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>

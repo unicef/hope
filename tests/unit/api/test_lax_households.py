@@ -1,17 +1,16 @@
 from django.core.management import call_command
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import PendingIndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
+from hope.api.models import Grant
+from hope.apps.household.models import PendingHousehold
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
-
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.household.models import PendingHousehold
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class CreateLaxHouseholdsTests(HOPEApiTestCase):
@@ -85,20 +84,20 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [household_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
 
         household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
-        self.assertEqual(household.country.iso_code2, "AF")
-        self.assertEqual(household.country_origin.iso_code2, "AF")
-        self.assertEqual(household.size, 3)
-        self.assertEqual(sorted(household.consent_sharing), sorted(["UNICEF", "PRIVATE_PARTNER"]))
-        self.assertEqual(household.village, "Test Village")
-        self.assertEqual(household.head_of_household, self.head_of_household)
-        self.assertEqual(household.primary_collector, self.primary_collector)
-        self.assertEqual(household.alternate_collector, self.alternate_collector)
+        assert household.country.iso_code2 == "AF"
+        assert household.country_origin.iso_code2 == "AF"
+        assert household.size == 3
+        assert sorted(household.consent_sharing) == sorted(["UNICEF", "PRIVATE_PARTNER"])
+        assert household.village == "Test Village"
+        assert household.head_of_household == self.head_of_household
+        assert household.primary_collector == self.primary_collector
+        assert household.alternate_collector == self.alternate_collector
 
     def test_create_multiple_households_success(self) -> None:
         second_head_of_household = PendingIndividualFactory(
@@ -132,11 +131,10 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         ]
 
         response = self.client.post(self.url, households_data, format="json")
-        print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 2)
-        self.assertEqual(response.data["accepted"], 2)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 2
+        assert response.data["errors"] == 0
 
     def test_create_household_with_validation_errors(self) -> None:
         household_data = {
@@ -149,10 +147,10 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [household_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 0)
-        self.assertEqual(response.data["errors"], 1)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 0
+        assert response.data["errors"] == 1
 
     def test_create_households_mixed_success_and_errors(self) -> None:
         households_data = [
@@ -177,10 +175,10 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, households_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 2)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 1)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 1
 
     def test_household_without_alternate_collector(self) -> None:
         household_data = {
@@ -196,13 +194,13 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [household_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
 
         household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
-        self.assertEqual(household.alternate_collector, None)
+        assert household.alternate_collector is None
 
     def test_household_with_admin_areas(self) -> None:
         household_data = {
@@ -223,13 +221,13 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [household_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
 
         household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
-        self.assertEqual(household.admin1, self.admin1)
-        self.assertEqual(household.admin2, self.admin2)
-        self.assertEqual(household.admin3, self.admin3)
-        self.assertEqual(household.admin4, self.admin4)
+        assert household.admin1 == self.admin1
+        assert household.admin2 == self.admin2
+        assert household.admin3 == self.admin3
+        assert household.admin4 == self.admin4

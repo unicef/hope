@@ -7,6 +7,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 import { ReactElement } from 'react';
+import { snakeCase } from 'lodash';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -25,6 +26,7 @@ export const individualDataRow = (
   countriesDict,
   isEdit,
   handleSelectBioData,
+  individual,
 ): ReactElement => {
   const fieldName = camelCase(row[0]);
   const isItemSelected = isSelected(row[0]);
@@ -34,7 +36,7 @@ export const individualDataRow = (
     previousValue: string;
     approveStatus: boolean;
   };
-  const field = fieldsDict[row[0]];
+  const field = fieldsDict[snakeCase(row[0])];
 
   const isCountryFieldName =
     fieldName === 'country' ||
@@ -46,16 +48,10 @@ export const individualDataRow = (
     : valueDetails.previousValue;
 
   const individualValue = field?.isFlexField
-    ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
+    ? individual?.flexFields[row[0]]
     : isCountryFieldName
-      ? countriesDict[
-          ticket.individualDataUpdateTicketDetails?.individual[
-            camelCase(fieldName)
-          ]
-        ]
-      : ticket.individualDataUpdateTicketDetails?.individual[
-          camelCase(fieldName)
-        ];
+      ? countriesDict[individual?.[camelCase(fieldName)]]
+      : individual?.[camelCase(fieldName)];
 
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
@@ -92,7 +88,7 @@ export const individualDataRow = (
         <Capitalize>
           {row[0] === 'sex'
             ? 'gender'
-            : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+            : snakeCase(row[0]).replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align="left" data-cy="current-value">

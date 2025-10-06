@@ -1,22 +1,21 @@
 from pathlib import Path
 
+from constance.test import override_config
 from django.conf import settings
 from django.urls import reverse
-
-import responses
-from constance.test import override_config
 from django_webtest import WebTest
+import responses
+
 from extras.test_utils.factories.account import (
     PartnerFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    UserRoleFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-
-from hct_mis_api.apps.account.admin.mixins import get_valid_kobo_username
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
-from hct_mis_api.apps.core.models import BusinessArea
+from hope.admin.account_mixins import get_valid_kobo_username
+from hope.apps.account.models import IncompatibleRoles, Role, User
+from hope.apps.core.models import BusinessArea
 
 
 class UserImportCSVTest(WebTest):
@@ -35,7 +34,10 @@ class UserImportCSVTest(WebTest):
     def test_import_csv(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -48,11 +50,19 @@ class UserImportCSVTest(WebTest):
 
     @responses.activate
     def test_import_csv_with_kobo(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(
+            responses.POST,
+            f"{settings.KOBO_URL}/authorized_application/users/",
+            json={},
+            status=201,
+        )
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -67,10 +77,13 @@ class UserImportCSVTest(WebTest):
     @responses.activate
     def test_import_csv_detect_incompatible_roles(self) -> None:
         u: User = UserFactory(email="test@example.com", partner=self.partner)
-        UserRoleFactory(user=u, role=self.role_2, business_area=self.business_area)
+        RoleAssignmentFactory(user=u, role=self.role_2, business_area=self.business_area)
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -78,7 +91,7 @@ class UserImportCSVTest(WebTest):
         res = res.form.submit()
         assert res.status_code == 200
 
-        assert not u.user_roles.filter(role=self.role, business_area=self.business_area).exists()
+        assert not u.role_assignments.filter(role=self.role, business_area=self.business_area).exists()
 
     @responses.activate
     def test_import_csv_do_not_change_partner(self) -> None:
@@ -87,7 +100,10 @@ class UserImportCSVTest(WebTest):
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = partner2.id
         res.form["role"] = self.role.id
@@ -100,7 +116,10 @@ class UserImportCSVTest(WebTest):
     def test_import_csv_with_username(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users2.csv", (Path(__file__).parent / "users2.csv").read_bytes())
+        res.form["file"] = (
+            "users2.csv",
+            (Path(__file__).parent / "users2.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -128,7 +147,12 @@ class UserKoboActionsTest(WebTest):
     @responses.activate
     @override_config(KOBO_ADMIN_CREDENTIALS="kobo_admin:pwd")
     def test_create_kobo_user(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(
+            responses.POST,
+            f"{settings.KOBO_URL}/authorized_application/users/",
+            json={},
+            status=201,
+        )
         responses.add(
             responses.POST,
             f"{settings.KOBO_URL}/admin/login/",
@@ -145,13 +169,15 @@ class UserKoboActionsTest(WebTest):
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=1",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>'
+            f'{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
         responses.add(
             responses.GET,
             f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=2",
-            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
+            body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}'
+            f'</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
 

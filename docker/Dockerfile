@@ -32,7 +32,7 @@ RUN apt-get update \
 
 
 ENV XDG_RUNTIME_DIR=/run/user/"${UID}"
-ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
+ENV DJANGO_SETTINGS_MODULE=hope.config.settings
 WORKDIR $APP_PATH
 
 # Dist builder image
@@ -66,17 +66,17 @@ RUN --mount=type=cache,target=/root/.uv-cache \
     uv sync --cache-dir=/root/.uv-cache \
         --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen --no-install-package hope
+        --no-editable --frozen --group dev --no-install-package hope
 COPY ./tests ./tests
 COPY ./src/data $APP_PATH/data
 COPY ./manage.py ./manage.py
-COPY .flake8 pyproject.toml uv.lock MANIFEST.in ./
+COPY pyproject.toml uv.lock ruff.toml mypy.ini tox.ini MANIFEST.in ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM node:20.19.5-bookworm-slim AS frontend-builder
+FROM node:22-bookworm-slim AS frontend-builder
 
 WORKDIR /fe-build
 COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./
@@ -89,10 +89,10 @@ RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 FROM uv as dist-builder
 WORKDIR $APP_PATH
 COPY ./src/ ./src/
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hope/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-dev --no-editable --frozen
+        --no-editable --frozen
 
 
 ## Dist (backend only) image

@@ -1,15 +1,16 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanNode,
-  useAllPaymentPlansForTableQuery,
-} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeoplePaymentPlansTableProps {
   filter;
@@ -22,28 +23,88 @@ export const PeoplePaymentPlansTable = ({
 }: PeoplePaymentPlansTableProps): ReactElement => {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
-  const initialVariables: AllPaymentPlansForTableQueryVariables = {
-    businessArea,
-    search: filter.search,
-    status: filter.status,
-    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
-    totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
-    dispersionStartDate: filter.dispersionStartDate || null,
-    dispersionEndDate: filter.dispersionEndDate || null,
-    isFollowUp: filter.isFollowUp ? true : null,
-    program: programId,
-    isPaymentPlan: true,
-  };
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      search: filter.search,
+      status: filter.status,
+      totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
+      totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
+      dispersionStartDate: filter.dispersionStartDate || null,
+      dispersionEndDate: filter.dispersionEndDate || null,
+      isFollowUp: filter.isFollowUp ? true : null,
+      isPaymentPlan: true,
+    }),
+    [
+      businessArea,
+      programId,
+      filter.search,
+      filter.status,
+      filter.totalEntitledQuantityFrom,
+      filter.totalEntitledQuantityTo,
+      filter.dispersionStartDate,
+      filter.dispersionEndDate,
+      filter.isFollowUp,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: paymentPlansData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentPlanListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
+  const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
 
   return (
-    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+    <UniversalRestTable
       defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
       headCells={headCells}
-      query={useAllPaymentPlansForTableQuery}
-      queriedObjectName="allPaymentPlans"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      data={paymentPlansData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      itemsCount={dataPaymentPlansCount?.count}
+      renderRow={(row: PaymentPlanList) => (
         <PeoplePaymentPlanTableRow
           key={row.id}
           plan={row}

@@ -14,8 +14,6 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DividerLine } from '@core/DividerLine';
-import { renderUserName } from '@utils/utils';
-import { UserNode } from '@generated/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -41,13 +39,13 @@ const MessageIconContainer = styled(Box)`
 
 export interface MessageDialogProps {
   comment: string;
-  author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
+  author?: string;
 }
 export function MessageDialog({
   comment,
-  author,
   date,
+  author,
 }: MessageDialogProps): ReactElement {
   const { t } = useTranslation();
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
@@ -72,7 +70,7 @@ export function MessageDialog({
           <DialogContainer>
             <Box display="flex" flexDirection="column">
               <Box mt={2} display="flex">
-                {renderUserName(author)}{' '}
+                {author}{' '}
                 <GreyText>
                   <Box ml={1}>
                     on <UniversalMoment>{date}</UniversalMoment>

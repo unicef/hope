@@ -1,8 +1,13 @@
 import base64
 from io import BytesIO
-from typing import Any
 
+from django.test import testcases
+from parameterized import parameterized
+from PIL import Image
 import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
@@ -10,29 +15,26 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from parameterized import parameterized
-from PIL import Image
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
-from hct_mis_api.api.endpoints.rdi.push_people import PeopleUploadMixin
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
+from hope.api.models import Grant
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
+    DISABLED,
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
     NOT_COLLECTED,
+    NOT_DISABLED,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class TestPushPeople(HOPEApiTestCase):
@@ -42,7 +44,8 @@ class TestPushPeople(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
@@ -52,7 +55,9 @@ class TestPushPeople(HOPEApiTestCase):
             type=DataCollectingType.Type.SOCIAL.value,
         )
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
         )
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -87,28 +92,28 @@ class TestPushPeople(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
-        self.assertEqual(rdi.program, self.program)
+        assert rdi.program == self.program
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(hh)
-        self.assertIsNotNone(ind)
-        self.assertEqual(hh.head_of_household, ind)
-        self.assertEqual(hh.primary_collector, ind)
-        self.assertEqual(hh.village, "village1")
+        assert hh is not None
+        assert ind is not None
+        assert hh.head_of_household == ind
+        assert hh.primary_collector == ind
+        assert hh.village == "village1"
 
-        self.assertEqual(ind.full_name, "John Doe")
-        self.assertEqual(ind.sex, NOT_COLLECTED)
-        self.assertEqual(ind.relationship, HEAD)
+        assert ind.full_name == "John Doe"
+        assert ind.sex == NOT_COLLECTED
+        assert ind.relationship == HEAD
 
-        self.assertEqual(response_json["id"], str(self.rdi.id))
-        self.assertEqual(len(response_json["people"]), 1)
+        assert response_json["id"] == str(self.rdi.id)
+        assert len(response_json["people"]) == 1
 
     def test_upload_single_person_with_documents(self) -> None:
         data = [
@@ -133,20 +138,20 @@ class TestPushPeople(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(ind)
-        self.assertEqual(ind.full_name, "John Doe")
-        self.assertEqual(ind.sex, MALE)
+        assert ind is not None
+        assert ind.full_name == "John Doe"
+        assert ind.sex == MALE
 
         document = PendingDocument.objects.filter(individual=ind).first()
-        self.assertIsNotNone(document)
-        self.assertEqual(document.document_number, "10")
+        assert document is not None
+        assert document.document_number == "10"
 
     def test_upload_multiple_people_with_documents(self) -> None:
         data = [
@@ -181,35 +186,35 @@ class TestPushPeople(HOPEApiTestCase):
             },
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
 
-        self.assertEqual(len(response_json["people"]), 2)
+        assert len(response_json["people"]) == 2
 
         households = PendingHousehold.objects.filter(registration_data_import=rdi)
-        self.assertEqual(len(households), 2)
+        assert len(households) == 2
 
         individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
-        self.assertEqual(len(individuals), 2)
+        assert len(individuals) == 2
 
         john_doe = PendingIndividual.objects.filter(full_name="John Doe").first()
 
-        self.assertIsNotNone(john_doe)
-        self.assertEqual(john_doe.full_name, "John Doe")
-        self.assertEqual(john_doe.sex, MALE)
+        assert john_doe is not None
+        assert john_doe.full_name == "John Doe"
+        assert john_doe.sex == MALE
 
         mary_doe = PendingIndividual.objects.filter(full_name="Mary Doe").first()
 
-        self.assertIsNotNone(mary_doe)
-        self.assertEqual(mary_doe.full_name, "Mary Doe")
-        self.assertEqual(mary_doe.sex, FEMALE)
+        assert mary_doe is not None
+        assert mary_doe.full_name == "Mary Doe"
+        assert mary_doe.sex == FEMALE
 
         document = PendingDocument.objects.filter(individual=john_doe).first()
-        self.assertIsNotNone(document)
-        self.assertEqual(document.document_number, "10")
+        assert document is not None
+        assert document.document_number == "10"
 
     def test_upload_with_errors(self) -> None:
         data = [
@@ -236,36 +241,41 @@ class TestPushPeople(HOPEApiTestCase):
             },
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
-        self.assertEqual(
-            response.json(),
-            [
-                {
-                    "birth_date": ["This field is required."],
-                    "documents": [
-                        {
-                            "document_number": ["This field is required."],
-                            "type": ["This field is required."],
-                        }
-                    ],
-                    "type": ["This field is required."],
-                },
-                {"birth_date": ["This field is required."], "type": ["This field is required."]},
-            ],
-        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+        assert response.json() == [
+            {
+                "birth_date": ["This field is required."],
+                "documents": [
+                    {
+                        "document_number": ["This field is required."],
+                        "type": ["This field is required."],
+                    }
+                ],
+                "type": ["This field is required."],
+            },
+            {
+                "birth_date": ["This field is required."],
+                "type": ["This field is required."],
+            },
+        ]
 
     @parameterized.expand(
         [
             ("invalid_phone_no", "phone_no", "invalid", False),
             ("invalid_phone_no_alternative", "phone_no", "invalid", False),
             ("valid_phone_no", "phone_no_alternative", "+48 632 215 789", True),
-            ("valid_phone_no_alternative", "phone_no_alternative", "+48 632 215 789", True),
+            (
+                "valid_phone_no_alternative",
+                "phone_no_alternative",
+                "+48 632 215 789",
+                True,
+            ),
             ("phone_no_alternative_as_null", "phone_no_alternative", None, False),
             ("phone_no_as_null", "phone_no", None, False),
         ]
     )
     def test_upload_single_person_with_phone_number(
-        self, _: Any, field_name: str, phone_number: str, expected_value: bool
+        self, helper: str, field_name: str, phone_number: str, expected_value: bool
     ) -> None:
         data = [
             {
@@ -281,15 +291,15 @@ class TestPushPeople(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertIsNotNone(ind)
-        self.assertEqual(ind.full_name, "John Doe")
-        self.assertEqual(getattr(ind, f"{field_name}_valid"), expected_value)
+        assert ind is not None
+        assert ind.full_name == "John Doe"
+        assert getattr(ind, f"{field_name}_valid") == expected_value
 
     @parameterized.expand(
         [
@@ -298,7 +308,7 @@ class TestPushPeople(HOPEApiTestCase):
             ("null-village", None, ""),
         ]
     )
-    def test_push_single_person_with_village(self, _: Any, village: str, expected_value: str) -> None:
+    def test_push_single_person_with_village(self, helper: str, village: str, expected_value: str) -> None:
         data = [
             {
                 "residence_status": "IDP",
@@ -312,13 +322,13 @@ class TestPushPeople(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertEqual(ind.household.village, expected_value)
+        assert ind.household.village == expected_value
 
     def test_push_single_person_with_admin_areas(self) -> None:
         data = [
@@ -338,16 +348,16 @@ class TestPushPeople(HOPEApiTestCase):
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
 
         rdi = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
-        self.assertIsNotNone(rdi)
+        assert rdi is not None
         ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
-        self.assertEqual(ind.household.admin1.p_code, "AF01")
-        self.assertEqual(ind.household.admin2.p_code, "AF0101")
-        self.assertEqual(ind.household.admin3, None)
-        self.assertEqual(ind.household.admin4, None)
+        assert ind.household.admin1.p_code == "AF01"
+        assert ind.household.admin2.p_code == "AF0101"
+        assert ind.household.admin3 is None
+        assert ind.household.admin4 is None
 
 
 class TestPeopleUploadMixin:
@@ -390,3 +400,25 @@ class TestPeopleUploadMixin:
         photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
         assert photo_saved.startswith(prefix) is False
         assert photo_saved == photo_data
+
+
+class TestPeopleSerializer(testcases.TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.common_data = {
+            "type": "",
+            "birth_date": "2000-01-01",
+            "full_name": "John Doe",
+            "sex": "MALE",
+            "country_origin": "",
+        }
+
+    def test_people_serializer_empty_disability(self):
+        serializer = PushPeopleSerializer(data={**self.common_data, "disability": ""})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == NOT_DISABLED
+
+    def test_people_serializer_disability(self):
+        serializer = PushPeopleSerializer(data={**self.common_data, "disability": "disabled"})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == DISABLED
