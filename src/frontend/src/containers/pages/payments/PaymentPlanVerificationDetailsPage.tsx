@@ -23,7 +23,8 @@ import {
   getFilterFromQueryParams,
   isPermissionDeniedError,
 } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -73,13 +74,23 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const {
     data: paymentPlan,
     isLoading,
     error,
   } = useQuery<PaymentVerificationPlanDetails>({
-    queryKey: ['PaymentVerificationPlanDetails', businessArea, paymentPlanId, programId],
+    queryKey: [
+      'PaymentVerificationPlanDetails',
+      businessArea,
+      paymentPlanId,
+      programId,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
         businessAreaSlug: businessArea,
@@ -236,10 +247,15 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
+            setAppliedFilter={(f) => {
+              setAppliedFilter(f);
+              setShouldScroll(true);
+            }}
             verifications={paymentPlan.paymentVerificationPlans}
           />
-          <TableWrapper>{renderVerificationsTable()}</TableWrapper>
+          <div ref={tableRef}>
+            <TableWrapper>{renderVerificationsTable()}</TableWrapper>
+          </div>
         </>
       ) : null}
       {canSeeActivationMessage() ? (

@@ -1,6 +1,6 @@
-import { IconButton } from '@mui/material';
+import { IconButton, Box } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -16,6 +16,7 @@ import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/Tar
 import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useProgramContext } from 'src/programContext';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 const initialFilter = {
   name: '',
@@ -37,6 +38,11 @@ const TargetPopulationsPage = (): ReactElement => {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
   const [isInfoOpen, setToggleInfo] = useState(false);
 
@@ -73,15 +79,20 @@ const TargetPopulationsPage = (): ReactElement => {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(newFilter) => {
+          setAppliedFilter(newFilter);
+          setShouldScroll(true);
+        }}
       />
-      <Table
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.TARGETING_VIEW_DETAILS,
-          permissions,
-        )}
-      />
+      <Box ref={tableRef}>
+        <Table
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.TARGETING_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </Box>
     </>
   );
 };

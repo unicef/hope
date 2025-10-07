@@ -52,7 +52,7 @@ const EditProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: treeData, isLoading: treeLoading } =
+  const { data: treeData } =
     useQuery<PaginatedAreaTreeList>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
@@ -138,13 +138,12 @@ const EditProgramPage = (): ReactElement => {
 
   if (
     loadingProgram ||
-    treeLoading ||
     userPartnerChoicesLoading ||
     choicesLoading
   )
     return <LoadingComponent />;
 
-  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
+  if (!program || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -167,6 +166,8 @@ const EditProgramPage = (): ReactElement => {
     registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
+    reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications,
   } = program;
 
   const programHasRdi = registrationImportsTotalCount > 0;
@@ -216,6 +217,7 @@ const EditProgramPage = (): ReactElement => {
         'partners',
         'partnerAccess',
         'pduFields',
+        'isActive',
       ]);
 
       // Build the base programData object
@@ -247,6 +249,8 @@ const EditProgramPage = (): ReactElement => {
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
+        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await updateProgramDetails(programData);
@@ -282,6 +286,7 @@ const EditProgramPage = (): ReactElement => {
   };
 
   const initialValuesProgramDetails = {
+    isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
     programmeCode: programmeCode,
@@ -297,6 +302,8 @@ const EditProgramPage = (): ReactElement => {
     cashPlus: cashPlus,
     frequencyOfPayments: frequencyOfPayments,
     pduFields: pduFields,
+    reconciliationWindowInDays: reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
@@ -335,6 +342,8 @@ const EditProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['partnerAccess'],
   ];

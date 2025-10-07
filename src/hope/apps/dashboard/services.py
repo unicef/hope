@@ -1,20 +1,103 @@
 import calendar
 from collections import defaultdict
 import json
-from typing import Any, Protocol, TypedDict, cast
+import logging
+from pathlib import Path
+from typing import (
+    Any,
+    Protocol,
+    TypedDict,
+    cast,
+)
 from uuid import UUID
 
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
+import sentry_sdk
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.household.models import Household
 from hope.apps.payment.models import Payment, PaymentPlan
 
+logger = logging.getLogger(__name__)
+
+
 CACHE_TIMEOUT = 60 * 60 * 24
+FERTILITY_DATA_CACHE_KEY = "fertility_data"
+
+
+def _load_fertility_data() -> dict[str, dict[str, float]]:
+    """Load and cache fertility data from the JSON file.
+
+    Data is transformed from a list to a nested dictionary with the format:
+    `{year: {business_area_name: rate}}`.
+    """
+    cached_data = cache.get(FERTILITY_DATA_CACHE_KEY)
+    if cached_data is not None:
+        return cached_data
+
+    iso3_to_ba_name_map = {
+        country.iso_code3: ba.name
+        for ba in BusinessArea.objects.prefetch_related("countries")
+        for country in ba.countries.all()
+        if country.iso_code3
+    }
+
+    file_path = Path(__file__).parent / "rates" / "fertility_rates.json"
+    transformed_data: dict[str, dict[str, float]] = defaultdict(dict)
+
+    try:
+        with open(file_path) as f:
+            data_from_file = json.load(f)
+
+        for country_entry in data_from_file:
+            iso_code = country_entry.get("Country Code")
+            business_area_name = iso3_to_ba_name_map.get(iso_code)
+
+            if not business_area_name:
+                logger.warning(f"Could not map country code '{iso_code}' to a Business Area.")
+                continue
+
+            for key, value in country_entry.items():
+                if key.isdigit():
+                    year_str = key
+                    rate = float(value)
+                    transformed_data[year_str][business_area_name] = rate
+
+    except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
+        logger.error(f"Could not load or process fertility data file: {e}")
+        sentry_sdk.capture_exception(e)
+        raise
+
+    final_data = dict(transformed_data)
+    cache.set(FERTILITY_DATA_CACHE_KEY, final_data, CACHE_TIMEOUT)
+    return final_data
+
+
+def get_fertility_rate(country: str, year: int) -> float:
+    """Get the fertility rate for a given country and year.
+
+    Falls back to the most recent year's data if the requested year is not found.
+    """
+    data = _load_fertility_data()
+    if not data:
+        return 0.0
+
+    if str(year) in data:
+        return data[str(year)].get(country, 0.0)
+
+    # Fallback to the most recent available year
+    available_years = sorted(data.keys(), reverse=True)
+    if available_years:
+        latest_year_data = data[available_years[0]]
+        return latest_year_data.get(country, 0.0)
+
+    return 0.0
+
+
 GLOBAL_SLUG = "global"
 DEFAULT_ITERATOR_CHUNK_SIZE = 2500
 HOUSEHOLD_BATCH_SIZE = 2500
@@ -25,7 +108,7 @@ class CountrySummaryDict(TypedDict):
     total_quantity: float
     total_payments: int
     individuals: int
-    children_counts: int
+    children_counts: float
     pwd_counts: int
     reconciled_count: int
     finished_payment_plans: int
@@ -38,7 +121,7 @@ class GlobalSummaryDict(TypedDict):
     total_usd: float
     total_payments: int
     individuals: int
-    children_counts: int
+    children_counts: float
     pwd_counts: int
     reconciled_count: int
     finished_payment_plans: int
@@ -213,7 +296,7 @@ class DashboardCacheBase(Protocol):
             households_qs = (
                 Household.objects.using("read_only")
                 .filter(id__in=batch_ids)
-                .select_related("admin1", "business_area")
+                .select_related("admin1", "admin_area", "business_area", "program", "program__data_collecting_type")
                 .annotate(
                     pwd_count_calc=get_pwd_count_expression(),
                     admin1_name_hh=Coalesce(F("admin1__name"), Value("Unknown Admin1")),
@@ -226,6 +309,7 @@ class DashboardCacheBase(Protocol):
                     "pwd_count_calc",
                     "admin1_name_hh",
                     "country_name_hh",
+                    "program__data_collecting_type__type",
                 )
             )
 
@@ -233,10 +317,11 @@ class DashboardCacheBase(Protocol):
                 size_value = hh.get("size")
                 household_map[hh["id"]] = {
                     "size": 1 if size_value is None else size_value,
-                    "children_count": hh.get("children_count") or 0,
+                    "children_count": hh.get("children_count"),  # Return the raw value or None
                     "pwd_count": hh.get("pwd_count_calc") or 0,
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
                     "country": hh.get("country_name_hh", "Unknown Country"),
+                    "dct_type": hh.get("program__data_collecting_type__type"),
                 }
         return household_map
 
@@ -376,7 +461,7 @@ class DashboardDataCache(DashboardCacheBase):
                 "total_quantity": 0.0,
                 "total_payments": 0,
                 "individuals": 0,
-                "children_counts": 0,
+                "children_counts": 0.0,
                 "pwd_counts": 0,
                 "reconciled_count": 0,
                 "finished_payment_plans": 0,
@@ -432,7 +517,19 @@ class DashboardDataCache(DashboardCacheBase):
             ):
                 h_data = household_map.get(household_id, {})
                 current_summary["individuals"] += int(h_data.get("size", 0))
-                current_summary["children_counts"] += int(h_data.get("children_count", 0))
+
+                children_count = h_data.get("children_count")
+                is_sw_program = h_data.get("dct_type") == "SOCIAL"
+
+                if is_sw_program or children_count is None:
+                    payment_year = payment.get("year")
+                    country_name = h_data.get("country", "Unknown Country")
+                    if payment_year:
+                        fertility_rate = get_fertility_rate(country_name, payment_year)
+                        current_summary["children_counts"] += fertility_rate
+                else:
+                    current_summary["children_counts"] += children_count
+
                 current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                 current_summary["_seen_households"].add(household_id)
 
@@ -468,7 +565,7 @@ class DashboardDataCache(DashboardCacheBase):
                     "payments": totals["total_payments"],
                     "households": len(totals["_seen_households"]),
                     "individuals": totals["individuals"],
-                    "children_counts": totals["children_counts"],
+                    "children_counts": int(round(totals["children_counts"])),
                     "pwd_counts": totals["pwd_counts"],
                     "reconciled": totals["reconciled_count"],
                     "finished_payment_plans": totals["finished_payment_plans"],
@@ -568,7 +665,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     "total_usd": 0.0,
                     "total_payments": 0,
                     "individuals": 0,
-                    "children_counts": 0,
+                    "children_counts": 0.0,
                     "pwd_counts": 0,
                     "reconciled_count": 0,
                     "finished_payment_plans": 0,
@@ -618,7 +715,21 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 ):
                     h_data = household_map.get(household_id, {})
                     current_summary["individuals"] += int(h_data.get("size", 0))
-                    current_summary["children_counts"] += int(h_data.get("children_count", 0))
+
+                    # --- Start of modified children_count logic ---
+                    children_count = h_data.get("children_count")
+                    is_sw_program = h_data.get("dct_type") == "SOCIAL"
+
+                    if is_sw_program or children_count is None:
+                        payment_year = payment.get("year")
+                        country_name = h_data.get("country", "Unknown Country")
+                        if payment_year:
+                            fertility_rate = get_fertility_rate(country_name, payment_year)
+                            current_summary["children_counts"] += fertility_rate
+                    else:
+                        current_summary["children_counts"] += children_count
+                    # --- End of modified children_count logic ---
+
                     current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                     current_summary["_seen_households"].add(household_id)
 
@@ -642,7 +753,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                         "payments": totals["total_payments"],
                         "households": len(totals["_seen_households"]),
                         "individuals": totals["individuals"],
-                        "children_counts": totals["children_counts"],
+                        "children_counts": int(round(totals["children_counts"])),
                         "pwd_counts": totals["pwd_counts"],
                         "reconciled": totals["reconciled_count"],
                         "finished_payment_plans": totals["finished_payment_plans"],

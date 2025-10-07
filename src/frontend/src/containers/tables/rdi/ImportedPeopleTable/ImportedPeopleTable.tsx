@@ -1,6 +1,6 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';

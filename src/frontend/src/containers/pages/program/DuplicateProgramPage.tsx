@@ -113,7 +113,11 @@ const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode', 'beneficiaryGroup']);
+    const requestValues = omit(values, [
+      'editMode',
+      'beneficiaryGroup',
+      'isActive',
+    ]);
     const initialPduFieldState = {
       label: '',
       pduData: {
@@ -259,6 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const initialValues = {
     editMode: false,
+    isActive: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: null,
     startDate,

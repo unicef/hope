@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   paymentPlanStatusToColor,
@@ -14,7 +14,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface ProgramDetailsProps {
-  targetPopulation : TargetPopulationDetail;
+  targetPopulation: TargetPopulationDetail;
 }
 
 function TargetPopulationDetails({
@@ -31,7 +31,7 @@ function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid data-cy="details-grid" container spacing={6}>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField label={t('Status')}>
               <StatusBox
                 dataCy="target-population-status"
@@ -41,21 +41,21 @@ function TargetPopulationDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
               value={createdBy}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               dataCy="program-name"
               label={t('Programme')}
               value={programName}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={4}>
             <LabelizedField
               dataCy="programme-cycle-title"
               label={t('Programme Cycle')}

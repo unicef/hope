@@ -8,6 +8,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -42,16 +43,15 @@ export function ForceFailedButton({
           {
             businessAreaSlug,
             paymentId: id,
-            paymentPlanId: ppId,
+            paymentPlanPk: ppId,
             programSlug,
           },
         ),
       onSuccess: () => {
         showMessage(t('Payment has been marked as failed successfully.'));
       },
-      onError: (error) => {
-        showMessage(t('Failed to mark the payment as failed.'));
-        console.error(error);
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     });
 

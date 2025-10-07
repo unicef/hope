@@ -16,6 +16,7 @@ import {
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -28,7 +29,7 @@ export function LockPaymentPlan({
   paymentPlan,
 }: LockPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
@@ -58,8 +59,8 @@ export function LockPaymentPlan({
         exact: false,
       });
     },
-    onError: (error) => {
-      showRestApiError(error);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

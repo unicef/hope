@@ -148,7 +148,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
       <ApprovePaymentPlansModal
         selectedPlansIds={selectedApproved}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
-        onApprove={async (_, comment) => {
+        onApprove={async(_, comment) => {
           try {
             await bulkAction.mutateAsync({
               ids: selectedApproved,

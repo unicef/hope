@@ -251,7 +251,7 @@ const AddFilterTargetingCriteriaDisplay = ({
             <Box display="flex" flexWrap="wrap">
               {rules.length
                 ? rules?.map((criteria, index) => (
-                    // eslint-disable-next-line
+                     
                     <Fragment key={criteria.id || index}>
                       <Criteria
                         criteriaIndex={index}

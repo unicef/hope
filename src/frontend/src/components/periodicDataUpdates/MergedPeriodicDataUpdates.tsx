@@ -114,6 +114,7 @@ const MergedPeriodicDataUpdates = () => {
       <TableCell>
         <StatusBox
           status={row.status}
+          statusDisplay={row.statusDisplay}
           statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
         />
       </TableCell>
@@ -123,6 +124,7 @@ const MergedPeriodicDataUpdates = () => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={mergedHeadCells}
       data={data ?? []}

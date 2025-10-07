@@ -19,7 +19,7 @@ interface EditValuesTypes {
   issueType?: string | number;
   category?: string | number;
   language: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   admin: any;
   area: string;
   selectedHousehold?;
@@ -53,7 +53,7 @@ function prepareInitialValueAddIndividual(
   delete individualData.flexFields;
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
-      // eslint-disable-next-line no-param-reassign,prefer-destructuring
+       
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -61,7 +61,7 @@ function prepareInitialValueAddIndividual(
   );
   initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
-      // eslint-disable-next-line no-param-reassign,prefer-destructuring
+       
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -164,7 +164,7 @@ const prepareInitialValueDict = {
 export function prepareInitialValues(
   ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   let initialValues: EditValuesTypes = {
     priority: ticket.priority === 0 ? 'Not set' : ticket.priority,
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
@@ -219,7 +219,7 @@ export const dataChangeComponentDict = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function preparePositiveFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
@@ -239,7 +239,7 @@ function preparePositiveFeedbackVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareNegativeFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
@@ -259,7 +259,7 @@ function prepareNegativeFeedbackVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareReferralVariables(requiredVariables, values) {
   return {
     variables: {
@@ -279,7 +279,7 @@ function prepareReferralVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareGrievanceComplaintVariables(requiredVariables, values) {
   return {
     variables: {
@@ -292,7 +292,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareSensitiveVariables(requiredVariables, values) {
   return {
     variables: {
@@ -304,7 +304,7 @@ function prepareSensitiveVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareAddIndividualVariables(requiredVariables, values) {
   let { flexFields } = values.individualData;
   if (flexFields) {
@@ -330,7 +330,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareDeleteIndividualVariables(requiredVariables, values) {
   return {
     variables: {
@@ -342,19 +342,19 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareEditIndividualVariables(requiredVariables, values) {
   const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
   const flexFields = values.individualDataUpdateFields
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
-      // eslint-disable-next-line no-param-reassign
+       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
@@ -401,7 +401,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
@@ -437,7 +437,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function prepareDefaultVariables(requiredVariables, values) {
   return {
     variables: {
@@ -471,7 +471,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function prepareRestUpdateVariables(_businessArea, values, ticket) {
   const mapDocumentationToUpdate = (
     documentationToUpdate,

@@ -1,7 +1,6 @@
-import { styled } from '@mui/system';
-import Grid from '@mui/material/Grid2';
+import { Box, Grid, Typography } from '@mui/material';
 import Slider from '@mui/material/Slider';
-import { Typography, Box } from '@mui/material';
+import { styled } from '@mui/system';
 import { ReactElement } from 'react';
 
 const StyledBox = styled(Box)({
@@ -35,7 +34,7 @@ export const FormikSliderField = ({
           onChange={handleSliderChange}
           aria-labelledby="input-slider"
         />
-        <Grid>
+        <Grid size={2}>
           <p>
             {field.value}
             {suffix || null}

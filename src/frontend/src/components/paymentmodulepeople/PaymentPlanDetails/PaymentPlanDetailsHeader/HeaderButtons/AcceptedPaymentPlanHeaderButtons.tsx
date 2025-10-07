@@ -22,17 +22,20 @@ import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaginatedFSPXlsxTemplateList } from '@restgenerated/models/PaginatedFSPXlsxTemplateList';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
+  canClose: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
+  canClose,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -68,9 +71,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         showMessage(t('Password has been sent.'));
       },
       onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while sending the password'),
-        );
+        showApiErrorMessages(error, showMessage);
       },
     },
   );
@@ -89,9 +90,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         showMessage(t('Exporting XLSX started'));
       },
       onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while exporting XLSX'),
-        );
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -111,10 +110,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       showMessage(t('Sending to Payment Gateway started'));
     },
     onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while sending to payment gateway'),
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -122,9 +118,26 @@ export function AcceptedPaymentPlanHeaderButtons({
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-    BackgroundActionStatusEnum.XLSX_EXPORTING;
+      BackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
+
+  const { mutateAsync: closePaymentPlan, isPending: loadingClose } =
+    useMutation({
+      mutationFn: async () => {
+        return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+        });
+      },
+      onSuccess: () => {
+        showMessage(t('Payment plan closed successfully'));
+      },
+      onError: (e) => {
+        showApiErrorMessages(e, showMessage);
+      },
+    });
 
   if (loadingTemplates) return <LoadingComponent />;
   if (errorTemplates) return null;
@@ -146,7 +159,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };
@@ -155,7 +168,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     try {
       await exportReconciliationXlsx();
       handleClose();
-    } catch (e) {
+    } catch {
       // Error handling is managed by the mutation's onError callback
     }
   };
@@ -273,6 +286,19 @@ export function AcceptedPaymentPlanHeaderButtons({
             >
               {t('Send to FSP')}
             </Button>
+          </Box>
+        )}
+        {canClose && (
+          <Box m={2}>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              data-cy="button-close"
+              onClick={() => closePaymentPlan()}
+              loading={loadingClose}
+            >
+              {t('Close')}
+            </LoadingButton>
           </Box>
         )}
       </>

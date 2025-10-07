@@ -2,7 +2,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import { MessageDetail } from '@restgenerated/models/MessageDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';

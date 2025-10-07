@@ -92,6 +92,8 @@ export const PaymentPlanDetailsHeader = ({
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
 
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case PaymentPlanStatusEnum.OPEN:
@@ -164,6 +166,7 @@ export const PaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
+          canClose={canClose}
           paymentPlan={paymentPlan}
         />
       );

@@ -59,12 +59,7 @@ export function ReassignRoleUnique({
         showMessage(t('Role Reassigned'));
       },
       onError: (error: any) => {
-        const errorMessage =
-          error?.body?.errors?.[0]?.message ||
-          error?.body?.errors ||
-          error?.message ||
-          'An error occurred while reassigning role.';
-        showMessage(errorMessage);
+        showApiErrorMessages(error, showMessage);
       },
     });
 

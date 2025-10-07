@@ -251,6 +251,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
       <UniversalRestTable
         itemsCount={templateCountData?.count}
         isOnPaper={true}
+        noEmptyMessage={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
         data={templatesData ?? {}}

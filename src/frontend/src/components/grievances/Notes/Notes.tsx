@@ -1,11 +1,11 @@
-import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { renderUserName } from '@utils/utils';
+import { renderUserName, showApiErrorMessages } from '@utils/utils';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -81,9 +81,7 @@ export function Notes({
       });
     },
     onError: (error: any) => {
-      showMessage(
-        error?.body?.errors || error?.message || t('An error occurred'),
-      );
+      showApiErrorMessages(error, showMessage);
     },
   });
 

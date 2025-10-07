@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 from django.core.exceptions import PermissionDenied
 
 from hope.apps.core.models import BusinessArea
-from hope.apps.core.utils import get_program_id_from_headers
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
@@ -108,6 +107,7 @@ class Permissions(Enum):
     PM_ASSIGN_FUNDS_COMMITMENTS = auto()
     PM_SYNC_PAYMENT_PLAN_WITH_PG = auto()
     PM_SYNC_PAYMENT_WITH_PG = auto()
+    PM_CLOSE_FINISHED = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()
@@ -125,6 +125,7 @@ class Permissions(Enum):
     PM_PROGRAMME_CYCLE_DELETE = auto()
 
     RECEIVE_PARSED_WU_QCF = auto()
+    RECEIVE_PP_OVERDUE_EMAIL = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -320,8 +321,6 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     program = None
     if program_slug := kwargs.get("program"):
         program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
-    elif kwargs.get("Program"):  # TODO: GraphQL - remove after GraphQL complete removal
-        program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
     obj = program or business_area
 
     return any(user.has_perm(permission.name, obj) for permission in permissions)

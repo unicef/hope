@@ -1,5 +1,6 @@
 import { Paper } from '@mui/material';
-import { ReactElement, useState, ChangeEvent } from 'react';
+import { ReactElement, useState, useRef, ChangeEvent } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,7 +20,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string; userId?: string } = {};
   if (filters.userId !== '') {
@@ -60,6 +61,11 @@ export function ActivityLogPage(): ReactElement {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
 
   // Query for activity logs based on whether it's all programs or a specific program
@@ -151,19 +157,24 @@ export function ActivityLogPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <StyledPaper>
-        <MainActivityLogTable
-          totalCount={totalCount}
-          rowsPerPage={rowsPerPage}
-          logEntries={logEntries}
-          page={page}
-          loading={logsLoading}
-          onChangePage={handlePageChange}
-          onChangeRowsPerPage={handleRowsPerPageChange}
-        />
-      </StyledPaper>
+      <div ref={tableRef}>
+        <StyledPaper>
+          <MainActivityLogTable
+            totalCount={totalCount}
+            rowsPerPage={rowsPerPage}
+            logEntries={logEntries}
+            page={page}
+            loading={logsLoading}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
+          />
+        </StyledPaper>
+      </div>
     </>
   );
 }

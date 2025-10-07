@@ -61,4 +61,8 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp",
         "schedule": crontab(hour="*/24"),
     },
+    "periodic_send_payment_plan_reconciliation_overdue_emails": {
+        "task": "hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails",
+        "schedule": crontab(hour="*/24"),
+    },
 }

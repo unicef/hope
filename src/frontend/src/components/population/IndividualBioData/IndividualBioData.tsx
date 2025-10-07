@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
+import { Box, Grid, Paper, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {

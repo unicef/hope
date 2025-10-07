@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -21,7 +22,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   canSendForApproval,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
@@ -41,7 +42,7 @@ export function LockedFspPaymentPlanHeaderButtons({
       });
     },
     onError: (error) => {
-      showRestApiError(error, 'An error occurred while unlocking FSP.');
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -63,9 +64,7 @@ export function LockedFspPaymentPlanHeaderButtons({
         });
       },
       onError: (error) => {
-        showMessage(
-          error.message || t('An error occurred while sending for approval.'),
-        );
+        showApiErrorMessages(error, showMessage);
       },
     });
 
