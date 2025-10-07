@@ -9,7 +9,7 @@ import itertools
 import json
 import logging
 import string
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
@@ -17,7 +17,6 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import F, Func, Q, Value
-from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -29,7 +28,6 @@ from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
-    from django.http import HttpHeaders
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -247,7 +245,6 @@ raise_attribute_error = object()
 
 
 def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
-    import functools
 
     try:
         return functools.reduce(getattr, attr.split("."), obj)
@@ -259,7 +256,6 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
 
 
 def nested_dict_get(dictionary: dict, path: str) -> str | None:
-    import functools
 
     return functools.reduce(
         lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
