@@ -13,8 +13,8 @@ class BaseRestPermission(BasePermission):
         permissions = view.get_permissions_for_action()
         kwargs = {
             "business_area": request.parser_context.get("kwargs", {}).get("business_area_slug"),
-            "program": request.parser_context.get("kwargs", {}).get("program_slug"),
-            "Program": request.parser_context.get("kwargs", {}).get("program_id"),  # TODO: GraphQL - remove at the end
+            "program": request.parser_context.get("kwargs", {}).get("program_slug")
+            or request.query_params.get("program"),
         }
 
         return check_permissions(user, permissions, **kwargs)
