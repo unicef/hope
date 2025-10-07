@@ -35,9 +35,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
 
 EDIT_PAYMENT_VERIFICATION_MUTATION = """
 mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
@@ -72,7 +69,9 @@ class TestPaymentVerificationMutations(APITestCase):
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
         registration_data_import = RegistrationDataImportFactory(
             imported_by=cls.user, business_area=BusinessArea.objects.first()
@@ -103,7 +102,6 @@ class TestPaymentVerificationMutations(APITestCase):
         EntitlementCardFactory(household=household)
         cls.payment_plan = payment_plan
         cls.verification = payment_plan.payment_verification_plans.first()
-        VerificationPlanStatusChangeServices(payment_verification_plan).activate()
         info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)
         request = RequestFactory().get("/api/graphql")
         request.user = cls.user
