@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from django_filters import CharFilter, FilterSet
 
 from hope.apps.core.filters import IntegerFilter
-from hope.apps.core.utils import decode_id_string
 from hope.apps.geo.models import Area
 
 if TYPE_CHECKING:
@@ -27,5 +26,4 @@ class AreaFilter(FilterSet):
         return qs.filter(area_type__country__business_areas__slug=value)
 
     def parent_id_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet":
-        parent_id = decode_id_string(value)
-        return qs.filter(parent_id=parent_id)
+        return qs.filter(parent_id=value)
