@@ -245,7 +245,6 @@ raise_attribute_error = object()
 
 
 def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
-
     try:
         return functools.reduce(getattr, attr.split("."), obj)
     except AttributeError as e:
@@ -256,7 +255,6 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
 
 
 def nested_dict_get(dictionary: dict, path: str) -> str | None:
-
     return functools.reduce(
         lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
         # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
