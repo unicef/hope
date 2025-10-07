@@ -60,6 +60,17 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
+    def _get_paginated(self, url: str, params: Optional[Dict] = None) -> List[Dict]:
+        next_url = url
+        results: List = []
+
+        while next_url:
+            data, _ = self._get(next_url, params)
+            next_url = data.get("next")  # type: ignore
+            results.extend(data["results"])
+            params = None  # pass params only in the first call
+        return results
+
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
