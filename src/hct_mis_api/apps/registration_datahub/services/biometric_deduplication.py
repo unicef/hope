@@ -353,9 +353,12 @@ class BiometricDeduplicationService:
                     program=program,
                     deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
                 ).values_list("id", flat=True)
-                individual_ids = list(
-                    PendingIndividual.objects.filter(registration_data_import__in=rdis).values_list("pk", flat=True)
-                )
+                individual_ids = [
+                    str(pk)
+                    for pk in PendingIndividual.objects.filter(registration_data_import__in=rdis).values_list(
+                        "pk", flat=True
+                    )
+                ]
                 data = self.get_deduplication_set_results(program.deduplication_set_id, individual_ids)
                 similarity_pairs = [
                     SimilarityPair(
