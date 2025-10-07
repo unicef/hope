@@ -114,9 +114,6 @@ class UserViewSet(
 
         role_assignment_ids = list(role_assignments_queryset.values_list("id", flat=True))
 
-        if not role_assignment_ids:
-            return User.objects.none()
-
         queryset = (
             super()
             .get_queryset()
