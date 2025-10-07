@@ -52,7 +52,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -71,7 +71,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert not result
@@ -91,7 +91,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -110,7 +110,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -125,7 +125,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -139,7 +139,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
