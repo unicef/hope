@@ -8,7 +8,6 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions, check_permissions
 from hope.apps.core.models import BusinessArea
-from hope.apps.core.utils import encode_id_base64_required
 from hope.apps.program.models import Program
 
 
