@@ -490,7 +490,7 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
 
     try:
         service = BiometricDeduplicationService()
-        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+        service.fetch_biometric_deduplication_results_and_process(program)
     except Exception as e:
         logger.warning(e)
         raise

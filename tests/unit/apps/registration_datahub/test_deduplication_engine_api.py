@@ -120,11 +120,27 @@ class DeduplicationEngineApiTest(TestCase):
     def test_get_duplicates(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
-        get_mock.return_value = {}, 200
+        get_mock.return_value = {"results": []}, 200
 
-        api.get_duplicates(deduplication_set_id)
+        api.get_duplicates(deduplication_set_id, [])
+        get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/", {"reference_pk": ""})
 
-        get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/")
+    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    def test_get_duplicates_paginated(self, get_mock: mock.Mock) -> None:
+        api = DeduplicationEngineAPI()
+        deduplication_set_id = str(uuid.uuid4())
+
+        page1 = ({"next": "deduplication_sets/x/duplicates/?page=2", "results": [{"id": 1}, {"id": 2}]}, 200)
+        page2 = ({"next": None, "results": [{"id": 3}, {"id": 4}]}, 200)
+
+        get_mock.side_effect = [page1, page2]
+
+        results = api.get_duplicates(deduplication_set_id, ["1,2,3,4"])
+        assert results == [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
+
+        get_mock.assert_any_call(f"deduplication_sets/{deduplication_set_id}/duplicates/", {"reference_pk": "1,2,3,4"})
+        get_mock.assert_any_call("deduplication_sets/x/duplicates/?page=2", None)
+        assert get_mock.call_count == 2
 
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_process_deduplication(self, post_mock: mock.Mock) -> None:
