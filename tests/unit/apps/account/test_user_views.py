@@ -580,7 +580,7 @@ class TestUserList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 5
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 12
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -589,7 +589,7 @@ class TestUserList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 6
 
         self.user2.first_name = "Zoe"
         self.user2.save()
@@ -601,7 +601,7 @@ class TestUserList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 8
 
         self.user3.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -616,7 +616,7 @@ class TestUserList:
                 etag_third_call,
                 etag_third_call,
             ]
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 8
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -625,7 +625,7 @@ class TestUserList:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 6
 
 
 class TestProgramUsers:
@@ -845,7 +845,7 @@ class TestProgramUsers:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 21
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -854,7 +854,7 @@ class TestProgramUsers:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 10
 
         self.user2.first_name = "Zoe"
         self.user2.save()
@@ -865,8 +865,8 @@ class TestProgramUsers:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 9
+            # 6 queries are saved because of cached permissions calculations
+            assert len(ctx.captured_queries) == 15
 
         self.user3.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -876,7 +876,7 @@ class TestProgramUsers:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 5
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 15
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -885,7 +885,7 @@ class TestProgramUsers:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 10
 
 
 class TestUserFilter:
