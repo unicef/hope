@@ -8,9 +8,8 @@ from constance import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import requests
-from requests.exceptions import JSONDecodeError
-from constance import config
 from requests.adapters import HTTPAdapter
+from requests.exceptions import JSONDecodeError
 from urllib3.util.retry import Retry
 
 from hope.apps.core.models import BusinessArea
@@ -64,7 +63,7 @@ class RapidProAPI:
         token = getattr(business_area, RapidProAPI.mode_to_token_dict[mode], None)
         self.url = business_area.rapid_pro_host or settings.RAPID_PRO_URL
         if not token:
-            raise TokenNotProvided(f"Token is not set for {business_area.name}.")
+            raise TokenNotProvidedError(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})
 
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> dict:
@@ -96,13 +95,13 @@ class RapidProAPI:
             if not urns:
                 return {"error": error}
             errors: list[str] = []
-            for index in urns.keys():
+            for index in urns:
                 try:
                     errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
                 except (ValueError, IndexError):
                     continue
             return {"phone_numbers": errors}
-        except Exception:
+        except (JSONDecodeError, AttributeError):
             return None
 
     def _get_url(self) -> str:
@@ -149,7 +148,7 @@ class RapidProAPI:
                         urns=urns,
                     )
                 )
-            except Exception as e:
+            except (requests.exceptions.HTTPError, ValidationError) as e:
                 return successful_flows, e
         return successful_flows, None
 
@@ -214,7 +213,7 @@ class RapidProAPI:
                 ), None
             response, _ = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
-        except Exception as e:
+        except (requests.exceptions.HTTPError, ValidationError) as e:
             logger.warning(e)
             return str(e), None
 
@@ -249,7 +248,7 @@ class RapidProAPI:
                 "not_responded": not_responded_count,
                 "flow_start_status": flow_start_status,
             }
-        except Exception as e:
+        except requests.exceptions.HTTPError as e:
             logger.warning(e)
             return str(e), None
 

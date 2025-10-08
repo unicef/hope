@@ -4,8 +4,10 @@ from unittest.mock import MagicMock, patch
 import uuid
 
 from django.test import TestCase
-
+import pytest
 import requests
+from requests import HTTPError
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -19,7 +21,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from requests import HTTPError
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.models import BusinessArea
@@ -311,7 +312,7 @@ class TestRapidProVerificationTask(TestCase):
         assert first_phone != second_phone
         assert not ind.phone_no_valid
 
-    @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_requests(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
@@ -341,19 +342,19 @@ class TestRapidProVerificationTask(TestCase):
         api._client.get = MagicMock(
             return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
         )
-        self.assertEqual(api._handle_get_request("/endpoint"), {"a": 1})
+        assert api._handle_get_request("/endpoint") == {"a": 1}
 
         api._client.get = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
-        with self.assertRaises(HTTPError):
+        with pytest.raises(HTTPError):
             api._handle_get_request("/endpoint")
 
         api._client.post = MagicMock(
             return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
         )
-        self.assertEqual(api._handle_post_request("/endpoint", {"b": 2}), {"a": 1})
+        assert api._handle_post_request("/endpoint", {"b": 2}) == {"a": 1}
 
         api._client.post = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
-        with self.assertRaises(HTTPError):
+        with pytest.raises(HTTPError):
             api._handle_post_request("/endpoint", {"b": 2})
 
     def test_parse_json_urns_error(self) -> None:
@@ -364,34 +365,24 @@ class TestRapidProVerificationTask(TestCase):
 
         with patch.object(requests.Session, "mount", autospec=True):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-            self.assertEqual(api._parse_json_urns_error(None, []), None)
+            assert api._parse_json_urns_error(None, []) is None
 
             e = MagicMock()
             e.response = MagicMock()
             e.response.status_code = 400
             e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
 
-            self.assertEqual(
-                api._parse_json_urns_error(e, ["a", "b"]),
-                {"phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]},
-            )
+            assert api._parse_json_urns_error(e, ["a", "b"]) == {
+                "phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]
+            }
 
-            self.assertEqual(
-                api._parse_json_urns_error(e, []),
-                {"phone_numbers": []},
-            )
+            assert api._parse_json_urns_error(e, []) == {"phone_numbers": []}
 
             e.response.json.return_value = {"error": "error"}
-            self.assertEqual(
-                api._parse_json_urns_error(e, ["a", "b"]),
-                {"error": {"error": "error"}},
-            )
+            assert api._parse_json_urns_error(e, ["a", "b"]) == {"error": {"error": "error"}}
 
             e.response.json.side_effect = Exception("test")
-            self.assertEqual(
-                api._parse_json_urns_error(e, ["a", "b"]),
-                None,
-            )
+            assert api._parse_json_urns_error(e, ["a", "b"]) is None
 
 
 class TestPhoneNumberVerification(TestCase):
