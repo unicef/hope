@@ -1,6 +1,5 @@
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -19,7 +18,7 @@ import {
 import { useProgramContext } from '../../../../programContext';
 
 export const CommunicationPage = (): ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
