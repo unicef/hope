@@ -81,8 +81,8 @@ class BiometricDeduplicationServiceTest(TestCase):
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
     def test_get_deduplication_set_results(self, mock_get_duplicates: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-        service.get_deduplication_set_results(self.program.deduplication_set_id, [])
-        mock_get_duplicates.assert_called_once_with(self.program.deduplication_set_id, [])
+        service.get_deduplication_set_results(self.program.deduplication_set_id, ["1", "2"])
+        mock_get_duplicates.assert_called_once_with(self.program.deduplication_set_id, ["1", "2"])
 
     @patch(
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set"
@@ -598,6 +598,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Ready"))
         service.mark_rdis_as_error = mock.Mock()
+        service.get_deduplication_set_results = mock.Mock(side_effect=Exception)
 
         service.fetch_biometric_deduplication_results_and_process(self.program)
 
