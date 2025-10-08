@@ -124,7 +124,7 @@ class DeduplicationEngineApiTest(TestCase):
         api.get_duplicates(deduplication_set_id, [])
         get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/", {"reference_pk": ""})
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_duplicates_paginated(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())

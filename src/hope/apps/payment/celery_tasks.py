@@ -297,7 +297,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     from hope.apps.payment.models import Payment, PaymentPlan
     from hope.apps.steficon.models import Rule, RuleCommit
 
-    BULK_SIZE = 1000
+    bulk_size = 1000
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -323,7 +323,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 
         updates_buffer = []
         with transaction.atomic():
-            for payment in qs.iterator(chunk_size=BULK_SIZE):
+            for payment in qs.iterator(chunk_size=bulk_size):
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
 
                 payment.entitlement_quantity = result.value
@@ -336,7 +336,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_date = now
                 updates_buffer.append(payment)
                 # Flush in chunks to keep memory and row locks under control
-                if len(updates_buffer) >= BULK_SIZE:  # pragma: no cover
+                if len(updates_buffer) >= bulk_size:  # pragma: no cover
                     Payment.signature_manager.bulk_update_with_signature(
                         updates_buffer,
                         ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],

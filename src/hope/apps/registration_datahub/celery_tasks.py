@@ -83,7 +83,7 @@ def registration_xlsx_import_task(
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
-                raise AlreadyRunningException(
+                raise AlreadyRunningError(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)

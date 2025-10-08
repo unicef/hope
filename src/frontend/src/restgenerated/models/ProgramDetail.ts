@@ -78,7 +78,6 @@ export type ProgramDetail = {
      * Program household count [sys]
      */
     householdCount?: number;
-    numberOfHouseholdsWithTpInProgram: number;
     readonly adminUrl: string;
     /**
      * Program description

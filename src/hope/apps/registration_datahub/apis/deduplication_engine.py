@@ -109,11 +109,10 @@ class DeduplicationEngineAPI(BaseAPI):
         return response_data
 
     def get_duplicates(self, deduplication_set_id: str, individual_ids: list[str]) -> list[dict]:
-        response_data = self._get_paginated(
+        return self._get_paginated(
             self.Endpoints.GET_DUPLICATES.format(deduplication_set_pk=deduplication_set_id),
             params={"reference_pk": ",".join(individual_ids)},
         )
-        return response_data
 
     def process_deduplication(self, deduplication_set_id: str) -> tuple[dict, int]:
         response_data, status = self._post(

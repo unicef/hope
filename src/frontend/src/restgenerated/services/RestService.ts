@@ -4893,8 +4893,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         offset,
         orderBy,
         ordering,
@@ -4925,8 +4923,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4996,8 +4992,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -13129,8 +13123,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         offset,
         orderBy,
         ordering,
@@ -13162,8 +13154,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -13234,8 +13224,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -13304,8 +13292,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         orderBy,
         ordering,
         search,
@@ -13331,8 +13317,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * Ordering
          *
@@ -13397,8 +13381,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
@@ -13597,7 +13579,6 @@ export class RestService {
         orderBy,
         ordering,
         partner,
-        program,
         roles,
         search,
         serializer,
@@ -13638,7 +13619,6 @@ export class RestService {
          */
         ordering?: string,
         partner?: Array<number>,
-        program?: string,
         roles?: Array<string>,
         search?: string,
         serializer?: string,
@@ -13665,7 +13645,6 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'partner': partner,
-                'program': program,
                 'roles': roles,
                 'search': search,
                 'serializer': serializer,
@@ -13703,7 +13682,6 @@ export class RestService {
         orderBy,
         ordering,
         partner,
-        program,
         roles,
         search,
         status,
@@ -13735,7 +13713,6 @@ export class RestService {
          */
         ordering?: string,
         partner?: Array<number>,
-        program?: string,
         roles?: Array<string>,
         search?: string,
         /**
@@ -13759,7 +13736,6 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'partner': partner,
-                'program': program,
                 'roles': roles,
                 'search': search,
                 'status': status,
