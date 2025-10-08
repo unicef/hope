@@ -49,6 +49,7 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
     PaymentInstructionData,
     PaymentInstructionStatus,
     PaymentRecordData,
+    PaymentSerializer,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -637,7 +638,7 @@ class TestPaymentGatewayService(APITestCase):
             number="123456789",
             data={
                 "provider": "Provider",
-                "code": "CBA",
+                "service_provider_code": "CBA",
             },
             account_type=AccountType.objects.get(key="mobile"),
             financial_institution=fi,
@@ -653,21 +654,6 @@ class TestPaymentGatewayService(APITestCase):
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
         self.payments[0].refresh_from_db()
-
-        with self.assertRaisesMessage(
-            Exception,
-            f"No Financial Institution Mapping found for"
-            f" financial_institution {fi},"
-            f" fsp {self.payments[0].financial_service_provider},"
-            f" payment {self.payments[0].id},"
-            f" collector {self.payments[0].collector}.",
-        ):
-            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-            post_mock.reset_mock()
-
-        FinancialInstitutionMapping.objects.create(
-            financial_service_provider=self.pg_fsp, financial_institution=fi, code="123"
-        )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
@@ -687,8 +673,8 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "mobile_money",
                         "account_type": "mobile",
                         "account": {
-                            "service_provider_code": "123",
                             "number": "123456789",
+                            "service_provider_code": "CBA",
                             "provider": "Provider",
                             "financial_institution": str(fi.id),
                         },
@@ -1096,3 +1082,64 @@ class TestPaymentGatewayService(APITestCase):
             called_payments, called_split = mock_add_records.call_args[0][0], mock_add_records.call_args[0][1]
             assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
             assert called_split == self.pp_split_2.pk
+
+    def test_map_financial_institution_pk_and_mapping_found(self) -> None:
+        fi = FinancialInstitution.objects.create(name="Bank A", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.pg_fsp, code="BANKA_CODE_FOR_OTHER_FSP"
+        )
+        account_data = {"financial_institution": str(fi.pk), "number": "123"}
+
+        result = PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert result["service_provider_code"] == "BANKA_CODE_FOR_OTHER_FSP"
+        assert result["number"] == "123"
+
+    def test_map_financial_institution_pk_and_mapping_missing_raises(self) -> None:
+        fi = FinancialInstitution.objects.create(name="Bank B", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        account_data = {"financial_institution": str(fi.pk)}
+
+        with pytest.raises(Exception) as exc:
+            PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert "No Financial Institution Mapping found" in str(exc.value)
+
+    def test_map_financial_institution_with_code_and_fsp_is_uba_passthrough(self) -> None:
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
+        self.payments[0].financial_service_provider = uba_fsp
+        self.payments[0].save()
+        account_data = {"code": "UBA_SPECIFIC_CODE", "number": "999"}
+
+        result = PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert result["service_provider_code"] == "UBA_SPECIFIC_CODE"
+        assert result["number"] == "999"
+
+    def test_map_financial_institution_with_code_and_fsp_is_not_uba_map_via_uba_mapping(self) -> None:
+        # incoming code belongs to UBA, map it to UBA FI, then map to other FSP code
+
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+        payment = self.payments[0]
+
+        # Create a Financial Institution and mappings:
+        fi = FinancialInstitution.objects.create(name="Bank C", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        # UBA mapping identified by incoming code
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=uba_fsp, code="UBA_CODE_X"
+        )
+        # Target FSP-specific code for the same FI
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.pg_fsp, code="OTHER_FSP_CODE_FOR_BANKC"
+        )
+
+        account_data = {"code": "UBA_CODE_X", "extra": "keep"}
+
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+        assert result["service_provider_code"] == "OTHER_FSP_CODE_FOR_BANKC"
+        assert result["extra"] == "keep"
+
+    def test_map_financial_institution_with_code_mapping_missing_raises(self) -> None:
+        # No mappings created for the given code
+        account_data = {"code": "UNKNOWN_CODE"}
+
+        with pytest.raises(Exception) as exc:
+            PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert "No Financial Institution Mapping found" in str(exc.value)
