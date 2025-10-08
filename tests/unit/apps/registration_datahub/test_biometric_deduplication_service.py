@@ -81,8 +81,8 @@ class BiometricDeduplicationServiceTest(TestCase):
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
     def test_get_deduplication_set_results(self, mock_get_duplicates: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-        service.get_deduplication_set_results(self.program.deduplication_set_id, ["1","2"])
-        mock_get_duplicates.assert_called_once_with(self.program.deduplication_set_id, ["1","2"])
+        service.get_deduplication_set_results(self.program.deduplication_set_id, ["1", "2"])
+        mock_get_duplicates.assert_called_once_with(self.program.deduplication_set_id, ["1", "2"])
 
     @patch(
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set"
