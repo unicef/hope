@@ -18,17 +18,13 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import (
     HouseholdFactory,
-    create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import (
     BeneficiaryGroupFactory,
-    ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program, ProgramCycle
+from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -248,8 +244,8 @@ class TestProgramList:
         assert response_data[3]["id"] == str(program_finished.id)
 
     def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
-        no_queries_not_cached_no_permissions = 12
-        no_queries_not_cached_with_permissions = 8
+        no_queries_not_cached_no_permissions = 11
+        no_queries_not_cached_with_permissions = 7
         no_queries_cached = 5
 
         program_afghanistan2 = ProgramFactory(business_area=self.afghanistan)
@@ -498,155 +494,3 @@ class TestProgramFilter:
         response_data_max = response_max.json()["results"]
         assert len(response_data_max) == 1
         assert response_data_max[0]["id"] == str(program2.id)
-
-    def test_filter_number_of_households_with_tp_in_program(self) -> None:
-        def _create_hhs_for_pp(program: Program, payment_plan: PaymentPlan, no_hhs: int) -> list:
-            households = []
-            for _ in range(no_hhs):
-                household, _ = create_household_and_individuals(
-                    {
-                        "business_area": self.afghanistan,
-                        "program": program,
-                    },
-                    [
-                        {
-                            "business_area": self.afghanistan,
-                            "program": program,
-                        },
-                    ],
-                )
-                households.append(household)
-                PaymentFactory(
-                    parent=payment_plan,
-                    household=household,
-                    business_area=self.afghanistan,
-                    program=program,
-                )
-            return households
-
-        def _create_pp_and_hhs_for_program_cycle(
-            program: Program, program_cycle: ProgramCycle, pp_status: str, no_hhs: int
-        ) -> None:
-            payment_plan = PaymentPlanFactory(
-                program_cycle=program_cycle,
-                status=pp_status,
-                business_area=self.afghanistan,
-            )
-            _create_hhs_for_pp(program, payment_plan, no_hhs)
-
-        program1 = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            start_date=datetime.datetime(2020, 1, 1),
-        )
-        _create_pp_and_hhs_for_program_cycle(program1, program1.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 5)
-
-        # program with payments in 2 payment plans, one with excluded status, hh_count=7 but 3 excluded
-        program2 = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            start_date=datetime.datetime(2021, 1, 1),
-        )
-        _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_OPEN, 3)
-        _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
-
-        # program with payments in 2 payment plans, hh_count=7
-        program3 = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            start_date=datetime.datetime(2022, 1, 1),
-        )
-        _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
-        _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
-
-        # program with payments in 2 program cycles with payment plans in correct status, hh_count=6
-        program4 = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            start_date=datetime.datetime(2023, 1, 1),
-        )
-        _create_pp_and_hhs_for_program_cycle(program4, program4.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
-        program_cycle_program4 = ProgramCycleFactory(program=program4)
-        _create_pp_and_hhs_for_program_cycle(program4, program_cycle_program4, PaymentPlan.Status.TP_PROCESSING, 3)
-
-        # program with repeated household in 2 payments, hh_count=5 but 1 repetition
-        program5 = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            start_date=datetime.datetime(2024, 1, 1),
-        )
-        payment_plan_1 = PaymentPlanFactory(
-            program_cycle=program5.cycles.first(),
-            status=PaymentPlan.Status.TP_PROCESSING,
-            business_area=self.afghanistan,
-        )
-        households = _create_hhs_for_pp(program5, payment_plan_1, 4)
-        payment_plan_2 = PaymentPlanFactory(
-            program_cycle=program5.cycles.first(),
-            status=PaymentPlan.Status.TP_PROCESSING,
-            business_area=self.afghanistan,
-        )
-        PaymentFactory(
-            parent=payment_plan_2,
-            household=households[0],
-            business_area=self.afghanistan,
-            program=program5,
-        )
-
-        for program in [program1, program2, program3, program4, program5]:
-            self.create_user_role_with_permissions(
-                self.user,
-                [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-                self.afghanistan,
-                program,
-            )
-
-        response_min = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_min": 5})
-        assert response_min.status_code == status.HTTP_200_OK
-        response_data_min = response_min.json()["results"]
-        assert len(response_data_min) == 3
-        program_ids_min = [program["id"] for program in response_data_min]
-        assert str(program1.id) in program_ids_min
-        assert str(program3.id) in program_ids_min
-        assert str(program4.id) in program_ids_min
-
-        assert str(program2.id) not in program_ids_min
-        assert str(program5.id) not in program_ids_min
-
-        response_max = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_max": 5})
-        assert response_max.status_code == status.HTTP_200_OK
-        response_data_max = response_max.json()["results"]
-        assert len(response_data_max) == 3
-        program_ids_max = [program["id"] for program in response_data_max]
-        assert str(program1.id) in program_ids_max
-        assert str(program2.id) in program_ids_max
-        assert str(program5.id) in program_ids_max
-
-        assert str(program3.id) not in program_ids_max
-        assert str(program4.id) not in program_ids_max
-
-        response_min_max = self.client.get(
-            self.list_url,
-            {
-                "number_of_households_with_tp_in_program_min": 5,
-                "number_of_households_with_tp_in_program_max": 5,
-            },
-        )
-        assert response_min_max.status_code == status.HTTP_200_OK
-        response_data_min_max = response_min_max.json()["results"]
-        assert len(response_data_min_max) == 1
-        program_ids_min_max = [program["id"] for program in response_data_min_max]
-        assert str(program1.id) in program_ids_min_max
-
-        # test number_of_households_with_tp_in_program_min value on a list
-        response_list = self.client.get(
-            self.list_url,
-        )
-        assert response_min_max.status_code == status.HTTP_200_OK
-        response_list_data = response_list.json()["results"]
-        assert len(response_list_data) == 5
-        assert response_list_data[0]["number_of_households_with_tp_in_program"] == 5
-        assert response_list_data[1]["number_of_households_with_tp_in_program"] == 4
-        assert response_list_data[2]["number_of_households_with_tp_in_program"] == 7
-        assert response_list_data[3]["number_of_households_with_tp_in_program"] == 6
-        assert response_list_data[4]["number_of_households_with_tp_in_program"] == 4

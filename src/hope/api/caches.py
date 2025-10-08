@@ -1,6 +1,7 @@
 import functools
 from typing import Any, Callable
 
+from constance import config
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
@@ -76,9 +77,20 @@ def etag_decorator(
     return inner
 
 
-def get_or_create_cache_key(key: str, default: Any) -> Any:
+def get_or_create_cache_key(key: str, default: Any = 1) -> Any:
     """Get value from cache by key or create it with default value."""
-    return cache.get_or_set(key, default)
+    return cache.get_or_set(key, default, timeout=config.REST_API_TTL)
+
+
+def increment_cache_key(key: str) -> int:
+    """Increment a numeric cache key, creating it if it doesn't exist."""
+    try:
+        val = cache.incr(key)
+        cache.expire(key, timeout=config.REST_API_TTL)
+        return val
+    except ValueError:
+        cache.set(key, 1, timeout=config.REST_API_TTL)
+        return 1
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):

@@ -84,20 +84,22 @@ class PermissionsBackend(BaseBackend):
             & (Q(business_area=filters.get("business_area"), program=None) | Q(**filters))
         ).exclude(expiry_date__lt=timezone.now())
 
-        if business_area and not role_assignments.exists():
+        role_assignment_ids = list(role_assignments.values_list("id", flat=True))
+
+        if business_area and not role_assignment_ids:
             return set()
 
         permissions_set = set()
 
         # permissions from the RoleAssignments' Groups
         role_assignment_group_permissions = Permission.objects.filter(
-            group__role_assignments__in=role_assignments
+            group__role_assignments__id__in=role_assignment_ids
         ).values_list("content_type__app_label", "codename")
         permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
 
         # permissions from RoleAssignment's Roles
         role_assignment_role_permissions = Role.objects.filter(
-            role_assignments__in=role_assignments, permissions__isnull=False
+            role_assignments__id__in=role_assignment_ids, permissions__isnull=False
         ).values_list("permissions", flat=True)
         permissions_set.update(
             permission for permission_list in role_assignment_role_permissions for permission in permission_list

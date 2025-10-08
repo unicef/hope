@@ -39,5 +39,9 @@ class LocMemCache(DjangoLocMemCache):
             if re.match(key_pattern, key):
                 self.delete(key)
 
+    def expire(self, key: str, timeout: float | None = None) -> bool:
+        """Set expiration time on an existing key."""
+        return self.touch(key, timeout)
+
     def lock(self, key: str, blocking_timeout: float = 0, timeout: float | None = None) -> SimpleCacheLock:
         return SimpleCacheLock(self, key, blocking_timeout, timeout)

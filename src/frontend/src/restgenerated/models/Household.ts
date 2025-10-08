@@ -14,8 +14,8 @@ import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type Household = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
-    country: CountryEnum;
-    countryOrigin?: CountryOriginEnum;
+    country?: CountryEnum | null;
+    countryOrigin?: CountryOriginEnum | null;
     size?: number | null;
     consentSharing?: Array<ConsentSharingEnum>;
     village?: string | null;
