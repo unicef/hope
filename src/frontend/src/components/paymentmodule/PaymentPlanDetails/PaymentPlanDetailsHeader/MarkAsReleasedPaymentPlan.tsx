@@ -74,7 +74,7 @@ export function MarkAsReleasedPaymentPlan({
 
     const financeReleasesCount =
       paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.finance_release?.length;
+        .actions?.financeRelease?.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };

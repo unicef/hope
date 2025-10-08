@@ -28,30 +28,32 @@ interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
   approvals: PaymentPlanDetail['approvalProcess'][number]['actions'];
+  author?: string;
 }
 
 export function GreyInfoCard({
   topMessage,
   topDate,
   approvals,
+  author,
 }: GreyInfoCardProps): ReactElement {
   const mappedApprovals = approvals?.map((action) => {
-    const { info, created_at, comment, created_by } = action;
+    const { info, createdAt, comment } = action;
     return (
       info && (
-        <Box alignItems="center" display="flex" key={created_at}>
+        <Box alignItems="center" display="flex" key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
-              on <UniversalMoment>{created_at}</UniversalMoment>
+              on <UniversalMoment>{createdAt}</UniversalMoment>
             </GreyText>
           </Box>
           <Box p={1} ml={1}>
             {comment ? (
               <MessageDialog
                 comment={comment}
-                author={created_by}
-                date={created_at}
+                date={createdAt}
+                author={author}
               />
             ) : (
               <IconPlaceholder />
@@ -66,8 +68,7 @@ export function GreyInfoCard({
     <Box display="flex" flexDirection="column">
       <Box p={3}>
         <GreyTitle>
-          {topMessage} on
-          <UniversalMoment>{topDate}</UniversalMoment>
+          {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
       <GreyBox

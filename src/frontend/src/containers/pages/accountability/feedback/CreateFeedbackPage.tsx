@@ -174,7 +174,7 @@ function CreateFeedbackPage(): ReactElement {
     language: null,
     consent: false,
     verificationRequired: false,
-    programId: null,
+    programId: isAllPrograms ? null : selectedProgram?.id,
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
@@ -256,7 +256,7 @@ function CreateFeedbackPage(): ReactElement {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({

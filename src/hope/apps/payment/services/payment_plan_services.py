@@ -6,13 +6,17 @@ from typing import IO, TYPE_CHECKING, Callable, Union
 
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import OuterRef
+from django.db.models import DateField, ExpressionWrapper, F, OuterRef
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.models import User
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
@@ -31,6 +35,7 @@ from hope.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_notification_emails,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_payment_plan_reconciliation_overdue_email,
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
 )
@@ -47,6 +52,7 @@ from hope.apps.payment.models import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
+from hope.apps.payment.utils import get_link
 from hope.apps.program.models import Program, ProgramCycle
 from hope.apps.targeting.models import (
     TargetingCollectorRuleFilterBlock,
@@ -62,7 +68,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.apps.account.models import AbstractUser, User
+    from hope.apps.account.models import AbstractUser
 
 
 class PaymentPlanService:
@@ -449,10 +455,13 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments = payment_plan.payment_items.select_related("household_snapshot").all()
-        for payment in payments:
-            payment.update_signature_hash()
-        Payment.objects.bulk_update(payments, ["signature_hash"])
+        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
+        paginator = Paginator(payments_queryset, 500)
+        for page_number in paginator.page_range:
+            payments = paginator.page(page_number).object_list
+            for payment in payments:
+                payment.update_signature_hash()
+            Payment.objects.bulk_update(payments, ["signature_hash"])
 
     def create_targeting_criteria(self, targeting_criteria_input: dict, program: Program) -> None:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
@@ -956,3 +965,64 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan
+
+    @classmethod
+    def send_reconciliation_overdue_emails(cls) -> None:
+        today = datetime.date.today()
+
+        overdue_payment_plans = (
+            PaymentPlan.objects.annotate(
+                due_date=ExpressionWrapper(
+                    F("dispersion_start_date")
+                    + F("program_cycle__program__reconciliation_window_in_days") * datetime.timedelta(days=1),
+                    output_field=DateField(),
+                )
+            )
+            .filter(
+                status=PaymentPlan.Status.ACCEPTED,
+                due_date=today,
+                program_cycle__program__send_reconciliation_window_expiry_notifications=True,
+                program_cycle__program__reconciliation_window_in_days__gte=1,
+            )
+            .distinct()
+        )
+
+        for pp in overdue_payment_plans:
+            if pp.has_payments_reconciliation_overdue:
+                send_payment_plan_reconciliation_overdue_email.delay(str(pp.pk))
+
+    def send_reconciliation_overdue_email_for_pp(self) -> None:
+        business_area = self.payment_plan.business_area
+        users = [
+            user
+            for user in User.objects.all()
+            if user.has_perm(Permissions.RECEIVE_PP_OVERDUE_EMAIL.name, business_area)
+        ]
+
+        if users:
+            text_template = "payment/pp_reconciliation_overdue_email.txt"
+            html_template = "payment/pp_reconciliation_overdue_email.html"
+
+            payment_plan_id = str(self.payment_plan.id)
+            program_slug = self.payment_plan.program.slug
+            payment_plan_link = get_link(
+                f"/{self.payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
+            )
+
+        for user in users:
+            context = {
+                "first_name": getattr(user, "first_name", ""),
+                "last_name": getattr(user, "last_name", ""),
+                "email": getattr(user, "email", ""),
+                "message": f"Please be informed that Payment Plan: {self.payment_plan.unicef_id} has exceeded its"
+                f" reconciliation window of {self.payment_plan.program.reconciliation_window_in_days} days."
+                f" Please take the necessary steps to complete the reconciliation process timely.",
+                "title": f"Payment Plan {self.payment_plan.unicef_id} Reconciliation Overdue",
+                "link": f"Payment Plan: {payment_plan_link}",
+            }
+
+            user.email_user(
+                subject=context["title"],
+                html_body=render_to_string(html_template, context=context),
+                text_body=render_to_string(text_template, context=context),
+            )

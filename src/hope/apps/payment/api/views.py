@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -36,6 +36,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
+from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -1161,7 +1162,7 @@ class PaymentPlanViewSet(
             )
         if payment_plan.export_file_per_fsp is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
             raise ValidationError(
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
             )
@@ -1846,7 +1847,22 @@ class PaymentViewSet(
         return get_object_or_404(Payment, id=payment_id)
 
     def get_queryset(self) -> QuerySet:
-        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_pk"])
+        parent_id = self.kwargs["payment_plan_pk"]
+        # Prefetch roles for each individual's household
+        role_prefetch = Prefetch(
+            "households_and_roles",
+            queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
+            to_attr="prefetched_roles",
+        )
+        # Prefetch individuals within households, including their roles
+        individual_prefetch = Prefetch(
+            "household__individuals",
+            queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
+            to_attr="prefetched_individuals",
+        )
+        return (
+            Payment.objects.filter(parent_id=parent_id).select_related("parent").prefetch_related(individual_prefetch)
+        )
 
     @action(
         detail=True,
