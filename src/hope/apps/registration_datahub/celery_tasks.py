@@ -83,7 +83,7 @@ def registration_xlsx_import_task(
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
-                raise AlreadyRunningError(
+                raise AlreadyRunningException(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -225,7 +225,6 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
             program_id=str(program_id),
         )
     except (RequestException, json.JSONDecodeError, Error, ValidationError) as e:  # pragma: no cover
-        logger.warning(e)  # pragma: no cover
         raise self.retry(exc=e)  # pragma: no cover
 
 
@@ -329,7 +328,6 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
     try:
         return PullKoboSubmissions().execute(kobo_import_data, program)
     except (RequestException, json.JSONDecodeError, Error, ValidationError) as e:  # pragma: no cover
-        logger.warning(e)  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
@@ -352,7 +350,6 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     try:
         return ValidateXlsxImport().execute(import_data, program)
     except (InvalidFileException, Error, ValidationError) as e:  # pragma: no cover
-        logger.warning(e)  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
@@ -500,7 +497,7 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
 
     try:
         service = BiometricDeduplicationService()
-        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+        service.fetch_biometric_deduplication_results_and_process(program)
     except (Program.DoesNotExist, Error) as e:
         logger.warning(e)
         raise

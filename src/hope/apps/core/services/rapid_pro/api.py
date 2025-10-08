@@ -9,6 +9,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 import requests
 from requests.exceptions import JSONDecodeError
+from constance import config
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from hope.apps.core.models import BusinessArea
 
@@ -45,20 +48,29 @@ class RapidProAPI:
 
     def __init__(self, business_area_slug: str, mode: str) -> None:
         self._client = requests.session()
+        retry = Retry(
+            total=3,
+            backoff_factor=0.5,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=frozenset(["GET"]),
+        )
+        adapter = HTTPAdapter(max_retries=retry)
         self._init_token(business_area_slug, mode)
+        self._client.mount(self._get_url(), adapter)
+        self._timeout = 30  # seconds
 
     def _init_token(self, business_area_slug: str, mode: str) -> None:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         token = getattr(business_area, RapidProAPI.mode_to_token_dict[mode], None)
         self.url = business_area.rapid_pro_host or settings.RAPID_PRO_URL
         if not token:
-            raise TokenNotProvidedError(f"Token is not set for {business_area.name}.")
+            raise TokenNotProvided(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})
 
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> dict:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
-        response = self._client.get(url)
+        response = self._client.get(url, timeout=self._timeout)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -67,27 +79,31 @@ class RapidProAPI:
         return response.json()
 
     def _handle_post_request(self, url: str, data: dict) -> dict:
-        response = self._client.post(url=f"{self._get_url()}{url}", json=data)
+        response = self._client.post(url=f"{self._get_url()}{url}", json=data, timeout=self._timeout)
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.warning(e.response.text)
-
+        except requests.exceptions.HTTPError:
+            logger.exception("RapidPro API post request failed")
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | list:
-        if e.response and e.response.status_code != 400:
-            return False
+    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | dict:
+        if not getattr(e, "response", None) or e.response.status_code != 400:
+            return None
         try:
             error = e.response.json()
             urns = error.get("urns")
             if not urns:
-                return False
-            return [f"{phone_numbers[int(index)]} - phone number is incorrect" for index in urns]
-
-        except (JSONDecodeError, AttributeError):
-            return False
+                return {"error": error}
+            errors: list[str] = []
+            for index in urns.keys():
+                try:
+                    errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
+                except (ValueError, IndexError):
+                    continue
+            return {"phone_numbers": errors}
+        except Exception:
+            return None
 
     def _get_url(self) -> str:
         return f"{self.url}/api/v2"
@@ -112,10 +128,10 @@ class RapidProAPI:
                     data,
                 )
             except requests.exceptions.HTTPError as e:
-                errors = self._parse_json_urns_error(e, phone_numbers)
+                batch_phone_numbers = [urn.split(":")[-1] for urn in data.get("urns", [])]
+                errors = self._parse_json_urns_error(e, batch_phone_numbers)
                 if errors:
-                    logger.warning("wrong phone numbers " + str(errors))
-                    raise ValidationError(message={"phone_numbers": errors}) from e
+                    raise ValidationError(message=errors) from e  # pragma no cover
                 raise
 
         successful_flows: list = []
@@ -133,7 +149,7 @@ class RapidProAPI:
                         urns=urns,
                     )
                 )
-            except (requests.exceptions.HTTPError, ValidationError) as e:
+            except Exception as e:
                 return successful_flows, e
         return successful_flows, None
 
@@ -161,10 +177,10 @@ class RapidProAPI:
         variable_received_name = "cash_received_text"
         variable_received_positive_string = "YES"
         variable_amount_name = "cash_received_amount"
-        phone_number = run.get("contact").get("urn").split(":")[1]
+        phone_number = run.get("contact", {}).get("urn", "").split(":")[1]
         values = run.get("values")
-        received = None
-        received_amount = None
+        received: None | bool = None
+        received_amount: None | Decimal = None
         if not values:
             return {
                 "phone_number": phone_number,
@@ -198,7 +214,7 @@ class RapidProAPI:
                 ), None
             response, _ = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
-        except (requests.exceptions.HTTPError, ValidationError) as e:
+        except Exception as e:
             logger.warning(e)
             return str(e), None
 
@@ -233,7 +249,7 @@ class RapidProAPI:
                 "not_responded": not_responded_count,
                 "flow_start_status": flow_start_status,
             }
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             logger.warning(e)
             return str(e), None
 
@@ -254,5 +270,5 @@ class RapidProAPI:
             errors = self._parse_json_urns_error(e, phone_numbers)
             if errors:
                 logger.warning("wrong phone numbers " + str(errors))
-                raise ValidationError(message={"phone_numbers": errors}) from e
+                raise ValidationError(message=errors) from e  # pragma no cover
             raise

@@ -430,6 +430,10 @@ class TestPaymentGatewayService(BaseTestCase):
         self.pp.refresh_from_db()
         assert self.pp.status == PaymentPlan.Status.FINISHED
 
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
     @mock.patch(
@@ -441,9 +445,18 @@ class TestPaymentGatewayService(BaseTestCase):
         get_quantity_in_usd_mock: Any,
         get_record_mock: Any,
         get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
     ) -> None:
         self.payments[0].status = Payment.STATUS_ERROR
         self.payments[0].save()
+
+        self.payments[1].status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        self.payments[1].save()
+
+        self.pp_split_1.sent_to_payment_gateway = True
+        self.pp_split_2.sent_to_payment_gateway = True
+        self.pp_split_1.save()
+        self.pp_split_2.save()
 
         get_record_mock.side_effect = [
             PaymentRecordData(
@@ -462,6 +475,7 @@ class TestPaymentGatewayService(BaseTestCase):
 
         pg_service = PaymentGatewayService()
         pg_service.api.get_record = get_record_mock  # type: ignore
+        pg_service.api.change_payment_instruction_status = change_payment_instruction_status_mock  # type: ignore
 
         pg_service.sync_record(self.payments[0])
         assert get_record_mock.call_count == 1
@@ -470,6 +484,10 @@ class TestPaymentGatewayService(BaseTestCase):
         assert self.payments[0].fsp_auth_code == "1"
         assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
         assert self.payments[0].delivered_quantity_usd == 100.0
+
+        self.pp.refresh_from_db()
+        assert self.pp.status == PaymentPlan.Status.FINISHED
+        assert change_payment_instruction_status_mock.call_count == 2
 
     def test_get_hope_status(self) -> None:
         p = PaymentRecordData(
