@@ -21,6 +21,7 @@ interface PaymentsHouseholdTableProps {
   canViewPaymentRecordDetails: boolean;
 }
 function PaymentsHouseholdTable({
+  // ...existing code...
   household,
   openInNewTab = false,
   businessArea,
@@ -34,6 +35,7 @@ function PaymentsHouseholdTable({
     programSlug: programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -64,6 +66,22 @@ function PaymentsHouseholdTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const { data: paymentsCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsCount',
+      household?.id,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanPk: household?.id,
+      }),
+    enabled: page === 0,
+  });
+
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
@@ -87,6 +105,9 @@ function PaymentsHouseholdTable({
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={paymentsCountData?.count}
       renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow
           key={row.id}
