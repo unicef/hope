@@ -7,7 +7,6 @@ from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceF
 
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.models.partner import Partner
-from hope.models.program import Program
 from hope.models.role import Role
 from hope.models.user import USER_STATUS_CHOICES, User
 
@@ -18,7 +17,6 @@ if TYPE_CHECKING:
 
 
 class UsersFilter(FilterSet):
-    program = CharFilter(required=False, method="program_filter")
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
     partner = MultipleChoiceFilter(choices=lambda: Partner.get_partners_as_choices(), method="partners_filter")
@@ -67,47 +65,6 @@ class UsersFilter(FilterSet):
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         return qs.filter(
             Q(role_assignments__business_area__slug=value) | Q(partner__role_assignments__business_area__slug=value)
-        )
-
-    def program_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        business_area = Program.objects.get(slug=value).business_area
-        return qs.filter(
-            Q(
-                partner__role_assignments__program__slug=value,
-                partner__role_assignments__expiry_date__gte=timezone.now(),
-            )
-            | Q(
-                partner__role_assignments__program__slug=value,
-                partner__role_assignments__expiry_date__isnull=True,
-            )
-            | Q(
-                partner__role_assignments__program=None,
-                partner__role_assignments__business_area=business_area,
-                partner__role_assignments__expiry_date__gte=timezone.now(),
-            )
-            | Q(
-                partner__role_assignments__program=None,
-                partner__role_assignments__business_area=business_area,
-                partner__role_assignments__expiry_date__isnull=True,
-            )
-            | Q(
-                role_assignments__program__slug=value,
-                role_assignments__expiry_date__gte=timezone.now(),
-            )
-            | Q(
-                role_assignments__program__slug=value,
-                role_assignments__expiry_date__isnull=True,
-            )
-            | Q(
-                role_assignments__program=None,
-                role_assignments__business_area=business_area,
-                role_assignments__expiry_date__gte=timezone.now(),
-            )
-            | Q(
-                role_assignments__program=None,
-                role_assignments__business_area=business_area,
-                role_assignments__expiry_date__isnull=True,
-            )
         )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: list["UUID"]) -> "QuerySet[User]":

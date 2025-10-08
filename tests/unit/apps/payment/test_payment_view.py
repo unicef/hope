@@ -6,12 +6,15 @@ from rest_framework import status
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import IndividualFactory, IndividualRoleInHouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.models.household import ROLE_ALTERNATE
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
+from hope.models.data_collecting_type import DataCollectingType
 
 pytestmark = pytest.mark.django_db
 
@@ -83,6 +86,28 @@ class TestPaymentViewSet:
             payment = resp_data["results"][0]
             assert payment["delivered_quantity"] == "999.00"
             assert payment["status"] == "Transaction Successful"
+
+    def test_get_list_for_people(self, create_user_role_with_permissions: Any):
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        hh = self.payment.household
+        IndividualFactory(full_name="Full Name Test123", household=hh, program=self.program_active)
+        IndividualRoleInHouseholdFactory(household=hh, individual=hh.individuals.first(), role=ROLE_ALTERNATE)
+        self.program_active.data_collecting_type.type = DataCollectingType.Type.SOCIAL
+        self.program_active.data_collecting_type.save()
+        self.pp.refresh_from_db()
+        assert self.pp.is_social_worker_program is True
+
+        response = self.client.get(self.url_list)
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        payment = resp_data["results"][0]
+        assert payment.get("people_individual") is not None
+        assert payment["people_individual"]["full_name"] == "Full Name Test123"
+        assert payment["people_individual"]["role"] == "Alternate collector"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),

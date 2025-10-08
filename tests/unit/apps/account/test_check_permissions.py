@@ -6,7 +6,6 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.utils import encode_id_base64_required
 from hope.models.business_area import BusinessArea
 from hope.models.program import Program
 from hope.models.role import Role
@@ -54,7 +53,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -73,7 +72,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert not result
@@ -93,7 +92,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -112,7 +111,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -127,7 +126,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result
@@ -141,7 +140,7 @@ class TestCheckPermissions(TestCase):
 
         arguments = {
             "business_area": self.business_area.slug,
-            "Program": encode_id_base64_required(self.program.id, "Program"),
+            "program": self.program.slug,
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         assert result

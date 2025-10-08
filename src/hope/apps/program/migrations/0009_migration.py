@@ -10,41 +10,21 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            sql="""
-                ALTER TABLE program_program
-                DROP COLUMN IF EXISTS status_rank;
-
-                ALTER TABLE program_program
-                ADD COLUMN status_rank smallint DEFAULT 99;
-
-                -- Create trigger function to update status_rank
-                CREATE OR REPLACE FUNCTION program_program_status_rank_fn()
-                RETURNS trigger AS $$
-                BEGIN
-                    NEW.status_rank := CASE NEW.status
-                        WHEN 'DRAFT' THEN 1
-                        WHEN 'ACTIVE' THEN 2
-                        WHEN 'FINISHED' THEN 3
-                        ELSE 99
-                    END;
-                    RETURN NEW;
-                END;
-                $$ LANGUAGE plpgsql;
-
-                DROP TRIGGER IF EXISTS program_program_status_rank_trg ON program_program;
-
-                CREATE TRIGGER program_program_status_rank_trg
-                BEFORE INSERT OR UPDATE ON program_program
-                FOR EACH ROW
-                EXECUTE PROCEDURE program_program_status_rank_fn();
-
-                CREATE INDEX IF NOT EXISTS prog_status_rank_id_idx ON program_program (status_rank, id);
-                """,
-            reverse_sql="""
-                    DROP TRIGGER IF EXISTS program_program_status_rank_trg ON program_program;
-                    DROP FUNCTION IF EXISTS program_program_status_rank_fn;
-                    DROP INDEX IF EXISTS prog_status_rank_id_idx;
-                    ALTER TABLE program_program DROP COLUMN IF EXISTS status_rank;
-                """,
-        ),
+            """
+            ALTER TABLE program_program
+            ADD COLUMN IF NOT EXISTS status_rank smallint GENERATED ALWAYS AS (
+              CASE status
+                WHEN 'DRAFT' THEN 1
+                WHEN 'ACTIVE' THEN 2
+                WHEN 'FINISHED' THEN 3
+                ELSE 99
+              END
+            ) STORED;
+            CREATE INDEX prog_status_rank_id_idx ON program_program (status_rank, id);
+            """,
+            """
+            DROP INDEX IF EXISTS prog_status_rank_id_idx;
+            ALTER TABLE program_program DROP COLUMN IF EXISTS status_rank;
+            """,
+        )
     ]

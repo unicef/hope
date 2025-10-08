@@ -111,12 +111,18 @@ class UserViewSet(
             .exclude(expiry_date__lt=timezone.now())
         )
 
+        if program_slug := self.request.query_params.get("program"):
+            program = get_object_or_404(Program, slug=program_slug, business_area__slug=business_area_slug)
+            role_assignments_queryset = role_assignments_queryset.filter(Q(program=program) | Q(program=None))
+
+        role_assignment_ids = list(role_assignments_queryset.values_list("id", flat=True))
+
         queryset = (
             super()
             .get_queryset()
             .filter(
-                Q(role_assignments__in=role_assignments_queryset)
-                | Q(partner__role_assignments__in=role_assignments_queryset)
+                Q(role_assignments__id__in=role_assignment_ids)
+                | Q(partner__role_assignments__id__in=role_assignment_ids)
             )
             .distinct()
             .order_by("first_name")
@@ -127,7 +133,9 @@ class UserViewSet(
             role_assignments_queryset = role_assignments_queryset.order_by("business_area__slug", "role__name")
             queryset = queryset.prefetch_related(
                 models.Prefetch(
-                    "role_assignments", queryset=role_assignments_queryset, to_attr="cached_user_role_assignments"
+                    "role_assignments",
+                    queryset=role_assignments_queryset,
+                    to_attr="cached_user_role_assignments",
                 ),
                 models.Prefetch(
                     "partner__role_assignments",
