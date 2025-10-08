@@ -32,6 +32,26 @@ function PaymentsPeopleTable({
     id: household.id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for payments, only enabled on first page
+  const { data: paymentsCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsCount',
+      queryVariables,
+      businessArea,
+      household.id,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanPk: household.id,
+        ...queryVariables,
+      }),
+    enabled: page === 0,
+  });
 
   const {
     data: paymentsData,
@@ -69,6 +89,9 @@ function PaymentsPeopleTable({
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={paymentsCountData?.count}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

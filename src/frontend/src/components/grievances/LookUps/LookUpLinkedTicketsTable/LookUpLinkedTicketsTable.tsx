@@ -67,6 +67,8 @@ export function LookUpLinkedTicketsTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
 
   const { data, isLoading, error } = useQuery<PaginatedGrievanceTicketListList>(
@@ -124,7 +126,7 @@ export function LookUpLinkedTicketsTable({
         );
       }
     },
-    enabled: !choicesLoading && !!choicesData,
+    enabled: !choicesLoading && !!choicesData && page === 0,
   });
 
   if (choicesLoading) {
@@ -193,6 +195,8 @@ export function LookUpLinkedTicketsTable({
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}
         renderRow={renderRow}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );

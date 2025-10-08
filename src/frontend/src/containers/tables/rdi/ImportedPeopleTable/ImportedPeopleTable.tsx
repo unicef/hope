@@ -40,6 +40,8 @@ export function ImportedPeopleTable({
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       rdiId,
@@ -47,8 +49,9 @@ export function ImportedPeopleTable({
       duplicatesOnly: showDuplicates,
       businessAreaSlug: businessArea,
       programSlug: programId,
+      page,
     }),
-    [rdiId, household, showDuplicates, businessArea, programId],
+    [rdiId, household, showDuplicates, businessArea, programId, page],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -71,6 +74,23 @@ export function ImportedPeopleTable({
           { withPagination: true },
         ),
       ),
+  });
+
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsIndividualsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
   });
 
   return (
@@ -104,6 +124,9 @@ export function ImportedPeopleTable({
           isLoading={isLoading}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
+          itemsCount={countData?.count}
+          page={page}
+          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}
@@ -124,6 +147,9 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          itemsCount={countData?.count}
+          page={page}
+          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}

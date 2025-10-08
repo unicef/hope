@@ -12,7 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -29,11 +29,21 @@ interface ProgramCyclesTableProgramDetailsProps {
 const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
+  const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    page,
   });
+
+  // Update queryVariables when page changes
+  React.useEffect(() => {
+    setQueryVariables((prev) => ({
+      ...prev,
+      page,
+    }));
+  }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
@@ -67,6 +77,7 @@ const ProgramCyclesTableProgramDetails = ({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
 
   const canViewDetails = programId !== 'all';
@@ -169,6 +180,8 @@ const ProgramCyclesTableProgramDetails = ({
       setQueryVariables={setQueryVariables}
       actions={actions}
       itemsCount={dataProgramCyclesCount?.count}
+      page={page}
+      setPage={setPage}
     />
   );
 };
