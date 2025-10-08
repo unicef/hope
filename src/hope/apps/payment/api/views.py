@@ -34,7 +34,6 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
-from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -109,6 +108,8 @@ from hope.models.business_area import BusinessArea
 from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.log_entry import log_create
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan

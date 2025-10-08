@@ -8,7 +8,7 @@
  * * `RECEIVED` - RECEIVED
  * * `RECEIVED_WITH_ISSUES` - RECEIVED WITH ISSUES
  */
-export enum PaymentVerificationDetailsStatusEnum {
+export enum PaymentVerificationStatusEnum {
     NOT_RECEIVED = 'NOT_RECEIVED',
     PENDING = 'PENDING',
     RECEIVED = 'RECEIVED',
