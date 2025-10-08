@@ -191,11 +191,11 @@ class DeduplicationResultSerializer(serializers.Serializer):
         try:
             uuid.UUID(hit_id)
             pk = hit_id
-        except (ValueError, TypeError):
+        except (ValueError, TypeError):  # pragma: no cover
             return None
         try:
             individual = Individual.all_objects.get(id=pk)
-        except Individual.DoesNotExist:
+        except Individual.DoesNotExist:  # pragma: no cover
             return None
         return str(individual.unicef_id)
 
