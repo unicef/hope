@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class BiometricDeduplicationService:
+    GET_DUPLICATES_BATCH_SIZE = 200
     DEDUP_STATE_READY = "Ready"
     DEDUP_STATE_FAILED = "Failed"
 
@@ -56,7 +57,11 @@ class BiometricDeduplicationService:
         return str(deduplication_set_id)
 
     def get_deduplication_set_results(self, deduplication_set_id: str, individual_ids: List[str]) -> List[dict]:
-        return self.api.get_duplicates(deduplication_set_id, individual_ids)
+        results: List[dict] = []
+        for i in range(0, len(individual_ids), self.GET_DUPLICATES_BATCH_SIZE):
+            batch = individual_ids[i : i + self.GET_DUPLICATES_BATCH_SIZE]
+            results.extend(self.api.get_duplicates(deduplication_set_id, batch))
+        return results
 
     def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
         response_data = self.api.get_deduplication_set(deduplication_set_id)
