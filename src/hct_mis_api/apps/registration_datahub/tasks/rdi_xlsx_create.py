@@ -524,7 +524,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         if header in self._pdu_column_names:
                             continue
                         elif header.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_delivery_mechanism_fields(cell.value, header, cell.row, obj_to_create)
+                            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
                             continue
 
                         combined_fields = self.COMBINED_FIELDS

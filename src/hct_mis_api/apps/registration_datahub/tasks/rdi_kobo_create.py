@@ -345,7 +345,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
                         elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_delivery_mechanism_fields(
+                            self._handle_account_fields(
                                 i_value, i_field, int(f"{household_count}{ind_count}"), individual_obj
                             )
                         else:

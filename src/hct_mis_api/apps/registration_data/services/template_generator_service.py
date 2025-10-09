@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.apps.program.models import Program
 
 
@@ -36,7 +37,9 @@ class TemplateFileGeneratorService:
         self._add_households_columns()
         self._add_individuals_columns()
         self._add_people_columns()
-        self._handle_choices({**self.households_fields, **self.individuals_fields})
+        self._handle_choices(
+            {**self.households_fields, **self.individuals_fields, **FinancialInstitution.get_rdi_template_choices()}
+        )
         return wb
 
     def _add_households_columns(self) -> None:

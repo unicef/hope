@@ -252,6 +252,7 @@ class GenericRegistrationService(BaseRegistrationService):
             individual_id=individual.id,
             account_type=AccountType.objects.get(key="bank"),
             number=account_data["data"].pop("number", None),
+            financial_institution_id=account_data["data"].pop("account_code", None),  # TODO MB field name?
             **account_data,
         )
 
