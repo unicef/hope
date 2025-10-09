@@ -34,16 +34,19 @@ export function AccountField({
                              }: AccountProps): ReactElement {
   const { t } = useTranslation();
 
-  const accountFieldName = `${baseName}.${getIndexForId(
+  const accountIndex = getIndexForId(
     values[baseName],
     id,
-  )}`;
+  );
+  const accountFieldName = `${baseName}.${accountIndex}`;
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dataFields = account?.dataFields ? JSON.parse(account.dataFields) : {};
 
   const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
+  const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
+  const isBank = accountType === 'bank';
 
   return (
     <>
@@ -127,7 +130,7 @@ export function AccountField({
                 label={t('New Value')}
                 component={FormikSelectField}
                 choices={accountFinancialInstitutionChoices}
-                required
+                required={isBank}
               />
             </Grid>
           </Fragment>
@@ -148,7 +151,7 @@ export function AccountField({
               }
               const fieldProps = {
                 component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
-                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices } : {}),
+                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: isBank } : {}),
               };
 
               return (
