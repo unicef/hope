@@ -8,6 +8,7 @@ import pytest
 import requests
 from requests import HTTPError
 
+import requests
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
