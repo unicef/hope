@@ -87,6 +87,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -285,7 +286,8 @@ const PeriodicDataUpdatePendingForMerge = () => {
       title="Periodic Data Updates pending for Merge"
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
-      hidePagination={true}
+      page={page}
+      setPage={setPage}
       actions={
         canMerge
           ? [

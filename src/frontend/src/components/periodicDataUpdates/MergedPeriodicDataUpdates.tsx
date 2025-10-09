@@ -86,6 +86,8 @@ const MergedPeriodicDataUpdates = () => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
+  const [page, setPage] = useState(0);
+
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
       key={row.id}
@@ -133,7 +135,8 @@ const MergedPeriodicDataUpdates = () => {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       title="Merged Periodic Data Updates"
-      hidePagination={true}
+      page={page}
+      setPage={setPage}
     />
   );
 };

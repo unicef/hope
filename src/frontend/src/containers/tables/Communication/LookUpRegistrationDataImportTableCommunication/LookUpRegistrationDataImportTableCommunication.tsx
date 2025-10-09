@@ -79,6 +79,8 @@ function LookUpRegistrationDataImportTableCommunication({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const { data, isLoading, error } =
     useQuery<PaginatedRegistrationDataImportListList>({
       queryKey: [
@@ -111,6 +113,7 @@ function LookUpRegistrationDataImportTableCommunication({
           queryVariables,
         ),
       ),
+    enabled: !!businessArea && !!programId && page === 0,
   });
 
   const handleRadioChange = (id: string): void => {
@@ -141,6 +144,8 @@ function LookUpRegistrationDataImportTableCommunication({
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );

@@ -51,6 +51,8 @@ function CommunicationTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const { data, isLoading, error } = useQuery<PaginatedMessageListList>({
     queryKey: [
       'businessAreasProgramsMessagesList',
@@ -82,6 +84,7 @@ function CommunicationTable({
           queryVariables,
         ),
       ),
+    enabled: !!businessArea && !!programId && page === 0,
   });
 
   const renderRow = (message: MessageList): ReactElement => (
@@ -105,6 +108,8 @@ function CommunicationTable({
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}
         initialRowsPerPage={10}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );
