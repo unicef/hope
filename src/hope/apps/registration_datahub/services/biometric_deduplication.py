@@ -89,7 +89,7 @@ class BiometricDeduplicationService:
             try:
                 self.api.bulk_upload_images(deduplication_set_id, images)
 
-            except DeduplicationEngineAPI.DeduplicationEngineAPIException:
+            except DeduplicationEngineAPI.DeduplicationEngineAPIError:
                 logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
                 rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
                 rdi.save(update_fields=["deduplication_engine_status"])
