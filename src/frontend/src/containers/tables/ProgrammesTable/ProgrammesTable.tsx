@@ -66,6 +66,8 @@ function ProgrammesTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
@@ -92,6 +94,7 @@ function ProgrammesTable({
       RestService.restBusinessAreasProgramsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
+    enabled: page === 0,
   });
 
   return (
@@ -113,6 +116,8 @@ function ProgrammesTable({
               choicesData={choicesData}
             />
           )}
+          page={page}
+          setPage={setPage}
         />
       </TableWrapper>
     </>
