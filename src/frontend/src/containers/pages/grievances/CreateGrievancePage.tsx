@@ -366,7 +366,7 @@ const CreateGrievancePage = (): ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const requestData = prepareRestVariables(businessArea, values);
+            const requestData = prepareRestVariables(values);
             const data = await mutateAsync(requestData);
             const grievanceTickets = data || [];
             const grievanceTicket = grievanceTickets[0];

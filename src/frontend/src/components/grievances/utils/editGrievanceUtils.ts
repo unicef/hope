@@ -19,7 +19,7 @@ interface EditValuesTypes {
   issueType?: string | number;
   category?: string | number;
   language: string;
-   
+
   admin: any;
   area: string;
   selectedHousehold?;
@@ -53,7 +53,6 @@ function prepareInitialValueAddIndividual(
   delete individualData.flexFields;
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
-       
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -61,7 +60,6 @@ function prepareInitialValueAddIndividual(
   );
   initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
-       
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -83,10 +81,7 @@ function mapFieldsToObjects(fields: { [key: string]: Field }) {
 }
 
 function prepareInitialValueEditIndividual(initialValues, ticket) {
-  const {
-    individual,
-    ticketDetails,
-  } = ticket;
+  const { individual, ticketDetails } = ticket;
 
   const {
     documents,
@@ -164,7 +159,6 @@ const prepareInitialValueDict = {
 export function prepareInitialValues(
   ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
-   
   let initialValues: EditValuesTypes = {
     priority: ticket.priority === 0 ? 'Not set' : ticket.priority,
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
@@ -219,92 +213,66 @@ export const dataChangeComponentDict = {
   },
 };
 
- 
 function preparePositiveFeedbackVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          category: {
-            positiveFeedbackTicketExtras: {
-              household: values.selectedHousehold?.id,
-              individual: values.selectedIndividual?.id,
-            },
-          },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      category: {
+        positiveFeedbackTicketExtras: {
+          household: values.selectedHousehold?.id,
+          individual: values.selectedIndividual?.id,
         },
       },
     },
   };
 }
 
- 
 function prepareNegativeFeedbackVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          category: {
-            negativeFeedbackTicketExtras: {
-              household: values.selectedHousehold?.id,
-              individual: values.selectedIndividual?.id,
-            },
-          },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      category: {
+        negativeFeedbackTicketExtras: {
+          household: values.selectedHousehold?.id,
+          individual: values.selectedIndividual?.id,
         },
       },
     },
   };
 }
 
- 
 function prepareReferralVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          category: {
-            referralTicketExtras: {
-              household: values.selectedHousehold?.id,
-              individual: values.selectedIndividual?.id,
-            },
-          },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      category: {
+        referralTicketExtras: {
+          household: values.selectedHousehold?.id,
+          individual: values.selectedIndividual?.id,
         },
       },
     },
   };
 }
 
- 
 function prepareGrievanceComplaintVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        issueType: values.issueType,
-        linkedTickets: values.selectedLinkedTickets,
-      },
-    },
+    ...requiredVariables,
+    issueType: values.issueType,
+    linkedTickets: values.selectedLinkedTickets,
   };
 }
 
- 
 function prepareSensitiveVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-      },
-    },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
   };
 }
 
- 
 function prepareAddIndividualVariables(requiredVariables, values) {
   let { flexFields } = values.individualData;
   if (flexFields) {
@@ -316,45 +284,33 @@ function prepareAddIndividualVariables(requiredVariables, values) {
     }
   }
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-        extras: {
-          addIndividualIssueTypeExtras: {
-            individualData: { ...values.individualData, flexFields },
-          },
-        },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
+    extras: {
+      addIndividualIssueTypeExtras: {
+        individualData: { ...values.individualData, flexFields },
       },
     },
   };
 }
 
- 
 function prepareDeleteIndividualVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-      },
-    },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
   };
 }
 
- 
 function prepareEditIndividualVariables(requiredVariables, values) {
   const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
-       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
   const flexFields = values.individualDataUpdateFields
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
-       
       prev[camelCase(current.fieldName)] = current.fieldValue;
       return prev;
     }, {});
@@ -401,7 +357,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 }
 
- 
 function prepareEditHouseholdVariables(requiredVariables, values) {
   const householdData = values.householdDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
@@ -423,29 +378,14 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     delete householdData.roles;
   }
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        // linkedTickets: values.selectedLinkedTickets,
-        // extras: {
-        //   householdDataUpdateIssueTypeExtras: {
-        //     householdData,
-        //   },
-        // },
-      },
-    },
+    ...requiredVariables,
   };
 }
 
- 
 function prepareDefaultVariables(requiredVariables, values) {
   return {
-    variables: {
-      input: {
-        ...requiredVariables,
-        linkedTickets: values.selectedLinkedTickets,
-      },
-    },
+    ...requiredVariables,
+    linkedTickets: values.selectedLinkedTickets,
   };
 }
 
@@ -471,7 +411,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
- 
+
 export function prepareRestUpdateVariables(_businessArea, values, ticket) {
   const mapDocumentationToUpdate = (
     documentationToUpdate,
