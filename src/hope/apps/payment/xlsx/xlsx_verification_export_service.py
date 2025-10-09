@@ -10,7 +10,6 @@ import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from hope.apps.core.models import FileTemp
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
@@ -193,7 +192,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
     def get_email_context(self, user: "User") -> dict:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
+        payment_verification_id = str(self.payment_verification_plan.id)
         api = reverse("download-payment-verification-plan", args=[payment_verification_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
