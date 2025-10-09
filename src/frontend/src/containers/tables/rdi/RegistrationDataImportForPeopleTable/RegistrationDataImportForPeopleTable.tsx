@@ -42,6 +42,8 @@ export function RegistrationDataImportForPeopleTable({
   const { t } = useTranslation();
   const { businessArea, programSlug } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       search: filter.search,
@@ -54,6 +56,7 @@ export function RegistrationDataImportForPeopleTable({
         max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
       }),
       size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
+      page,
     }),
     [
       filter.search,
@@ -63,6 +66,7 @@ export function RegistrationDataImportForPeopleTable({
       filter.importDateRangeMax,
       filter.sizeMin,
       filter.sizeMax,
+      page,
     ],
   );
 
@@ -101,7 +105,7 @@ export function RegistrationDataImportForPeopleTable({
       programSlug,
       queryVariables,
     ],
-    queryFn: async() => {
+    queryFn: async () => {
       const params = createApiParams(
         { businessAreaSlug: businessArea, programSlug },
         queryVariables,
@@ -111,6 +115,7 @@ export function RegistrationDataImportForPeopleTable({
         params,
       );
     },
+    enabled: page === 0,
   });
 
   const handleRadioChange = (id: string): void => {
@@ -135,6 +140,8 @@ export function RegistrationDataImportForPeopleTable({
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count ?? (data as any)?.count ?? 0}
+        page={page}
+        setPage={setPage}
         renderRow={(row) => (
           <RegistrationDataImportForPeopleTableRow
             key={row.id}

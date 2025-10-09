@@ -40,6 +40,9 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     ],
   );
 
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -50,10 +53,10 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     return {
       ...filtered,
       businessAreaSlug: businessArea,
-      offset: queryVariables.offset,
-      limit: queryVariables.limit,
+      offset: page * 10,
+      limit: 10,
     };
-  }, [initialQueryVariables, queryVariables, businessArea]);
+  }, [initialQueryVariables, businessArea, page]);
 
   const {
     data: dataUsers,
@@ -69,6 +72,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     queryKey: ['businessAreasUsersCount', businessArea, filteredQueryVariables],
     queryFn: () =>
       RestService.restBusinessAreasUsersCountRetrieve(filteredQueryVariables),
+    enabled: page === 0,
   });
 
   return (
@@ -86,6 +90,8 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
         defaultOrderBy="status"
         defaultOrderDirection="desc"
         renderRow={(row) => <UsersTableRow user={row} key={row.id} />}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );
