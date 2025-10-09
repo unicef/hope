@@ -85,12 +85,11 @@ class VerificationPlanStatusChangeServices:
             if not self.payment_verification_plan.can_activate:
                 raise ValidationError("You can activate only PENDING/ERROR verifications")
 
-            if self.payment_verification_plan.is_rapid_pro:
-                if exception := self._activate_rapidpro():
-                    self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
-                    self.payment_verification_plan.error = str(exception)
-                    self.payment_verification_plan.save()
-                    raise exception
+            if self.payment_verification_plan.is_rapid_pro and (exception := self._activate_rapidpro()):
+                self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
+                self.payment_verification_plan.error = str(exception)
+                self.payment_verification_plan.save()
+                raise exception
 
             self.payment_verification_plan.set_active()
             self.payment_verification_plan.save()
