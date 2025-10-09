@@ -86,7 +86,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | dict:
+    def _parse_json_urns_error(self, e: Any, phone_numbers: list[str]) -> bool | dict | None:
         if not getattr(e, "response", None) or e.response.status_code != 400:
             return None
         try:

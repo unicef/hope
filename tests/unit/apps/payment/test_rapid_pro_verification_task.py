@@ -381,7 +381,7 @@ class TestRapidProVerificationTask(TestCase):
             e.response.json.return_value = {"error": "error"}
             assert api._parse_json_urns_error(e, ["a", "b"]) == {"error": {"error": "error"}}
 
-            e.response.json.side_effect = Exception("test")
+            e.response.json.side_effect = AttributeError("test")
             assert api._parse_json_urns_error(e, ["a", "b"]) is None
 
 
