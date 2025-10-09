@@ -1691,6 +1691,7 @@ class PaymentPlanManagerialViewSet(
                     PaymentPlan.Status.ACCEPTED,
                 ],
             )
+            .select_related("program_cycle__program")
         )
 
     # TODO: e2e failed probably because of cache here
@@ -1712,11 +1713,16 @@ class PaymentPlanManagerialViewSet(
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-
+        payment_plans = PaymentPlan.objects.filter(id__in=serializer.validated_data["ids"]).select_related(
+            "program_cycle__program",
+            "imported_file",
+            "export_file_entitlement",
+            "export_file_per_fsp",
+        )
         with transaction.atomic():
-            for payment_plan_id_str in serializer.validated_data["ids"]:
+            for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    payment_plan_id_str,
+                    payment_plan,
                     input_data,
                     self.business_area,
                     request,
@@ -1727,13 +1733,11 @@ class PaymentPlanManagerialViewSet(
     @transaction.atomic
     def _perform_payment_plan_status_action(
         self,
-        payment_plan_id: str,
+        payment_plan: PaymentPlan,
         input_data: dict,
         business_area: BusinessArea,
         request: Request,
     ) -> None:
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-
         if not self.request.user.has_perm(
             self._get_action_permission(input_data["action"]),  # type: ignore
             payment_plan.program_cycle.program or business_area,
@@ -1758,7 +1762,7 @@ class PaymentPlanManagerialViewSet(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
-            programs=payment_plan.program_cycle.program.pk,
+            programs=payment_plan.program_cycle.program_id,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

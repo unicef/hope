@@ -56,14 +56,14 @@ const ProgramCyclesTableProgramDetails = ({
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsCyclesCountRetrieve',
-      programId,
+      program.slug,
       businessAreaSlug,
       queryVariables,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         createApiParams(
-          { businessAreaSlug, programSlug: programId },
+          { businessAreaSlug, programSlug: program.slug },
           queryVariables,
         ),
       ),
