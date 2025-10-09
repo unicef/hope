@@ -9,7 +9,6 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 
 from hope.apps.accountability.models import Survey
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.household.models import Household
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ class ExportSurveySampleService:
 
     def get_email_context(self) -> dict:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        survey_id = encode_id_base64(self.survey.id, "Survey")
+        survey_id = str(self.survey.id)
         api = reverse("download-survey-sample", args=[survey_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 

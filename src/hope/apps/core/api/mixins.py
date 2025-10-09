@@ -166,7 +166,8 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
         )
 
         return queryset.filter(
-            Q(**{f"{self.program_model_field}__in": program_ids}) | Q(**{f"{self.program_model_field}__isnull": True})
+            Q(**{f"{self.program_model_field}__id__in": program_ids})
+            | Q(**{f"{self.program_model_field}__isnull": True})
         )
 
 
