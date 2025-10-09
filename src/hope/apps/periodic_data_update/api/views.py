@@ -232,6 +232,7 @@ class PDUOnlineEditViewSet(
             .prefetch_related(
                 Prefetch("authorized_users", queryset=User.objects.order_by("first_name", "last_name", "username")),
             )
+            .order_by("id")
         )
 
     @transaction.atomic
