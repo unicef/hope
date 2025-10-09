@@ -343,23 +343,26 @@ class TestUpdateIndividualDataService(TestCase):
             financial_institution=fi1,
             account_type=AccountType.objects.get(key="mobile"),
         )
-
         self.ticket.individual_data_update_ticket_details.individual_data["accounts"] = [
             {
                 "approve_status": True,
                 "value": {
+                    "number": "2222",
+                    "financial_institution": str(fi1.id),
                     "data_fields": {
-                        "financial_institution": str(fi1.id),
                         "new_field": "new_value",
-                        "number": "2222",
                     },
-                    "name": "mobile",
+                    "account_type": "mobile",
                 },
             }
         ]
         self.ticket.individual_data_update_ticket_details.individual_data["accounts_to_edit"] = [
             {
                 "approve_status": True,
+                "financial_institution": str(fi2.id),
+                "financial_institution_previous_value": str(fi1.id),
+                "number": "123123",
+                "number_previous_value": "123",
                 "data_fields": [
                     {
                         "name": "field",
@@ -367,12 +370,6 @@ class TestUpdateIndividualDataService(TestCase):
                         "value": "updated_value",
                     },
                     {"name": "new_field", "previous_value": None, "value": "new_value"},
-                    {"name": "number", "previous_value": "123", "value": "123123"},
-                    {
-                        "name": "financial_institution",
-                        "previous_value": str(fi1.id),
-                        "value": str(fi2.id),
-                    },
                 ],
                 "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
                 "name": "mobile",
@@ -399,6 +396,7 @@ class TestUpdateIndividualDataService(TestCase):
         assert new_account.financial_institution == fi1
         assert new_account.data == {
             "new_field": "new_value",
+            "number": "2222",
         }
 
     def test_update_people_individual_hh_fields(self) -> None:
