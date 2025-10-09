@@ -16,7 +16,6 @@ import {
   ListItemText,
   MenuItem,
   Select,
-  SelectChangeEvent,
   styled,
   Tooltip,
   Typography,
@@ -93,25 +92,30 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     permissions,
   );
 
+  const availableFundsCommitments = useMemo(
+    () => paymentPlan?.availableFundsCommitments || [],
+    [paymentPlan],
+  );
+  const selectedCommitment = useMemo(() => {
+    if (!selectedFundsCommitment) return undefined;
+    return availableFundsCommitments.find(
+      (commitment) =>
+        commitment?.fundsCommitmentNumber ===
+        selectedFundsCommitment?.fundsCommitmentNumber,
+    );
+  }, [availableFundsCommitments, selectedFundsCommitment]);
+
   const handleFundsCommitmentChange = (newValue: any) => {
     setSelectedFundsCommitment(newValue);
     setSelectedItems([]);
   };
 
-  const availableFundsCommitments =
-    paymentPlan?.availableFundsCommitments || [];
-  const selectedCommitment = availableFundsCommitments.find(
-    (commitment) =>
-      commitment.fundsCommitmentNumber ===
-      selectedFundsCommitment?.fundsCommitmentNumber,
-  );
-
-  const handleItemsChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as unknown as string[];
-
+  const handleItemsChange = (event: any) => {
+    const value = event.target.value as string[];
+    if (!selectedCommitment) return;
     if (value.includes('select-all')) {
       const allItems =
-        selectedCommitment?.fundsCommitmentItems.map(
+        selectedCommitment.fundsCommitmentItems?.map(
           (item) => item.recSerialNumber,
         ) || [];
       if (selectedItems.length === allItems.length) {
@@ -122,10 +126,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     } else {
       const clickedItem = Number(value[value.length - 1]); // Get the last clicked item
       if (selectedItems.includes(clickedItem)) {
-        // If the item is already selected, remove it
         setSelectedItems(selectedItems.filter((item) => item !== clickedItem));
       } else {
-        // If the item is not selected, add it
         setSelectedItems([...selectedItems, clickedItem]);
       }
     }
@@ -143,7 +145,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         await queryClient.invalidateQueries({
           queryKey: ['paymentPlan'],
         });
-//        TODO: Maciej please check it
+        //        TODO: Maciej please check it
       } catch (error: any) {
         const errorMessages = error?.data.state.data?.map(
           (x: any) => x.message,
@@ -194,14 +196,14 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   }
                   options={availableFundsCommitments}
                   getOptionLabel={(option) =>
-                    option.fundsCommitmentNumber || ''
+                    option?.fundsCommitmentNumber || ''
                   }
                   renderInput={(params) => (
                     <TextField {...params} label={t('Funds Commitment')} />
                   )}
                   renderOption={(props, option) => (
-                    <MenuItem {...props} value={option.fundsCommitmentNumber}>
-                      {option.fundsCommitmentNumber}
+                    <MenuItem {...props} value={option?.fundsCommitmentNumber}>
+                      {option?.fundsCommitmentNumber}
                     </MenuItem>
                   )}
                   isOptionEqualToValue={(option, value) =>
@@ -244,7 +246,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       <Checkbox
                         checked={
                           selectedCommitment?.fundsCommitmentItems.length > 0 &&
-                          selectedCommitment.fundsCommitmentItems.every(
+                          selectedCommitment?.fundsCommitmentItems.every(
                             (item) =>
                               selectedItems.includes(item.recSerialNumber),
                           )
@@ -293,8 +295,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     disabled={
                       loadingAssign ||
                       !canAssignFunds ||
-                      (selectedFundsCommitment && selectedItems.length === 0) ||
-                      (!selectedFundsCommitment && selectedItems.length > 0) ||
+                      !selectedFundsCommitment ||
+                      selectedItems.length === 0 ||
                       isAlreadyAssigned
                     }
                   >
@@ -311,7 +313,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
                 <Typography variant="h6" fontWeight="bold" mb={2}>
                   {t('Funds Commitment Number')}:{' '}
-                  {selectedCommitment.fundsCommitmentNumber}{' '}
+                  {selectedCommitment?.fundsCommitmentNumber ?? '-'}{' '}
                   {paymentPlan.fundsCommitments.insufficientAmount && (
                     <WarningTooltip
                       message={t('Insufficient Commitment Amount')}
