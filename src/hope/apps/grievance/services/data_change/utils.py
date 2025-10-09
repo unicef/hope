@@ -293,7 +293,6 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
 def handle_update_account(account: dict) -> Account | None:
     account_instance = get_object_or_404(Account, id=account.get("id"))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
-    data_fields_dict["number"] = account["number"]
     account_instance.number = account["number"]
     account_instance.financial_institution_id = account.get("financial_institution")
     account_instance.account_data = data_fields_dict
@@ -309,7 +308,6 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
         rdi_merge_status=individual.rdi_merge_status,
     )
     account_instance.data = account.get("data_fields", {})
-    account_instance.data["number"] = account["number"]
     return account_instance
 
 
