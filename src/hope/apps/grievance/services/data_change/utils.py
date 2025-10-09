@@ -22,11 +22,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_ONE,
 )
 from hope.apps.core.models import FlexibleAttribute
-from hope.apps.core.utils import (
-    encode_id_base64,
-    encode_id_base64_required,
-    serialize_flex_attributes,
-)
+from hope.apps.core.utils import serialize_flex_attributes
 from hope.apps.geo import models as geo_models
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import (
@@ -320,10 +316,10 @@ def prepare_previous_documents(
     for document_data in documents_to_remove_with_approve_status:
         document_id = document_data.get("value")
         document: Document = get_object_or_404(Document, id=document_id)
-        previous_documents[encode_id_base64_required(document.id, "Document")] = {
-            "id": encode_id_base64(document.id, "Document"),
+        previous_documents[str(document.id)] = {
+            "id": str(document.id),
             "document_number": document.document_number,
-            "individual": encode_id_base64(document.individual.id, "Individual"),
+            "individual": str(document.individual.id),
             "key": document.type.key,
             "country": document.country.iso_code3,
         }
@@ -378,11 +374,10 @@ def prepare_previous_identities(
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=identity_id)
-        encoded_identity = encode_id_base64_required(identity.id, "IndividualIdentity")
-        previous_identities[encoded_identity] = {
-            "id": encoded_identity,  # TODO: can be removed maybe
+        previous_identities[str(identity.id)] = {
+            "id": str(identity.id),
             "number": identity.number,
-            "individual": encode_id_base64(identity.individual.id, "Individual"),
+            "individual": str(identity.individual.id),
             "partner": identity.partner.name,
             "country": identity.country.iso_code3,
         }

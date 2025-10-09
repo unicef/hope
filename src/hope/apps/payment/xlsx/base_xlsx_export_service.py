@@ -9,7 +9,6 @@ from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.utils import get_link
 
 if TYPE_CHECKING:
@@ -73,7 +72,7 @@ class XlsxExportBaseService:
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
     def get_email_context(self, user: "User") -> dict:
-        payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        payment_verification_id = str(self.payment_plan.id)
         path_name = "download-payment-plan-payment-list"
         link = get_link(reverse(path_name, args=[payment_verification_id]))
 
