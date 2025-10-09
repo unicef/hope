@@ -10,6 +10,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import (
@@ -1326,6 +1327,10 @@ class FlexFieldArrayField(ArrayField):
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
+    CACHE_KEY_AREAS_DICT = "FinancialServiceProviderXlsxTemplate:areas_dict"
+    CACHE_KEY_COUNTRIES_DICT = "FinancialServiceProviderXlsxTemplate:countries_dict"
+    CACHE_TTL_SECONDS = 60 * 10  # 10 minutes
+
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
@@ -1396,8 +1401,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         blank=True,
     )
 
-    @staticmethod
+    @classmethod
     def get_data_from_payment_snapshot(
+        cls,
         household_data: Dict[str, Any],
         core_field: Dict[str, Any],
     ) -> Optional[str]:
@@ -1413,12 +1419,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
 
             if main_key in {"country_origin_id", "country_id"}:
-                country = Country.objects.filter(pk=household_data.get(main_key)).first()
-                return country.iso_code3 if country else None
+                country = cls.get_countries_dict().get(household_data.get(main_key))
+                return country["iso_code3"] if country else None
 
             if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
-                area = Area.objects.filter(pk=household_data.get(main_key)).first()
-                return f"{area.p_code} - {area.name}" if area else "" if area else None
+                area = cls.get_areas_dict().get(household_data.get(main_key))
+                return f"{area['p_code']} - {area['name']}" if area else None
 
             if main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
@@ -1575,10 +1581,30 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         doc_numbers = [doc.get("document_number", "") for doc in doc_list]
         return ", ".join(doc_numbers)
 
-    @staticmethod
-    def get_admin_level_2(snapshot_data: Dict[str, Any]) -> str:
-        area = Area.objects.filter(pk=snapshot_data.get("admin2_id")).first()
-        return area.name if area else ""
+    @classmethod
+    def get_admin_level_2(cls, snapshot_data: Dict[str, Any]) -> str:
+        area = cls.get_areas_dict().get(snapshot_data.get("admin2_id"))
+        return area["name"] if area else ""
+
+    @classmethod
+    def get_areas_dict(cls) -> dict:
+        cached = cache.get(cls.CACHE_KEY_AREAS_DICT)
+        if cached is not None:
+            return cached
+
+        data = {str(row["pk"]): row for row in Area.objects.values("pk", "name", "p_code")}
+        cache.set(cls.CACHE_KEY_AREAS_DICT, data, timeout=cls.CACHE_TTL_SECONDS)
+        return data
+
+    @classmethod
+    def get_countries_dict(cls) -> dict:
+        cached = cache.get(cls.CACHE_KEY_COUNTRIES_DICT)
+        if cached is not None:
+            return cached
+
+        data = {str(row["pk"]): row for row in Country.objects.values("pk", "iso_code3")}
+        cache.set(cls.CACHE_KEY_COUNTRIES_DICT, data, timeout=cls.CACHE_TTL_SECONDS)
+        return data
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"

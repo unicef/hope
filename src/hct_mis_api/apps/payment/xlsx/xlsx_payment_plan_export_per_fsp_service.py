@@ -25,6 +25,7 @@ from hct_mis_api.apps.payment.models import (
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
@@ -179,15 +180,20 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def add_rows(
         self,
-        payment_ids: List[int],
+        split: PaymentPlanSplit,
         ws: "Worksheet",
     ) -> None:
-        for i in range(0, len(payment_ids), self.batch_size):
-            batch_ids = payment_ids[i : i + self.batch_size]
-            payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
-
-            for payment in payment_qs:
-                ws.append(self.get_payment_row(payment))
+        qs = (
+            split.split_payment_items.eligible()
+            .select_related(
+                "household_snapshot",
+                "delivery_type",
+                "financial_service_provider",
+            )
+            .order_by("unicef_id")
+        )
+        for payment in qs.iterator(chunk_size=self.batch_size):
+            ws.append(self.get_payment_row(payment))
 
     def get_payment_row(self, payment: Payment) -> List[str]:
         if self.payment_generate_token_and_order_numbers:
@@ -275,9 +281,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 filename += f"-chunk{i + 1}"
             wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(split.split_payment_items.eligible().order_by("unicef_id").values_list("id", flat=True))
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))  # type: ignore
-            self.add_rows(payment_ids, ws_fsp)
+            self.add_rows(split, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
             workbook_name = (
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
