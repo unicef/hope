@@ -69,13 +69,13 @@ export function AccountField({
               <LabelizedField
                 label={t('New Value')}
                 value={account?.accountType || ''}
-              />
+              /> aaa
             </Grid>
           </>
         ) : (
           <Grid size={{ xs: 8 }}>
             <Field
-              name={`${accountFieldName}.name`}
+              name={`${accountFieldName}.accountType`}
               variant="outlined"
               label={t('New Value')}
               component={FormikSelectField}
@@ -107,12 +107,12 @@ export function AccountField({
             <Grid size={{ xs: 4 }}>
               <LabelizedField
                 label={t('Account Item')}
-                value="financial_institution"
+                value="financial institution"
               />
             </Grid>
             <Grid size={{ xs: 8 }}>
               <Field
-                name={`${accountFieldName}.financial_institution`}
+                name={`${accountFieldName}.financialInstitution`}
                 variant="outlined"
                 label={t('New Value')}
                 component={FormikSelectField}

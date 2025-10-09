@@ -403,7 +403,7 @@ export function validateUsingSteps(
               errors.individualDataUpdateFieldsAccounts =
                 'Account Number is required';
             }
-            if (!acc.name) {
+            if (!acc.accountType) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Type is required';
             }
@@ -427,7 +427,7 @@ export function validateUsingSteps(
               errors.individualDataUpdateAccountsToEdit =
                 'Account Number is required';
             }
-            if (!acc.financial_institution) {
+            if (!acc.financialInstitution) {
               errors.individualDataUpdateAccountsToEdit =
                 'Account Financial Institution is required';
             }

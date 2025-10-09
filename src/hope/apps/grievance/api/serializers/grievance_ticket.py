@@ -34,16 +34,19 @@ from hope.apps.program.models import Program
 
 
 class CreateAccountSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    approve_status = serializers.BooleanField()
-    value = serializers.JSONField(required=True)
+    account_type = serializers.CharField(required=True)
+    financial_institution = serializers.CharField(required=True)
+    number = serializers.CharField(required=True)
+    data_fields = serializers.JSONField(required=False)
+    approve_status = serializers.BooleanField(required=False)
 
 
 class EditAccountSerializer(serializers.Serializer):
     id = serializers.UUIDField()
-    name = serializers.CharField(required=True)
-    data_fields = serializers.JSONField(required=True)
-    approve_status = serializers.BooleanField()
+    financial_institution = serializers.CharField(required=True)
+    number = serializers.CharField(required=True)
+    data_fields = serializers.JSONField(required=False)
+    approve_status = serializers.BooleanField(required=False)
 
 
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
@@ -616,7 +619,7 @@ class GrievanceCreateNoteSerializer(serializers.Serializer):
 
 
 class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
-    individual_approve_data = serializers.JSONField()
+    individual_approve_data = serializers.JSONField(required=False)
     approved_documents_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_documents_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_documents_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
