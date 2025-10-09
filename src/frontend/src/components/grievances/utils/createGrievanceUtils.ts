@@ -466,7 +466,6 @@ export function prepareVariables(businessArea, values) {
 }
 
 export function prepareRestVariables(values: any): CreateGrievanceTicket {
-  // Build extras based on category and issue type
   const extras: any = {};
   const category = parseInt(values.category, 10);
   const issueType = values.issueType
