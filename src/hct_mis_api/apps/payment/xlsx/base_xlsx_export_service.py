@@ -56,15 +56,13 @@ class XlsxExportBaseService:
 
         ws.column_dimensions = dim_holder
 
-    def _add_col_bgcolor(
-        self, col: Optional[List] = None, hex_code: str = "A0FDB0", no_of_columns: Optional[int] = None
-    ) -> None:
+    def _add_col_bgcolor(self, col: Optional[List] = None, hex_code: str = "A0FDB0") -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
             bd = Side(style="thin", color="999999")
             for y in range(
                 1,
-                (self.ws_export_list.max_column if no_of_columns is None else no_of_columns) + 1,
+                self.ws_export_list.max_row + 1,
             ):
                 cell = self.ws_export_list.cell(row=y, column=row_index)
                 cell.fill = fill
@@ -79,9 +77,9 @@ class XlsxExportBaseService:
         return ""
 
     def get_email_context(self, user: "User") -> Dict:
-        payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         path_name = "download-payment-plan-payment-list"
-        link = self.get_link(reverse(path_name, args=[payment_verification_id]))
+        link = self.get_link(reverse(path_name, args=[payment_plan_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 

@@ -859,6 +859,9 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
+    CACHE_KEY_ALL_DOC_TYPES = "DocumentType:all_doc_types"
+    CACHE_TTL_SECONDS = 60 * 10  # 10 minutes
+
     label = models.CharField(max_length=100)
     key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)
@@ -880,8 +883,13 @@ class DocumentType(TimeStampedUUIDModel):
 
     @classmethod
     def get_all_doc_types(cls) -> List[str]:
-        """return list of Document Types keys"""
-        return list(cls.objects.all().only("key").values_list("key", flat=True))
+        cached = cache.get(cls.CACHE_KEY_ALL_DOC_TYPES)
+        if cached is not None:
+            return cached
+
+        data = list(cls.objects.all().only("key").values_list("key", flat=True))
+        cache.set(cls.CACHE_KEY_ALL_DOC_TYPES, data, timeout=cls.CACHE_TTL_SECONDS)
+        return data
 
 
 class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
