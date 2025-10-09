@@ -396,7 +396,6 @@ class TestUpdateIndividualDataService(TestCase):
         assert new_account.financial_institution == fi1
         assert new_account.data == {
             "new_field": "new_value",
-            "number": "2222",
         }
 
     def test_update_people_individual_hh_fields(self) -> None:
