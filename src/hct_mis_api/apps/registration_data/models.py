@@ -443,6 +443,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
         duplicates = []
         for pair in similarity_pairs:
             duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            if not duplicate:
+                continue
             household = duplicate.household
             duplicates.append(
                 dict(
