@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class BiometricDeduplicationService:
-    GET_DUPLICATES_BATCH_SIZE = 200
+    GET_DUPLICATES_BATCH_SIZE = 100
     DEDUP_STATE_READY = "Ready"
     DEDUP_STATE_FAILED = "Failed"
 
