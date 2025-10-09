@@ -1149,9 +1149,8 @@ class TestPaymentGatewayService(BaseTestCase):
         fi = FinancialInstitution.objects.create(name="Bank B", type=FinancialInstitution.FinancialInstitutionType.BANK)
         account_data = {"financial_institution": str(fi.pk)}
 
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(Exception, match="No Financial Institution Mapping found"):
             PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
-        assert "No Financial Institution Mapping found" in str(exc.value)
 
     def test_map_financial_institution_with_code_and_fsp_is_uba_passthrough(self) -> None:
         uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
@@ -1191,6 +1190,5 @@ class TestPaymentGatewayService(BaseTestCase):
         # No mappings created for the given code
         account_data = {"code": "UNKNOWN_CODE"}
 
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(Exception, match="No Financial Institution Mapping found"):
             PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
-        assert "No Financial Institution Mapping found" in str(exc.value)
