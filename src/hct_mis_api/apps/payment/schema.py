@@ -375,7 +375,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return PaymentNode.get_collector_field(self, "full_name")
 
     def resolve_snapshot_collector_account_data(self, info: Any) -> Any:
-        # TODO MB refactor FE
         return PaymentNode.get_collector_field(self, "account_data")
 
     @classmethod
