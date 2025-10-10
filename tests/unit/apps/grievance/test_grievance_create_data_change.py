@@ -15,6 +15,7 @@ from extras.test_utils.factories.household import (
     IndividualFactory,
     IndividualIdentityFactory,
 )
+from extras.test_utils.factories.payment import AccountFactory, FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.models import Partner
 from hope.apps.account.permissions import Permissions
@@ -33,6 +34,7 @@ from hope.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
+from hope.apps.payment.models import AccountType
 from hope.apps.program.models import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -432,5 +434,187 @@ class TestGrievanceCreateDataChangeAction:
             },
         }
         response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.data[0]
+
+    def test_create_account_bank_requires_financial_institution(self, create_user_role_with_permissions: Any) -> None:
+        # Create account types
+        AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank"})
+        AccountType.objects.get_or_create(key="mobile", defaults={"label": "Mobile"})
+
+        # Create financial institution
+        financial_institution = FinancialInstitutionFactory.create(name="Test Bank")
+
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+
+        # Test 1: Bank account without financial_institution should fail
+        input_data_fail = {
+            "description": "Test bank account without financial institution",
+            "assigned_to": str(self.user.id),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].id),
+                        "individual_data": {
+                            "accounts": [
+                                {
+                                    "account_type": "bank",
+                                    # Missing financial_institution - this should fail validation
+                                    "number": "1234567890",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data_fail, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "financial_institution" in str(response.data).lower()
+
+        # Test 2: Bank account with financial_institution should succeed
+        input_data_success = {
+            "description": "Test bank account with financial institution",
+            "assigned_to": str(self.user.id),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].id),
+                        "individual_data": {
+                            "accounts": [
+                                {
+                                    "account_type": "bank",
+                                    "financial_institution": financial_institution.name,
+                                    "number": "1234567890",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data_success, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.data[0]
+
+    def test_create_account_non_bank_optional_financial_institution(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        # Create account types
+        AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank"})
+        AccountType.objects.get_or_create(key="mobile", defaults={"label": "Mobile"})
+
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+
+        # Test: Mobile account without financial_institution should succeed
+        input_data = {
+            "description": "Test mobile account without financial institution",
+            "assigned_to": str(self.user.id),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].id),
+                        "individual_data": {
+                            "accounts": [
+                                {
+                                    "account_type": "mobile",
+                                    # No financial_institution - this should be OK for non-bank accounts
+                                    "number": "+48123456789",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "id" in response.data[0]
+
+    def test_edit_account_bank_requires_financial_institution(self, create_user_role_with_permissions: Any) -> None:
+        # Create account types
+        bank_type = AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank"})[0]
+        AccountType.objects.get_or_create(key="mobile", defaults={"label": "Mobile"})[0]
+
+        # Create financial institution
+        financial_institution = FinancialInstitutionFactory.create(name="Test Bank")
+
+        # Create existing bank account
+        bank_account = AccountFactory.create(
+            individual=self.individuals[0],
+            account_type=bank_type,
+            financial_institution=financial_institution,
+            number="1111111111",
+        )
+
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+
+        # Test 1: Editing bank account without financial_institution should fail
+        input_data_fail = {
+            "description": "Test edit bank account without financial institution",
+            "assigned_to": str(self.user.id),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].id),
+                        "individual_data": {
+                            "accounts_to_edit": [
+                                {
+                                    "id": str(bank_account.id),
+                                    # Missing financial_institution - this should fail validation for bank account
+                                    "number": "2222222222",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data_fail, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "financial_institution" in str(response.data).lower()
+
+        # Test 2: Editing bank account with financial_institution should succeed
+        input_data_success = {
+            "description": "Test edit bank account with financial institution",
+            "assigned_to": str(self.user.id),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].id),
+                        "individual_data": {
+                            "accounts_to_edit": [
+                                {
+                                    "id": str(bank_account.id),
+                                    "financial_institution": "New Bank Name",
+                                    "number": "3333333333",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data_success, format="json")
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]

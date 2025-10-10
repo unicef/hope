@@ -594,9 +594,8 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
       const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
         values.individualDataUpdateFieldsIdentities,
       );
-      const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
-        values.individualDataUpdateFieldsPaymentChannels,
-      );
+      const individualDataUpdateFieldsAccountsWithoutIds =
+        removeIdPropertyFromObjects(values.individualDataUpdateFieldsAccounts);
 
       extras.issueType = {
         individualDataUpdateIssueTypeExtras: {
@@ -609,11 +608,8 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
             identities: newlyAddedIdentitiesWithoutIds,
             identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
             identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-            paymentChannels: newlyAddedPaymentChannelsWithoutIds,
-            paymentChannelsToRemove:
-              values.individualDataUpdatePaymentChannelsToRemove,
-            paymentChannelsToEdit:
-              values.individualDataUpdatePaymentChannelsToEdit,
+            accounts: individualDataUpdateFieldsAccountsWithoutIds,
+            accounts_to_edit: values.individualDataUpdateAccountsToEdit,
           },
         },
       };
