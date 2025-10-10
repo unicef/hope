@@ -163,7 +163,7 @@ function Entitlement({
       id: string;
       programSlug: string;
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve(
+      RestService.restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve(
         {
           businessAreaSlug,
           id,

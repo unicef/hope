@@ -93,6 +93,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
 
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
@@ -289,7 +290,8 @@ const PeriodicDataUpdatePendingForApproval = () => {
       title="Periodic Data Updates pending for Approval"
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
-      hidePagination={true}
+      page={page}
+      setPage={setPage}
       actions={
         canApprove
           ? [

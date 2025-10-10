@@ -40,6 +40,8 @@ export function LookUpProgrammesTableSurveys({
   const { selectedProgram: programFromContext } = useProgramContext();
   const beneficiaryGroup = programFromContext?.beneficiaryGroup;
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
@@ -54,6 +56,7 @@ export function LookUpProgrammesTableSurveys({
       budgetMin: filter.budgetMin,
       dataCollectingType: filter.dataCollectingType,
       ordering: 'startDate',
+      page,
     }),
     [
       businessArea,
@@ -67,6 +70,7 @@ export function LookUpProgrammesTableSurveys({
       filter.budgetMin,
       filter.budgetMax,
       filter.dataCollectingType,
+      page,
     ],
   );
 
@@ -89,6 +93,15 @@ export function LookUpProgrammesTableSurveys({
         }),
       ),
     enabled: !!queryVariables.businessAreaSlug,
+  });
+
+  const { data: countData } = useQuery({
+    queryKey: ['businessAreasProgramsCount', queryVariables, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
+    enabled: page === 0,
   });
 
   const handleRadioChange = (id: string): void => {
@@ -118,6 +131,9 @@ export function LookUpProgrammesTableSurveys({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
+          itemsCount={countData?.count}
+          page={page}
+          setPage={setPage}
           renderRow={(row: ProgramList) => (
             <LookUpProgrammesTableRowSurveys
               key={row.id}
