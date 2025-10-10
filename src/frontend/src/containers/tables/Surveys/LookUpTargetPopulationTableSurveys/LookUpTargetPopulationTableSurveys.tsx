@@ -42,6 +42,8 @@ export function LookUpTargetPopulationTableSurveys({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       totalHouseholdsCountWithValidPhoneNoMin:
@@ -58,6 +60,7 @@ export function LookUpTargetPopulationTableSurveys({
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programSlug: programId,
+      page,
     }),
     [
       filter.totalHouseholdsCountMin,
@@ -67,6 +70,7 @@ export function LookUpTargetPopulationTableSurveys({
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
       programId,
+      page,
     ],
   );
 
@@ -97,6 +101,24 @@ export function LookUpTargetPopulationTableSurveys({
     },
   });
 
+  // Count query, enabled only on page 0
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -114,6 +136,9 @@ export function LookUpTargetPopulationTableSurveys({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={countData?.count}
+        page={page}
+        setPage={setPage}
         renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowSurveys
             radioChangeHandler={enableRadioButton && handleRadioChange}

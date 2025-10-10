@@ -315,6 +315,12 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             .select_related(
                 "partner",
             )
+            .prefetch_related(
+                "role_assignments__business_area",
+                "role_assignments__program",
+                "role_assignments__role",
+                "groups",
+            )
         )
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Sequence[str]:

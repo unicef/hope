@@ -63,11 +63,36 @@ export function TargetPopulationTable({
     ],
   );
 
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  // Count query (enabled only on page 0)
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsCount',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  // Main data query
   const {
     data: targetPopulationsData,
     isLoading,
@@ -78,6 +103,7 @@ export function TargetPopulationTable({
       businessArea,
       programId,
       queryVariables,
+      page,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
@@ -132,6 +158,9 @@ export function TargetPopulationTable({
             canViewDetails={canViewDetails}
           />
         )}
+        page={page}
+        setPage={setPage}
+        itemsCount={countData?.count ?? undefined}
       />
     </TableWrapper>
   );

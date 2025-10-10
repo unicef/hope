@@ -15,7 +15,6 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
 from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
@@ -57,7 +56,6 @@ class TestExcludeHouseholds(BaseTestCase):
         cls.another_payment_plan = PaymentPlanFactory(
             created_by=cls.user,
         )
-        cls.payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
         hoh1 = IndividualFactory(household=None)
         cls.household_1 = HouseholdFactory(head_of_household=hoh1)
