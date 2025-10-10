@@ -6,7 +6,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
-from django.shortcuts import get_object_or_404
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import (

@@ -28,7 +28,6 @@ from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
-    from django.http import HttpHeaders
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
