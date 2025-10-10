@@ -991,6 +991,7 @@ class PaymentChoicesSerializer(serializers.Serializer):
 
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
+    parent_id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
     household_unicef_id = serializers.CharField(source="household.unicef_id")
@@ -1022,6 +1023,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "unicef_id",
+            "parent_id",
             "household_id",
             "household_unicef_id",
             "household_size",
