@@ -9,7 +9,6 @@ from hope.apps.account.models import USER_STATUS_CHOICES, Partner
 from hope.apps.core.utils import CustomOrderingFilter
 
 if TYPE_CHECKING:
-
     from django.db.models.query import QuerySet
 
     from hope.apps.account.models import User
