@@ -199,7 +199,7 @@ export const GrievancesTable = ({
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
-    enabled: isAllPrograms,
+    enabled: isAllPrograms && page === 0,
   });
 
   // SELECTED PROGRAM
