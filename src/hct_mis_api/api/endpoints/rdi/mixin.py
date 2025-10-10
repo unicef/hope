@@ -59,11 +59,18 @@ class AccountMixin:
         PendingAccount.objects.create(individual=member, **doc)
 
 
+DATA_PREFIX_PREFIX = "data:"
+DATA_PREFIX_SUFFIX = ";base64,"
+
+
 class PhotoMixin:
     @staticmethod
     def get_photo(photo: Optional[str]) -> Optional[SimpleUploadedFile]:
         if photo:
-            data = photo.removeprefix("data:image/png;base64,")
+            if photo.startswith(DATA_PREFIX_PREFIX) and DATA_PREFIX_SUFFIX in photo:
+                data = photo[photo.index(DATA_PREFIX_SUFFIX) + len(DATA_PREFIX_SUFFIX) :]
+            else:
+                data = photo
             p = get_photo_from_stream(data)
             return p
         return None
