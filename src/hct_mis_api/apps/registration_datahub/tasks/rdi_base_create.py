@@ -53,7 +53,7 @@ class RdiBaseCreateTask:
         value_caster = reduce(lambda next_caster, caster: caster(next_caster), casters)
         return value_caster.cast(field, value)
 
-    def _handle_delivery_mechanism_fields(
+    def _handle_account_fields(
         self,
         value: Any,
         header: str,
@@ -86,6 +86,7 @@ class RdiBaseCreateTask:
                         individual=individual,
                         account_type=account_types_dict[account_type],
                         number=values.pop("number", None),
+                        financial_institution_id=data.pop("financial_institution", None),
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
