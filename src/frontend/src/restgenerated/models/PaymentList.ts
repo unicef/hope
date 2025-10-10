@@ -8,6 +8,7 @@ import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
+    readonly parentId: string;
     readonly householdId: string;
     householdUnicefId: string;
     householdSize: number;

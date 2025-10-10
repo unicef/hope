@@ -1435,6 +1435,94 @@ export function showApiErrorMessages(
   showMessage(fallbackMsg);
 }
 
+export function getApiErrorMessages(
+  error: any,
+  fallbackMsg: string = 'An error occurred',
+): string {
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
+      });
+    } else if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = path ? `${path}.${key}` : key;
+        collectErrors(value, newPath, errors);
+      });
+    } else if (typeof obj === 'string') {
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
+    }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    return error.join('  \n');
+  }
+
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    if (error.body.every((item) => typeof item === 'string')) {
+      return error.body.join('  \n');
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.body === 'string') {
+    return error.body;
+  }
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof error.body === 'object' &&
+    error.body !== null
+  ) {
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && error !== null) {
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallbackMsg;
+}
+
 // Utility to split camelCase/PascalCase and capitalize
 export function splitCamelCase(str: string): string {
   if (!str) return '';
