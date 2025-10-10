@@ -86,7 +86,7 @@ class RdiBaseCreateTask:
                         individual=individual,
                         account_type=account_types_dict[account_type],
                         number=values.pop("number", None),
-                        financial_institution_id=data.pop("account_code", None),  # TODO MB field name?
+                        financial_institution_id=data.pop("financial_institution", None),
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
