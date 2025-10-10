@@ -104,10 +104,9 @@ const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
@@ -186,7 +185,7 @@ const CreateGrievancePage = (): ReactElement => {
     priority: null,
     urgency: null,
     partner: null,
-    program: isAllPrograms ? '' : programId,
+    program: isAllPrograms ? '' : selectedProgram?.id || '',
     comments: null,
     linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
@@ -367,7 +366,7 @@ const CreateGrievancePage = (): ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const requestData = prepareRestVariables(businessArea, values);
+            const requestData = prepareRestVariables(values);
             const data = await mutateAsync(requestData);
             const grievanceTickets = data || [];
             const grievanceTicket = grievanceTickets[0];
