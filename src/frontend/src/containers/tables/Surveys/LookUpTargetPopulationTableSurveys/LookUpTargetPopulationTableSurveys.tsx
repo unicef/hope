@@ -119,6 +119,18 @@ export function LookUpTargetPopulationTableSurveys({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof countData?.count === 'number') {
+      setPersistedCount(countData.count);
+    }
+  }, [page, countData]);
+
+  const itemsCount = persistedCount;
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -136,7 +148,7 @@ export function LookUpTargetPopulationTableSurveys({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: TargetPopulationList) => (

@@ -66,6 +66,11 @@ export function TargetPopulationTable({
   // Controlled pagination state
   const [page, setPage] = useState(0);
 
+  // Persisted count state
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -91,6 +96,13 @@ export function TargetPopulationTable({
       ),
     enabled: page === 0,
   });
+
+  // Persist count on page 0
+  useEffect(() => {
+    if (page === 0 && countData?.count !== undefined) {
+      setPersistedCount(countData.count);
+    }
+  }, [page, countData]);
 
   // Main data query
   const {
@@ -160,7 +172,7 @@ export function TargetPopulationTable({
         )}
         page={page}
         setPage={setPage}
-        itemsCount={countData?.count ?? undefined}
+        itemsCount={persistedCount}
       />
     </TableWrapper>
   );

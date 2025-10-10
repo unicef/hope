@@ -4,7 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
@@ -53,6 +53,18 @@ function PaymentsPeopleTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof paymentsCountData?.count === 'number') {
+      setPersistedCount(paymentsCountData.count);
+    }
+  }, [page, paymentsCountData]);
+
+  const itemsCount = persistedCount;
+
   const {
     data: paymentsData,
     isLoading,
@@ -91,7 +103,7 @@ function PaymentsPeopleTable({
       setQueryVariables={setQueryVariables}
       page={page}
       setPage={setPage}
-      itemsCount={paymentsCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

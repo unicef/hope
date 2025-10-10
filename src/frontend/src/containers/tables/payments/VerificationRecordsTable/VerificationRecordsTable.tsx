@@ -83,6 +83,18 @@ export function VerificationRecordsTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof verificationCountData?.count === 'number') {
+      setPersistedCount(verificationCountData.count);
+    }
+  }, [page, verificationCountData]);
+
+  const itemsCount = persistedCount;
+
   const {
     data: paymentsData,
     isLoading,
@@ -121,7 +133,7 @@ export function VerificationRecordsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={verificationCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}

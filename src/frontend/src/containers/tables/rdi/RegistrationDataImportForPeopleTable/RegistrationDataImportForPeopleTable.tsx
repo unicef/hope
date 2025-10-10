@@ -118,6 +118,18 @@ export function RegistrationDataImportForPeopleTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof countData?.count === 'number') {
+      setPersistedCount(countData.count);
+    }
+  }, [page, countData]);
+
+  const itemsCount = persistedCount;
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -128,7 +140,7 @@ export function RegistrationDataImportForPeopleTable({
         title={
           noTitle
             ? null
-            : `${t('List of Imports')} (${countData?.count ?? (data as any)?.count ?? 0})`
+            : `${t('List of Imports')} (${itemsCount ?? (data as any)?.count ?? 0})`
         }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"
@@ -139,7 +151,7 @@ export function RegistrationDataImportForPeopleTable({
         error={error || countError}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count ?? (data as any)?.count ?? 0}
+        itemsCount={itemsCount ?? (data as any)?.count ?? 0}
         page={page}
         setPage={setPage}
         renderRow={(row) => (

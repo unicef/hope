@@ -58,6 +58,18 @@ export function PeopleVerificationRecordsTable({
       }),
     enabled: page === 0,
   });
+
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof verificationCountData?.count === 'number') {
+      setPersistedCount(verificationCountData.count);
+    }
+  }, [page, verificationCountData]);
+
+  const itemsCount = persistedCount;
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -100,7 +112,7 @@ export function PeopleVerificationRecordsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={verificationCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}
