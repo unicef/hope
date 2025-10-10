@@ -237,7 +237,6 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
-export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export { PaymentVerificationDetailsStatusEnum as PaymentVerificationDetailsStatusEnumCamelCase } from './models/PaymentVerificationDetailsStatusEnum';
