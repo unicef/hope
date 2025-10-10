@@ -69,7 +69,7 @@ export function AccountField({
               <LabelizedField
                 label={t('New Value')}
                 value={account?.accountType || ''}
-              /> aaa
+              />
             </Grid>
           </>
         ) : (
