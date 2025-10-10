@@ -3,12 +3,16 @@ from typing import Any
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Country
+from hope.models.business_area import BusinessArea
+from hope.models.country import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import Document, DocumentType, Household, Individual
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.program.models import Program
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.program import Program
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,

@@ -77,12 +77,16 @@ from extras.test_utils.factories.account import RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Country
-from hope.apps.household.models import DocumentType
 from hope.config.env import env
+from hope.models.business_area import BusinessArea
+from hope.models.country import Country
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.document_type import DocumentType
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 def pytest_addoption(parser) -> None:  # type: ignore

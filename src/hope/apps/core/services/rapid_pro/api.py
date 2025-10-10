@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 import requests
 from requests.exceptions import JSONDecodeError
 
-from hope.apps.core.models import BusinessArea
+from hope.models.business_area import BusinessArea
 
 logger = logging.getLogger(__name__)
 

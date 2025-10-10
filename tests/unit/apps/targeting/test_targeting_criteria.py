@@ -14,15 +14,14 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import Household, Individual
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
-)
+from hope.models.business_area import BusinessArea
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.payment_plan import PaymentPlan
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TestTargetingCriteriaQuery(BaseTestCase):

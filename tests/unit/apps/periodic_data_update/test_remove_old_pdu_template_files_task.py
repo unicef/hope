@@ -10,11 +10,11 @@ from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
 )
-from hope.apps.core.models import FileTemp
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from hope.apps.periodic_data_update.models import PDUXlsxTemplate
+from hope.models.file_temp import FileTemp
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 

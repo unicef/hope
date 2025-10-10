@@ -15,10 +15,12 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.models import Household, Individual
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hope.apps.payment.models import PaymentPlan
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.payment_plan import PaymentPlan
 
 
 class TestExcludeHouseholds(BaseTestCase):
@@ -94,7 +96,7 @@ class TestExcludeHouseholds(BaseTestCase):
             currency="PLN",
         )
 
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_payment_with_wrong_hh_ids(self, get_exchange_rate_mock: Any) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
@@ -190,7 +192,7 @@ class TestExcludeHouseholds(BaseTestCase):
         )
         assert self.payment_plan.exclude_household_error == error_msg
 
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_successfully(self, get_exchange_rate_mock: Any) -> None:
         self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
         self.payment_plan.save(update_fields=["background_action_status"])
@@ -218,7 +220,7 @@ class TestExcludeHouseholds(BaseTestCase):
             hh_unicef_id_2,
         }
 
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_exclude_individuals_people_program(self, get_exchange_rate_mock: Any) -> None:
         people_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
         beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)

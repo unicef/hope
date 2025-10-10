@@ -20,12 +20,10 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter, UserAvailableFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
@@ -47,14 +45,14 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
-from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
-from hope.apps.periodic_data_update.models import (
-    PDUOnlineEdit,
-    PDUOnlineEditSentBackComment,
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models.pdu_online_edit_sent_back_comment import PDUOnlineEditSentBackComment
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models.pdu_xlsx_upload import PDUXlsxUpload
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +257,9 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Authorized users updated successfully."})
 
     @action(detail=True, methods=["post"])
-    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_for_approval(
+        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
+    ) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         if instance.status != PDUOnlineEdit.Status.NEW:
@@ -314,7 +314,9 @@ class PDUOnlineEditViewSet(
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
-    def send_back(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_back(
+        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
+    ) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -343,7 +345,9 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
 
     @action(detail=False, methods=["post"])
-    def bulk_approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_approve(
+        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
+    ) -> Response:
         self.check_user_authorization(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -18,9 +18,11 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.api.models import Grant
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models.area import Area
+from hope.models.country import Country
+from hope.models.grant import Grant
+from hope.models.household import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -30,13 +32,13 @@ from hope.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
     PendingHousehold,
-    PendingIndividual,
 )
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.individual import PendingIndividual
+from hope.models.registration_data_import import RegistrationDataImport
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
+
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),

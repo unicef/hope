@@ -75,6 +75,5 @@ export type ProgramList = {
      * Program household count [sys]
      */
     householdCount?: number;
-    numberOfHouseholdsWithTpInProgram: number;
 };
 

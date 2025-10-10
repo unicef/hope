@@ -8,11 +8,12 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import Household, Individual
 from hope.apps.payment.services.payment_household_snapshot_service import (
     get_household_snapshot,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.universal_update_script import UniversalUpdate
 
 
 def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:

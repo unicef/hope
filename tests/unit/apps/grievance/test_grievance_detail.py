@@ -42,20 +42,19 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
+from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
+from hope.models.household import (
     DUPLICATE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hope.apps.sanction_list.models import (
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
-)
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.payment_verification import PaymentVerification
+from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models.program import Program
+from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
 
 pytestmark = pytest.mark.django_db()
 

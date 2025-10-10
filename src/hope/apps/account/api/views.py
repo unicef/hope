@@ -23,7 +23,6 @@ from hope.apps.account.api.serializers import (
     UserSerializer,
 )
 from hope.apps.account.filters import UsersFilter
-from hope.apps.account.models import Partner, RoleAssignment, User
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.account.profile_cache import ProfileEtagKey, ProfileKeyConstructor
 from hope.apps.core.api.mixins import (
@@ -33,10 +32,14 @@ from hope.apps.core.api.mixins import (
     PermissionActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.partner import Partner
+from hope.models.program import Program
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

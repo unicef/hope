@@ -15,11 +15,12 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
+from hope.models import country as geo_models
+from hope.models.business_area import BusinessArea
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -50,6 +50,7 @@ export { ComparisonMethod7bbEnum as ComparisonMethod7bbEnumCamelCase } from './m
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
+export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';
@@ -236,9 +237,9 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
+export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
-export { PaymentVerificationDetailsStatusEnum as PaymentVerificationDetailsStatusEnumCamelCase } from './models/PaymentVerificationDetailsStatusEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
@@ -247,6 +248,7 @@ export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCame
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingEnumCamelCase } from './models/PaymentVerificationPlanSamplingEnum';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
+export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';
 export type { PDUDataCreate as PDUDataCreateCamelCase } from './models/PDUDataCreate';
