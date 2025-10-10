@@ -99,6 +99,8 @@ function LookUpHouseholdTableCommunication({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
@@ -203,6 +205,8 @@ function LookUpHouseholdTableCommunication({
       data={data}
       isLoading={isLoading}
       error={error}
+      page={page}
+      setPage={setPage}
     />
   );
   return noTableStyling ? (

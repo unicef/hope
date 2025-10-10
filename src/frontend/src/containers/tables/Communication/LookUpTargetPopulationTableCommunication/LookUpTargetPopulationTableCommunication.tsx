@@ -76,6 +76,8 @@ const LookUpTargetPopulationTableCommunication = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const {
     data: paymentPlansData,
     isLoading,
@@ -115,6 +117,8 @@ const LookUpTargetPopulationTableCommunication = ({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        page={page}
+        setPage={setPage}
         renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowCommunication
             radioChangeHandler={enableRadioButton && handleRadioChange}

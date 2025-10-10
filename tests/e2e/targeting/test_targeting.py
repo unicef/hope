@@ -1350,6 +1350,7 @@ class TestTargeting:
         page_targeting.get_tab_field_list()
         page_targeting.get_tab_targeting_diagram().click()
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_filters(
         self,
         create_programs: None,

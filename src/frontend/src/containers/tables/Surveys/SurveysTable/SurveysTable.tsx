@@ -30,6 +30,8 @@ function SurveysTable({
   const { t } = useTranslation();
   const businessAreaSlug = baseUrl.split('/')[0];
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug,
@@ -42,6 +44,7 @@ function SurveysTable({
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
       ordering: '-created_at',
+      page,
     }),
     [
       businessAreaSlug,
@@ -51,6 +54,7 @@ function SurveysTable({
       filter.createdBy,
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
+      page,
     ],
   );
 
@@ -96,7 +100,7 @@ function SurveysTable({
           queryVariables,
         ),
       ),
-    enabled: !!businessAreaSlug && !!programId,
+    enabled: page === 0,
   });
 
   const categoryDict = restChoicesToDict(choicesData);
@@ -115,6 +119,8 @@ function SurveysTable({
         defaultOrderDirection="desc"
         itemsCount={dataSurveysCount?.count}
         initialRowsPerPage={10}
+        page={page}
+        setPage={setPage}
         renderRow={(row: Survey) => (
           <SurveysTableRow
             key={row.id}

@@ -20,6 +20,7 @@ interface VerificationsTableProps {
 }
 
 export function VerificationsTable({
+  // ...existing code...
   paymentPlanId,
   filter,
   canViewRecordDetails,
@@ -39,6 +40,28 @@ export function VerificationsTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for verification records, only enabled on first page
+  const { data: verificationCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
+        },
+      ),
+    enabled: page === 0,
+  });
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -95,6 +118,9 @@ export function VerificationsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={verificationCountData?.count}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}
