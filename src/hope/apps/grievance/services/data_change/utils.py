@@ -299,7 +299,7 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
     account_instance = Account(
         individual=individual,
         account_type=AccountType.objects.get(key=account["account_type"]),
-        financial_institution_id=account["financial_institution"],
+        financial_institution_id=account.get("financial_institution"),
         number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )

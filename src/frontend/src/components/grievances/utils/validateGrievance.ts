@@ -407,7 +407,7 @@ export function validateUsingSteps(
               errors.individualDataUpdateFieldsAccounts =
                 'Account Type is required';
             }
-            if (!acc.financial_institution) {
+            if (!acc.financialInstitution) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Financial Institution is required';
             }
