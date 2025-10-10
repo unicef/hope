@@ -43,6 +43,11 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   // Controlled pagination state
   const [page, setPage] = useState(0);
 
+  // Persisted count state
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -75,6 +80,13 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     enabled: page === 0,
   });
 
+  // Persist count on page 0
+  useEffect(() => {
+    if (page === 0 && dataUsersCount?.count !== undefined) {
+      setPersistedCount(dataUsersCount.count);
+    }
+  }, [page, dataUsersCount]);
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -85,7 +97,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
         data={dataUsers}
         isLoading={isLoadingUsers}
         error={errorUsers}
-        itemsCount={dataUsersCount?.count}
+        itemsCount={persistedCount}
         rowsPerPageOptions={[10, 15, 20]}
         defaultOrderBy="status"
         defaultOrderDirection="desc"

@@ -103,6 +103,18 @@ function SurveysTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof dataSurveysCount?.count === 'number') {
+      setPersistedCount(dataSurveysCount.count);
+    }
+  }, [page, dataSurveysCount]);
+
+  const itemsCount = persistedCount;
+
   const categoryDict = restChoicesToDict(choicesData);
 
   return (
@@ -117,7 +129,7 @@ function SurveysTable({
         setQueryVariables={setQueryVariables}
         defaultOrderBy="created_at"
         defaultOrderDirection="desc"
-        itemsCount={dataSurveysCount?.count}
+        itemsCount={itemsCount}
         initialRowsPerPage={10}
         page={page}
         setPage={setPage}

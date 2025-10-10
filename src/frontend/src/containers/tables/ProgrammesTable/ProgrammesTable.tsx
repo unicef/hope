@@ -97,6 +97,18 @@ function ProgrammesTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof dataProgramsCount?.count === 'number') {
+      setPersistedCount(dataProgramsCount.count);
+    }
+  }, [page, dataProgramsCount]);
+
+  const itemsCount = persistedCount;
+
   return (
     <>
       <TableWrapper>
@@ -108,7 +120,7 @@ function ProgrammesTable({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
-          itemsCount={dataProgramsCount?.count}
+          itemsCount={itemsCount}
           renderRow={(row: ProgramList) => (
             <ProgrammesTableRow
               key={row.id}

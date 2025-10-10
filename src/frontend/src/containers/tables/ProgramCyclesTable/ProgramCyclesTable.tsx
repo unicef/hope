@@ -91,6 +91,18 @@ const ProgramCyclesTablePaymentModule = ({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof dataProgramCyclesCount?.count === 'number') {
+      setPersistedCount(dataProgramCyclesCount.count);
+    }
+  }, [page, dataProgramCyclesCount]);
+
+  const itemsCount = persistedCount;
+
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
       mutationFn: ({
@@ -224,7 +236,7 @@ const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
-      itemsCount={dataProgramCyclesCount?.count}
+      itemsCount={itemsCount}
       data={data}
       error={error}
       isLoading={isLoading}

@@ -93,6 +93,18 @@ export function ImportedPeopleTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof countData?.count === 'number') {
+      setPersistedCount(countData.count);
+    }
+  }, [page, countData]);
+
+  const itemsCount = persistedCount;
+
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
@@ -124,7 +136,7 @@ export function ImportedPeopleTable({
           isLoading={isLoading}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
-          itemsCount={countData?.count}
+          itemsCount={itemsCount}
           page={page}
           setPage={setPage}
           renderRow={(row: IndividualList) => (
@@ -147,7 +159,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
-          itemsCount={countData?.count}
+          itemsCount={itemsCount}
           page={page}
           setPage={setPage}
           renderRow={(row: IndividualList) => (

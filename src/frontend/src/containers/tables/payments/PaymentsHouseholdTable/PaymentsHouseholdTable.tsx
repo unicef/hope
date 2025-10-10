@@ -8,7 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
@@ -21,7 +21,6 @@ interface PaymentsHouseholdTableProps {
   canViewPaymentRecordDetails: boolean;
 }
 function PaymentsHouseholdTable({
-  // ...existing code...
   household,
   openInNewTab = false,
   businessArea,
@@ -96,6 +95,18 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof paymentsCountData?.count === 'number') {
+      setPersistedCount(paymentsCountData.count);
+    }
+  }, [page, paymentsCountData]);
+
+  const itemsCount = persistedCount;
+
   return (
     <UniversalRestTable
       title={t('Payments')}
@@ -107,7 +118,7 @@ function PaymentsHouseholdTable({
       setQueryVariables={setQueryVariables}
       page={page}
       setPage={setPage}
-      itemsCount={paymentsCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow
           key={row.id}

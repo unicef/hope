@@ -94,6 +94,18 @@ export function PeopleVerificationsTable({
     enabled: page === 0,
   });
 
+  // Persist count after fetching on page 0
+  const [persistedCount, setPersistedCount] = useState<number | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    if (page === 0 && typeof countData?.count === 'number') {
+      setPersistedCount(countData.count);
+    }
+  }, [page, countData]);
+
+  const itemsCount = persistedCount;
+
   return (
     <UniversalRestTable
       title={t('Verification Records')}
@@ -105,7 +117,7 @@ export function PeopleVerificationsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={countData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}
