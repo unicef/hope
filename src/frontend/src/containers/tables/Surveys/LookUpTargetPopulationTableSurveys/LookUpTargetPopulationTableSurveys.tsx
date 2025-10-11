@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -119,17 +120,7 @@ export function LookUpTargetPopulationTableSurveys({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof countData?.count === 'number') {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, countData);
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);

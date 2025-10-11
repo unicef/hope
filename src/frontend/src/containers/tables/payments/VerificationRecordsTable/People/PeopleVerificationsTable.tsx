@@ -6,6 +6,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PeopleVerificationsHeadCells';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
@@ -94,17 +95,7 @@ export function PeopleVerificationsTable({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof countData?.count === 'number') {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <UniversalRestTable

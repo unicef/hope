@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { dateToIsoString, restChoicesToDict } from '@utils/utils';
@@ -103,17 +104,7 @@ function SurveysTable({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof dataSurveysCount?.count === 'number') {
-      setPersistedCount(dataSurveysCount.count);
-    }
-  }, [page, dataSurveysCount]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, dataSurveysCount);
 
   const categoryDict = restChoicesToDict(choicesData);
 

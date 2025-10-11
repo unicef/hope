@@ -13,6 +13,7 @@ import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -80,17 +81,7 @@ const ProgramCyclesTableProgramDetails = ({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  React.useEffect(() => {
-    if (page === 0 && typeof dataProgramCyclesCount?.count === 'number') {
-      setPersistedCount(dataProgramCyclesCount.count);
-    }
-  }, [page, dataProgramCyclesCount]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, dataProgramCyclesCount);
 
   const canViewDetails = programId !== 'all';
 

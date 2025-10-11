@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
@@ -95,17 +96,7 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof paymentsCountData?.count === 'number') {
-      setPersistedCount(paymentsCountData.count);
-    }
-  }, [page, paymentsCountData]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, paymentsCountData);
 
   return (
     <UniversalRestTable

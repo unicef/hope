@@ -9,6 +9,7 @@ import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgram
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -97,17 +98,7 @@ function ProgrammesTable({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof dataProgramsCount?.count === 'number') {
-      setPersistedCount(dataProgramsCount.count);
-    }
-  }, [page, dataProgramsCount]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, dataProgramsCount);
 
   return (
     <>

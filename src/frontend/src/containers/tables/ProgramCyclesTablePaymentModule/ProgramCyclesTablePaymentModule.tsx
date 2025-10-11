@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 
 interface ProgramCyclesTablePaymentModuleProps {
@@ -91,17 +92,7 @@ export const ProgramCyclesTablePaymentModule = ({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof dataProgramCyclesCount?.count === 'number') {
-      setPersistedCount(dataProgramCyclesCount.count);
-    }
-  }, [page, dataProgramCyclesCount]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, dataProgramCyclesCount);
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({

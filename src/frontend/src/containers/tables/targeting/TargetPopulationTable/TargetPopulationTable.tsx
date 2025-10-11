@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -66,11 +67,6 @@ export function TargetPopulationTable({
   // Controlled pagination state
   const [page, setPage] = useState(0);
 
-  // Persisted count state
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -97,12 +93,7 @@ export function TargetPopulationTable({
     enabled: page === 0,
   });
 
-  // Persist count on page 0
-  useEffect(() => {
-    if (page === 0 && countData?.count !== undefined) {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
+  const persistedCount = usePersistedCount(page, countData);
 
   // Main data query
   const {

@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
@@ -93,17 +94,7 @@ export function ImportedPeopleTable({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof countData?.count === 'number') {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <div data-cy="imported-individuals-table">

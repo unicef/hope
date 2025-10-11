@@ -13,6 +13,7 @@ import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface TargetPopulationProps {
   filter;
@@ -79,11 +80,6 @@ export function TargetPopulationForPeopleTable({
   // Controlled pagination state
   const [page, setPage] = useState(0);
 
-  // Persisted count state
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -107,12 +103,7 @@ export function TargetPopulationForPeopleTable({
     enabled: page === 0,
   });
 
-  // Persist count on page 0
-  useEffect(() => {
-    if (page === 0 && countData?.count !== undefined) {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
+  const persistedCount = usePersistedCount(page, countData);
 
   // Main data query
   const {

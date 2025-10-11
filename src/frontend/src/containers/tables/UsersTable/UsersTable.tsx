@@ -10,6 +10,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useQuery } from '@tanstack/react-query';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { filterEmptyParams } from '@utils/utils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 interface UsersTableProps {
   filter;
 }
@@ -43,11 +44,6 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   // Controlled pagination state
   const [page, setPage] = useState(0);
 
-  // Persisted count state
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -80,12 +76,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     enabled: page === 0,
   });
 
-  // Persist count on page 0
-  useEffect(() => {
-    if (page === 0 && dataUsersCount?.count !== undefined) {
-      setPersistedCount(dataUsersCount.count);
-    }
-  }, [page, dataUsersCount]);
+  const persistedCount = usePersistedCount(page, dataUsersCount);
 
   return (
     <TableWrapper>
