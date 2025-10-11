@@ -19,6 +19,7 @@ import {
   householdStatusToColor,
 } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -124,17 +125,7 @@ export const HouseholdTable = ({
     enabled: page === 0,
   });
 
-  // Persist count after fetching on page 0
-  const [persistedCount, setPersistedCount] = useState<number | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    if (page === 0 && typeof countData?.count === 'number') {
-      setPersistedCount(countData.count);
-    }
-  }, [page, countData]);
-
-  const itemsCount = persistedCount;
+  const itemsCount = usePersistedCount(page, countData);
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,

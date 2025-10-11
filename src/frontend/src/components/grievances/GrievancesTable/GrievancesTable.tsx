@@ -35,6 +35,7 @@ import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface GrievancesTableProps {
   filter;
@@ -223,7 +224,7 @@ export const GrievancesTable = ({
           { withPagination: true },
         ),
       ),
-    enabled: !isAllPrograms && page === 0,
+    enabled: !isAllPrograms,
   });
   //SELECTED PROGRAM COUNT
   const { data: selectedProgramGrievanceTicketsCount } =
@@ -243,6 +244,18 @@ export const GrievancesTable = ({
         ),
       enabled: !isAllPrograms && page === 0,
     });
+
+  const persistedCountAll = usePersistedCount(
+    page,
+    allProgramsGrievanceTicketsCount,
+  );
+  const persistedCountSelected = usePersistedCount(
+    page,
+    selectedProgramGrievanceTicketsCount,
+  );
+  const persistedCount = isAllPrograms
+    ? persistedCountAll
+    : persistedCountSelected;
 
   const optionsData = usersData;
 
@@ -456,11 +469,7 @@ export const GrievancesTable = ({
             setQueryVariables={setQueryVariables}
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
-            itemsCount={
-              isAllPrograms
-                ? allProgramsGrievanceTicketsCount?.count
-                : selectedProgramGrievanceTicketsCount?.count
-            }
+            itemsCount={persistedCount}
             renderRow={(row: GrievanceTicketList) => (
               <GrievancesTableRow
                 key={row.id}
