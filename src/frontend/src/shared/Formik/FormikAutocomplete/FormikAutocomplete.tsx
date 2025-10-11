@@ -6,6 +6,7 @@ export function FormikAutocomplete({
   form,
   choices,
   label,
+  required = false,
 }): ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
@@ -17,6 +18,11 @@ export function FormikAutocomplete({
     }
   };
 
+  const showError = Boolean(
+    form.touched[field.name] && form.errors[field.name],
+  );
+  const helperText = showError ? form.errors[field.name] : '';
+
   return (
     <Box mt={2}>
       <Autocomplete
@@ -27,7 +33,14 @@ export function FormikAutocomplete({
         value={realSelectedValue}
         getOptionLabel={(choice) => choice.labelEn}
         renderInput={(params) => (
-          <TextField {...params} label={label} variant="outlined" />
+          <TextField
+            {...params}
+            label={label}
+            variant="outlined"
+            required={required}
+            error={showError}
+            helperText={helperText}
+          />
         )}
       />
     </Box>

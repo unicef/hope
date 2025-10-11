@@ -6,6 +6,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PeopleVerificationsHeadCells';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
@@ -94,6 +95,8 @@ export function PeopleVerificationsTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <UniversalRestTable
       title={t('Verification Records')}
@@ -105,7 +108,7 @@ export function PeopleVerificationsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={countData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}

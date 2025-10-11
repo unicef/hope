@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -92,6 +93,8 @@ export function TargetPopulationTable({
     enabled: page === 0,
   });
 
+  const persistedCount = usePersistedCount(page, countData);
+
   // Main data query
   const {
     data: targetPopulationsData,
@@ -160,7 +163,7 @@ export function TargetPopulationTable({
         )}
         page={page}
         setPage={setPage}
-        itemsCount={countData?.count ?? undefined}
+        itemsCount={persistedCount}
       />
     </TableWrapper>
   );

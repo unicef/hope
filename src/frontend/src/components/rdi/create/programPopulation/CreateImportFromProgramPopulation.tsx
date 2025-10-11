@@ -40,7 +40,7 @@ export const CreateImportFromProgramPopulationForm = ({
       .max(255, 'Too long'),
     importFromProgramId: Yup.string().required('Programme is required'),
     importType: Yup.string(),
-     
+
     importFromIds: Yup.string().when('importType', ([importType], schema) =>
       importType === 'usingIds'
         ? schema
@@ -81,7 +81,7 @@ export const CreateImportFromProgramPopulationForm = ({
         ),
     });
 
-  const onSubmit = async(values): Promise<void> => {
+  const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
     try {
       const response =
@@ -162,6 +162,7 @@ export const CreateImportFromProgramPopulationForm = ({
           name="importFromProgramId"
           label={t('Programme Name')}
           fullWidth
+          required
           choices={filteredProgramChoices}
           component={FormikAutocomplete}
           onInputChange={(_e, value) => setProgramSearch(value)}

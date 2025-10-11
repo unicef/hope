@@ -300,13 +300,11 @@ export function TableRestComponent<T>({
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>
-      {!hidePagination && (
+      {!hidePagination && typeof itemsCount === 'number' && itemsCount >= 0 && (
         <TablePagination
           rowsPerPageOptions={rowsPerPageOptions}
           component="div"
-          count={
-            itemsCount == null || itemsCount === undefined ? -1 : itemsCount
-          }
+          count={itemsCount}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePageProp}
