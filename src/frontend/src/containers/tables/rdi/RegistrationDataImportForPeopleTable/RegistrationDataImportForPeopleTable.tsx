@@ -1,4 +1,5 @@
 import { ReactElement, useMemo, useState, useEffect } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
@@ -118,6 +119,8 @@ export function RegistrationDataImportForPeopleTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -128,7 +131,7 @@ export function RegistrationDataImportForPeopleTable({
         title={
           noTitle
             ? null
-            : `${t('List of Imports')} (${countData?.count ?? (data as any)?.count ?? 0})`
+            : `${t('List of Imports')} (${itemsCount ?? (data as any)?.count ?? 0})`
         }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"
@@ -139,7 +142,7 @@ export function RegistrationDataImportForPeopleTable({
         error={error || countError}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count ?? (data as any)?.count ?? 0}
+        itemsCount={itemsCount ?? (data as any)?.count ?? 0}
         page={page}
         setPage={setPage}
         renderRow={(row) => (

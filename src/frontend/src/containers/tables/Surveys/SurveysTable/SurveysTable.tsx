@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { dateToIsoString } from '@utils/utils';
@@ -100,6 +101,9 @@ function SurveysTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, dataSurveysCount);
+
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -112,7 +116,7 @@ function SurveysTable({
         setQueryVariables={setQueryVariables}
         defaultOrderBy="created_at"
         defaultOrderDirection="desc"
-        itemsCount={dataSurveysCount?.count}
+        itemsCount={itemsCount}
         initialRowsPerPage={10}
         page={page}
         setPage={setPage}

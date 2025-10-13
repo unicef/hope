@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './VerificationRecordsHeadCells';
@@ -83,6 +84,8 @@ export function VerificationRecordsTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, verificationCountData);
+
   const {
     data: paymentsData,
     isLoading,
@@ -121,7 +124,7 @@ export function VerificationRecordsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={verificationCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}
