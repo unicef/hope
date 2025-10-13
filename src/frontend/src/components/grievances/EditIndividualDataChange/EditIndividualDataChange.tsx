@@ -18,8 +18,8 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { IndividualList } from '@restgenerated/models/IndividualList';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -44,7 +44,7 @@ function EditIndividualDataChange({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: IndividualList = values.selectedIndividual;
+  const individual: IndividualDetail = values.selectedIndividual;
   const {
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
@@ -86,18 +86,21 @@ function EditIndividualDataChange({
       businessAreaSlug,
       programSlug,
       individual?.id,
-      individual?.program?.slug,
+      //@ts-ignore programSlug is present
+      individual?.programSlug,
+      individual,
     ],
     queryFn: () => {
       if (!individual?.id) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug: individual?.program?.slug,
+        //@ts-ignore programSlug is present
+        programSlug: individual?.programSlug,
         id: individual?.id,
       });
     },
-    enabled:
-      !!individual?.id && individual?.program?.slug && !!businessAreaSlug,
+    //@ts-ignore programSlug is present
+    enabled: !!individual?.id && individual?.programSlug && !!businessAreaSlug,
   });
 
   useEffect(() => {
