@@ -8,6 +8,7 @@ from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import serialize_flex_attributes
 from hope.apps.geo.models import Area
+from hope.apps.payment.models import FinancialInstitution
 from hope.apps.program.models import Program
 
 
@@ -36,7 +37,9 @@ class TemplateFileGeneratorService:
         self._add_households_columns()
         self._add_individuals_columns()
         self._add_people_columns()
-        self._handle_choices({**self.households_fields, **self.individuals_fields})
+        self._handle_choices(
+            {**self.households_fields, **self.individuals_fields, **FinancialInstitution.get_rdi_template_choices()}
+        )
         return wb
 
     def _add_households_columns(self) -> None:
