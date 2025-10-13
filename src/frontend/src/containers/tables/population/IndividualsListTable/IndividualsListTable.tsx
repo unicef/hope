@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
@@ -122,6 +123,8 @@ export function IndividualsListTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -135,7 +138,7 @@ export function IndividualsListTable({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: IndividualList) => (
