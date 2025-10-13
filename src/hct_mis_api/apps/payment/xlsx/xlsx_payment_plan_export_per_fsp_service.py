@@ -225,7 +225,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         split: PaymentPlanSplit,
         ws: "Worksheet",
     ) -> None:
-        generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
+        if self.payment_generate_token_and_order_numbers:
+            generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
 
         qs = (
             split.split_payment_items.eligible()

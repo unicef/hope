@@ -1209,6 +1209,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_export_xlsx_per_fsp_error_msg(self) -> None:
+        self.maxDiff = None
         fsp = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_aaa"
         )

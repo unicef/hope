@@ -668,7 +668,7 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=["background_action_status"])
 
         create_payment_plan_payment_list_xlsx.delay(payment_plan_id=str(self.payment_plan.pk), user_id=str(user_id))
-        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
     def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: Optional[str]) -> PaymentPlan:
@@ -678,7 +678,7 @@ class PaymentPlanService:
         create_payment_plan_payment_list_xlsx_per_fsp.delay(
             str(self.payment_plan.pk), str(user_id), fsp_xlsx_template_id
         )
-        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
@@ -797,7 +797,7 @@ class PaymentPlanService:
                 raise GraphQLError(
                     f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
                 )
-            payments_chunks = list(chunks(payments.order_by("unicef_id").only("id"), chunks_no))
+            payments_chunks = list(chunks(payments.order_by("unicef_id"), chunks_no))
 
         elif split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -806,26 +806,22 @@ class PaymentPlanService:
         ]:
             area_level = split_type[-1]
             grouped_payments = list(
-                payments.order_by(f"household__admin{area_level}__p_code", "unicef_id")
-                .select_related(f"household__admin{area_level}")
-                .only("id", "household")
+                payments.order_by(f"household__admin{area_level}__p_code", "unicef_id").select_related(
+                    f"household__admin{area_level}"
+                )
             )
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
                 payments_chunks.append(list(payments))
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
-            grouped_payments = list(
-                payments.order_by("collector__unicef_id", "unicef_id")
-                .select_related("collector")
-                .only("id", "collector")
-            )
+            grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
                 payments_chunks.append(list(payments))
 
         elif split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
-            payments_chunks = [list(payments.only("id"))]
+            payments_chunks = [list(payments)]
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
