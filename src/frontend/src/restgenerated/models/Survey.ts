@@ -15,6 +15,7 @@ export type Survey = {
     flow?: string;
     flowId?: string | null;
     paymentPlan?: string | null;
+    readonly paymentPlanName: string;
     fullListArguments?: AccountabilityFullListArguments | null;
     randomSamplingArguments?: AccountabilityRandomSamplingArguments | null;
     readonly sampleFilePath: string | null;
