@@ -74,8 +74,8 @@ function RequestedHouseholdDataChangeTable(
     handleSelected(individualId, 'selectedRoles', selectedRoles, setFieldValue);
   };
 
-  const flexFields = householdData.flex_fields || {};
-  delete householdData.flex_fields;
+  const flexFields = householdData.flexFields || {};
+  delete householdData.flexFields;
   const entries = Object.entries(householdData).filter(
     ([key]) => key !== 'roles',
   );
