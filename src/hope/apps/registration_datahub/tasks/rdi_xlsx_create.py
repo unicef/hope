@@ -548,7 +548,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         header = header_cell.value
                         if header in self._pdu_column_names:
                             continue
-                        elif header.startswith(Account.ACCOUNT_FIELD_PREFIX):
+                        if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
                             self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
                             continue
 
