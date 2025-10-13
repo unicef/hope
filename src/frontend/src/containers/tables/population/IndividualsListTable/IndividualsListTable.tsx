@@ -31,6 +31,8 @@ export function IndividualsListTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
@@ -47,6 +49,7 @@ export function IndividualsListTable({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      page,
     }),
     [
       filter.ageMin,
@@ -62,6 +65,7 @@ export function IndividualsListTable({
       filter.lastRegistrationDateMax,
       programId,
       businessArea,
+      page,
     ],
   );
   const replacements = {
@@ -115,6 +119,7 @@ export function IndividualsListTable({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
 
   return (
@@ -131,6 +136,8 @@ export function IndividualsListTable({
         allowSort={false}
         filterOrderBy={filter.orderBy}
         itemsCount={countData?.count}
+        page={page}
+        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <IndividualsListTableRow
             key={row.id}

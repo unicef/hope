@@ -48,6 +48,7 @@ function PaymentsTable({
     paymentPlanId: paymentPlan.id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -116,6 +117,8 @@ function PaymentsTable({
             queryVariables={queryVariables}
             setQueryVariables={setQueryVariables}
             data={paymentsData}
+            page={page}
+            setPage={setPage}
             renderRow={(row: PaymentList) => (
               <PaymentsTableRow
                 key={row.id}

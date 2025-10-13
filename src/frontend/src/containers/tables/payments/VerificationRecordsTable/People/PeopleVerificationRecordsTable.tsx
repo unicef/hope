@@ -18,6 +18,7 @@ interface PeopleVerificationRecordsTableProps {
 }
 
 export function PeopleVerificationRecordsTable({
+  // ...existing code...
   paymentPlanId,
   filter,
   canViewRecordDetails,
@@ -37,6 +38,26 @@ export function PeopleVerificationRecordsTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for verification records, only enabled on first page
+  const { data: verificationCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanId,
+        ...queryVariables,
+      }),
+    enabled: page === 0,
+  });
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -77,6 +98,9 @@ export function PeopleVerificationRecordsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={verificationCountData?.count}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}

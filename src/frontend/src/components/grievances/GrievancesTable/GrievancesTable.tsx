@@ -223,7 +223,7 @@ export const GrievancesTable = ({
           { withPagination: true },
         ),
       ),
-    enabled: !isAllPrograms,
+    enabled: !isAllPrograms && page === 0,
   });
   //SELECTED PROGRAM COUNT
   const { data: selectedProgramGrievanceTicketsCount } =
@@ -241,7 +241,7 @@ export const GrievancesTable = ({
             queryVariables,
           ),
         ),
-      enabled: !isAllPrograms,
+      enabled: !isAllPrograms && page === 0,
     });
 
   const optionsData = usersData;
@@ -456,7 +456,6 @@ export const GrievancesTable = ({
             setQueryVariables={setQueryVariables}
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
-            onPageChanged={setPage}
             itemsCount={
               isAllPrograms
                 ? allProgramsGrievanceTicketsCount?.count
@@ -480,6 +479,8 @@ export const GrievancesTable = ({
                 setInputValue={setInputValue}
               />
             )}
+            page={page}
+            setPage={setPage}
           />
         </Paper>
       </TableWrapper>
