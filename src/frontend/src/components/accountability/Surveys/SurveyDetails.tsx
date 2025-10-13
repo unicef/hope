@@ -54,7 +54,7 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
                 <BlackLink
                   to={`/${baseUrl}/target-population/${survey?.paymentPlan}`}
                 >
-                  {survey?.paymentPlan}
+                  {survey?.paymentPlanName}
                 </BlackLink>
               ) : (
                 '-'
