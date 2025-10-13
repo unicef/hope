@@ -70,8 +70,7 @@ class PhotoMixin:
                 data = photo[photo.index(DATA_PREFIX_SUFFIX) + len(DATA_PREFIX_SUFFIX) :]
             else:
                 data = photo
-            p = get_photo_from_stream(data)
-            return p
+            return get_photo_from_stream(data)
         return None
 
 

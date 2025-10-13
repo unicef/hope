@@ -91,7 +91,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             try:
                 if header_cell.value in self._pdu_column_names:
                     continue
-                elif header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
+                if header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
                     self._handle_account_fields(cell.value, header_cell.value, cell.row, obj_to_create)
                     continue
 
