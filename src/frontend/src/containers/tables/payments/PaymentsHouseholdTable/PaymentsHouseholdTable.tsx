@@ -21,7 +21,6 @@ interface PaymentsHouseholdTableProps {
   canViewPaymentRecordDetails: boolean;
 }
 function PaymentsHouseholdTable({
-  // ...existing code...
   household,
   openInNewTab = false,
   businessArea,
