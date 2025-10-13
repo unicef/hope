@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
@@ -58,6 +59,8 @@ export function PeopleVerificationRecordsTable({
       }),
     enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, verificationCountData);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -100,7 +103,7 @@ export function PeopleVerificationRecordsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={verificationCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}

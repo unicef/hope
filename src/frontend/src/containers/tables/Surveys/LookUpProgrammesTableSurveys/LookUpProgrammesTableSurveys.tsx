@@ -1,4 +1,5 @@
 import { ReactElement, useState, useEffect, useMemo } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import styled from 'styled-components';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -104,6 +105,8 @@ export function LookUpProgrammesTableSurveys({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
     setFieldValue('program', id);
@@ -131,7 +134,7 @@ export function LookUpProgrammesTableSurveys({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
-          itemsCount={countData?.count}
+          itemsCount={itemsCount}
           page={page}
           setPage={setPage}
           renderRow={(row: ProgramList) => (

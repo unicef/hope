@@ -10,6 +10,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
@@ -89,6 +90,8 @@ export const PeopleListTable = ({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
       'businessAreasProgramsIndividualsList',
@@ -119,7 +122,7 @@ export const PeopleListTable = ({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: IndividualList) => (
