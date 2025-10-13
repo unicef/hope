@@ -13579,6 +13579,7 @@ export class RestService {
         orderBy,
         ordering,
         partner,
+        program,
         roles,
         search,
         serializer,
@@ -13619,6 +13620,7 @@ export class RestService {
          */
         ordering?: string,
         partner?: Array<number>,
+        program?: string,
         roles?: Array<string>,
         search?: string,
         serializer?: string,
@@ -13645,6 +13647,7 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'partner': partner,
+                'program': program,
                 'roles': roles,
                 'search': search,
                 'serializer': serializer,
@@ -13682,7 +13685,6 @@ export class RestService {
         orderBy,
         ordering,
         partner,
-        roles,
         search,
         status,
     }: {
@@ -13713,7 +13715,6 @@ export class RestService {
          */
         ordering?: string,
         partner?: Array<number>,
-        roles?: Array<string>,
         search?: string,
         /**
          * * `ACTIVE` - Active
@@ -13736,7 +13737,6 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'partner': partner,
-                'roles': roles,
                 'search': search,
                 'status': status,
             },
