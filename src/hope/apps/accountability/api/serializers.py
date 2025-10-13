@@ -45,22 +45,12 @@ class FeedbackMessageCreateSerializer(serializers.Serializer):
 
 
 class FeedbackListSerializer(serializers.ModelSerializer):
-    household_unicef_id = serializers.CharField(
-        source="household_lookup.unicef_id", allow_null=True
-    )
+    household_unicef_id = serializers.CharField(source="household_lookup.unicef_id", allow_null=True)
     household_id = serializers.CharField(source="household_lookup_id", allow_null=True)
-    individual_unicef_id = serializers.CharField(
-        source="individual_lookup.unicef_id", allow_null=True
-    )
-    individual_id = serializers.CharField(
-        source="individual_lookup_id", allow_null=True
-    )
-    linked_grievance_unicef_id = serializers.CharField(
-        source="linked_grievance.unicef_id", allow_null=True
-    )
-    linked_grievance_category = serializers.CharField(
-        source="linked_grievance.category", allow_null=True
-    )
+    individual_unicef_id = serializers.CharField(source="individual_lookup.unicef_id", allow_null=True)
+    individual_id = serializers.CharField(source="individual_lookup_id", allow_null=True)
+    linked_grievance_unicef_id = serializers.CharField(source="linked_grievance.unicef_id", allow_null=True)
+    linked_grievance_category = serializers.CharField(source="linked_grievance.category", allow_null=True)
     program_name = serializers.CharField(source="program.name", allow_null=True)
     created_by = serializers.SerializerMethodField()
     feedback_messages = FeedbackMessageSerializer(many=True, read_only=True)
@@ -106,9 +96,7 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):
-    issue_type = serializers.ChoiceField(
-        required=True, choices=Feedback.ISSUE_TYPE_CHOICES
-    )
+    issue_type = serializers.ChoiceField(required=True, choices=Feedback.ISSUE_TYPE_CHOICES)
     household_lookup = serializers.UUIDField(allow_null=True, required=False)
     individual_lookup = serializers.UUIDField(allow_null=True, required=False)
     program_id = serializers.UUIDField(allow_null=True, required=False)
@@ -137,9 +125,7 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
 
 
 class FeedbackUpdateSerializer(serializers.ModelSerializer):
-    issue_type = serializers.ChoiceField(
-        required=True, choices=Feedback.ISSUE_TYPE_CHOICES
-    )
+    issue_type = serializers.ChoiceField(required=True, choices=Feedback.ISSUE_TYPE_CHOICES)
     household_lookup = serializers.UUIDField(allow_null=True, required=False)
     individual_lookup = serializers.UUIDField(allow_null=True, required=False)
     description = serializers.CharField(required=True)
@@ -208,9 +194,7 @@ class MessageCreateSerializer(serializers.Serializer):
     body = serializers.CharField()
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
-    random_sampling_arguments = RandomSamplingSerializer(
-        required=False, allow_null=True
-    )
+    random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
     payment_plan = serializers.PrimaryKeyRelatedField(
         queryset=PaymentPlan.objects.all(), required=False, allow_null=True
     )
@@ -225,9 +209,7 @@ class MessageCreateSerializer(serializers.Serializer):
 
 
 class AccountabilityFullListArgumentsSerializer(serializers.Serializer):
-    excluded_admin_areas = serializers.ListField(
-        child=serializers.CharField(required=True)
-    )
+    excluded_admin_areas = serializers.ListField(child=serializers.CharField(required=True))
 
 
 class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
@@ -235,9 +217,7 @@ class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
     max = serializers.IntegerField(required=True)
 
 
-class AccountabilityRandomSamplingArgumentsSerializer(
-    AccountabilityFullListArgumentsSerializer
-):
+class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
     confidence_interval = serializers.FloatField(required=True)
     margin_of_error = serializers.FloatField(required=True)
     age = AccountabilityCommunicationMessageAgeInput(allow_null=True)
@@ -255,12 +235,8 @@ class SurveySerializer(serializers.ModelSerializer):
         allow_null=True,
         queryset=PaymentPlan.objects.all(),
     )
-    payment_plan_name = serializers.CharField(
-        source="payment_plan.name", read_only=True
-    )
-    full_list_arguments = AccountabilityFullListArgumentsSerializer(
-        write_only=True, required=False, allow_null=True
-    )
+    payment_plan_name = serializers.CharField(source="payment_plan.name", read_only=True)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True, required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
         write_only=True, required=False, allow_null=True
     )
@@ -330,15 +306,9 @@ class SurveySampleSizeSerializer(serializers.Serializer):
     payment_plan = serializers.PrimaryKeyRelatedField(
         queryset=PaymentPlan.objects.all(), required=False, allow_null=True
     )
-    sampling_type = serializers.ChoiceField(
-        required=True, choices=Survey.SAMPLING_CHOICES, allow_null=True
-    )
-    full_list_arguments = AccountabilityFullListArgumentsSerializer(
-        required=False, allow_null=True
-    )
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
-        required=False, allow_null=True
-    )
+    sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES, allow_null=True)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False, allow_null=True)
 
 
 class SampleSizeSerializer(serializers.Serializer):
@@ -359,9 +329,5 @@ class MessageSampleSizeSerializer(serializers.Serializer):
         queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
     )
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)
-    full_list_arguments = AccountabilityFullListArgumentsSerializer(
-        required=False, allow_null=True
-    )
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
-        required=False, allow_null=True
-    )
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False, allow_null=True)
