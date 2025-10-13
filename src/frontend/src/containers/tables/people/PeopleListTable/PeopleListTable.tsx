@@ -26,6 +26,8 @@ export const PeopleListTable = ({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
@@ -43,6 +45,7 @@ export const PeopleListTable = ({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      page,
     }),
     [
       filter.ageMin,
@@ -59,6 +62,7 @@ export const PeopleListTable = ({
       filter.lastRegistrationDateMax,
       programId,
       businessArea,
+      page,
     ],
   );
 
@@ -66,6 +70,7 @@ export const PeopleListTable = ({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
+
   const { data: countData } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsHouseholdsCount',
@@ -81,6 +86,7 @@ export const PeopleListTable = ({
           { withPagination: true },
         ),
       ),
+    enabled: page === 0,
   });
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
@@ -114,6 +120,8 @@ export const PeopleListTable = ({
         allowSort={false}
         filterOrderBy={filter.orderBy}
         itemsCount={countData?.count}
+        page={page}
+        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <PeopleListTableRow
             key={row.id}

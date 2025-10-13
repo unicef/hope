@@ -83,6 +83,8 @@ export function PaymentsTableRow({
     return <OrangeError />;
   };
 
+  // Removed unused navigate
+
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
@@ -99,7 +101,12 @@ export function PaymentsTableRow({
       </TableCell>
       <TableCell align="left">
         {canViewDetails ? (
-          <BlackLink to={paymentDetailsPath}>{payment.unicefId}</BlackLink>
+          <BlackLink
+            to={paymentDetailsPath}
+            state={{ parentId: payment.parentId }}
+          >
+            {payment.unicefId}
+          </BlackLink>
         ) : (
           payment.unicefId
         )}

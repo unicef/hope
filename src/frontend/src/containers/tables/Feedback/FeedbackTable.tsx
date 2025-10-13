@@ -63,6 +63,8 @@ function FeedbackTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   // Selected Program Feedbacks
   const {
     data: selectedProgramFeedbacksData,
@@ -101,7 +103,7 @@ function FeedbackTable({
           queryVariables,
         ),
       ),
-    enabled: !isAllPrograms,
+    enabled: !isAllPrograms && page === 0,
   });
 
   // All Programs Feedbacks
@@ -132,7 +134,7 @@ function FeedbackTable({
       RestService.restBusinessAreasFeedbacksCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
-    enabled: isAllPrograms,
+    enabled: isAllPrograms && page === 0,
   });
 
   const replacements = {
@@ -183,6 +185,8 @@ function FeedbackTable({
             ? allProgramsFeedbacksCount?.count
             : selectedProgramFeedbacksCount?.count
         }
+        page={page}
+        setPage={setPage}
         renderRow={(row: FeedbackList) => (
           <FeedbackTableRow
             key={row.id}

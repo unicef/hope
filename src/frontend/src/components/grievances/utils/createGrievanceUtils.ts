@@ -465,12 +465,7 @@ export function prepareVariables(businessArea, values) {
   return prepareFunction(requiredVariables, values);
 }
 
-// Transform form values to REST API CreateGrievanceTicket format
-export function prepareRestVariables(
-  businessArea: string,
-  values: any,
-): CreateGrievanceTicket {
-  // Build extras based on category and issue type
+export function prepareRestVariables(values: any): CreateGrievanceTicket {
   const extras: any = {};
   const category = parseInt(values.category, 10);
   const issueType = values.issueType

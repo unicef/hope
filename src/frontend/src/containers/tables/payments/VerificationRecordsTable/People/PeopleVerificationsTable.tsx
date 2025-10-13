@@ -26,14 +26,17 @@ export function PeopleVerificationsTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       ...filter,
       businessAreaSlug: businessArea,
       programSlug: programId,
       paymentVerificationPk: paymentPlanId,
+      page,
     }),
-    [filter, businessArea, programId, paymentPlanId],
+    [filter, businessArea, programId, paymentPlanId, page],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -68,6 +71,29 @@ export function PeopleVerificationsTable({
     },
   });
 
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentVerificationPk: paymentPlanId,
+          },
+          queryVariables,
+        ),
+      );
+    },
+    enabled: page === 0,
+  });
+
   return (
     <UniversalRestTable
       title={t('Verification Records')}
@@ -77,6 +103,9 @@ export function PeopleVerificationsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={countData?.count}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}
