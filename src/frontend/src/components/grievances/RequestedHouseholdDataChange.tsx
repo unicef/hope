@@ -87,7 +87,7 @@ export function RequestedHouseholdDataChange({
   );
   let allApprovedCount = 0;
   const flexFields = householdData?.flexFields || {};
-  delete householdData.flex_fields;
+  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   // Count approved top-level fields
