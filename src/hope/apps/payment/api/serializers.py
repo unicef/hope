@@ -1177,7 +1177,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             return collector_data.get(field_name)
         return None
 
-    def get_snapshot_collector_account_data(self, obj: Payment) -> Any:
+    def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
 
 
