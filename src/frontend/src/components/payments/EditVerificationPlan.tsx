@@ -248,12 +248,12 @@ export const EditVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
-    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
-      return RestService.restAreasList({
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
         limit: 100,
-        areaTypeAreaLevel: 2,
-        search: undefined,
       });
     },
     enabled: !!businessArea,
