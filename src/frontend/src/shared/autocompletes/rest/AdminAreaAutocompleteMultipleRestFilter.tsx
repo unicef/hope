@@ -9,7 +9,7 @@ import {
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
 import { useQuery } from '@tanstack/react-query';
 
 export function AdminAreaAutocompleteMultipleRestFilter({
@@ -34,7 +34,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
   const [open, setOpen] = useState(false);
 
   const [queryVariables, setQueryVariables] = useState({
-    areaTypeAreaLevel: level,
+    level: level,
     limit: 100,
     search: debouncedInputText || undefined,
     parentId: parentId || undefined,
@@ -50,7 +50,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
   useEffect(() => {
     setQueryVariables((prev) => ({
       ...prev,
-      areaTypeAreaLevel: level,
+      level: level,
       parentId: parentId || undefined,
     }));
   }, [level, parentId]);
@@ -59,12 +59,14 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     data: areasData,
     isLoading,
     refetch,
-  } = useQuery<PaginatedAreaList>({
+  } = useQuery<PaginatedAreaListList>({
     queryKey: ['areas', businessArea, queryVariables],
     queryFn: async() => {
       try {
-        const result = await RestService.restAreasList({
-          ...queryVariables,
+        const result = await RestService.restBusinessAreasGeoAreasList({
+          businessAreaSlug: businessArea,
+          level: queryVariables.level,
+          name: queryVariables.search,
           limit: queryVariables.limit || 100,
         });
         return result;

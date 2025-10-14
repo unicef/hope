@@ -27,7 +27,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -145,13 +145,13 @@ const CreateCommunicationPage = (): ReactElement => {
   const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
 
-  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
-    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+  const { data: adminAreasData } = useQuery<PaginatedAreaListList>({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
-      return RestService.restAreasList({
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
         limit: 100,
-        areaTypeAreaLevel: 2,
-        search: undefined,
       });
     },
     enabled: !!businessArea,
