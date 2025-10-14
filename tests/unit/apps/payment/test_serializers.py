@@ -145,6 +145,20 @@ class PaymentListSerializerTest(TestCase):
 
         assert data["snapshot_collector_full_name"] == "Name_from_Snapshot"
 
+    def test_if_snapshot_collector_data_is_none(self) -> None:
+        household_data = {
+            "primary_collector": None,
+            "alternate_collector": None,
+        }
+        PaymentHouseholdSnapshot.objects.create(
+            payment=self.payment,
+            snapshot_data=household_data,
+            household_id=self.payment.household.id,
+        )
+        payment = Payment.objects.get(id=self.payment.id)
+        account_data = PaymentListSerializer.get_collector_field(payment, "account_data")
+        assert account_data is None
+
 
 class PaymentPlanListSerializerTest(TestCase):
     @classmethod
