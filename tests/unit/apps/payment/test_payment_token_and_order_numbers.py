@@ -50,11 +50,10 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
             assert payment.token_number is None
 
     def test_generate_token_and_order_numbers_for_payments(self) -> None:
-        for payment in self.payment_plan.eligible_payments.all():
-            payment = generate_token_and_order_numbers(payment)
-
-            assert len(str(payment.order_number)) == 9
-            assert len(str(payment.token_number)) == 7
+        generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
+        payment = self.payment_plan.eligible_payments.first()
+        assert len(str(payment.order_number)) == 9
+        assert len(str(payment.token_number)) == 7
 
     def test_check_if_token_or_order_number_exists_per_program(self) -> None:
         payment = Payment.objects.first()

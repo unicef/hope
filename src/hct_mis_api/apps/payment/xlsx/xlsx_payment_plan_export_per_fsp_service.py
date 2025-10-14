@@ -3,10 +3,12 @@ import string
 import zipfile
 from io import BytesIO
 from tempfile import NamedTemporaryFile
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
+from django.db import transaction
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
@@ -29,9 +31,61 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
+
+
+def generate_token_and_order_numbers(qs: QuerySet[Payment], program: Program, batch_size: int = 1000) -> None:
+    """
+    Ensure order_number/token_number for all rows in qs.
+    """
+    # Load existing numbers ONCE
+    existing_orders: Set[int] = set(
+        Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
+            "order_number", flat=True
+        )
+    )
+    existing_tokens: Set[int] = set(
+        Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
+            "token_number", flat=True
+        )
+    )
+
+    to_update: List[Payment] = []
+
+    for payment in qs.only("order_number", "token_number").iterator(chunk_size=batch_size):
+        need_order: bool = not payment.order_number
+        need_token: bool = not payment.token_number
+
+        if not (need_order or need_token):
+            continue
+
+        if need_order:
+            n9: int = generate_numeric_token(9)
+            while n9 in existing_orders:
+                n9 = generate_numeric_token(9)  # pragma: no cover
+            payment.order_number = n9
+            existing_orders.add(n9)
+
+        if need_token:
+            n7: int = generate_numeric_token(7)
+            while n7 in existing_tokens:
+                n7 = generate_numeric_token(7)  # pragma: no cover
+            payment.token_number = n7
+            existing_tokens.add(n7)
+
+        to_update.append(payment)
+
+        if len(to_update) >= batch_size:  # pragma: no cover
+            with transaction.atomic():
+                Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
+            to_update.clear()
+
+    if to_update:
+        with transaction.atomic():
+            Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
 
 
 def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
@@ -40,36 +94,15 @@ def check_if_token_or_order_number_exists_per_program(payment: Payment, field_na
     ).exists()
 
 
-def generate_token_and_order_numbers(payment: Payment) -> Payment:
-    # AB#134721
-    if payment.order_number and payment.token_number:
-        return payment
-
-    order_number = generate_numeric_token(9)
-    token_number = generate_numeric_token(7)
-
-    while check_if_token_or_order_number_exists_per_program(payment, "order_number", order_number):
-        order_number = generate_numeric_token(9)
-
-    while check_if_token_or_order_number_exists_per_program(payment, "token_number", token_number):
-        token_number = generate_numeric_token(7)
-
-    payment.order_number = order_number
-    payment.token_number = token_number
-    payment.save(update_fields=["order_number", "token_number"])
-    return payment
-
-
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: Optional[str] = None):
-        self.batch_size = 5000
+        self.batch_size = 2000
         self.payment_plan = payment_plan
         self.is_social_worker_program = self.payment_plan.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
-        flexible_attributes = FlexibleAttribute.objects.all()
         self.flexible_attributes = {
-            flexible_attribute.name: flexible_attribute for flexible_attribute in flexible_attributes
+            flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
         }
         self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
@@ -83,7 +116,15 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def get_account_fields_headers(self) -> List[str]:
         # Iterate over eligible payments to find the first with valid account_data
-        for payment in self.payment_plan.eligible_payments.all():
+        qs = (
+            self.payment_plan.eligible_payments.select_related("household_snapshot")
+            .only("id", "household_snapshot__snapshot_data")  # keep it minimal
+            .filter(
+                Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
+                | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
+            )
+        )
+        for payment in qs:
             snapshot = getattr(payment, "household_snapshot", None)
             snapshot_data = snapshot.snapshot_data if snapshot else {}
             collector_data = (
@@ -183,6 +224,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         split: PaymentPlanSplit,
         ws: "Worksheet",
     ) -> None:
+        if self.payment_generate_token_and_order_numbers:
+            generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
+
         qs = (
             split.split_payment_items.eligible()
             .select_related(
@@ -196,9 +240,6 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             ws.append(self.get_payment_row(payment))
 
     def get_payment_row(self, payment: Payment) -> List[str]:
-        if self.payment_generate_token_and_order_numbers:
-            payment = generate_token_and_order_numbers(payment)
-
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in self.template_columns

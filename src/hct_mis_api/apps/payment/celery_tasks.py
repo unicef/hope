@@ -159,7 +159,6 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
             with transaction.atomic():
-                # regenerate always xlsx
                 service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
                 service.export_per_fsp(user)
                 payment_plan.background_action_status_none()
