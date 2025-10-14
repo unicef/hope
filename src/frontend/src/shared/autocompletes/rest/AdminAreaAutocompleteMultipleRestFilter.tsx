@@ -126,9 +126,9 @@ export function AdminAreaAutocompleteMultipleRestFilter({
 
   const options = areasData?.results
     ? areasData.results
-        .map((area: AreaList) => {
-          if (!area || !area.id) return null;
         .map((area) => {
+          if (!area || !area.id) return null;
+          const option = {
             name: area.name || '',
             value: area.id,
           };
