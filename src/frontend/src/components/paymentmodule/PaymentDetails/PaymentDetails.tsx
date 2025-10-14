@@ -50,9 +50,7 @@ function PaymentDetails({
     'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
-  const collectorAccountData = payment?.snapshotCollectorAccountData
-    ? JSON.parse(payment.snapshotCollectorAccountData)
-    : {};
+  const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
 
   return (
     <>
