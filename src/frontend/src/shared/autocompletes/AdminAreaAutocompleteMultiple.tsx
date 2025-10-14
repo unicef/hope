@@ -34,12 +34,14 @@ export function AdminAreaAutocompleteMultiple({
   const { data: areasData, isLoading } = useQuery({
     queryKey: ['adminAreas', debouncedInputText, businessArea, level, parentId],
     queryFn: () =>
-      RestService.restAreasList({
-        search: debouncedInputText,
-        areaTypeAreaLevel: level,
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: level,
+        name: debouncedInputText,
         parentId: parentId || undefined,
         limit: 100,
       }),
+    enabled: !!businessArea,
   });
 
   const loading = isLoading;
