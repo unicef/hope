@@ -34,7 +34,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
   const [open, setOpen] = useState(false);
 
   const [queryVariables, setQueryVariables] = useState({
-    areaTypeAreaLevel: level,
+    level: level,
     limit: 100,
     search: debouncedInputText || undefined,
     parentId: parentId || undefined,
@@ -50,7 +50,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
   useEffect(() => {
     setQueryVariables((prev) => ({
       ...prev,
-      areaTypeAreaLevel: level,
+      level: level,
       parentId: parentId || undefined,
     }));
   }, [level, parentId]);
@@ -63,8 +63,10 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     queryKey: ['areas', businessArea, queryVariables],
     queryFn: async() => {
       try {
-        const result = await RestService.restAreasList({
-          ...queryVariables,
+        const result = await RestService.restBusinessAreasGeoAreasList({
+          businessAreaSlug: businessArea,
+          level: queryVariables.level,
+          name: queryVariables.search,
           limit: queryVariables.limit || 100,
         });
         return result;

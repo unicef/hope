@@ -44,7 +44,6 @@ export function AdminAreaAutocomplete({
 
   const [queryVariables, setQueryVariables] = useState({
     limit: 20,
-    areaTypeAreaLevel: level,
     search: debouncedInputText || undefined,
   });
 
@@ -52,20 +51,21 @@ export function AdminAreaAutocomplete({
     setQueryVariables((prev) => ({
       ...prev,
       search: debouncedInputText || undefined,
-      areaTypeAreaLevel: level,
     }));
-  }, [debouncedInputText, level]);
+  }, [debouncedInputText]);
 
   const {
     data: areasData,
     isLoading: loading,
     refetch,
   } = useQuery({
-    queryKey: ['adminAreas', queryVariables, businessArea],
+    queryKey: ['adminAreas', queryVariables, businessArea, level],
     queryFn: () =>
-      RestService.restAreasList({
-        ...queryVariables,
-        // businessAreaSlug: businessArea, // Uncomment if needed by API
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: level,
+        name: queryVariables.search,
+        limit: queryVariables.limit,
       }),
     enabled: open && !!businessArea,
     staleTime: 0,
