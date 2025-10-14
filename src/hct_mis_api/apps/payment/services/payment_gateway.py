@@ -3,6 +3,7 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
+from django.db.models import QuerySet
 from django.utils.timezone import now
 
 from _decimal import Decimal
@@ -457,7 +458,7 @@ class PaymentGatewayService:
                 _payment.status = Payment.STATUS_SENT_TO_PG
             Payment.objects.bulk_update(_payments, ["status"])
 
-        def _add_records(_payments: List[Payment], _container: PaymentPlanSplit) -> None:
+        def _add_records(_payments: QuerySet[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
@@ -486,8 +487,7 @@ class PaymentGatewayService:
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
-                payments = list(payments_qs.order_by("unicef_id"))
-                _add_records(payments, split)
+                _add_records(payments_qs.order_by("unicef_id"), split)
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()

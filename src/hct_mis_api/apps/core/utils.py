@@ -9,6 +9,7 @@ from collections.abc import MutableMapping
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
+from itertools import islice
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,6 +17,7 @@ from typing import (
     Dict,
     Generator,
     Iterable,
+    Iterator,
     List,
     Optional,
     Tuple,
@@ -864,10 +866,16 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 }
 
 
-def chunks(lst: list, n: int) -> list:
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+def chunks(it: Iterable, size: int) -> Iterator[List]:
+    """
+    Yield lists of up to `size` items from `it`.
+    """
+    iterator = iter(it)
+    while True:
+        buf: List = list(islice(iterator, size))
+        if not buf:
+            return
+        yield buf
 
 
 def send_email_notification_on_commit(service: Any, user: "User") -> None:

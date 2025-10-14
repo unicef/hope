@@ -883,6 +883,10 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             msg = "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             raise GraphQLError(msg)
 
+        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+            msg = "Payment List Per FSP export already in progress."
+            raise GraphQLError(msg)
+
         if not payment_plan.eligible_payments:
             msg = "Export failed: The Payment List is empty."
             raise GraphQLError(msg)
