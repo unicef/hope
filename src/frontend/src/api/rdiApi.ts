@@ -20,7 +20,7 @@ export const runDeduplicationDataImports = async(
 ): Promise<any> => {
   try {
     const response = await api.post(
-      `${businessAreaSlug}/programs/${programId}/registration-data-imports/run-deduplication/`,
+      `business-areas/${businessAreaSlug}/programs/${programId}/registration-data-imports/run-deduplication/`,
       {},
     );
     return response.data;
