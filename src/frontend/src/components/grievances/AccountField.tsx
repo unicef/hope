@@ -33,13 +33,19 @@ export function AccountField({
 }: AccountProps): ReactElement {
   const { t } = useTranslation();
 
-  const accountFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
+  const accountIndex = getIndexForId(
+    values[baseName],
+    id,
+  );
+  const accountFieldName = `${baseName}.${accountIndex}`;
 
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dataFields = account?.dataFields || {};
 
   const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
+  const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
+  const isBank = accountType === 'bank';
 
   return (
     <>
@@ -75,7 +81,7 @@ export function AccountField({
         ) : (
           <Grid size={{ xs: 8 }}>
             <Field
-              name={`${accountFieldName}.name`}
+              name={`${accountFieldName}.accountType`}
               variant="outlined"
               label={t('New Value')}
               component={FormikSelectField}
@@ -107,17 +113,17 @@ export function AccountField({
             <Grid size={{ xs: 4 }}>
               <LabelizedField
                 label={t('Account Item')}
-                value="financial_institution"
+                value="financial institution"
               />
             </Grid>
             <Grid size={{ xs: 8 }}>
               <Field
-                name={`${accountFieldName}.financial_institution`}
+                name={`${accountFieldName}.financialInstitution`}
                 variant="outlined"
                 label={t('New Value')}
                 component={FormikSelectField}
                 choices={accountFinancialInstitutionChoices}
-                required
+                required={isBank}
               />
             </Grid>
           </Fragment>
@@ -125,25 +131,21 @@ export function AccountField({
       ) : (
         <>
           {Object.entries(dataFields).map(([key, value]) => {
-            let displayValue = String(value);
-            const isFinancialInstitutionField = key === 'financial_institution';
-            if (
-              isFinancialInstitutionField &&
-              Array.isArray(accountFinancialInstitutionChoices)
-            ) {
-              const choice = accountFinancialInstitutionChoices.find(
-                (c: any) => c.value === value,
-              );
-              displayValue = choice ? choice.name : String(value);
-            }
-            const fieldProps = {
-              component: isFinancialInstitutionField
-                ? FormikSelectField
-                : FormikTextField,
-              ...(isFinancialInstitutionField
-                ? { choices: accountFinancialInstitutionChoices }
-                : {}),
-            };
+              let displayValue = String(value);
+              const isFinancialInstitutionField = key === 'financial_institution';
+              if (
+                isFinancialInstitutionField &&
+                Array.isArray(accountFinancialInstitutionChoices)
+              ) {
+                const choice = accountFinancialInstitutionChoices.find(
+                  (c: any) => c.value === value,
+                );
+                displayValue = choice ? choice.name : String(value);
+              }
+              const fieldProps = {
+                component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
+                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: isBank } : {}),
+              };
 
             return (
               <Fragment key={key}>

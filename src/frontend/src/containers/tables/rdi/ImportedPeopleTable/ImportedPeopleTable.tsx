@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
@@ -93,6 +94,8 @@ export function ImportedPeopleTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
@@ -124,7 +127,7 @@ export function ImportedPeopleTable({
           isLoading={isLoading}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
-          itemsCount={countData?.count}
+          itemsCount={itemsCount}
           page={page}
           setPage={setPage}
           renderRow={(row: IndividualList) => (
@@ -147,7 +150,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
-          itemsCount={countData?.count}
+          itemsCount={itemsCount}
           page={page}
           setPage={setPage}
           renderRow={(row: IndividualList) => (

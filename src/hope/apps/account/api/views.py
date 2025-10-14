@@ -112,6 +112,9 @@ class UserViewSet(
             program = get_object_or_404(Program, slug=program_slug, business_area__slug=business_area_slug)
             role_assignments_queryset = role_assignments_queryset.filter(Q(program=program) | Q(program=None))
 
+        if role_ids_filter := self.request.query_params.getlist("roles"):
+            role_assignments_queryset = role_assignments_queryset.filter(role__id__in=role_ids_filter)
+
         role_assignment_ids = list(role_assignments_queryset.values_list("id", flat=True))
 
         queryset = (
@@ -127,16 +130,20 @@ class UserViewSet(
         )
 
         if self.request and self.request.query_params.get("serializer") == "program_users":
-            role_assignments_queryset = role_assignments_queryset.order_by("business_area__slug", "role__name")
+            all_role_assignments_queryset = (
+                RoleAssignment.objects.select_related("business_area", "role", "program")
+                .exclude(expiry_date__lt=timezone.now())
+                .order_by("business_area__slug", "role__name")
+            )
             queryset = queryset.prefetch_related(
                 models.Prefetch(
                     "role_assignments",
-                    queryset=role_assignments_queryset,
+                    queryset=all_role_assignments_queryset,
                     to_attr="cached_user_role_assignments",
                 ),
                 models.Prefetch(
                     "partner__role_assignments",
-                    queryset=role_assignments_queryset,
+                    queryset=all_role_assignments_queryset,
                     to_attr="cached_partner_role_assignments",
                 ),
             )
@@ -152,7 +159,13 @@ class UserViewSet(
         data = self.get_serializer(user).data
         return Response(data)
 
-    @extend_schema(parameters=[OpenApiParameter(name="serializer", type=str)])
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name="serializer", type=str),
+            OpenApiParameter(name="program"),
+            OpenApiParameter(name="roles", type=str, many=True),
+        ]
+    )
     @etag_decorator(UserListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:

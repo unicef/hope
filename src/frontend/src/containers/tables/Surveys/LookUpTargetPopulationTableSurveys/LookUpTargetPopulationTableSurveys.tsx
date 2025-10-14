@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -119,6 +120,8 @@ export function LookUpTargetPopulationTableSurveys({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -136,7 +139,7 @@ export function LookUpTargetPopulationTableSurveys({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: TargetPopulationList) => (

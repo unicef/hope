@@ -13,6 +13,7 @@ import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface TargetPopulationProps {
   filter;
@@ -102,6 +103,8 @@ export function TargetPopulationForPeopleTable({
     enabled: page === 0,
   });
 
+  const persistedCount = usePersistedCount(page, countData);
+
   // Main data query
   const {
     data: targetPopulationsData,
@@ -163,7 +166,7 @@ export function TargetPopulationForPeopleTable({
         )}
         page={page}
         setPage={setPage}
-        itemsCount={countData?.count ?? undefined}
+        itemsCount={persistedCount}
       />
     </TableWrapper>
   );

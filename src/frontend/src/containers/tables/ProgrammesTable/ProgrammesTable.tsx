@@ -9,6 +9,7 @@ import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgram
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -97,6 +98,8 @@ function ProgrammesTable({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, dataProgramsCount);
+
   return (
     <>
       <TableWrapper>
@@ -108,7 +111,7 @@ function ProgrammesTable({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
-          itemsCount={dataProgramsCount?.count}
+          itemsCount={itemsCount}
           renderRow={(row: ProgramList) => (
             <ProgrammesTableRow
               key={row.id}
