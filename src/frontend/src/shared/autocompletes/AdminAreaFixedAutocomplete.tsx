@@ -43,13 +43,15 @@ export const AdminAreaFixedAutocomplete = ({
       value,
     ],
     queryFn: () =>
-      RestService.restAreasList({
-        id: value || undefined,
-        search: debouncedInputText || '',
-        areaTypeAreaLevel: level === 1 ? 1 : 2,
-        parentId: parentId || undefined,
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: level === 1 ? 1 : 2,
+        name: debouncedInputText || undefined,
         limit: 50,
+        id: value || undefined,
+        parentId: parentId || undefined,
       }),
+    enabled: !!businessArea,
   });
 
   const loading = isLoading;
