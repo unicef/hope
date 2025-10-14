@@ -139,7 +139,7 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 2']
                     'line': 3
                 }
             ],
-            'message': 'Export failed: The Payment List is empty.',
+            'message': 'Payment List Per FSP export already in progress.',
             'path': [
                 'exportXlsxPaymentPlanPaymentListPerFsp'
             ]
@@ -148,6 +148,26 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 2']
 }
 
 snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 3'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Export failed: The Payment List is empty.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 4'] = {
     'data': {
         'exportXlsxPaymentPlanPaymentListPerFsp': {
             'paymentPlan': {

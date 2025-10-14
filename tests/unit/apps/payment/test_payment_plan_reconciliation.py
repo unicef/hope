@@ -1227,12 +1227,22 @@ class TestPaymentPlanReconciliation(APITestCase):
                 str(xlsx_template.pk), "FinancialServiceProviderXlsxTemplate"
             ),
         }
+
         # wrong Payment Plan status
         self.snapshot_graphql_request(
             request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
         )
-        # upd payment plan status
+
+        # wrong Payment Plan background status
         payment_plan.status = PaymentPlan.Status.ACCEPTED
+        payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan.save()
+        # wrong Payment Plan status
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+        )
+
+        payment_plan.background_action_status = None
         payment_plan.save()
         # no eligible payments
         self.snapshot_graphql_request(
