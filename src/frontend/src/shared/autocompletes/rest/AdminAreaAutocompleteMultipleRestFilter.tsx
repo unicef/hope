@@ -9,7 +9,7 @@ import {
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
 import { useQuery } from '@tanstack/react-query';
 
 export function AdminAreaAutocompleteMultipleRestFilter({
@@ -59,7 +59,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     data: areasData,
     isLoading,
     refetch,
-  } = useQuery<PaginatedAreaList>({
+  } = useQuery<PaginatedAreaListList>({
     queryKey: ['areas', businessArea, queryVariables],
     queryFn: async() => {
       try {
@@ -126,9 +126,9 @@ export function AdminAreaAutocompleteMultipleRestFilter({
 
   const options = areasData?.results
     ? areasData.results
-        .map((area) => {
+        .map((area: AreaList) => {
           if (!area || !area.id) return null;
-          const option = {
+        .map((area) => {
             name: area.name || '',
             value: area.id,
           };
