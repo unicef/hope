@@ -73,7 +73,6 @@ const OtherPeriodicDataUpdates = () => {
       'CANCELED_CREATE',
       'NOT_SCHEDULED_MERGE',
       'CANCELED_MERGE',
-      'MERGED',
       'FAILED_MERGE',
       'FAILED_CREATE',
     ] as const,
