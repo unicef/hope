@@ -39,7 +39,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FullList } from '@restgenerated/models/FullList';
@@ -247,7 +247,7 @@ export const EditVerificationPlan = ({
     : null;
   const loadRapidProFlows = refetchRapidProFlows;
 
-  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
+  const { data: adminAreasData } = useQuery<PaginatedAreaListList>({
     queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
