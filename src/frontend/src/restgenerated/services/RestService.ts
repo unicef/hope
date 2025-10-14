@@ -1854,7 +1854,7 @@ export class RestService {
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        formData: GrievanceIndividualDataChangeApprove,
+        formData?: GrievanceIndividualDataChangeApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',

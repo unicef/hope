@@ -1061,17 +1061,17 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> dict | None:
         """Return primary_collector or alternate_collector field value or None."""
-        if household_snapshot := getattr(payment, "household_snapshot", None):
-            household_snapshot_data = household_snapshot.snapshot_data
-            collector_data = (
-                household_snapshot_data.get("primary_collector")
-                or household_snapshot_data.get("alternate_collector")
-                or {}
-            )
-            return collector_data.get(field_name)
-        return None
+        household_snapshot = getattr(payment, "household_snapshot", None)
+        if not household_snapshot:
+            return None
+
+        data = household_snapshot.snapshot_data or {}
+        collector_data = data.get("primary_collector") or data.get("alternate_collector") or None
+        if not isinstance(collector_data, dict):
+            return None
+        return collector_data.get(field_name)
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name")
@@ -1177,7 +1177,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             return collector_data.get(field_name)
         return None
 
-    def get_snapshot_collector_account_data(self, obj: Payment) -> Any:
+    def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
 
 
