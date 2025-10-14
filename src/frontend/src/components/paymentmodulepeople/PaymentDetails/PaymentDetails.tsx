@@ -51,7 +51,7 @@ export function PaymentDetails({
     'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
-  const collectorAccountData = payment?.snapshotCollectorAccountData;
+  const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
 
   return (
     <>
