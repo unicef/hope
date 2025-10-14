@@ -10,6 +10,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useQuery } from '@tanstack/react-query';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { filterEmptyParams } from '@utils/utils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 interface UsersTableProps {
   filter;
 }
@@ -75,6 +76,8 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     enabled: page === 0,
   });
 
+  const persistedCount = usePersistedCount(page, dataUsersCount);
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -85,7 +88,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
         data={dataUsers}
         isLoading={isLoadingUsers}
         error={errorUsers}
-        itemsCount={dataUsersCount?.count}
+        itemsCount={persistedCount}
         rowsPerPageOptions={[10, 15, 20]}
         defaultOrderBy="status"
         defaultOrderDirection="desc"
