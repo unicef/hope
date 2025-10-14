@@ -105,7 +105,9 @@ function Entitlement({
   const queryClient = useQueryClient();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.id ? String(paymentPlan.steficonRule.id) : '',
+    paymentPlan.steficonRule?.rule?.id
+      ? String(paymentPlan.steficonRule.rule.id)
+      : '',
   );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
@@ -161,15 +163,18 @@ function Entitlement({
       id: string;
       programSlug: string;
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve(
+      RestService.restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve(
         {
           businessAreaSlug,
           id,
           programSlug,
         },
       ),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

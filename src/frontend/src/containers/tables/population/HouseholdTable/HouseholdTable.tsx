@@ -19,6 +19,7 @@ import {
   householdStatusToColor,
 } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -40,6 +41,8 @@ export const HouseholdTable = ({
   const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
@@ -54,7 +57,7 @@ export const HouseholdTable = ({
     return {
       businessAreaSlug: businessArea,
       programSlug: programId,
-      sizeMin:filter.householdSizeMin,
+      sizeMin: filter.householdSizeMin,
       sizeMax: filter.householdSizeMax,
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -65,6 +68,7 @@ export const HouseholdTable = ({
       withdrawn: matchWithdrawnValue(),
       ordering: filter.orderBy,
       rdiMergeStatus: 'MERGED',
+      page,
     };
   }, [
     businessArea,
@@ -79,6 +83,7 @@ export const HouseholdTable = ({
     filter.residenceStatus,
     filter.withdrawn,
     filter.orderBy,
+    page,
   ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -117,7 +122,10 @@ export const HouseholdTable = ({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
@@ -215,7 +223,9 @@ export const HouseholdTable = ({
         isLoading={isLoading}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );

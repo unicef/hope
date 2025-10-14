@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -63,11 +64,38 @@ export function TargetPopulationTable({
     ],
   );
 
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  // Count query (enabled only on page 0)
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsCount',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const persistedCount = usePersistedCount(page, countData);
+
+  // Main data query
   const {
     data: targetPopulationsData,
     isLoading,
@@ -78,6 +106,7 @@ export function TargetPopulationTable({
       businessArea,
       programId,
       queryVariables,
+      page,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
@@ -132,6 +161,9 @@ export function TargetPopulationTable({
             canViewDetails={canViewDetails}
           />
         )}
+        page={page}
+        setPage={setPage}
+        itemsCount={persistedCount}
       />
     </TableWrapper>
   );

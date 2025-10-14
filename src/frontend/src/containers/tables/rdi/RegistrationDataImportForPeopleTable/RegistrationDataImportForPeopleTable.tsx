@@ -1,4 +1,5 @@
 import { ReactElement, useMemo, useState, useEffect } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
@@ -42,6 +43,8 @@ export function RegistrationDataImportForPeopleTable({
   const { t } = useTranslation();
   const { businessArea, programSlug } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       search: filter.search,
@@ -54,6 +57,7 @@ export function RegistrationDataImportForPeopleTable({
         max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
       }),
       size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
+      page,
     }),
     [
       filter.search,
@@ -63,6 +67,7 @@ export function RegistrationDataImportForPeopleTable({
       filter.importDateRangeMax,
       filter.sizeMin,
       filter.sizeMax,
+      page,
     ],
   );
 
@@ -101,7 +106,7 @@ export function RegistrationDataImportForPeopleTable({
       programSlug,
       queryVariables,
     ],
-    queryFn: async() => {
+    queryFn: async () => {
       const params = createApiParams(
         { businessAreaSlug: businessArea, programSlug },
         queryVariables,
@@ -111,7 +116,10 @@ export function RegistrationDataImportForPeopleTable({
         params,
       );
     },
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -123,7 +131,7 @@ export function RegistrationDataImportForPeopleTable({
         title={
           noTitle
             ? null
-            : `${t('List of Imports')} (${countData?.count ?? (data as any)?.count ?? 0})`
+            : `${t('List of Imports')} (${itemsCount ?? (data as any)?.count ?? 0})`
         }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"
@@ -134,7 +142,9 @@ export function RegistrationDataImportForPeopleTable({
         error={error || countError}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count ?? (data as any)?.count ?? 0}
+        itemsCount={itemsCount ?? (data as any)?.count ?? 0}
+        page={page}
+        setPage={setPage}
         renderRow={(row) => (
           <RegistrationDataImportForPeopleTableRow
             key={row.id}

@@ -22,11 +22,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_ONE,
 )
 from hope.apps.core.models import FlexibleAttribute
-from hope.apps.core.utils import (
-    encode_id_base64,
-    encode_id_base64_required,
-    serialize_flex_attributes,
-)
+from hope.apps.core.utils import serialize_flex_attributes
 from hope.apps.geo import models as geo_models
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import (
@@ -265,18 +261,25 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
     items = []
     for account in accounts:
         _id = account.pop("id")
-        delivery_mechanism_data = get_object_or_404(Account, id=_id)
+        account_object = get_object_or_404(Account, id=_id)
+        data_fields = account.get("data_fields", {})
+        financial_institution = account.get("financial_institution")
+        number = account.get("number")
         data = {
-            "id": _id,
-            "name": delivery_mechanism_data.account_type.key,
+            "id": str(_id),
+            "account_type": account_object.account_type.key,
             "approve_status": False,
+            "financial_institution": financial_institution,
+            "financial_institution_previous_value": account_object.financial_institution.pk,
+            "number": number,
+            "number_previous_value": account_object.number,
             "data_fields": [
                 {
                     "name": field,
                     "value": value,
-                    "previous_value": delivery_mechanism_data.account_data.get(field),
+                    "previous_value": account_object.data.get(field),
                 }
-                for field, value in account["data_fields"].items()
+                for field, value in data_fields.items()
             ],
         }
         items.append(data)
@@ -286,6 +289,8 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
 def handle_update_account(account: dict) -> Account | None:
     account_instance = get_object_or_404(Account, id=account.get("id"))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
+    account_instance.number = account["number"]
+    account_instance.financial_institution_id = account.get("financial_institution")
     account_instance.account_data = data_fields_dict
     return account_instance
 
@@ -293,10 +298,12 @@ def handle_update_account(account: dict) -> Account | None:
 def handle_add_account(account: dict, individual: Individual) -> Account:
     account_instance = Account(
         individual=individual,
-        account_type=AccountType.objects.get(key=account["name"]),
+        account_type=AccountType.objects.get(key=account["account_type"]),
+        financial_institution_id=account.get("financial_institution"),
+        number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )
-    account_instance.account_data = account["data_fields"]
+    account_instance.data = account.get("data_fields", {})
     return account_instance
 
 
@@ -307,10 +314,10 @@ def prepare_previous_documents(
     for document_data in documents_to_remove_with_approve_status:
         document_id = document_data.get("value")
         document: Document = get_object_or_404(Document, id=document_id)
-        previous_documents[encode_id_base64_required(document.id, "Document")] = {
-            "id": encode_id_base64(document.id, "Document"),
+        previous_documents[str(document.id)] = {
+            "id": str(document.id),
             "document_number": document.document_number,
-            "individual": encode_id_base64(document.individual.id, "Individual"),
+            "individual": str(document.individual.id),
             "key": document.type.key,
             "country": document.country.iso_code3,
         }
@@ -365,11 +372,10 @@ def prepare_previous_identities(
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=identity_id)
-        encoded_identity = encode_id_base64_required(identity.id, "IndividualIdentity")
-        previous_identities[encoded_identity] = {
-            "id": encoded_identity,  # TODO: can be removed maybe
+        previous_identities[str(identity.id)] = {
+            "id": str(identity.id),
             "number": identity.number,
-            "individual": encode_id_base64(identity.individual.id, "Individual"),
+            "individual": str(identity.individual.id),
             "partner": identity.partner.name,
             "country": identity.country.iso_code3,
         }

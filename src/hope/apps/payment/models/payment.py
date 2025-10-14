@@ -843,8 +843,8 @@ class PaymentPlan(
         return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     @property
-    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
-        """Export MTCN file - xlsx file with password."""
+    def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
+        """Export MTCN file xlsx file with password."""
         all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
         return self.is_payment_gateway and all_sent_to_fsp
 
@@ -2103,8 +2103,14 @@ class Payment(
 
     @property
     def people_individual(self) -> Individual | None:
-        """Return first Individual from Household for DCT social worker."""
-        return self.household.individuals.first() if self.parent.is_social_worker_program else None
+        if not getattr(self.parent, "is_social_worker_program", False):
+            return None
+
+        household = self.household
+        prefetched = getattr(household, "prefetched_individuals", None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        return household.individuals.select_related().first()
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
@@ -2140,6 +2146,14 @@ class FinancialInstitution(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
+
+    @classmethod
+    def get_rdi_template_choices(cls) -> dict:
+        return {
+            "account__ACCOUNT_TYPE__financial_institution": {
+                "choices": [{"value": fi.pk, "label": {"English(EN)": fi.name}} for fi in cls.objects.all()]
+            }
+        }
 
 
 class FinancialInstitutionMapping(TimeStampedModel):

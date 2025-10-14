@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
@@ -18,6 +19,7 @@ interface PeopleVerificationRecordsTableProps {
 }
 
 export function PeopleVerificationRecordsTable({
+  // ...existing code...
   paymentPlanId,
   filter,
   canViewRecordDetails,
@@ -37,6 +39,28 @@ export function PeopleVerificationRecordsTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for verification records, only enabled on first page
+  const { data: verificationCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanId,
+        ...queryVariables,
+      }),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, verificationCountData);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -77,6 +101,9 @@ export function PeopleVerificationRecordsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
           key={payment.id}

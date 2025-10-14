@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { showApiErrorMessages } from '@utils/utils';
+import { getApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -51,6 +51,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
   const { businessArea, programId } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
+  const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
   const canUploadReconciliation =
@@ -62,38 +63,36 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
     allowedState.includes(paymentPlan.backgroundActionStatus) &&
     paymentPlan.fspCommunicationChannel == 'XLSX';
 
-  const {
-    mutateAsync: importReconciliationXlsx,
-    isPending: fileLoading,
-    error: xlsxErrors,
-  } = useMutation({
-    mutationFn: ({
-      businessAreaSlug,
-      id,
-      programSlug,
-      formData,
-    }: {
-      businessAreaSlug: string;
-      id: string;
-      programSlug: string;
-      formData: PaymentPlanImportFile;
-    }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
-        {
-          businessAreaSlug,
-          id,
-          programSlug,
-          formData,
-        },
-      ),
-    onSuccess: () => {
-      setOpenImport(false);
-      showMessage(t('Your import was successful!'));
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
+  const { mutateAsync: importReconciliationXlsx, isPending: fileLoading } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        formData,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        formData: PaymentPlanImportFile;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            formData,
+          },
+        ),
+      onSuccess: () => {
+        setOpenImport(false);
+        showMessage(t('Your import was successful!'));
+        setXlsxError(null);
+      },
+      onError: (error: any) => {
+        setXlsxError(getApiErrorMessages(error));
+      },
+    });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -153,12 +152,10 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
                 setFileToImport(file);
               }}
             />
-            {fileToImport && xlsxErrors ? (
+            {fileToImport && xlsxError ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
-                <p>{xlsxErrors.message}</p>
-                {/* //TODO: fix */}
-                {/* <ImportErrors errors={xlsxErrors} /> */}
+                <p>{xlsxError}</p>
               </Error>
             ) : null}
           </>

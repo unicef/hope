@@ -35,6 +35,7 @@ from hope.apps.payment.utils import (
     from_received_to_status,
     generate_cache_key,
     get_quantity_in_usd,
+    normalize_score,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -296,6 +297,8 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     from hope.apps.payment.models import Payment, PaymentPlan
     from hope.apps.steficon.models import Rule, RuleCommit
 
+    bulk_size = 1000
+
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
@@ -305,30 +308,48 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         payment_plan.save()
 
     try:
-        updates = []
+        now = timezone.now()
+        qs = payment_plan.eligible_payments.select_related("household").only(
+            "id",
+            "household",  # for rule.execute input
+            "entitlement_quantity",
+            "entitlement_quantity_usd",
+            "entitlement_date",
+        )
+
+        pp_currency = payment_plan.currency
+        pp_exchange_rate = payment_plan.exchange_rate
+        pp_currency_exchange_date = payment_plan.currency_exchange_date
+
+        updates_buffer = []
         with transaction.atomic():
-            payment: Payment
-            for payment in payment_plan.eligible_payments:
+            for payment in qs.iterator(chunk_size=bulk_size):
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
+
                 payment.entitlement_quantity = result.value
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=result.value,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency=pp_currency,
+                    exchange_rate=pp_exchange_rate,
+                    currency_exchange_date=pp_currency_exchange_date,
                 )
-                payment.entitlement_date = timezone.now()
-                updates.append(payment)
-            Payment.signature_manager.bulk_update_with_signature(
-                updates,
-                [
-                    "entitlement_quantity",
-                    "entitlement_date",
-                    "entitlement_quantity_usd",
-                ],
-            )
+                payment.entitlement_date = now
+                updates_buffer.append(payment)
+                # Flush in chunks to keep memory and row locks under control
+                if len(updates_buffer) >= bulk_size:  # pragma: no cover
+                    Payment.signature_manager.bulk_update_with_signature(
+                        updates_buffer,
+                        ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
+                    )
+                    updates_buffer.clear()
 
-            payment_plan.steficon_applied_date = timezone.now()
+            if updates_buffer:
+                Payment.signature_manager.bulk_update_with_signature(
+                    updates_buffer,
+                    ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
+                )
+
+            payment_plan.steficon_applied_date = now
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
                 payment_plan.remove_export_files()
@@ -767,7 +788,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
                         "payment_plan": payment_plan,
                     }
                 )
-                payment.vulnerability_score = result.value
+                payment.vulnerability_score = normalize_score(result.value)
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["vulnerability_score"])
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED

@@ -115,6 +115,54 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
 
+    def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
+        if financial_institution_pk := account_data.get("financial_institution"):
+            financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
+            try:
+                fsp_mapping = FinancialInstitutionMapping.objects.get(
+                    financial_institution=financial_institution,
+                    financial_service_provider=obj.financial_service_provider,
+                )
+                account_data["service_provider_code"] = fsp_mapping.code
+
+            except FinancialInstitutionMapping.DoesNotExist:
+                raise Exception(
+                    f"No Financial Institution Mapping found for"
+                    f" financial_institution {financial_institution},"
+                    f" fsp {obj.financial_service_provider},"
+                    f" payment {obj.id},"
+                    f" collector {obj.collector}."
+                )
+
+        elif financial_institution_code := account_data.get("code"):
+            # financial_institution_code is now collected as a specific fsp code (uba_code)
+            uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+            if financial_institution_code and obj.financial_service_provider == uba_fsp:
+                account_data["service_provider_code"] = financial_institution_code
+
+            else:
+                try:
+                    uba_mapping = FinancialInstitutionMapping.objects.get(
+                        code=financial_institution_code,
+                        financial_service_provider=uba_fsp,
+                    )
+                    fsp_mapping = FinancialInstitutionMapping.objects.get(
+                        financial_institution=uba_mapping.financial_institution,
+                        financial_service_provider=obj.financial_service_provider,
+                    )
+                    account_data["service_provider_code"] = fsp_mapping.code
+
+                except FinancialInstitutionMapping.DoesNotExist:
+                    raise Exception(
+                        f"No Financial Institution Mapping found for"
+                        f" financial_institution_code {financial_institution_code},"
+                        f" fsp {obj.financial_service_provider},"
+                        f" payment {obj.id},"
+                        f" collector {obj.collector}."
+                    )
+
+        return account_data
+
     def get_extra_data(self, obj: Payment) -> dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
@@ -126,12 +174,13 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         snapshot_data = self.get_extra_data(obj)
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
         account_data = collector_data.get("account_data", {})
+        account_type = obj.delivery_type.account_type and obj.delivery_type.account_type.key
 
         payload_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
-            "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
+            "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
@@ -141,52 +190,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         }
 
         if account_data:
-            if financial_institution_pk := account_data.get("financial_institution"):
-                financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
-                try:
-                    fsp_mapping = FinancialInstitutionMapping.objects.get(
-                        financial_institution=financial_institution,
-                        financial_service_provider=obj.financial_service_provider,
-                    )
-                    account_data["service_provider_code"] = fsp_mapping.code
-
-                except FinancialInstitutionMapping.DoesNotExist:
-                    raise Exception(
-                        f"No Financial Institution Mapping found for"
-                        f" financial_institution {financial_institution},"
-                        f" fsp {obj.financial_service_provider},"
-                        f" payment {obj.id},"
-                        f" collector {obj.collector}."
-                    )
-
-            elif financial_institution_code := account_data.get("code"):
-                # financial_institution_code is now collected as a specific fsp code (uba_code)
-
-                uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
-                if financial_institution_code and obj.financial_service_provider == uba_fsp:
-                    account_data["service_provider_code"] = financial_institution_code
-
-                else:
-                    try:
-                        uba_mapping = FinancialInstitutionMapping.objects.get(
-                            code=financial_institution_code,
-                            financial_service_provider=uba_fsp,
-                        )
-                        fsp_mapping = FinancialInstitutionMapping.objects.get(
-                            financial_institution=uba_mapping.financial_institution,
-                            financial_service_provider=obj.financial_service_provider,
-                        )
-                        account_data["service_provider_code"] = fsp_mapping.code
-
-                    except FinancialInstitutionMapping.DoesNotExist:
-                        raise Exception(
-                            f"No Financial Institution Mapping found for"
-                            f" financial_institution_code {financial_institution_code},"
-                            f" fsp {obj.financial_service_provider},"
-                            f" payment {obj.id},"
-                            f" collector {obj.collector}."
-                        )
-
+            if account_type == "bank":
+                account_data = self._map_financial_institution(obj, account_data)
             payload_data["account"] = account_data
 
         payload = PaymentPayloadSerializer(data=payload_data)
@@ -631,7 +636,8 @@ class PaymentGatewayService:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
     def sync_record(self, payment: Payment) -> None:
-        if not payment.parent.is_payment_gateway:
+        payment_plan = payment.parent
+        if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
@@ -640,9 +646,19 @@ class PaymentGatewayService:
                 payment,
                 [pg_payment_record],
                 payment.parent_split,
-                payment.parent,
-                payment.parent.exchange_rate,
+                payment_plan,
+                payment_plan.exchange_rate,
             )
+
+            if payment_plan.is_reconciled:
+                payment_plan.status_finished()
+                payment_plan.save()
+                for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
+                    self.change_payment_instruction_status(
+                        PaymentInstructionStatus.FINALIZED,
+                        instruction,
+                        validate_response=False,
+                    )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate

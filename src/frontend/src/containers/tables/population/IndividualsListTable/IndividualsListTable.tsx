@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
@@ -31,6 +32,8 @@ export function IndividualsListTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
@@ -47,6 +50,7 @@ export function IndividualsListTable({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      page,
     }),
     [
       filter.ageMin,
@@ -62,6 +66,7 @@ export function IndividualsListTable({
       filter.lastRegistrationDateMax,
       programId,
       businessArea,
+      page,
     ],
   );
   const replacements = {
@@ -115,7 +120,10 @@ export function IndividualsListTable({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <TableWrapper>
@@ -130,7 +138,9 @@ export function IndividualsListTable({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <IndividualsListTableRow
             key={row.id}

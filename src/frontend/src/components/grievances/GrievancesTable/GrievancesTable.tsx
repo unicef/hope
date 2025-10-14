@@ -35,6 +35,7 @@ import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface GrievancesTableProps {
   filter;
@@ -199,7 +200,7 @@ export const GrievancesTable = ({
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
-    enabled: isAllPrograms,
+    enabled: isAllPrograms && page === 0,
   });
 
   // SELECTED PROGRAM
@@ -241,8 +242,20 @@ export const GrievancesTable = ({
             queryVariables,
           ),
         ),
-      enabled: !isAllPrograms,
+      enabled: !isAllPrograms && page === 0,
     });
+
+  const persistedCountAll = usePersistedCount(
+    page,
+    allProgramsGrievanceTicketsCount,
+  );
+  const persistedCountSelected = usePersistedCount(
+    page,
+    selectedProgramGrievanceTicketsCount,
+  );
+  const persistedCount = isAllPrograms
+    ? persistedCountAll
+    : persistedCountSelected;
 
   const optionsData = usersData;
 
@@ -456,12 +469,7 @@ export const GrievancesTable = ({
             setQueryVariables={setQueryVariables}
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
-            onPageChanged={setPage}
-            itemsCount={
-              isAllPrograms
-                ? allProgramsGrievanceTicketsCount?.count
-                : selectedProgramGrievanceTicketsCount?.count
-            }
+            itemsCount={persistedCount}
             renderRow={(row: GrievanceTicketList) => (
               <GrievancesTableRow
                 key={row.id}
@@ -480,6 +488,8 @@ export const GrievancesTable = ({
                 setInputValue={setInputValue}
               />
             )}
+            page={page}
+            setPage={setPage}
           />
         </Paper>
       </TableWrapper>

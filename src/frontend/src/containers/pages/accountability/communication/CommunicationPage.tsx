@@ -1,15 +1,11 @@
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
@@ -22,7 +18,7 @@ import {
 import { useProgramContext } from '../../../../programContext';
 
 export const CommunicationPage = (): ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
@@ -47,16 +43,6 @@ export const CommunicationPage = (): ReactElement => {
     setShouldScroll(false),
   );
 
-  const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
-
-  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissionInModule(
@@ -65,7 +51,6 @@ export const CommunicationPage = (): ReactElement => {
     )
   )
     return <PermissionDenied />;
-  if (!choicesData) return null;
 
   return (
     <>

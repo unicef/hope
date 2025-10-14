@@ -120,7 +120,7 @@ function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 4,
+                size: 6,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
@@ -129,7 +129,7 @@ function Description({
                     {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
-                size: 8,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -148,7 +148,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.memberLabel} ID`,
@@ -167,7 +167,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
             ]
               .filter((el) =>

@@ -234,8 +234,8 @@ class SurveySerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
         queryset=PaymentPlan.objects.all(),
-        write_only=True,
     )
+    payment_plan_name = serializers.CharField(source="payment_plan.name", read_only=True)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True, required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
         write_only=True, required=False, allow_null=True
@@ -258,6 +258,7 @@ class SurveySerializer(serializers.ModelSerializer):
             "flow",
             "flow_id",
             "payment_plan",
+            "payment_plan_name",
             "full_list_arguments",
             "random_sampling_arguments",
             "sample_file_path",

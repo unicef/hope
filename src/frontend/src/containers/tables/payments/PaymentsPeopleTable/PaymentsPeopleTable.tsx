@@ -4,7 +4,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useEffect } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
@@ -32,6 +33,28 @@ function PaymentsPeopleTable({
     id: household.id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for payments, only enabled on first page
+  const { data: paymentsCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsCount',
+      queryVariables,
+      businessArea,
+      household.id,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanPk: household.id,
+        ...queryVariables,
+      }),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, paymentsCountData);
 
   const {
     data: paymentsData,
@@ -69,6 +92,9 @@ function PaymentsPeopleTable({
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

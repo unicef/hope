@@ -1,5 +1,6 @@
 import io
 
+from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
@@ -73,25 +74,30 @@ class VerificationPlanStatusChangeServices:
         )
 
     def activate(self) -> PaymentVerificationPlan:
-        if self.payment_verification_plan.can_activate():
-            raise ValidationError("You can activate only PENDING verification")
+        with cache.lock(
+            f"payment_verification_plan_activate_rapidpro_{str(self.payment_verification_plan.id)}",
+            blocking_timeout=60 * 5,
+            timeout=60 * 5,
+        ) as locked:
+            if not locked:
+                raise ValidationError("RapidPro activation already in progress")  # pragma: no cover
 
-        if self._can_activate_via_rapidpro():
-            self._activate_rapidpro()
+            if not self.payment_verification_plan.can_activate:
+                raise ValidationError("You can activate only PENDING/ERROR verifications")
 
-        self.payment_verification_plan.set_active()
-        self.payment_verification_plan.save()
+            if self.payment_verification_plan.is_rapid_pro and (exception := self._activate_rapidpro()):
+                self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
+                self.payment_verification_plan.error = str(exception)
+                self.payment_verification_plan.save()
+                raise exception
 
-        return self.payment_verification_plan
+            self.payment_verification_plan.set_active()
+            self.payment_verification_plan.save()
 
-    def _can_activate_via_rapidpro(self) -> bool:
-        return (
-            self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO
-        )
+            return self.payment_verification_plan
 
-    def _activate_rapidpro(self) -> None:
-        business_area_slug = self.payment_verification_plan.business_area.slug
-        api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
+    def _activate_rapidpro(self) -> None | Exception:
+        api = RapidProAPI(self.payment_verification_plan.business_area.slug, RapidProAPI.MODE_VERIFICATION)
 
         hoh_ids = [
             pv.payment.household.head_of_household.pk
@@ -99,9 +105,12 @@ class VerificationPlanStatusChangeServices:
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-        successful_flows, error = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
-        for successful_flow in successful_flows:
-            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(successful_flow.response["uuid"])
+        successful_flows, exception = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        new_flow_start_uuids = [sf.response["uuid"] for sf in successful_flows]
+        self.payment_verification_plan.rapid_pro_flow_start_uuids = [
+            {*self.payment_verification_plan.rapid_pro_flow_start_uuids, *new_flow_start_uuids}
+        ]
+        self.payment_verification_plan.save(update_fields=["rapid_pro_flow_start_uuids"])
 
         all_urns = []
         for successful_flow in successful_flows:
@@ -115,13 +124,7 @@ class VerificationPlanStatusChangeServices:
                 payment_verifications_to_upd.append(pv)
         PaymentVerification.objects.bulk_update(payment_verifications_to_upd, ("sent_to_rapid_pro",), 1000)
 
-        self.payment_verification_plan.save()
-
-        if error is not None:
-            self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
-            self.payment_verification_plan.error = str(error)
-            self.payment_verification_plan.save()
-            raise error
+        return exception
 
     def finish(self) -> PaymentVerificationPlan:
         if not self.payment_verification_plan.payment_plan.is_reconciled:

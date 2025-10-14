@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 
 interface ProgramCyclesTablePaymentModuleProps {
@@ -30,6 +31,8 @@ export const ProgramCyclesTablePaymentModule = ({
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
@@ -45,14 +48,25 @@ export const ProgramCyclesTablePaymentModule = ({
   // Don't fetch data when viewing "all programs"
   const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
+  const rowsPerPage =
+    queryVariables && typeof queryVariables.limit === 'number'
+      ? queryVariables.limit
+      : 5;
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', queryVariables, businessArea, programId],
+      queryKey: [
+        'programCycles',
+        queryVariables,
+        businessArea,
+        programId,
+        page,
+        rowsPerPage,
+      ],
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
           createApiParams(
             { businessAreaSlug: businessArea, programSlug: programId },
-            queryVariables,
+            { ...queryVariables, offset: page * rowsPerPage },
             { withPagination: true },
           ),
         );
@@ -66,6 +80,7 @@ export const ProgramCyclesTablePaymentModule = ({
       programId,
       businessArea,
       queryVariables,
+      page,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
@@ -74,7 +89,10 @@ export const ProgramCyclesTablePaymentModule = ({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, dataProgramCyclesCount);
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -92,7 +110,7 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async() => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.slug],
           exact: false,
@@ -121,7 +139,7 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async() => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.slug],
           exact: false,
@@ -142,7 +160,7 @@ export const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async(programCycle: ProgramCycleList) => {
+  const finishAction = async (programCycle: ProgramCycleList) => {
     try {
       await finishMutation({
         businessAreaSlug: businessArea,
@@ -155,7 +173,7 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const reactivateAction = async(programCycle: ProgramCycleList) => {
+  const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
       await reactivateMutation({
         businessAreaSlug: businessArea,
@@ -219,12 +237,14 @@ export const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={adjustedHeadCells}
-      itemsCount={dataProgramCyclesCount?.count}
+      itemsCount={itemsCount}
       data={data}
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
     />
   );
 };

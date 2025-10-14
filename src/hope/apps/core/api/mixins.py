@@ -75,6 +75,17 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
+    def _get_paginated(self, url: str, params: None | dict = None) -> list[dict]:
+        next_url = url
+        results: list = []
+
+        while next_url:
+            data, _ = self._get(next_url, params)
+            next_url = data.get("next")  # type: ignore
+            results.extend(data["results"])
+            params = None  # pass params only in the first call
+        return results
+
     def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
@@ -155,7 +166,8 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
         )
 
         return queryset.filter(
-            Q(**{f"{self.program_model_field}__in": program_ids}) | Q(**{f"{self.program_model_field}__isnull": True})
+            Q(**{f"{self.program_model_field}__id__in": program_ids})
+            | Q(**{f"{self.program_model_field}__isnull": True})
         )
 
 

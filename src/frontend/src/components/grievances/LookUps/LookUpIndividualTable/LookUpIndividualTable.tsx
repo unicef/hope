@@ -125,6 +125,9 @@ export function LookUpIndividualTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  // Add page state for pagination
+  const [page, setPage] = useState(0);
+
   // Selected Program Individuals
   const {
     data: selectedProgramIndividualsData,
@@ -163,7 +166,7 @@ export function LookUpIndividualTable({
           queryVariables,
         ),
       ),
-    enabled: !!businessArea && !!programId && !isAllPrograms,
+    enabled: !!businessArea && !!programId && !isAllPrograms && page === 0,
   });
 
   // All Programs Individuals
@@ -194,7 +197,7 @@ export function LookUpIndividualTable({
       RestService.restBusinessAreasIndividualsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
-    enabled: !!businessArea && isAllPrograms,
+    enabled: !!businessArea && isAllPrograms && page === 0,
   });
 
   const replacements = {
@@ -257,6 +260,8 @@ export function LookUpIndividualTable({
           individual={row}
         />
       )}
+      page={page}
+      setPage={setPage}
     />
   );
   return noTableStyling ? (

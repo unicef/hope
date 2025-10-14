@@ -116,22 +116,11 @@ const CreateSurveyPage = (): ReactElement => {
   const parts = pathname.split('/');
   const categoryIndex = parts.indexOf('create') + 1;
   const categoryFromUrl = parts[categoryIndex];
-  const isCategoryValid = [
-    SurveyCategoryEnum.SMS,
-    SurveyCategoryEnum.MANUAL,
-    SurveyCategoryEnum.RAPID_PRO,
-  ].includes(categoryFromUrl as SurveyCategoryEnum);
   const [category, setCategory] = useState<string | undefined>(categoryFromUrl);
   useEffect(() => {
     setCategory(categoryFromUrl);
   }, [category, pathname, categoryFromUrl]);
 
-  // Set category to SMS if the user types random string in url
-  if (!isCategoryValid) {
-    navigate(
-      `/${businessArea}/accountability/surveys/create/${SurveyCategoryEnum.SMS}`,
-    );
-  }
   const initialValues = {
     category,
     message: '',
@@ -425,6 +414,7 @@ const CreateSurveyPage = (): ReactElement => {
               continueText:
                 category === SurveyCategoryEnum.MANUAL ? t('Save') : t('Send'),
             }).then(async () => {
+              let response;
               try {
                 const variables = prepareMutationVariables(values);
                 const requestBody = {
@@ -440,15 +430,18 @@ const CreateSurveyPage = (): ReactElement => {
                   flow: variables.input.flow,
                 };
 
-                const response = await mutate({
+                response = await mutate({
                   businessAreaSlug: businessArea,
                   programSlug: programId,
                   requestBody,
                 });
                 showMessage(t('Survey created.'));
-                navigate(`/${baseUrl}/accountability/surveys/${response.id}`);
               } catch (e) {
                 showApiErrorMessages(e, showMessage);
+              } finally {
+                if (response && response.id) {
+                  navigate(`/${baseUrl}/accountability/surveys/${response.id}`);
+                }
               }
             });
           } else {
