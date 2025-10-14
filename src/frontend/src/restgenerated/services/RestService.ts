@@ -1151,14 +1151,19 @@ export class RestService {
      */
     public static restBusinessAreasGeoAreasList({
         businessAreaSlug,
+        id,
         level,
         limit,
         name,
         offset,
         ordering,
-        updatedAt,
+        parentId,
+        parentPCode,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
+        id?: string,
         level?: number,
         /**
          * Number of results to return per page.
@@ -1173,7 +1178,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAt?: string,
+        parentId?: string | null,
+        parentPCode?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedAreaListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1182,12 +1190,16 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'id': id,
                 'level': level,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
-                'updated_at': updatedAt,
+                'parent_id': parentId,
+                'parent_p_code': parentPCode,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -1201,14 +1213,19 @@ export class RestService {
      */
     public static restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug,
+        id,
         level,
         limit,
         name,
         offset,
         ordering,
-        updatedAt,
+        parentId,
+        parentPCode,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
+        id?: string,
         level?: number,
         /**
          * Number of results to return per page.
@@ -1223,7 +1240,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAt?: string,
+        parentId?: string | null,
+        parentPCode?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedAreaTreeList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1232,12 +1252,16 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'id': id,
                 'level': level,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
-                'updated_at': updatedAt,
+                'parent_id': parentId,
+                'parent_p_code': parentPCode,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
