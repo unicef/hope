@@ -79,10 +79,10 @@ function Description({
 
   // Set program value based on selected household or individual
   useEffect(() => {
-    if (values.selectedIndividual?.program.id) {
-      setFieldValue('program', values.selectedIndividual.program.id);
+    if (values.selectedIndividual?.program?.id) {
+      setFieldValue('program', values.selectedIndividual?.program?.id);
     } else if (values.selectedHousehold?.programId) {
-      setFieldValue('program', values.selectedHousehold.programId);
+      setFieldValue('program', values.selectedHousehold?.programId);
     }
   }, [values.selectedHousehold, values.selectedIndividual, setFieldValue]);
   const categoryChoices: {
@@ -139,7 +139,7 @@ function Description({
                     canViewHouseholdDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
+                        to={`/${baseUrl}/population/household/${values.selectedHousehold?.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
@@ -158,7 +158,7 @@ function Description({
                     canViewIndividualDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
+                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual?.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
