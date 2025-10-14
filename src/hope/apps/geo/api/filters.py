@@ -12,8 +12,14 @@ class AreaFilter(UpdatedAtFilter):
         field_name="name",
         lookup_expr="startswith",
     )
-    updated_at = filters.DateTimeFilter()
+    parent_p_code = filters.CharFilter(field_name="parent__p_code")
 
     class Meta:
         model = Area
-        fields = ("level", "name")
+        fields = (
+            "id",
+            "level",
+            "name",
+            "parent_id",
+            "parent_p_code",
+        )
