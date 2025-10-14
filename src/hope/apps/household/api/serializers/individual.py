@@ -284,7 +284,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
         )
 
     def get_role(self, obj: dict) -> str:
-        roles = obj.prefetched_roles
+        roles = getattr(obj, "prefetched_roles", None)
         if roles:
             return roles[0].get_role_display()
         return ROLE_NO_ROLE
