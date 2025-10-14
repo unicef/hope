@@ -18,8 +18,9 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { IndividualList } from '@restgenerated/models/IndividualList';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -40,11 +41,12 @@ function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: IndividualList = values.selectedIndividual;
+  const individual: IndividualDetail | IndividualList =
+    values.selectedIndividual;
   const {
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
@@ -80,24 +82,29 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
+  const resolvedProgramSlug =
+    individual && 'programSlug' in individual
+      ? (individual.programSlug as string)
+      : individual && 'program' in individual && individual.program?.slug
+        ? individual.program.slug
+        : undefined;
   const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
     queryKey: [
       'individual',
       businessAreaSlug,
-      programSlug,
+      resolvedProgramSlug,
       individual?.id,
-      individual?.program?.slug,
+      individual,
     ],
     queryFn: () => {
-      if (!individual?.id) return null;
+      if (!individual?.id || !resolvedProgramSlug) return null;
       return RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
-        programSlug: individual?.program?.slug,
+        programSlug: resolvedProgramSlug,
         id: individual?.id,
       });
     },
-    enabled:
-      !!individual?.id && individual?.program?.slug && !!businessAreaSlug,
+    enabled: !!individual?.id && !!resolvedProgramSlug && !!businessAreaSlug,
   });
 
   useEffect(() => {
