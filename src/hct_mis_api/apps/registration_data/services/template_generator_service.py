@@ -38,9 +38,31 @@ class TemplateFileGeneratorService:
         self._add_individuals_columns()
         self._add_people_columns()
         self._handle_choices(
-            {**self.households_fields, **self.individuals_fields, **FinancialInstitution.get_rdi_template_choices()}
+            {
+                **self.households_fields,
+                **self.individuals_fields,
+                **self._get_filtered_financial_institution_choices(),
+            }
         )
         return wb
+
+    def _get_filtered_financial_institution_choices(self) -> Dict:
+        countries = self.business_area.countries.all()
+        country_fi_pks = set(FinancialInstitution.objects.filter(country__in=countries).values_list("pk", flat=True))
+
+        all_fi_fields = FinancialInstitution.get_rdi_template_choices()
+        filtered_fi_fields = {}
+
+        for field_name, field_definition in all_fi_fields.items():
+            new_field_definition = field_definition.copy()
+            if "choices" in new_field_definition:
+                all_choices = new_field_definition["choices"]
+                filtered_choices = [choice for choice in all_choices if choice.get("value") in country_fi_pks]
+                new_field_definition["choices"] = filtered_choices
+
+            filtered_fi_fields[field_name] = new_field_definition
+
+        return filtered_fi_fields
 
     def _add_households_columns(self) -> None:
         self.households_fields = {
