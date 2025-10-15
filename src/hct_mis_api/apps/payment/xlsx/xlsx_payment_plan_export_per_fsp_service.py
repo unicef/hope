@@ -61,7 +61,7 @@ def generate_token_and_order_numbers(
     )
 
     for attempt in range(max_rounds):
-        base_missing = (
+        base_missing = list(
             qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
             .order_by("id")
             .values_list("id", flat=True)
