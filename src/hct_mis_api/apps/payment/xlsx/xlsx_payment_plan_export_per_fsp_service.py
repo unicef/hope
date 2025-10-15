@@ -61,13 +61,13 @@ def generate_token_and_order_numbers(
     )
 
     for attempt in range(max_rounds):
-        base_missing = list(
-            qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
-            .order_by("id")
-            .values_list("id", flat=True)
-        )
+        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
 
-        for batch in chunks(qs, batch_size):
+        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
+        if not payments_ids:
+            return  # nothing to do
+
+        for batch in chunks(payments_ids, batch_size):
             # lock and update in one atomic block per chunk
             with transaction.atomic():
                 payments = list(
@@ -106,8 +106,6 @@ def generate_token_and_order_numbers(
                 if to_update:
                     Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
 
-        if not base_missing.exists():
-            return
         time.sleep(base_sleep * (2**attempt))
 
 
