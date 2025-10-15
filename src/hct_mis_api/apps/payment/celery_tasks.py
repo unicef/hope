@@ -125,13 +125,13 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                if payment_plan.business_area.enable_email_notification:
-                    send_email_notification_on_commit(service, user)
+            if payment_plan.business_area.enable_email_notification:
+                send_email_notification_on_commit(service, user)
 
         except Exception as e:
+            logger.exception("Create Payment Plan Generate XLSX Error")
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
-            logger.exception("Create Payment Plan Generate XLSX Error")
             raise self.retry(exc=e)
 
     except Exception as e:
@@ -164,15 +164,15 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                if payment_plan.business_area.enable_email_notification:
-                    send_email_notification_on_commit(service, user)
-                    if fsp_xlsx_template_id:
-                        service.send_email_with_passwords(user, payment_plan)
+            if payment_plan.business_area.enable_email_notification:
+                send_email_notification_on_commit(service, user)
+                if fsp_xlsx_template_id:
+                    service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:
+            logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
-            logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
             raise self.retry(exc=e)
 
     except Exception as e:

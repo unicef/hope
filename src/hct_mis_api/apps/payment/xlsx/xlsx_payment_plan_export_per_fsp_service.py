@@ -20,6 +20,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -41,7 +42,6 @@ def generate_token_and_order_numbers(qs: QuerySet[Payment], program: Program, ba
     """
     Ensure order_number/token_number for all rows in qs.
     """
-    # Load existing numbers ONCE
     existing_orders: Set[int] = set(
         Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
             "order_number", flat=True
@@ -53,45 +53,50 @@ def generate_token_and_order_numbers(qs: QuerySet[Payment], program: Program, ba
         )
     )
 
-    to_update: List[Payment] = []
+    qs = (
+        qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
+        .order_by("id")
+        .values_list("id", flat=True)
+    )
 
-    for payment in qs.only("order_number", "token_number").iterator(chunk_size=batch_size):
-        need_order: bool = not payment.order_number
-        need_token: bool = not payment.token_number
-
-        if not (need_order or need_token):
-            continue
-
-        if need_order:
-            n9: int = generate_numeric_token(9)
-            while n9 in existing_orders:
-                n9 = generate_numeric_token(9)  # pragma: no cover
-            payment.order_number = n9
-            existing_orders.add(n9)
-
-        if need_token:
-            n7: int = generate_numeric_token(7)
-            while n7 in existing_tokens:
-                n7 = generate_numeric_token(7)  # pragma: no cover
-            payment.token_number = n7
-            existing_tokens.add(n7)
-
-        to_update.append(payment)
-
-        if len(to_update) >= batch_size:  # pragma: no cover
-            with transaction.atomic():
-                Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
-            to_update.clear()
-
-    if to_update:
+    for batch in chunks(qs, batch_size):
+        # lock and update in one atomic block per chunk
         with transaction.atomic():
-            Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
+            payments = list(
+                Payment.objects.filter(pk__in=batch)
+                .only("id", "order_number", "token_number")
+                .select_for_update(skip_locked=True)
+            )
+            if not payments:
+                continue
 
+            to_update: List[Payment] = []
 
-def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
-    return Payment.objects.filter(
-        parent__program_cycle__program=payment.parent.program_cycle.program, **{field_name: token}
-    ).exists()
+            for payment in payments:
+                need_order = payment.order_number is None
+                need_token = payment.token_number is None
+
+                if not (need_order or need_token):
+                    continue
+
+                if need_order:
+                    n9 = generate_numeric_token(9)
+                    while n9 in existing_orders:
+                        n9 = generate_numeric_token(9)
+                    payment.order_number = n9
+                    existing_orders.add(n9)
+
+                if need_token:
+                    n7 = generate_numeric_token(7)
+                    while n7 in existing_tokens:
+                        n7 = generate_numeric_token(7)
+                    payment.token_number = n7
+                    existing_tokens.add(n7)
+
+                to_update.append(payment)
+
+            if to_update:
+                Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
 
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
