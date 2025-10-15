@@ -99,4 +99,4 @@ class TestChoicesViewSet:
         response_data = response.data
         assert response_data is not None
         assert len(response_data) == 250
-        assert response_data[0] == {"name": "ABW", "value": "Aruba"}
+        assert response_data[0] == {"name": "Aruba", "value": "ABW"}
