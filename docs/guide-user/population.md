@@ -22,16 +22,16 @@ Possible matches will continue to receive cash transfers until a decision has be
 ## How to navigate the population module
 
 1. The household view page displays a search bar with several filters and a list of households.
-   ![Image](_screenshots/population/1.png)
+   ![Image](_screenshots/population/popu_8.png)
 
 
-1. To view household details, click on the Household ID link, benefits received, household composition, list of individuals in the household, payment records, vulnerabilities, registration details and activity log are also displayed.
-    ![Image](_screenshots/population/2.png)
+2. To view household details, click on the Household ID link, benefits received, household composition, list of individuals in the household, payment records, vulnerabilities, registration details and activity log are also displayed.
+    ![Image](_screenshots/population/popu_9.png)
 
 
-2. The individuals view page displays a search bar with several filters and list of individuals.
-    ![Image](_screenshots/population/3.png)
+3. The individuals view page displays a search bar with several filters and list of individuals.
+    ![Image](_screenshots/population/popu_10.png)
 
 
-1. To view individual details, click on the Individual ID link, bio data, vulnerabilities and an activity log are also displayed.
-    ![Image](_screenshots/population/4.png)
+4. To view individual details, click on the Individual ID link, bio data, vulnerabilities and an activity log are also displayed.
+    ![Image](_screenshots/population/popu_11.png)
