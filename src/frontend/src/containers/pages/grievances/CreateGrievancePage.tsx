@@ -124,6 +124,26 @@ const CreateGrievancePage = (): ReactElement => {
 
   const linkedTicketId = location.state?.linkedTicketId;
   const selectedHousehold = location.state?.selectedHousehold;
+  const feedbackProgramId = location.state?.feedbackProgramId;
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, limit: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
+    });
+
+  const feedbackProgram = programsData?.results?.find(
+    (prog) => prog.id === feedbackProgramId,
+  );
+  const feedbackProgramSlug = feedbackProgram?.slug;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
@@ -131,16 +151,19 @@ const CreateGrievancePage = (): ReactElement => {
       (typeof selectedHousehold === 'string' ||
         typeof selectedHousehold === 'number'),
   );
+
+  const entityProgramSlug = feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
-      queryKey: ['household', businessArea, programId, selectedHousehold],
+      queryKey: ['household', businessArea, entityProgramSlug, selectedHousehold],
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: entityProgramSlug,
           id: String(selectedHousehold),
         }),
-      enabled: shouldFetchHousehold,
+      enabled: shouldFetchHousehold && !!entityProgramSlug,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
@@ -153,14 +176,14 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
-      queryKey: ['individual', businessArea, programId, selectedIndividual],
+      queryKey: ['individual', businessArea, entityProgramSlug, selectedIndividual],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: entityProgramSlug,
           id: String(selectedIndividual),
         }),
-      enabled: shouldFetchIndividual,
+      enabled: shouldFetchIndividual && !!entityProgramSlug,
     });
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
@@ -210,19 +233,6 @@ const CreateGrievancePage = (): ReactElement => {
     },
   });
 
-  const { data: programsData, isLoading: programsDataLoading } =
-    useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
-    });
 
   const {
     data: allAddIndividualFieldsData,
