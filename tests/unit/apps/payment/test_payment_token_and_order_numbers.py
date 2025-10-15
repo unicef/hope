@@ -12,7 +12,6 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-    check_if_token_or_order_number_exists_per_program,
     generate_token_and_order_numbers,
 )
 
@@ -54,17 +53,6 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         payment = self.payment_plan.eligible_payments.first()
         assert len(str(payment.order_number)) == 9
         assert len(str(payment.token_number)) == 7
-
-    def test_check_if_token_or_order_number_exists_per_program(self) -> None:
-        payment = Payment.objects.first()
-        payment.token_number = 1234567
-        payment.order_number = 987654321
-        payment.save(update_fields=["token_number", "order_number"])
-        payment.refresh_from_db()
-        assert check_if_token_or_order_number_exists_per_program(payment, "token_number", 1234567) is True
-        assert check_if_token_or_order_number_exists_per_program(payment, "token_number", 7777777) is False
-        assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 987654321) is True
-        assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 123456789) is False
 
     def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
         with self.assertRaises(ValidationError):

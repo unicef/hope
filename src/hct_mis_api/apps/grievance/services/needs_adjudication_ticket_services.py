@@ -271,7 +271,7 @@ def create_needs_adjudication_tickets_for_biometrics(
             if pair.individual1:
                 original_individual = pair.individual1
             else:
-                original_individual = pair.individual2  # pragma: no_cover
+                original_individual = pair.individual2  # pragma: no cover
 
         else:
             # if both individuals are from the same rdi mark second as duplicate
