@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
-if TYPE_CHECKING:  # pragma: no_cover
+if TYPE_CHECKING:  # pragma: no cover
     from hct_mis_api.apps.account.models import Partner, User
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.geo.models import Area

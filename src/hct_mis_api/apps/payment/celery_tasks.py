@@ -128,7 +128,7 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
             if payment_plan.business_area.enable_email_notification:
                 send_email_notification_on_commit(service, user)
 
-        except Exception as e:  # pragma: no_cover
+        except Exception as e:  # pragma: no cover
             logger.exception("Create Payment Plan Generate XLSX Error")
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
@@ -169,7 +169,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 if fsp_xlsx_template_id:
                     service.send_email_with_passwords(user, payment_plan)
 
-        except Exception as e:  # pragma: no_cover
+        except Exception as e:  # pragma: no cover
             logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
