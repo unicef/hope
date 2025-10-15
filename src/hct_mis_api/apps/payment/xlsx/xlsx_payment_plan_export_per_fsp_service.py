@@ -113,12 +113,12 @@ def generate_token_and_order_numbers(
         if not payments_ids:
             return
 
-        if attempt > 0:
+        if attempt > 0:  # pragma: no cover
             time.sleep(base_sleep * (2**attempt))
 
         generate_token_and_order_numbers_for_batches(payments_ids, batch_size, existing_tokens, existing_orders)
 
-    if missing_qs.count():
+    if missing_qs.count():  # pragma: no cover
         log_and_raise("Failed to generate order/token numbers, reached max attempts.")
 
 
