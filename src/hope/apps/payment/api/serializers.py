@@ -619,7 +619,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
     can_split = serializers.SerializerMethodField()
-    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     is_payment_gateway_and_all_sent_to_fsp = serializers.BooleanField()
     fsp_communication_channel = serializers.CharField()
