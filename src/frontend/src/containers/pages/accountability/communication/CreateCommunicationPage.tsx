@@ -151,7 +151,6 @@ const CreateCommunicationPage = (): ReactElement => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
         level: 2,
-        limit: 100,
       });
     },
     enabled: !!businessArea,
