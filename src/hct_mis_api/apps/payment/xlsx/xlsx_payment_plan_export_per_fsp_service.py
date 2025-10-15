@@ -39,6 +39,52 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
+def generate_token_and_order_numbers_for_batches(
+    payments_ids: List[str],
+    batch_size: int,
+    existing_tokens: Set[int],
+    existing_orders: Set[int],
+) -> None:
+    for batch in chunks(payments_ids, batch_size):
+        # lock and update in one atomic block per chunk
+        with transaction.atomic():
+            payments = list(
+                Payment.objects.filter(pk__in=batch)
+                .only("id", "order_number", "token_number")
+                .select_for_update(skip_locked=True)
+            )
+            if not payments:  # pragma: no cover
+                continue
+
+            to_update: List[Payment] = []
+
+            for payment in payments:
+                need_order = payment.order_number is None
+                need_token = payment.token_number is None
+
+                if not (need_order or need_token):  # pragma: no cover
+                    continue
+
+                if need_order:
+                    n9 = generate_numeric_token(9)
+                    while n9 in existing_orders:  # pragma: no cover
+                        n9 = generate_numeric_token(9)
+                    payment.order_number = n9
+                    existing_orders.add(n9)
+
+                if need_token:
+                    n7 = generate_numeric_token(7)
+                    while n7 in existing_tokens:  # pragma: no cover
+                        n7 = generate_numeric_token(7)
+                    payment.token_number = n7
+                    existing_tokens.add(n7)
+
+                to_update.append(payment)
+
+            if to_update:
+                Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
+
+
 def generate_token_and_order_numbers(
     qs: QuerySet[Payment],
     program: Program,
@@ -62,51 +108,18 @@ def generate_token_and_order_numbers(
 
     for attempt in range(max_rounds):
         missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
-
         payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
+
         if not payments_ids:
-            return  # nothing to do
+            return
 
-        for batch in chunks(payments_ids, batch_size):
-            # lock and update in one atomic block per chunk
-            with transaction.atomic():
-                payments = list(
-                    Payment.objects.filter(pk__in=batch)
-                    .only("id", "order_number", "token_number")
-                    .select_for_update(skip_locked=True)
-                )
-                if not payments:  # pragma: no cover
-                    continue
+        if attempt > 0:
+            time.sleep(base_sleep * (2**attempt))
 
-                to_update: List[Payment] = []
+        generate_token_and_order_numbers_for_batches(payments_ids, batch_size, existing_tokens, existing_orders)
 
-                for payment in payments:
-                    need_order = payment.order_number is None
-                    need_token = payment.token_number is None
-
-                    if not (need_order or need_token):  # pragma: no cover
-                        continue
-
-                    if need_order:
-                        n9 = generate_numeric_token(9)
-                        while n9 in existing_orders:  # pragma: no cover
-                            n9 = generate_numeric_token(9)
-                        payment.order_number = n9
-                        existing_orders.add(n9)
-
-                    if need_token:
-                        n7 = generate_numeric_token(7)
-                        while n7 in existing_tokens:  # pragma: no cover
-                            n7 = generate_numeric_token(7)
-                        payment.token_number = n7
-                        existing_tokens.add(n7)
-
-                    to_update.append(payment)
-
-                if to_update:
-                    Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
-
-        time.sleep(base_sleep * (2**attempt))
+    if missing_qs.count():
+        log_and_raise("Failed to generate order/token numbers, reached max attempts.")
 
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
