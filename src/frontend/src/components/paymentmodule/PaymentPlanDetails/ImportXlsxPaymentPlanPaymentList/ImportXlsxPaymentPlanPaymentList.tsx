@@ -45,19 +45,19 @@ export function ImportXlsxPaymentPlanPaymentList({
       businessAreaSlug,
       id,
       programSlug,
-      formData,
+      requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
       programSlug: string;
-      formData: PaymentPlanImportFile;
+      requestBody: PaymentPlanImportFile;
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+      RestService.restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate(
         {
           businessAreaSlug,
           id,
           programSlug,
-          formData,
+          requestBody,
         },
       ),
     onSuccess: () => {
@@ -84,7 +84,7 @@ export function ImportXlsxPaymentPlanPaymentList({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
           programSlug: programId,
-          formData: formData as any,
+          requestBody: formData as any,
         });
       } catch {
         // Error is already handled by onError in mutation
