@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -1406,6 +1407,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         cls,
         household_data: Dict[str, Any],
         core_field: Dict[str, Any],
+        admin_areas_dict: Optional[Dict[int, Dict[str, Any]]] = None,
     ) -> Optional[str]:
         collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
         primary_collector = household_data.get("primary_collector", {})
@@ -1423,7 +1425,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 return country["iso_code3"] if country else None
 
             if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
-                area = cls.get_areas_dict().get(household_data.get(main_key))
+                area = admin_areas_dict.get(household_data.get(main_key))
                 return f"{area['p_code']} - {area['name']}" if area else None
 
             if main_key == "roles":
@@ -1588,6 +1590,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_areas_dict(cls) -> dict:
+        start_time  = time.time()
         cached = cache.get(cls.CACHE_KEY_AREAS_DICT)
         if cached is not None:
             return cached

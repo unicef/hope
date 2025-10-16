@@ -161,21 +161,29 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
             with transaction.atomic():
                 service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
                 service.export_per_fsp(user)
+                print("celery task 1")
                 payment_plan.background_action_status_none()
+                print("celery task 2")
                 payment_plan.save()
+                print("celery task 3")
 
-            if payment_plan.business_area.enable_email_notification:
-                send_email_notification_on_commit(service, user)
-                if fsp_xlsx_template_id:
-                    service.send_email_with_passwords(user, payment_plan)
+                if payment_plan.business_area.enable_email_notification:
+                    print("celery task 4")
+                    send_email_notification_on_commit(service, user)
+                    print("celery task 5")
+                    if fsp_xlsx_template_id:
+                        print("celery task 6")
+                        service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:  # pragma: no cover
+            print(e)
             logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
             raise self.retry(exc=e)
 
     except Exception as e:
+        print(e)
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
         raise self.retry(exc=e)
 
