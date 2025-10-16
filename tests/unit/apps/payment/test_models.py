@@ -730,6 +730,8 @@ class TestFinancialServiceProviderModel(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        cls.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
 
     def test_fsp_template_get_column_from_core_field(self) -> None:
         household, individuals = create_household(
@@ -785,20 +787,28 @@ class TestFinancialServiceProviderModel(TestCase):
         generate_delivery_mechanisms()
 
         # get None if no snapshot
-        none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        none_resp = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertIsNone(none_resp)
 
         create_payment_plan_snapshot_data(payment.parent)
         payment.refresh_from_db()
 
         # check invalid filed name
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
+        result = fsp_xlsx_template.get_column_from_core_field(
+            payment, "invalid_people_field_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertIsNone(result)
 
         # People program
-        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        given_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(given_name, primary.given_name)
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "individual_unicef_id", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(ind_unicef_id, primary.unicef_id)
 
         # Standard program
@@ -806,41 +816,69 @@ class TestFinancialServiceProviderModel(TestCase):
         payment.parent.program.data_collecting_type.save()
 
         # check fields value
-        size = fsp_xlsx_template.get_column_from_core_field(payment, "size")
+        size = fsp_xlsx_template.get_column_from_core_field(payment, "size", self.admin_areas_dict, self.countries_dict)
         self.assertEqual(size, 1)
-        admin1 = fsp_xlsx_template.get_column_from_core_field(payment, "admin1")
+        admin1 = fsp_xlsx_template.get_column_from_core_field(
+            payment, "admin1", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(admin1, f"{area1.p_code} - {area1.name}")
-        admin2 = fsp_xlsx_template.get_column_from_core_field(payment, "admin2")
+        admin2 = fsp_xlsx_template.get_column_from_core_field(
+            payment, "admin2", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(admin2, f"{area2.p_code} - {area2.name}")
-        admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3")
+        admin3 = fsp_xlsx_template.get_column_from_core_field(
+            payment, "admin3", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
-        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        given_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(given_name, primary.given_name)
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "individual_unicef_id", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(ind_unicef_id, primary.unicef_id)
-        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "household_unicef_id")
+        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "household_unicef_id", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(hh_unicef_id, household.unicef_id)
-        phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no")
+        phone_no = fsp_xlsx_template.get_column_from_core_field(
+            payment, "phone_no", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(phone_no, primary.phone_no)
-        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative")
+        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(
+            payment, "phone_no_alternative", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(phone_no_alternative, primary.phone_no_alternative)
-        national_id_no = fsp_xlsx_template.get_column_from_core_field(payment, "national_id_no")
+        national_id_no = fsp_xlsx_template.get_column_from_core_field(
+            payment, "national_id_no", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(national_id_no, document.document_number)
-        wallet_name = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_name")
+        wallet_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(wallet_name, primary.wallet_name)
-        blockchain_name = fsp_xlsx_template.get_column_from_core_field(payment, "blockchain_name")
+        blockchain_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "blockchain_name", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(blockchain_name, primary.blockchain_name)
-        wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
+        wallet_address = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_address", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(wallet_address, primary.wallet_address)
 
-        role = fsp_xlsx_template.get_column_from_core_field(payment, "role")
+        role = fsp_xlsx_template.get_column_from_core_field(payment, "role", self.admin_areas_dict, self.countries_dict)
         self.assertEqual(role, "PRIMARY")
 
-        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
+        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "primary_collector_id", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(primary_collector_id, str(primary.pk))
 
         # country_origin
-        country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
+        country_origin = fsp_xlsx_template.get_column_from_core_field(
+            payment, "country_origin", self.admin_areas_dict, self.countries_dict
+        )
         self.assertEqual(household.country_origin.iso_code3, country_origin)
 
 

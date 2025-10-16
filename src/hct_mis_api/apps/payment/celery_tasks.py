@@ -12,6 +12,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from celery.exceptions import MaxRetriesExceededError
 from concurrency.api import disable_concurrency
 
 from hct_mis_api.apps.account.models import User
@@ -125,14 +126,17 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-            if payment_plan.business_area.enable_email_notification:
-                send_email_notification_on_commit(service, user)
+                if payment_plan.business_area.enable_email_notification:
+                    send_email_notification_on_commit(service, user)
 
         except Exception as e:  # pragma: no cover
             logger.exception("Create Payment Plan Generate XLSX Error")
-            payment_plan.background_action_status_xlsx_export_error()
-            payment_plan.save()
-            raise self.retry(exc=e)
+            try:
+                raise self.retry(exc=e)
+            except MaxRetriesExceededError:
+                payment_plan.background_action_status_xlsx_export_error()
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                raise
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Error")
@@ -158,32 +162,40 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
+            service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
+
+            if service.payment_generate_token_and_order_numbers:
+                with cache.lock(
+                    f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
+                    blocking_timeout=60 * 10,
+                    timeout=60 * 20,
+                ):
+                    with transaction.atomic():
+                        service.generate_token_and_order_numbers(
+                            payment_plan.eligible_payments.all(), payment_plan.program
+                        )
+
             with transaction.atomic():
-                service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
                 service.export_per_fsp(user)
-                print("celery task 1")
                 payment_plan.background_action_status_none()
-                print("celery task 2")
-                payment_plan.save()
-                print("celery task 3")
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
 
                 if payment_plan.business_area.enable_email_notification:
-                    print("celery task 4")
                     send_email_notification_on_commit(service, user)
-                    print("celery task 5")
                     if fsp_xlsx_template_id:
-                        print("celery task 6")
                         service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:  # pragma: no cover
-            print(e)
             logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
-            payment_plan.background_action_status_xlsx_export_error()
-            payment_plan.save()
-            raise self.retry(exc=e)
+            # If this was the last allowed attempt, mark error and let the task fail.
+            try:
+                raise self.retry(exc=e)
+            except MaxRetriesExceededError:
+                payment_plan.background_action_status_xlsx_export_error()
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                raise
 
     except Exception as e:
-        print(e)
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
         raise self.retry(exc=e)
 

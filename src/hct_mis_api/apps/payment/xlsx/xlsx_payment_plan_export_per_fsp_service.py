@@ -1,14 +1,12 @@
 import logging
 import string
-import time
 import zipfile
 from io import BytesIO
 from tempfile import NamedTemporaryFile
-from typing import List, Optional, Set, Any
+from typing import List, Optional, Set
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -20,9 +18,11 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    get_core_fields_attributes,
+)
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
-from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -40,102 +40,13 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
-def generate_token_and_order_numbers_for_batches(
-    payments_ids: List[str],
-    batch_size: int,
-    existing_tokens: Set[int],
-    existing_orders: Set[int],
-) -> None:
-    for batch in chunks(payments_ids, batch_size):
-        print("generate_token_and_order_numbers_for_batches 1")
-        # lock and update in one atomic block per chunk
-        with transaction.atomic():
-            payments = list(
-                Payment.objects.filter(pk__in=batch)
-                .only("id", "order_number", "token_number")
-                .select_for_update(skip_locked=True)
-            )
-            if not payments:  # pragma: no cover
-                continue
-
-            to_update: List[Payment] = []
-
-            for payment in payments:
-                need_order = payment.order_number is None
-                need_token = payment.token_number is None
-
-                if not (need_order or need_token):  # pragma: no cover
-                    continue
-
-                if need_order:
-                    n9 = generate_numeric_token(9)
-                    while n9 in existing_orders:  # pragma: no cover
-                        n9 = generate_numeric_token(9)
-                    payment.order_number = n9
-                    existing_orders.add(n9)
-
-                if need_token:
-                    n7 = generate_numeric_token(7)
-                    while n7 in existing_tokens:  # pragma: no cover
-                        n7 = generate_numeric_token(7)
-                    payment.token_number = n7
-                    existing_tokens.add(n7)
-
-                to_update.append(payment)
-
-            if to_update:
-                Payment.objects.bulk_update(to_update, ["order_number", "token_number"], batch_size=batch_size)
-
-
-def generate_token_and_order_numbers(
-    qs: QuerySet[Payment],
-    program: Program,
-    batch_size: int = 1000,
-    base_sleep: float = 60.0,  # 1 minute (in seconds)
-    max_rounds: int = 8,  # number of exponential rounds (4h)
-) -> None:
-    """
-    Ensure order_number/token_number for all rows in qs.
-    """
-    print("generate_token_and_order_numbers 1")
-    existing_orders: Set[int] = set(
-        Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
-            "order_number", flat=True
-        )
-    )
-    print("generate_token_and_order_numbers 2")
-    existing_tokens: Set[int] = set(
-        Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
-            "token_number", flat=True
-        )
-    )
-    print("generate_token_and_order_numbers 3")
-
-    for attempt in range(max_rounds):
-        print("generate_token_and_order_numbers 4")
-        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
-        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
-        print("generate_token_and_order_numbers payments_ids", len(payments_ids))
-        if not payments_ids:
-            return
-
-        if attempt > 0:  # pragma: no cover
-            print(f"generate_token_and_order_numbers sleep",base_sleep * (2**attempt))
-            time.sleep(base_sleep * (2**attempt))
-
-        generate_token_and_order_numbers_for_batches(payments_ids, batch_size, existing_tokens, existing_orders)
-
-    if missing_qs.count():  # pragma: no cover
-        log_and_raise("Failed to generate order/token numbers, reached max attempts.")
-
-
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: Optional[str] = None):
         self.batch_size = 2000
         self.payment_plan = payment_plan
         self.is_social_worker_program = self.payment_plan.is_social_worker_program
         # TODO: in future will be per BA or program flag?
-        self.payment_generate_token_and_order_numbers = False
+        self.payment_generate_token_and_order_numbers = True
         self.flexible_attributes = {
             flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
         }
@@ -149,7 +60,65 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.flex_fields = []
         self.document_fields = []
         self.core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
-        self.admin_area_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
+
+    def generate_token_and_order_numbers(
+        self,
+        qs: QuerySet[Payment],
+        program: Program,
+    ) -> None:
+        """
+        Ensure order_number/token_number for all rows in qs.
+        """
+        existing_orders: Set[int] = set(
+            Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
+                "order_number", flat=True
+            )
+        )
+        existing_tokens: Set[int] = set(
+            Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
+                "token_number", flat=True
+            )
+        )
+
+        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
+        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
+
+        if not payments_ids:
+            return
+
+        payments = list(qs.only("id", "order_number", "token_number"))
+        if not payments:  # pragma: no cover
+            return
+
+        to_update: List[Payment] = []
+
+        for payment in payments:
+            need_order = payment.order_number is None
+            need_token = payment.token_number is None
+
+            if not (need_order or need_token):  # pragma: no cover
+                continue
+
+            if need_order:
+                n9 = generate_numeric_token(9)
+                while n9 in existing_orders:  # pragma: no cover
+                    n9 = generate_numeric_token(9)
+                payment.order_number = n9
+                existing_orders.add(n9)
+
+            if need_token:
+                n7 = generate_numeric_token(7)
+                while n7 in existing_tokens:  # pragma: no cover
+                    n7 = generate_numeric_token(7)
+                payment.token_number = n7
+                existing_tokens.add(n7)
+
+            to_update.append(payment)
+
+        if to_update:
+            Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
     def get_account_fields_headers(self) -> List[str]:
         # Iterate over eligible payments to find the first with valid account_data
@@ -256,37 +225,11 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.header_list = column_list
         return self.header_list
 
-
-    def get_column_from_core_field(self,
-        payment: "Payment",
-        core_field_name: str,
-    ) -> Any:
-        core_field = self.core_fields_attributes.get(core_field_name)
-        if not core_field:
-            # Some fields can be added to the template, such as 'size'
-            # which are not applicable to "People" export.
-            return None
-
-        snapshot = getattr(payment, "household_snapshot", None)
-        if not snapshot:
-            logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
-            return None
-        snapshot_data = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
-            snapshot.snapshot_data, core_field, self.admin_area_dict
-        )
-
-        return snapshot_data
-
     def add_rows(
         self,
         split: PaymentPlanSplit,
         ws: "Worksheet",
     ) -> None:
-        if self.payment_generate_token_and_order_numbers:
-            print("add_rows 1")
-            generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
-            print("add_rows 2")
-
         qs = (
             split.split_payment_items.eligible()
             .select_related(
@@ -296,19 +239,20 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             .order_by("unicef_id")
         )
-        print("add_rows 3")
         for payment in qs.iterator(chunk_size=self.batch_size):
-            print("row gen")
             ws.append(self.get_payment_row(payment))
-        print("add_rows 4")
 
     def get_payment_row(self, payment: Payment) -> List[str]:
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, column_name, self.admin_areas_dict
+            )
             for column_name in self.template_columns
         ]
         core_fields_row = [
-            self.get_column_from_core_field(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+                payment, column_name, self.admin_areas_dict, self.countries_dict
+            )
             for column_name in self.core_fields
         ]
         payment_row.extend(core_fields_row)
@@ -316,7 +260,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row.extend(flex_field_row)
         # get document number by document type key
         documents_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, doc_type_key)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, doc_type_key, self.admin_areas_dict
+            )
             for doc_type_key in self.document_fields
         ]
         payment_row.extend(documents_row)
@@ -326,6 +272,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for account_key in self.account_fields_headers
         ]
         payment_row.extend(accounts_row)
+
         return list(map(self.right_format_for_xlsx, payment_row))
 
     def _get_flex_field_by_name(self, name: str, payment: Payment) -> str:
@@ -373,29 +320,23 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     ) -> None:
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
-        print("create_workbooks_per_split 1")
+
         fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
         delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()
-        print("create_workbooks_per_split 2")
         for i, split in enumerate(splits):
             filename = fsp.name
             if splits_count > 1:
                 filename += f"-chunk{i + 1}"
             wb, ws_fsp = self.open_workbook(filename)
-            print("create_workbooks_per_split 3")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))  # type: ignore
-            print("create_workbooks_per_split 4")
             self.add_rows(split, ws_fsp)
-            print("create_workbooks_per_split 5")
             self._adjust_column_width_from_col(ws_fsp)
-            print("create_workbooks_per_split 6")
             workbook_name = (
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
             )
-            print("create_workbooks_per_split 7")
             if splits_count > 1:
                 workbook_name += f"_chunk{i + 1}"
             workbook_name += ".xlsx"
@@ -405,33 +346,28 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 workbook_name,
                 password,
             )
-            print("create_workbooks_per_split 8")
 
     def export_per_fsp(self, user: "User") -> None:
-        print("export_per_fsp 1")
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
 
             # generate passwords only if allow_export_fsp_auth_code=True
             password, xlsx_password, encryption_arg = None, None, {}
             if self.allow_export_fsp_auth_code:
-                print("export_per_fsp 2")
                 allowed_chars = f"{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}{string.punctuation}"
                 password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
                 xlsx_password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
                 encryption_arg = {"encryption": pyzipper.WZ_AES}
-            print("export_per_fsp 3")
+
             with pyzipper.AESZipFile(
                 tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, **encryption_arg
             ) as zip_file:
-                print("export_per_fsp 4")
                 # set password only for auth code export
                 if self.allow_export_fsp_auth_code:
                     zip_file.setpassword(password.encode("utf-8"))
 
                 self.create_workbooks_per_split(zip_file, xlsx_password)
 
-            print("export_per_fsp 6")
             file_temp_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
@@ -439,18 +375,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 password=password,
                 xlsx_password=xlsx_password,
             )
-            print("export_per_fsp 7")
             tmp_zip.seek(0)
-            print("export_per_fsp 8")
             # remove old file
             self.payment_plan.remove_export_files()
-            print("export_per_fsp 9")
             file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-            print("export_per_fsp 10")
             self.payment_plan.export_file_per_fsp = file_temp_obj
-            print("export_per_fsp 11")
-            self.payment_plan.save(["export_file_per_fsp","updated_at"])
-            print("export_per_fsp 12")
+            self.payment_plan.save(update_fields=["export_file_per_fsp", "updated_at"])
 
     @staticmethod
     def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
