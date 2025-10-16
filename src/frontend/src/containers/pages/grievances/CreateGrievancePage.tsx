@@ -140,9 +140,9 @@ const CreateGrievancePage = (): ReactElement => {
         ),
     });
 
-  const feedbackProgram = programsData?.results?.find(
-    (prog) => prog.id === feedbackProgramId,
-  );
+  const feedbackProgram = feedbackProgramId
+    ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
+    : undefined;
   const feedbackProgramSlug = feedbackProgram?.slug;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
@@ -256,7 +256,7 @@ const CreateGrievancePage = (): ReactElement => {
             businessAreaSlug: businessArea,
           },
         ),
-    });
+  });
 
   const {
     data: allEditPeopleFieldsData,
@@ -442,6 +442,11 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
+        const dynamicEntityProgramSlug = feedbackProgramSlug ||
+          (programId !== 'all' ? programId :
+            ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
+             (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug)));
+
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -528,7 +533,7 @@ const CreateGrievancePage = (): ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === GrievanceSteps.Verification && (
-                        <Verification values={values} />
+                        <Verification values={values} programSlug={dynamicEntityProgramSlug} />
                       )}
                       {activeStep === GrievanceSteps.Description && (
                         <>
@@ -546,6 +551,7 @@ const CreateGrievancePage = (): ReactElement => {
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
+                            programSlug={dynamicEntityProgramSlug}
                           />
                         </>
                       )}
