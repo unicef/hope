@@ -40,7 +40,7 @@ export function GrievanceFlexFieldPhotoModal({
         ?.flex_fields;
 
   const picUrl: string = isCurrent
-    ? flexFields[field.name]?.previous_value
+    ? flexFields[field.name]?.previousValue
     : flexFields[field.name]?.value;
   return picUrl ? (
     <PhotoModal src={picUrl} />

@@ -47,7 +47,7 @@ export function GrievanceFlexFieldPhotoModalEditable({
         ?.flexFields;
 
   const picUrl: string = isCurrent
-    ? flexFields[flexField.name]?.previous_value
+    ? flexFields[flexField.name]?.previousValue
     : flexFields[flexField.name]?.value;
 
   return (
