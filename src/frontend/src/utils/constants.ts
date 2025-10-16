@@ -313,8 +313,6 @@ export const generateTableOrderOptionsMember = (
       name: `${beneficiaryGroup.memberLabel}: descending`,
       value: '-unicef_id',
     },
-    { name: 'Status: ascending', value: 'status_label' },
-    { name: 'Status: descending', value: '-status_label' },
     { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
     {
       name: `${beneficiaryGroup.groupLabel} Size: descending`,
