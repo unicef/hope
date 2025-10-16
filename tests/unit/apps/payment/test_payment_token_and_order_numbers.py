@@ -12,7 +12,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-    generate_token_and_order_numbers,
+    XlsxPaymentPlanExportPerFspService,
 )
 
 
@@ -49,7 +49,8 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
             assert payment.token_number is None
 
     def test_generate_token_and_order_numbers_for_payments(self) -> None:
-        generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
+        service = XlsxPaymentPlanExportPerFspService(self.payment_plan, None)
+        service.generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
         payment = self.payment_plan.eligible_payments.first()
         assert len(str(payment.order_number)) == 9
         assert len(str(payment.token_number)) == 7
