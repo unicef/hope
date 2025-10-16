@@ -138,7 +138,7 @@ export const ReassignRoleBox = ({
         (ticket.individual?.role === 'PRIMARY' ||
           ticket.individual?.relationship === 'HEAD')) ||
       (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-        ticket.ticketDetails?.individualData?.role?.previous_value ===
+        ticket.ticketDetails?.individualData?.role?.previousValue ===
           'PRIMARY' &&
         (ticket.ticketDetails?.individualData?.role?.value === 'ALTERNATE' ||
           ticket.ticketDetails?.individualData?.role?.value === 'NO_ROLE'))
