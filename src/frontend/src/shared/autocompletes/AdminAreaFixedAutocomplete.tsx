@@ -57,7 +57,7 @@ export const AdminAreaFixedAutocomplete = ({
   const loading = isLoading;
 
   useEffect(() => {
-    if (areasData) {
+    if (areasData?.results) {
       setNewValue(
         typeof value === 'string'
           ? areasData.results.find((item) => item.name === value)
@@ -90,12 +90,11 @@ export const AdminAreaFixedAutocomplete = ({
       <StyledAutocomplete
         options={areasData?.results || []}
         defaultValue={
-          areasData && typeof value === 'string'
+          areasData?.results && typeof value === 'string'
             ? areasData.results.find((item) => item.id === value)
             : value
         }
         getOptionLabel={(option: any) => (option ? `${option.name}` : '')}
-         
         isOptionEqualToValue={(option: any, value: any) =>
           typeof value === 'string'
             ? option?.id === value
