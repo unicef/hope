@@ -313,10 +313,10 @@ export const generateTableOrderOptionsMember = (
       name: `${beneficiaryGroup.memberLabel}: descending`,
       value: '-unicef_id',
     },
-    { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
+    { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'household__size' },
     {
       name: `${beneficiaryGroup.groupLabel} Size: descending`,
-      value: '-size',
+      value: '-household__size',
     },
     { name: 'Registration Date: ascending', value: 'last_registration_date' },
     { name: 'Registration Date: descending', value: '-last_registration_date' },
