@@ -152,52 +152,57 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
     user_id: str,
     fsp_xlsx_template_id: Optional[str] = None,
 ) -> None:
-    try:
-        from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-            XlsxPaymentPlanExportPerFspService,
-        )
-
-        user = get_user_model().objects.get(pk=user_id)
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        set_sentry_business_area_tag(payment_plan.business_area.name)
+    with cache.lock(
+        f"create_payment_plan_payment_list_xlsx_per_fsp_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
         try:
-            service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
+            from hct_mis_api.apps.payment.models import PaymentPlan
+            from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+                XlsxPaymentPlanExportPerFspService,
+            )
 
-            if service.payment_generate_token_and_order_numbers:
-                with cache.lock(
-                    f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
-                    blocking_timeout=60 * 10,
-                    timeout=60 * 20,
-                ):
-                    with transaction.atomic():
-                        service.generate_token_and_order_numbers(
-                            payment_plan.eligible_payments.all(), payment_plan.program
-                        )
-
-            with transaction.atomic():
-                service.export_per_fsp(user)
-                payment_plan.background_action_status_none()
-                payment_plan.save(update_fields=["background_action_status", "updated_at"])
-
-                if payment_plan.business_area.enable_email_notification:
-                    send_email_notification_on_commit(service, user)
-                    if fsp_xlsx_template_id:
-                        service.send_email_with_passwords(user, payment_plan)
-
-        except Exception as e:  # pragma: no cover
-            logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
-            # If this was the last allowed attempt, mark error and let the task fail.
+            user = get_user_model().objects.get(pk=user_id)
+            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+            set_sentry_business_area_tag(payment_plan.business_area.name)
             try:
-                raise self.retry(exc=e)
-            except MaxRetriesExceededError:
-                payment_plan.background_action_status_xlsx_export_error()
-                payment_plan.save(update_fields=["background_action_status", "updated_at"])
-                raise
+                service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
 
-    except Exception as e:
-        logger.exception("Create Payment Plan List XLSX Per FSP Error")
-        raise self.retry(exc=e)
+                if service.payment_generate_token_and_order_numbers:
+                    with cache.lock(
+                        f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
+                        blocking_timeout=60 * 10,
+                        timeout=60 * 20,
+                    ):
+                        with transaction.atomic():
+                            service.generate_token_and_order_numbers(
+                                payment_plan.eligible_payments.all(), payment_plan.program
+                            )
+
+                with transaction.atomic():
+                    service.export_per_fsp(user)
+                    payment_plan.background_action_status_none()
+                    payment_plan.save(update_fields=["background_action_status", "updated_at"])
+
+                    if payment_plan.business_area.enable_email_notification:
+                        send_email_notification_on_commit(service, user)
+                        if fsp_xlsx_template_id:
+                            service.send_email_with_passwords(user, payment_plan)
+
+            except Exception as e:  # pragma: no cover
+                logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
+                # If this was the last allowed attempt, mark error and let the task fail.
+                try:
+                    raise self.retry(exc=e)
+                except MaxRetriesExceededError:
+                    payment_plan.background_action_status_xlsx_export_error()
+                    payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                    raise
+
+        except Exception as e:
+            logger.exception("Create Payment Plan List XLSX Per FSP Error")
+            raise self.retry(exc=e)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
