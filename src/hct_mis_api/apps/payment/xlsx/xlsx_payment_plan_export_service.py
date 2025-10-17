@@ -28,10 +28,13 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
     def __init__(self, payment_plan: PaymentPlan):
         self.batch_size = 5000
         self.payment_plan = payment_plan
+        self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, column_name, self.admin_areas_dict
+            )
             for column_name in self.HEADERS
         ]
         self.ws_export_list.append(payment_row)

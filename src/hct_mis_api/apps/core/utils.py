@@ -878,15 +878,10 @@ def chunks(it: Iterable, size: int) -> Iterator[List]:
         yield buf
 
 
-def send_email_notification_on_commit(service: Any, user: "User") -> None:
-    context = service.get_email_context(user)
-    transaction.on_commit(
-        lambda: user.email_user(
-            subject=context["title"],
-            html_body=render_to_string(service.html_template, context=context),
-            text_body=render_to_string(service.text_template, context=context),
-        )
-    )
+def send_email_notification_on_commit(
+    service: Any, user: Optional["User"] = None, context_kwargs: Optional[Dict] = None
+) -> None:
+    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
 
 
 def send_email_notification(
