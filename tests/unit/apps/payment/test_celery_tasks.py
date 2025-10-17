@@ -317,11 +317,11 @@ class TestPaymentCeleryTask(TestCase):
 
             send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
-            # first call from > create_payment_plan_payment_list_xlsx_per_fsp
-            # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
+            # 2 first calls from > create_payment_plan_payment_list_xlsx_per_fsp
+            # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
             self.assertEqual(
                 mock_mailjet_send.call_count,
-                2,
+                3,
             )
 
     @patch("hct_mis_api.apps.payment.celery_tasks.logger")
