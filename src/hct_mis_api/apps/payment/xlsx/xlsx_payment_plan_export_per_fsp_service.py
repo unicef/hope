@@ -7,7 +7,8 @@ from typing import List, Optional, Set
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.db.models import Q, QuerySet, transaction
+from django.db import transaction
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
