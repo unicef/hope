@@ -14,9 +14,9 @@ class TestFlexibleHelperMethods(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.importer = FlexibleAttributeImporter()
-        wb = xlrd.open_workbook(filename=f"{settings.TESTS_ROOT}/apps/core/test_files/flex_init.xls")
-        cls.survey_sheet = wb.sheet_by_name("survey")
-        cls.choices_sheet = wb.sheet_by_name("choices")
+        cls.filename = f"{settings.TESTS_ROOT}/apps/core/test_files/flex_init.xls"
+        cls.survey_sheet_name = "survey"  # keep only the name
+        cls.choices_sheet_name = "choices"  # keep only the name
         cls.importer._reset_model_fields_variables()
 
     def test_get_model_fields(self) -> None:
@@ -78,8 +78,9 @@ class TestFlexibleHelperMethods(TestCase):
         english label: Milk and dairy products: yoghurt, cheese
         required: false
         """
-
-        row = self.survey_sheet.row(61)
+        wb = xlrd.open_workbook(filename=self.filename)
+        sheet = wb.sheet_by_name(self.survey_sheet_name)
+        row = sheet.row(61)
         type_value = row[0].value
         name_value = row[1].value
         required_value = row[6].value
@@ -137,7 +138,9 @@ class TestFlexibleHelperMethods(TestCase):
         english label: Consent
         required: false
         """
-        row = self.survey_sheet.row(4)
+        wb = xlrd.open_workbook(filename=self.filename)
+        sheet = wb.sheet_by_name(self.survey_sheet_name)
+        row = sheet.row(4)
         name_value = row[1].value
         required_value = row[6].value
         label_value = row[2].value
@@ -172,7 +175,9 @@ class TestFlexibleHelperMethods(TestCase):
         name: 1
         english label: Yes
         """
-        row = self.choices_sheet.row(1)
+        wb = xlrd.open_workbook(filename=self.filename)
+        sheet = wb.sheet_by_name(self.choices_sheet_name)
+        row = sheet.row(1)
         list_name_value = row[0].value
         name_value = row[1].value
         label_value = row[2].value
@@ -351,7 +356,9 @@ class TestFlexibleHelperMethods(TestCase):
             assert case["expected"] == result
 
     def test_get_list_of_field_choices(self) -> None:
-        result = self.importer._get_list_of_field_choices(self.survey_sheet)
+        wb = xlrd.open_workbook(filename=self.filename)
+        sheet = wb.sheet_by_name(self.survey_sheet_name)
+        result = self.importer._get_list_of_field_choices(sheet)
         expected = {
             "sex",
             "severity_of_disability",
