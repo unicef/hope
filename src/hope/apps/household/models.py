@@ -800,6 +800,20 @@ class Household(
                 fields=["program", "created_at"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
+            models.Index(
+                name="hh_prog_unicef_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hh_size_id_idx",
+                fields=["size", "id"],
+            ),
+            models.Index(
+                name="hi_prog_ltreg_act_merg_idx",
+                fields=["program", "last_registration_date"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
         ]
         constraints = [
             UniqueConstraint(
@@ -1001,6 +1015,16 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
                 raise ValidationError("Document number is not validating")
 
     class Meta:
+        indexes = [
+            # GinIndex(
+            #     OpClass(Upper("document_number"), name="gin_trgm_ops"),
+            #     name="doc_number_upper_trgm_gin",
+            # ),
+            models.Index(
+                fields=["type", "individual"],
+                name="doc_type_individual_idx",
+            ),
+        ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
             UniqueConstraint(
@@ -1554,7 +1578,52 @@ class Individual(
 
     class Meta:
         verbose_name = "Individual"
-        indexes = (GinIndex(fields=["vector_column"]),)
+        indexes = (
+            GinIndex(fields=["vector_column"]),
+            models.Index(
+                name="hi_prog_id_active_merged_idx",
+                fields=["program", "id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_hh_active_merged_idx",
+                fields=["program", "household"],  # -> (program_id, household_id)
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_possible_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_possible_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_confirmed_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_confirmed_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_dup_idx",
+                condition=Q(
+                    is_removed=False, rdi_merge_status="MERGED", deduplication_golden_record_status="DUPLICATE"
+                ),
+            ),
+            models.Index(
+                name="hi_hh_active_merged_idx",
+                fields=["household"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_birth_idx",
+                fields=["program", "unicef_id"],
+                include=["birth_date"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+        )
         constraints = [
             UniqueConstraint(
                 fields=["unicef_id", "program"],
