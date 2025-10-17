@@ -11,12 +11,9 @@ import {
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useApproveNeedsAdjudicationMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { BlackLink } from '@core/BlackLink';
 import { useConfirmation } from '@core/ConfirmationDialog';
@@ -27,31 +24,53 @@ import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export const NeedsAdjudicationDetailsOld = ({
   ticket,
   canApprove,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { businessAreaSlug, baseUrl, isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const [approve] = useApproveNeedsAdjudicationMutation({
-    refetchQueries: () => [
-      {
-        query: GrievanceTicketDocument,
-        variables: { id: ticket.id },
-      },
-    ],
+  const mutation = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        formData: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
+      });
+    },
   });
-  const details = ticket.needsAdjudicationTicketDetails;
+
+  const details = ticket.ticketDetails;
   const [selectedDuplicate, setSelectedDuplicate] = useState(
     details?.selectedIndividual?.id,
   );
@@ -144,11 +163,9 @@ export const NeedsAdjudicationDetailsOld = ({
                   confirm({
                     content: confirmationText,
                   }).then(() => {
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        selectedIndividualId: selectedDuplicate,
-                      },
+                    mutation.mutateAsync({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: true, // Marking as approved/duplicate
                     });
                     setIsEditMode(false);
                   })
@@ -265,16 +282,10 @@ export const NeedsAdjudicationDetailsOld = ({
               </UniversalMoment>
             </TableCell>
             <TableCell align="left">
-              {
-                details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
-                  .label
-              }
+              {details.goldenRecordsIndividual?.documents[0]?.type.label}
             </TableCell>
             <TableCell align="left">
-              {
-                details.goldenRecordsIndividual?.documents?.edges[0]?.node
-                  .documentNumber
-              }
+              {details.goldenRecordsIndividual?.documents[0].documentNumber}
             </TableCell>
             <TableCell align="left">
               {details.goldenRecordsIndividual?.household?.admin2?.name}
@@ -342,13 +353,10 @@ export const NeedsAdjudicationDetailsOld = ({
               </UniversalMoment>
             </TableCell>
             <TableCell align="left">
-              {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
+              {details.possibleDuplicate?.documents[0]?.type.label}
             </TableCell>
             <TableCell align="left">
-              {
-                details.possibleDuplicate?.documents?.edges[0]?.node
-                  .documentNumber
-              }
+              {details.possibleDuplicate?.documents?.documentNumber}
             </TableCell>
             <TableCell align="left">
               {details.possibleDuplicate?.household?.admin2?.name}

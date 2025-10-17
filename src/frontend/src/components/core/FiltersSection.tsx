@@ -1,4 +1,4 @@
-import { Box, Collapse, Grid2 as Grid } from '@mui/material';
+import { Box, Collapse, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { FC, ReactElement, useState } from 'react';
 import styled from 'styled-components';
@@ -30,14 +30,16 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
   const filtersComponent = (
     <>
       {/* //TODO: hiding controlers for now */}
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Box
-          pt={4}
-          pb={4}
-          display="flex"
-          alignItems="center"
-          justifyContent="flex-start"
-          width="100%"
+          sx={{
+            pt: 4,
+            pb: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            width: '100%',
+          }}
         >
           {/* <Button
             variant='text'
@@ -51,9 +53,9 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
         </Box>
       </Grid>
       <Collapse in={expanded}>
-        <Box display="flex" flexDirection="column" width="100%">
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
           {children}
-          <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             {withApplyClearButtons && (
               <ClearApplyButtons
                 clearHandler={clearHandler}

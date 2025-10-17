@@ -5,9 +5,8 @@ import { TFunction } from 'i18next';
 
 export const editProgramDetailsValidationSchema = (
   t: TFunction<'translation', undefined>,
-  initialValues: any,
 ): Yup.ObjectSchema<any, any, any, any> => {
-  let endDate = Yup.date()
+  const endDate = Yup.date()
     .transform((curr, orig) => (orig === '' ? null : curr))
     .when('startDate', (startDate, schema) =>
       startDate instanceof Date && !isNaN(startDate.getTime())
@@ -21,10 +20,6 @@ export const editProgramDetailsValidationSchema = (
     )
     .min(today, t('End Date cannot be in the past'))
     .nullable();
-
-  if (initialValues.editMode) {
-    endDate = endDate.required(t('End Date is required'));
-  }
 
   return Yup.object().shape({
     editMode: Yup.boolean(),
@@ -48,7 +43,32 @@ export const editProgramDetailsValidationSchema = (
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
     ),
-    beneficiaryGroup: Yup.string().required(t('Beneficiary Group is required')),
+    beneficiaryGroup: Yup.string()
+      .nullable()
+      .test({
+        name: 'conditional-required',
+        message: t('Beneficiary Group is required'),
+        test: function(value) {
+          // Get parent values from the validation context
+          const { dataCollectingTypeCode } = this.parent;
+
+          // Field should only be required when dataCollectingTypeCode is present
+          // Note: we can't check programHasRdi or isCopyProgramPage here as they're not part of the form values
+          if (!dataCollectingTypeCode) {
+            return true; // Not required if dataCollectingTypeCode is not set
+          }
+
+          // If this is a programEdit page (where the field might be disabled),
+          // always consider the validation passed, as we'll set a default value via useEffect
+          // The validation will be handled by the disabled state in the form
+          if (this.options?.context?.isEdit || this.options?.context?.isCopy) {
+            return true;
+          }
+
+          // If required, check if value exists
+          return !!value;
+        },
+      }),
     description: Yup.string()
       .min(3, t('Too short'))
       .max(255, t('Too long'))

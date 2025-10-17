@@ -1,39 +1,39 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  Grid2 as Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from '@mui/material';
-import { GetApp } from '@mui/icons-material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useAllSteficonRulesQuery,
-  useExportXlsxPpListMutation,
-  useSetSteficonRuleOnPpListMutation,
-} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GetApp } from '@mui/icons-material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from '@mui/material';
+import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
-import { useProgramContext } from '../../../../programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -90,7 +90,7 @@ const BoxWithBorderRight = styled(Box)`
 `;
 
 interface EntitlementProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -101,30 +101,85 @@ function Entitlement({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.rule.id || '',
+    paymentPlan.steficonRule?.rule?.id
+      ? String(paymentPlan.steficonRule.rule.id)
+      : '',
   );
-  const options = {
-    refetchQueries: () => [
-      {
-        query: PaymentPlanDocument,
-        variables: {
-          id: paymentPlan.id,
-        },
+
+  const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody: ApplyEngineFormula;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            requestBody,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Formula is executing, please wait until completed'));
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
       },
-    ],
-  };
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
 
-  const [setSteficonRule, { loading: loadingSetSteficonRule }] =
-    useSetSteficonRuleOnPpListMutation(options);
+  const { data: steficonData, isLoading: loading } =
+    useQuery<PaginatedRuleList>({
+      queryKey: ['engineRules'],
+      queryFn: () =>
+        RestService.restEngineRulesList({
+          type: 'PAYMENT_PLAN',
+          deprecated: false,
+          enabled: true,
+        }),
+    });
 
-  const { data: steficonData, loading } = useAllSteficonRulesQuery({
-    variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
-    fetchPolicy: 'network-only',
+  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve(
+        {
+          businessAreaSlug,
+          id,
+          programSlug,
+        },
+      ),
+    onSuccess: async () => {
+      showMessage(t('Exporting XLSX started. Please check your email.'));
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
   });
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListMutation();
 
   if (!steficonData) {
     return null;
@@ -140,17 +195,17 @@ function Entitlement({
 
   const shouldDisableEntitlementSelect =
     !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED || !isActiveProgram;
 
   const shouldDisableExportXlsx =
     loadingExport ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
+      BackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -161,8 +216,8 @@ function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems="center" container>
-            <Grid size={{ xs: 11 }}>
+          <Grid container alignItems="center">
+            <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -184,52 +239,52 @@ function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData.allSteficonRules?.edges?.map((each, index) => (
+                  {steficonData?.results?.map((each, index) => (
                     <MenuItem
                       data-cy={`select-option-${index}`}
-                      key={each.node.id}
-                      value={each.node.id}
+                      key={each.id}
+                      value={each.id}
                     >
-                      {each.node.name}
+                      {each.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid>
-              <Box ml={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    loadingSetSteficonRule ||
-                    !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus ===
-                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
-                    !isActiveProgram
+            <Grid size={{ xs: 1 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={
+                  loadingSetSteficonRule ||
+                  !steficonRuleValue ||
+                  paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                  paymentPlan.backgroundActionStatus ===
+                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                  !isActiveProgram
+                }
+                data-cy="button-apply-steficon"
+                onClick={async () => {
+                  try {
+                    await setSteficonRule({
+                      programSlug: programId,
+                      businessAreaSlug: businessArea,
+                      id: paymentPlan.id,
+                      requestBody: {
+                        engineFormulaRuleId: steficonRuleValue,
+                        version: paymentPlan.version,
+                      },
+                    });
+                    showMessage(
+                      t('Formula is executing, please wait until completed'),
+                    );
+                  } catch (e) {
+                    showApiErrorMessages(e, showMessage);
                   }
-                  data-cy="button-apply-steficon"
-                  onClick={async () => {
-                    try {
-                      await setSteficonRule({
-                        variables: {
-                          paymentPlanId: paymentPlan.id,
-                          steficonRuleId: steficonRuleValue,
-                          version: paymentPlan.version,
-                        },
-                      });
-                      showMessage(
-                        t('Formula is executing, please wait until completed'),
-                      );
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
-                    }
-                  }}
-                >
-                  {t('Apply')}
-                </Button>
-              </Box>
+                }}
+              >
+                {t('Apply')}
+              </Button>
             </Grid>
           </Grid>
           <Box display="flex" alignItems="center">
@@ -265,20 +320,13 @@ function Entitlement({
                   color="primary"
                   startIcon={<GetApp />}
                   data-cy="button-export-xlsx"
-                  onClick={async () => {
-                    try {
-                      await mutateExport({
-                        variables: {
-                          paymentPlanId: paymentPlan.id,
-                        },
-                      });
-                      showMessage(
-                        t('Exporting XLSX started. Please check your email.'),
-                      );
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
-                    }
-                  }}
+                  onClick={() =>
+                    mutateExport({
+                      businessAreaSlug: businessArea,
+                      programSlug: programId,
+                      id: paymentPlan.id,
+                    })
+                  }
                 >
                   {t('Export Xlsx')}
                 </LoadingButton>

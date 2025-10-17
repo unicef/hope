@@ -7,16 +7,16 @@ import VerificationPaymentDetailsPage from '@containers/pages/payments/Verificat
 export const PaymentVerificationRoutes = (): ReactElement => {
   const paymentVerificationRoutes = [
     {
-      path: 'verification/payment/:id',
-      element: <VerificationPaymentDetailsPage />,
-    },
-    {
       path: 'payment-verification',
       element: <PaymentVerificationPage />,
     },
     {
       path: 'payment-verification/payment-plan/:paymentPlanId',
       element: <PaymentPlanVerificationDetailsPage />,
+    },
+    {
+      path: 'payment-verification/payment-plan/:paymentPlanId/verification/payment/:id',
+      element: <VerificationPaymentDetailsPage />,
     },
   ];
 

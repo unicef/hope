@@ -12,11 +12,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
 import PhotoModal from '@components/core/PhotoModal/PhotoModal';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -32,7 +32,7 @@ const StyledTable = styled(Table)`
 export interface DocumentsToEditTableProps {
   values;
   isEdit;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   documentTypeDict;
   countriesDict;
@@ -59,7 +59,7 @@ export function DocumentsToEditTable({
   };
   const { selectedDocumentsToEdit } = values;
   const renderCurrentPhoto = (doc): ReactElement => {
-    if (doc.value?.photo === doc.previous_value?.photo) {
+    if (doc.value?.photo === doc.previousValue?.photo) {
       return <GreyText>{t('Not updated')}</GreyText>;
     }
     if (!document.value?.photo) {
@@ -77,7 +77,7 @@ export function DocumentsToEditTable({
   };
 
   return (
-    <div key={document.previous_value.number}>
+    <div key={document.previousValue.number}>
       <TableTitle>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">{t('Document to be edited')}</Typography>
@@ -124,11 +124,11 @@ export function DocumentsToEditTable({
             <TableCell />
             <TableCell align="left">{t('Country')}</TableCell>
             <TableCell align="left">
-              {countriesDict[document.previous_value.country]}
+              {countriesDict[document.previousValue.country]}
             </TableCell>
             <TableCell align="left">
               {renderNewOrNotUpdated(
-                countriesDict[document.previous_value.country],
+                countriesDict[document.previousValue.country],
                 countriesDict[document.value?.country],
               )}
             </TableCell>
@@ -137,11 +137,11 @@ export function DocumentsToEditTable({
             <TableCell />
             <TableCell align="left">{t('Document Type')}</TableCell>
             <TableCell align="left">
-              {documentTypeDict[document.previous_value.key]}
+              {documentTypeDict[document.previousValue.key]}
             </TableCell>
             <TableCell align="left">
               {renderNewOrNotUpdated(
-                documentTypeDict[document.previous_value.key],
+                documentTypeDict[document.previousValue.key],
                 documentTypeDict[document.value.key],
               )}
             </TableCell>
@@ -150,10 +150,10 @@ export function DocumentsToEditTable({
             <TableCell />
 
             <TableCell align="left">{t('Document Number')}</TableCell>
-            <TableCell align="left">{document.previous_value.number}</TableCell>
+            <TableCell align="left">{document.previousValue.number}</TableCell>
             <TableCell align="left">
               {renderNewOrNotUpdated(
-                document.previous_value.number,
+                document.previousValue.number,
                 document.value.number,
               )}
             </TableCell>
@@ -162,8 +162,8 @@ export function DocumentsToEditTable({
             <TableCell />
             <TableCell align="left">{t('Photo')}</TableCell>
             <TableCell align="left">
-              {document.previous_value?.photo ? (
-                <PhotoModal src={document.previous_value.photo} />
+              {document.previousValue?.photo ? (
+                <PhotoModal src={document.previousValue.photo} />
               ) : (
                 '-'
               )}

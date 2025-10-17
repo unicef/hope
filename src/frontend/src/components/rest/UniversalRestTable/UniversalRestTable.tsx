@@ -1,7 +1,11 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
+import {
+  columnToOrderBy,
+  filterEmptyParams,
+  isPermissionDeniedError,
+} from '@utils/utils';
 import {
   Order,
   TableRestComponent,
@@ -10,6 +14,9 @@ import { isEqual } from 'lodash';
 
 //TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
+  page?: number;
+  setPage?: (page: number) => void;
+  customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
@@ -30,6 +37,10 @@ interface UniversalRestTableProps<T = any, K = any> {
   isLoading: boolean;
   queryVariables: any;
   setQueryVariables: (variables: K) => void;
+  itemsCount?: number;
+  initialRowsPerPage?: number;
+  hidePagination?: boolean;
+  noEmptyMessage?: boolean;
 }
 type QueryVariables = {
   offset: number;
@@ -55,23 +66,53 @@ export const UniversalRestTable = <T, K>({
   isLoading,
   queryVariables,
   setQueryVariables,
+  itemsCount,
+  initialRowsPerPage,
+  hidePagination,
+  customHeadRenderer,
+  noEmptyMessage = false,
+  page: pageProp,
+  setPage: setPageProp,
 }: UniversalRestTableProps<T, K>): ReactElement => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
+  const [rowsPerPage, setRowsPerPage] = useState(
+    initialRowsPerPage || rowsPerPageOptions[0],
+  );
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
   const [orderDirection, setOrderDirection] = useState<Order>(
     defaultOrderDirection,
   );
 
+  // Internal page state if not controlled
+  const [internalPage, setInternalPage] = useState(0);
+  const page = typeof pageProp === 'number' ? pageProp : internalPage;
+  const setPage =
+    typeof setPageProp === 'function' ? setPageProp : setInternalPage;
+
+  const filteredQueryVariables = useMemo(() => {
+    const filtered = filterEmptyParams(queryVariables);
+
+    return {
+      ...filtered,
+      businessAreaSlug: queryVariables.businessAreaSlug,
+      ...(queryVariables.ordering ? { ordering: queryVariables.ordering } : {}),
+    };
+  }, [queryVariables]);
+
   useEffect(() => {
     const newVariables: QueryVariables = {
-      ...queryVariables,
+      ...filteredQueryVariables,
       offset: page * rowsPerPage,
       limit: rowsPerPage,
-      ordering: orderBy
-        ? columnToOrderBy(orderBy, orderDirection)
-        : queryVariables.ordering,
     };
+
+    const ordering = orderBy
+      ? columnToOrderBy(orderBy, orderDirection)
+      : filteredQueryVariables.ordering;
+
+    if (ordering) {
+      newVariables.ordering = ordering;
+    }
+
     const newState = newVariables as unknown as K;
 
     if (!isEqual(newState, queryVariables)) {
@@ -82,6 +123,7 @@ export const UniversalRestTable = <T, K>({
     rowsPerPage,
     orderBy,
     orderDirection,
+    filteredQueryVariables,
     setQueryVariables,
     queryVariables,
   ]);
@@ -102,6 +144,7 @@ export const UniversalRestTable = <T, K>({
 
   return (
     <TableRestComponent<T>
+      data-cy="universal-rest-table"
       title={correctTitle}
       actions={actions}
       data={typedResults}
@@ -112,7 +155,7 @@ export const UniversalRestTable = <T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data?.count ?? 0}
+      itemsCount={itemsCount}
       handleChangePage={(_event, newPage) => {
         setPage(newPage);
       }}
@@ -133,6 +176,9 @@ export const UniversalRestTable = <T, K>({
       onSelectAllClick={onSelectAllClick}
       numSelected={numSelected}
       allowSort={allowSort}
+      hidePagination={hidePagination}
+      customHeadRenderer={customHeadRenderer}
+      noEmptyMessage={noEmptyMessage}
     />
   );
 };

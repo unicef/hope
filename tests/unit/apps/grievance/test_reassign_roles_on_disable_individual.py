@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -8,22 +9,21 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
-class TestReassignRolesOnDisableIndividual(APITestCase):
+class TestReassignRolesOnDisableIndividual(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -72,13 +72,13 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         role_reassign_data = {
             "HEAD": {
                 "role": "HEAD",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": individual.id,
             },
             str(self.primary_role.id): {
                 "role": "PRIMARY",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": individual.id,
             },
         }
 
@@ -92,21 +92,21 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         individual.refresh_from_db()
         self.household.refresh_from_db()
 
-        self.assertEqual(self.household.head_of_household, individual)
-        self.assertEqual(individual.relationship, HEAD)
+        assert self.household.head_of_household == individual
+        assert individual.relationship == HEAD
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        self.assertEqual(role, ROLE_PRIMARY)
+        assert role == ROLE_PRIMARY
 
     def test_reassign_alternate_role_to_primary_collector(self) -> None:
         role_reassign_data = {
             str(self.alternate_role.id): {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.primary_collector_individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": self.primary_collector_individual.id,
             },
         }
 
-        with self.assertRaises(ValidationError) as context:
+        with pytest.raises(ValidationError) as context:
             reassign_roles_on_disable_individual_service(
                 self.alternate_collector_individual,
                 role_reassign_data,
@@ -114,7 +114,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
                 self.program_one,
             )
 
-        self.assertTrue("Cannot reassign the role" in str(context.exception))
+        assert "Cannot reassign the role" in str(context.value)
 
     def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)
@@ -122,15 +122,18 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         role_reassign_data = {
             str(self.alternate_role.id): {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": individual.id,
             },
         }
         reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        self.assertEqual(role, ROLE_ALTERNATE)
+        assert role == ROLE_ALTERNATE
 
     def test_reassign_primary_role_to_current_alternate_collector(self) -> None:
         # change HOH so that the individual can be disabled
@@ -140,24 +143,29 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         role_reassign_data = {
             str(self.primary_role.id): {
                 "role": "PRIMARY",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.alternate_collector_individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": self.alternate_collector_individual.id,
             },
         }
 
         reassign_roles_on_disable_individual_service(
-            self.primary_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.primary_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(
             household=self.household, individual=self.alternate_collector_individual
         ).role
-        self.assertEqual(role, ROLE_PRIMARY)
+        assert role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
-        self.assertIsNone(previous_role)
+        assert previous_role is None
 
-    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
+    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
+        self,
+    ) -> None:
         household, _ = create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
@@ -176,19 +184,22 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         role_reassign_data = {
             str(self.alternate_role.id): {
                 "role": "ALTERNATE",
-                "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.no_role_individual.id, "IndividualNode"),
+                "household": self.household.id,
+                "individual": self.no_role_individual.id,
             },
         }
 
         reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
+            self.alternate_collector_individual,
+            role_reassign_data,
+            UserFactory(),
+            self.program_one,
         )
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=self.no_role_individual).role
-        self.assertEqual(role, ROLE_ALTERNATE)
+        assert role == ROLE_ALTERNATE
 
         external_role = IndividualRoleInHousehold.objects.get(
             household=household, individual=self.no_role_individual
         ).role
-        self.assertEqual(external_role, ROLE_PRIMARY)  # still with primary role in another household
+        assert external_role == ROLE_PRIMARY  # still with primary role in another household

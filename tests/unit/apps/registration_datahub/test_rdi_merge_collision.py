@@ -2,19 +2,22 @@ from contextlib import contextmanager
 from typing import Callable, Generator
 
 from django.db import DEFAULT_DB_ALIAS, connections
-
 import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.geo.models import Area, AreaType, Country
+from hope.apps.household.models import MALE, Household, Individual
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
 
-from hct_mis_api.apps.geo.models import Area, AreaType, Country
-from hct_mis_api.apps.household.models import MALE, Household, Individual
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-pytestmark = [pytest.mark.usefixtures("django_elasticsearch_setup"), pytest.mark.elasticsearch, pytest.mark.django_db]
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.elasticsearch,
+    pytest.mark.django_db,
+]
 
 
 @contextmanager
@@ -38,51 +41,54 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def germany() -> Country:
     return Country.objects.create(name="Germany", iso_code2="DE", iso_code3="DEU", iso_num="276")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(
+        name="Test Program for Household",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin1(state: AreaType) -> Area:
     return Area.objects.create(name="Kabul", area_type=state, p_code="AF11")
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin2(district: AreaType) -> Area:
     return Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
 
 
-@pytest.fixture()
+@pytest.fixture
 def state(poland: Country) -> AreaType:
     return AreaType.objects.create(name="State", country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def district(poland: Country, state: AreaType) -> AreaType:
     return AreaType.objects.create(name="District", parent=state, country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def merged_rdi(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(program=program, status=RegistrationDataImport.MERGED)
 
 
-@pytest.fixture()
+@pytest.fixture
 def in_review_rdi(program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(program=program, status=RegistrationDataImport.IN_REVIEW)
 
@@ -193,20 +199,24 @@ def test_merge_rdi_with_collision(
     5. Merged individual should be updated with the pending individual data
     5. Merged household should have added in_review_rdi to extra_rdis m2m
     """
-    from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+    from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
     # Enable collision detection in the program
     program.collision_detection_enabled = True
-    from hct_mis_api.apps.program.collision_detectors import (
-        IdentificationKeyCollisionDetector,
-    )
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 
     # Get the initial state before merging
     pending_household_obj, pending_individual = pending_household
-    merged_household_obj, (merged_individual_to_remove, merged_individual) = merged_household
+    (
+        merged_household_obj,
+        (
+            merged_individual_to_remove,
+            merged_individual,
+        ),
+    ) = merged_household
 
     # Store original values for later comparison
     pending_household_id = pending_household_obj.id

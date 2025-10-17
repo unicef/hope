@@ -7,6 +7,6 @@ export type PeriodicField = {
     readonly id: string;
     name: string;
     readonly label: string;
-    pdu_data: PeriodicFieldData;
+    pduData: PeriodicFieldData;
 };
 

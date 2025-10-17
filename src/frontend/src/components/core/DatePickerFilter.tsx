@@ -1,6 +1,6 @@
 import { Box, FormControl } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { formatISO, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { FieldLabel } from './FieldLabel';
 import { ReactElement } from 'react';
 
@@ -11,7 +11,15 @@ export const DatePickerFilter = ({
   dataCy = 'date-picker-filter',
   ...props
 }): ReactElement => {
-  const datePickerValue = value ? parseISO(value) : null;
+  let datePickerValue = null;
+  if (value) {
+    // If value is 'YYYY-MM-DD', convert to ISO string for parseISO
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      datePickerValue = parseISO(`${value}T00:00:00.000Z`);
+    } else {
+      datePickerValue = parseISO(value);
+    }
+  }
   const calculatedDataCy =
     dataCy === 'date-picker-filter'
       ? `date-picker-filter-${props?.label || props?.placeholder || ''}`
@@ -25,7 +33,11 @@ export const DatePickerFilter = ({
           slotProps={{ textField: { size: 'small' } }}
           onChange={(date) => {
             if (date) {
-              onChange(formatISO(date));
+              // Format as 'yyyy-MM-dd' (date only)
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              onChange(`${year}-${month}-${day}`);
             } else {
               onChange(null);
             }

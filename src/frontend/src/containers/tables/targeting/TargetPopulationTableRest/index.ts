@@ -1,1 +1,0 @@
-export { TargetPopulationTableRest } from './TargetPopulationTableRest';

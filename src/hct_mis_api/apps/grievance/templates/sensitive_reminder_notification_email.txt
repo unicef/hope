@@ -1,4 +1,0 @@
-{% extends 'base_notification_email.txt' %}
-{% block content %}
-    A Grievance & Feedback ticket {{ ticket_url }} created over {{ hours_ago }} hours ago requires action and attention
-{% endblock %}

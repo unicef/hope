@@ -3,18 +3,17 @@ from typing import Iterator
 
 from django.core.cache import cache
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,
 )
-from rest_framework import status
-from rest_framework.test import APITestCase
+from hope.api.models import APIToken, Grant
+from hope.apps.core.models import BusinessArea
 from unit.api.factories import APITokenFactory
-
-from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 @contextlib.contextmanager
@@ -39,17 +38,17 @@ class HOPEApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        user = UserFactory()
+        cls.user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
         cls.role = RoleFactory(
             subsystem="API",
             name="c",
             permissions=[p.name for p in cls.user_permissions],
         )
-        user.user_roles.create(role=cls.role, business_area=cls.business_area)
+        cls.user.role_assignments.create(role=cls.role, business_area=cls.business_area)
 
         cls.token = APITokenFactory(
-            user=user,
+            user=cls.user,
             grants=[c.name for c in cls.user_permissions],
         )
         cls.token.valid_for.set([cls.business_area])
@@ -89,7 +88,7 @@ class ConstanceSettingsAPITest(APITestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
-        self.assertIn("BANNER_MESSAGE", response.data)
-        self.assertEqual(response.data["BANNER_MESSAGE"], "Default banner message")
+        assert "BANNER_MESSAGE" in response.data
+        assert response.data["BANNER_MESSAGE"] == "Default banner message"

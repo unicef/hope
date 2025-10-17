@@ -1,9 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { AllLogEntriesQuery } from '@generated/graphql';
+import { LogEntry } from '@restgenerated/models/LogEntry';
 
-export const headCells: HeadCell<
-AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<LogEntry>[] = [
   {
     disablePadding: false,
     label: 'Date',

@@ -1,9 +1,9 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useRegistrationChoicesQuery } from '@generated/graphql';
-import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -13,6 +13,9 @@ import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface RegistrationFiltersProps {
   filter;
@@ -33,6 +36,7 @@ const RegistrationFilters = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -53,7 +57,19 @@ const RegistrationFilters = ({
   };
 
   const { t } = useTranslation();
-  const { data: registrationChoicesData } = useRegistrationChoicesQuery();
+  const { data: registrationChoicesData } = useQuery({
+    queryKey: [
+      RestService
+        .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
+      businessAreaSlug,
+      programSlug,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
+        { businessAreaSlug, programSlug },
+      );
+    },
+  });
   if (!registrationChoicesData) {
     return null;
   }
@@ -63,7 +79,7 @@ const RegistrationFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}
@@ -73,7 +89,7 @@ const RegistrationFilters = ({
           />
         </Grid>
         <Grid size={{ xs: 4 }}>
-          <AssigneeAutocomplete
+          <AssigneeAutocompleteRestFilter
             name="importedBy"
             label={t('Imported By')}
             filter={filter}
@@ -92,13 +108,11 @@ const RegistrationFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             data-cy="filter-status"
           >
-            {registrationChoicesData.registrationDataStatusChoices.map(
-              (item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ),
-            )}
+            {registrationChoicesData.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 3 }}>

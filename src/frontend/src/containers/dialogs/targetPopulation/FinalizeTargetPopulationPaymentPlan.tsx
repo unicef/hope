@@ -11,8 +11,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
-import { Action } from '@generated/graphql';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -21,7 +22,6 @@ export interface FinalizeTargetPopulationPaymentPlanProps {
   targetPopulationId: string;
 }
 
-//TODO: remove this Finalize mutation is not existent in the backend
 export const FinalizeTargetPopulationPaymentPlan = ({
   open,
   setOpen,
@@ -31,18 +31,38 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
-  const { mutatePaymentPlanAction: finish, loading: loadingFinish } =
-    usePaymentPlanAction(
-      Action.Draft,
-      targetPopulationId,
-      () => showMessage(t('Target Population Finalized')),
-      () => setOpen(false),
-    );
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const { mutateAsync: markReady, isPending: loadingFinish } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
+        businessAreaSlug: businessArea,
+        id: targetPopulationId,
+        programSlug: programId,
+      }),
+    onSuccess: () => {
+      showMessage(t('Target Population Finalized'));
+      setOpen(false);
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulationId,
+          programId,
+        ],
+      });
+      navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
+    },
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
   const { isSocialDctType } = useProgramContext();
+
   const onSubmit = (): void => {
-    finish();
-    navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
+    markReady();
   };
   return (
     <Dialog

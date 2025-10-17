@@ -1,7 +1,8 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import (
@@ -15,17 +16,15 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework.test import APIClient
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hope.apps.payment.models import Payment, PaymentPlan
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
@@ -34,11 +33,10 @@ def _time(some_time: datetime.date) -> str:
 
 
 class TestDetails(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)
@@ -62,10 +60,10 @@ class TestDetails(TestCase):
         response_ok = self.api_client.get(
             f"/api/hh-status?tax_id={tax_id}&business_area_code={self.business_area.code}"
         )
-        self.assertEqual(response_ok.status_code, 200)
+        assert response_ok.status_code == 200
 
         response_nok = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code=non-existent")
-        self.assertEqual(response_nok.status_code, 404)
+        assert response_nok.status_code == 404
 
     def test_filtering_business_area_code_with_detail_id(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area)
@@ -85,15 +83,15 @@ class TestDetails(TestCase):
         response_ok = self.api_client.get(
             f"/api/hh-status?detail_id={detail_id}&business_area_code={self.business_area.code}"
         )
-        self.assertEqual(response_ok.status_code, 200)
+        assert response_ok.status_code == 200
 
         response_nok = self.api_client.get(f"/api/hh-status?detail_id={detail_id}&business_area_code=non-existent")
-        self.assertEqual(response_nok.status_code, 404)
+        assert response_nok.status_code == 404
 
     def test_getting_non_existent_individual(self) -> None:
         response = self.api_client.get("/api/hh-status?tax_id=non-existent")
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Document with given tax_id: non-existent not found")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Document with given tax_id: non-existent not found"
 
     def test_getting_individual_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -111,17 +109,17 @@ class TestDetails(TestCase):
         tax_id = pending_document.document_number
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], _time(pending_household.updated_at))
+        assert info["status"] == "imported"
+        assert info["date"] == _time(pending_household.updated_at)
 
         individual = info["individual"]
-        self.assertIsNotNone(individual)
-        self.assertEqual(individual["relationship"], HEAD)
-        self.assertEqual(individual["role"], ROLE_NO_ROLE)
-        self.assertEqual(individual["tax_id"], tax_id)
+        assert individual is not None
+        assert individual["relationship"] == HEAD
+        assert individual["role"] == ROLE_NO_ROLE
+        assert individual["tax_id"] == tax_id
 
     def test_getting_individual_with_status_merged_to_population(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -131,11 +129,11 @@ class TestDetails(TestCase):
         tax_id = document.document_number
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "merged to population")
-        self.assertEqual(info["date"], _time(household.created_at))
+        assert info["status"] == "merged to population"
+        assert info["date"] == _time(household.created_at)
 
     def test_getting_individual_with_status_targeted(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -154,11 +152,11 @@ class TestDetails(TestCase):
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "merged to population")
-        self.assertEqual(info["date"], _time(household.created_at))
+        assert info["status"] == "merged to population"
+        assert info["date"] == _time(household.created_at)
 
     def test_getting_individual_with_status_sent_to_cash_assist(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -179,11 +177,11 @@ class TestDetails(TestCase):
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        self.assertIsNotNone(data["info"])
+        assert data["info"] is not None
         info = data["info"]
-        self.assertEqual(info["status"], "paid")
+        assert info["status"] == "paid"
 
     def test_getting_individual_with_status_paid(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -192,21 +190,24 @@ class TestDetails(TestCase):
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         payment = PaymentFactory(
-            household=household, currency="PLN", delivery_date=datetime.date.today(), delivered_quantity=1
+            household=household,
+            currency="PLN",
+            delivery_date=datetime.date.today(),
+            delivered_quantity=1,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        self.assertIsNotNone(data["info"])
+        assert data["info"] is not None
         info = data["info"]
-        self.assertEqual(info["status"], "paid")
-        self.assertEqual(datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date(), payment.delivery_date)
+        assert info["status"] == "paid"
+        assert datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
 
     def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=non-existent")
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Household with given detail_id: non-existent not found")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Household with given detail_id: non-existent not found"
 
     def test_getting_household_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -223,12 +224,12 @@ class TestDetails(TestCase):
         detail_id = pending_household.detail_id
 
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], _time(pending_household.updated_at))
-        self.assertTrue("individual" not in info)
+        assert info["status"] == "imported"
+        assert info["date"] == _time(pending_household.updated_at)
+        assert "individual" not in info
 
     def test_getting_household_with_status_paid(self) -> None:
         detail_id = "HOPE-2022530111222"
@@ -238,19 +239,19 @@ class TestDetails(TestCase):
         individual.save()
         payment = PaymentFactory(household=household, delivered_quantity=1000, collector=individual)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "paid")
-        self.assertEqual(info["date"], _time(payment.delivery_date))
-        self.assertTrue("individual" not in info)
+        assert info["status"] == "paid"
+        assert info["date"] == _time(payment.delivery_date)
+        assert "individual" not in info
 
     def test_query_params_validation(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=xxx&tax_id=yyy")
-        self.assertEqual(response.status_code, 400)
+        assert response.status_code == 400
 
         response = self.api_client.get("/api/hh-status")
-        self.assertEqual(response.status_code, 400)
+        assert response.status_code == 400
 
     def test_households_count_gt_1(self) -> None:
         detail_id = "123"
@@ -258,12 +259,12 @@ class TestDetails(TestCase):
         PendingHouseholdFactory(detail_id=detail_id)
         PendingHouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 400)
+        assert response.status_code == 400
 
         HouseholdFactory(detail_id=detail_id)
         HouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 400)
+        assert response.status_code == 400
 
     def test_documents_count_gt_1(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -273,4 +274,4 @@ class TestDetails(TestCase):
         PendingDocumentFactory(individual=individual, type=document_type, document_number="123")
 
         response = self.api_client.get("/api/hh-status?tax_id=123")
-        self.assertEqual(response.status_code, 400)
+        assert response.status_code == 400

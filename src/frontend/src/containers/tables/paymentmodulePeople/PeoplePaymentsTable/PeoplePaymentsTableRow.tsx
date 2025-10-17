@@ -1,11 +1,12 @@
-import TableCell from '@mui/material/TableCell';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '@components/core/WarningTooltip';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
+import TableCell from '@mui/material/TableCell';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
@@ -13,11 +14,11 @@ import {
   paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
-import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { ReactElement, SyntheticEvent } from 'react';
-import { StatusBox } from '@components/core/StatusBox';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -55,11 +56,9 @@ const GreenCheck = styled(CheckCircleOutlineRoundedIcon)`
 `;
 
 interface PeoplePaymentsTableRowProps {
-  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
+  payment: PaymentList;
   canViewDetails: boolean;
-  onWarningClick?: (
-    payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-  ) => void;
+  onWarningClick?: (payment: PaymentList) => void;
   permissions;
 }
 
@@ -81,7 +80,7 @@ export const PeoplePaymentsTableRow = ({
   const renderDeliveredQuantity = (): ReactElement => {
     const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
       payment;
-    if (status === PaymentStatus.TransactionErroneous) {
+    if (status === PaymentStatusEnum.TRANSACTION_ERRONEOUS) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
     if (deliveredQuantity === null) {
@@ -101,7 +100,7 @@ export const PeoplePaymentsTableRow = ({
     if (deliveredQuantity === null) {
       return <></>;
     }
-    if (deliveredQuantity === 0) {
+    if (Number(deliveredQuantity) === 0) {
       return <RedError />;
     }
     if (deliveredQuantity === entitlementQuantity) {
@@ -110,7 +109,7 @@ export const PeoplePaymentsTableRow = ({
     return <OrangeError />;
   };
 
-  const individual = payment?.household?.individuals?.edges?.[0]?.node;
+  const individual = payment?.peopleIndividual;
   const individualDetailsPath = `/${baseUrl}/population/people/${individual?.id}`;
 
   return (
@@ -129,7 +128,12 @@ export const PeoplePaymentsTableRow = ({
       </TableCell>
       <TableCell align="left">
         {canViewDetails ? (
-          <BlackLink to={paymentDetailsPath}>{payment.unicefId}</BlackLink>
+          <BlackLink
+            to={paymentDetailsPath}
+            state={{ parentId: payment.parentId }}
+          >
+            {payment.unicefId}
+          </BlackLink>
         ) : (
           payment.unicefId
         )}
@@ -153,16 +157,15 @@ export const PeoplePaymentsTableRow = ({
         )}
       </TableCell>
       <TableCell align="left">
-        {renderSomethingOrDash(payment.household.admin2?.name)}
+        {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
 
       <TableCell align="left">
-        {payment.financialServiceProvider
-          ? payment.financialServiceProvider.name
-          : '-'}
+        {payment.fspName ? payment.fspName : '-'}
       </TableCell>
       <TableCell align="left">
-        {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
+        {payment.entitlementQuantity != null &&
+        Number(payment.entitlementQuantity) >= 0
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
               payment.currency,

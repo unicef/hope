@@ -4,21 +4,21 @@
 /* eslint-disable */
 export type Area = {
     readonly id: string;
-    readonly created_at: string;
-    readonly updated_at: string;
-    original_id?: string | null;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    originalId?: string | null;
     name: string;
-    p_code?: string | null;
-    geom?: string | null;
-    point?: string | null;
-    readonly valid_from: string | null;
-    valid_until?: string | null;
+    pCode?: string | null;
+    longitude?: number | null;
+    latitude?: number | null;
+    readonly validFrom: string | null;
+    validUntil?: string | null;
     extras?: any;
     readonly lft: number;
     readonly rght: number;
-    readonly tree_id: number;
+    readonly treeId: number;
     readonly level: number;
     parent?: string | null;
-    area_type: string;
+    areaType: string;
 };
 

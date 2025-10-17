@@ -59,7 +59,7 @@ export function FormikDecimalField({
         ),
       }}
       // https://github.com/mui-org/material-ui/issues/12805
-      // eslint-disable-next-line react/jsx-no-duplicate-props
+       
       inputProps={{
         'data-cy': `input-${field.name}`,
       }}

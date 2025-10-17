@@ -12,8 +12,7 @@ from extras.test_utils.factories.payment import (
     generate_reconciled_payment_plan,
     update_fsps,
 )
-
-from hct_mis_api.apps.core.models import DataCollectingType
+from hope.apps.core.models import DataCollectingType
 
 
 class TestFixtures(TestCase):
@@ -24,7 +23,7 @@ class TestFixtures(TestCase):
         UserFactory(username="root")
         DataCollectingTypeFactory(
             label="Full",
-            code="full",
+            code="full_collection",
             weight=1,
             business_areas=[afg],
             type=DataCollectingType.Type.STANDARD.value,

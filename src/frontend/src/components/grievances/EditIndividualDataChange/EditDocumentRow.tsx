@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
@@ -6,10 +6,6 @@ import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
@@ -26,9 +22,9 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditDocumentRowProps {
   setFieldValue;
   values;
-  document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
+  document: any;
   arrayHelpers;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  addIndividualFieldsData: any;
   id: string;
 }
 
@@ -45,18 +41,18 @@ export function EditDocumentRow({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
-  const removed = documentsToRemove.includes(document.node.id);
+  const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
     <Grid container spacing={3}>
-      <Grid size={{ xs: 11 }}>
+      <Grid size={11}>
         <DocumentField
           id={id}
-          key={`${id}-${document.node.country}-${document.node.type.label}`}
+          key={`${id}-${document.country}-${document.type.label}`}
           onDelete={() =>
             removeItemById(
               values.individualDataUpdateDocumentsToEdit,
-              document.node.id,
+              document.id,
               arrayHelpers,
             )
           }
@@ -64,21 +60,21 @@ export function EditDocumentRow({
           documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
           baseName="individualDataUpdateDocumentsToEdit"
           isEdited={isEdited}
-          photoSrc={document.node.photo}
+          photoSrc={document.photo}
           setFieldValue={setFieldValue}
           values={values}
         />
       </Grid>
-      <Grid size={{ xs: 1 }}>
+      <Grid size={1}>
         <Box display="flex" alignItems="center">
           <IconButton
             onClick={() => {
               arrayHelpers.remove({
-                id: document.node.id,
-                country: document.node.countryIso3,
-                key: document.node.type.key,
-                number: document.node.documentNumber,
-                photo: document.node.photo,
+                id: document.id,
+                country: document.countryIso3,
+                key: document.type.key,
+                number: document.documentNumber,
+                photo: document.photo,
               });
               setEdit(false);
             }}
@@ -89,32 +85,29 @@ export function EditDocumentRow({
       </Grid>
     </Grid>
   ) : (
-    <Grid container spacing={3} key={document.node.id}>
-      <Grid size={{ xs: 3 }}>
+    <Grid container spacing={3} key={document.id}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('ID TYPE')}
-            value={document.node.type.label}
-          />
+          <LabelizedField label={t('ID TYPE')} value={document.type.label} />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={document.node.country} />
+          <LabelizedField label={t('Country')} value={document.country.name} />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID Number')}
-            value={document.node.documentNumber}
+            value={document.documentNumber}
           />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs: 2 }}>
-        <PhotoModal showRotate={false} src={document.node.photo} />
+      <Grid size={2}>
+        <PhotoModal showRotate={false} src={document.photo} />
       </Grid>
-      <Grid size={{ xs: 1 }}>
+      <Grid size={1}>
         {!removed ? (
           !isEditTicket && (
             <Box display="flex" alignItems="center">
@@ -122,7 +115,7 @@ export function EditDocumentRow({
                 onClick={() => {
                   setFieldValue(
                     `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                    document.node.id,
+                    document.id,
                   );
                 }}
               >
@@ -131,11 +124,11 @@ export function EditDocumentRow({
               <IconButton
                 onClick={() => {
                   arrayHelpers.push({
-                    id: document.node.id,
-                    country: document.node.countryIso3,
-                    key: document.node.type.key,
-                    number: document.node.documentNumber,
-                    photo: document.node.photo,
+                    id: document.id,
+                    country: document.countryIso3,
+                    key: document.type.key,
+                    number: document.documentNumber,
+                    photo: document.photo,
                   });
                   setEdit(true);
                 }}

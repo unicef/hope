@@ -4,15 +4,15 @@ title: Ecosystem
 
 # Supporting Components
 
-HOPE is designed with a modular architecture, giving users the flexibility to customize 
-and extend the platform according to their unique needs. 
-It’s built to be scalable, adaptable, and interoperable, making it simple to integrate with other 
+HOPE is designed with a modular architecture, giving users the flexibility to customize
+and extend the platform according to their unique needs.
+It’s built to be scalable, adaptable, and interoperable, making it simple to integrate with other
 systems and platforms, ensuring smooth workflows and easy expansion as your needs grow.
 
 
-- [Aurora](aurora.md) 
+- [Aurora](aurora.md)
 
-- [Kobo](kobo/index.md) 
+- [Kobo](kobo/index.md)
 
 - [DeduplicationEngine](hde.md)
 

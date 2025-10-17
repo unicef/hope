@@ -1,21 +1,36 @@
-import { Box, Grid2 as Grid, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import { MenuItem } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { useAllFieldsAttributesQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
-  const { data } = useAllFieldsAttributesQuery();
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const { data } = useQuery({
+    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
+    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
+  });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('All');
   const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
-    if (data && !selectOptions.length) {
-      const options = data.allFieldsAttributes.map((el) => el.associatedWith);
+    if (data?.results && !selectOptions.length) {
+      const options = data.results.map((el) => el.associatedWith);
       const filteredOptions = options.filter(
         (item, index) => options.indexOf(item) === index,
       );
@@ -27,7 +42,7 @@ export function FlexFieldTab(): ReactElement {
   }
 
   return (
-    <Box p={3}>
+    <Box sx={{ p: 3 }}>
       <Grid container spacing={3}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
@@ -85,7 +100,7 @@ export function FlexFieldTab(): ReactElement {
         selectedOption={selectedOption}
         searchValue={searchValue}
         selectedFieldType={selectedFieldType}
-        fields={data.allFieldsAttributes}
+        fields={data.results}
       />
     </Box>
   );

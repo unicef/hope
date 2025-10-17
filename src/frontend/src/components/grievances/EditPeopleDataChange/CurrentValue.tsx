@@ -1,14 +1,20 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
   values;
 }
@@ -42,19 +48,18 @@ export function CurrentValue({
       }
       break;
     case 'BOOL':
-      /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     case 'IMAGE':
       return isNewTicket ? (
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <GrievanceFlexFieldPhotoModalNewIndividual
             flexField={field}
             individualId={values?.selectedIndividual?.id || null}
           />
         </Grid>
       ) : (
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
         </Grid>
       );
@@ -62,7 +67,7 @@ export function CurrentValue({
       displayValue = value;
   }
   return (
-    <Grid size={{ xs: 3 }}>
+    <Grid size={12}>
       <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );

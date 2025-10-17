@@ -3,7 +3,7 @@ title: Process
 description: ""
 template: term.html
 terms:
-  - glossary: 
+  - glossary:
     - Deduplication
     - Registration
     - Targeting

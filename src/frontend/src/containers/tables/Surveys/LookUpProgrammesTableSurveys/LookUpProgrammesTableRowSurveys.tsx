@@ -1,11 +1,12 @@
-import { Radio } from '@mui/material';
-import TableCell from '@mui/material/TableCell';
-import { AllProgramsQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 import {
   choicesToDict,
   formatCurrency,
@@ -14,8 +15,8 @@ import {
 import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
-  program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
-  choicesData: ProgrammeChoiceDataQuery;
+  program: ProgramList;
+  choicesData: ProgramChoices;
   radioChangeHandler: (program) => void;
   selectedProgram: string;
 }
@@ -27,14 +28,12 @@ export function LookUpProgrammesTableRowSurveys({
   selectedProgram,
 }: LookUpProgrammesTableRowSurveysProps): ReactElement {
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
   const handleClick = (): void => {
     radioChangeHandler(program.id);
   };
 
-  const programSectorChoiceDict = choicesToDict(
-    choicesData.programSectorChoices,
-  );
+  const programSectorChoiceDict = choicesToDict(choicesData.sectorChoices);
 
   return (
     <ClickableTableRow
@@ -52,7 +51,7 @@ export function LookUpProgrammesTableRowSurveys({
           }}
           value={program.id}
           name="radio-button-program"
-          inputProps={{ 'aria-label': program.id }}
+          slotProps={{ input: { 'aria-label': program.id } }}
           data-cy="input-radio-program"
         />
       </TableCell>
@@ -73,9 +72,11 @@ export function LookUpProgrammesTableRowSurveys({
         {programSectorChoiceDict[program.sector]}
       </TableCell>
       <TableCell align="right">
-        {program.totalNumberOfHouseholdsWithTpInProgram}
+        {program.householdCount}
       </TableCell>
-      <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
+      <TableCell align="right">
+        {formatCurrency(Number(program.budget))}
+      </TableCell>
     </ClickableTableRow>
   );
 }

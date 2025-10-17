@@ -1,17 +1,18 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
   values;
 }
@@ -49,12 +50,11 @@ export function CurrentValue({
         }
         break;
       case 'BOOL':
-        /* eslint-disable-next-line no-nested-ternary */
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
         return (
-          <Grid size={{ xs: 3 }}>
+          <Grid size={3}>
             <GrievanceFlexFieldPhotoModalNewHousehold
               flexField={field}
               householdId={values?.selectedHousehold?.id || null}
@@ -66,7 +66,7 @@ export function CurrentValue({
     }
   }
   return (
-    <Grid size={{ xs: 3 }}>
+    <Grid size={12}>
       <LabelizedField label={t('Current Value')} value={displayValue} />
     </Grid>
   );

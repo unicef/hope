@@ -1,10 +1,10 @@
 import { Bar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { ChartData } from '@restgenerated/models/ChartData';
 import { ReactElement } from 'react';
 
 interface TicketsByCategoryChartProps {
-  data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
+  data: ChartData;
 }
 
 export const TicketsByCategoryChart = ({

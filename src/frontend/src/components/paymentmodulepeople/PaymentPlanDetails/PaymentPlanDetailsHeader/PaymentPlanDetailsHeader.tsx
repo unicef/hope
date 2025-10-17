@@ -5,7 +5,6 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
@@ -18,11 +17,12 @@ import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPla
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function PaymentPlanDetailsHeader({
@@ -63,6 +63,8 @@ export function PaymentPlanDetailsHeader({
     paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -137,6 +139,7 @@ export function PaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
+          canClose={canClose}
         />
       );
       break;

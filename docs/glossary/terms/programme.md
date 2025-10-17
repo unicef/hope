@@ -6,7 +6,7 @@ tags:
   - programme
   - cycle
 terms:
-  - glossary: 
+  - glossary:
     - Program
     - Cycle
     - Programme Population
@@ -20,7 +20,7 @@ The campaign targeting a certain set of beneficiaries around a particular
 
 ## Cycle
 
-A cycle is a named time span (es. Jan, Feb… or First-Quarter, Second-Quarter…) to manage recurring payments 
+A cycle is a named time span (es. Jan, Feb… or First-Quarter, Second-Quarter…) to manage recurring payments
 (paying SAME HH/IND multiple times)
 
 The Cycle must respect the following rules:
@@ -68,7 +68,7 @@ Households or Individuals who fit the first set of targeting criteria and
 
 ## Programme Partner
 
-A group of users involved in the operations of a specific programme, 
+A group of users involved in the operations of a specific programme,
 often granted a defined set of permissions within programme (i.e., Grievance Redressal)
 
 ## Programme Time Series Fields
@@ -78,4 +78,3 @@ Individual's details that can be collected and updated more than once during the
 ## Round
 
 An attribute to Programme Time Series fields that indicates how many times can a specific field be collected within the programme.
-

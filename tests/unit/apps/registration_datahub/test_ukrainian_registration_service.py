@@ -2,37 +2,35 @@ import datetime
 import json
 from typing import Dict
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     Registration2024,
     UkraineBaseRegistrationService,
 )
 
 
 class BaseTestUkrainianRegistrationService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
@@ -50,6 +48,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -63,6 +62,9 @@ class BaseTestUkrainianRegistrationService(TestCase):
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
         cls.household = [
             {
@@ -127,7 +129,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
         files = {
             "individuals": [
                 {
-                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",  # noqa
                 }
             ]
         }
@@ -145,19 +147,28 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=2,
-                fields={"household": cls.household, "individuals": [individual_wit_bank_account_and_tax]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_wit_bank_account_and_tax],
+                },
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                fields={"household": cls.household, "individuals": [individual_with_no_tax]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_with_no_tax],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                fields={"household": cls.household, "individuals": [individual_without_bank_account]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_without_bank_account],
+                },
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -165,7 +176,10 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": cls.household, "individuals": [individual_with_tax_id_which_is_too_long]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_with_tax_id_which_is_too_long],
+                },
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -186,19 +200,20 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         service.process_records(rdi.id, records_ids)
 
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
-        self.assertEqual(
+        assert Record.objects.filter(id__in=records_ids, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 4
+        assert (
             PendingDocument.objects.filter(
-                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
-            ).count(),
-            1,
+                document_number="TESTID",
+                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+            ).count()
+            == 1
         )
 
         # Checking only first is enough, because they all in one RDI
         registration_data_import = PendingHousehold.objects.all()[0].registration_data_import
-        self.assertEqual(registration_data_import.program, self.program)
+        assert registration_data_import.program == self.program
 
     def test_import_data_to_datahub_retry(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -206,14 +221,14 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         records_ids_all = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
+        assert Record.objects.filter(id__in=records_ids_all, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
-        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
+        assert Record.objects.filter(id__in=records_ids_all, ignored=False).count() == 4
+        assert PendingHousehold.objects.count() == 4
 
     def test_import_document_validation(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -221,8 +236,8 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
 
         service.process_records(rdi.id, [x.id for x in self.bad_records])
         self.bad_records[0].refresh_from_db()
-        self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
-        self.assertEqual(PendingHousehold.objects.count(), 0)
+        assert self.bad_records[0].status == Record.STATUS_ERROR
+        assert PendingHousehold.objects.count() == 0
 
 
 class TestRegistration2024(BaseTestUkrainianRegistrationService):
@@ -252,11 +267,11 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         service.process_records(rdi.id, [self.record.id])
 
-        self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.filter(program=rdi.program).count(), 1)
-        self.assertEqual(
-            PendingIndividual.objects.get(family_name="Romaniak").flex_fields,
-            {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
-        )
+        assert Record.objects.filter(id__in=[self.record.id], ignored=False).count() == 1
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingIndividual.objects.filter(program=rdi.program).count() == 1
+        assert PendingIndividual.objects.get(family_name="Romaniak").flex_fields == {
+            "low_income_hh_h_f": True,
+            "single_headed_hh_h_f": False,
+        }

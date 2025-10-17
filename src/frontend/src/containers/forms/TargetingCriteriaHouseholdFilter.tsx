@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { IndividualFieldsQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 import SubField from '@components/targeting/SubField';
 import { ReactElement } from 'react';
@@ -40,7 +39,7 @@ export function TargetingCriteriaHouseholdFilter({
   choicesDict,
 }: {
   index: number;
-  data: IndividualFieldsQuery;
+  data: any;
   each;
   onChange: (e, object) => void;
   values;
@@ -48,12 +47,17 @@ export function TargetingCriteriaHouseholdFilter({
   choicesDict;
 }): ReactElement {
   const { t } = useTranslation();
+
+  if (!data || !data.length) {
+    return <div>{t('No data available')}</div>;
+  }
+
   const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={data}
         fieldName={each.fieldName}
         onChange={onChange}
         showDelete

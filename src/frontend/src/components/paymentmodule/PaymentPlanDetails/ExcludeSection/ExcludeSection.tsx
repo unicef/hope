@@ -3,19 +3,14 @@ import {
   Button,
   Collapse,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import {
-  PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useExcludeHouseholdsPpMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -27,10 +22,16 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 function ExcludeSection({
@@ -58,13 +59,37 @@ function ExcludeSection({
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const { showMessage } = useSnackbar();
+  const { mutateAsync } = useMutation({
+    mutationFn: (requestBody: PaymentPlanExcludeBeneficiaries) => {
+      return RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
 
   const hasExcludePermission = hasPermissions(
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
     permissions,
   );
   const hasOpenOrLockedStatus =
-    status === PaymentPlanStatus.Locked || status === PaymentPlanStatus.Open;
+    status === PaymentPlanStatusEnum.LOCKED ||
+    status === PaymentPlanStatusEnum.OPEN;
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
@@ -76,11 +101,8 @@ function ExcludeSection({
     return '';
   };
 
-  const { showMessage } = useSnackbar();
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
-
-  const [mutate, { error }] = useExcludeHouseholdsPpMutation();
 
   const handleIdsChange = (event): void => {
     if (event.target.value === '') {
@@ -95,32 +117,12 @@ function ExcludeSection({
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSave = async (values): Promise<void> => {
+  const handleSave = (values): void => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
-    try {
-      await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          excludedHouseholdsIds: idsToSave,
-          exclusionReason: values.exclusionReason || null,
-        },
-        refetchQueries: () => [
-          {
-            query: PaymentPlanDocument,
-            variables: { id: paymentPlan.id },
-            fetchPolicy: 'network-only',
-          },
-          'AllPaymentsForTable',
-        ],
-        awaitRefetchQueries: true,
-      });
-      if (!error) {
-        showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
-        setExclusionsOpen(false);
-      }
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    }
+    mutateAsync({
+      excludedHouseholdsIds: idsToSave,
+      exclusionReason: values.exclusionReason,
+    });
   };
 
   const handleApply = (): void => {

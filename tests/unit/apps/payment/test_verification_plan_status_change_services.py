@@ -1,10 +1,11 @@
-import uuid
 from typing import Dict
 from unittest.mock import MagicMock, patch
+import uuid
 
+from django.core.cache import cache
 from django.test import TestCase
-
 import requests
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -20,10 +21,9 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+from hope.apps.geo.models import Area
+from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
 
@@ -51,6 +51,9 @@ class TestPhoneNumberVerification(TestCase):
             payment_plan=payment_plan,
         )
         cls.individuals = []
+        # set cache key
+        version_key = f":1:afghanistan:1:{program.slug}:registration_data_import_list"
+        cache.set(version_key, 1)
         for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=cls.afghanistan, program=program
@@ -58,7 +61,7 @@ class TestPhoneNumberVerification(TestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": program,
                 },
                 {
@@ -109,7 +112,7 @@ class TestPhoneNumberVerification(TestCase):
             other_household, other_individuals = create_household(
                 {
                     "registration_data_import": other_registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": other_program,
                 },
                 {"registration_data_import": other_registration_data_import},
@@ -134,9 +137,9 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_verification = other_payment_plan.payment_verification_plans.first()
 
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
-        self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
-        self.assertIsNone(self.verification.error)
-        self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
+        assert self.verification.status == PaymentVerification.STATUS_PENDING
+        assert self.verification.error is None
+        assert self.verification.payment_record_verifications.count() == self.payment_record_amount
 
         def create_flow_response() -> Dict:
             return {
@@ -149,8 +152,14 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             try:
                 VerificationPlanStatusChangeServices(self.verification).activate()
@@ -160,107 +169,117 @@ class TestPhoneNumberVerification(TestCase):
                 self.fail("Should have raised HTTPError")
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR)
-        self.assertIsNotNone(self.verification.error)
+        assert self.verification.status == PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
+        assert self.verification.error is not None
 
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            100,
+            ).count()
+            == 100
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            10,
+            ).count()
+            == 10
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
 
         post_request_mock = MagicMock()
         post_request_mock.side_effect = [first_flow, create_flow_response()]
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             VerificationPlanStatusChangeServices(self.verification).activate()
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_ACTIVE)
-        self.assertIsNone(self.verification.error)
+        assert self.verification.status == PaymentVerificationPlan.STATUS_ACTIVE
+        assert self.verification.error is None
 
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
-            ).count(),
-            self.payment_record_amount,
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
-        self.assertEqual(
+        assert (
             PaymentVerification.objects.filter(
                 payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
-            ).count(),
-            self.payment_record_amount,
+            ).count()
+            == self.payment_record_amount
         )

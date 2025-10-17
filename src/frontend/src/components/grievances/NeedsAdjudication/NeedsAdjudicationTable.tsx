@@ -16,10 +16,10 @@ import { StyledTable } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketQuery } from '@generated/graphql';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   isEditable: boolean;
   selectedIndividualIds: string[];
   setSelectedIndividualIds: (
@@ -47,7 +47,7 @@ export const NeedsAdjudicationTable = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const details = ticket?.needsAdjudicationTicketDetails;
+  const details = ticket?.ticketDetails;
 
   const handleSelect = (id: string) => {
     setSelectedIndividualIds((prevSelected: string[]) => {
@@ -174,10 +174,10 @@ export const NeedsAdjudicationTable = ({
         </UniversalMoment>
       </TableCell>
       <TableCell align="left" data-cy="document-type-cell">
-        {possibleDuplicate?.documents?.edges[0]?.node.type.label}
+        {possibleDuplicate?.documents?.[0]?.type.label}
       </TableCell>
       <TableCell align="left" data-cy="document-number-cell">
-        {possibleDuplicate?.documents?.edges[0]?.node.documentNumber}
+        {possibleDuplicate?.documents?.[0]?.documentNumber}
       </TableCell>
       <TableCell align="left" data-cy="admin2-name-cell">
         {possibleDuplicate?.household?.admin2?.name}
@@ -323,16 +323,10 @@ export const NeedsAdjudicationTable = ({
             </UniversalMoment>
           </TableCell>
           <TableCell align="left" data-cy="doc-type-cell">
-            {
-              details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
-                .label
-            }
+            {details.goldenRecordsIndividual?.documents?.[0]?.type.label}
           </TableCell>
           <TableCell align="left" data-cy="doc-number-cell">
-            {
-              details.goldenRecordsIndividual?.documents?.edges[0]?.node
-                .documentNumber
-            }
+            {details.goldenRecordsIndividual?.documents?.[0]?.documentNumber}
           </TableCell>
           <TableCell align="left" data-cy="admin-level2-cell">
             {details.goldenRecordsIndividual?.household?.admin2?.name}

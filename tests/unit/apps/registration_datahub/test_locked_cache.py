@@ -1,9 +1,9 @@
-import time
 from threading import Thread
+import time
 
 from django.test import TestCase
 
-from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
+from hope.apps.registration_datahub.celery_tasks import locked_cache
 
 
 class DummyClass:
@@ -33,5 +33,5 @@ class TestLockedCache(TestCase):
         for thread in threads:
             thread.join()
 
-        self.assertTrue(dummy_class1._executed)
-        self.assertFalse(dummy_class2._executed)
+        assert dummy_class1._executed
+        assert not dummy_class2._executed

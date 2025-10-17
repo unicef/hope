@@ -3,20 +3,21 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
+import RegistrationFilters from '@components/rdi/RegistrationFilters';
 import { ButtonTooltip } from '@core/ButtonTooltip';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
+import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import RegistrationFilters from '@components/rdi/RegistrationFilters';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 const initialFilter = {
   search: '',
@@ -34,9 +35,15 @@ function RegistrationDataImportPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const { data: deduplicationFlags, loading } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+  const { data: deduplicationFlags, isLoading: loading } = useQuery({
+    queryKey: ['deduplicationFlags', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: programId,
+      }),
   });
+
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -44,12 +51,17 @@ function RegistrationDataImportPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const { mutateAsync } = useMutation({
     mutationFn: async () =>
       runDeduplicationDataImports(businessArea, programId),
-    onSuccess: ({ data }) => {
-      showMessage(data.message);
+    onSuccess: () => {
+      showMessage('Deduplication process started');
     },
   });
 
@@ -57,7 +69,7 @@ function RegistrationDataImportPage(): ReactElement {
     try {
       await mutateAsync();
     } catch (error) {
-      showMessage(error.message);
+      showApiErrorMessages(error, showMessage);
     }
   };
 
@@ -99,15 +111,20 @@ function RegistrationDataImportPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(newFilter) => {
+          setAppliedFilter(newFilter);
+          setShouldScroll(true);
+        }}
       />
-      <RegistrationDataImportTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.RDI_VIEW_DETAILS,
-          permissions,
-        )}
-      />
+      <Box ref={tableRef}>
+        <RegistrationDataImportTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </Box>
     </>
   );
 }

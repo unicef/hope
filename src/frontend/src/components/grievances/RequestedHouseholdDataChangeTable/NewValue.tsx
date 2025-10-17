@@ -1,14 +1,15 @@
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface NewValueProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
 }
 
@@ -35,7 +36,7 @@ export function NewValue({ field, value }: NewValueProps): ReactElement {
       }
       break;
     case 'BOOL':
-      /* eslint-disable-next-line no-nested-ternary */
+       
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
     case 'IMAGE':

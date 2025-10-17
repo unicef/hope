@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Delegate = {
-    delegate_id: string;
-    delegated_for: Array<string>;
+    delegateId: string;
+    delegatedFor: Array<string>;
 };
 

@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { SurveyNode } from '@generated/graphql';
+import { Survey } from '@restgenerated/models/Survey';
 
-export const headCells: HeadCell<SurveyNode>[] = [
+export const headCells: HeadCell<Survey>[] = [
   {
     disablePadding: false,
     label: 'Survey ID',

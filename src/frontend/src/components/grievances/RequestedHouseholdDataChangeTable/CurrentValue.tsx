@@ -1,14 +1,15 @@
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
 }
 
@@ -17,6 +18,7 @@ export function CurrentValue({
   value,
 }: CurrentValueProps): ReactElement {
   let displayValue;
+
   if (
     field?.name === 'country' ||
     field?.name === 'country_origin' ||
@@ -30,8 +32,6 @@ export function CurrentValue({
           field.choices.find((item) => item.value === value)?.labelEn || '-';
         break;
       case 'SELECT_MANY':
-        displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
         if (value instanceof Array) {
           displayValue = value
             .map(
@@ -40,18 +40,32 @@ export function CurrentValue({
                 '-',
             )
             .join(', ');
+        } else {
+          displayValue = '-';
         }
         break;
       case 'BOOL':
-        /* eslint-disable-next-line no-nested-ternary */
+         
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
         displayValue = <GrievanceFlexFieldPhotoModal field={field} isCurrent />;
         break;
       default:
-        displayValue = value;
+        displayValue =
+          typeof value === 'object' && value !== null && 'value' in value
+            ? value.value
+            : value;
     }
   }
-  return <>{displayValue || '-'}</>;
+  return (
+    <>
+      {displayValue === null ||
+      displayValue === 'null' ||
+      displayValue === undefined ||
+      displayValue === ''
+        ? '-'
+        : displayValue}
+    </>
+  );
 }

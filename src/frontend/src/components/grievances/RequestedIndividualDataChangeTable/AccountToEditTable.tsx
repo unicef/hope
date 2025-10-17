@@ -12,10 +12,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -31,7 +31,7 @@ const StyledTable = styled(Table)`
 export interface AccountToEditTableProps {
   values;
   isEdit;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   index;
   account;
@@ -69,7 +69,7 @@ export function AccountToEditTable({
       <TableTitle>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t('Account to be edited')} - {account.name}
+            {t('Account to be edited')} - {account.accountType}
           </Typography>
         </Box>
       </TableTitle>
@@ -104,29 +104,52 @@ export function AccountToEditTable({
           </TableRow>
         </TableHead>
         <TableBody>
-            {account.data_fields.map(
-              (field, fieldIndex) => {
-                const isFinancialInstitutionField = field.name === 'financial_institution';
-                const previousValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.previous_value] : field.previous_value;
-                const newValue = isFinancialInstitutionField ? accountFinancialInstitutionsDict[field.value] : field.value;
-                return (
-                <TableRow key={fieldIndex}>
-                  <TableCell align="left"></TableCell>
-                  <TableCell align="left">{field.name}</TableCell>
-                  <TableCell align="left">
-                    {previousValue || '-'}
-                  </TableCell>
-                  <TableCell align="left">
-                    {renderNewOrNotUpdated(
-                      previousValue,
-                      newValue,
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-},
-            )}
-          </TableBody>
+          <TableRow key="number">
+            <TableCell align="left"></TableCell>
+            <TableCell align="left">Number</TableCell>
+            <TableCell align="left">
+              {account.numberPreviousValue || '-'}
+            </TableCell>
+            <TableCell align="left">
+              {renderNewOrNotUpdated(
+                account.numberPreviousValue,
+                account.number,
+              )}
+            </TableCell>
+          </TableRow>
+          <TableRow key="financial_institution">
+            <TableCell align="left"></TableCell>
+            <TableCell align="left">Financial Institution</TableCell>
+            <TableCell align="left">
+              {accountFinancialInstitutionsDict[
+                account.financialInstitutionPreviousValue
+              ] || '-'}
+            </TableCell>
+            <TableCell align="left">
+              {accountFinancialInstitutionsDict[account.financialInstitution]}
+            </TableCell>
+          </TableRow>
+          {account.dataFields.map((field, fieldIndex) => {
+            const isFinancialInstitutionField =
+              field.name === 'financial_institution';
+            const previousValue = isFinancialInstitutionField
+              ? accountFinancialInstitutionsDict[field.previousValue]
+              : field.previousValue;
+            const newValue = isFinancialInstitutionField
+              ? accountFinancialInstitutionsDict[field.value]
+              : field.value;
+            return (
+              <TableRow key={fieldIndex}>
+                <TableCell align="left"></TableCell>
+                <TableCell align="left">{field.name}</TableCell>
+                <TableCell align="left">{previousValue || '-'}</TableCell>
+                <TableCell align="left">
+                  {renderNewOrNotUpdated(previousValue, newValue)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
       </StyledTable>
     </>
   );

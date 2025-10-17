@@ -1,19 +1,50 @@
-import { GraphQLError } from 'graphql';
+export function safeStringify(value) {
+  if (typeof value === 'object' && value !== null) {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '[object Object]';
+    }
+  }
+  return String(value);
+}
+// Status color for periodic data updates online edits
+export function periodicDataUpdatesOnlineEditsStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'NEW':
+      return theme.hctPalette.gray;
+    case 'READY':
+      return theme.hctPalette.orange;
+    case 'APPROVED':
+      return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.darkerBlue;
+    case 'MERGING':
+      return theme.hctPalette.blue;
+    case 'CREATING':
+      return theme.hctPalette.blue;
+    case 'FAILED_MERGE':
+      return theme.hctPalette.red;
+    case 'FAILED_CREATE':
+      return theme.hctPalette.red;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import localForage from 'localforage';
+import _ from 'lodash';
 import camelCase from 'lodash/camelCase';
 import moment from 'moment';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
-import {
-  AllProgramsQuery,
-  ChoiceObject,
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanBuildStatus,
-  PaymentPlanStatus,
-  PaymentStatus,
-  ProgramStatus,
-} from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -29,6 +60,19 @@ const Gender = new Map([
   ['NOT_COLLECTED', 'Not Collected'],
   ['NOT_ANSWERED', 'Not Answered'],
 ]);
+
+export function restChoicesToDict(choices: Choice[] | null): {
+  [key: string]: string;
+} {
+  if (!choices || !choices.length) return {};
+  return choices.reduce(
+    (dict, choice) => {
+      dict[choice.value] = choice.name;
+      return dict;
+    },
+    {} as { [key: string]: string },
+  );
+}
 
 const IdentificationType = new Map([
   ['NA', 'N/A'],
@@ -56,6 +100,23 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export const isPartnerVisible = (partnerName: string): boolean => {
+  if (!partnerName) return false;
+  return (
+    !partnerName.startsWith('UNICEF Partner for') && partnerName !== 'UNICEF HQ'
+  );
+};
+
+export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
 export function periodicDataUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -77,16 +138,17 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case ProgramStatus.Draft:
+    case ProgramStatusEnum.DRAFT:
       return theme.hctPalette.gray;
-    case ProgramStatus.Active:
+    case ProgramStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case ProgramStatus.Finished:
+    case ProgramStatusEnum.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
   }
 }
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -106,6 +168,7 @@ export function maritalStatusToColor(
       return theme.hctPalette.gray;
   }
 }
+
 export function populationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -118,49 +181,19 @@ export function populationStatusToColor(
   }
 }
 
-export function cashPlanStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'DISTRIBUTION_COMPLETED':
-      return theme.hctPalette.green;
-    case 'TRANSACTION_COMPLETED':
-      return theme.hctPalette.green;
-    default:
-      return theme.palette.error.main;
-  }
-}
-export function paymentRecordStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case PaymentStatus.Pending:
-      return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
-      return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
-      return theme.hctPalette.lightBlue;
-    default:
-      return theme.palette.error.main;
-  }
-}
-
 export function paymentStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
-    case PaymentStatus.SentToPaymentGateway:
-    case PaymentStatus.SentToFsp:
+    case 'Pending':
+    case 'Sent to Payment Gateway':
+    case 'Sent to FSP':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -169,22 +202,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'Pending':
       return 'PENDING';
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return 'DELIVERED FULLY';
-    case PaymentStatus.PartiallyDistributed:
+    case 'Partially Distributed':
       return 'DELIVERED PARTIALLY';
-    case PaymentStatus.NotDistributed:
+    case 'Not Distributed':
       return 'NOT DELIVERED';
-    case PaymentStatus.ForceFailed:
+    case 'Force failed':
       return 'FORCE FAILED';
-    case PaymentStatus.ManuallyCancelled:
+    case 'Manually Cancelled':
       return 'MANUALLY CANCELLED';
-    case PaymentStatus.SentToPaymentGateway:
+    case 'Sent to Payment Gateway':
       return 'SENT TO PAYMENT GATEWAY';
-    case PaymentStatus.SentToFsp:
+    case 'Sent to FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -193,21 +226,25 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentPlanStatus.TpOpen:
+    case PaymentPlanStatus.OPEN:
       return 'OPEN';
-    case PaymentPlanStatus.Draft:
-      return 'READY FOR PAYMENT MODULE';
-    case PaymentPlanStatus.TpLocked:
+    case PaymentPlanStatus.LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.Processing:
+    case PaymentPlanStatus.TP_OPEN:
+      return 'OPEN';
+    case PaymentPlanStatus.DRAFT:
+      return 'READY FOR PAYMENT MODULE';
+    case PaymentPlanStatus.TP_LOCKED:
+      return 'LOCKED';
+    case PaymentPlanStatus.PROCESSING:
       return 'PROCESSING';
-    case PaymentPlanStatus.SteficonWait:
+    case PaymentPlanStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
-    case PaymentPlanStatus.SteficonRun:
+    case PaymentPlanStatus.STEFICON_RUN:
       return 'STEFICON RUN';
-    case PaymentPlanStatus.SteficonError:
+    case PaymentPlanStatus.STEFICON_ERROR:
       return 'STEFICON ERROR';
-    case PaymentPlanStatus.SteficonCompleted:
+    case PaymentPlanStatus.STEFICON_COMPLETED:
       return 'STEFICON COMPLETED';
 
     //   if other PP statuses ==> ASSIGNED
@@ -249,6 +286,7 @@ export function verificationRecordsStatusToColor(
       return theme.palette.error.main;
   }
 }
+
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -295,23 +333,23 @@ export function paymentPlanStatusToColor(
 ): string {
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
-    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
-    [PaymentPlanStatus.Finished]: theme.hctPalette.gray,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
-    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.red,
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Preparing]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Processing]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
-    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
-    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
+    [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.green,
+    [PaymentPlanStatus.FINISHED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
+    [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
+    [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
+    [PaymentPlanStatus.LOCKED]: theme.hctPalette.red,
+    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.red,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
+    [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
+    [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
+    [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
+    [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
+    [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -324,10 +362,10 @@ export function paymentPlanBuildStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBuildStatus.Ok]: theme.hctPalette.green,
-    [PaymentPlanBuildStatus.Failed]: theme.hctPalette.red,
-    [PaymentPlanBuildStatus.Building]: theme.hctPalette.orange,
-    [PaymentPlanBuildStatus.Pending]: theme.hctPalette.gray,
+    OK: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    BUILDING: theme.hctPalette.orange,
+    PENDING: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -340,6 +378,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    NEW: theme.hctPalette.gray,
     EXPORTED: theme.hctPalette.green,
     FAILED: theme.hctPalette.red,
     TO_EXPORT: theme.hctPalette.gray,
@@ -352,6 +391,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   }
   return theme.palette.error.main;
 }
+
 export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -375,21 +415,17 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+    [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+    [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
-      theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.SendToPaymentGateway]:
-      theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SendToPaymentGatewayError]:
+    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -516,7 +552,6 @@ export function programCycleStatusToColor(
 export function selectFields(
   fullObject,
   keys: string[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): { [key: string]: any } {
   return keys.reduce((acc, current) => {
     acc[current] = fullObject[current];
@@ -528,17 +563,14 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-//eslint-disable-next-line @typescript-eslint/no-use-before-define
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
   if (!Array.isArray(arr)) {
     return arr;
   }
-  //eslint-disable-next-line @typescript-eslint/no-use-before-define
+
   return arr.map(camelizeObjectKeys);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeObjectKeys(obj): { [key: string]: any } {
   if (!obj) {
     return obj;
@@ -570,7 +602,7 @@ export function columnToOrderBy(
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
-export function choicesToDict(choices: ChoiceObject[]): {
+export function choicesToDict(choices: Array<Record<string, any>>): {
   [key: string]: string;
 } {
   if (!choices) return {};
@@ -581,39 +613,46 @@ export function choicesToDict(choices: ChoiceObject[]): {
   }, {});
 }
 
-export function programStatusToPriority(status: ProgramStatus): number {
+export function programStatusToPriority(status: string): number {
   switch (status) {
-    case ProgramStatus.Draft:
+    case ProgramStatusEnum.DRAFT:
       return 1;
-    case ProgramStatus.Active:
+    case ProgramStatusEnum.ACTIVE:
       return 2;
     default:
       return 3;
   }
 }
+
+function isBase64(str) {
+  if (typeof str !== 'string') return false;
+  if (!str.length || str.length % 4 !== 0) return false;
+  // Regex covers pure base64 (no mime or data: prefix)
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(str);
+}
+
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
+  if (!isBase64(idString)) return idString;
   if (idString.includes(':')) {
     // Already decoded
     return idString.split(':')[1];
+  }
+  // Check for valid base64 (length multiple of 4, only base64 chars)
+  const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+  if (idString.length % 4 !== 0 || !base64Pattern.test(idString)) {
+    console.error('decodeIdString: Not a valid base64 string:', idString);
+    return null;
   }
   try {
     const decoded = atob(idString);
     return decoded.split(':')[1];
   } catch (e) {
-    console.error('Failed to decode string:', e);
+    console.error('Failed to decode string:', e, idString);
     return null;
   }
-}
-export function programCompare(
-  a: AllProgramsQuery['allPrograms']['edges'][number],
-  b: AllProgramsQuery['allPrograms']['edges'][number],
-): number {
-  const statusA = programStatusToPriority(a.node.status);
-  const statusB = programStatusToPriority(b.node.status);
-  return statusA > statusB ? 1 : -1;
 }
 
 export function formatCurrency(
@@ -629,20 +668,20 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number,
+  amount: number | string,
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(amountCleared, true);
+  if (!currency) return formatCurrency(Number(amountCleared), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(amountCleared);
+  }).format(Number(amountCleared));
 }
 
 export function countPercentage(
@@ -689,7 +728,6 @@ export function paymentPlanBackgroundActionStatusMapping(status): string {
   return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -748,7 +786,6 @@ const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function thingForSpecificGrievanceType(
   ticket: { category: number | string; issueType?: number | string },
   thingDict,
@@ -790,7 +827,6 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getFullNodeFromEdgesById = (edges, id) => {
   if (!edges) return null;
   return edges.find((edge) => edge.node.id === id)?.node || null;
@@ -812,32 +848,6 @@ export const getFlexFieldTextValue = (_key, value, fieldAttribute): string => {
   }
 
   return textValue;
-};
-
-export const handleValidationErrors = (
-  fieldName,
-  e,
-  setFieldError,
-  showMessage,
-): { nonValidationErrors: GraphQLError[] } => {
-  const validationErrors = e.graphQLErrors.filter(
-    (error) => error instanceof ValidationGraphQLError,
-  );
-  const nonValidationErrors = e.graphQLErrors.filter(
-    (error) => !(error instanceof ValidationGraphQLError),
-  );
-  for (const validationError of validationErrors) {
-    Object.entries(validationError.validationErrors[fieldName]).map(
-      // eslint-disable-next-line array-callback-return
-      (entry) => {
-        if (entry[0] === '__all__') {
-          showMessage((entry[1] as string[]).join('\n'));
-        }
-        setFieldError(entry[0], (entry[1] as string[]).join('\n'));
-      },
-    );
-  }
-  return { nonValidationErrors };
 };
 
 export function renderSomethingOrDash(something): number | string | boolean {
@@ -1187,28 +1197,338 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
     const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
     const decodedId = atob(base64);
     return regex.test(decodedId);
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
-export function adjustHeadCells(
-  headCells,
+export function adjustHeadCells<T>(
+  headCells: HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;
   },
 ) {
   if (!beneficiaryGroup) return headCells;
-
   return headCells.map((cell) => {
+    // @ts-ignore
     if (replacements[cell.id]) {
+      // @ts-ignore
       return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
     }
     return cell;
   });
+}
+
+export const filterEmptyParams = (params) => {
+  if (!params) return {};
+
+  return Object.fromEntries(
+    Object.entries(params).filter(([, value]) => {
+      // Handle basic empty values
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 1 && value[0] === '')
+      ) {
+        return false;
+      }
+
+      // Handle empty arrays
+      if (Array.isArray(value) && value.length === 0) {
+        return false;
+      }
+
+      // Handle JSON strings that represent empty objects or objects with empty values
+      if (
+        typeof value === 'string' &&
+        (value.startsWith('{') || value.startsWith('['))
+      ) {
+        try {
+          const parsedValue = JSON.parse(value);
+
+          // Empty arrays in JSON format
+          if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+            return false;
+          }
+
+          // Objects with empty values
+          if (typeof parsedValue === 'object' && parsedValue !== null) {
+            const hasNonEmptyValue = Object.values(parsedValue).some(
+              (v) => v !== '' && v !== null && v !== undefined,
+            );
+            return hasNonEmptyValue;
+          }
+        } catch {
+          // If parsing fails, keep the value
+          return true;
+        }
+      }
+
+      return true;
+    }),
+  );
+};
+
+export function deepCamelize(data) {
+  const notCalizedKeys = ['form_errors', 'household_data'];
+  if (_.isArray(data)) {
+    return data.map(deepCamelize);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const camelKey = _.camelCase(key);
+        if (notCalizedKeys.includes(key)) {
+          // Special handling for error_info to keep it as is
+          result[camelKey] = value;
+          return result;
+        }
+        result[camelKey] = deepCamelize(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
+}
+
+export function deepUnderscore(data) {
+  if (_.isArray(data)) {
+    return data.map(deepUnderscore);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        // Special handling for keys that follow the pattern of letters followed by numbers
+        if (/^[a-zA-Z]+\d+$/.test(key)) {
+          // Keep original key for letter+number pattern fields
+          result[key] = deepUnderscore(value);
+        } else {
+          // Normal snake_case conversion for other fields
+          const underscoreKey = _.snakeCase(key);
+          result[underscoreKey] = deepUnderscore(value);
+        }
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
+}
+
+export const fieldNameToLabel = (fieldName: string): string => {
+  if (!fieldName) return '';
+
+  return fieldName
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+export function showApiErrorMessages(
+  error: any,
+  showMessage: (msg: string) => void,
+  fallbackMsg: string = 'An error occurred',
+): void {
+  // Helper to convert field names to readable labels and remove array indexes
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  // Collect errors per field
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
+      });
+    } else if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = path ? `${path}.${key}` : key;
+        collectErrors(value, newPath, errors);
+      });
+    } else if (typeof obj === 'string') {
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
+    }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  // Handle plain array of strings (e.g. ["msg1", "msg2"])
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    showMessage(error.join('  \n'));
+    return;
+  }
+
+  // Handle array of errors in error.body
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    // If error.body is a plain array of strings
+    if (error.body.every((item) => typeof item === 'string')) {
+      showMessage(error.body.join('  \n'));
+      return;
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
+    return;
+  }
+  // Handle string error in error.body
+  if (error && typeof error === 'object' && typeof error.body === 'string') {
+    showMessage(error.body);
+    return;
+  }
+  // Handle object of arrays/objects in error.body (field errors)
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof error.body === 'object' &&
+    error.body !== null
+  ) {
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
+    return;
+  }
+  // Handle top-level object of arrays (field errors)
+  if (error && typeof error === 'object' && error !== null) {
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
+    return;
+  }
+  // Handle string error in error.message
+  if (error && typeof error === 'object' && typeof error.message === 'string') {
+    showMessage(error.message);
+    return;
+  }
+  showMessage(fallbackMsg);
+}
+
+export function getApiErrorMessages(
+  error: any,
+  fallbackMsg: string = 'An error occurred',
+): string {
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
+      });
+    } else if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = path ? `${path}.${key}` : key;
+        collectErrors(value, newPath, errors);
+      });
+    } else if (typeof obj === 'string') {
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
+    }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    return error.join('  \n');
+  }
+
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    if (error.body.every((item) => typeof item === 'string')) {
+      return error.body.join('  \n');
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.body === 'string') {
+    return error.body;
+  }
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof error.body === 'object' &&
+    error.body !== null
+  ) {
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && error !== null) {
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallbackMsg;
+}
+
+// Utility to split camelCase/PascalCase and capitalize
+export function splitCamelCase(str: string): string {
+  if (!str) return '';
+  // Insert space before all caps, then capitalize first letter
+  const withSpaces = str
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s) => s.toUpperCase());
+  return withSpaces.trim();
 }

@@ -1,5 +1,4 @@
 import { ReactElement, useState } from 'react';
-import { AllPaymentPlansForTableQuery } from '@generated/graphql';
 import styled from 'styled-components';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
@@ -24,9 +23,10 @@ import { StyledTable } from '@components/grievances/GrievancesApproveSection/App
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface FollowUpPaymentPlansModalProps {
-  paymentPlan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][0]['node'];
+  paymentPlan: PaymentPlanList;
   canViewDetails: boolean;
 }
 
@@ -42,8 +42,7 @@ export const FollowUpPaymentPlansModal = ({
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
 
-  const followUps =
-    paymentPlan.followUps?.edges?.map((edge) => edge?.node) || [];
+  const followUps = paymentPlan.followUps || [];
 
   if (!followUps.length) return null;
 

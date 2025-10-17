@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
-import { AllLogEntriesQuery, LogEntryAction } from '@generated/graphql';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
 import {
   ButtonPlaceHolder,
   Cell,
@@ -50,7 +50,7 @@ function snakeToFieldReadable(str: string): string {
   );
 }
 interface ObjectRepresentationsProps {
-  logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
+  logEntry: LogEntry;
 }
 
 function ObjectRepresentations({
@@ -58,9 +58,12 @@ function ObjectRepresentations({
 }: ObjectRepresentationsProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const id = logEntry.objectId;
-  const { model } = logEntry.contentType;
+  const { programSlug } = logEntry;
+  // Normalize model key: lowercase and remove spaces
+  const model = (logEntry.contentType || '').toLowerCase().replace(/\s+/g, '');
+
   const modelToUrlDict = {
-    program: `/${baseUrl}/details/${btoa('ProgramNode:' + id)}`,
+    programme: `/${baseUrl}/details/${programSlug}`,
     targetpopulation: `/${baseUrl}/target-population/${btoa(
       'TargetPopulationNode:' + id,
     )}`,
@@ -90,8 +93,8 @@ function ObjectRepresentations({
   };
   if (
     !(model in modelToUrlDict) ||
-    logEntry.action === LogEntryAction.Delete ||
-    logEntry.action === LogEntryAction.SoftDelete
+    logEntry.action === 'DELETE' ||
+    logEntry.action === 'SOFT_DELETE'
   ) {
     return <>{logEntry.objectId}</>;
   }
@@ -101,13 +104,11 @@ function ObjectRepresentations({
 }
 
 interface LogRowProps {
-  logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
-  actionChoicesDict: { [id: string]: string };
+  logEntry;
 }
 
 export function MainActivityLogTableRow({
   logEntry,
-  actionChoicesDict,
 }: LogRowProps): ReactElement {
   const changes = logEntry.changes || {};
   const [expanded, setExpanded] = useState(false);
@@ -120,18 +121,16 @@ export function MainActivityLogTableRow({
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : 'System'}
+          {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.name}
+          {logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
         <Cell weight={headCells[4].weight} data-cy="action-cell">
-          {actionChoicesDict[logEntry.action]}
+          {logEntry.action}
         </Cell>
         <Cell weight={headCells[5].weight} data-cy="change-key-cell">
           <Dashable>{snakeToFieldReadable(keys[0])}</Dashable>
@@ -157,18 +156,16 @@ export function MainActivityLogTableRow({
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : 'System'}
+          {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.name}
+          {logEntry.contentType}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
         </Cell>
         <Cell weight={headCells[4].weight} data-cy="action-cell">
-          {actionChoicesDict[logEntry.action]}
+          {logEntry.action}
         </Cell>
         <Cell weight={headCells[5].weight} data-cy="changes-cell">
           Multiple

@@ -3,14 +3,14 @@ import { Checkbox } from '@mui/material';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { StatusBox } from '@core/StatusBox';
 import { grievanceTicketStatusToColor, renderUserName } from '@utils/utils';
-import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 import { MouseEvent, ReactElement } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface LookUpLinkedTicketsTableRowProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  ticket: GrievanceTicketList;
   selected: Array<string>;
   checkboxClickHandler: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,

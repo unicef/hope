@@ -16,8 +16,9 @@ import { InReviewPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/Payme
 import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { AdminButton } from '@components/core/AdminButton';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -26,7 +27,7 @@ const StatusWrapper = styled.div`
 interface FollowUpPaymentPlanDetailsHeaderProps {
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function FollowUpPaymentPlanDetailsHeader({
@@ -62,6 +63,8 @@ export function FollowUpPaymentPlanDetailsHeader({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
+
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
 
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
@@ -142,6 +145,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
+          canClose={canClose}
         />
       );
       break;
@@ -178,6 +182,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

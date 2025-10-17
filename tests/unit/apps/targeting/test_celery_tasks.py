@@ -5,10 +5,9 @@ from django.test import TestCase
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-
-from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
+from hope.apps.household.forms import CreateTargetPopulationTextForm
+from hope.apps.payment.models import PaymentPlan
+from hope.apps.targeting.celery_tasks import create_tp_from_list
 
 
 class CreateTPFromListTaskTest(TestCase):
@@ -26,8 +25,8 @@ class CreateTPFromListTaskTest(TestCase):
             "program_cycle": self.program_cycle.pk,
         }
 
-    @patch("hct_mis_api.apps.household.forms.CreateTargetPopulationTextForm")
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
+    @patch("hope.apps.household.forms.CreateTargetPopulationTextForm")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
     def test_create_tp_from_list_success(self, mock_create_payments: Mock, mock_form_class: Mock) -> None:
         mock_form = Mock(spec=CreateTargetPopulationTextForm)
         mock_form.is_valid.return_value = True
@@ -45,7 +44,7 @@ class CreateTPFromListTaskTest(TestCase):
         payment_plan = PaymentPlan.objects.get(name="Test TP")
 
         mock_create_payments.assert_called_once_with(payment_plan)
-        self.assertEqual(payment_plan.business_area, self.program.business_area)
-        self.assertEqual(payment_plan.program_cycle, self.program_cycle)
-        self.assertEqual(payment_plan.created_by, self.user)
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        assert payment_plan.business_area == self.program.business_area
+        assert payment_plan.program_cycle == self.program_cycle
+        assert payment_plan.created_by == self.user
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

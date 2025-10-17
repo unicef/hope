@@ -91,7 +91,7 @@ export function BaseAutocompleteRest({
         }
       }}
       isOptionEqualToValue={(option, selectedValue) =>
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+         
         handleOptionSelected(option as any, selectedValue as any)
       }
       getOptionLabel={handleOptionLabel}
@@ -111,17 +111,19 @@ export function BaseAutocompleteRest({
             data-cy={`${label}-input`}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            InputProps={{
-              ...params.InputProps,
-              startAdornment,
-              endAdornment: (
-                <>
-                  {isLoading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                startAdornment,
+                endAdornment: (
+                  <>
+                    {isLoading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              },
             }}
             {...textFieldProps}
           />

@@ -1,13 +1,15 @@
 import calendar
-import json
 from decimal import Decimal
+import json
 from typing import Any, Callable, Dict, Optional, Type
 
 from django.core.cache import cache
 from django.utils import timezone
-
 import pytest
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -17,19 +19,19 @@ from extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
-from hct_mis_api.apps.dashboard.services import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.dashboard.serializers import DashboardBaseSerializer
+from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
+    get_fertility_rate,
     get_pwd_count_expression,
 )
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.models import Program
+from hope.apps.household.models import Household
+from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.program.models import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -74,14 +76,15 @@ def _create_test_payment_for_queryset(
     return payment, pp
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
+@pytest.mark.django_db(transaction=True)
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
     expected_key: str = f"dashboard_data_{slug}"
     assert cache_class.get_cache_key(slug) == expected_key
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
@@ -94,7 +97,7 @@ def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> Non
     assert data == {"test": f"{cache_name}_data"}
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is not found in the cache."""
@@ -103,7 +106,7 @@ def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> No
     assert data is None
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that store_data correctly stores data in the cache."""
@@ -115,7 +118,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "cache_name, cache_class, slug, expected_optional_fields",
+    ("cache_name", "cache_class", "slug", "expected_optional_fields"),
     [
         (
             "DashboardDataCache",
@@ -155,9 +158,9 @@ def test_refresh_data(
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
-        assert (
-            item.keys() & expected_optional_fields == expected_optional_fields
-        ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
 
@@ -165,7 +168,10 @@ def test_refresh_data(
 TEST_CASES = [
     (
         "delivered_quantity_usd prioritized",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardDataCache,
     ),
@@ -183,13 +189,20 @@ TEST_CASES = [
     ),
     (
         "Pending status with null delivered_quantity_usd",
-        {"status": "Pending", "delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "status": "Pending",
+            "delivered_quantity_usd": None,
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("250.0"),
         DashboardDataCache,
     ),
     (
         "global cache prioritizes delivered_quantity_usd",
-        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        {
+            "delivered_quantity_usd": Decimal("100.0"),
+            "entitlement_quantity_usd": Decimal("50.0"),
+        },
         Decimal("500.0"),
         DashboardGlobalDataCache,
     ),
@@ -197,7 +210,7 @@ TEST_CASES = [
 
 
 @pytest.mark.parametrize(
-    "test_name, payment_updates, expected_total, cache_service",
+    ("test_name", "payment_updates", "expected_total", "cache_service"),
     TEST_CASES,
     ids=[case[0] for case in TEST_CASES],
 )
@@ -456,20 +469,34 @@ def test_payment_plan_counts() -> None:
     user = UserFactory()
 
     create_payment_verification_plan_with_status(
-        payment_plan=pp2, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp2,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
     create_payment_verification_plan_with_status(
-        payment_plan=pp4, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+        payment_plan=pp4,
+        user=user,
+        business_area=ba,
+        program=prog_a_sector_x,
+        status="FINISHED",
     )
 
     PaymentFactory(
-        parent=pp1, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+        parent=pp1,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp3, program=prog_b_sector_y, delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+        parent=pp3,
+        program=prog_b_sector_y,
+        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc),
     )
     PaymentFactory(
-        parent=pp5, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+        parent=pp5,
+        program=prog_a_sector_x,
+        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc),
     )
     Payment.objects.filter(parent=pp1, business_area=ba).update(
         delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
@@ -537,7 +564,14 @@ def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
     cache.delete(cache_key)
@@ -559,7 +593,14 @@ def test_refresh_data_no_payments_global() -> None:
         is_removed=False,
         conflicted=False,
         excluded=False,
-    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+    ).exclude(
+        status__in=[
+            "Transaction Erroneous",
+            "Not Distributed",
+            "Force failed",
+            "Manually Cancelled",
+        ]
+    ).delete()
 
     cache_key = DashboardGlobalDataCache.get_cache_key("global")
     cache.delete(cache_key)
@@ -615,7 +656,7 @@ def test_partial_refresh_empty_cache_fallback(
 
 
 @pytest.mark.parametrize(
-    "cache_class_under_test, is_global_scenario",
+    ("cache_class_under_test", "is_global_scenario"),
     [
         (DashboardGlobalDataCache, True),
         (DashboardDataCache, False),
@@ -808,9 +849,9 @@ def test_base_queryset_filter_plan_status() -> None:
 
     payment_invalid, _ = _create_test_payment_for_queryset(prog, ba, pp_status=invalid_status)
     qs_invalid = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-    assert not qs_invalid.filter(
-        pk=payment_invalid.pk
-    ).exists(), f"Payment should be excluded for PP status {invalid_status}"
+    assert not qs_invalid.filter(pk=payment_invalid.pk).exists(), (
+        f"Payment should be excluded for PP status {invalid_status}"
+    )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
@@ -870,7 +911,12 @@ def test_base_queryset_filter_payment_status() -> None:
     prog = ProgramFactory.create(business_area=ba)
 
     included_status = "Transaction Successful"
-    excluded_statuses = ["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]
+    excluded_statuses = [
+        "Transaction Erroneous",
+        "Not Distributed",
+        "Force failed",
+        "Manually Cancelled",
+    ]
 
     payment_included, _ = _create_test_payment_for_queryset(prog, ba, payment_status=included_status)
     qs_included = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
@@ -879,9 +925,9 @@ def test_base_queryset_filter_payment_status() -> None:
     for status_val in excluded_statuses:
         payment_excluded, _ = _create_test_payment_for_queryset(prog, ba, payment_status=status_val)
         qs_excluded = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
-        assert not qs_excluded.filter(
-            pk=payment_excluded.pk
-        ).exists(), f"Payment should be excluded for status {status_val}"
+        assert not qs_excluded.filter(pk=payment_excluded.pk).exists(), (
+            f"Payment should be excluded for status {status_val}"
+        )
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
@@ -902,3 +948,137 @@ def test_get_base_payment_queryset_with_without_ba() -> None:
     qs_all = DashboardCacheBase._get_base_payment_queryset()
     assert qs_all.filter(pk=payment1.pk).exists()
     assert qs_all.filter(pk=payment2.pk).exists()
+
+
+CHILDREN_COUNT_SCENARIOS = [
+    ("social_program", "SOCIAL", 10, 2.6, 3),
+    ("children_count_none", "STANDARD", None, 3.8, 4),
+    ("children_count_value", "STANDARD", 7, 1.1, 7),
+]
+
+
+@pytest.mark.parametrize(
+    ("test_id", "dct_type", "household_children_count", "fertility_rate", "expected_children"),
+    CHILDREN_COUNT_SCENARIOS,
+)
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_children_count_calculation_scenarios(
+    test_id: str,
+    dct_type: str,
+    household_children_count: Optional[int],
+    fertility_rate: float,
+    expected_children: int,
+    mocker: Any,
+    afghanistan: BusinessArea,
+) -> None:
+    """Test various scenarios for children_count calculation in dashboard data."""
+    mocker.patch("hope.apps.dashboard.services.get_fertility_rate", return_value=fertility_rate)
+    cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
+    cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
+
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct, sector=f"Sector-{test_id}")
+    household, _ = create_household(
+        household_args={
+            "program": program,
+            "business_area": afghanistan,
+            "children_count": household_children_count,
+        }
+    )
+    status_map = {
+        "social_program": Payment.STATUS_SUCCESS,
+        "children_count_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
+        "children_count_value": Payment.STATUS_PENDING,
+    }
+    status = status_map[test_id]
+
+    PaymentFactory.create(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        delivery_date=TEST_DATE,
+        status=status,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert len(result) == 1
+    assert result[0]["children_counts"] == expected_children
+
+    global_result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
+    global_agg_group = [
+        item
+        for item in global_result
+        if item["country"] == afghanistan.name and item["sector"] == f"Sector-{test_id}" and item["status"] == status
+    ]
+    assert len(global_agg_group) == 1
+    assert global_agg_group[0]["children_counts"] == expected_children
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_success(mocker: Any) -> None:
+    """Test get_fertility_rate successfully retrieves a rate using the real data file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2020)
+    assert rate == 5.145
+    mock_open = mocker.patch("builtins.open")
+    rate2 = get_fertility_rate("Afghanistan", 2021)
+    assert rate2 == 5.039
+    mock_open.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_fallback_to_latest_year() -> None:
+    """Test get_fertility_rate falls back to the most recent year's data using the real file."""
+    ba = BusinessAreaFactory(name="Afghanistan")
+    country = CountryFactory()
+    ba.countries.add(country)
+    cache.delete("fertility_data")
+
+    rate = get_fertility_rate("Afghanistan", 2025)
+    assert rate == 4.84
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_country_not_found() -> None:
+    """Test get_fertility_rate returns 0.0 if country is not found in the real file."""
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("Wonderland", 2023)
+    assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_get_fertility_rate_no_data(mocker: Any) -> None:
+    """Test get_fertility_rate returns 0.0 if the data file is empty."""
+    mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
+    cache.delete("fertility_data")
+    rate = get_fertility_rate("AnyCountry", 2023)
+    assert rate == 0.0
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_file_not_found(mocker: Any) -> None:
+    """Test _load_fertility_data raises FileNotFoundError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", side_effect=FileNotFoundError("File not found"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(FileNotFoundError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
+    """Test _load_fertility_data raises JSONDecodeError and captures exception."""
+    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="invalid json"))
+    cache.delete("fertility_data")
+
+    with pytest.raises(json.JSONDecodeError):
+        get_fertility_rate("AnyCountry", 2023)
+    mock_sentry.capture_exception.assert_called_once()

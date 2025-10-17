@@ -1,5 +1,6 @@
 import { Button } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -31,6 +32,11 @@ function UsersPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions))
@@ -57,9 +63,14 @@ function UsersPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <UsersTable filter={appliedFilter} />
+      <div ref={tableRef}>
+        <UsersTable filter={appliedFilter} />
+      </div>
     </>
   );
 }

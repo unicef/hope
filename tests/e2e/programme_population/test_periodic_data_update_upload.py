@@ -4,12 +4,14 @@ from typing import Any
 
 import openpyxl
 import pytest
+from selenium.common.exceptions import TimeoutException
+
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
+    PDUXlsxTemplates,
 )
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
+    PDUXlsxUploads,
 )
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -17,30 +19,29 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.periodic_data_update import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
+    PDUXlsxTemplateFactory,
+    PDUXlsxUploadFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.core.models import (
+from hope.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
+from hope.apps.household.models import Individual
+from hope.apps.periodic_data_update.models import (
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
 )
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
+from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PDUXlsxExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.utils import (
+from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -112,7 +113,11 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -130,27 +135,27 @@ def create_flexible_attribute(
 
 
 def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
+    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[Any]]
 ) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-    ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
+    ws_pdu = wb[PDUXlsxExportTemplateService.PDU_SHEET]
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
+    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")  # noqa: SIM115
     wb.save(tmp_file.name)
     tmp_file.seek(0)
     return tmp_file
 
 
 def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _TemporaryFileWrapper:
-    periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+    periodic_data_update_template = PDUXlsxTemplate.objects.create(
         program=program,
         business_area=program.business_area,
-        filters=dict(),
+        filters={},
         rounds_data=rounds_data,
     )
-    service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+    service = PDUXlsxExportTemplateService(periodic_data_update_template)
     service.generate_workbook()
     service.save_xlsx_file()
     tmp_file = add_pdu_data_to_xlsx(periodic_data_update_template, rows)
@@ -159,15 +164,14 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
 
 
 @pytest.mark.usefixtures("login")
-class TestPeriodicDataUpdateUpload:
-    # @flaky(max_runs=5, min_passes=1)
+class TestPDUXlsxUpload:
     def test_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
@@ -184,23 +188,24 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        pageIndividuals.getButtonImport().click()
-        pageIndividuals.getDialogImport()
-        assert "IMPORT" in pageIndividuals.getButtonImportSubmit().text
-        pageIndividuals.upload_file(tmp_file.name)
-        pageIndividuals.getButtonImportSubmit().click()
-        pageIndividuals.getPduUpdates().click()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
+        page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
+        page_individuals.get_tab_offline_edits().click()
+        page_individuals.get_button_import().click()
+        page_individuals.get_dialog_import()
+        assert "IMPORT" in page_individuals.get_button_import_submit().text
+        page_individuals.upload_file(tmp_file.name)
+        page_individuals.get_button_import_submit().click()
+        page_individuals.get_tab_offline_edits().click()
+        periodic_data_update_upload = PDUXlsxUpload.objects.first()
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
-        assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
 
     @pytest.mark.night
     def test_periodic_data_update_upload_form_error(
@@ -209,7 +214,7 @@ class TestPeriodicDataUpdateUpload:
         program: Program,
         individual: Individual,
         date_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
@@ -226,27 +231,27 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
         try:
-            pageIndividuals.getNavIndividuals().click()
-        except BaseException:
-            pageIndividuals.getNavProgrammePopulation().click()
-            pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        pageIndividuals.getButtonImport().click()
-        pageIndividuals.getDialogImport()
-        pageIndividuals.upload_file(tmp_file.name)
-        pageIndividuals.getButtonImportSubmit().click()
-        pageIndividuals.getPduUpdates().click()
-        pageIndividuals.getStatusContainer()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.FAILED
-        assert pageIndividuals.getStatusContainer().text == "FAILED"
-        assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "FAILED"
-        pageIndividuals.getUpdateDetailsBtn(periodic_data_update_upload.pk).click()
+            page_individuals.get_nav_individuals().click()
+        except TimeoutException:
+            page_individuals.get_nav_programme_population().click()
+            page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
+        page_individuals.get_tab_offline_edits().click()
+        page_individuals.get_button_import().click()
+        page_individuals.get_dialog_import()
+        page_individuals.upload_file(tmp_file.name)
+        page_individuals.get_button_import_submit().click()
+        page_individuals.get_status_container()
+        periodic_data_update_upload = PDUXlsxUpload.objects.first()
+        assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
+        assert page_individuals.get_status_container().text == "Failed"
+        assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Failed"
+        page_individuals.get_update_details_btn(periodic_data_update_upload.pk).click()
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
-        assert pageIndividuals.getPduFormErrors().text == error_text
+        assert page_individuals.get_pdu_form_errors().text == error_text
 
     @pytest.mark.skip("Unskip after fix: 214341")
     @pytest.mark.night
@@ -256,14 +261,14 @@ class TestPeriodicDataUpdateUpload:
         program: Program,
         individual: Individual,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
+        page_individuals: Individuals,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+        periodic_data_update_template = PDUXlsxTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,
@@ -273,25 +278,26 @@ class TestPeriodicDataUpdateUpload:
                 }
             ],
         )
-        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
+        service = PDUXlsxExportTemplateService(periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "-1"
+        del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
+        ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
+        ws_meta[PDUXlsxExportTemplateService.META_ID_ADDRESS] = "-1"
         with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
-            pageIndividuals.selectGlobalProgramFilter(program.name)
-            pageIndividuals.getNavProgrammePopulation().click()
-            pageIndividuals.getNavIndividuals().click()
-            pageIndividuals.getTabPeriodicDataUpdates().click()
-            pageIndividuals.getButtonImport().click()
-            pageIndividuals.getDialogImport()
-            pageIndividuals.upload_file(tmp_file.name)
-            pageIndividuals.getButtonImportSubmit().click()
-            error_text = pageIndividuals.getPduUploadError().text
+            page_individuals.select_global_program_filter(program.name)
+            page_individuals.get_nav_programme_population().click()
+            page_individuals.get_nav_individuals().click()
+            page_individuals.get_tab_periodic_data_updates().click()
+            page_individuals.get_tab_offline_edits().click()
+            page_individuals.get_button_import().click()
+            page_individuals.get_dialog_import()
+            page_individuals.upload_file(tmp_file.name)
+            page_individuals.get_button_import_submit().click()
+            error_text = page_individuals.get_pdu_upload_error().text
             assert error_text == "Periodic Data Update Template with ID -1 not found"
 
     @pytest.mark.night
@@ -300,15 +306,15 @@ class TestPeriodicDataUpdateUpload:
         clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-        pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
-        pagePeriodicDataUploads: PeriodicDataUpdateUploads,
+        page_individuals: Individuals,
+        page_pdu_xlsx_templates: PDUXlsxTemplates,
+        page_pdu_xlsx_uploads: PDUXlsxUploads,
     ) -> None:
-        periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
+        periodic_data_update_template = PDUXlsxTemplateFactory(
             program=program,
             business_area=program.business_area,
-            status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
-            filters=dict(),
+            status=PDUXlsxTemplate.Status.TO_EXPORT,
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,
@@ -318,23 +324,23 @@ class TestPeriodicDataUpdateUpload:
                 }
             ],
         )
-        pdu_upload = PeriodicDataUpdateUploadFactory(
+        pdu_upload = PDUXlsxUploadFactory(
             template=periodic_data_update_template,
-            status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+            status=PDUXlsxUpload.Status.SUCCESSFUL,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
+        page_individuals.select_global_program_filter(program.name)
+        page_individuals.get_nav_programme_population().click()
         try:
-            pageIndividuals.getNavIndividuals().click()
-        except BaseException:
-            pageIndividuals.getNavProgrammePopulation().click()
-            pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
+            page_individuals.get_nav_individuals().click()
+        except TimeoutException:
+            page_individuals.get_nav_programme_population().click()
+            page_individuals.get_nav_individuals().click()
+        page_individuals.get_tab_periodic_data_updates().click()
+        page_individuals.get_tab_offline_edits().click()
 
         index = pdu_upload.id
-        assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
-        assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
-        assert f"{pdu_upload.created_at:%-d %b %Y}" in pagePeriodicDataUploads.getUpdateCreatedAt(index).text
-        assert pdu_upload.created_by.get_full_name() in pagePeriodicDataUploads.getUpdateCreatedBy(index).text
-        assert "SUCCESSFUL" in pagePeriodicDataUploads.getUpdateStatus(index).text
+        assert str(index) in page_pdu_xlsx_uploads.get_update_id(index).text
+        assert str(pdu_upload.template.id) in page_pdu_xlsx_uploads.get_update_template(index).text
+        assert f"{pdu_upload.created_at:%-d %b %Y}" in page_pdu_xlsx_uploads.get_update_created_at(index).text
+        assert pdu_upload.created_by.get_full_name() in page_pdu_xlsx_uploads.get_update_created_by(index).text
+        assert "Successful" in page_pdu_xlsx_uploads.get_update_status(index).text

@@ -1,20 +1,17 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
-import get from 'lodash/get';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  useImportXlsxPaymentVerificationPlanFileMutation,
-  ImportXlsxPaymentVerificationPlanFileMutation,
-  XlsxErrorNode,
-} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -34,43 +31,56 @@ export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
 }: ImportXlsxProps): ReactElement => {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
+  const { businessArea, programId: programSlug } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportXlsxPaymentVerificationPlanFileMutation();
-
-  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] =
-    get(uploadData, 'importXlsxPaymentVerificationPlanFile.errors');
+  const importMutation = useMutation({
+    mutationFn: (data: PaymentVerificationPlanImport) =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsImportXlsxCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: paymentVerificationPlanId,
+          formData: data,
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasProgramsPaymentVerificationsVerificationsList',
+        ],
+      });
+    },
+  });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-        const { data, errors } = await mutate({
-          variables: {
-            paymentVerificationPlanId,
-            file: fileToImport,
-          },
-          refetchQueries,
+        await importMutation.mutateAsync({
+          file: fileToImport,
         });
-
-        if (
-          !errors &&
-          !data?.importXlsxPaymentVerificationPlanFile?.errors.length
-        ) {
-          setOpenImport(false);
-          showMessage(t('Your import was successful!'));
-        }
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+        setOpenImport(false);
+        showMessage(t('Your import was successful!'));
+      } catch (error) {
+        showApiErrorMessages(error, showMessage);
       }
     }
   };
+  const errorWithBody = importMutation.error as any;
+  const errorBody = errorWithBody?.body;
 
   return (
     <>
@@ -96,7 +106,7 @@ export const ImportXlsx = ({
           <>
             <DropzoneField
               dontShowFilename={false}
-              loading={fileLoading}
+              loading={importMutation.isPending}
               onChange={(files) => {
                 if (files.length === 0) {
                   return;
@@ -113,18 +123,12 @@ export const ImportXlsx = ({
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport && importMutation.error && (
               <Error>
                 <p>Errors</p>
-                {error
-                  ? error.graphQLErrors.map((x) => (
-                      <p key={x.message}>{x.message}</p>
-                    ))
-                  : null}
-                <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
+                <p>{JSON.stringify(errorBody)}</p>
               </Error>
-            ) : null}
+            )}
           </>
           <DialogActions>
             <Button
@@ -136,7 +140,7 @@ export const ImportXlsx = ({
               CANCEL
             </Button>
             <LoadingButton
-              loading={fileLoading}
+              loading={importMutation.isPending}
               disabled={!fileToImport}
               type="submit"
               color="primary"

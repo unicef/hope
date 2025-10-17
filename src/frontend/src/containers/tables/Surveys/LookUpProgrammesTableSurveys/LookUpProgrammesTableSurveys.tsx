@@ -1,17 +1,18 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState, useEffect, useMemo } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import styled from 'styled-components';
-import {
-  AllActiveProgramsQueryVariables,
-  AllProgramsQuery,
-  ProgrammeChoiceDataQuery,
-  useAllActiveProgramsQuery,
-} from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
 import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 
 const NoTableStyling = styled.div`
   .MuiPaper-elevation1 {
@@ -23,7 +24,7 @@ const NoTableStyling = styled.div`
 interface LookUpProgrammesTableSurveysProps {
   businessArea: string;
   filter;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   selectedProgram;
   handleChange: (value) => void;
   setFieldValue;
@@ -39,20 +40,72 @@ export function LookUpProgrammesTableSurveys({
 }: LookUpProgrammesTableSurveysProps): ReactElement {
   const { selectedProgram: programFromContext } = useProgramContext();
   const beneficiaryGroup = programFromContext?.beneficiaryGroup;
-  const initialVariables: AllActiveProgramsQueryVariables = {
-    businessArea,
-    search: filter.search,
-    startDate: filter.startDate || null,
-    endDate: filter.endDate || null,
-    status: filter.status,
-    sector: filter.sector,
-    numberOfHouseholdsWithTpInProgram: JSON.stringify({
-      min: filter.numberOfHouseholdsMin || 1,
-      max: filter.numberOfHouseholdsMax,
+
+  const [page, setPage] = useState(0);
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      search: filter.search,
+      startDate: filter.startDate || null,
+      endDate: filter.endDate || null,
+      status: filter.status !== '' ? filter.status : undefined,
+      sector: filter.sector,
+      numberOfHouseholdsMax: filter.numberOfHouseholdsMax,
+      numberOfHouseholdsMin: filter.numberOfHouseholdsMin || 1,
+      budgetMax: filter.budgetMax,
+      budgetMin: filter.budgetMin,
+      dataCollectingType: filter.dataCollectingType,
+      ordering: 'startDate',
+      page,
     }),
-    budget: JSON.stringify(filter.budget),
-    dataCollectingType: filter.dataCollectingType,
-  };
+    [
+      businessArea,
+      filter.search,
+      filter.startDate,
+      filter.endDate,
+      filter.status,
+      filter.sector,
+      filter.numberOfHouseholdsMin,
+      filter.numberOfHouseholdsMax,
+      filter.budgetMin,
+      filter.budgetMax,
+      filter.dataCollectingType,
+      page,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: dataPrograms,
+    isLoading: isLoadingPrograms,
+    error: errorPrograms,
+  } = useQuery<PaginatedProgramListList>({
+    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+          withPagination: true,
+        }),
+      ),
+    enabled: !!queryVariables.businessAreaSlug,
+  });
+
+  const { data: countData } = useQuery({
+    queryKey: ['businessAreasProgramsCount', queryVariables, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -73,15 +126,18 @@ export function LookUpProgrammesTableSurveys({
   return (
     <NoTableStyling>
       <TableWrapper>
-        <UniversalTable<
-          AllProgramsQuery['allPrograms']['edges'][number]['node'],
-          AllActiveProgramsQueryVariables
-        >
+        <UniversalRestTable
           headCells={adjustedHeadCells}
-          query={useAllActiveProgramsQuery}
-          queriedObjectName="allActivePrograms"
-          initialVariables={initialVariables}
-          renderRow={(row) => (
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
+          defaultOrderBy="startDate"
+          data={dataPrograms}
+          isLoading={isLoadingPrograms}
+          error={errorPrograms}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
+          renderRow={(row: ProgramList) => (
             <LookUpProgrammesTableRowSurveys
               key={row.id}
               program={row}
