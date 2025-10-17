@@ -32,16 +32,18 @@ export interface EditIndividualDataChangeProps {
   setFieldValue;
   form;
   field;
+  programSlug?: string;
 }
 
 function EditIndividualDataChange({
   values,
   setFieldValue,
+  programSlug,
 }: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessAreaSlug } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -51,30 +53,33 @@ function EditIndividualDataChange({
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
   } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessAreaSlug],
+    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         },
       ),
+    enabled: Boolean(businessArea),
   });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['grievanceTicketsChoices', businessAreaSlug],
+    queryKey: ['grievanceTicketsChoices', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
+        businessAreaSlug: businessArea,
       }),
+    enabled: Boolean(businessArea),
   });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualsChoices', businessAreaSlug],
+      queryKey: ['individualsChoices', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         }),
+      enabled: Boolean(businessArea),
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -82,29 +87,21 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const resolvedProgramSlug =
-    individual && 'programSlug' in individual
-      ? (individual.programSlug as string)
-      : individual && 'program' in individual && individual.program?.slug
-        ? individual.program.slug
-        : undefined;
-  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
+  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery<IndividualDetail>({
     queryKey: [
       'individual',
-      businessAreaSlug,
-      resolvedProgramSlug,
+      businessArea,
       individual?.id,
-      individual,
+      programSlug,
+      programId,
     ],
-    queryFn: () => {
-      if (!individual?.id || !resolvedProgramSlug) return null;
-      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        programSlug: resolvedProgramSlug,
-        id: individual?.id,
-      });
-    },
-    enabled: !!individual?.id && !!resolvedProgramSlug && !!businessAreaSlug,
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug: businessArea,
+        id: individual.id,
+        programSlug: programSlug,
+      }),
+    enabled: Boolean(individual && businessArea && programSlug),
   });
 
   useEffect(() => {

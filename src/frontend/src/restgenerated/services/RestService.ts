@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
+import type { AreaList } from '../models/AreaList';
+import type { AreaTree } from '../models/AreaTree';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
 import type { Bulk } from '../models/Bulk';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
@@ -50,8 +52,6 @@ import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
 import type { MessageSampleSize } from '../models/MessageSampleSize';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
-import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
-import type { PaginatedAreaTreeList } from '../models/PaginatedAreaTreeList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedAuthorizedUserList } from '../models/PaginatedAuthorizedUserList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
@@ -1146,16 +1146,14 @@ export class RestService {
      *
      * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
      * variable token_permission.
-     * @returns PaginatedAreaListList
+     * @returns AreaList
      * @throws ApiError
      */
     public static restBusinessAreasGeoAreasList({
         businessAreaSlug,
         id,
         level,
-        limit,
         name,
-        offset,
         ordering,
         parentId,
         parentPCode,
@@ -1165,15 +1163,7 @@ export class RestService {
         businessAreaSlug: string,
         id?: string,
         level?: number,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
         name?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Which field to use when ordering the results.
          */
@@ -1182,7 +1172,7 @@ export class RestService {
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedAreaListList> {
+    }): CancelablePromise<Array<AreaList>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/geo/areas/',
@@ -1192,9 +1182,7 @@ export class RestService {
             query: {
                 'id': id,
                 'level': level,
-                'limit': limit,
                 'name': name,
-                'offset': offset,
                 'ordering': ordering,
                 'parent_id': parentId,
                 'parent_p_code': parentPCode,
@@ -1208,16 +1196,14 @@ export class RestService {
      *
      * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
      * variable token_permission.
-     * @returns PaginatedAreaTreeList
+     * @returns AreaTree
      * @throws ApiError
      */
     public static restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug,
         id,
         level,
-        limit,
         name,
-        offset,
         ordering,
         parentId,
         parentPCode,
@@ -1227,15 +1213,7 @@ export class RestService {
         businessAreaSlug: string,
         id?: string,
         level?: number,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
         name?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Which field to use when ordering the results.
          */
@@ -1244,7 +1222,7 @@ export class RestService {
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedAreaTreeList> {
+    }): CancelablePromise<Array<AreaTree>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/geo/areas/all-areas-tree/',
@@ -1254,9 +1232,7 @@ export class RestService {
             query: {
                 'id': id,
                 'level': level,
-                'limit': limit,
                 'name': name,
-                'offset': offset,
                 'ordering': ordering,
                 'parent_id': parentId,
                 'parent_p_code': parentPCode,

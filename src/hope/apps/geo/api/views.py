@@ -34,6 +34,7 @@ class AreaViewSet(
     PERMISSIONS = [Permissions.GEO_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter
+    pagination_class = None
 
     @etag_decorator(AreasKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AreasKeyConstructor())

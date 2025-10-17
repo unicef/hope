@@ -167,8 +167,6 @@ export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './mod
 export type { Organization as OrganizationCamelCase } from './models/Organization';
 export { OrgEnumeratorEnum as OrgEnumeratorEnumCamelCase } from './models/OrgEnumeratorEnum';
 export type { PaginatedAreaList as PaginatedAreaListCamelCase } from './models/PaginatedAreaList';
-export type { PaginatedAreaListList as PaginatedAreaListListCamelCase } from './models/PaginatedAreaListList';
-export type { PaginatedAreaTreeList as PaginatedAreaTreeListCamelCase } from './models/PaginatedAreaTreeList';
 export type { PaginatedAreaTypeList as PaginatedAreaTypeListCamelCase } from './models/PaginatedAreaTypeList';
 export type { PaginatedAuthorizedUserList as PaginatedAuthorizedUserListCamelCase } from './models/PaginatedAuthorizedUserList';
 export type { PaginatedBeneficiaryGroupList as PaginatedBeneficiaryGroupListCamelCase } from './models/PaginatedBeneficiaryGroupList';

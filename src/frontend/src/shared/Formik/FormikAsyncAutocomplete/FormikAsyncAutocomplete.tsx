@@ -40,7 +40,6 @@ export function FormikAsyncAutocomplete({
         return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: variables?.businessArea || '',
           name: inputValue || undefined,
-          limit: 20,
         });
       }
       return null;

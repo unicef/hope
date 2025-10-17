@@ -10,6 +10,7 @@ import {
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
+import { AreaList } from '@restgenerated/models/AreaList';
 
 export function AdminAreaAutocomplete({
   disabled,
@@ -58,14 +59,13 @@ export function AdminAreaAutocomplete({
     data: areasData,
     isLoading: loading,
     refetch,
-  } = useQuery({
+  } = useQuery<AreaList[]>({
     queryKey: ['adminAreas', queryVariables, businessArea, level],
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
         level: level,
         name: queryVariables.search,
-        limit: queryVariables.limit,
       }),
     enabled: open && !!businessArea,
     staleTime: 0,
@@ -88,7 +88,7 @@ export function AdminAreaAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = areasData?.results || [];
+  const allEdges = areasData || [];
 
   const handleOptionSelected = (option: any, selectedValue: any) => {
     if (typeof selectedValue === 'string') {

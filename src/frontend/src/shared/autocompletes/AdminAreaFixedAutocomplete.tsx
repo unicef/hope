@@ -8,8 +8,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
+  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
+  .MuiFormControl-marginDense {
     margin-top: 4px;
   }
 `;
@@ -47,7 +47,6 @@ export const AdminAreaFixedAutocomplete = ({
         businessAreaSlug: businessArea,
         level: level === 1 ? 1 : 2,
         name: debouncedInputText || undefined,
-        limit: 50,
         id: value || undefined,
         parentId: parentId || undefined,
       }),
@@ -60,7 +59,7 @@ export const AdminAreaFixedAutocomplete = ({
     if (areasData) {
       setNewValue(
         typeof value === 'string'
-          ? areasData.results.find((item) => item.name === value)
+          ? areasData.find((item) => item.name === value)
           : value,
       );
     }
@@ -88,14 +87,13 @@ export const AdminAreaFixedAutocomplete = ({
   return (
     <Box mt={1}>
       <StyledAutocomplete
-        options={areasData?.results || []}
+        options={areasData || []}
         defaultValue={
           areasData && typeof value === 'string'
-            ? areasData.results.find((item) => item.id === value)
+            ? areasData.find((item) => item.id === value)
             : value
         }
         getOptionLabel={(option: any) => (option ? `${option.name}` : '')}
-         
         isOptionEqualToValue={(option: any, value: any) =>
           typeof value === 'string'
             ? option?.id === value
