@@ -33,7 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { AreaTree } from "@restgenerated/models/AreaTree";
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
