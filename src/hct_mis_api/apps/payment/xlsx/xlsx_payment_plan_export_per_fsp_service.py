@@ -7,7 +7,7 @@ from typing import List, Optional, Set
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, transaction
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
@@ -376,11 +376,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 xlsx_password=xlsx_password,
             )
             tmp_zip.seek(0)
-            # remove old file
-            self.payment_plan.remove_export_files()
-            file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_file_per_fsp = file_temp_obj
-            self.payment_plan.save(update_fields=["export_file_per_fsp", "updated_at"])
+            with transaction.atomic():
+                self.payment_plan.remove_export_files()
+                file_temp_obj.file.save(zip_file_name, File(tmp_zip))
+                self.payment_plan.export_file_per_fsp = file_temp_obj
+                self.payment_plan.background_action_status_none()
+                self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
 
     @staticmethod
     def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:

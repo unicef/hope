@@ -180,15 +180,12 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                                 payment_plan.eligible_payments.all(), payment_plan.program
                             )
 
-                with transaction.atomic():
-                    service.export_per_fsp(user)
-                    payment_plan.background_action_status_none()
-                    payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                service.export_per_fsp(user)
 
-                    if payment_plan.business_area.enable_email_notification:
-                        send_email_notification_on_commit(service, user)
-                        if fsp_xlsx_template_id:
-                            service.send_email_with_passwords(user, payment_plan)
+                if payment_plan.business_area.enable_email_notification:
+                    send_email_notification(service, user)
+                    if fsp_xlsx_template_id:
+                        service.send_email_with_passwords(user, payment_plan)
 
             except Exception as e:  # pragma: no cover
                 logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
