@@ -11,6 +11,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -61,9 +62,7 @@ export function BulkAssignModal({
       setSelected([]);
     },
     onError: (error: any) => {
-      const errorMessage =
-        error?.body?.errors || error?.message || 'An error occurred';
-      showMessage(errorMessage);
+      showApiErrorMessages(error, showMessage);
     },
   });
 

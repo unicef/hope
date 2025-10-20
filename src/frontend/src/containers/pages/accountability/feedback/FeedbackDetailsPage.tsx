@@ -6,7 +6,8 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
-import { Grid2 as Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -59,7 +60,9 @@ function FeedbackDetailsPage(): ReactElement {
         <LinkedGrievance feedback={feedback} />
       </Grid>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={feedback.id} />
+        <Box sx={{ mt: 2 }}>
+          <UniversalActivityLogTable objectId={feedback.id} />
+        </Box>
       )}
     </>
   );

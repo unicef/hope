@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +41,7 @@ function HouseholdQuestionnaire({
       programId,
       values.selectedHousehold?.programSlug,
       values.selectedHousehold?.program?.slug,
+      values.selectedIndividual?.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
@@ -48,7 +49,7 @@ function HouseholdQuestionnaire({
         id: householdId,
         programSlug:
           values.selectedHousehold?.programSlug ||
-          values.selectedHousehold?.program?.slug,
+          values.selectedHousehold?.program?.slug || values.selectedIndividual?.program?.slug,
       }),
     enabled: !!householdId,
   });

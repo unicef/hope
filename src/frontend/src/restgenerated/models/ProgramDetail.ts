@@ -78,7 +78,6 @@ export type ProgramDetail = {
      * Program household count [sys]
      */
     householdCount?: number;
-    numberOfHouseholdsWithTpInProgram: number;
     readonly adminUrl: string;
     /**
      * Program description
@@ -104,5 +103,7 @@ export type ProgramDetail = {
     readonly registrationImportsTotalCount: number;
     readonly targetPopulationsCount: number;
     readonly screenBeneficiary: boolean;
+    reconciliationWindowInDays?: number;
+    sendReconciliationWindowExpiryNotifications?: boolean;
 };
 

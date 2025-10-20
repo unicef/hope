@@ -117,6 +117,8 @@ const NewPeriodicDataUpdates = (): ReactElement => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
+  const [page, setPage] = useState(0);
+
   const navigate = useNavigate();
   const renderRow = (row: any): ReactElement => {
     const url = `/${baseUrl}/population/individuals/online-templates/${row.id}`;
@@ -156,6 +158,7 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={onlineEditsHeadCells}
       data={data ?? []}
@@ -164,7 +167,8 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       title="New Periodic Data Updates"
-      hidePagination={true}
+      page={page}
+      setPage={setPage}
       actions={[
         <Button
           key="add-new-online-edit"

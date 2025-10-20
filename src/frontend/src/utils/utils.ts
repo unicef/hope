@@ -1,3 +1,13 @@
+export function safeStringify(value) {
+  if (typeof value === 'object' && value !== null) {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '[object Object]';
+    }
+  }
+  return String(value);
+}
 // Status color for periodic data updates online edits
 export function periodicDataUpdatesOnlineEditsStatusToColor(
   theme: typeof themeObj,
@@ -12,6 +22,14 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.green;
     case 'MERGED':
       return theme.hctPalette.darkerBlue;
+    case 'MERGING':
+      return theme.hctPalette.blue;
+    case 'CREATING':
+      return theme.hctPalette.blue;
+    case 'FAILED_MERGE':
+      return theme.hctPalette.red;
+    case 'FAILED_CREATE':
+      return theme.hctPalette.red;
     default:
       return theme.hctPalette.gray;
   }
@@ -162,7 +180,6 @@ export function populationStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-
 
 export function paymentStatusToColor(
   theme: typeof themeObj,
@@ -535,7 +552,6 @@ export function programCycleStatusToColor(
 export function selectFields(
   fullObject,
   keys: string[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): { [key: string]: any } {
   return keys.reduce((acc, current) => {
     acc[current] = fullObject[current];
@@ -547,17 +563,14 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-//eslint-disable-next-line @typescript-eslint/no-use-before-define
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
   if (!Array.isArray(arr)) {
     return arr;
   }
-  //eslint-disable-next-line @typescript-eslint/no-use-before-define
+
   return arr.map(camelizeObjectKeys);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function camelizeObjectKeys(obj): { [key: string]: any } {
   if (!obj) {
     return obj;
@@ -618,13 +631,11 @@ function isBase64(str) {
   return /^[A-Za-z0-9+/]+={0,2}$/.test(str);
 }
 
-
 export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
-  if (!isBase64(idString))
-      return idString;
+  if (!isBase64(idString)) return idString;
   if (idString.includes(':')) {
     // Already decoded
     return idString.split(':')[1];
@@ -717,7 +728,6 @@ export function paymentPlanBackgroundActionStatusMapping(status): string {
   return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -776,7 +786,6 @@ const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function thingForSpecificGrievanceType(
   ticket: { category: number | string; issueType?: number | string },
   thingDict,
@@ -818,7 +827,6 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getFullNodeFromEdgesById = (edges, id) => {
   if (!edges) return null;
   return edges.find((edge) => edge.node.id === id)?.node || null;
@@ -1189,12 +1197,11 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
     const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
     const decodedId = atob(base64);
     return regex.test(decodedId);
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
@@ -1216,8 +1223,6 @@ export function adjustHeadCells<T>(
   });
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars,
-              @typescript-eslint/no-shadow */
 export const filterEmptyParams = (params) => {
   if (!params) return {};
 
@@ -1258,7 +1263,7 @@ export const filterEmptyParams = (params) => {
             );
             return hasNonEmptyValue;
           }
-        } catch (e) {
+        } catch {
           // If parsing fails, keep the value
           return true;
         }
@@ -1269,8 +1274,6 @@ export const filterEmptyParams = (params) => {
   );
 };
 
-/* eslint-enable @typescript-eslint/no-unused-vars,
-                 @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
   const notCalizedKeys = ['form_errors', 'household_data'];
   if (_.isArray(data)) {
@@ -1332,24 +1335,64 @@ export function showApiErrorMessages(
   showMessage: (msg: string) => void,
   fallbackMsg: string = 'An error occurred',
 ): void {
-  function traverseErrors(obj: any, path: string = '') {
+  // Helper to convert field names to readable labels and remove array indexes
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  // Collect errors per field
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
     if (Array.isArray(obj)) {
-      obj.forEach((item, idx) => {
-        traverseErrors(item, `${path}[${idx}]`);
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
       });
     } else if (obj && typeof obj === 'object') {
       Object.entries(obj).forEach(([key, value]) => {
         const newPath = path ? `${path}.${key}` : key;
-        traverseErrors(value, newPath);
+        collectErrors(value, newPath, errors);
       });
     } else if (typeof obj === 'string') {
-      showMessage(path ? `${path}: ${obj}` : obj);
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
     }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  // Handle plain array of strings (e.g. ["msg1", "msg2"])
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    showMessage(error.join('  \n'));
+    return;
   }
 
   // Handle array of errors in error.body
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
-    traverseErrors(error.body);
+    // If error.body is a plain array of strings
+    if (error.body.every((item) => typeof item === 'string')) {
+      showMessage(error.body.join('  \n'));
+      return;
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle string error in error.body
@@ -1364,12 +1407,24 @@ export function showApiErrorMessages(
     typeof error.body === 'object' &&
     error.body !== null
   ) {
-    traverseErrors(error.body);
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle top-level object of arrays (field errors)
   if (error && typeof error === 'object' && error !== null) {
-    traverseErrors(error);
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    showMessage(messages.join('  \n'));
     return;
   }
   // Handle string error in error.message
@@ -1378,6 +1433,94 @@ export function showApiErrorMessages(
     return;
   }
   showMessage(fallbackMsg);
+}
+
+export function getApiErrorMessages(
+  error: any,
+  fallbackMsg: string = 'An error occurred',
+): string {
+  function formatFieldLabel(field: string): string {
+    let cleaned = field.replace(/\[\d+\]/g, '');
+    cleaned = cleaned.split('.').pop();
+    let label = cleaned.replace(/_/g, ' ');
+    label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+    label = label
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    return label.trim();
+  }
+
+  function collectErrors(
+    obj: any,
+    path: string = '',
+    errors: Record<string, string[]> = {},
+  ) {
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => {
+        collectErrors(item, path, errors);
+      });
+    } else if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = path ? `${path}.${key}` : key;
+        collectErrors(value, newPath, errors);
+      });
+    } else if (typeof obj === 'string') {
+      const label = path ? formatFieldLabel(path) : '';
+      if (!errors[label]) errors[label] = [];
+      errors[label].push(obj);
+    }
+    return errors;
+  }
+
+  const messages: string[] = [];
+
+  if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
+    return error.join('  \n');
+  }
+
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    if (error.body.every((item) => typeof item === 'string')) {
+      return error.body.join('  \n');
+    }
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.body === 'string') {
+    return error.body;
+  }
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof error.body === 'object' &&
+    error.body !== null
+  ) {
+    const errors = collectErrors(error.body);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && error !== null) {
+    const errors = collectErrors(error);
+    Object.entries(errors).forEach(([label, msgs]) => {
+      msgs.forEach((msg) => {
+        messages.push(`${label}: ${msg}`);
+      });
+    });
+    return messages.join('  \n');
+  }
+  if (error && typeof error === 'object' && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallbackMsg;
 }
 
 // Utility to split camelCase/PascalCase and capitalize

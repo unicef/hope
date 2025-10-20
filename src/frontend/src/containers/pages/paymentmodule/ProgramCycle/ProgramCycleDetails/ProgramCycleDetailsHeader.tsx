@@ -56,8 +56,7 @@ export const ProgramCycleDetailsHeader = ({
         showMessage(t('Programme Cycle Finished'));
       },
       onError: (error) => {
-        showMessage(t('Failed to finish the programme cycle.'));
-        console.error(error);
+        showApiErrorMessages(error, showMessage);
       },
     });
 

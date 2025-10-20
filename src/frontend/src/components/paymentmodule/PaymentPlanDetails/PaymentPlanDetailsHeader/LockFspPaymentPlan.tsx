@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockFspPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -30,7 +31,7 @@ export function LockFspPaymentPlan({
   permissions,
 }: LockFspPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage, showRestApiError } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
@@ -59,8 +60,8 @@ export function LockFspPaymentPlan({
         exact: false,
       });
     },
-    onError: (error) => {
-      showRestApiError(error);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

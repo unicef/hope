@@ -122,7 +122,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
         numberOfRounds: roundsNames.length,
         roundsCovered: roundsCovered || 0,
         roundNumber: initialRoundNumber,
-        roundName: roundsNames[initialRoundNumber - 1],
+        roundName:
+          Array.isArray(roundsNames) && roundsNames[initialRoundNumber - 1]
+            ? roundsNames[initialRoundNumber - 1]
+            : '',
       };
     });
   };
@@ -209,6 +212,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       authorizedUsers: values.authorizedUsers,
       name: values.name || null,
     };
+
 
     try {
       await createTemplateMutation({

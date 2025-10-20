@@ -18,6 +18,7 @@ import { useProgramContext } from '../../../programContext';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ReactivateProgramProps {
   program: ProgramDetail;
@@ -50,8 +51,8 @@ export function ReactivateProgram({
       showMessage(t('Programme reactivated.'));
       setOpen(false);
     },
-    onError: () => {
-      showMessage(t('Programme reactivate action failed.'));
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

@@ -10,6 +10,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
@@ -25,6 +26,8 @@ export const PeopleListTable = ({
 }: PeopleListTableProps): ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
+
+  const [page, setPage] = useState(0);
 
   const initialQueryVariables = useMemo(
     () => ({
@@ -43,6 +46,7 @@ export const PeopleListTable = ({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      page,
     }),
     [
       filter.ageMin,
@@ -59,6 +63,7 @@ export const PeopleListTable = ({
       filter.lastRegistrationDateMax,
       programId,
       businessArea,
+      page,
     ],
   );
 
@@ -66,6 +71,7 @@ export const PeopleListTable = ({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
+
   const { data: countData } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsHouseholdsCount',
@@ -81,7 +87,10 @@ export const PeopleListTable = ({
           { withPagination: true },
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
@@ -113,7 +122,9 @@ export const PeopleListTable = ({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <PeopleListTableRow
             key={row.id}

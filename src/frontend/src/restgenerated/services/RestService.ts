@@ -4813,8 +4813,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -4892,8 +4893,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         offset,
         orderBy,
         ordering,
@@ -4924,8 +4923,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4995,8 +4992,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -8467,8 +8462,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -8539,13 +8535,13 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsList({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         limit,
         offset,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         /**
          * Number of results to return per page.
@@ -8558,10 +8554,10 @@ export class RestService {
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             query: {
@@ -8577,21 +8573,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8603,21 +8599,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8629,23 +8625,23 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate({
         businessAreaSlug,
         paymentId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         requestBody,
     }: {
         businessAreaSlug: string,
         paymentId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         requestBody: RevertMarkPaymentAsFailed,
     }): CancelablePromise<RevertMarkPaymentAsFailed> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/revert-mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/{payment_id}/revert-mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_id': paymentId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             body: requestBody,
@@ -8658,19 +8654,19 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/count/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8681,21 +8677,21 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsCreate({
         businessAreaSlug,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
         requestBody,
     }: {
         businessAreaSlug: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
         requestBody: PaymentPlanSupportingDocument,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
             body: requestBody,
@@ -8709,21 +8705,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDestroy({
         businessAreaSlug,
         fileId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         fileId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8735,21 +8731,21 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDownloadRetrieve({
         businessAreaSlug,
         fileId,
-        paymentPlanId,
+        paymentPlanPk,
         programSlug,
     }: {
         businessAreaSlug: string,
         fileId: string,
-        paymentPlanId: string,
+        paymentPlanPk: string,
         programSlug: string,
     }): CancelablePromise<PaymentPlanSupportingDocument> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/download/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/download/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
-                'payment_plan_id': paymentPlanId,
+                'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
             },
         });
@@ -8954,6 +8950,32 @@ export class RestService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCloseRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/close/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
         });
     }
     /**
@@ -9533,8 +9555,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9660,8 +9683,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9789,8 +9813,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9921,8 +9946,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10106,8 +10132,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10545,8 +10572,9 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -12425,9 +12453,10 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
@@ -12862,9 +12891,10 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
@@ -13093,8 +13123,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         offset,
         orderBy,
         ordering,
@@ -13126,8 +13154,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -13198,8 +13224,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -13268,8 +13292,6 @@ export class RestService {
         name,
         numberOfHouseholdsMax,
         numberOfHouseholdsMin,
-        numberOfHouseholdsWithTpInProgramMax,
-        numberOfHouseholdsWithTpInProgramMin,
         orderBy,
         ordering,
         search,
@@ -13295,8 +13317,6 @@ export class RestService {
         name?: string,
         numberOfHouseholdsMax?: string,
         numberOfHouseholdsMin?: string,
-        numberOfHouseholdsWithTpInProgramMax?: string,
-        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * Ordering
          *
@@ -13361,8 +13381,6 @@ export class RestService {
                 'name': name,
                 'number_of_households_max': numberOfHouseholdsMax,
                 'number_of_households_min': numberOfHouseholdsMin,
-                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
-                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'search': search,
@@ -13667,8 +13685,6 @@ export class RestService {
         orderBy,
         ordering,
         partner,
-        program,
-        roles,
         search,
         status,
     }: {
@@ -13699,8 +13715,6 @@ export class RestService {
          */
         ordering?: string,
         partner?: Array<number>,
-        program?: string,
-        roles?: Array<string>,
         search?: string,
         /**
          * * `ACTIVE` - Active
@@ -13723,8 +13737,6 @@ export class RestService {
                 'order_by': orderBy,
                 'ordering': ordering,
                 'partner': partner,
-                'program': program,
-                'roles': roles,
                 'search': search,
                 'status': status,
             },

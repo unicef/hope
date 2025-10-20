@@ -12,7 +12,8 @@ import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -29,11 +30,21 @@ interface ProgramCyclesTableProgramDetailsProps {
 const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
+  const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    page,
   });
+
+  // Update queryVariables when page changes
+  React.useEffect(() => {
+    setQueryVariables((prev) => ({
+      ...prev,
+      page,
+    }));
+  }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
@@ -56,18 +67,21 @@ const ProgramCyclesTableProgramDetails = ({
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsCyclesCountRetrieve',
-      programId,
+      program.slug,
       businessAreaSlug,
       queryVariables,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         createApiParams(
-          { businessAreaSlug, programSlug: programId },
+          { businessAreaSlug, programSlug: program.slug },
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, dataProgramCyclesCount);
 
   const canViewDetails = programId !== 'all';
 
@@ -168,7 +182,9 @@ const ProgramCyclesTableProgramDetails = ({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       actions={actions}
-      itemsCount={dataProgramCyclesCount?.count}
+      itemsCount={itemsCount}
+      page={page}
+      setPage={setPage}
     />
   );
 };

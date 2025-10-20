@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models.signals import m2m_changed, post_save
-from django.dispatch import receiver
+from django.dispatch import Signal, receiver
 
 from hope.apps.account.models import Partner, Role, RoleAssignment
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
@@ -16,6 +16,9 @@ from hope.apps.program.models import Program
 from hope.apps.program.signals import program_closed_signal, program_opened_signal
 from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.signals import rdi_merged
+
+post_bulk_update = Signal()
+post_bulk_create = Signal()
 
 
 @receiver(m2m_changed, sender=DataCollectingType.compatible_types.through)

@@ -1,4 +1,4 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -54,6 +54,7 @@ export const TargetPopulationTableFilters = ({
 
   const allowedStatusChoices = [
     'ASSIGNED',
+    PaymentPlanStatusEnum.DRAFT,
     PaymentPlanStatusEnum.TP_OPEN,
     PaymentPlanStatusEnum.TP_LOCKED,
     PaymentPlanStatusEnum.PROCESSING,
@@ -71,10 +72,13 @@ export const TargetPopulationTableFilters = ({
   const preparedStatusChoices =
     [
       { name: 'Assigned', value: 'ASSIGNED' },
+      { name: 'Ready for Payment Module', value: PaymentPlanStatusEnum.DRAFT },
       ...(statusChoicesData || []),
-    ]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
-    ) || [];
+    ]
+      ?.filter((el) =>
+        allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
+      )
+      ?.filter((el) => el.name !== 'Draft') || [];
 
   return (
     <FiltersSection
@@ -82,7 +86,7 @@ export const TargetPopulationTableFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -91,7 +95,7 @@ export const TargetPopulationTableFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -107,7 +111,7 @@ export const TargetPopulationTableFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountGte}
@@ -119,7 +123,7 @@ export const TargetPopulationTableFilters = ({
             data-cy="filters-total-households-count-min"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             value={filter.totalHouseholdsCountLte}
             placeholder={t('To')}
@@ -130,7 +134,7 @@ export const TargetPopulationTableFilters = ({
             data-cy="filters-total-households-count-max"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
@@ -138,7 +142,7 @@ export const TargetPopulationTableFilters = ({
             value={filter.createdAtGte}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtLte', date)}

@@ -1,6 +1,9 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
 import { RestService } from '@restgenerated/services/RestService';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -51,7 +54,6 @@ function ImportedIndividualsTable({
     setQueryVariables(initialVariables);
   }, [initialVariables]);
 
-
   const replacements = {
     id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
@@ -72,9 +74,9 @@ function ImportedIndividualsTable({
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
-        <Grid container justifyContent="flex-end" spacing={3}>
+        <Grid container spacing={3} sx={{ justifyContent: 'flex-end' }}>
           <Grid>
-            <Box p={3}>
+            <Box sx={{ p: 3 }}>
               <FormControlLabel
                 control={
                   <Checkbox

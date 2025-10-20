@@ -14,6 +14,7 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -63,19 +64,15 @@ export function RequestedHouseholdDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
       });
     },
-    onError: (err: any) => {
-      if (err?.body?.errors) {
-        Object.values(err.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage(err?.message || 'An error occurred');
-      }
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
   const householdData = React.useMemo(
@@ -258,7 +255,7 @@ export function RequestedHouseholdDataChange({
           await mutate(mutationPayload);
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (error) {
+        } catch {
           // Error handling is done in the mutation's onError callback
         }
       }}

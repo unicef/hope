@@ -44,6 +44,7 @@ const PeoplePaymentsTable = ({
     paymentPlanId: paymentPlan.id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -63,7 +64,7 @@ const PeoplePaymentsTable = ({
           {
             businessAreaSlug: businessArea,
             programSlug: programId,
-            paymentPlanId: paymentPlan.id,
+            paymentPlanPk: paymentPlan.id,
           },
           queryVariables,
           { withPagination: true },
@@ -99,6 +100,8 @@ const PeoplePaymentsTable = ({
             queryVariables={queryVariables}
             setQueryVariables={setQueryVariables}
             data={paymentsData}
+            page={page}
+            setPage={setPage}
             renderRow={(row: PaymentList) => (
               <PeoplePaymentsTableRow
                 key={row.id}

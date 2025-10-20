@@ -1,33 +1,33 @@
-import * as Yup from 'yup';
-import { showApiErrorMessages, today } from '@utils/utils';
-import moment from 'moment/moment';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import {
   Box,
   Button,
   DialogContent,
   DialogTitle,
   FormHelperText,
+  Grid,
 } from '@mui/material';
-import { DialogDescription } from '@containers/dialogs/DialogDescription';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogActions } from '@containers/dialogs/DialogActions';
-import { LoadingButton } from '@core/LoadingButton';
-import { useTranslation } from 'react-i18next';
-import { Field, Form, Formik, FormikValues } from 'formik';
-import { GreyText } from '@core/GreyText';
-import Grid from '@mui/material/Grid2';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikDateField } from '@shared/Formik/FormikDateField';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
-import type { DefaultError } from '@tanstack/query-core';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import type { DefaultError } from '@tanstack/query-core';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages, today } from '@utils/utils';
+import { Field, Form, Formik, FormikValues } from 'formik';
+import moment from 'moment/moment';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 
 interface CreateProgramCycleProps {
   program: ProgramDetail;
@@ -148,7 +148,7 @@ const CreateProgramCycle = ({
                 </GreyText>
               </DialogDescription>
               <Grid container spacing={3}>
-                <Grid size={{ xs: 12 }}>
+                <Grid size={12}>
                   <Field
                     name="title"
                     fullWidth
@@ -161,7 +161,7 @@ const CreateProgramCycle = ({
                     <FormHelperText error>{error.data.title}</FormHelperText>
                   )}
                 </Grid>
-                <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
+                <Grid size={6} data-cy="start-date-cycle">
                   <Field
                     name="startDate"
                     label={t('Start Date')}
@@ -176,7 +176,7 @@ const CreateProgramCycle = ({
                     </FormHelperText>
                   )}
                 </Grid>
-                <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
+                <Grid size={6} data-cy="end-date-cycle">
                   <Field
                     name="endDate"
                     label={t('End Date')}

@@ -86,6 +86,8 @@ const MergedPeriodicDataUpdates = () => {
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
   });
 
+  const [page, setPage] = useState(0);
+
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
       key={row.id}
@@ -114,6 +116,7 @@ const MergedPeriodicDataUpdates = () => {
       <TableCell>
         <StatusBox
           status={row.status}
+          statusDisplay={row.statusDisplay}
           statusToColor={periodicDataUpdatesOnlineEditsStatusToColor}
         />
       </TableCell>
@@ -123,6 +126,7 @@ const MergedPeriodicDataUpdates = () => {
   return (
     <UniversalRestTable
       isOnPaper={true}
+      noEmptyMessage={true}
       renderRow={renderRow}
       headCells={mergedHeadCells}
       data={data ?? []}
@@ -131,7 +135,8 @@ const MergedPeriodicDataUpdates = () => {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       title="Merged Periodic Data Updates"
-      hidePagination={true}
+      page={page}
+      setPage={setPage}
     />
   );
 };

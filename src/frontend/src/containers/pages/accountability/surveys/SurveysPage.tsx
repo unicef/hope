@@ -2,40 +2,23 @@ import { CreateSurveyMenu } from '@components/accountability/Surveys/CreateSurve
 import { SurveysFilters } from '@components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { SurveysTable } from '@containers/tables/Surveys/SurveysTable';
 import { usePermissions } from '@hooks/usePermissions';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { SurveysTable } from '@containers/tables/Surveys/SurveysTable';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 
 function SurveysPage(): ReactElement {
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
-  const { baseUrl, programId } = useBaseUrl();
-  const businessAreaSlug = baseUrl.split('/')[0];
-
-  const { data: categoryChoicesData } = useQuery({
-    queryKey: ['surveyCategoryChoices', businessAreaSlug, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
-        businessAreaSlug,
-        programSlug: programId,
-      }),
-    enabled: !!businessAreaSlug && !!programId,
-  });
-
-  const choicesData = categoryChoicesData || null;
 
   const initialFilter = {
     search: '',
@@ -52,6 +35,11 @@ function SurveysPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   if (permissions === null) return null;
   if (
@@ -62,9 +50,6 @@ function SurveysPage(): ReactElement {
   )
     return <PermissionDenied />;
 
-  if (!choicesData) {
-    return <LoadingComponent />;
-  }
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
     permissions,
@@ -80,13 +65,14 @@ function SurveysPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <SurveysTable
-        filter={appliedFilter}
-        canViewDetails={canViewDetails}
-        choicesData={choicesData}
-      />
+      <div ref={tableRef}>
+        <SurveysTable filter={appliedFilter} canViewDetails={canViewDetails} />
+      </div>
     </>
   );
 }

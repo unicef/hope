@@ -10,13 +10,11 @@ import { Survey } from '@restgenerated/models/Survey';
 interface SurveysTableRowProps {
   survey: Survey;
   canViewDetails: boolean;
-  categoryDict;
 }
 
 export function SurveysTableRow({
   survey,
   canViewDetails,
-  categoryDict,
 }: SurveysTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
@@ -40,7 +38,7 @@ export function SurveysTableRow({
         )}
       </TableCell>
       <TableCell align="left">{survey.title}</TableCell>
-      <TableCell align="left">{categoryDict[survey.category]}</TableCell>
+      <TableCell align="left">{survey.category}</TableCell>
       <TableCell align="left">{survey.numberOfRecipients || 'N/A'}</TableCell>
       <TableCell align="left">{survey.createdBy}</TableCell>
       <TableCell align="left">

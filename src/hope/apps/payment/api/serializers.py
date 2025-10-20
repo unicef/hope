@@ -323,7 +323,8 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program = serializers.CharField(source="program_cycle.program.name")
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
-    program_cycle_id = serializers.UUIDField(source="program_cycle.id", read_only=True)
+    program_slug = serializers.CharField(source="program_cycle.program.slug", read_only=True)
+    program_cycle_id = serializers.UUIDField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -346,11 +347,13 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "follow_ups",
             "program",
             "program_id",
+            "program_slug",
             "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
             "admin_url",
             "screen_beneficiary",
+            "has_payments_reconciliation_overdue",
         )
 
     @staticmethod
@@ -599,7 +602,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True)
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    can_create_xlsx_with_fsp_auth_code = serializers.BooleanField()
+    is_payment_gateway_and_all_sent_to_fsp = serializers.BooleanField()
     fsp_communication_channel = serializers.CharField()
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
@@ -646,7 +649,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "can_split",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
-            "can_create_xlsx_with_fsp_auth_code",
+            "is_payment_gateway_and_all_sent_to_fsp",
             "fsp_communication_channel",
             "financial_service_provider",
             "can_export_xlsx",
@@ -782,7 +785,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
-                return obj.can_create_xlsx_with_fsp_auth_code
+                return obj.is_payment_gateway_and_all_sent_to_fsp
 
             if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
                 if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
@@ -971,6 +974,7 @@ class PaymentChoicesSerializer(serializers.Serializer):
 
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
+    parent_id = serializers.UUIDField(read_only=True)
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
     household_unicef_id = serializers.CharField(source="household.unicef_id")
@@ -1002,6 +1006,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "unicef_id",
+            "parent_id",
             "household_id",
             "household_unicef_id",
             "household_size",

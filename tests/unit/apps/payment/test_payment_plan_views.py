@@ -1,3 +1,4 @@
+from datetime import timezone as dt_timezone
 from io import BytesIO
 import json
 from pathlib import Path
@@ -211,7 +212,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         self.set_up(api_client, afghanistan)
         approval_process = ApprovalProcessFactory(
             payment_plan=self.payment_plan1,
-            sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
             sent_for_approval_by=self.user,
         )
         approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
@@ -647,7 +648,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["can_send_to_payment_gateway"] is False
         assert payment_plan["can_split"] is False
         assert payment_plan["total_households_count_with_valid_phone_no"] == 0
-        assert payment_plan["can_create_xlsx_with_fsp_auth_code"] is False
+        assert payment_plan["is_payment_gateway_and_all_sent_to_fsp"] is False
         assert payment_plan["fsp_communication_channel"] == "XLSX"
         assert payment_plan["can_export_xlsx"] is False
         assert payment_plan["can_download_xlsx"] is False
@@ -1615,6 +1616,7 @@ class TestTargetPopulationActions:
             resp_data = response.json()
             assert "id" in resp_data
             assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
+            assert "STEFICON_WAIT" in resp_data["status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1845,6 +1847,7 @@ class TestPaymentPlanActions:
         self.url_pp_split = reverse("api:payments:payment-plans-split", kwargs=url_kwargs)
         self.url_create_follow_up = reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs)
         self.url_funds_commitments = reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs)
+        self.url_pp_close = reverse("api:payments:payment-plans-close", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -2057,6 +2060,8 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
+            self.pp.refresh_from_db(fields=["background_action_status"])
+            assert self.pp.background_action_status == "RULE_ENGINE_RUN"
             assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
@@ -2815,3 +2820,35 @@ class TestPaymentPlanActions:
         assert len(response.json()) == 2
         assert response.json()[0]["name"] == "XLSX_1"
         assert response.json()[1]["name"] == "XLSX_2"
+
+    @pytest.mark.parametrize(
+        ("permissions", "expected_status", "pp_status"),
+        [
+            ([Permissions.PM_CLOSE_FINISHED], status.HTTP_200_OK, PaymentPlan.Status.FINISHED),
+            ([Permissions.PM_CLOSE_FINISHED], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
+            ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.FINISHED),
+        ],
+    )
+    def test_pp_close(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+        pp_status: str,
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = pp_status
+        self.pp.save()
+        self.pp.refresh_from_db()
+
+        assert self.pp.status == pp_status
+        response = self.client.get(self.url_pp_close)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan closed"}
+
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            assert (
+                response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
+            )

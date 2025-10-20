@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone as dt_timezone
 import json
 from typing import Any
 from unittest import mock
@@ -13,6 +13,7 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
+from django.utils.timezone import now
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
@@ -75,7 +76,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_in_approval(self, afghanistan: BusinessAreaFactory) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=PaymentPlan.Status.IN_APPROVAL)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
@@ -140,7 +141,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_other_status(self, afghanistan: BusinessAreaFactory, status: str) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=status)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
@@ -421,6 +422,33 @@ class TestPaymentPlanModel(TestCase):
             individual_ids="IND-01, IND-02",
         )
         assert not pp.has_empty_ids_criteria
+
+    def test_has_payments_reconciliation_overdue(self) -> None:
+        pp = PaymentPlanFactory(
+            dispersion_start_date=now().date() - timedelta(days=20),
+            dispersion_end_date=now().date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        program = pp.program
+        program.reconciliation_window_in_days = 10
+        program.save()
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_SUCCESS, delivered_quantity=100)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
+        assert pp.has_payments_reconciliation_overdue is True
+
+        program.reconciliation_window_in_days = 30
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
+
+        program.reconciliation_window_in_days = 0
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
 
 
 class TestPaymentModel(TestCase):

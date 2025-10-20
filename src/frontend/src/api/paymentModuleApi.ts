@@ -7,7 +7,7 @@ interface BulkActionPaymentPlansManagerialProps {
   comment?: string;
 }
 
-export const bulkActionPaymentPlansManagerial = async ({
+export const bulkActionPaymentPlansManagerial = async({
   businessAreaSlug,
   ids,
   action,
@@ -24,7 +24,7 @@ export const bulkActionPaymentPlansManagerial = async ({
 
   try {
     const response = await api.post(
-      `${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
+      `business-areas/${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
       payload,
     );
     return response.data;
@@ -33,7 +33,7 @@ export const bulkActionPaymentPlansManagerial = async ({
   }
 };
 
-export const deleteSupportingDocument = async (
+export const deleteSupportingDocument = async(
   businessArea: string,
   programId: string,
   paymentPlanId: string,
@@ -41,7 +41,7 @@ export const deleteSupportingDocument = async (
 ): Promise<{ success: boolean }> => {
   try {
     await api.delete(
-      `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
+      `business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
     );
     return { success: true };
   } catch (error) {
@@ -49,7 +49,7 @@ export const deleteSupportingDocument = async (
   }
 };
 
-export const uploadSupportingDocument = async (
+export const uploadSupportingDocument = async(
   businessArea: string,
   programId: string,
   paymentPlanId: string,
@@ -71,7 +71,7 @@ export const uploadSupportingDocument = async (
   }
 };
 
-export const fetchSupportingDocument = async (
+export const fetchSupportingDocument = async(
   businessAreaSlug: string,
   programId: string,
   paymentPlanId: string,
@@ -80,7 +80,7 @@ export const fetchSupportingDocument = async (
 ): Promise<any> => {
   return handleApiResponse(
     api.get(
-      `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
+      `business-areas/${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
       {},
       fileName,
     ),

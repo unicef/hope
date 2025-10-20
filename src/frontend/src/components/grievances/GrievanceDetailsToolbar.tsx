@@ -135,6 +135,9 @@ export const GrievanceDetailsToolbar = ({
       const householdData = ticket.ticketDetails?.householdData || {};
       const individualData = ticket.ticketDetails?.individualData || {};
 
+      console.log('householdData', householdData);
+      console.log('individualData', individualData);
+
       const allData = {
         ...householdData,
         ...individualData,
@@ -328,7 +331,7 @@ export const GrievanceDetailsToolbar = ({
         }).then(async () => {
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch (e) {
+          } catch {
             // Error handling is done in the mutation onError callback
           }
         })

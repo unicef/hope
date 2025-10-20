@@ -6,12 +6,10 @@ from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
-from django.shortcuts import get_object_or_404
 
 from hope.apps.account.models import Partner, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.accountability.models import Feedback
-from hope.apps.core.utils import decode_id_string
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -26,14 +24,6 @@ from hope.apps.grievance.validators import validate_file
 from hope.apps.household.models import Individual
 
 logger = logging.getLogger(__name__)
-
-
-def get_individual(individual_id: str) -> Individual:
-    decoded_selected_individual_id = decode_id_string(individual_id)
-    return get_object_or_404(
-        Individual.objects.select_related("household"),
-        id=decoded_selected_individual_id,
-    )
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:

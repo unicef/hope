@@ -42,6 +42,7 @@ export type PaymentPlanDetail = {
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
      * * `FINISHED` - Finished
+     * * `CLOSED` - Closed
      */
     status?: PaymentPlanStatusEnum;
     /**
@@ -317,7 +318,7 @@ export type PaymentPlanDetail = {
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
     readonly totalHouseholdsCountWithValidPhoneNo: number;
-    canCreateXlsxWithFspAuthCode: boolean;
+    isPaymentGatewayAndAllSentToFsp: boolean;
     fspCommunicationChannel: string;
     readonly financialServiceProvider: FinancialServiceProvider;
     readonly canExportXlsx: boolean;

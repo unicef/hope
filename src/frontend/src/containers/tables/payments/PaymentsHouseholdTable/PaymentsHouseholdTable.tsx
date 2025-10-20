@@ -8,7 +8,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
@@ -34,6 +35,7 @@ function PaymentsHouseholdTable({
     programSlug: programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -64,6 +66,22 @@ function PaymentsHouseholdTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const { data: paymentsCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsCount',
+      household?.id,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanPk: household?.id,
+      }),
+    enabled: page === 0,
+  });
+
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
@@ -78,6 +96,8 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
+  const itemsCount = usePersistedCount(page, paymentsCountData);
+
   return (
     <UniversalRestTable
       title={t('Payments')}
@@ -87,6 +107,9 @@ function PaymentsHouseholdTable({
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow
           key={row.id}

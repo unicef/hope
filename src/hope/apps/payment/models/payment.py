@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
 import hashlib
@@ -26,6 +26,7 @@ from django.db.models.functions import Coalesce
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.text import Truncator
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils import Choices
@@ -208,6 +209,7 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+        CLOSED = "CLOSED", "Closed"
 
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
@@ -228,6 +230,7 @@ class PaymentPlan(
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.CLOSED,
     )
 
     CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
@@ -840,8 +843,8 @@ class PaymentPlan(
         return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
 
     @property
-    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
-        """Export MTCN file - xlsx file with password."""
+    def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
+        """Export MTCN file xlsx file with password."""
         all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
         return self.is_payment_gateway and all_sent_to_fsp
 
@@ -1031,6 +1034,25 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+
+    @property
+    def has_payments_reconciliation_overdue(self) -> bool:
+        reconciliation_window_in_days = self.program.reconciliation_window_in_days
+        if not reconciliation_window_in_days:
+            return False
+
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
+        is_overdue = due_date <= now().date()
+
+        return (
+            self.status == PaymentPlan.Status.ACCEPTED
+            and is_overdue
+            and self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
+            .filter(
+                delivered_quantity__isnull=True,
+            )
+            .exists()
+        )
 
     # @transitions #####################################################################
 
@@ -1369,6 +1391,14 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.FINISHED,
+        target=Status.CLOSED,
+    )
+    def status_close(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -2047,8 +2077,14 @@ class Payment(
 
     @property
     def people_individual(self) -> Individual | None:
-        """Return first Individual from Household for DCT social worker."""
-        return self.household.individuals.first() if self.parent.is_social_worker_program else None
+        if not getattr(self.parent, "is_social_worker_program", False):
+            return None
+
+        household = self.household
+        prefetched = getattr(household, "prefetched_individuals", None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        return household.individuals.select_related().first()
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
@@ -2084,6 +2120,14 @@ class FinancialInstitution(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
+
+    @classmethod
+    def get_rdi_template_choices(cls) -> dict:
+        return {
+            "account__ACCOUNT_TYPE__financial_institution": {
+                "choices": [{"value": fi.pk, "label": {"English(EN)": fi.name}} for fi in cls.objects.all()]
+            }
+        }
 
 
 class FinancialInstitutionMapping(TimeStampedModel):
