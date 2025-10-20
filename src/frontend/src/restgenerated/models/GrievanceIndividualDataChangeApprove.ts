@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type GrievanceIndividualDataChangeApprove = {
-    individualApproveData: any;
+    individualApproveData?: any;
     approvedDocumentsToCreate?: Array<number>;
     approvedDocumentsToEdit?: Array<number>;
     approvedDocumentsToRemove?: Array<number>;

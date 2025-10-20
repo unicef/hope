@@ -10,6 +10,7 @@ import {
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
+import { AreaList } from '@restgenerated/models/AreaList';
 
 export function AdminAreaAutocomplete({
   disabled,
@@ -44,7 +45,6 @@ export function AdminAreaAutocomplete({
 
   const [queryVariables, setQueryVariables] = useState({
     limit: 20,
-    areaTypeAreaLevel: level,
     search: debouncedInputText || undefined,
   });
 
@@ -52,20 +52,20 @@ export function AdminAreaAutocomplete({
     setQueryVariables((prev) => ({
       ...prev,
       search: debouncedInputText || undefined,
-      areaTypeAreaLevel: level,
     }));
-  }, [debouncedInputText, level]);
+  }, [debouncedInputText]);
 
   const {
     data: areasData,
     isLoading: loading,
     refetch,
-  } = useQuery({
-    queryKey: ['adminAreas', queryVariables, businessArea],
+  } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', queryVariables, businessArea, level],
     queryFn: () =>
-      RestService.restAreasList({
-        ...queryVariables,
-        // businessAreaSlug: businessArea, // Uncomment if needed by API
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: level,
+        name: queryVariables.search,
       }),
     enabled: open && !!businessArea,
     staleTime: 0,
@@ -88,7 +88,7 @@ export function AdminAreaAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = areasData?.results || [];
+  const allEdges = areasData || [];
 
   const handleOptionSelected = (option: any, selectedValue: any) => {
     if (typeof selectedValue === 'string') {
