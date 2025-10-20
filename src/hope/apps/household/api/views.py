@@ -4,11 +4,10 @@ from constance import config
 from django.db.models import Exists, F, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import status, serializers
+from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -189,7 +188,7 @@ class HouseholdViewSet(
 
     @extend_schema(
         responses={
-            200: PaymentListSerializer,
+            200: PaymentListSerializer(many=True),
         },
     )
     @action(detail=True, methods=["get"])
@@ -207,7 +206,6 @@ class HouseholdViewSet(
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
 
-
     @extend_schema(
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
@@ -221,7 +219,6 @@ class HouseholdViewSet(
             Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         ).count()
         return Response({"count": payments_count}, status=status.HTTP_200_OK)
-
 
     @extend_schema(
         responses={
