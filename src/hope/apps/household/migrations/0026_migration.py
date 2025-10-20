@@ -56,6 +56,14 @@ class Migration(migrations.Migration):
                 max_length=85,
             ),
         ),
+        # --- DROP the trigger that depends on household_individual.full_name ---
+        migrations.RunSQL(
+            sql="""
+            DROP TRIGGER IF EXISTS vector_column_trigger
+            ON household_individual;
+        """,
+            reverse_sql="",
+        ),
         migrations.AlterField(
             model_name="individual",
             name="full_name",
@@ -66,6 +74,23 @@ class Migration(migrations.Migration):
                 max_length=255,
                 validators=[django.core.validators.MinLengthValidator(2)],
             ),
+        ),
+        # --- RECREATE the trigger ---
+        migrations.RunSQL(
+            sql="""
+                CREATE TRIGGER vector_column_trigger
+                    BEFORE INSERT OR
+                UPDATE OF observed_disability, full_name, vector_column
+                ON household_individual
+                    FOR EACH ROW EXECUTE PROCEDURE
+                    tsvector_update_trigger(
+                    vector_column, 'pg_catalog.english', observed_disability, full_name
+                    );
+                """,
+            reverse_sql="""
+                    DROP TRIGGER IF EXISTS vector_column_trigger
+                    ON household_individual;
+                """,
         ),
         migrations.AlterField(
             model_name="individual",
