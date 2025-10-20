@@ -3,8 +3,8 @@ from typing import Any
 from constance import config
 from django.db.models import Exists, F, OuterRef, Prefetch, Q, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -43,7 +43,7 @@ from hope.apps.household.api.serializers.individual import (
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
 from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
-from hope.apps.payment.api.serializers import PaginatedPaymentResponseSerializer, PaymentListSerializer
+from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
 
@@ -80,6 +80,10 @@ class HouseholdViewSet(
             Permissions.RDI_VIEW_DETAILS,
         ],
         "payments": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PM_VIEW_DETAILS,
+        ],
+        "payments_count": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.PM_VIEW_DETAILS,
         ],
@@ -185,12 +189,11 @@ class HouseholdViewSet(
 
     @extend_schema(
         responses={
-            200: PaginatedPaymentResponseSerializer,
+            200: PaymentListSerializer,
         },
     )
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        self.pagination_class = LimitOffsetPagination
         hh = self.get_object()
         payments = Payment.objects.filter(
             Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
@@ -203,6 +206,22 @@ class HouseholdViewSet(
 
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
+
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
+        },
+        filters=True,
+    )
+    @action(detail=True, methods=["get"], url_path="payments/count")
+    def payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+        hh = self.get_object()
+        payments_count = Payment.objects.filter(
+            Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        ).count()
+        return Response({"count": payments_count}, status=status.HTTP_200_OK)
+
 
     @extend_schema(
         responses={

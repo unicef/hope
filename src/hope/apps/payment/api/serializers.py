@@ -1140,13 +1140,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
-class PaginatedPaymentResponseSerializer(serializers.Serializer):
-    count = serializers.IntegerField()
-    next = serializers.URLField()
-    previous = serializers.URLField()
-    results = PaymentListSerializer(many=True)
-
-
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     parent = PaymentPlanDetailSerializer()
     source_payment = PaymentListSerializer()

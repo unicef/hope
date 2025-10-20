@@ -189,7 +189,6 @@ export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } 
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
 export type { PaginatedPaymentPlanList as PaginatedPaymentPlanListCamelCase } from './models/PaginatedPaymentPlanList';
 export type { PaginatedPaymentPlanListList as PaginatedPaymentPlanListListCamelCase } from './models/PaginatedPaymentPlanListList';
-export type { PaginatedPaymentResponse as PaginatedPaymentResponseCamelCase } from './models/PaginatedPaymentResponse';
 export type { PaginatedPaymentVerificationPlanListList as PaginatedPaymentVerificationPlanListListCamelCase } from './models/PaginatedPaymentVerificationPlanListList';
 export type { PaginatedPDUOnlineEditListList as PaginatedPDUOnlineEditListListCamelCase } from './models/PaginatedPDUOnlineEditListList';
 export type { PaginatedPDUXlsxTemplateListList as PaginatedPDUXlsxTemplateListListCamelCase } from './models/PaginatedPDUXlsxTemplateListList';
