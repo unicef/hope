@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -42,7 +43,7 @@ from hope.apps.household.api.serializers.individual import (
 )
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
 from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
-from hope.apps.payment.api.serializers import PaymentListSerializer
+from hope.apps.payment.api.serializers import PaginatedPaymentResponseSerializer, PaymentListSerializer
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
 
@@ -184,28 +185,24 @@ class HouseholdViewSet(
 
     @extend_schema(
         responses={
-            200: PaymentListSerializer(many=True),
+            200: PaginatedPaymentResponseSerializer,
         },
     )
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        self.pagination_class = LimitOffsetPagination
         hh = self.get_object()
         payments = Payment.objects.filter(
             Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         )
-        total_count = payments.count()
 
         page = self.paginate_queryset(payments)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            response = self.get_paginated_response(serializer.data)
-            response.data["count"] = total_count
-            return response
+            return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(payments, many=True)
-        response = Response(serializer.data)
-        response.data["count"] = total_count
-        return response
+        return Response(serializer.data)
 
     @extend_schema(
         responses={
