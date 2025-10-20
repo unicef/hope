@@ -9229,7 +9229,7 @@ export class RestService {
         businessAreaSlug,
         id,
         programSlug,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
@@ -9237,7 +9237,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: PaymentPlanImportFile,
+        formData: PaymentPlanImportFile,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -9247,8 +9247,8 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
