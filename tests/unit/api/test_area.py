@@ -87,7 +87,7 @@ class APIAreaTests(HOPEApiTestCase):
             response = self.client.get(self.url_list)
 
         assert response.status_code == status.HTTP_200_OK
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 6
         assert {
             "id": str(self.area_1_area_type_1.id),
