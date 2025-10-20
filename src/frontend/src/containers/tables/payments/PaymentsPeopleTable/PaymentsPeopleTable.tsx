@@ -4,7 +4,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState, useEffect } from 'react';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { ReactElement, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
@@ -56,13 +57,36 @@ function PaymentsPeopleTable({
             id: household.id,
           },
           queryVariables,
+
           { withPagination: true },
         ),
       );
     },
   });
 
-  const itemsCount = usePersistedCount(page, paymentsData?.count);
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsPaymentsCount',
+      programId,
+      businessArea,
+      queryVariables,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <UniversalRestTable
