@@ -2,11 +2,11 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface AcceptanceProcessStepperProps {
-  acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
+  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
 }
 
 export function AcceptanceProcessStepper({

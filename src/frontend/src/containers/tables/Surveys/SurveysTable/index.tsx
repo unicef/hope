@@ -1,1 +1,2 @@
-export { SurveysTable } from './SurveysTable';
+import SurveysTable from './SurveysTable';
+export { SurveysTable };

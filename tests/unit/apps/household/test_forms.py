@@ -6,10 +6,9 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.household.forms import MassEnrollForm
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.models import Program
+from hope.apps.household.forms import MassEnrollForm
+from hope.apps.household.models import Household
+from hope.apps.program.models import Program
 
 
 class MassEnrollFormTest(TestCase):
@@ -19,9 +18,11 @@ class MassEnrollFormTest(TestCase):
         partial = DataCollectingTypeFactory(
             business_areas=[afg],
         )
-        partial.compatible_types.add(partial)
         self.program = ProgramFactory(
-            name="Test Program 333", business_area_id=afg.id, status=Program.ACTIVE, data_collecting_type=partial
+            name="Test Program 333",
+            business_area_id=afg.id,
+            status=Program.ACTIVE,
+            data_collecting_type=partial,
         )
         self.household = HouseholdFactory(
             program=self.program,
@@ -35,4 +36,4 @@ class MassEnrollFormTest(TestCase):
             business_area_id=self.business_area_id,
             households=Household.objects.filter(id=self.household.id),
         )
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()

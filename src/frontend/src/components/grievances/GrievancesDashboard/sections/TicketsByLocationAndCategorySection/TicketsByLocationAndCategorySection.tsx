@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 import { TicketsByLocationAndCategoryChart } from '../../charts/TicketsByLocationAndCategoryChart';
 import { DashboardPaper } from '../../DashboardPaper';
+import { DetailedChartData } from '@restgenerated/models/DetailedChartData';
 import { ReactElement } from 'react';
 
 interface TicketsByLocationAndCategorySectionProps {
-  data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
+  data: DetailedChartData;
 }
 
 export function TicketsByLocationAndCategorySection({

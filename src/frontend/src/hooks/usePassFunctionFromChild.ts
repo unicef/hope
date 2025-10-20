@@ -6,9 +6,9 @@ export function usePassFunctionFromChild(): [() => void, (action) => void] {
     (action) => void,
   ];
   const setChildFunctionWrapper = (action): void => {
-    if (!childFunction) {
-      setChildFunction(() => () => action());
-    }
+    setChildFunction(() => () => {
+      return action();
+    });
   };
   return [childFunction, setChildFunctionWrapper];
 }

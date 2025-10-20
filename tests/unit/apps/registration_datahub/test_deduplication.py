@@ -1,15 +1,13 @@
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
-
 import pytest
+
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from unit.conftest import disabled_locally_test
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.models import (
     DUPLICATE,
     FEMALE,
     HEAD,
@@ -21,17 +19,15 @@ from hct_mis_api.apps.household.models import (
     Individual,
     PendingIndividual,
 )
-from hct_mis_api.apps.registration_data.models import (
+from hope.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
     ImportData,
 )
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.utils.elasticsearch_utils import (
-    populate_index,
-    rebuild_search_index,
-)
-from hct_mis_api.apps.utils.querysets import evaluate_qs
+from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
+from hope.apps.utils.querysets import evaluate_qs
+from unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -39,11 +35,10 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 @disabled_locally_test
 class TestBatchDeduplication(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -248,8 +243,8 @@ class TestBatchDeduplication(TestCase):
             deduplication_batch_status=UNIQUE_IN_BATCH
         )
 
-        self.assertEqual(duplicate_in_batch.count(), 4)
-        self.assertEqual(unique_in_batch.count(), 3)
+        assert duplicate_in_batch.count() == 4
+        assert unique_in_batch.count() == 3
 
         expected_duplicates = (
             "Tessta Testowski",
@@ -262,14 +257,8 @@ class TestBatchDeduplication(TestCase):
             "Tescik Testowski",
             "Test Example",
         )
-        self.assertEqual(
-            tuple(duplicate_in_batch.values_list("full_name", flat=True)),
-            expected_duplicates,
-        )
-        self.assertEqual(
-            tuple(unique_in_batch.values_list("full_name", flat=True)),
-            expected_uniques,
-        )
+        assert tuple(duplicate_in_batch.values_list("full_name", flat=True)) == expected_duplicates
+        assert tuple(unique_in_batch.values_list("full_name", flat=True)) == expected_uniques
 
         duplicate_in_golden_record = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_golden_record_status=DUPLICATE
@@ -281,9 +270,9 @@ class TestBatchDeduplication(TestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 5)
-        self.assertEqual(unique_in_golden_record.count(), 1)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
+        assert duplicate_in_golden_record.count() == 5
+        assert unique_in_golden_record.count() == 1
+        assert needs_adjudication_in_golden_record.count() == 1
 
         expected_duplicates_gr = (
             "Tessta Testowski",
@@ -295,23 +284,16 @@ class TestBatchDeduplication(TestCase):
 
         expected_uniques_gr = ("Tesa Testowski",)
 
-        self.assertEqual(
-            tuple(duplicate_in_golden_record.values_list("full_name", flat=True)),
-            expected_duplicates_gr,
-        )
-        self.assertEqual(
-            tuple(unique_in_golden_record.values_list("full_name", flat=True)),
-            expected_uniques_gr,
-        )
+        assert tuple(duplicate_in_golden_record.values_list("full_name", flat=True)) == expected_duplicates_gr
+        assert tuple(unique_in_golden_record.values_list("full_name", flat=True)) == expected_uniques_gr
 
 
 @pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -434,8 +416,8 @@ class TestGoldenRecordDeduplication(TestCase):
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
-        self.assertEqual(needs_adjudication.count(), 0)
-        self.assertEqual(duplicate.count(), 4)
+        assert needs_adjudication.count() == 0
+        assert duplicate.count() == 4
 
     def test_deduplicate_individuals_from_other_source(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
@@ -451,5 +433,5 @@ class TestGoldenRecordDeduplication(TestCase):
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
-        self.assertEqual(needs_adjudication.count(), 0)
-        self.assertEqual(duplicate.count(), 2)
+        assert needs_adjudication.count() == 0
+        assert duplicate.count() == 2

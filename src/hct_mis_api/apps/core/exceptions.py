@@ -1,2 +1,0 @@
-class SearchException(Exception):
-    pass

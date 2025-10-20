@@ -1,20 +1,17 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
+import { Grid, IconButton } from '@mui/material';
 import camelCase from 'lodash/camelCase';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  AllAddIndividualFieldsQuery,
-  IndividualQuery,
-} from '@generated/graphql';
 import { EditPeopleDataChangeField } from './EditPeopleDataChangeField';
 import { CurrentValue } from './CurrentValue';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 export interface EditPeopleDataChangeFieldRowProps {
-  fields: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'];
-  individual: IndividualQuery['individual'];
+  fields: any[];
+  individual: IndividualDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
@@ -42,7 +39,7 @@ export const EditPeopleDataChangeFieldRow = ({
   }, [itemValue.fieldName]);
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid size={{ xs: 4 }}>
+      <Grid size={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -79,10 +76,10 @@ export const EditPeopleDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid size={{ xs: 4 }} />
+        <Grid size={4} />
       )}
       {itemValue.fieldName && (
-        <Grid size={{ xs: 1 }}>
+        <Grid size={1}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

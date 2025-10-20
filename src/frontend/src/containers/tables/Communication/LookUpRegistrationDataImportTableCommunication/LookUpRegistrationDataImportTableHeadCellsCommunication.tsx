@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { RegistrationDataImportNode } from '@generated/graphql';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
-export const headCells: HeadCell<RegistrationDataImportNode>[] = [
+export const headCells: HeadCell<RegistrationDataImportList>[] = [
   {
     disablePadding: false,
     label: '',
@@ -24,25 +24,25 @@ export const headCells: HeadCell<RegistrationDataImportNode>[] = [
   {
     disablePadding: false,
     label: 'Import Date',
-    id: 'import_date',
+    id: 'importDate',
     numeric: false,
   },
   {
     disablePadding: true,
-    label: 'Num. of Recipients',
-    id: 'total_households_count_with_valid_phone_no',
+    label: 'Num. of Households',
+    id: 'numberOfHouseholds',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Imported by',
-    id: 'imported_by__first_name',
+    id: 'importedBy',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Data Source',
-    id: 'data_source',
+    id: 'dataSource',
     numeric: false,
   },
 ];

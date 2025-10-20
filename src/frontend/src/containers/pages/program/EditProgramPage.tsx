@@ -2,39 +2,44 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
-import { DetailsStep } from '@components/programs/EditProgram/DetailsStep';
-import { PartnersStep } from '@components/programs/EditProgram/PartnersStep';
-import { ProgramFieldSeriesStep } from '@components/programs/EditProgram/ProgramFieldSeriesStep';
-import {
-  handleNext,
-  ProgramStepper,
-} from '@components/programs/CreateProgram/ProgramStepper';
-import {
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
-  useUpdateProgramMutation,
-  useUpdateProgramPartnersMutation,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
-import { hasPermissionInModule } from '../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
+import { DetailsStep } from '@components/programs/EditProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/EditProgram/PartnersStep';
+import { ProgramFieldSeriesStep } from '@components/programs/EditProgram/ProgramFieldSeriesStep';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { AreaTree } from '@restgenerated/models/AreaTree';
+import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
+import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
+import { UserChoices } from '@restgenerated/models/UserChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  decodeIdString,
+  isPartnerVisible,
+  mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
+  deepUnderscore,
+} from '@utils/utils';
+import { Formik } from 'formik';
 import { omit } from 'lodash';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { hasPermissionInModule } from '../../../config/permissions';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -47,55 +52,98 @@ const EditProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
-    variables: { businessArea },
-  });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
-
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
-
-  const [updateProgramDetails, { loading: loadingUpdate }] =
-    useUpdateProgramMutation({
-      refetchQueries: [
-        {
-          query: ALL_LOG_ENTRIES_QUERY,
-          variables: {
-            objectId: decodeIdString(id),
-            count: 5,
-            businessArea,
-          },
-        },
-      ],
+  const { data: treeData } =
+    useQuery<AreaTree[]>({
+      queryKey: ['allAreasTree', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+          businessAreaSlug: businessArea,
+        }),
     });
 
-  const [updateProgramPartners] = useUpdateProgramPartnersMutation({
-    refetchQueries: [
-      {
-        query: ALL_LOG_ENTRIES_QUERY,
-        variables: {
-          objectId: decodeIdString(id),
-          count: 5,
-          businessArea,
-        },
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
+  });
+
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
+    });
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: updateProgramDetails, isPending: loadingUpdateProgram } =
+    useMutation({
+      mutationFn: (programData: ProgramUpdate) => {
+        return RestService.restBusinessAreasProgramsUpdate({
+          businessAreaSlug: businessArea,
+          slug: id,
+          requestBody: programData,
+        });
       },
-    ],
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaProgram', businessArea, id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreaPrograms', businessArea],
+        });
+      },
+    });
+
+  const {
+    mutateAsync: updateProgramPartners,
+    isPending: loadingPartnersUpdate,
+  } = useMutation({
+    mutationFn: (partnerData: ProgramUpdatePartnerAccess) => {
+      return RestService.restBusinessAreasProgramsUpdatePartnerAccessCreate({
+        businessAreaSlug: businessArea,
+        slug: id,
+        requestBody: partnerData,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaProgram', businessArea, id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaPrograms', businessArea],
+      });
+      // Invalidate activity logs cache
+      await queryClient.invalidateQueries({
+        queryKey: ['activityLogs', businessArea, decodeIdString(id)],
+      });
+    },
   });
 
   if (
     loadingProgram ||
-    treeLoading ||
     userPartnerChoicesLoading ||
-    pdusubtypeChoicesLoading
+    choicesLoading
   )
     return <LoadingComponent />;
 
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (!program || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -114,20 +162,22 @@ const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-    registrationImports,
+    partnerAccess = 'ALL_PARTNERS_ACCESS',
+    registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
-  } = data.program;
+    reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications,
+  } = program;
 
-  const programHasRdi = registrationImports?.totalCount > 0;
+  const programHasRdi = registrationImportsTotalCount > 0;
   const programHasTp = targetPopulationsCount > 0;
 
   const handleSubmitProgramDetails = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
-      : 0;
+      : '0.00';
     const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
@@ -135,32 +185,31 @@ const EditProgramPage = (): ReactElement => {
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
-      .map(({ pduData, ...rest }) => ({
-        ...rest,
-        pduData: pduData
-          ? {
-              ...Object.fromEntries(
-                Object.entries(pduData).filter(
-                  ([key]) => key !== '__typename' && key !== 'id',
-                ),
-              ),
-              roundsNames: (() => {
-                if (!pduData.roundsNames) {
-                  pduData.roundsNames = [];
-                }
-
-                if (
-                  pduData.numberOfRounds === 1 &&
-                  pduData.roundsNames.length === 0
-                ) {
-                  return [''];
-                }
-
-                return pduData.roundsNames.map((roundName) => roundName || '');
-              })(),
+      .map(({ pdu_data, ...rest }) => {
+        let newPduData = pdu_data;
+        if (pdu_data) {
+          const filteredPduData = Object.fromEntries(
+            Object.entries(pdu_data).filter(([key]) => key !== 'id'),
+          );
+          filteredPduData.rounds_names = (() => {
+            if (!pdu_data.rounds_names) {
+              pdu_data.rounds_names = [];
             }
-          : pduData,
-      }));
+            if (
+              pdu_data.number_of_rounds === 1 &&
+              pdu_data.rounds_names.length === 0
+            ) {
+              return [''];
+            }
+            return pdu_data.rounds_names.map((roundName) => roundName || '');
+          })();
+          newPduData = filteredPduData;
+        }
+        return {
+          ...rest,
+          pduData: newPduData,
+        };
+      });
 
     try {
       const requestValuesDetails = omit(values, [
@@ -168,99 +217,111 @@ const EditProgramPage = (): ReactElement => {
         'partners',
         'partnerAccess',
         'pduFields',
+        'isActive',
       ]);
-      const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
-        omit(pduField, ['__typename']),
-      );
-      const response = await updateProgramDetails({
-        variables: {
-          programData: {
-            id,
-            ...requestValuesDetails,
-            budget: budgetToFixed,
-            populationGoal: populationGoalParsed,
-            pduFields: pduFieldsToSendWithoutTypename,
-          },
-          version,
-        },
-      });
+
+      // Build the base programData object
+      const programData: ProgramUpdate = {
+        programmeCode: requestValuesDetails.programmeCode,
+        name: requestValuesDetails.name,
+        slug: '', // readonly field, will be ignored by API
+        sector: requestValuesDetails.sector,
+        description: requestValuesDetails.description,
+        budget: budgetToFixed,
+        administrativeAreasOfImplementation:
+          requestValuesDetails.administrativeAreasOfImplementation,
+        populationGoal: populationGoalParsed,
+        cashPlus: requestValuesDetails.cashPlus,
+        frequencyOfPayments: requestValuesDetails.frequencyOfPayments,
+        // Always send dataCollectingType, but only update if Draft
+        dataCollectingType:
+          program.status === 'DRAFT'
+            ? requestValuesDetails.dataCollectingTypeCode
+            : program.dataCollectingType.code,
+        beneficiaryGroup: requestValuesDetails.beneficiaryGroup,
+        startDate: requestValuesDetails.startDate,
+        endDate:
+          requestValuesDetails.endDate === '' ||
+          requestValuesDetails.endDate === undefined
+            ? null
+            : requestValuesDetails.endDate,
+        pduFields: deepUnderscore(pduFieldsToSend),
+        version,
+        status: '', // readonly field, will be ignored by API
+        partnerAccess: '', // readonly field, will be ignored by API
+        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
+      };
+
+      const response = await updateProgramDetails(programData);
       showMessage(t('Programme edited.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/details/${response.slug}`);
+    } catch (e: any) {
+      showApiErrorMessages(e, showMessage);
     }
   };
 
   const handleSubmitPartners = async (values): Promise<void> => {
     const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
-            areaAccess,
           }))
         : [];
 
     try {
-      const response = await updateProgramPartners({
-        variables: {
-          programData: {
-            id,
-            partners: partnersToSet,
-            partnerAccess: values.partnerAccess,
-          },
-          version,
-        },
-      });
+      const partnerData: ProgramUpdatePartnerAccess = {
+        partners: partnersToSet,
+        partnerAccess: values.partnerAccess as PartnerAccessEnum,
+        version,
+      };
+
+      await updateProgramPartners(partnerData);
       showMessage(t('Programme Partners updated.'));
-      navigate(
-        `/${baseUrl}/details/${response.data.updateProgramPartners.program.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/details/${id}`);
+    } catch (e: any) {
+      showApiErrorMessages(e, showMessage);
     }
   };
 
-  const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
-    const { ...rest } = field;
-    return {
-      ...rest,
-      label: JSON.parse(field.label)['English(EN)'],
-    };
-  });
-
   const initialValuesProgramDetails = {
+    isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
-    programmeCode,
-    startDate,
-    endDate,
+    programmeCode: programmeCode,
+    startDate: startDate,
+    endDate: endDate,
     sector,
-    dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    dataCollectingTypeCode: dataCollectingType.code,
+    beneficiaryGroup: beneficiaryGroup.id,
     description,
     budget,
-    administrativeAreasOfImplementation,
-    populationGoal,
-    cashPlus,
-    frequencyOfPayments,
-    pduFields: mappedPduFields,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
+    populationGoal: populationGoal,
+    cashPlus: cashPlus,
+    frequencyOfPayments: frequencyOfPayments,
+    pduFields: pduFields,
+    reconciliationWindowInDays: reconciliationWindowInDays,
+    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+    program.budget === '0.00' ? '' : program.budget;
   initialValuesProgramDetails.populationGoal =
-    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+    program.populationGoal === 0 ? '' : program.populationGoal;
 
   const initialValuesPartners = {
     partners:
       partners.length > 0
         ? partners
-            .filter((partner) => partner.name !== 'UNICEF')
+            .filter((partner) => isPartnerVisible(partner.name))
             .map((partner) => ({
               id: partner.id,
-              areas: partner.areas.map((area) => decodeIdString(area.id)),
               areaAccess: partner.areaAccess,
+              areas: Array.isArray(partner.areas)
+                ? partner.areas.map((area) => area.id)
+                : [],
             }))
         : [],
     partnerAccess,
@@ -281,12 +342,13 @@ const EditProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['partnerAccess'],
   ];
 
-  const { allAreasTree } = treeData;
-  const { userPartnerChoices } = userPartnerChoicesData;
+  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -327,10 +389,8 @@ const EditProgramPage = (): ReactElement => {
           onSubmit={(values) => {
             handleSubmitProgramDetails(values);
           }}
-          validationSchema={editProgramDetailsValidationSchema(
-            t,
-            initialValuesProgramDetails,
-          )}
+          validationSchema={editProgramDetailsValidationSchema(t)}
+          validationContext={{ isEdit: true }}
           validateOnChange={true}
         >
           {({
@@ -387,13 +447,16 @@ const EditProgramPage = (): ReactElement => {
                             values={values}
                             step={step}
                             setStep={setStep}
-                            pdusubtypeChoicesData={pdusubtypeChoicesData}
+                            pdusubtypeChoicesData={
+                              choicesData?.pduSubtypeChoices
+                            }
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
-                            program={data.program}
+                            program={program}
                             setFieldValue={setFieldValue}
                             submitForm={submitForm}
+                            loading={loadingUpdateProgram}
                           />
                         )}
                       </div>
@@ -414,13 +477,10 @@ const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices = userPartnerChoices
-              .filter((partner) => partner.name !== 'UNICEF')
-              .map((partner) => ({
-                value: partner.value,
-                label: partner.name,
-                disabled: values.partners.some((p) => p.id === partner.value),
-              }));
+            const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+              userPartnerChoices,
+              values.partners,
+            );
 
             return (
               <BaseSection title={t('Programme Partners')}>
@@ -428,12 +488,12 @@ const EditProgramPage = (): ReactElement => {
                   <div>
                     <PartnersStep
                       values={values}
-                      allAreasTreeData={allAreasTree}
+                      allAreasTreeData={treeData || []}
                       partnerChoices={mappedPartnerChoices}
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}
                       programId={id}
-                      loading={loadingUpdate}
+                      loading={loadingPartnersUpdate}
                     />
                   </div>
                 </Fade>

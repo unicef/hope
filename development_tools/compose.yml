@@ -6,12 +6,17 @@ volumes:
 services:
   db:
     image: postgres:14.3
-    command: -c 'max_connections=200'
+    shm_size: 512m
+    command: # full form
+      - "postgres"
+      - "-c"
+      - "max_connections=1000"
+      - "-c"
+      - "shared_buffers=256MB"
     volumes:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
-      - EXTRA_CONF=max_connections=1000
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASS=postgres

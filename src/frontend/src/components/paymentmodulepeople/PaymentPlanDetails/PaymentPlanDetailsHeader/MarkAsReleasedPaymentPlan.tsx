@@ -1,3 +1,11 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,24 +14,19 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { GreyText } from '@core/GreyText';
-import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
+import { useMutation } from '@tanstack/react-query';
 
 export interface MarkAsReleasedPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function MarkAsReleasedPaymentPlan({
@@ -31,22 +34,43 @@ export function MarkAsReleasedPaymentPlan({
 }: MarkAsReleasedPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
   const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] =
     useState(false);
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: review, loading: loadingReview } =
-    usePaymentPlanAction(
-      Action.Review,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been marked as reviewed.')),
-      () => setMarkAsReleasedDialogOpen(false),
-    );
+  const { mutateAsync: markAsReleased, isPending: loadingMarkAsReleased } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody: AcceptanceProcess;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansMarkAsReleasedCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+          requestBody,
+        }),
+      onSuccess: () => {
+        showMessage(t('Payment Plan has been marked as released.'));
+        setMarkAsReleasedDialogOpen(false);
+      },
+    });
 
   const shouldShowLastReviewerMessage = (): boolean => {
     const financeReleaseNumberRequired =
-      paymentPlan.approvalProcess?.edges[0]?.node.financeReleaseNumberRequired;
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
+        ?.financeReleaseNumberRequired;
+
     const financeReleasesCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
+        .actions?.financeRelease?.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };
@@ -63,7 +87,14 @@ export function MarkAsReleasedPaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        review(values.comment);
+        markAsReleased({
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         resetForm({});
       }}
       validationSchema={validationSchema}
@@ -126,7 +157,7 @@ export function MarkAsReleasedPaymentPlan({
                   CANCEL
                 </Button>
                 <LoadingButton
-                  loading={loadingReview}
+                  loading={loadingMarkAsReleased}
                   type="submit"
                   color="primary"
                   variant="contained"

@@ -3,10 +3,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllProgramsForTableQuery,
-  ProgrammeChoiceDataQuery,
-} from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -16,10 +13,11 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableRowProps {
-  program: AllProgramsForTableQuery['allPrograms']['edges'][number]['node'];
-  choicesData: ProgrammeChoiceDataQuery;
+  program: ProgramList;
+  choicesData: ProgramChoices;
 }
 
 function ProgrammesTableRow({
@@ -28,14 +26,12 @@ function ProgrammesTableRow({
 }: ProgrammesTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
   const handleClick = (): void => {
     navigate(programDetailsPath);
   };
 
-  const programSectorChoiceDict = choicesToDict(
-    choicesData.programSectorChoices,
-  );
+  const programSectorChoiceDict = choicesToDict(choicesData?.sectorChoices);
 
   return (
     <>
@@ -62,8 +58,10 @@ function ProgrammesTableRow({
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
-        <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
+        <TableCell align="right">{program.householdCount}</TableCell>
+        <TableCell align="right">
+          {formatCurrency(Number(program.budget))}
+        </TableCell>
       </ClickableTableRow>
     </>
   );

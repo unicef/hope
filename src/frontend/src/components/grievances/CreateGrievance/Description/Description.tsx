@@ -1,36 +1,29 @@
-import {
-  Box,
-  FormHelperText,
-  Grid2 as Grid,
-  GridSize,
-  Typography,
-} from '@mui/material';
-import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  AllProgramsForChoicesQuery,
-  GrievancesChoiceDataQuery,
-  usePartnerForGrievanceChoicesQuery,
-} from '@generated/graphql';
-import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { choicesToDict } from '@utils/utils';
-import { BlackLink } from '@core/BlackLink';
-import { LabelizedField } from '@core/LabelizedField';
-import { OverviewContainer } from '@core/OverviewContainer';
-import { Title } from '@core/Title';
+import { Field } from 'formik';
+import { ReactElement, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { useProgramContext } from 'src/programContext';
-import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -50,10 +43,10 @@ const BoxWithBorderBottom = styled.div`
 export interface DescriptionProps {
   values;
   showIssueType: (values) => boolean;
-  selectedIssueType: (values) => string;
+  issueTypeToDisplay: string;
   baseUrl: string;
-  choicesData: GrievancesChoiceDataQuery;
-  programsData: AllProgramsForChoicesQuery;
+  choicesData: GrievanceChoices;
+  programsData: PaginatedProgramListList;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
@@ -62,7 +55,7 @@ export interface DescriptionProps {
 function Description({
   values,
   showIssueType,
-  selectedIssueType,
+  issueTypeToDisplay,
   baseUrl,
   choicesData,
   programsData,
@@ -71,28 +64,27 @@ function Description({
   permissions,
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
-  const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
-    variables: {
-      householdId: values.selectedHousehold?.id,
-      individualId: values.selectedIndividual?.id,
-    },
-    fetchPolicy: 'network-only',
+  const { data: partnerChoicesData } = useQuery({
+    queryKey: ['partnerForGrievanceChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
   });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
   useEffect(() => {
-    if (values.selectedHousehold?.program?.id) {
-      setFieldValue('program', values.selectedHousehold.program.id);
-    } else if (values.selectedIndividual?.program?.id) {
-      setFieldValue('program', values.selectedIndividual.program.id);
+    if (values.selectedIndividual?.program?.id) {
+      setFieldValue('program', values.selectedIndividual?.program?.id);
+    } else if (values.selectedHousehold?.programId) {
+      setFieldValue('program', values.selectedHousehold?.programId);
     }
   }, [values.selectedHousehold, values.selectedIndividual, setFieldValue]);
-
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
@@ -111,9 +103,10 @@ function Description({
     permissions,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   const isAnonymousTicket =
     !values.selectedHousehold?.id && !values.selectedIndividual?.id;
@@ -127,16 +120,16 @@ function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 4,
+                size: 6,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
                 value: (
                   <span>
-                    {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
+                    {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
-                size: 8,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -146,7 +139,7 @@ function Description({
                     canViewHouseholdDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
+                        to={`/${baseUrl}/population/household/${values.selectedHousehold?.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
@@ -155,7 +148,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.memberLabel} ID`,
@@ -165,7 +158,7 @@ function Description({
                     canViewIndividualDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
+                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual?.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
@@ -174,7 +167,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
             ]
               .filter((el) =>
@@ -197,7 +190,7 @@ function Description({
                 fullWidth
                 variant="outlined"
                 label={t('Partner*')}
-                choices={partnerChoicesData?.partnerForGrievanceChoices || []}
+                choices={partnerChoicesData || []}
                 component={FormikSelectField}
               />
             </Grid>
@@ -288,11 +281,11 @@ function Description({
             />
           </Grid>
         </Grid>
-        <Box pt={5}>
+        <Box sx={{ pt: 5 }}>
           <BoxWithBorders>
             <Grid container spacing={4}>
               <Grid size={{ xs: 6 }}>
-                <Box py={3}>
+                <Box sx={{ py: 3 }}>
                   <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
@@ -302,7 +295,7 @@ function Description({
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                 <Grid size={{ xs: 6 }}>
-                  <Box py={3}>
+                  <Box sx={{ py: 3 }}>
                     <LookUpPaymentRecord
                       values={values}
                       onValueChange={setFieldValue}
@@ -318,7 +311,7 @@ function Description({
         </Box>
       </BoxPadding>
       {canAddDocumentation && (
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <BoxWithBorderBottom>
             <Title>
               <Typography variant="h6">

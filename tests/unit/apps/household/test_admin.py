@@ -1,12 +1,15 @@
-from django.urls import reverse
+from typing import TYPE_CHECKING
 
+from django.urls import reverse
 from django_webtest import WebTest
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
-from hct_mis_api.apps.account.models import User
+if TYPE_CHECKING:
+    from hope.apps.account.models import User
 
 
 class BaseTest(WebTest):
@@ -18,7 +21,9 @@ class BaseTest(WebTest):
         registration_data_import = RegistrationDataImportFactory()
 
         cls.household = HouseholdFactory.build(
-            registration_data_import=registration_data_import, business_area=business_area, program=program
+            registration_data_import=registration_data_import,
+            business_area=business_area,
+            program=program,
         )
         cls.household.household_collection.save()
         cls.individual = IndividualFactory(

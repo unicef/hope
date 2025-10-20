@@ -2,8 +2,9 @@ from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import CountryFactory
@@ -15,12 +16,11 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (
+from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
-from hct_mis_api.apps.household.models import SINGLE, Document, Individual
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.models import SINGLE, Document, Individual
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -62,7 +62,7 @@ class TestAddIndividualService(TestCase):
         service.close(UserFactory())
 
         self.household.refresh_from_db()
-        self.assertEqual(self.household.size, 4)
+        assert self.household.size == 4
 
     def test_increase_household_size_when_size_is_none_on_close_ticket(self) -> None:
         self.household.size = None
@@ -73,7 +73,7 @@ class TestAddIndividualService(TestCase):
 
         self.household.refresh_from_db()
         household_size = Individual.objects.filter(household=self.household).count()
-        self.assertEqual(self.household.size, household_size)
+        assert self.household.size == household_size
 
     def test_add_individual_with_document_that_already_exists(self) -> None:
         individual = IndividualFactory(program=self.program, household=self.household)
@@ -96,9 +96,9 @@ class TestAddIndividualService(TestCase):
         self.ticket_details.save()
 
         service = AddIndividualService(self.ticket, {})
-        with self.assertRaises(ValidationError):
+        with pytest.raises(DRFValidationError):
             service.close(UserFactory())
-        self.assertEqual(Document.objects.filter(document_number="123456").count(), 1)
+        assert Document.objects.filter(document_number="123456").count() == 1
 
     def test_add_individual_with_document_that_exists_in_pending_status(self) -> None:
         individual = IndividualFactory(program=self.program, household=self.household)
@@ -125,5 +125,5 @@ class TestAddIndividualService(TestCase):
             service.close(UserFactory())
         except ValidationError:
             self.fail("ValidationError should not be raised")
-        self.assertEqual(Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count(), 0)
-        self.assertEqual(Document.objects.filter(document_number="123456").count(), 2)
+        assert Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count() == 0
+        assert Document.objects.filter(document_number="123456").count() == 2

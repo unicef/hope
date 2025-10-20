@@ -2,17 +2,13 @@ import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  CashPlanVerificationSamplingChoicesQuery,
-  PaymentPlanQuery,
-  PaymentVerificationPlanStatus,
-  PaymentVerificationPlanVerificationChannel,
-  useExportXlsxPaymentVerificationPlanFileMutation,
-  useInvalidPaymentVerificationPlanMutation,
-} from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
@@ -22,42 +18,81 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledLink = styled.a`
   text-decoration: none;
 `;
 
 interface VerificationPlanActionsProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
-  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: PaymentPlanQuery['paymentPlan'];
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
+  paymentPlanNode: PaymentVerificationPlanDetails;
 }
 
 export function VerificationPlanActions({
   verificationPlan,
-  samplingChoicesData,
-  planNode,
+  paymentPlanNode,
 }: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { businessArea, programSlug } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const exportXlsxMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: paymentPlanNode.id,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          paymentPlanNode.id,
+          programSlug,
+        ],
+      });
+    },
+  });
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPaymentVerificationPlanFileMutation();
+  const invalidVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: paymentPlanNode.id,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
 
-  const [mutateInvalid, { loading: loadingInvalid }] =
-    useInvalidPaymentVerificationPlanMutation();
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          paymentPlanNode.id,
+          programSlug,
+        ],
+      });
+    },
+  });
 
-  if (!verificationPlan || !samplingChoicesData || !permissions) return null;
+  if (!verificationPlan || !permissions) return null;
 
   const isPending =
-    verificationPlan.status === PaymentVerificationPlanStatus.Pending;
+    verificationPlan.status === PaymentVerificationPlanStatusEnum.PENDING;
   const isActive =
-    verificationPlan.status === PaymentVerificationPlanStatus.Active;
+    verificationPlan.status === PaymentVerificationPlanStatusEnum.ACTIVE;
 
   const verificationChannelXLSX =
-    verificationPlan.verificationChannel ===
-    PaymentVerificationPlanVerificationChannel.Xlsx;
+    verificationPlan.verificationChannel === 'XLSX';
 
   const canEdit = hasPermissions(
     PERMISSIONS.PAYMENT_VERIFICATION_UPDATE,
@@ -102,7 +137,7 @@ export function VerificationPlanActions({
             <Box mr={2}>
               {canDelete && (
                 <DeleteVerificationPlan
-                  cashOrPaymentPlanId={planNode.id}
+                  cashOrPaymentPlanId={paymentPlanNode.id}
                   paymentVerificationPlanId={verificationPlan.id}
                 />
               )}
@@ -110,14 +145,14 @@ export function VerificationPlanActions({
             {canEdit && (
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
-                cashOrPaymentPlanId={planNode.id}
-                isPaymentPlan={planNode.__typename === 'PaymentPlanNode'}
+                cashOrPaymentPlanId={paymentPlanNode.id}
               />
             )}
             {canActivate && (
               <Box alignItems="center" display="flex">
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
+                  cashOrPaymentPlanId={paymentPlanNode.id}
                 />
               </Box>
             )}
@@ -130,28 +165,25 @@ export function VerificationPlanActions({
                 {canExport && (
                   <Box p={2}>
                     <LoadingButton
-                      loading={loadingExport}
+                      loading={exportXlsxMutation.isPending}
                       disabled={
-                        loadingExport || verificationPlan.xlsxFileExporting
+                        exportXlsxMutation.isPending ||
+                        verificationPlan.xlsxFileExporting
                       }
                       color="primary"
                       variant="outlined"
                       startIcon={<GetApp />}
                       data-cy="export-xlsx"
-                      onClick={async () => {
+                      onClick={async() => {
                         try {
-                          await mutateExport({
-                            variables: {
-                              paymentVerificationPlanId: verificationPlan.id,
-                            },
-                          });
+                          await exportXlsxMutation.mutateAsync();
                           showMessage(
                             t(
                               'Exporting XLSX started. Please check your email.',
                             ),
                           );
-                        } catch (e) {
-                          e.graphQLErrors.map((x) => showMessage(x.message));
+                        } catch (error) {
+                          showApiErrorMessages(error, showMessage);
                         }
                       }}
                     >
@@ -184,40 +216,40 @@ export function VerificationPlanActions({
                   <Box p={2} data-cy="import-xlsx">
                     <ImportXlsx
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={planNode.id}
+                      cashOrPaymentPlanId={paymentPlanNode.id}
                     />
                   </Box>
                 )}
 
                 {canFinish && verificationPlan.xlsxFileImported && (
-                  <FinishVerificationPlan verificationPlan={verificationPlan} />
+                  <FinishVerificationPlan
+                    verificationPlan={verificationPlan}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
+                  />
                 )}
                 {canDiscard &&
                   !verificationPlan.xlsxFileWasDownloaded &&
                   !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
+                      cashOrPaymentPlanId={paymentPlanNode.id}
                     />
                   )}
                 {canMarkInvalid && (
                   <Box p={2}>
                     <LoadingButton
-                      loading={loadingInvalid}
+                      loading={invalidVerificationPlanMutation.isPending}
                       color="primary"
                       variant="outlined"
                       data-cy="button-mark-as-invalid"
-                      onClick={async () => {
+                      onClick={async() => {
                         try {
-                          await mutateInvalid({
-                            variables: {
-                              paymentVerificationPlanId: verificationPlan.id,
-                            },
-                          });
+                          await invalidVerificationPlanMutation.mutateAsync();
                           showMessage(
                             t('Verification plan marked as invalid.'),
                           );
-                        } catch (e) {
-                          e.graphQLErrors.map((x) => showMessage(x.message));
+                        } catch (error) {
+                          showApiErrorMessages(error, showMessage);
                         }
                       }}
                     >
@@ -231,11 +263,15 @@ export function VerificationPlanActions({
             {!verificationChannelXLSX && (
               <>
                 {canFinish && (
-                  <FinishVerificationPlan verificationPlan={verificationPlan} />
+                  <FinishVerificationPlan
+                    verificationPlan={verificationPlan}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
+                  />
                 )}
                 {canDiscard && (
                   <DiscardVerificationPlan
                     paymentVerificationPlanId={verificationPlan.id}
+                    cashOrPaymentPlanId={paymentPlanNode.id}
                   />
                 )}
               </>
