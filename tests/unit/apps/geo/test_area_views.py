@@ -157,8 +157,7 @@ class TestAreaViews:
         )
         response = self.client.get(self.url_list)
         assert response.status_code == status.HTTP_200_OK
-
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 7
         assert {
             "id": str(self.area_1_area_type_1.id),
@@ -233,7 +232,7 @@ class TestAreaViews:
         response_level_1 = self.client.get(self.url_list, {"level": 1})
         assert response_level_1.status_code == status.HTTP_200_OK
 
-        response_json_1 = response_level_1.json()["results"]
+        response_json_1 = response_level_1.json()
         assert len(response_json_1) == 4
         assert {
             "id": str(self.area_1_area_type_1.id),
@@ -266,7 +265,7 @@ class TestAreaViews:
 
         response_level_2 = self.client.get(self.url_list, {"level": 2})
         assert response_level_2.status_code == status.HTTP_200_OK
-        response_json_2 = response_level_2.json()["results"]
+        response_json_2 = response_level_2.json()
         assert len(response_json_2) == 3
 
     def test_list_areas_filter_by_id(
@@ -285,7 +284,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"id": self.area_1_area_type_1.id})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 1
         assert {
             "id": str(self.area_1_area_type_1.id),
@@ -311,7 +310,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"parent_id": self.area_1_area_type_1.id})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 2
         assert {
             "id": str(self.area_1_area_type_2.id),
@@ -332,7 +331,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"parent_id": self.area_2_area_type_1.id})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 1
         assert {
             "id": str(self.area_2_area_type_2.id),
@@ -346,7 +345,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"parent_id": self.area_1_area_type_2.id})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 0
 
     def test_list_areas_filter_by_parent_p_code(
@@ -365,7 +364,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"parent_p_code": "AREA1-ARTYPE1"})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 2
         assert {
             "id": str(self.area_1_area_type_2.id),
@@ -386,7 +385,7 @@ class TestAreaViews:
         assert response.status_code == status.HTTP_200_OK
 
         # Different parent - should only return one child
-        response_json = response.json()["results"]
+        response_json = response.json()
         assert len(response_json) == 1
         assert {
             "id": str(self.area_2_area_type_2.id),
@@ -412,7 +411,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"name": "Area 1"})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json_1 = response.json()["results"]
+        response_json_1 = response.json()
         assert len(response_json_1) == 3
 
     def test_list_areas_caching(

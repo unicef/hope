@@ -39,7 +39,6 @@ export function AdminAreaAutocompleteMultiple({
         level: level,
         name: debouncedInputText,
         parentId: parentId || undefined,
-        limit: 100,
       }),
     enabled: !!businessArea,
   });
@@ -53,7 +52,7 @@ export function AdminAreaAutocompleteMultiple({
     setInputTextChange('');
   }, [value]);
 
-  const options = areasData?.results || [];
+  const options = areasData || [];
   return (
     <StyledAutocomplete
       multiple

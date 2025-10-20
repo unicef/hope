@@ -18,7 +18,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -53,7 +53,7 @@ const EditProgramPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: treeData } =
-    useQuery<PaginatedAreaTreeList>({
+    useQuery<AreaTree[]>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGeoAreasAllAreasTreeList({
