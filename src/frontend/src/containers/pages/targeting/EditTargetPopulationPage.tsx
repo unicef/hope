@@ -1,47 +1,40 @@
-import { ReactElement, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentPlanBuildStatus,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
+import { ReactElement } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { usePermissions } from '@hooks/usePermissions';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useParams } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
+  const { businessArea, programSlug } = useBaseUrl();
 
-  const { data, loading, error, startPolling, stopPolling } =
-    usePaymentPlanQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
-  const buildStatus = data?.paymentPlan?.buildStatus;
-  useEffect(() => {
-    if (
-      [
-        PaymentPlanBuildStatus.Building,
-        PaymentPlanBuildStatus.Pending,
-      ].includes(buildStatus)
-    ) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return () => stopPolling();
-  }, [buildStatus, id, startPolling, stopPolling]);
+  const {
+    data: paymentPlan,
+    isLoading: loading,
+    error,
+  } = useQuery<TargetPopulationDetail>({
+    queryKey: ['targetPopulation', businessArea, id, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
+        businessAreaSlug: businessArea,
+        id: id,
+        programSlug,
+      }),
+  });
 
-  if (loading && !data) return <LoadingComponent />;
+  if (loading && !paymentPlan) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
-
-  const { paymentPlan } = data;
+  if (!paymentPlan || permissions === null) return null;
 
   return (
     <EditTargetPopulation

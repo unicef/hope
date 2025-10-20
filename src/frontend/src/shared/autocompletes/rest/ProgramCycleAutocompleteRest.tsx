@@ -3,7 +3,7 @@ import { handleOptionSelected } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
-import { fetchProgramCycles, ProgramCyclesQuery } from '@api/programCycleApi';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const ProgramCycleAutocompleteRest = ({
   value,
@@ -17,7 +17,7 @@ export const ProgramCycleAutocompleteRest = ({
   error?: string;
 }): ReactElement => {
   const { t } = useTranslation();
-  const [queryParams, setQueryParams] = useState<ProgramCyclesQuery>({
+  const [queryParams, setQueryParams] = useState({
     offset: 0,
     limit: 10,
     ordering: 'title',
@@ -37,7 +37,12 @@ export const ProgramCycleAutocompleteRest = ({
       value={value}
       label={t('Programme Cycle')}
       dataCy="filters-program-cycle-autocomplete"
-      fetchFunction={fetchProgramCycles}
+      fetchFunction={() =>
+        RestService.restBusinessAreasProgramsCyclesList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        })
+      }
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {

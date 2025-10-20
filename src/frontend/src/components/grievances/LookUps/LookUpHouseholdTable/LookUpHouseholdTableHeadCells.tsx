@@ -1,9 +1,7 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { AllHouseholdsForPopulationTableQuery } from '@generated/graphql';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
-export const headCells: HeadCell<
-AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<HouseholdDetail>[] = [
   {
     disablePadding: false,
     label: '',

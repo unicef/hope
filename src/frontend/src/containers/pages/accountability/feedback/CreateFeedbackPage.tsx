@@ -1,54 +1,58 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from '@mui/material';
-import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import * as Yup from 'yup';
-import {
-  CreateFeedbackInput,
-  FeedbackIssueType,
-  useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
-  useFeedbackIssueTypeChoicesQuery,
-} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { OverviewContainer } from '@components/core/OverviewContainer';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { Consent } from '@components/grievances/Consent';
+import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-import {
-  PERMISSIONS,
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Stepper,
+  Step,
+  StepLabel,
+  FormHelperText,
+  Typography,
+  Button,
+} from '@mui/material';
+import { Grid, Box } from '@mui/system';
+import { RestService } from '@restgenerated/index';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
+import { showApiErrorMessages } from '@utils/utils';
+import { Formik, Field } from 'formik';
+import { ReactElement, useState, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  hasPermissions,
+  PERMISSIONS,
+  hasPermissionInModule,
+} from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
+import styled from 'styled-components';
+import { Admin2SyncEffect } from './Admin2SyncEffect';
+import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
+
+// Constants for feedback issue types
+const FEEDBACK_ISSUE_TYPE = {
+  POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
+  NEGATIVE_FEEDBACK: 'NEGATIVE_FEEDBACK',
+};
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -85,7 +89,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     consent: Yup.bool().nullable(),
     area: Yup.string().nullable(),
     language: Yup.string().nullable(),
-    program: Yup.string().nullable(),
+    programId: Yup.string().nullable(),
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
@@ -143,7 +147,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -157,7 +161,6 @@ function CreateFeedbackPage(): ReactElement {
   ];
 
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
-  const [validateData, setValidateData] = useState(false);
 
   const initialValues = {
     category: 'Feedback',
@@ -170,34 +173,49 @@ function CreateFeedbackPage(): ReactElement {
     area: null,
     language: null,
     consent: false,
-    program: isAllPrograms ? '' : programId,
     verificationRequired: false,
+    programId: isAllPrograms ? null : selectedProgram?.id,
   };
 
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea, first: 1000 },
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
-
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, limit: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
-  const [mutate, { loading }] = useCreateFeedbackTicketMutation();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      requestBody;
+    }) =>
+      RestService.restBusinessAreasFeedbacksCreate({
+        businessAreaSlug,
+        requestBody,
+      }),
+  });
 
-  if (userDataLoading || choicesLoading || programsDataLoading)
-    return <LoadingComponent />;
+  if (choicesLoading || programsDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
-  if (!choicesData || !userData || !programsData) return null;
+  if (!choicesData || !programsData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -214,7 +232,7 @@ function CreateFeedbackPage(): ReactElement {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const prepareVariables = (values): CreateFeedbackInput => ({
+  const prepareVariables = (values) => ({
     area: values.area,
     comments: values.comments,
     consent: values.consent,
@@ -222,14 +240,18 @@ function CreateFeedbackPage(): ReactElement {
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
-    admin2: values.admin2,
-    language: values.language,
-    program: values.program,
+    admin2:
+      typeof values.admin2 === 'object' && values.admin2 !== null
+        ? values.admin2.id
+        : values.admin2,
+    language: values.language || '',
+    programId: values.programId || null,
   });
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   return (
     <Formik
@@ -238,45 +260,43 @@ function CreateFeedbackPage(): ReactElement {
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({
-              variables: { input: prepareVariables(values) },
+              businessAreaSlug: businessArea,
+              requestBody: prepareVariables(values),
             });
             showMessage(t('Feedback created'));
-            navigate(
-              `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
-            );
+            navigate(`/${baseUrl}/grievance/feedback/${response.id}`);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showApiErrorMessages(e, showMessage, 'Error creating feedback');
           }
         } else {
-          setValidateData(false);
           handleNext();
         }
       }}
-      validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
-      validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
+      validateOnChange={true}
+      validateOnBlur={true}
       validationSchema={validationSchemaWithSteps(activeStep)}
       // validate={(values) =>
       //   validateUsingSteps(values, activeStep, setValidateData)
       // }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
+        // Sync admin2 with selectedHousehold.admin2
+        <Admin2SyncEffect
+          selectedHousehold={values.selectedHousehold}
+          admin2={values.admin2}
+          setFieldValue={setFieldValue}
+        />;
         const isAnonymousTicket =
           !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
-        // Set program value based on selected household or individual
-        if (
-          values.selectedHousehold?.program?.id &&
-          values.program !== values.selectedHousehold.program.id
-        ) {
-          setFieldValue('program', values.selectedHousehold.program.id);
-        } else if (
-          values.selectedIndividual?.program?.id &&
-          values.program !== values.selectedIndividual.program.id
-        ) {
-          setFieldValue('program', values.selectedIndividual.program.id);
-        }
         return (
           <>
+            <ProgramIdSyncEffect />
+            <Admin2SyncEffect
+              selectedHousehold={values.selectedHousehold}
+              admin2={values.admin2}
+              setFieldValue={setFieldValue}
+            />
             <PageHeader
               title="New Feedback"
               breadCrumbs={
@@ -321,7 +341,7 @@ function CreateFeedbackPage(): ReactElement {
                               label="Issue Type"
                               variant="outlined"
                               required
-                              choices={choicesData.feedbackIssueTypeChoices}
+                              choices={choicesData}
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
@@ -357,7 +377,12 @@ function CreateFeedbackPage(): ReactElement {
                                   )}
                                 </Typography>
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
+                                  <HouseholdQuestionnaire values={values} programSlug={
+                                    values.selectedHousehold?.programSlug ||
+                                    values.selectedHousehold?.program?.slug ||
+                                    values.selectedIndividual?.program?.slug ||
+                                    values.selectedIndividual?.programSlug
+                                  } />
                                 </Box>
                               </Box>
                               <Typography variant="subtitle2">
@@ -397,7 +422,7 @@ function CreateFeedbackPage(): ReactElement {
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Issue Type')}>
                                     {values.issueType ===
-                                    FeedbackIssueType.PositiveFeedback
+                                    FEEDBACK_ISSUE_TYPE.POSITIVE_FEEDBACK
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
@@ -435,6 +460,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
+                              {touched.description &&
+                                typeof errors.description === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.description}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -453,10 +484,13 @@ function CreateFeedbackPage(): ReactElement {
                                 variant="outlined"
                                 component={FormikAdminAreaAutocomplete}
                                 dataCy="input-admin2"
-                                disabled={Boolean(
-                                  values.selectedHousehold?.admin2,
-                                )}
                               />
+                              {touched.admin2 &&
+                                typeof errors.admin2 === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.admin2}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -467,6 +501,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-area"
                               />
+                              {touched.area &&
+                                typeof errors.area === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.area}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 6 }}>
                               <Field
@@ -478,10 +518,16 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-languages"
                               />
+                              {touched.language &&
+                                typeof errors.language === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.language}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 3 }}>
                               <Field
-                                name="program"
+                                name="programId"
                                 label={t('Programme Name')}
                                 fullWidth
                                 variant="outlined"
@@ -489,6 +535,12 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
                               />
+                              {touched.programId &&
+                                typeof errors.programId === 'string' && (
+                                  <FormHelperText error>
+                                    {errors.programId}
+                                  </FormHelperText>
+                                )}
                             </Grid>
                           </Grid>
                         </BoxPadding>

@@ -1,14 +1,16 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-from django.conf import settings
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
-
+from freezegun import freeze_time
+from parameterized import parameterized
 import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import (
@@ -22,10 +24,7 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from freezegun import freeze_time
-from parameterized import parameterized
-
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
@@ -37,13 +36,13 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import (
+from hope.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -71,17 +70,14 @@ def capture_on_commit_callbacks(
 
 @pytest.mark.elasticsearch
 class TestRdiMergeTask(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
+        call_command("init_core_fixtures")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=program)
+        cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
 
@@ -102,9 +98,24 @@ class TestRdiMergeTask(TestCase):
             area_level=4,
         )
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
-        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_3,
+            p_code="area3",
+            parent=cls.area2,
+        )
+        cls.area4 = AreaFactory(
+            name="City Test4",
+            area_type=area_type_level_4,
+            p_code="area4",
+            parent=cls.area3,
+        )
 
         rebuild_search_index()
 
@@ -218,9 +229,8 @@ class TestRdiMergeTask(TestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
-        household = PendingHouseholdFactory(
+        hh = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -236,9 +246,9 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        self.set_imported_individuals(household)
-        household.head_of_household = PendingIndividual.objects.first()
-        household.save()
+        self.set_imported_individuals(hh)
+        hh.head_of_household = PendingIndividual.objects.first()
+        hh.save()
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -248,42 +258,37 @@ class TestRdiMergeTask(TestCase):
 
         household = households.first()
 
-        self.assertEqual(1, households.count())
-        self.assertEqual(8, individuals.count())
-        self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
-        self.assertEqual(household.detail_id, "123456123")
+        assert households.count() == 1
+        assert individuals.count() == 8
+        assert household.flex_fields.get("enumerator_id") == 1234567890
+        assert household.detail_id == "123456123"
 
         # check KoboImportedSubmission
         kobo_import_submission_qs = KoboImportedSubmission.objects.all()
         kobo_import_submission = kobo_import_submission_qs.first()
-        self.assertEqual(kobo_import_submission_qs.count(), 1)
-        self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
-        self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
-        # self.assertEqual(kobo_import_submission.imported_household, None)
+        assert kobo_import_submission_qs.count() == 1
+        assert str(kobo_import_submission.kobo_submission_uuid) == "c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+        assert kobo_import_submission.kobo_asset_id == "123456123"
+        assert str(kobo_import_submission.kobo_submission_time) == "2022-02-22 12:22:22+00:00"
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
 
-        self.assertEqual(individual_with_valid_phone_data.phone_no_valid, True)
-        self.assertEqual(individual_with_valid_phone_data.phone_no_alternative_valid, True)
+        assert individual_with_valid_phone_data.phone_no_valid is True
+        assert individual_with_valid_phone_data.phone_no_alternative_valid is True
 
-        self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
-        self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
+        assert individual_with_invalid_phone_data.phone_no_valid is False
+        assert individual_with_invalid_phone_data.phone_no_alternative_valid is False
 
-        self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
-        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name, "Wallet Name 1")
-        self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name, "Blockchain Name 1"
-        )
-        self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
-        )
+        assert Individual.objects.filter(full_name="Baz Bush").first().email == "fake_email_5@com"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().email == "fake_email_1@com"
+        assert Individual.objects.filter(full_name="Bob Jackson").first().email == ""
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name == "Wallet Name 1"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name == "Blockchain Name 1"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address == "Wallet Address 1"
 
-        household_data = model_to_dict(
-            household,
+        household_data: Dict = model_to_dict(
+            household,  # type: ignore
             (
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",
@@ -297,7 +302,6 @@ class TestRdiMergeTask(TestCase):
                 "male_age_group_60_count",
                 "children_count",
                 "size",
-                "admin_area",
                 "admin1",
                 "admin2",
                 "admin3",
@@ -319,21 +323,19 @@ class TestRdiMergeTask(TestCase):
             "male_age_group_60_count": 1,
             "children_count": 5,
             "size": 8,
-            "admin_area": self.area4.id,
             "admin1": self.area1.id,
             "admin2": self.area2.id,
             "admin3": self.area3.id,
             "admin4": self.area4.id,
             "zip_code": "00-123",
         }
-        self.assertEqual(household_data, expected)
+        assert household_data == expected
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -361,11 +363,10 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.reset_mock()
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -380,8 +381,6 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        # when business_area.screen_beneficiary is False
-        self.business_area.screen_beneficiary = False
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
@@ -391,11 +390,10 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.assert_not_called()
 
     @freeze_time("2022-01-01")
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -406,9 +404,6 @@ class TestRdiMergeTask(TestCase):
             kobo_submission_time="2022-02-22T12:22:22",
             flex_fields={"enumerator_id": 1234567890},
         )
-
-        # when rdi.screen_beneficiary is False
-        self.business_area.screen_beneficiary = True
         self.business_area.save()
         self.rdi.screen_beneficiary = False
         self.rdi.save()
@@ -478,43 +473,34 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
 
         individual_without_collection.refresh_from_db()
-        self.assertIsNotNone(individual_without_collection.individual_collection)
-        self.assertEqual(
-            individual_without_collection.individual_collection.individuals.count(),
-            2,
-        )
-        self.assertEqual(
-            individual_collection.individuals.count(),
-            2,
-        )
+        assert individual_without_collection.individual_collection is not None
+        assert individual_without_collection.individual_collection.individuals.count() == 2
+        assert individual_collection.individuals.count() == 2
         if household_representation_exists is not None:
             if household_representation_exists:
                 household_collection.refresh_from_db()
-                self.assertEqual(household_collection.households.count(), 2)
+                assert household_collection.households.count() == 2
             else:
                 household.refresh_from_db()
-                self.assertIsNotNone(household.household_collection)
-                self.assertEqual(household.household_collection.households.count(), 2)
+                assert household.household_collection is not None
+                assert household.household_collection.households.count() == 2
 
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )
         self.set_imported_individuals(household)
         external_collector = PendingIndividualFactory(
-            **{
-                "full_name": "External Collector",
-                "given_name": "External",
-                "family_name": "Collector",
-                "relationship": NON_BENEFICIARY,
-                "birth_date": "1962-02-02",  # age 39
-                "sex": "OTHER",
-                "registration_data_import": self.rdi,
-                "email": "xd@com",
-            }
+            full_name="External Collector",
+            given_name="External",
+            family_name="Collector",
+            relationship=NON_BENEFICIARY,
+            birth_date="1962-02-02",
+            sex="OTHER",
+            registration_data_import=self.rdi,
+            email="xd@com",
         )
         role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()
@@ -523,13 +509,16 @@ class TestRdiMergeTask(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
     )
     def test_merge_biometric_deduplication_enabled(
         self,
@@ -541,7 +530,6 @@ class TestRdiMergeTask(TestCase):
         program.save()
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )
@@ -556,4 +544,4 @@ class TestRdiMergeTask(TestCase):
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(rdi.pk)
         rdi.refresh_from_db()
-        self.assertEqual(rdi.status, RegistrationDataImport.MERGED)
+        assert rdi.status == RegistrationDataImport.MERGED

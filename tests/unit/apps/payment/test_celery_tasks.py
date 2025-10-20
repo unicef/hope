@@ -1,12 +1,13 @@
-import logging.config
 from decimal import Decimal
+import logging.config
 from unittest.mock import Mock, patch
 
+from celery.exceptions import Retry
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
+import pytest
 
-from celery.exceptions import Retry
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import (
@@ -18,28 +19,29 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.celery_tasks import (
+from hope.apps.core.models import FileTemp
+from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
-from hct_mis_api.apps.payment.utils import generate_cache_key
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.payment.utils import generate_cache_key
+from hope.apps.steficon.models import Rule
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -65,7 +67,7 @@ class TestPaymentCeleryTask(TestCase):
                 },
             },
             "loggers": {
-                "hct_mis_api.apps.payment.celery_tasks": {
+                "hope.apps.payment.celery_tasks": {
                     "handlers": ["console"],
                     "level": "INFO",
                     "propagate": False,
@@ -74,7 +76,7 @@ class TestPaymentCeleryTask(TestCase):
         }
         logging.config.dictConfig(self.TEST_LOGGING)
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_wrong_pp_status(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
@@ -85,10 +87,10 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db()
         result = prepare_payment_plan_task(str(payment_plan.pk))
 
-        self.assertFalse(result)
+        assert result is False
         mock_logger.info.assert_called_with("The Payment Plan must have the status TP_OPEN.")
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_already_running(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_OPEN,
@@ -107,14 +109,14 @@ class TestPaymentCeleryTask(TestCase):
         cache.set(cache_key, True, timeout=300)
         result = prepare_payment_plan_task(pp_id_str)
 
-        self.assertFalse(result)
+        assert result is False
         mock_logger.info.assert_called_with(
             f"Task prepare_payment_plan_task with payment_plan_id {pp_id_str} already running."
         )
 
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.prepare_payment_plan_task.retry")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.prepare_payment_plan_task.retry")
     def test_prepare_payment_plan_task_exception_handling(
         self, mock_retry: Mock, mock_logger: Mock, mock_create_payments: Mock
     ) -> None:
@@ -125,11 +127,11 @@ class TestPaymentCeleryTask(TestCase):
             created_by=self.user,
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
         mock_create_payments.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             prepare_payment_plan_task(payment_plan_id=str(payment_plan.pk))
 
         payment_plan.refresh_from_db()
@@ -137,7 +139,7 @@ class TestPaymentCeleryTask(TestCase):
         mock_logger.exception.assert_called_once_with("Prepare Payment Plan Error")
         mock_retry.assert_called_once_with(exc=mock_create_payments.side_effect)
 
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_FAILED)
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
     def test_payment_plan_apply_steficon_hh_selection(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -148,7 +150,7 @@ class TestPaymentCeleryTask(TestCase):
         )
         payment = PaymentFactory(parent=payment_plan)
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_WAIT)
+        assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_WAIT
 
         engine_rule = RuleFactory(name="Rule-test", type=Rule.TYPE_TARGETING)
         RuleCommitFactory(definition="result.value=Decimal('500.33333333')", rule=engine_rule, version=11)
@@ -156,13 +158,13 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan_apply_steficon_hh_selection(str(payment_plan.pk), str(engine_rule.id))
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_COMPLETED)
+        assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_COMPLETED
 
         payment.refresh_from_db(fields=["vulnerability_score"])
-        self.assertEqual(payment.vulnerability_score, Decimal("500.333"))
+        assert payment.vulnerability_score == Decimal("500.333")
 
-    @patch("hct_mis_api.apps.steficon.models.RuleCommit.execute")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
+    @patch("hope.apps.steficon.models.RuleCommit.execute")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
     def test_payment_plan_apply_steficon_hh_selection_exception_handling(
         self, mock_retry: Mock, mock_rule_execute: Mock
     ) -> None:
@@ -173,21 +175,21 @@ class TestPaymentCeleryTask(TestCase):
         )
         PaymentFactory(parent=payment_plan)
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_WAIT)
+        assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_WAIT
         engine_rule = RuleFactory(name="Rule-test123", type=Rule.TYPE_TARGETING)
         RuleCommitFactory(definition="result.value=Decimal('123')", rule=engine_rule, version=2)
 
         mock_rule_execute.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_apply_steficon_hh_selection(str(payment_plan.pk), str(engine_rule.id))
 
         mock_retry.assert_called_once()
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_STEFICON_ERROR)
+        assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_ERROR
 
     @patch(
-        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -202,8 +204,8 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan_rebuild_stats(pp_id_str)
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_population_count_fields")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
+    @patch("hope.apps.payment.models.PaymentPlan.update_population_count_fields")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
     def test_payment_plan_rebuild_stats_exception_handling(
         self, mock_retry: Mock, mock_update_population_count_fields: Mock
     ) -> None:
@@ -216,7 +218,7 @@ class TestPaymentCeleryTask(TestCase):
         PaymentFactory(parent=payment_plan)
         mock_update_population_count_fields.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_rebuild_stats(str(payment_plan.pk))
 
         mock_retry.assert_called_once()
@@ -234,10 +236,10 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan_full_rebuild(str(payment_plan.pk))
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
 
-    @patch("hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
-    @patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_full_rebuild.retry")
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+    @patch("hope.apps.payment.celery_tasks.payment_plan_full_rebuild.retry")
     def test_payment_plan_full_rebuild_retry_exception_handling(
         self, mock_retry: Mock, mock_full_rebuild: Mock
     ) -> None:
@@ -250,12 +252,12 @@ class TestPaymentCeleryTask(TestCase):
         PaymentFactory(parent=payment_plan)
         mock_full_rebuild.side_effect = Exception("Simulated exception just for test")
         mock_retry.side_effect = Retry("Simulated retry")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             payment_plan_full_rebuild(str(payment_plan.pk))
 
         mock_retry.assert_called_once()
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_FAILED)
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
     def test_create_payment_plan_payment_list_xlsx_per_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -270,7 +272,7 @@ class TestPaymentCeleryTask(TestCase):
         with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
             type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
-            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
@@ -278,18 +280,16 @@ class TestPaymentCeleryTask(TestCase):
             payment_plan.refresh_from_db()
             file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-            self.assertIsNone(payment_plan.background_action_status)
-            self.assertTrue(payment_plan.has_export_file)
-            self.assertTrue(
-                payment_plan.export_file_per_fsp.file.name.startswith(
-                    f"payment_plan_payment_list_{payment_plan.unicef_id}"
-                )
+            assert payment_plan.background_action_status is None
+            assert payment_plan.has_export_file
+            assert payment_plan.export_file_per_fsp.file.name.startswith(
+                f"payment_plan_payment_list_{payment_plan.unicef_id}"
             )
-            self.assertTrue(payment_plan.export_file_per_fsp.file.name.endswith(".zip"))
-            self.assertIsNotNone(file_obj.password)
-            self.assertIsNotNone(file_obj.xlsx_password)
+            assert payment_plan.export_file_per_fsp.file.name.endswith(".zip")
+            assert file_obj.password is not None
+            assert file_obj.xlsx_password is not None
 
-    @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
+    @patch("hope.apps.payment.notifications.MailjetClient.send_email")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password(self, mock_mailjet_send: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.FINISHED,
@@ -303,41 +303,38 @@ class TestPaymentCeleryTask(TestCase):
         with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
             # override property to always return True
             type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
-            self.assertTrue(payment_plan.is_payment_gateway_and_all_sent_to_fsp)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
             # create zip file with passwords
             create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
             payment_plan.refresh_from_db()
             file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-            self.assertIsNone(payment_plan.background_action_status)
-            self.assertEqual(payment_plan.export_file_per_fsp, file_obj)
-            self.assertIsNotNone(file_obj.password)
-            self.assertIsNotNone(file_obj.xlsx_password)
+            assert payment_plan.background_action_status is None
+            assert payment_plan.export_file_per_fsp == file_obj
+            assert file_obj.password is not None
+            assert file_obj.xlsx_password is not None
 
             send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
             # first call from > create_payment_plan_payment_list_xlsx_per_fsp
             # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
-            self.assertEqual(
-                mock_mailjet_send.call_count,
-                2,
-            )
+            assert mock_mailjet_send.call_count == 2
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.get_user_model")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.get_user_model")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:
         mock_get_user_model.objects.get.side_effect = Exception("User not found")
-        with self.assertRaises(Exception):  # noqa: B017
+        with pytest.raises(Exception, match="“pp_id_123” is not a valid UUID."):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.get_quantity_in_usd")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
+    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,
@@ -352,7 +349,7 @@ class TestPaymentCeleryTask(TestCase):
             exchange_rate=0.1,
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.exchange_rate, Decimal("0.10000000"))
+        assert payment_plan.exchange_rate == Decimal("0.10000000")
         payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
 
         mock_get_exchange_rate.return_value = 1.25
@@ -360,15 +357,15 @@ class TestPaymentCeleryTask(TestCase):
 
         update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.exchange_rate, 1.25)
+        assert payment_plan.exchange_rate == 1.25
 
         payment.refresh_from_db()
-        self.assertEqual(payment.entitlement_quantity_usd, 125.0)
+        assert payment.entitlement_quantity_usd == 125.0
 
         mock_update_money_fields.assert_called_once()
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger")
-    @patch("hct_mis_api.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
+    @patch("hope.apps.payment.celery_tasks.logger")
+    @patch("hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments.retry")
     def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
         self, mock_retry: Mock, mock_logger: Mock
     ) -> None:
@@ -381,23 +378,45 @@ class TestPaymentCeleryTask(TestCase):
         mock_retry.side_effect = Retry("force retry just for testing")
 
         with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
-            with self.assertRaises(Retry):
+            with pytest.raises(Retry):
                 update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
 
         mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
         mock_retry.assert_called_once()
 
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_periodic_send_payment_plan_reconciliation_overdue_emails(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        periodic_send_payment_plan_reconciliation_overdue_emails()
+        mock_service_cls.send_reconciliation_overdue_emails.assert_called_once()
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_send_payment_plan_reconciliation_overdue_email(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        create_afghanistan()
+        pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+
+        mock_service = mock_service_cls.return_value
+        send_payment_plan_reconciliation_overdue_email(str(pp.id))
+        mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
+
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_runs_service_process_files_since(self, mock_service_cls: Mock) -> None:
         mock_service = mock_service_cls.return_value
         periodic_sync_payment_plan_invoices_western_union_ftp()
         mock_service.process_files_since.assert_called_once()
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger.exception")
-    @patch("hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp.retry")
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_runs_service_process_files_since_retries_on_exception(
         self,
         mock_service_cls: Mock,
@@ -407,14 +426,14 @@ class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
         mock_service = mock_service_cls.return_value
         mock_service.process_files_since.side_effect = Exception("test")
         mock_retry.side_effect = Retry("forced retry test")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             periodic_sync_payment_plan_invoices_western_union_ftp()
         mock_logger_exception.assert_called_once()
         mock_retry.assert_called_once()
 
 
 class SendQCFReportEmailNotificationsTests(TestCase):
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_sends_email_and_marks_sent(
         self,
         mock_service_cls: Mock,
@@ -431,11 +450,11 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
         mock_service.send_notification_emails.assert_called_once_with(qcf_report)
         qcf_report.refresh_from_db()
-        self.assertTrue(qcf_report.sent)
+        assert qcf_report.sent
 
-    @patch("hct_mis_api.apps.payment.celery_tasks.logger.exception")
-    @patch("hct_mis_api.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
-    @patch("hct_mis_api.apps.payment.services.qcf_reports_service.QCFReportsService")
+    @patch("hope.apps.payment.celery_tasks.logger.exception")
+    @patch("hope.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
     def test_sends_email_and_marks_sent_retries_on_exception(
         self,
         mock_service_cls: Mock,
@@ -452,7 +471,7 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_service.send_notification_emails.side_effect = Exception("test abc")
 
         mock_retry.side_effect = Retry("forced retry test")
-        with self.assertRaises(Retry):
+        with pytest.raises(Retry):
             send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
         mock_logger_exception.assert_called_once()
         mock_retry.assert_called_once()

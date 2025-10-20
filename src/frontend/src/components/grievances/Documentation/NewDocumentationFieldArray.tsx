@@ -1,4 +1,4 @@
-import { Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import { Button, FormHelperText, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
@@ -18,13 +18,21 @@ export function NewDocumentationFieldArray({
 }: NewDocumentationFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <Grid container spacing={3}>
+    <Grid container size={12} spacing={3}>
       <FieldArray
         name="documentation"
         render={(arrayHelpers) => (
           <>
             {values.documentation?.map((_item, index) => (
-              <Grid size={{ xs: 12 }} key={`${index}-documentation-file`}>
+              <Grid
+                container
+                size={12}
+                direction="row"
+                alignItems="center"
+                spacing={3}
+                key={`${index}-documentation-file`}
+                sx={{ mb: 2 }}
+              >
                 <DocumentationField
                   index={index}
                   onDelete={() => arrayHelpers.remove(index)}
@@ -33,7 +41,7 @@ export function NewDocumentationFieldArray({
                 />
               </Grid>
             ))}
-            <Grid size={{ xs: 12 }}>
+            <Grid size={12}>
               <Button
                 data-cy="add-documentation"
                 color="primary"

@@ -1,19 +1,18 @@
-import json
 from datetime import datetime
+import json
 from typing import Any
 from unittest.mock import patch
 
+from constance.test import override_config
 from django.conf import settings
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
 
-from constance.test import override_config
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
+from hope.api.models import Grant
 from unit.api.factories import APITokenFactory
-
-from hct_mis_api.api.admin import TOKEN_INFO_EMAIL, APITokenAdmin
-from hct_mis_api.api.models import Grant
 
 
 class TestApiToken(TestCase):
@@ -35,13 +34,16 @@ class TestApiToken(TestCase):
         )
         cls.token.valid_for.set([cls.afg])
 
-    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @patch("hope.apps.utils.celery_tasks.requests.post")
     @patch.object(APITokenAdmin, "message_user", return_value=None)
     @patch.object(APITokenAdmin, "__init__", return_value=None)
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_send_api_token(
-        self, mocked_requests_init: Any, mocked_requests_user: Any, mocked_requests_post: Any
+        self,
+        mocked_requests_init: Any,
+        mocked_requests_user: Any,
+        mocked_requests_post: Any,
     ) -> None:
         request = HttpRequest()
 
@@ -53,7 +55,10 @@ class TestApiToken(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": f"[test] HOPE API Token {self.token} infos",
                         "To": [
                             {
@@ -61,7 +66,15 @@ class TestApiToken(TestCase):
                             },
                         ],
                         "Cc": [],
-                        "TextPart": f"\nDear {self.user.first_name},\n\nplease find below API token infos\n\nName: {self.token}\nKey: {self.token.key}\nGrants: {self.token.grants}\nExpires: {self.token.valid_to}\nBusiness Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\nRegards\n\nThe HOPE Team\n",
+                        "TextPart": f"\nDear {self.user.first_name},\n\n"
+                        f"please find below API token infos\n\n"
+                        f"Name: {self.token}\n"
+                        f"Key: {self.token.key}\n"
+                        f"Grants: {self.token.grants}\n"
+                        f"Expires: {self.token.valid_to}\n"
+                        f"Business Areas: {', '.join(self.token.valid_for.values_list('name', flat=True))}\n\n"
+                        f"Regards\n\n"
+                        f"The HOPE Team\n",
                     }
                 ]
             }
@@ -70,4 +83,5 @@ class TestApiToken(TestCase):
             "https://api.mailjet.com/v3.1/send",
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
             data=expected_data,
+            timeout=30,
         )

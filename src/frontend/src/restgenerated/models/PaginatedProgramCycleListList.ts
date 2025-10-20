@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { ProgramCycleList } from './ProgramCycleList';
 export type PaginatedProgramCycleListList = {
-    count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<ProgramCycleList>;

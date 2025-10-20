@@ -1,9 +1,7 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { AllSanctionListIndividualsQuery } from '@generated/graphql';
+import { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
 
-export const headCells: HeadCell<
-AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<SanctionListIndividual>[] = [
   {
     disablePadding: false,
     label: 'Ref. No. on Sanction List',
@@ -31,12 +29,5 @@ AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['
     id: 'documents',
     numeric: false,
     dataCy: 'documents',
-  },
-  {
-    disablePadding: false,
-    label: 'Listed On',
-    id: 'listedOn',
-    numeric: false,
-    dataCy: 'listedOn',
   },
 ];

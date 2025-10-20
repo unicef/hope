@@ -2,8 +2,8 @@ from typing import Any, Optional
 from unittest.mock import patch
 
 from django.test import TestCase
-
 import pytest
+
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
@@ -16,8 +16,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
@@ -27,11 +26,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -57,7 +56,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             household_data={
                 "registration_data_import": cls.rdi_other,
                 "program": cls.program_from,
-                "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
@@ -113,57 +111,24 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         )
 
     def _imported_objects_count_before(self) -> None:
-        self.assertEqual(
-            Household.pending_objects.filter().count(),
-            0,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            0,
-        )
+        assert Household.pending_objects.filter().count() == 0
+        assert Individual.pending_objects.count() == 0
+        assert IndividualIdentity.pending_objects.count() == 0
+        assert Document.pending_objects.count() == 0
+        assert IndividualRoleInHousehold.pending_objects.count() == 0
 
     def _imported_objects_count_after(self, multiplier: int = 1) -> None:
-        self.assertEqual(
-            Household.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            2 * multiplier,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            1 * multiplier,
-        )
+        assert Household.pending_objects.count() == 1 * multiplier
+        assert Individual.pending_objects.count() == 2 * multiplier
+        assert IndividualIdentity.pending_objects.count() == 1 * multiplier
+        assert Document.pending_objects.count() == 1 * multiplier
+        assert IndividualRoleInHousehold.pending_objects.count() == 1 * multiplier
 
     def test_registration_program_population_import_task_wrong_status(self) -> None:
         rdi_status = self.registration_data_import.status
         self._run_task()
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            rdi_status,
-            self.registration_data_import.status,
-        )
+        assert rdi_status == self.registration_data_import.status
 
     def test_registration_program_population_import_task(self) -> None:
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
@@ -174,10 +139,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IN_REVIEW,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
         self._imported_objects_count_after()
 
@@ -199,10 +161,12 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id
         self.registration_data_import.delete()
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             self._run_task(str(rdi_id))
 
-    def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
+    def test_registration_program_population_import_ba_postpone_deduplication(
+        self,
+    ) -> None:
         self.afghanistan.postpone_deduplication = True
         self.afghanistan.save()
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
@@ -211,12 +175,9 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IN_REVIEW,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
-    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache")
+    @patch("hope.apps.registration_datahub.celery_tasks.locked_cache")
     def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:
         mocked_locked_cache.return_value.__enter__.return_value = False
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
@@ -225,7 +186,4 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IMPORT_SCHEDULED,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IMPORT_SCHEDULED

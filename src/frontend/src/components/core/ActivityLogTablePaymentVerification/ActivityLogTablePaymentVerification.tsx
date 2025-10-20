@@ -8,10 +8,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentVerificationLogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
+import { LogEntry } from '@restgenerated/models/LogEntry';
 
 const Table = styled.div`
   display: flex;
@@ -49,7 +49,7 @@ const Toolbar = styled.div`
 `;
 
 interface ActivityLogTablePaymentVerificationProps {
-  logEntries: PaymentVerificationLogEntryNode[];
+  logEntries: LogEntry[];
   totalCount: number;
   rowsPerPage: number;
   page: number;
@@ -91,7 +91,7 @@ export function ActivityLogTablePaymentVerification({
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
-            <LogRow key={value.id} logEntry={value} />
+            <LogRow key={value.objectId} logEntry={value} />
           ))}
         </Table>
         <TablePagination

@@ -1,16 +1,14 @@
 import { ClearApplyButtons } from '@core/ClearApplyButtons';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { createHandleApplyFilterChange } from '@utils/utils';
-import React from 'react';
-import Grid from '@mui/material/Grid2';
 import { ContainerWithBorder } from '@core/ContainerWithBorder';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { MenuItem } from '@mui/material';
-import { NumberTextField } from '@core/NumberTextField';
-import { DatePickerFilter } from '@core/DatePickerFilter';
+import { Grid, MenuItem } from '@mui/material';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import moment from 'moment/moment';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ProgramCyclesFiltersProps {
   filter;
@@ -59,7 +57,7 @@ export const ProgramCyclesFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -67,7 +65,7 @@ export const ProgramCyclesFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -84,11 +82,11 @@ export const ProgramCyclesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.total_entitled_quantity_usd_from}
+            value={filter.totalEntitledQuantityUsd_from}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange(
@@ -98,10 +96,10 @@ export const ProgramCyclesFilters = ({
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.total_entitled_quantity_usd_to}
+            value={filter.totalEntitledQuantityUsd_to}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange(
@@ -110,26 +108,26 @@ export const ProgramCyclesFilters = ({
               )
             }
             error={
-              filter.total_entitled_quantity_usd_from &&
-              filter.total_entitled_quantity_usd_to &&
-              filter.total_entitled_quantity_usd_from >
-                filter.total_entitled_quantity_usd_to
+              filter.totalEntitledQuantityUsd_from &&
+              filter.totalEntitledQuantityUsd_to &&
+              filter.totalEntitledQuantityUsd_from >
+                filter.totalEntitledQuantityUsd_to
             }
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel="Date"
             onChange={(date) =>
               handleFilterChange(
-                'start_date',
+                'startDate',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
             value={filter.startDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
@@ -137,7 +135,7 @@ export const ProgramCyclesFilters = ({
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
-            value={filter.end_date}
+            value={filter.endDate}
           />
         </Grid>
       </Grid>

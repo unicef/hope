@@ -1,12 +1,13 @@
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { IndividualNode, IndividualQuery } from '@generated/graphql';
 import { FlagTooltip } from '@core/FlagTooltip';
 import { WarningTooltip } from '@core/WarningTooltip';
 import { FC, ReactElement } from 'react';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface IndividualFlagsProps {
-  individual: IndividualQuery['individual'] | IndividualNode;
+  individual: IndividualList | IndividualDetail;
 }
 
 export const IndividualFlags: FC<IndividualFlagsProps> = ({ individual }) => {

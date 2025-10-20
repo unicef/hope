@@ -1,101 +1,102 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class ManagerialConsole(BaseComponents):
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
     title = 'h6[data-cy="title"]'
-    approveButton = 'button[data-cy="approve-button"]'
-    selectAllApproval = 'span[data-cy="select-all-approval"]'
-    programSelectApproval = 'div[data-cy="program-select-approval"]'
-    selectApproval = 'span[data-cy="select-approval"]'
-    columnField = 'td[data-cy="column-field"]'
-    authorizeButton = 'button[data-cy="authorize-button"]'
-    selectAllAuthorization = 'span[data-cy="select-all-authorization"]'
-    programSelectAuthorization = 'div[data-cy="program-select-authorization"]'
-    selectAuthorization = 'span[data-cy="select-authorization"]'
-    columnFieldAuthorization = 'td[data-cy="column-field-authorization"]'
-    releaseButton = 'button[data-cy="release-button"]'
-    selectAllRelease = 'span[data-cy="select-all-release"]'
-    programSelectRelease = 'div[data-cy="program-select-release"]'
-    selectRelease = 'span[data-cy="select-release"]'
-    columnFieldRelease = 'td[data-cy="column-field-release"]'
-    searchReleased = 'div[data-cy="search-released"]'
-    programSelectReleased = 'div[data-cy="program-select-released"]'
-    columnFieldReleased = 'td[data-cy="column-field-released"]'
-    plansIds = 'span[data-cy="plans-ids"]'
-    buttonCancel = 'button[data-cy="button-cancel"]'
-    buttonSave = 'button[data-cy="button-save"]'
-    commentApprove = 'div[data-cy="comment-approve"]'
+    approve_button = 'button[data-cy="approve-button"]'
+    select_all_approval = 'span[data-cy="select-all-approval"]'
+    program_select_approval = 'div[data-cy="program-select-approval"]'
+    select_approval = 'span[data-cy="select-approval"]'
+    column_field = 'td[data-cy="column-field"]'
+    authorize_button = 'button[data-cy="authorize-button"]'
+    select_all_authorization = 'span[data-cy="select-all-authorization"]'
+    program_select_authorization = 'div[data-cy="program-select-authorization"]'
+    select_authorization = 'span[data-cy="select-authorization"]'
+    column_field_authorization = 'td[data-cy="column-field-authorization"]'
+    release_button = 'button[data-cy="release-button"]'
+    select_all_release = 'span[data-cy="select-all-release"]'
+    program_select_release = 'div[data-cy="program-select-release"]'
+    select_release = 'span[data-cy="select-release"]'
+    column_field_release = 'td[data-cy="column-field-release"]'
+    search_released = 'div[data-cy="search-released"]'
+    program_select_released = 'div[data-cy="program-select-released"]'
+    column_field_released = 'td[data-cy="column-field-released"]'
+    plans_ids = 'span[data-cy="plans-ids"]'
+    button_cancel = 'button[data-cy="button-cancel"]'
+    button_save = 'button[data-cy="button-save"]'
+    comment_approve = 'div[data-cy="comment-approve"]'
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getTitle(self) -> WebElement:
+    def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
-    def getApproveButton(self) -> WebElement:
-        return self.wait_for(self.approveButton)
+    def get_approve_button(self) -> WebElement:
+        return self.wait_for(self.approve_button)
 
-    def getSelectAllApproval(self) -> WebElement:
-        return self.wait_for(self.selectAllApproval)
+    def get_select_all_approval(self) -> WebElement:
+        return self.wait_for(self.select_all_approval)
 
-    def getProgramSelectApproval(self) -> WebElement:
-        return self.wait_for(self.programSelectApproval)
+    def get_program_select_approval(self) -> WebElement:
+        return self.wait_for(self.program_select_approval)
 
-    def getSelectApproval(self) -> WebElement:
-        return self.wait_for(self.selectApproval)
+    def get_select_approval(self) -> WebElement:
+        return self.wait_for(self.select_approval)
 
-    def getColumnField(self) -> WebElement:
-        return self.wait_for(self.columnField)
+    def get_column_field(self) -> WebElement:
+        return self.wait_for(self.column_field)
 
-    def getAuthorizeButton(self) -> WebElement:
-        return self.wait_for(self.authorizeButton)
+    def get_authorize_button(self) -> WebElement:
+        return self.wait_for(self.authorize_button)
 
-    def getSelectAllAuthorization(self) -> WebElement:
-        return self.wait_for(self.selectAllAuthorization)
+    def get_select_all_authorization(self) -> WebElement:
+        return self.wait_for(self.select_all_authorization)
 
-    def getProgramSelectAuthorization(self) -> WebElement:
-        return self.wait_for(self.programSelectAuthorization)
+    def get_program_select_authorization(self) -> WebElement:
+        return self.wait_for(self.program_select_authorization)
 
-    def getSelectAuthorization(self) -> WebElement:
-        return self.wait_for(self.selectAuthorization)
+    def get_select_authorization(self) -> WebElement:
+        return self.wait_for(self.select_authorization)
 
-    def getColumnFieldAuthorization(self) -> WebElement:
-        return self.wait_for(self.columnFieldAuthorization)
+    def get_column_field_authorization(self) -> WebElement:
+        return self.wait_for(self.column_field_authorization)
 
-    def getReleaseButton(self) -> WebElement:
-        return self.wait_for(self.releaseButton)
+    def get_release_button(self) -> WebElement:
+        return self.wait_for(self.release_button)
 
-    def getSelectAllRelease(self) -> WebElement:
-        return self.wait_for(self.selectAllRelease)
+    def get_select_all_release(self) -> WebElement:
+        return self.wait_for(self.select_all_release)
 
-    def getProgramSelectRelease(self) -> WebElement:
-        return self.wait_for(self.programSelectRelease)
+    def get_program_select_release(self) -> WebElement:
+        return self.wait_for(self.program_select_release)
 
-    def getSelectRelease(self) -> WebElement:
-        return self.wait_for(self.selectRelease)
+    def get_select_release(self) -> WebElement:
+        return self.wait_for(self.select_release)
 
-    def getColumnFieldRelease(self) -> WebElement:
-        return self.wait_for(self.columnFieldRelease)
+    def get_column_field_release(self) -> WebElement:
+        return self.wait_for(self.column_field_release)
 
-    def getSearchReleased(self) -> WebElement:
-        return self.wait_for(self.searchReleased)
+    def get_search_released(self) -> WebElement:
+        return self.wait_for(self.search_released)
 
-    def getProgramSelectReleased(self) -> WebElement:
-        return self.wait_for(self.programSelectReleased)
+    def get_program_select_released(self) -> WebElement:
+        return self.wait_for(self.program_select_released)
 
-    def getColumnFieldReleased(self) -> WebElement:
-        return self.wait_for(self.columnFieldReleased)
+    def get_column_field_released(self) -> WebElement:
+        return self.wait_for(self.column_field_released)
 
-    def getPlansIds(self) -> WebElement:
-        return self.wait_for(self.plansIds)
+    def get_plans_ids(self) -> WebElement:
+        return self.wait_for(self.plans_ids)
 
-    def getButtonCancel(self) -> WebElement:
-        return self.wait_for(self.buttonCancel)
+    def get_button_cancel(self) -> WebElement:
+        return self.wait_for(self.button_cancel)
 
-    def getButtonSave(self) -> WebElement:
-        return self.wait_for(self.buttonSave)
+    def get_button_save(self) -> WebElement:
+        return self.wait_for(self.button_save)
 
-    def getCommentApprove(self) -> WebElement:
-        return self.wait_for(self.commentApprove)
+    def get_comment_approve(self) -> WebElement:
+        return self.wait_for(self.comment_approve)

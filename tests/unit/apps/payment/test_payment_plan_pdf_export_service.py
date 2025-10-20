@@ -15,10 +15,9 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.models import Approval, DeliveryMechanism
-from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
+from hope.apps.core.models import DataCollectingType
+from hope.apps.payment.models import Approval, DeliveryMechanism
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
 
@@ -83,42 +82,42 @@ class TestPaymentPlanPDFExportService(TestCase):
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_web_links(self, get_link_mock: Any) -> None:
         expected_download_link = "http://www_link/download-payment-plan-summary-pdf/111"
         self.pdf_export_service.generate_web_links()
-        self.assertEqual(self.pdf_export_service.download_link, expected_download_link)
-        self.assertEqual(self.pdf_export_service.payment_plan_link, expected_download_link)
+        assert self.pdf_export_service.download_link == expected_download_link
+        assert self.pdf_export_service.payment_plan_link == expected_download_link
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.utils.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary(self, get_link_mock: Any) -> None:
         pdf1, filename1 = self.pdf_export_service.generate_pdf_summary()
 
-        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
+        assert self.payment_plan.program.data_collecting_type.type == DataCollectingType.Type.STANDARD
 
-        self.assertTrue(isinstance(pdf1, bytes))
-        self.assertEqual(filename1, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
+        assert isinstance(pdf1, bytes)
+        assert filename1 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
         self.payment_plan.program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
         self.payment_plan.program.data_collecting_type.save()
         self.payment_plan.program.data_collecting_type.refresh_from_db(fields=["type"])
 
-        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.SOCIAL)
+        assert self.payment_plan.program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
         pdf2, filename2 = self.pdf_export_service.generate_pdf_summary()
-        self.assertTrue(isinstance(pdf2, bytes))
-        self.assertEqual(filename2, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
+        assert isinstance(pdf2, bytes)
+        assert filename2 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
 
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.PaymentPlanPDFExportService.get_link",
+        "hope.apps.payment.utils.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     @patch(
-        "hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html",
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
     )
     def test_generate_pdf_summary_reconciliation(self, generate_pdf_from_html_mock: Any, get_link_mock: Any) -> None:
@@ -129,19 +128,17 @@ class TestPaymentPlanPDFExportService(TestCase):
         pdf_context_data = kwargs["data"]
         pdf_reconciliation_qs = pdf_context_data["reconciliation"]
 
-        self.assertEqual(pdf_reconciliation_qs["pending"], 1)
-        self.assertEqual(pdf_reconciliation_qs["reconciled"], 2)
-        self.assertEqual(pdf_reconciliation_qs["reconciled_usd"], 30.0)
-        self.assertEqual(pdf_reconciliation_qs["reconciled_local"], 15.0)
-        self.assertEqual(pdf_reconciliation_qs["failed_usd"], 210.0)
-        self.assertEqual(pdf_reconciliation_qs["failed_local"], 105.0)
-        self.assertEqual(
-            pdf_reconciliation_qs["failed_local"] + pdf_reconciliation_qs["reconciled_local"] + 10,
-            self.payment_plan.total_entitled_quantity,
+        assert pdf_reconciliation_qs["pending"] == 1
+        assert pdf_reconciliation_qs["reconciled"] == 2
+        assert pdf_reconciliation_qs["reconciled_usd"] == 30.0
+        assert pdf_reconciliation_qs["reconciled_local"] == 15.0
+        assert pdf_reconciliation_qs["failed_usd"] == 210.0
+        assert pdf_reconciliation_qs["failed_local"] == 105.0
+        assert self.payment_plan.total_entitled_quantity == (
+            pdf_reconciliation_qs["failed_local"] + pdf_reconciliation_qs["reconciled_local"] + 10
         )
-        self.assertEqual(
-            pdf_reconciliation_qs["failed_usd"] + pdf_reconciliation_qs["reconciled_usd"] + 20,
-            self.payment_plan.total_entitled_quantity_usd,
+        assert self.payment_plan.total_entitled_quantity_usd == (
+            pdf_reconciliation_qs["failed_usd"] + pdf_reconciliation_qs["reconciled_usd"] + 20
         )
 
     def test_get_email_context(self) -> None:
@@ -161,4 +158,4 @@ class TestPaymentPlanPDFExportService(TestCase):
 
         context = self.pdf_export_service.get_email_context(user_mock)
 
-        self.assertDictEqual(context, expected_context)
+        assert context == expected_context

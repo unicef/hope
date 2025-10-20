@@ -1,4 +1,7 @@
-export const headCells = [
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+
+export const headCells: HeadCell<PaymentPlanList>[] = [
   {
     disablePadding: false,
     label: 'Payment Plan ID',

@@ -3,7 +3,7 @@ description: ""
 template: term.html
 title: Payments
 terms:
-  - glossary: 
+  - glossary:
     - Cash Plan
     - Fund Commitment
     - Fund reservation
@@ -14,9 +14,9 @@ terms:
     - Purchase Order
     - Financial Service Provider
     - FSP
-    
+
 anchors:
-    - "Payment Record": single entry in a Payment Plan 
+    - "Payment Record": single entry in a Payment Plan
 
 ---
 
@@ -33,11 +33,11 @@ The delivery channels that will be used for payment plan dispersion
 
 ## Payment Plan
 
-List of <glossary:Payment Record> 
+List of <glossary:Payment Record>
 
 
 !!! note
-    
+
     - Target Population and Payment Plan is the same object in different phases of its life cycle
     - HouseHold Selection and Payment Record is the same object in different phases of its life cycle
 

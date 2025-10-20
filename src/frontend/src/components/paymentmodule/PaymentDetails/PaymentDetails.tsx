@@ -1,4 +1,5 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Overview } from '@components/payments/Overview';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -7,33 +8,24 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
+  safeStringify,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
 
 interface PaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
   canViewHouseholdDetails: boolean;
 }
@@ -47,24 +39,18 @@ function PaymentDetails({
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
-  if (
-    payment.verification &&
-    payment.verification.status !== PaymentVerificationStatus.Pending
-  ) {
+  let paymentVerification: PaymentDetail['verification'] = null;
+  if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
 
   const showFailureReason = [
-    PaymentStatus.NotDistributed,
-    PaymentStatus.ForceFailed,
-    PaymentStatus.TransactionErroneous,
+    'NOT_DISTRIBUTED',
+    'FORCE_FAILED',
+    'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
-  const collectorAccountData = payment?.snapshotCollectorAccountData
-  ? JSON.parse(payment.snapshotCollectorAccountData)
-  : {};
+  const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
 
   return (
     <>
@@ -115,7 +101,7 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent?.unicefId}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -219,14 +205,11 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType?.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('FSP')}
-              value={payment.serviceProvider?.fullName}
-            />
+            <LabelizedField label={t('FSP')} value={payment.fspName} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
@@ -237,14 +220,14 @@ function PaymentDetails({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-           {Object.entries(collectorAccountData).map(([key, value]) => (
-              <Grid key={key} size={{ xs: 3 }}>
-                <LabelizedField
-                  label={t(`Account ${key}`)}
-                  value={String(value)}
-                />
-              </Grid>
-            ))}
+          {Object.entries(collectorAccountData).map(([key, value]) => (
+            <Grid key={key} size={{ xs: 3 }}>
+              <LabelizedField
+                label={t(`Account ${key}`)}
+                value={safeStringify(value)}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Overview>
       <Overview>

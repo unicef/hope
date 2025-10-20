@@ -1,42 +1,64 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface HouseholdQuestionnaireProps {
   values;
+  programSlug?: string;
 }
 
 function HouseholdQuestionnaire({
   values,
+  programSlug,
 }: HouseholdQuestionnaireProps): ReactElement {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const householdId =
+    typeof values.selectedHousehold === 'object' &&
+    values.selectedHousehold !== null
+      ? values.selectedHousehold.id
+      : values.selectedHousehold;
 
-  useEffect(() => {
-    if (values.selectedHousehold) {
-      getHousehold();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.selectedHousehold]);
+  const {
+    data: household,
+    isLoading,
+    error,
+  } = useQuery<HouseholdDetail>({
+    queryKey: [
+      'household',
+      businessArea,
+      householdId,
+      programSlug,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        id: householdId,
+        programSlug: programSlug,
+      }),
+    enabled: !!householdId && !!programSlug,
+  });
 
-  if (!fullHousehold) return null;
-  if (fullHouseholdLoading) return <LoadingComponent />;
+  if (isLoading) return <LoadingComponent />;
+  if (error)
+    return <div>Error loading {beneficiaryGroup?.groupLabel} data</div>;
 
-  const selectedHouseholdData = fullHousehold?.household;
+  const selectedHouseholdData = household;
+
+  if (!selectedHouseholdData) return null;
 
   return (
     <Grid container spacing={6}>
@@ -68,12 +90,14 @@ function HouseholdQuestionnaire({
         {
           name: 'questionnaire_headOfHousehold',
           label: t(`Head of ${beneficiaryGroup?.groupLabel}`),
-          value: (
+          value: selectedHouseholdData.headOfHousehold ? (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
             >
               {selectedHouseholdData.headOfHousehold.fullName}
             </ContentLink>
+          ) : (
+            '-'
           ),
           size: 3,
         },
