@@ -19,9 +19,11 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     Document,
     Household,
     Individual,

@@ -27,7 +27,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.household.models import FEMALE, MALE
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.payment.models import Payment
 from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
     PDUOnlineEditGenerateDataService,

@@ -21,12 +21,14 @@ from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
     PendingDocument,

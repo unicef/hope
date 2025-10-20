@@ -25,9 +25,11 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
+)
+from hope.apps.household.models import (
     Household,
     Individual,
 )

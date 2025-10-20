@@ -22,8 +22,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

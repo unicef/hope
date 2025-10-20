@@ -15,10 +15,12 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
+)
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.models import (
     Household,
     HouseholdCollection,
     Individual,

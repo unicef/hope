@@ -20,11 +20,13 @@ from hope.apps.activity_log.models import log_create
 from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
 from hope.apps.geo.models import Area
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

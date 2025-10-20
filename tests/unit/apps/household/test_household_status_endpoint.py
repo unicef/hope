@@ -18,10 +18,12 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_NO_ROLE,
+)
+from hope.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hope.apps.payment.models import Payment, PaymentPlan

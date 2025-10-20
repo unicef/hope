@@ -52,7 +52,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketNote,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -61,6 +61,8 @@ from hope.apps.household.models import (
     ROLE_PRIMARY,
     SINGLE,
     WIDOWED,
+)
+from hope.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )

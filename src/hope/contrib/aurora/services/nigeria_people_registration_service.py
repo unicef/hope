@@ -6,9 +6,11 @@ from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
 from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingIndividual,

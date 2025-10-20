@@ -7,11 +7,13 @@ from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
 from hope.apps.activity_log.models import log_create
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,

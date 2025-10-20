@@ -42,11 +42,13 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
+)
+from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan

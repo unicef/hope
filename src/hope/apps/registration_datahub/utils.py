@@ -8,8 +8,10 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hope.apps.core.kobo.common import get_field_name
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,

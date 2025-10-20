@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories.program import ProgramFactory
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -16,6 +16,8 @@ from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingHousehold,
     PendingIndividual,

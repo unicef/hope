@@ -20,8 +20,10 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )

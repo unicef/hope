@@ -20,10 +20,12 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,
+)
+from hope.apps.household.models import (
     Document,
     DocumentType,
     Individual,

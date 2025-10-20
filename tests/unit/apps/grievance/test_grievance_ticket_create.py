@@ -27,7 +27,7 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -37,6 +37,8 @@ from hope.apps.household.models import (
     SINGLE,
     UNHCR,
     WIDOWED,
+)
+from hope.apps.household.models import (
     DocumentType,
     IndividualRoleInHousehold,
 )

@@ -13,19 +13,18 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
-    Household,
-    Individual,
-    PendingHousehold,
-    PendingIndividual,
 )
 from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
 from hope.apps.utils.models import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 if TYPE_CHECKING:
+    from hope.apps.household.models import (
+        Individual,
+    )
     from hope.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -234,6 +233,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
 
     def refresh_population_statistics(self) -> None:
+        from hope.apps.household.models import (
+            Household,
+            Individual,
+        )
+
         self.number_of_individuals = Individual.objects.filter(registration_data_import=self).count()
         self.number_of_households = Household.objects.filter(registration_data_import=self).count()
         self.save(update_fields=("number_of_individuals", "number_of_households"))
@@ -262,6 +266,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return not is_still_processing
 
     def update_duplicates_against_population_statistics(self) -> None:
+        from hope.apps.household.models import Individual
+
         self.golden_record_duplicates = Individual.objects.filter(
             registration_data_import_id=self.id,
             deduplication_golden_record_status=DUPLICATE,
@@ -278,6 +284,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         )
 
     def bulk_update_household_size(self) -> None:
+        from hope.apps.household.models import (
+            PendingHousehold,
+            PendingIndividual,
+        )
+
         # AB#208387
         if self.program and self.program.data_collecting_type.recalculate_composition:
             households = PendingHousehold.all_objects.filter(registration_data_import=self)
@@ -479,7 +490,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
     @classmethod
     def serialize_for_individual(
         cls,
-        individual: Individual,
+        individual: "Individual",
         similarity_pairs: QuerySet["DeduplicationEngineSimilarityPair"],
     ) -> list:
         duplicates = []

@@ -37,7 +37,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import to_choice_object
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -65,6 +65,8 @@ from hope.apps.household.models import (
     STATUS_ACTIVE,
     UNIQUE,
     WORK_STATUS_CHOICE,
+)
+from hope.apps.household.models import (
     DocumentType,
     Household,
     Individual,

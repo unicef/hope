@@ -19,8 +19,10 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_CHOICE,
+)
+from hope.apps.household.models import (
     Document,
     DocumentType,
     Household,

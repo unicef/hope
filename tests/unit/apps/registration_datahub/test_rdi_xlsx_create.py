@@ -31,9 +31,11 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
 from hope.apps.geo.models import Country as GeoCountry
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

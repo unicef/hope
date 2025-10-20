@@ -12,10 +12,12 @@ from extras.test_utils.factories.program import (
 )
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
+)
+from hope.apps.household.models import (
     ROLE_PRIMARY,
     DocumentType,
     PendingHousehold,

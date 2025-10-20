@@ -42,12 +42,14 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEARING,
     HOST,
     REFUGEE,
     ROLE_PRIMARY,
     SEEING,
+)
+from hope.apps.household.models import (
     Household,
     Individual,
 )
