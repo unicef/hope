@@ -1851,7 +1851,7 @@ class PaymentViewSet(
         return get_object_or_404(Payment, id=payment_id)
 
     def get_queryset(self) -> QuerySet:
-        parent_id = self.kwargs["payment_plan_pk"]
+        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
         # Prefetch roles for each individual's household
         role_prefetch = Prefetch(
             "households_and_roles",
@@ -1864,9 +1864,7 @@ class PaymentViewSet(
             queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
             to_attr="prefetched_individuals",
         )
-        return (
-            Payment.objects.filter(parent_id=parent_id).select_related("parent").prefetch_related(individual_prefetch)
-        )
+        return parent.eligible_payments.prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,

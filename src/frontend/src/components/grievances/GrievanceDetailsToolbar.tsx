@@ -135,9 +135,6 @@ export const GrievanceDetailsToolbar = ({
       const householdData = ticket.ticketDetails?.householdData || {};
       const individualData = ticket.ticketDetails?.individualData || {};
 
-      console.log('householdData', householdData);
-      console.log('individualData', individualData);
-
       const allData = {
         ...householdData,
         ...individualData,

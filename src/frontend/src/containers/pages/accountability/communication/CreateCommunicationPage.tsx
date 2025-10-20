@@ -27,7 +27,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { AreaList } from '@restgenerated/models/AreaList';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -145,13 +145,12 @@ const CreateCommunicationPage = (): ReactElement => {
   const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
 
-  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
-    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+  const { data: adminAreasData } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
-      return RestService.restAreasList({
-        limit: 100,
-        areaTypeAreaLevel: 2,
-        search: undefined,
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
       });
     },
     enabled: !!businessArea,
@@ -279,8 +278,8 @@ const CreateCommunicationPage = (): ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = adminAreasData?.results?.length
-    ? adminAreasData.results.map((area) => ({
+  const mappedAdminAreas = adminAreasData?.length
+    ? adminAreasData.map((area) => ({
         value: area.id,
         name: area.name || '',
       }))
