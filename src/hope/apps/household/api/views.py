@@ -193,14 +193,19 @@ class HouseholdViewSet(
         payments = Payment.objects.filter(
             Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         )
+        total_count = payments.count()
 
         page = self.paginate_queryset(payments)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response = self.get_paginated_response(serializer.data)
+            response.data["count"] = total_count
+            return response
 
         serializer = self.get_serializer(payments, many=True)
-        return Response(serializer.data)
+        response = Response(serializer.data)
+        response.data["count"] = total_count
+        return response
 
     @extend_schema(
         responses={
