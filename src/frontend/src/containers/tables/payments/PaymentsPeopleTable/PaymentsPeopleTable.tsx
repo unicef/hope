@@ -35,27 +35,6 @@ function PaymentsPeopleTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   const [page, setPage] = useState(0);
 
-  // Add count query for payments, only enabled on first page
-  const { data: paymentsCountData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsCount',
-      queryVariables,
-      businessArea,
-      household.id,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanPk: household.id,
-        ...queryVariables,
-      }),
-    enabled: page === 0,
-  });
-
-  const itemsCount = usePersistedCount(page, paymentsCountData);
-
   const {
     data: paymentsData,
     isLoading,
@@ -83,9 +62,11 @@ function PaymentsPeopleTable({
     },
   });
 
+  const itemsCount = usePersistedCount(page, paymentsData?.count);
+
   return (
     <UniversalRestTable
-      title={t('Payment Records')}
+      title={t('Payments')}
       headCells={headCells}
       data={paymentsData}
       error={error}

@@ -66,22 +66,6 @@ function PaymentsHouseholdTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: paymentsCountData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsCount',
-      household?.id,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanPk: household?.id,
-      }),
-    enabled: page === 0,
-  });
-
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
@@ -96,7 +80,7 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
-  const itemsCount = usePersistedCount(page, paymentsCountData);
+  const itemsCount = usePersistedCount(page, paymentsData?.count);
 
   return (
     <UniversalRestTable
