@@ -961,6 +961,7 @@ class PaymentPlanViewSet(
         detail=True,
         methods=["post"],
         url_path="entitlement-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
