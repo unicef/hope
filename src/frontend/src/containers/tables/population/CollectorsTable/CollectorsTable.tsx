@@ -102,7 +102,7 @@ export const CollectorsTable = ({
 
   // Extract collectors from the response
   const allCollectors = (data?.results || []).filter(
-    (collector) => collector.role !== 'NONE',
+    (collector) => collector.role !== 'NO_ROLE',
   );
 
   let sortedCollectors = [...allCollectors];

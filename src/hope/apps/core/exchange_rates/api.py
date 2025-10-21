@@ -33,7 +33,7 @@ class ExchangeRateClientDummy(ExchangeRateClient):
 class ExchangeRateClientAPI(ExchangeRateClient):
     HISTORY_MODE_PARAM_SHORT = "short"
     HISTORY_MODE_PARAM_LONG = "yes"
-    HISTORY_MODE_PARAM_LATEST_12 = "latest_12"
+    HISTORY_MODE_PARAM_LATEST_12 = "12"
 
     def __init__(self, api_key: str | None = None, api_url: str | None = None) -> None:
         self.api_key = api_key or settings.EXCHANGE_RATES_API_KEY
