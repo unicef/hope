@@ -317,9 +317,9 @@ class TestPaymentCeleryTask(TestCase):
 
             send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
-            # first call from > create_payment_plan_payment_list_xlsx_per_fsp
-            # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
-            assert mock_mailjet_send.call_count == 2
+            # 2 first calls from > create_payment_plan_payment_list_xlsx_per_fsp
+            # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
+            assert mock_mailjet_send.call_count == 3
 
     @patch("hope.apps.payment.celery_tasks.logger")
     @patch("hope.apps.payment.celery_tasks.get_user_model")
