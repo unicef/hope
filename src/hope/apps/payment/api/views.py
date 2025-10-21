@@ -1154,6 +1154,9 @@ class PaymentPlanViewSet(
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
 
+        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+            raise ValidationError("Payment List Per FSP export already in progress.")
+
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,
             PaymentPlan.Status.FINISHED,
