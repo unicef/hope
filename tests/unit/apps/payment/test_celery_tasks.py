@@ -321,7 +321,6 @@ class TestPaymentCeleryTask(TestCase):
             # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
             assert mock_mailjet_send.call_count == 3
 
-
     @patch("hope.apps.payment.celery_tasks.logger")
     @patch("hope.apps.payment.celery_tasks.get_user_model")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(

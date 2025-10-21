@@ -2,6 +2,7 @@ import datetime
 import logging
 from typing import Any
 
+from celery.exceptions import MaxRetriesExceededError
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -12,9 +13,6 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from celery.exceptions import MaxRetriesExceededError
-from concurrency.api import disable_concurrency
 
 from hope.apps.account.models import User
 from hope.apps.core.celery import app
@@ -176,15 +174,17 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
 
                 if service.payment_generate_token_and_order_numbers:
-                    with cache.lock(
-                        f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
-                        blocking_timeout=60 * 10,
-                        timeout=60 * 20,
+                    with (
+                        cache.lock(
+                            f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
+                            blocking_timeout=60 * 10,
+                            timeout=60 * 20,
+                        ),
+                        transaction.atomic(),
                     ):
-                        with transaction.atomic():
-                            service.generate_token_and_order_numbers(
-                                payment_plan.eligible_payments.all(), payment_plan.program
-                            )
+                        service.generate_token_and_order_numbers(
+                            payment_plan.eligible_payments.all(), payment_plan.program
+                        )
 
                 service.export_per_fsp(user)
 

@@ -1524,7 +1524,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         admin_areas_dict: dict[str, dict[str, Any]],
         countries_dict: dict[str, dict[str, Any]],
     ) -> str | None:
-        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
+        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
@@ -1662,10 +1662,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
-            "alternate_collector_document_numbers": (
-                cls.get_alternate_collector_doc_numbers,
-                [snapshot_data]
-            ),
+            "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
         if column_name in DocumentType.get_all_doc_types():
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)

@@ -6,29 +6,18 @@ from decimal import Decimal
 import functools
 import io
 import itertools
+from itertools import islice
 import json
 import logging
 import string
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional
-from collections import OrderedDict
-from collections.abc import MutableMapping
-from copy import deepcopy
-from datetime import date, datetime
-from decimal import Decimal
-from itertools import islice
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generator,
     Iterable,
     Iterator,
-    List,
     Optional,
-    Tuple,
-    Type,
-    Union,
 )
 
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -764,20 +753,18 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 }
 
 
-def chunks(it: Iterable, size: int) -> Iterator[List]:
-    """
-    Yield lists of up to `size` items from `it`.
-    """
+def chunks(it: Iterable, size: int) -> Iterator[list]:
+    """Yield lists of up to `size` items from `it`."""
     iterator = iter(it)
     while True:
-        buf: List = list(islice(iterator, size))
+        buf: list = list(islice(iterator, size))
         if not buf:
             return
         yield buf
 
 
 def send_email_notification_on_commit(
-    service: Any, user: Optional["User"] = None, context_kwargs: Optional[Dict] = None
+    service: Any, user: Optional["User"] = None, context_kwargs: dict | None = None
 ) -> None:
     transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
 

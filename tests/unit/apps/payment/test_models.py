@@ -877,33 +877,53 @@ class TestFinancialServiceProviderModel(TestCase):
         assert admin2 == f"{area2.p_code} - {area2.name}"
         admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3", admin_areas_dict, countries_dict)
         assert admin3 == f"{area3.p_code} - {area3.name}"
-        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name", admin_areas_dict, countries_dict)
+        given_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", admin_areas_dict, countries_dict
+        )
         assert given_name == primary.given_name
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id", admin_areas_dict, countries_dict)
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "individual_unicef_id", admin_areas_dict, countries_dict
+        )
         assert ind_unicef_id == primary.unicef_id
-        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "household_unicef_id", admin_areas_dict, countries_dict)
+        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "household_unicef_id", admin_areas_dict, countries_dict
+        )
         assert hh_unicef_id == household.unicef_id
         phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no", admin_areas_dict, countries_dict)
         assert phone_no == primary.phone_no
-        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative", admin_areas_dict, countries_dict)
+        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(
+            payment, "phone_no_alternative", admin_areas_dict, countries_dict
+        )
         assert phone_no_alternative == primary.phone_no_alternative
-        national_id_no = fsp_xlsx_template.get_column_from_core_field(payment, "national_id_no", admin_areas_dict, countries_dict)
+        national_id_no = fsp_xlsx_template.get_column_from_core_field(
+            payment, "national_id_no", admin_areas_dict, countries_dict
+        )
         assert national_id_no == document.document_number
-        wallet_name = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_name", admin_areas_dict, countries_dict)
+        wallet_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_name", admin_areas_dict, countries_dict
+        )
         assert wallet_name == primary.wallet_name
-        blockchain_name = fsp_xlsx_template.get_column_from_core_field(payment, "blockchain_name", admin_areas_dict, countries_dict)
+        blockchain_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "blockchain_name", admin_areas_dict, countries_dict
+        )
         assert blockchain_name == primary.blockchain_name
-        wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address", admin_areas_dict, countries_dict)
+        wallet_address = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_address", admin_areas_dict, countries_dict
+        )
         assert wallet_address == primary.wallet_address
 
         role = fsp_xlsx_template.get_column_from_core_field(payment, "role", admin_areas_dict, countries_dict)
         assert role == "PRIMARY"
 
-        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id", admin_areas_dict, countries_dict)
+        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "primary_collector_id", admin_areas_dict, countries_dict
+        )
         assert primary_collector_id == str(primary.pk)
 
         # country_origin
-        country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin", admin_areas_dict, countries_dict)
+        country_origin = fsp_xlsx_template.get_column_from_core_field(
+            payment, "country_origin", admin_areas_dict, countries_dict
+        )
         assert household.country_origin.iso_code3 == country_origin
 
 

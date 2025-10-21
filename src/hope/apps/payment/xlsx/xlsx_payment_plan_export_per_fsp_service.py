@@ -3,9 +3,6 @@ import logging
 import string
 from tempfile import NamedTemporaryFile
 import zipfile
-from io import BytesIO
-from tempfile import NamedTemporaryFile
-from typing import List, Optional, Set
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -19,9 +16,6 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pyzipper
 
-from hope.apps.account.models import User
-from hope.apps.core.models import FileTemp, FlexibleAttribute
-from hope.apps.payment.models import (
 from hope.apps.account.models import User
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
@@ -37,9 +31,6 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hope.apps.payment.validators import generate_numeric_token
-from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.utils.exceptions import log_and_raise
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.program.models import Program
@@ -76,15 +67,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         qs: QuerySet[Payment],
         program: Program,
     ) -> None:
-        """
-        Ensure order_number/token_number for all rows in qs.
-        """
-        existing_orders: Set[int] = set(
+        """Ensure order_number/token_number for all rows in qs."""
+        existing_orders: set[int] = set(
             Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
                 "order_number", flat=True
             )
         )
-        existing_tokens: Set[int] = set(
+        existing_tokens: set[int] = set(
             Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
                 "token_number", flat=True
             )
@@ -100,7 +89,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if not payments:  # pragma: no cover
             return
 
-        to_update: List[Payment] = []
+        to_update: list[Payment] = []
 
         for payment in payments:
             need_order = payment.order_number is None

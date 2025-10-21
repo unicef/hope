@@ -11,9 +11,7 @@ from hope.apps.geo.models import Country
 from hope.apps.household.models import Household
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.payment.validators import payment_token_and_order_number_validator
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-    XlsxPaymentPlanExportPerFspService
-)
+from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
 
 
 class TestPaymentTokenAndOrderNumbers(TestCase):
