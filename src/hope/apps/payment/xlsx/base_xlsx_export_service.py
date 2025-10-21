@@ -58,23 +58,22 @@ class XlsxExportBaseService:
         self,
         col: list | None = None,
         hex_code: str = "A0FDB0",
-        no_of_columns: int | None = None,
     ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
             bd = Side(style="thin", color="999999")
             for y in range(
                 1,
-                (self.ws_export_list.max_column if no_of_columns is None else no_of_columns) + 1,
+                self.ws_export_list.max_row + 1,
             ):
                 cell = self.ws_export_list.cell(row=y, column=row_index)
                 cell.fill = fill
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
     def get_email_context(self, user: "User") -> dict:
-        payment_verification_id = str(self.payment_plan.id)
+        payment_plan_id = str(self.payment_plan.id)
         path_name = "download-payment-plan-payment-list"
-        link = get_link(reverse(path_name, args=[payment_verification_id]))
+        link = get_link(reverse(path_name, args=[payment_plan_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 

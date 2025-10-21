@@ -961,6 +961,7 @@ class PaymentPlanViewSet(
         detail=True,
         methods=["post"],
         url_path="entitlement-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1152,6 +1153,9 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
+
+        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+            raise ValidationError("Payment List Per FSP export already in progress.")
 
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,

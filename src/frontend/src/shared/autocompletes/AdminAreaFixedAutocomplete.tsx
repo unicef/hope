@@ -56,7 +56,7 @@ export const AdminAreaFixedAutocomplete = ({
   const loading = isLoading;
 
   useEffect(() => {
-    if (areasData) {
+    if (Array.isArray(areasData)) {
       setNewValue(
         typeof value === 'string'
           ? areasData.find((item) => item.name === value)
