@@ -8,12 +8,18 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
-from hope.apps.household.api.serializers.individual import CountrySerializer
+from hope.apps.geo.models import Country
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 
 
+class CountrySmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ("name",)
+
+
 class BusinessAreaSerializer(serializers.ModelSerializer):
-    countries = CountrySerializer(many=True, read_only=True)
+    countries = CountrySmallSerializer(many=True, read_only=True)
 
     class Meta:
         model = BusinessArea
