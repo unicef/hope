@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
@@ -63,24 +64,30 @@ function PaymentsHouseholdTable({
       );
     },
   });
-  const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: paymentsCountData } = useQuery({
+  const { data: countData } = useQuery<CountResponse>({
     queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsCount',
-      household?.id,
-      businessArea,
+      'businessAreasProgramsHouseholdsPaymentsCount',
       programId,
+      businessArea,
+      queryVariables,
+      household?.id,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanPk: household?.id,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household?.id,
+          },
+          queryVariables,
+        ),
+      ),
     enabled: page === 0,
   });
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
@@ -96,7 +103,7 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
-  const itemsCount = usePersistedCount(page, paymentsCountData);
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <UniversalRestTable
