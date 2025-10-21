@@ -956,6 +956,7 @@ class DocumentType(TimeStampedUUIDModel):
         """Return list of Document Types choices."""
         return [(obj.key, obj.label) for obj in cls.objects.all()]
 
+    @classmethod
     def get_all_doc_types(cls) -> list[str]:
         cached = cache.get(cls.CACHE_KEY_ALL_DOC_TYPES)
         if cached is not None:
