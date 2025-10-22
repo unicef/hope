@@ -1,6 +1,5 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -19,6 +18,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 
 const Container = styled.div`
   && {
@@ -93,7 +93,9 @@ function ProgramDetailsPage(): ReactElement {
   if (!choices || !businessAreaData || permissions === null) return null;
 
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
-  return (
+  return error?.message.includes('Not Found') ? (
+    <SomethingWentWrong errorMessage="You are not authorized to view this program or the program does not exist." />
+  ) : (
     <>
       <ProgramDetailsPageHeader
         program={program}
@@ -130,4 +132,4 @@ function ProgramDetailsPage(): ReactElement {
   );
 }
 
-export default withErrorBoundary(ProgramDetailsPage, 'ProgramDetailsPage');
+export default ProgramDetailsPage;
