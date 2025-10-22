@@ -57,7 +57,7 @@ export function ImportXlsxPaymentPlanPaymentList({
           businessAreaSlug,
           id,
           programSlug,
-          requestBody,
+          formData: requestBody,
         },
       ),
     onSuccess: () => {
@@ -78,13 +78,13 @@ export function ImportXlsxPaymentPlanPaymentList({
       try {
         const formData = {
           // @ts-ignore - File object is expected here despite the string type in the model
-          file: fileToImport,
+          file: fileToImport as any,
         };
         await mutate({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
           programSlug: programId,
-          requestBody: formData as any,
+          requestBody: formData,
         });
       } catch {
         // Error is already handled by onError in mutation

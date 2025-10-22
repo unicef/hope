@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
+import type { AreaList } from '../models/AreaList';
+import type { AreaTree } from '../models/AreaTree';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
 import type { Bulk } from '../models/Bulk';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
@@ -50,8 +52,6 @@ import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
 import type { MessageSampleSize } from '../models/MessageSampleSize';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
-import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
-import type { PaginatedAreaTreeList } from '../models/PaginatedAreaTreeList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedAuthorizedUserList } from '../models/PaginatedAuthorizedUserList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
@@ -1146,16 +1146,14 @@ export class RestService {
      *
      * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
      * variable token_permission.
-     * @returns PaginatedAreaListList
+     * @returns AreaList
      * @throws ApiError
      */
     public static restBusinessAreasGeoAreasList({
         businessAreaSlug,
         id,
         level,
-        limit,
         name,
-        offset,
         ordering,
         parentId,
         parentPCode,
@@ -1165,15 +1163,7 @@ export class RestService {
         businessAreaSlug: string,
         id?: string,
         level?: number,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
         name?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Which field to use when ordering the results.
          */
@@ -1182,7 +1172,7 @@ export class RestService {
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedAreaListList> {
+    }): CancelablePromise<Array<AreaList>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/geo/areas/',
@@ -1192,9 +1182,7 @@ export class RestService {
             query: {
                 'id': id,
                 'level': level,
-                'limit': limit,
                 'name': name,
-                'offset': offset,
                 'ordering': ordering,
                 'parent_id': parentId,
                 'parent_p_code': parentPCode,
@@ -1208,16 +1196,14 @@ export class RestService {
      *
      * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
      * variable token_permission.
-     * @returns PaginatedAreaTreeList
+     * @returns AreaTree
      * @throws ApiError
      */
     public static restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug,
         id,
         level,
-        limit,
         name,
-        offset,
         ordering,
         parentId,
         parentPCode,
@@ -1227,15 +1213,7 @@ export class RestService {
         businessAreaSlug: string,
         id?: string,
         level?: number,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
         name?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
         /**
          * Which field to use when ordering the results.
          */
@@ -1244,7 +1222,7 @@ export class RestService {
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedAreaTreeList> {
+    }): CancelablePromise<Array<AreaTree>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/geo/areas/all-areas-tree/',
@@ -1254,9 +1232,7 @@ export class RestService {
             query: {
                 'id': id,
                 'level': level,
-                'limit': limit,
                 'name': name,
-                'offset': offset,
                 'ordering': ordering,
                 'parent_id': parentId,
                 'parent_p_code': parentPCode,
@@ -6778,6 +6754,193 @@ export class RestService {
         });
     }
     /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        messageId,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        surveyId,
+        unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        messageId?: string,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        surveyId?: string,
+        unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+        withdrawn?: boolean,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'message_id': messageId,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey_id': surveyId,
+                'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
      * @returns any No response body
      * @throws ApiError
      */
@@ -9066,7 +9229,7 @@ export class RestService {
         businessAreaSlug,
         id,
         programSlug,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
@@ -9074,7 +9237,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: PaymentPlanImportFile,
+        formData: PaymentPlanImportFile,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -9084,8 +9247,8 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
