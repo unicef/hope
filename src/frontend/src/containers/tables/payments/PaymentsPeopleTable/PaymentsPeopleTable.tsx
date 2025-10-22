@@ -1,19 +1,20 @@
-import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentsForTableQueryVariables,
-  HouseholdNode,
-  PaymentNode,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { createApiParams } from '@utils/apiUtils';
 
 interface PaymentsPeopleTableProps {
-  household?: HouseholdNode;
+  household?: HouseholdDetail;
   openInNewTab?: boolean;
   businessArea: string;
   canViewPaymentRecordDetails: boolean;
@@ -27,19 +28,78 @@ function PaymentsPeopleTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const initialVariables = {
-    householdId: household?.id,
-    businessArea,
-    program: programId,
+  const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    id: household.id,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      household.id,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsPaymentsCount',
+      programId,
+      businessArea,
+      queryVariables,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
-      title={t('Payment Records')}
+    <UniversalRestTable
+      title={t('Payments')}
       headCells={headCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
+      data={paymentsData}
+      error={error}
+      isLoading={isLoading}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

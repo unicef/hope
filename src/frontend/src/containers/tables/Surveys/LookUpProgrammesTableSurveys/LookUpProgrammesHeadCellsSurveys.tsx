@@ -1,9 +1,7 @@
-import { AllProgramsQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 
-export const headCells: HeadCell<
-AllProgramsQuery['allPrograms']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<ProgramList>[] = [
   {
     disablePadding: false,
     label: '',

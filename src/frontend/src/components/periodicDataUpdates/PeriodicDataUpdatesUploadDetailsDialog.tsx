@@ -1,13 +1,14 @@
-import React, { FC } from 'react';
-import { useTranslation } from 'react-i18next';
+import { RestService } from '@restgenerated/services/RestService';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
+  Typography,
 } from '@mui/material';
-import { fetchPeriodicDataUpdateUploadDetails } from '@api/periodicDataUpdateApi';
+import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -17,10 +18,6 @@ interface PeriodicDataUpdatesUploadDetailsDialogProps {
   onClose: () => void;
   uploadId: number;
 }
-
-// const StyledError = styled.p`
-//   color: red;
-// `;
 
 const FormErrorDisplay = ({ formErrors }) => {
   if (!formErrors || !formErrors.length) {
@@ -49,8 +46,8 @@ const FormErrorDisplay = ({ formErrors }) => {
     </div>
   );
 };
+
 const NonFormErrorDisplay = ({ nonFormErrors }) => {
-  // Attempt to parse the JSON if it's a string; otherwise assume it's already an array
   const errorMessages = nonFormErrors;
 
   if (!errorMessages || !errorMessages.length) {
@@ -67,6 +64,7 @@ const NonFormErrorDisplay = ({ nonFormErrors }) => {
     </div>
   );
 };
+
 export const PeriodicDataUpdatesUploadDetailsDialog: FC<
   PeriodicDataUpdatesUploadDetailsDialogProps
 > = ({ open, onClose, uploadId }) => {
@@ -80,7 +78,12 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
       uploadId,
     ],
     queryFn: () =>
-      fetchPeriodicDataUpdateUploadDetails(businessArea, programId, uploadId),
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: uploadId,
+      }),
+    enabled: !!uploadId,
   });
 
   if (isLoading) return <LoadingComponent />;
@@ -88,12 +91,18 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
-        <NonFormErrorDisplay
-          nonFormErrors={uploadDetailsData?.errors_info?.non_form_errors}
-        />
-        <FormErrorDisplay
-          formErrors={uploadDetailsData?.errors_info?.form_errors}
-        />
+        {!uploadDetailsData?.errorsInfo ? (
+          <Typography>No errors to display.</Typography>
+        ) : (
+          <>
+            <NonFormErrorDisplay
+              nonFormErrors={uploadDetailsData?.errorsInfo?.nonFormErrors}
+            />
+            <FormErrorDisplay
+              formErrors={uploadDetailsData?.errorsInfo?.formErrors}
+            />
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>

@@ -1,4 +1,4 @@
-import { Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -9,10 +9,6 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import {
-  AllAddIndividualFieldsQuery,
-  useAllAddIndividualFieldsQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { AgencyField } from './AgencyField';
@@ -22,9 +18,12 @@ import { removeItemById } from './utils/helpers';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface AddIndividualDataChangeFieldProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: any;
   flexField?: boolean;
 }
 export function AddIndividualDataChangeField({
@@ -94,7 +93,7 @@ export function AddIndividualDataChangeField({
   }
   return (
     <>
-      <Grid size={{ xs: 8 }}>
+      <Grid size={8}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -107,7 +106,7 @@ export function AddIndividualDataChangeField({
           {...fieldProps}
         />
       </Grid>
-      <Grid size={{ xs: 4 }} />
+      <Grid size={4} />
     </>
   );
 }
@@ -126,18 +125,60 @@ function AddIndividualDataChange({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessAreaSlug } = useBaseUrl();
 
-  const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading) {
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: ['individualChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restChoicesCountriesList(),
+  });
+
+  if (
+    loading ||
+    choicesLoading ||
+    individualChoicesLoading ||
+    countriesLoading
+  ) {
     return <LoadingComponent />;
   }
-  const flexFields = data.allAddIndividualsFieldsAttributes.filter(
-    (item) => item.isFlexField,
-  );
-  const coreFields = data.allAddIndividualsFieldsAttributes.filter(
-    (item) => !item.isFlexField,
-  );
 
+  const combinedData = {
+    results: data || [],
+    countriesChoices: countriesData || [],
+    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
+  };
+
+  const flexFields =
+    combinedData.results.filter((item) => item.isFlexField) || [];
+  const coreFields =
+    combinedData.results.filter((item) => !item.isFlexField) || [];
   return (
     !isEditTicket && (
       <>
@@ -147,14 +188,12 @@ function AddIndividualDataChange({
           </Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12 }}>{t('Core Fields')}</Grid>
+          <Grid size={12}>{t('Core Fields')}</Grid>
 
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
-          {flexFields.length > 0 && (
-            <Grid size={{ xs: 12 }}>{t('Flex Fields')}</Grid>
-          )}
+          {flexFields.length > 0 && <Grid size={12}>{t('Flex Fields')}</Grid>}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
               key={item.name}
@@ -169,20 +208,19 @@ function AddIndividualDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualData?.documents?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
                   return (
                     <DocumentField
-                      id={existingOrNewId}
-                      key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                      id={item?.id}
+                      key={`${item?.id}-${item?.country}-${item?.type?.key}`}
                       onDelete={() =>
                         removeItemById(
                           values.individualData.documents,
-                          existingOrNewId,
+                          item?.id,
                           arrayHelpers,
                         )
                       }
-                      countryChoices={data.countriesChoices}
-                      documentTypeChoices={data.documentTypeChoices}
+                      countryChoices={combinedData.countriesChoices}
+                      documentTypeChoices={combinedData.documentTypeChoices}
                       baseName="individualData.documents"
                       baseNameArray={values.individualData.documents}
                       setFieldValue={setFieldValue}
@@ -190,8 +228,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid size={{ xs: 8 }} />
-                <Grid size={{ xs: 12 }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -218,28 +256,27 @@ function AddIndividualDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualData?.identities?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
                   return (
                     <AgencyField
-                      key={existingOrNewId}
-                      id={existingOrNewId}
+                      key={item?.id}
+                      id={item?.id}
                       onDelete={() =>
                         removeItemById(
                           values.individualData.identities,
-                          existingOrNewId,
+                          item?.id,
                           arrayHelpers,
                         )
                       }
-                      countryChoices={data.countriesChoices}
-                      identityTypeChoices={data.identityTypeChoices}
+                      countryChoices={combinedData.countriesChoices}
+                      identityTypeChoices={combinedData.identityTypeChoices}
                       baseName="individualData.identities"
                       baseNameArray={values.individualData.identities}
                       values={values}
                     />
                   );
                 })}
-                <Grid size={{ xs: 8 }} />
-                <Grid size={{ xs: 12 }}>
+                <Grid size={8} />
+                <Grid size={12}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}

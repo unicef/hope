@@ -1,9 +1,10 @@
+from datetime import datetime, timedelta
 import json
-from datetime import datetime
 from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock
 
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
@@ -12,9 +13,9 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
-
+from django.utils.timezone import now
 import pytest
-from dateutil.relativedelta import relativedelta
+
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.core import (
     DataCollectingTypeFactory,
@@ -41,16 +42,15 @@ from extras.test_utils.factories.program import BeneficiaryGroupFactory, Program
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-
-from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.currencies import USDC
+from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
+from hope.apps.household.models import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hct_mis_api.apps.payment.models import (
+from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
+from hope.apps.payment.models import (
     Account,
     AccountType,
     Approval,
@@ -63,13 +63,13 @@ from hct_mis_api.apps.payment.models import (
     PaymentDataCollector,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
+from hope.apps.program.models import ProgramCycle
+from hope.apps.steficon.models import Rule
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestBasePaymentPlanModel:
@@ -94,7 +94,9 @@ class TestBasePaymentPlanModel:
         )
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
         approval_approval2 = ApprovalFactory(
-            type=Approval.APPROVAL, approval_process=approval_process, created_by=approval_user
+            type=Approval.APPROVAL,
+            approval_process=approval_process,
+            created_by=approval_user,
         )
         ApprovalFactory(type=Approval.AUTHORIZATION, approval_process=approval_process)
         modified_data = payment_plan._get_last_approval_process_data()
@@ -109,7 +111,9 @@ class TestBasePaymentPlanModel:
         )
         ApprovalFactory(type=Approval.AUTHORIZATION, approval_process=approval_process)
         approval_authorization2 = ApprovalFactory(
-            type=Approval.AUTHORIZATION, approval_process=approval_process, created_by=approval_user
+            type=Approval.AUTHORIZATION,
+            approval_process=approval_process,
+            created_by=approval_user,
         )
         ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
         modified_data = payment_plan._get_last_approval_process_data()
@@ -178,7 +182,7 @@ class TestPaymentPlanModel(TestCase):
 
     def test_create(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
-        self.assertIsInstance(pp, PaymentPlan)
+        assert isinstance(pp, PaymentPlan)
 
     def test_update_population_count_fields(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
@@ -213,12 +217,12 @@ class TestPaymentPlanModel(TestCase):
         pp.update_population_count_fields()
 
         pp.refresh_from_db()
-        self.assertEqual(pp.female_children_count, 1)
-        self.assertEqual(pp.male_children_count, 1)
-        self.assertEqual(pp.female_adults_count, 1)
-        self.assertEqual(pp.male_adults_count, 1)
-        self.assertEqual(pp.total_households_count, 2)
-        self.assertEqual(pp.total_individuals_count, 4)
+        assert pp.female_children_count == 1
+        assert pp.male_children_count == 1
+        assert pp.female_adults_count == 1
+        assert pp.male_adults_count == 1
+        assert pp.total_households_count == 2
+        assert pp.total_individuals_count == 4
 
     def test_update_money_fields(self) -> None:
         pp = PaymentPlanFactory()
@@ -242,12 +246,12 @@ class TestPaymentPlanModel(TestCase):
         pp.update_money_fields()
 
         pp.refresh_from_db()
-        self.assertEqual(pp.total_entitled_quantity, 200.00)
-        self.assertEqual(pp.total_entitled_quantity_usd, 400.00)
-        self.assertEqual(pp.total_delivered_quantity, 100.00)
-        self.assertEqual(pp.total_delivered_quantity_usd, 200.00)
-        self.assertEqual(pp.total_undelivered_quantity, 100.00)
-        self.assertEqual(pp.total_undelivered_quantity_usd, 200.00)
+        assert pp.total_entitled_quantity == 200.00
+        assert pp.total_entitled_quantity_usd == 400.00
+        assert pp.total_delivered_quantity == 100.00
+        assert pp.total_delivered_quantity_usd == 200.00
+        assert pp.total_undelivered_quantity == 100.00
+        assert pp.total_undelivered_quantity_usd == 200.00
 
     def test_not_excluded_payments(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
@@ -255,14 +259,14 @@ class TestPaymentPlanModel(TestCase):
         PaymentFactory(parent=pp, conflicted=True, currency="PLN")
 
         pp.refresh_from_db()
-        self.assertEqual(pp.eligible_payments.count(), 1)
+        assert pp.eligible_payments.count() == 1
 
     def test_can_be_locked(self) -> None:
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
         pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
-        self.assertEqual(pp1.can_be_locked, False)
+        assert pp1.can_be_locked is False
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
@@ -277,69 +281,71 @@ class TestPaymentPlanModel(TestCase):
             conflicted=False,
             currency="PLN",
         )
-        self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
-        self.assertEqual(pp1.can_be_locked, False)
+        assert pp1.payment_items.filter(payment_plan_hard_conflicted=True).count() == 1
+        assert pp1.can_be_locked is False
 
         # create not conflicted payment
         PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
-        self.assertEqual(pp1.can_be_locked, True)
+        assert pp1.can_be_locked is True
 
     def test_is_population_finalized(self) -> None:
         payment_plan = PaymentPlanFactory(created_by=self.user, status=PaymentPlan.Status.TP_PROCESSING)
-        self.assertTrue(payment_plan.is_population_finalized())
+        assert payment_plan.is_population_finalized()
 
     def test_get_exchange_rate_for_usdc_currency(self) -> None:
         pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
-        self.assertEqual(pp.get_exchange_rate(), 1.0)
+        assert pp.get_exchange_rate() == 1.0
 
     def test_is_reconciled(self) -> None:
         pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         PaymentFactory(parent=pp, currency="PLN", excluded=True)
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         PaymentFactory(parent=pp, currency="PLN", conflicted=True)
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p1 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_PENDING)
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p2 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p1.status = Payment.STATUS_SENT_TO_FSP
         p1.save()
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p1.status = Payment.STATUS_DISTRIBUTION_SUCCESS
         p1.save()
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p2.status = Payment.STATUS_SENT_TO_FSP
         p2.save()
-        self.assertEqual(pp.is_reconciled, False)
+        assert pp.is_reconciled is False
 
         p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
         p2.save()
-        self.assertEqual(pp.is_reconciled, True)
+        assert pp.is_reconciled is True
 
     def test_save_pp_steficon_rule_validation(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
         rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11)
         rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=22)
 
-        self.assertIsNone(pp.steficon_rule_targeting_id)
-        self.assertIsNone(pp.steficon_rule_id)
+        assert pp.steficon_rule_targeting_id is None
+        assert pp.steficon_rule_id is None
 
         with self.assertRaisesMessage(
-            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+            ValidationError,
+            f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}.",
         ):
             pp.steficon_rule = rule_for_tp
             pp.save()
 
         with self.assertRaisesMessage(
-            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+            ValidationError,
+            f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}.",
         ):
             pp.steficon_rule_targeting = rule_for_pp
             pp.save()
@@ -352,16 +358,16 @@ class TestPaymentPlanModel(TestCase):
         pp.save(update_fields=["excluded_ids"])
         pp.refresh_from_db()
 
-        self.assertEqual(pp.excluded_household_ids_targeting_level, [hh.unicef_id])
+        assert pp.excluded_household_ids_targeting_level == [hh.unicef_id]
 
     def test_payment_plan_has_empty_criteria_property(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
-        self.assertTrue(pp.has_empty_criteria)
+        assert pp.has_empty_criteria
 
     def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
 
-        self.assertTrue(pp.has_empty_ids_criteria)
+        assert pp.has_empty_ids_criteria
 
     def test_remove_export_file_entitlement(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user, status=PaymentPlan.Status.LOCKED)
@@ -374,18 +380,20 @@ class TestPaymentPlanModel(TestCase):
         pp.export_file_entitlement = file_temp
         pp.save()
         pp.refresh_from_db()
-        self.assertTrue(pp.has_export_file)
-        self.assertEqual(pp.export_file_entitlement.pk, file_temp.pk)
+        assert pp.has_export_file
+        assert pp.export_file_entitlement.pk == file_temp.pk
 
         pp.remove_export_file_entitlement()
         pp.save()
         pp.refresh_from_db()
-        self.assertFalse(pp.has_export_file)
-        self.assertIsNone(pp.export_file_entitlement)
+        assert not pp.has_export_file
+        assert pp.export_file_entitlement is None
 
     def test_remove_imported_file(self) -> None:
         pp = PaymentPlanFactory(
-            created_by=self.user, status=PaymentPlan.Status.LOCKED, imported_file_date=timezone.now()
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED,
+            imported_file_date=timezone.now(),
         )
         file_temp = FileTemp.objects.create(
             object_id=pp.pk,
@@ -396,15 +404,15 @@ class TestPaymentPlanModel(TestCase):
         pp.imported_file = file_temp
         pp.save()
         pp.refresh_from_db()
-        self.assertEqual(pp.imported_file.pk, file_temp.pk)
-        self.assertEqual(pp.imported_file_name, "Test_777.xlsx")
+        assert pp.imported_file.pk == file_temp.pk
+        assert pp.imported_file_name == "Test_777.xlsx"
 
         pp.remove_imported_file()
         pp.save()
         pp.refresh_from_db()
-        self.assertEqual(pp.imported_file_name, "")
-        self.assertIsNone(pp.imported_file)
-        self.assertIsNone(pp.imported_file_date)
+        assert pp.imported_file_name == ""
+        assert pp.imported_file is None
+        assert pp.imported_file_date is None
 
     def test_has_empty_ids_criteria(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
@@ -413,7 +421,34 @@ class TestPaymentPlanModel(TestCase):
             household_ids="HH-1, HH-2",
             individual_ids="IND-01, IND-02",
         )
-        self.assertFalse(pp.has_empty_ids_criteria)
+        assert not pp.has_empty_ids_criteria
+
+    def test_has_payments_reconciliation_overdue(self) -> None:
+        pp = PaymentPlanFactory(
+            dispersion_start_date=now().date() - timedelta(days=20),
+            dispersion_end_date=now().date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        program = pp.program
+        program.reconciliation_window_in_days = 10
+        program.save()
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_SUCCESS, delivered_quantity=100)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
+        assert pp.has_payments_reconciliation_overdue is True
+
+        program.reconciliation_window_in_days = 30
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
+
+        program.reconciliation_window_in_days = 0
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
 
 
 class TestPaymentModel(TestCase):
@@ -422,44 +457,53 @@ class TestPaymentModel(TestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        cls.pp = PaymentPlanFactory(created_by=cls.user)
+        cls.pp = PaymentPlanFactory(created_by=cls.user, business_area=cls.business_area)
 
     def test_create(self) -> None:
         p1 = PaymentFactory()
-        self.assertIsInstance(p1, Payment)
+        assert isinstance(p1, Payment)
 
     def test_unique_together(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             PaymentFactory(parent=pp, household=hh1, currency="PLN")
+
+    def test_household_admin2_property(self) -> None:
+        hh1 = HouseholdFactory(admin2=None, head_of_household=IndividualFactory(household=None))
+        admin2 = AreaFactory(name="New admin2")
+        payment = PaymentFactory(parent=self.pp, household=hh1)
+        assert payment.household_admin2 == ""
+        hh1.admin2 = admin2
+        hh1.save()
+        assert payment.household_admin2 == "New admin2"
 
     def test_payment_status_property(self) -> None:
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
-        self.assertEqual(payment.payment_status, "Pending")
+        assert payment.payment_status == "Pending"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-        self.assertEqual(payment.payment_status, "Delivered Fully")
+        assert payment.payment_status == "Delivered Fully"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_SUCCESS)
-        self.assertEqual(payment.payment_status, "Delivered Fully")
+        assert payment.payment_status == "Delivered Fully"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
-        self.assertEqual(payment.payment_status, "Delivered Partially")
+        assert payment.payment_status == "Delivered Partially"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_NOT_DISTRIBUTED)
-        self.assertEqual(payment.payment_status, "Not Delivered")
+        assert payment.payment_status == "Not Delivered"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_ERROR)
-        self.assertEqual(payment.payment_status, "Unsuccessful")
+        assert payment.payment_status == "Unsuccessful"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
-        self.assertEqual(payment.payment_status, "Force Failed")
+        assert payment.payment_status == "Force Failed"
 
         payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_MANUALLY_CANCELLED)
-        self.assertEqual(payment.payment_status, "-")
+        assert payment.payment_status == "-"
 
     def test_mark_as_failed(self) -> None:
         payment_invalid_status = PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
@@ -470,17 +514,17 @@ class TestPaymentModel(TestCase):
             delivered_quantity_usd=22,
             status=Payment.STATUS_DISTRIBUTION_PARTIAL,
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_invalid_status.mark_as_failed()
-        self.assertIn("Status shouldn't be failed", e.exception)
+        assert "Status shouldn't be failed" in e.value
 
         payment.mark_as_failed()
         payment.save()
         payment.refresh_from_db()
-        self.assertEqual(payment.delivered_quantity, 0)
-        self.assertEqual(payment.delivered_quantity_usd, 0)
-        self.assertIsNone(payment.delivery_date)
-        self.assertEqual(payment.status, Payment.STATUS_FORCE_FAILED)
+        assert payment.delivered_quantity == 0
+        assert payment.delivered_quantity_usd == 0
+        assert payment.delivery_date is None
+        assert payment.status == Payment.STATUS_FORCE_FAILED
 
     def test_revert_mark_as_failed(self) -> None:
         payment_entitlement_quantity_none = PaymentFactory(
@@ -493,24 +537,27 @@ class TestPaymentModel(TestCase):
         )
         payment_invalid_status = PaymentFactory(parent=self.pp, entitlement_quantity=999, status=Payment.STATUS_PENDING)
         payment = PaymentFactory(
-            parent=self.pp, entitlement_quantity=999, delivered_quantity=111, status=Payment.STATUS_FORCE_FAILED
+            parent=self.pp,
+            entitlement_quantity=999,
+            delivered_quantity=111,
+            status=Payment.STATUS_FORCE_FAILED,
         )
         date = timezone.now().date()
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_invalid_status.revert_mark_as_failed(999, date)
-        self.assertIn("Only payment marked as force failed can be reverted", e.exception)
+        assert "Only payment marked as force failed can be reverted" in e.value
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment_entitlement_quantity_none.revert_mark_as_failed(999, date)
-        self.assertIn("Entitlement quantity need to be set in order to revert", e.exception)
+        assert "Entitlement quantity need to be set in order to revert" in e.value
 
         payment.revert_mark_as_failed(999, date)
         payment.save()
         payment.refresh_from_db()
-        self.assertEqual(payment.delivered_quantity, 999)
-        self.assertEqual(payment.delivery_date.date(), date)
-        self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
+        assert payment.delivered_quantity == 999
+        assert payment.delivery_date.date() == date
+        assert payment.status == Payment.STATUS_DISTRIBUTION_SUCCESS
 
     def test_get_revert_mark_as_failed_status(self) -> None:
         payment = PaymentFactory(parent=self.pp, entitlement_quantity=999)
@@ -521,11 +568,11 @@ class TestPaymentModel(TestCase):
         )
         for delivered_quantity, status in delivered_quantity_with_status:
             result_status = payment.get_revert_mark_as_failed_status(delivered_quantity)
-            self.assertEqual(result_status, status)
+            assert result_status == status
 
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             payment.get_revert_mark_as_failed_status(1000)
-        self.assertIn("Wrong delivered quantity 1000 for entitlement quantity 999", e.exception)
+        assert "Wrong delivered quantity 1000 for entitlement quantity 999" in e.value
 
     def test_manager_annotations_pp_conflicts(self) -> None:
         program = RealProgramFactory()
@@ -534,9 +581,17 @@ class TestPaymentModel(TestCase):
         pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
 
         # create hard conflicted payment
-        pp2 = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, program_cycle=program_cycle, created_by=self.user)
+        pp2 = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
         # create soft conflicted payments
-        pp3 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
+        pp3 = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
         pp4 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
             program_cycle=program_cycle,
@@ -551,25 +606,23 @@ class TestPaymentModel(TestCase):
             obj.refresh_from_db()  # update unicef_id from trigger
 
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
-        self.assertEqual(p1_data["payment_plan_hard_conflicted"], True)
-        self.assertEqual(p1_data["payment_plan_soft_conflicted"], True)
+        assert p1_data["payment_plan_hard_conflicted"] is True
+        assert p1_data["payment_plan_soft_conflicted"] is True
 
-        self.assertEqual(len(p1_data["payment_plan_hard_conflicted_data"]), 1)
-        self.assertEqual(
-            json.loads(p1_data["payment_plan_hard_conflicted_data"][0]),
-            {
-                "payment_id": str(p2.id),
-                "payment_plan_id": str(pp2.id),
-                "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
-                "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
-                "payment_plan_unicef_id": str(pp2.unicef_id),
-                "payment_unicef_id": str(p2.unicef_id),
-            },
-        )
-        self.assertEqual(len(p1_data["payment_plan_soft_conflicted_data"]), 2)
-        self.assertCountEqual(
-            [json.loads(conflict_data) for conflict_data in p1_data["payment_plan_soft_conflicted_data"]],
+        assert len(p1_data["payment_plan_hard_conflicted_data"]) == 1
+        assert json.loads(p1_data["payment_plan_hard_conflicted_data"][0]) == {
+            "payment_id": str(p2.id),
+            "payment_plan_id": str(pp2.id),
+            "payment_plan_status": str(pp2.status),
+            "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+            "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
+            "payment_plan_unicef_id": str(pp2.unicef_id),
+            "payment_unicef_id": str(p2.unicef_id),
+        }
+        assert len(p1_data["payment_plan_soft_conflicted_data"]) == 2
+        assert len(
+            [json.loads(conflict_data) for conflict_data in p1_data["payment_plan_soft_conflicted_data"]]
+        ) == len(
             [
                 {
                     "payment_id": str(p3.id),
@@ -589,35 +642,33 @@ class TestPaymentModel(TestCase):
                     "payment_plan_unicef_id": str(pp4.unicef_id),
                     "payment_unicef_id": str(p4.unicef_id),
                 },
-            ],
+            ]
         )
 
         # the same conflicts when Cycle without end date
         program_cycle = program.cycles.first()
         ProgramCycle.objects.filter(pk=program_cycle.id).update(end_date=None)
         program_cycle.refresh_from_db()
-        self.assertIsNone(program_cycle.end_date)
+        assert program_cycle.end_date is None
 
         payment_data = Payment.objects.filter(id=p1.id).values()[0]
-        self.assertEqual(payment_data["payment_plan_hard_conflicted"], True)
-        self.assertEqual(payment_data["payment_plan_soft_conflicted"], True)
+        assert payment_data["payment_plan_hard_conflicted"] is True
+        assert payment_data["payment_plan_soft_conflicted"] is True
 
-        self.assertEqual(len(payment_data["payment_plan_hard_conflicted_data"]), 1)
-        self.assertEqual(
-            json.loads(payment_data["payment_plan_hard_conflicted_data"][0]),
-            {
-                "payment_id": str(p2.id),
-                "payment_plan_id": str(pp2.id),
-                "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
-                "payment_plan_end_date": None,
-                "payment_plan_unicef_id": str(pp2.unicef_id),
-                "payment_unicef_id": str(p2.unicef_id),
-            },
-        )
-        self.assertEqual(len(payment_data["payment_plan_soft_conflicted_data"]), 2)
-        self.assertCountEqual(
-            [json.loads(conflict_data) for conflict_data in payment_data["payment_plan_soft_conflicted_data"]],
+        assert len(payment_data["payment_plan_hard_conflicted_data"]) == 1
+        assert json.loads(payment_data["payment_plan_hard_conflicted_data"][0]) == {
+            "payment_id": str(p2.id),
+            "payment_plan_id": str(pp2.id),
+            "payment_plan_status": str(pp2.status),
+            "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+            "payment_plan_end_date": None,
+            "payment_plan_unicef_id": str(pp2.unicef_id),
+            "payment_unicef_id": str(p2.unicef_id),
+        }
+        assert len(payment_data["payment_plan_soft_conflicted_data"]) == 2
+        assert len(
+            [json.loads(conflict_data) for conflict_data in payment_data["payment_plan_soft_conflicted_data"]]
+        ) == len(
             [
                 {
                     "payment_id": str(p3.id),
@@ -637,7 +688,7 @@ class TestPaymentModel(TestCase):
                     "payment_plan_unicef_id": str(pp4.unicef_id),
                     "payment_unicef_id": str(p4.unicef_id),
                 },
-            ],
+            ]
         )
 
     def test_manager_annotations_conflicts_for_follow_up(self) -> None:
@@ -687,8 +738,8 @@ class TestPaymentModel(TestCase):
             _.refresh_from_db()  # update unicef_id from trigger
 
         p2_data = Payment.objects.filter(id=p2.id).values()[0]
-        self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+        assert p2_data["payment_plan_hard_conflicted"] is False
+        assert p2_data["payment_plan_soft_conflicted"] is False
 
         p3 = PaymentFactory(
             parent=pp3,
@@ -699,8 +750,8 @@ class TestPaymentModel(TestCase):
         p3.refresh_from_db()  # update unicef_id from trigger
         self.maxDiff = None
         p3_data = Payment.objects.filter(id=p3.id).values()[0]
-        self.assertEqual(p3_data["payment_plan_hard_conflicted"], True)
-        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
+        assert p3_data["payment_plan_hard_conflicted"] is True
+        assert p3_data["payment_plan_soft_conflicted"] is False
         import json
 
         data = {
@@ -712,7 +763,7 @@ class TestPaymentModel(TestCase):
             "payment_plan_unicef_id": str(pp2_follow_up.unicef_id),
             "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
         }
-        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [json.dumps(data)])
+        assert p3_data["payment_plan_hard_conflicted_data"] == [json.dumps(data)]
 
 
 class TestPaymentPlanSplitModel(TestCase):
@@ -724,6 +775,7 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
 
+@pytest.mark.django_db(transaction=True)
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -791,7 +843,7 @@ class TestFinancialServiceProviderModel(TestCase):
         none_resp = fsp_xlsx_template.get_column_from_core_field(
             payment, "given_name", admin_areas_dict, countries_dict
         )
-        self.assertIsNone(none_resp)
+        assert none_resp is None
 
         create_payment_plan_snapshot_data(payment.parent)
         payment.refresh_from_db()
@@ -800,17 +852,17 @@ class TestFinancialServiceProviderModel(TestCase):
         result = fsp_xlsx_template.get_column_from_core_field(
             payment, "invalid_people_field_name", admin_areas_dict, countries_dict
         )
-        self.assertIsNone(result)
+        assert result is None
 
         # People program
         given_name = fsp_xlsx_template.get_column_from_core_field(
             payment, "given_name", admin_areas_dict, countries_dict
         )
-        self.assertEqual(given_name, primary.given_name)
+        assert given_name == primary.given_name
         ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
             payment, "individual_unicef_id", admin_areas_dict, countries_dict
         )
-        self.assertEqual(ind_unicef_id, primary.unicef_id)
+        assert ind_unicef_id == primary.unicef_id
 
         # Standard program
         payment.parent.program.data_collecting_type.type = DataCollectingType.Type.STANDARD
@@ -818,61 +870,61 @@ class TestFinancialServiceProviderModel(TestCase):
 
         # check fields value
         size = fsp_xlsx_template.get_column_from_core_field(payment, "size", admin_areas_dict, countries_dict)
-        self.assertEqual(size, 1)
+        assert size == 1
         admin1 = fsp_xlsx_template.get_column_from_core_field(payment, "admin1", admin_areas_dict, countries_dict)
-        self.assertEqual(admin1, f"{area1.p_code} - {area1.name}")
+        assert admin1 == f"{area1.p_code} - {area1.name}"
         admin2 = fsp_xlsx_template.get_column_from_core_field(payment, "admin2", admin_areas_dict, countries_dict)
-        self.assertEqual(admin2, f"{area2.p_code} - {area2.name}")
+        assert admin2 == f"{area2.p_code} - {area2.name}"
         admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3", admin_areas_dict, countries_dict)
-        self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
+        assert admin3 == f"{area3.p_code} - {area3.name}"
         given_name = fsp_xlsx_template.get_column_from_core_field(
             payment, "given_name", admin_areas_dict, countries_dict
         )
-        self.assertEqual(given_name, primary.given_name)
+        assert given_name == primary.given_name
         ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
             payment, "individual_unicef_id", admin_areas_dict, countries_dict
         )
-        self.assertEqual(ind_unicef_id, primary.unicef_id)
+        assert ind_unicef_id == primary.unicef_id
         hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(
             payment, "household_unicef_id", admin_areas_dict, countries_dict
         )
-        self.assertEqual(hh_unicef_id, household.unicef_id)
+        assert hh_unicef_id == household.unicef_id
         phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no", admin_areas_dict, countries_dict)
-        self.assertEqual(phone_no, primary.phone_no)
+        assert phone_no == primary.phone_no
         phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(
             payment, "phone_no_alternative", admin_areas_dict, countries_dict
         )
-        self.assertEqual(phone_no_alternative, primary.phone_no_alternative)
+        assert phone_no_alternative == primary.phone_no_alternative
         national_id_no = fsp_xlsx_template.get_column_from_core_field(
             payment, "national_id_no", admin_areas_dict, countries_dict
         )
-        self.assertEqual(national_id_no, document.document_number)
+        assert national_id_no == document.document_number
         wallet_name = fsp_xlsx_template.get_column_from_core_field(
             payment, "wallet_name", admin_areas_dict, countries_dict
         )
-        self.assertEqual(wallet_name, primary.wallet_name)
+        assert wallet_name == primary.wallet_name
         blockchain_name = fsp_xlsx_template.get_column_from_core_field(
             payment, "blockchain_name", admin_areas_dict, countries_dict
         )
-        self.assertEqual(blockchain_name, primary.blockchain_name)
+        assert blockchain_name == primary.blockchain_name
         wallet_address = fsp_xlsx_template.get_column_from_core_field(
             payment, "wallet_address", admin_areas_dict, countries_dict
         )
-        self.assertEqual(wallet_address, primary.wallet_address)
+        assert wallet_address == primary.wallet_address
 
         role = fsp_xlsx_template.get_column_from_core_field(payment, "role", admin_areas_dict, countries_dict)
-        self.assertEqual(role, "PRIMARY")
+        assert role == "PRIMARY"
 
         primary_collector_id = fsp_xlsx_template.get_column_from_core_field(
             payment, "primary_collector_id", admin_areas_dict, countries_dict
         )
-        self.assertEqual(primary_collector_id, str(primary.pk))
+        assert primary_collector_id == str(primary.pk)
 
         # country_origin
         country_origin = fsp_xlsx_template.get_column_from_core_field(
             payment, "country_origin", admin_areas_dict, countries_dict
         )
-        self.assertEqual(household.country_origin.iso_code3, country_origin)
+        assert household.country_origin.iso_code3 == country_origin
 
 
 class TestDynamicChoiceArrayField(TestCase):
@@ -888,11 +940,11 @@ class TestDynamicChoiceArrayField(TestCase):
         form_field = field.formfield()
 
         # Check if the choices_callable is passed to the form field
-        self.assertEqual(list(form_field.choices), self.mock_choices)
+        assert list(form_field.choices) == self.mock_choices
         self.mock_choices_callable.assert_called_once()
 
         # Check the form field class and choices
-        self.assertIsInstance(form_field, DynamicChoiceField)
+        assert isinstance(form_field, DynamicChoiceField)
 
 
 class TestFinancialServiceProviderXlsxTemplate(TestCase):
@@ -905,16 +957,13 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
         form = self.FinancialServiceProviderXlsxTemplateForm(
             data={"core_fields": ["age", "residence_status"]}
         )  # real existing core fields
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
         template = form.save()
-        self.assertEqual(template.core_fields, ["age", "residence_status"])
+        assert template.core_fields == ["age", "residence_status"]
 
         form = self.FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
-        self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors,
-            {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
-        )
+        assert not form.is_valid()
+        assert form.errors == {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]}
 
 
 class TestAccountModel(TestCase):
@@ -942,27 +991,27 @@ class TestAccountModel(TestCase):
 
     def test_str(self) -> None:
         dmd = AccountFactory(individual=self.ind)
-        self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
+        assert str(dmd) == f"{dmd.individual} - {dmd.account_type}"
 
     def test_get_associated_object(self) -> None:
         dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
-        self.assertEqual(
-            PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd),
-            dmd.account_data,
+        assert (
+            PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd)
+            == dmd.account_data
         )
-        self.assertEqual(
+        assert (
             PaymentDataCollector.get_associated_object(
                 FspNameMapping.SourceModel.HOUSEHOLD.value,
                 self.ind,
-            ),
-            dmd.individual.household,
+            )
+            == dmd.individual.household
         )
-        self.assertEqual(
+        assert (
             PaymentDataCollector.get_associated_object(
                 FspNameMapping.SourceModel.INDIVIDUAL.value,
                 self.ind,
-            ),
-            dmd.individual,
+            )
+            == dmd.individual
         )
 
     def test_delivery_data(self) -> None:
@@ -978,17 +1027,17 @@ class TestAccountModel(TestCase):
         )
 
         fsp2 = FinancialServiceProviderFactory()  # no dm config (no required fields), just unpack dmd.data
-        self.assertEqual(
-            PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind),
-            dmd.account_data,
-        )
+        assert PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind) == dmd.account_data
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
         dm_config.required_fields.extend(["custom_ind_name", "custom_hh_address", "address"])
         dm_config.save()
 
         FspNameMapping.objects.create(
-            external_name="number", hope_name="number", source=FspNameMapping.SourceModel.ACCOUNT, fsp=self.fsp
+            external_name="number",
+            hope_name="number",
+            source=FspNameMapping.SourceModel.ACCOUNT,
+            fsp=self.fsp,
         )
         FspNameMapping.objects.create(
             external_name="expiry_date",
@@ -1009,7 +1058,10 @@ class TestAccountModel(TestCase):
             fsp=self.fsp,
         )
         FspNameMapping.objects.create(
-            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+            external_name="address",
+            hope_name="address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
         )
 
         def my_custom_ind_name(self: Any) -> str:
@@ -1022,18 +1074,15 @@ class TestAccountModel(TestCase):
 
         self.hh.__class__.my_custom_hh_address = property(my_custom_hh_address)
 
-        self.assertEqual(
-            PaymentDataCollector.delivery_data(self.fsp, self.dm_atm_card, self.ind),
-            {
-                "number": "test",
-                "expiry_date": "12.12.2024",
-                "name_of_cardholder": "Marek",
-                "custom_ind_name": f"{dmd.individual.full_name} Custom",
-                "custom_hh_address": f"{self.hh.address} Custom",
-                "address": self.hh.address,
-                "financial_institution": str(self.financial_institution.id),
-            },
-        )
+        assert PaymentDataCollector.delivery_data(self.fsp, self.dm_atm_card, self.ind) == {
+            "number": "test",
+            "expiry_date": "12.12.2024",
+            "name_of_cardholder": "Marek",
+            "custom_ind_name": f"{dmd.individual.full_name} Custom",
+            "custom_hh_address": f"{self.hh.address} Custom",
+            "address": self.hh.address,
+            "financial_institution": str(self.financial_institution.id),
+        }
 
     def test_delivery_data_setter(self) -> None:
         account = AccountFactory(
@@ -1043,7 +1092,7 @@ class TestAccountModel(TestCase):
             },
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
-            number="123",
+            number="test",
             financial_institution=self.financial_institution,
         )
         financial_institution2 = FinancialInstitution.objects.create(
@@ -1058,19 +1107,16 @@ class TestAccountModel(TestCase):
         }
         account.save()
 
-        self.assertEqual(
-            account.account_data,
-            {
-                "number": "456",
-                "expiry_date": "12.12.2025",
-                "financial_institution": str(financial_institution2.id),
-                "new_field": "new_value",
-                "name_of_cardholder": "Marek",
-            },
-        )
+        assert account.account_data == {
+            "number": "456",
+            "expiry_date": "12.12.2025",
+            "financial_institution": str(financial_institution2.id),
+            "new_field": "new_value",
+            "name_of_cardholder": "Marek",
+        }
 
     def test_validate(self) -> None:
-        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind), True)
+        assert PaymentDataCollector.validate_account(self.fsp, self.dm_cash_over_the_counter, self.ind) is True
 
         AccountFactory(
             number="test",
@@ -1081,16 +1127,19 @@ class TestAccountModel(TestCase):
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
         )
-        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
+        assert PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind) is True
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
         dm_config.required_fields.extend(["address"])
         dm_config.save()
 
         FspNameMapping.objects.create(
-            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+            external_name="address",
+            hope_name="address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
         )
-        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
+        assert PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind) is True
 
         dm_config.required_fields.extend(["missing_field"])
         dm_config.save()
@@ -1101,7 +1150,7 @@ class TestAccountModel(TestCase):
             source=FspNameMapping.SourceModel.INDIVIDUAL,
             fsp=self.fsp,
         )
-        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), False)
+        assert PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind) is False
 
     def test_validate_uniqueness(self) -> None:
         AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
@@ -1110,10 +1159,9 @@ class TestAccountModel(TestCase):
         Account.update_unique_field.assert_called_once()
 
     def test_unique_active_wallet_constraint(self) -> None:
-        AccountFactory(**{"individual": self.ind, "unique_key": "wallet-1", "active": True, "is_unique": True})
+        AccountFactory(individual=self.ind, unique_key="wallet-1", active=True, is_unique=True)
 
         test_cases = [
-            # (desc, active, is_unique, unique_key, should_raise)
             ("Inactive, should pass", False, True, "wallet-1", False),
             ("is_unique=False, should pass", True, False, "wallet-1", False),
             ("Both False, should pass", False, False, "wallet-1", False),
@@ -1132,7 +1180,7 @@ class TestAccountModel(TestCase):
                 }
                 if should_raise:
                     with transaction.atomic():
-                        with self.assertRaises(IntegrityError):
+                        with pytest.raises(IntegrityError):
                             AccountFactory(**kwargs)
                 else:
                     AccountFactory(**kwargs)
@@ -1155,14 +1203,14 @@ class TestAccountModelUniqueField(TransactionTestCase):
         account_type_bank, _ = AccountType.objects.update_or_create(
             key="bank",
             label="Bank",
-            defaults=dict(
-                unique_fields=[
+            defaults={
+                "unique_fields": [
                     "number",
                     "seeing_disability",
                     "name_of_cardholder__atm_card",
                 ],
-                payment_gateway_id="123",
-            ),
+                "payment_gateway_id": "123",
+            },
         )
 
         dmd_1 = AccountFactory(
@@ -1173,8 +1221,8 @@ class TestAccountModelUniqueField(TransactionTestCase):
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
-        self.assertIsNone(dmd_1.unique_key)
-        self.assertEqual(dmd_1.is_unique, True)
+        assert dmd_1.unique_key is None
+        assert dmd_1.is_unique is True
 
         dmd_2 = AccountFactory(
             data={"name_of_cardholder__atm_card": "test2"},
@@ -1184,8 +1232,8 @@ class TestAccountModelUniqueField(TransactionTestCase):
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
-        self.assertIsNone(dmd_2.unique_key)
-        self.assertEqual(dmd_2.is_unique, True)
+        assert dmd_2.unique_key is None
+        assert dmd_2.is_unique is True
 
         dmd_1.update_unique_field()
         dmd_2.update_unique_field()
@@ -1199,4 +1247,7 @@ class TestAccountTypeModel(TestCase):
         generate_delivery_mechanisms()
 
     def test_get_targeting_field_names(self) -> None:
-        self.assertEqual(AccountType.get_targeting_field_names(), ["bank__number", "mobile__number"])
+        assert AccountType.get_targeting_field_names() == [
+            "bank__number",
+            "mobile__number",
+        ]

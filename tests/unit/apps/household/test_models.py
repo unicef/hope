@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
+import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -12,11 +13,10 @@ from extras.test_utils.factories.household import (
     create_household,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo.models import Country
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -24,7 +24,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.utils.models import MergeStatusModel
 
 
 class TestHousehold(TestCase):
@@ -52,86 +52,107 @@ class TestHousehold(TestCase):
             area_level=4,
         )
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
-        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_3,
+            p_code="area3",
+            parent=cls.area2,
+        )
+        cls.area4 = AreaFactory(
+            name="City Test4",
+            area_type=area_type_level_4,
+            p_code="area4",
+            parent=cls.area3,
+        )
 
     def test_household_admin_areas_set(self) -> None:
         household, (individual) = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = self.area1
         household.admin1 = self.area1
         household.save()
 
         household.set_admin_areas()
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area1)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, None)
-        self.assertEqual(household.admin3, None)
-        self.assertEqual(household.admin4, None)
+        assert household.admin_area == self.area1
+        assert household.admin1 == self.area1
+        assert household.admin2 is None
+        assert household.admin3 is None
+        assert household.admin4 is None
 
         household.set_admin_areas(self.area4)
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area4)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, self.area2)
-        self.assertEqual(household.admin3, self.area3)
-        self.assertEqual(household.admin4, self.area4)
+        assert household.admin_area == self.area4
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 == self.area4
 
         household.set_admin_areas(self.area3)
         household.refresh_from_db()
 
-        self.assertEqual(household.admin_area, self.area3)
-        self.assertEqual(household.admin1, self.area1)
-        self.assertEqual(household.admin2, self.area2)
-        self.assertEqual(household.admin3, self.area3)
-        self.assertEqual(household.admin4, None)
+        assert household.admin_area == self.area3
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 is None
 
-    def test_household_set_admin_area_none_clears_all_admin_fields_when_area_is_none(self) -> None:
+    def test_household_set_admin_area_based_on_lowest_admin(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = None
-        household.admin1 = self.area1
-        household.admin2 = self.area2
-        household.admin3 = self.area3
+        household.admin1 = None
+        household.admin2 = None
+        household.admin3 = None
         household.admin4 = self.area4
 
-        household.set_admin_areas(None)
+        household.set_admin_areas()
         household.refresh_from_db()
 
-        self.assertIsNone(household.admin_area)
-        self.assertIsNone(household.admin1)
-        self.assertIsNone(household.admin2)
-        self.assertIsNone(household.admin3)
-        self.assertIsNone(household.admin4)
+        assert household.admin_area == self.area4
+        assert household.admin1 == self.area1
+        assert household.admin2 == self.area2
+        assert household.admin3 == self.area3
+        assert household.admin4 == self.area4
 
     def test_remove_household(self) -> None:
         household1, _ = create_household(
-            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9090"}
+            household_args={
+                "size": 1,
+                "business_area": self.business_area,
+                "unicef_id": "HH-9090",
+            }
         )
         household2, _ = create_household(
-            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9191"}
+            household_args={
+                "size": 1,
+                "business_area": self.business_area,
+                "unicef_id": "HH-9191",
+            }
         )
         household1.delete()
-        self.assertEqual(Household.all_objects.filter(unicef_id="HH-9090").first().is_removed, True)
+        assert Household.all_objects.filter(unicef_id="HH-9090").first().is_removed is True
         household2.delete(soft=False)
-        self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
+        assert Household.all_objects.filter(unicef_id="HH-9191").first() is None
 
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         HouseholdFactory(unicef_id="HH-123", program=self.program)
         HouseholdFactory(unicef_id="HH-000", program=self.program)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             HouseholdFactory(unicef_id="HH-123", program=self.program)
 
     def test_geopoint(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
         household.geopoint = 1.2, 0.5  # type: ignore
-        self.assertEqual(household.longitude, 1.2)
-        self.assertEqual(household.latitude, 0.5)
+        assert household.longitude == 1.2
+        assert household.latitude == 0.5
         household.geopoint = None
-        self.assertIsNone(household.longitude)
-        self.assertIsNone(household.latitude)
+        assert household.longitude is None
+        assert household.latitude is None
 
 
 class TestDocument(TestCase):
@@ -147,13 +168,15 @@ class TestDocument(TestCase):
         cls.individual = individual
         cls.program = ProgramFactory()
 
-    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -166,7 +189,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="213123",
                 individual=self.individual,
@@ -177,13 +200,15 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
-    def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
+    def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "Other",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -209,13 +234,15 @@ class TestDocument(TestCase):
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
 
-    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -228,7 +255,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="213123",
                 individual=self.individual,
@@ -239,13 +266,15 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
-    def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(self) -> None:
+    def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=False,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": False,
+            },
         )
 
         Document.objects.create(
@@ -269,13 +298,15 @@ class TestDocument(TestCase):
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
 
-    def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -287,7 +318,7 @@ class TestDocument(TestCase):
             program=self.program,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="11111",
                 individual=self.individual,
@@ -302,10 +333,10 @@ class TestDocument(TestCase):
     ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -318,7 +349,7 @@ class TestDocument(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(
                 document_number="456",
                 individual=self.individual,
@@ -329,20 +360,22 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
-    def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
+    def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "National Passport",
+                "unique_for_individual": True,
+            },
         )
         document_type2, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-            defaults=dict(
-                label="Tax Number Identification",
-                unique_for_individual=True,
-            ),
+            defaults={
+                "label": "Tax Number Identification",
+                "unique_for_individual": True,
+            },
         )
 
         Document.objects.create(
@@ -379,7 +412,7 @@ class TestIndividualModel(TestCase):
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         IndividualFactory(unicef_id="IND-123", program=self.program)
         IndividualFactory(unicef_id="IND-000", program=self.program)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             IndividualFactory(unicef_id="IND-123", program=self.program)
 
     def test_mark_as_distinct_raise_errors(self) -> None:
@@ -405,10 +438,5 @@ class TestIndividualModel(TestCase):
         doc_2.document_number = "123456ABC"
         doc_2.save()
 
-        with self.assertRaises(Exception) as error:
+        with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
             ind.mark_as_distinct()
-
-        self.assertEqual(
-            str(error.exception),
-            "IND-333: Valid Document already exists: 123456ABC.",
-        )

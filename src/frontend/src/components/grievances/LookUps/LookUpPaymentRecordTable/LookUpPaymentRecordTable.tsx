@@ -1,14 +1,14 @@
-import { MouseEvent, ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  AllPaymentsForTableQueryVariables,
-  PaymentNode,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
+import { useQuery } from '@tanstack/react-query';
 
 interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
@@ -23,11 +23,113 @@ export function LookUpPaymentRecordTable({
   const { businessArea, programId } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const initialVariables = {
-    householdId: initialValues?.selectedHousehold?.id,
-    businessArea,
-    program: programId === 'all' ? null : programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      householdId: initialValues?.selectedHousehold?.id,
+      businessAreaSlug: businessArea,
+      slug: programId === 'all' ? null : programId,
+    }),
+    [initialValues?.selectedHousehold?.id, businessArea, programId],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  // Separate page state for global and program payments
+  const [globalPage, setGlobalPage] = useState(0);
+  const [programPage, setProgramPage] = useState(0);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: [
+      programId === 'all' || !programId
+        ? 'businessAreasPaymentsList'
+        : 'businessAreasProgramsPaymentsList',
+      queryVariables,
+      initialValues?.selectedHousehold?.id,
+      businessArea,
+      programId,
+      programId === 'all' || !programId ? globalPage : programPage,
+    ],
+    queryFn: () => {
+      // Use global payments API when programId is 'all' or not available
+      if (programId === 'all' || !programId) {
+        return RestService.restBusinessAreasPaymentsList(
+          createApiParams(
+            {
+              householdId: initialValues?.selectedHousehold?.id,
+              businessAreaSlug: businessArea,
+            },
+            {},
+            { withPagination: true },
+          ),
+        );
+      }
+      // Use program-specific payments API when programId is available
+      return RestService.restBusinessAreasProgramsPaymentsList(
+        createApiParams(
+          {
+            householdId: initialValues?.selectedHousehold?.id,
+            businessAreaSlug: businessArea,
+            slug: programId,
+          },
+          {},
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
+  // Count queries for global and program payments
+  const { data: globalCountData } = useQuery({
+    queryKey: [
+      'businessAreasPaymentsCount',
+      queryVariables,
+      initialValues?.selectedHousehold?.id,
+      businessArea,
+      globalPage,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasPaymentsCountRetrieve(
+        createApiParams(
+          {
+            householdId: initialValues?.selectedHousehold?.id,
+            businessAreaSlug: businessArea,
+          },
+          {},
+        ),
+      ),
+    enabled: (programId === 'all' || !programId) && globalPage === 0,
+  });
+
+  const { data: programCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsCount',
+      queryVariables,
+      initialValues?.selectedHousehold?.id,
+      businessArea,
+      programId,
+      programPage,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
+        createApiParams(
+          {
+            householdId: initialValues?.selectedHousehold?.id,
+            businessAreaSlug: businessArea,
+            paymentPlanPk: programId,
+            programSlug: programId,
+          },
+          {},
+        ),
+      ),
+    enabled: programId !== 'all' && !!programId && programPage === 0,
+  });
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
   );
@@ -62,12 +164,14 @@ export function LookUpPaymentRecordTable({
 
   if (isEditTicket) {
     return (
-      <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+      <UniversalRestTable
         headCells={headCells}
-        query={useAllPaymentsForTableQuery}
-        queriedObjectName="allPayments"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        data={paymentsData}
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        renderRow={(row: PaymentList) => (
           <LookUpPaymentRecordTableRow
             openInNewTab={openInNewTab}
             key={row.id}
@@ -76,17 +180,28 @@ export function LookUpPaymentRecordTable({
             selected={selected}
           />
         )}
+        page={programId === 'all' || !programId ? globalPage : programPage}
+        setPage={
+          programId === 'all' || !programId ? setGlobalPage : setProgramPage
+        }
+        itemsCount={
+          programId === 'all' || !programId
+            ? globalCountData?.count
+            : programCountData?.count
+        }
       />
     );
   }
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+    <UniversalRestTable
       headCells={headCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}
+      data={paymentsData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
       renderRow={(row) => (
         <LookUpPaymentRecordTableRow
           openInNewTab={openInNewTab}
@@ -96,6 +211,15 @@ export function LookUpPaymentRecordTable({
           selected={selected}
         />
       )}
+      page={programId === 'all' || !programId ? globalPage : programPage}
+      setPage={
+        programId === 'all' || !programId ? setGlobalPage : setProgramPage
+      }
+      itemsCount={
+        programId === 'all' || !programId
+          ? globalCountData?.count
+          : programCountData?.count
+      }
     />
   );
 }

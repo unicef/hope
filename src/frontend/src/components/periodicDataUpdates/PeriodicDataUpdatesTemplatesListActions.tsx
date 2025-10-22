@@ -1,27 +1,24 @@
-import {
-  fetchPeriodicDataUpdateTemplate,
-  exportPeriodicDataUpdateTemplate,
-  uploadPeriodicDataUpdateTemplate,
-} from '@api/periodicDataUpdateApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const useDownloadPeriodicDataUpdateTemplate = () => {
   return useMutation({
     mutationFn: ({
-      businessAreaSlug: mutationBusinessAreaSlug,
-      programId: mutationProgramId,
-      templateId: mutationTemplateId,
+      businessAreaSlug,
+      programSlug,
+      templateId,
     }: {
       businessAreaSlug: string;
-      programId: string;
-      templateId: string;
-    }) => {
-      return fetchPeriodicDataUpdateTemplate(
-        mutationBusinessAreaSlug,
-        mutationProgramId,
-        mutationTemplateId,
-      );
-    },
+      programSlug: string;
+      templateId: number;
+    }) =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesDownloadRetrieve(
+        {
+          businessAreaSlug,
+          programSlug,
+          id: templateId,
+        },
+      ),
   });
 };
 
@@ -29,18 +26,20 @@ export const useExportPeriodicDataUpdateTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      businessAreaSlug: mutationBusinessAreaSlug,
-      programId: mutationProgramId,
-      templateId: mutationTemplateId,
+      businessAreaSlug,
+      programSlug,
+      templateId,
     }: {
       businessAreaSlug: string;
-      programId: string;
-      templateId: string;
+      programSlug: string;
+      templateId: number;
     }) =>
-      exportPeriodicDataUpdateTemplate(
-        mutationBusinessAreaSlug,
-        mutationProgramId,
-        mutationTemplateId,
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesExportCreate(
+        {
+          businessAreaSlug,
+          programSlug,
+          id: templateId,
+        },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -52,25 +51,21 @@ export const useExportPeriodicDataUpdateTemplate = () => {
 
 export const useUploadPeriodicDataUpdateTemplate = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programId,
-      file,
-      additionalParams,
+      programSlug,
+      requestBody,
     }: {
       businessAreaSlug: string;
-      programId: string;
-      file: File;
-      additionalParams?: Record<string, any>;
+      programSlug: string;
+      requestBody: any; // Should match PeriodicDataUpdateTemplateCreate
     }) =>
-      uploadPeriodicDataUpdateTemplate(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCreate({
         businessAreaSlug,
-        programId,
-        file,
-        additionalParams,
-      ),
+        programSlug,
+        requestBody,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['periodicDataUpdateUploads'],

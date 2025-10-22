@@ -1,12 +1,14 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { Choice } from '@restgenerated/models/Choice';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -45,14 +47,24 @@ export function VerificationRecordsFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const { data: choicesData } = usePaymentVerificationChoicesQuery();
-  if (!choicesData) {
+  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationStatusChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationPlanStatusList(),
+  });
+
+  const verificationChannelChoices = [
+    { name: 'Manual', value: 'MANUAL' },
+    { name: 'RapidPro', value: 'RAPIDPRO' },
+    { name: 'XLSX', value: 'XLSX' },
+  ];
+
+  if (!verificationStatusChoices) {
     return null;
   }
 
-  const verificationPlanOptions = verifications.edges.map((item) => (
-    <MenuItem key={item.node.unicefId} value={item.node.id}>
-      {item.node.unicefId}
+  const verificationPlanOptions = verifications.map((item) => (
+    <MenuItem key={item.unicefId} value={item.id}>
+      {item.unicefId}
     </MenuItem>
   ));
 
@@ -62,7 +74,7 @@ export function VerificationRecordsFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.search}
             label={t('Search')}
@@ -71,21 +83,21 @@ export function VerificationRecordsFilters({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Verification Status')}
             value={filter.status}
             fullWidth
           >
-            {choicesData.paymentVerificationStatusChoices.map((item) => (
+            {verificationStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationChannel', e.target.value)
@@ -93,16 +105,14 @@ export function VerificationRecordsFilters({
             label={t('Verification Channel')}
             value={filter.verificationChannel}
           >
-            {choicesData.cashPlanVerificationVerificationChannelChoices.map(
-              (item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ),
-            )}
+            {verificationChannelChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('paymentVerificationPlan', e.target.value)

@@ -27,5 +27,5 @@ jobs:
         working-directory: src/frontend
       - run: yarn lint
         working-directory: src/frontend
-      - run: yarn test --watchAll=false
+      - run: yarn test --run
         working-directory: src/frontend

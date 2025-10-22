@@ -1,1 +1,0 @@
-export { TotalAmountTransferredByCountrySection } from './TotalAmountTransferredByCountrySection';

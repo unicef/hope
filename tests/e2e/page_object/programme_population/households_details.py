@@ -1,145 +1,146 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class HouseholdsDetails(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    labelHouseholdSize = 'div[data-cy="label-Items Group Size"]'
-    labelResidenceStatus = 'div[data-cy="label-Residence Status"]'
-    labelHeadOfHousehold = 'div[data-cy="label-Head of Items Group"]'
-    labelFemaleChildHeadedHousehold = 'div[data-cy="label-FEMALE CHILD HEADED ITEMS GROUPS"]'
-    labelChildHeadedHousehold = 'div[data-cy="label-CHILD HEADED ITEMS GROUP"]'
-    labelCountry = 'div[data-cy="label-Country"]'
-    labelCountryOfOrigin = 'div[data-cy="label-Country of Origin"]'
-    labelAddress = 'div[data-cy="label-Address"]'
-    labelVillage = 'div[data-cy="label-Village"]'
-    labelZipCode = 'div[data-cy="label-Zip code"]'
-    labelAdministrativeLevel1 = 'div[data-cy="label-Administrative Level 1"]'
-    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
-    labelAdministrativeLevel3 = 'div[data-cy="label-Administrative Level 3"]'
-    labelAdministrativeLevel4 = 'div[data-cy="label-Administrative Level 4"]'
-    labelGeolocation = 'div[data-cy="label-Geolocation"]'
-    labelUnhcrCaseId = 'div[data-cy="label-UNHCR CASE ID"]'
-    labelLengthOfTimeSinceArrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
-    labelNumberOfTimesDisplaced = 'div[data-cy="label-NUMBER OF TIMES DISPLACED"]'
-    labelIsThisAReturneeHousehold = 'div[data-cy="label-IS THIS A RETURNEE ITEMS GROUP?"]'
-    labelLinkedGrievances = 'div[data-cy="label-Linked Grievances"]'
-    labelDataCollectingType = 'div[data-cy="label-Data Collecting Type"]'
-    labelCashReceived = 'div[data-cy="label-Cash received"]'
-    labelTotalCashReceived = 'div[data-cy="label-Total Cash Received"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    labelSource = 'div[data-cy="label-Source"]'
-    labelImportName = 'div[data-cy="label-Import name"]'
-    labelRegistrationDate = 'div[data-cy="label-Registration Date"]'
-    labelUserName = 'div[data-cy="label-User name"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    label_household_size = 'div[data-cy="label-Items Group Size"]'
+    label_residence_status = 'div[data-cy="label-Residence Status"]'
+    label_head_of_household = 'div[data-cy="label-Head of Items Group"]'
+    label_female_child_headed_household = 'div[data-cy="label-FEMALE CHILD HEADED ITEMS GROUPS"]'
+    label_child_headed_household = 'div[data-cy="label-CHILD HEADED ITEMS GROUP"]'
+    label_country = 'div[data-cy="label-Country"]'
+    label_country_of_origin = 'div[data-cy="label-Country of Origin"]'
+    label_address = 'div[data-cy="label-Address"]'
+    label_village = 'div[data-cy="label-Village"]'
+    label_zip_code = 'div[data-cy="label-Zip code"]'
+    label_administrative_level1 = 'div[data-cy="label-Administrative Level 1"]'
+    label_administrative_level2 = 'div[data-cy="label-Administrative Level 2"]'
+    label_administrative_level3 = 'div[data-cy="label-Administrative Level 3"]'
+    label_administrative_level4 = 'div[data-cy="label-Administrative Level 4"]'
+    label_geolocation = 'div[data-cy="label-Geolocation"]'
+    label_unhcr_case_id = 'div[data-cy="label-UNHCR CASE ID"]'
+    label_length_of_time_since_arrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
+    label_number_of_times_displaced = 'div[data-cy="label-NUMBER OF TIMES DISPLACED"]'
+    label_is_this_a_returnee_household = 'div[data-cy="label-IS THIS A RETURNEE ITEMS GROUP?"]'
+    label_linked_grievances = 'div[data-cy="label-Linked Grievances"]'
+    label_data_collecting_type = 'div[data-cy="label-Data Collecting Type"]'
+    label_cash_received = 'div[data-cy="label-Cash received"]'
+    label_total_cash_received = 'div[data-cy="label-Total Cash Received"]'
+    table_title = 'h6[data-cy="table-title"]'
+    table_label = 'span[data-cy="table-label"]'
+    status_container = 'div[data-cy="status-container"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    table_row = 'tr[data-cy="table-row"]'
+    label_source = 'div[data-cy="label-Source"]'
+    label_import_name = 'div[data-cy="label-Import name"]'
+    label_registration_date = 'div[data-cy="label-Registration Date"]'
+    label_user_name = 'div[data-cy="label-User name"]'
     row05 = '[data-cy="row05"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getLabelHouseholdSize(self) -> WebElement:
-        return self.wait_for(self.labelHouseholdSize)
+    def get_label_household_size(self) -> WebElement:
+        return self.wait_for(self.label_household_size)
 
-    def getLabelResidenceStatus(self) -> WebElement:
-        return self.wait_for(self.labelResidenceStatus)
+    def get_label_residence_status(self) -> WebElement:
+        return self.wait_for(self.label_residence_status)
 
-    def getLabelHeadOfHousehold(self) -> WebElement:
-        return self.wait_for(self.labelHeadOfHousehold)
+    def get_label_head_of_household(self) -> WebElement:
+        return self.wait_for(self.label_head_of_household)
 
-    def getLabelFemaleChildHeadedHousehold(self) -> WebElement:
-        return self.wait_for(self.labelFemaleChildHeadedHousehold)
+    def get_label_female_child_headed_household(self) -> WebElement:
+        return self.wait_for(self.label_female_child_headed_household)
 
-    def getLabelChildHeadedHousehold(self) -> WebElement:
-        return self.wait_for(self.labelChildHeadedHousehold)
+    def get_label_child_headed_household(self) -> WebElement:
+        return self.wait_for(self.label_child_headed_household)
 
-    def getLabelCountry(self) -> WebElement:
-        return self.wait_for(self.labelCountry)
+    def get_label_country(self) -> WebElement:
+        return self.wait_for(self.label_country)
 
-    def getLabelCountryOfOrigin(self) -> WebElement:
-        return self.wait_for(self.labelCountryOfOrigin)
+    def get_label_country_of_origin(self) -> WebElement:
+        return self.wait_for(self.label_country_of_origin)
 
-    def getLabelAddress(self) -> WebElement:
-        return self.wait_for(self.labelAddress)
+    def get_label_address(self) -> WebElement:
+        return self.wait_for(self.label_address)
 
-    def getLabelVillage(self) -> WebElement:
-        return self.wait_for(self.labelVillage)
+    def get_label_village(self) -> WebElement:
+        return self.wait_for(self.label_village)
 
-    def getLabelZipCode(self) -> WebElement:
-        return self.wait_for(self.labelZipCode)
+    def get_label_zip_code(self) -> WebElement:
+        return self.wait_for(self.label_zip_code)
 
-    def getLabelAdministrativeLevel1(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel1)
+    def get_label_administrative_level_1(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level1)
 
-    def getLabelAdministrativeLevel2(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel2)
+    def get_label_administrative_level_2(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level2)
 
-    def getLabelAdministrativeLevel3(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel3)
+    def get_label_administrative_level_3(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level3)
 
-    def getLabelAdministrativeLevel4(self) -> WebElement:
-        return self.wait_for(self.labelAdministrativeLevel4)
+    def get_label_administrative_level_4(self) -> WebElement:
+        return self.wait_for(self.label_administrative_level4)
 
-    def getLabelGeolocation(self) -> WebElement:
-        return self.wait_for(self.labelGeolocation)
+    def get_label_geolocation(self) -> WebElement:
+        return self.wait_for(self.label_geolocation)
 
-    def getLabelUnhcrCaseId(self) -> WebElement:
-        return self.wait_for(self.labelUnhcrCaseId)
+    def get_label_unhcr_case_id(self) -> WebElement:
+        return self.wait_for(self.label_unhcr_case_id)
 
-    def getLabelLengthOfTimeSinceArrival(self) -> WebElement:
-        return self.wait_for(self.labelLengthOfTimeSinceArrival)
+    def get_label_length_of_time_since_arrival(self) -> WebElement:
+        return self.wait_for(self.label_length_of_time_since_arrival)
 
-    def getLabelNumberOfTimesDisplaced(self) -> WebElement:
-        return self.wait_for(self.labelNumberOfTimesDisplaced)
+    def get_label_number_of_times_displaced(self) -> WebElement:
+        return self.wait_for(self.label_number_of_times_displaced)
 
-    def getLabelIsThisAReturneeHousehold(self) -> WebElement:
-        return self.wait_for(self.labelIsThisAReturneeHousehold)
+    def get_label_is_this_a_returnee_household(self) -> WebElement:
+        return self.wait_for(self.label_is_this_a_returnee_household)
 
-    def getLabelLinkedGrievances(self) -> WebElement:
-        return self.wait_for(self.labelLinkedGrievances)
+    def get_label_linked_grievances(self) -> WebElement:
+        return self.wait_for(self.label_linked_grievances)
 
-    def getLabelDataCollectingType(self) -> WebElement:
-        return self.wait_for(self.labelDataCollectingType)
+    def get_label_data_collecting_type(self) -> WebElement:
+        return self.wait_for(self.label_data_collecting_type)
 
-    def getLabelCashReceived(self) -> WebElement:
-        return self.wait_for(self.labelCashReceived)
+    def get_label_cash_received(self) -> WebElement:
+        return self.wait_for(self.label_cash_received)
 
-    def getLabelTotalCashReceived(self) -> WebElement:
-        return self.wait_for(self.labelTotalCashReceived)
+    def get_label_total_cash_received(self) -> WebElement:
+        return self.wait_for(self.label_total_cash_received)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
+    def get_status_container(self) -> WebElement:
+        return self.wait_for(self.status_container)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getLabelSource(self) -> WebElement:
-        return self.wait_for(self.labelSource)
+    def get_label_source(self) -> WebElement:
+        return self.wait_for(self.label_source)
 
-    def getLabelImportName(self) -> WebElement:
-        return self.wait_for(self.labelImportName)
+    def get_label_import_name(self) -> WebElement:
+        return self.wait_for(self.label_import_name)
 
-    def getLabelRegistrationDate(self) -> WebElement:
-        return self.wait_for(self.labelRegistrationDate)
+    def get_label_registration_date(self) -> WebElement:
+        return self.wait_for(self.label_registration_date)
 
-    def getLabelUserName(self) -> WebElement:
-        return self.wait_for(self.labelUserName)
+    def get_label_user_name(self) -> WebElement:
+        return self.wait_for(self.label_user_name)
 
-    def getRow05(self) -> WebElement:
+    def get_row05(self) -> WebElement:
         return self.wait_for(self.row05)

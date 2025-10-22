@@ -10,7 +10,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -27,7 +27,7 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   TextField,
   Typography,
@@ -38,6 +38,8 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -51,7 +53,7 @@ const StyledBox = styled(Box)`
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const SupportingDocumentsSection = ({
@@ -80,13 +82,13 @@ export const SupportingDocumentsSection = ({
 
   const canUploadFile =
     hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Locked ||
-      paymentPlan.status === PaymentPlanStatus.Open);
+    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
+      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
 
   const canRemoveFile =
     hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Locked ||
-      paymentPlan.status === PaymentPlanStatus.Open);
+    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
+      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
 
   const canDownloadFile = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_SUPPORTING_DOCUMENT,
@@ -124,11 +126,11 @@ export const SupportingDocumentsSection = ({
         setOpenImport(false);
         setDocuments([
           ...documents,
-          { id: doc.id, title: doc.title, file: doc.file },
+          { id: doc.id, title: doc.title, file: doc.file, uploadedAt: null },
         ]);
       },
-      onError: (err: Error) => {
-        setErrorMessage(err.message);
+      onError: (e: Error) => {
+        showApiErrorMessages(e, showMessage);
         setIsLoading(false);
       },
     });
@@ -175,14 +177,14 @@ export const SupportingDocumentsSection = ({
     _businessArea: string,
     _programId: string,
     paymentPlanId: string,
-    fileId: string,
+    fileId: number,
   ) => {
     try {
       await deleteSupportingDocument(
         _businessArea,
         _programId,
         paymentPlanId,
-        fileId,
+        fileId.toString(),
       );
       setDocuments(documents.filter((doc) => doc.id !== fileId));
       showMessage(t('File deleted successfully.'));
@@ -199,7 +201,7 @@ export const SupportingDocumentsSection = ({
   );
 
   const handleSupportingDocumentDownloadClick = (
-    fileId: string,
+    fileId: number,
     fileName: string,
   ) => {
     downloadSupportingDocument({
@@ -258,8 +260,8 @@ export const SupportingDocumentsSection = ({
         <Box mt={2}>
           <Grid container spacing={3}>
             {documents.map((doc) => (
-              <Grid key={doc.id} size={{ xs: 3 }}>
-                <GreyBox p={3} key={doc.id} data-cy="document-item">
+              <Grid size={3} key={doc.id}>
+                <GreyBox p={3} data-cy="document-item">
                   <Box
                     display="flex"
                     justifyContent="space-between"
@@ -363,7 +365,7 @@ export const SupportingDocumentsSection = ({
               />
               <FormHelperText error>{errorMessage}</FormHelperText>
               <Grid container>
-                <Grid size={{ xs: 12 }}>
+                <Grid size={12}>
                   <TextField
                     size="small"
                     label={t('Title')}
