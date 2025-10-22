@@ -21,11 +21,13 @@ import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtil
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
+  programSlug?: string;
 }
 
 function EditHouseholdDataChange({
   values,
   setFieldValue,
+  programSlug,
 }: EditHouseholdDataChangeProps): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
@@ -66,21 +68,16 @@ function EditHouseholdDataChange({
       'household',
       businessArea,
       household.id,
+      programSlug,
       programId,
-      //@ts-ignore
-      household.programSlug,
-      //@ts-ignore
-      household.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
-        //@ts-ignore
-        programSlug: household.programSlug || household.program?.slug,
-        // Define roleChoices for New Role select field
+        programSlug: programSlug,
       }),
-    enabled: Boolean(household && businessArea),
+    enabled: Boolean(household && businessArea && programSlug),
   });
 
   // Fetch household members for roles logic
@@ -89,17 +86,15 @@ function EditHouseholdDataChange({
       'householdMembers',
       businessArea,
       household.id,
-      //@ts-ignore
-      household.programSlug || household.program?.slug,
+      programSlug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
         id: household.id,
-        //@ts-ignore
-        programSlug: household.programSlug || household.program?.slug,
+        programSlug: programSlug,
       }),
-    enabled: Boolean(household && businessArea),
+    enabled: Boolean(household && businessArea && programSlug),
   });
 
   useEffect(() => {

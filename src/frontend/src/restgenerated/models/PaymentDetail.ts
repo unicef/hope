@@ -67,6 +67,6 @@ export type PaymentDetail = {
      */
     additionalCollectorName?: string | null;
     transactionReferenceId?: string | null;
-    readonly snapshotCollectorAccountData: any;
+    readonly snapshotCollectorAccountData: Record<string, any> | null;
 };
 

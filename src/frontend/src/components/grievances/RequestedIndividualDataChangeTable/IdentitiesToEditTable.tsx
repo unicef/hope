@@ -108,7 +108,7 @@ export function IdentitiesToEditTable({
             <TableCell />
             <TableCell align="left">{t('Partner')}</TableCell>
             <TableCell align="left">
-              {getPreviousPartner(identity.previous_value)}
+              {getPreviousPartner(identity.previousValue)}
             </TableCell>
             <TableCell align="left">
               {identity.value?.partner ?? (
@@ -120,11 +120,11 @@ export function IdentitiesToEditTable({
             <TableCell />
             <TableCell align="left">{t('Country')}</TableCell>
             <TableCell align="left">
-              {countriesDict[identity.previous_value.country]}
+              {countriesDict[identity.previousValue.country]}
             </TableCell>
             <TableCell align="left">
               {renderNewOrNotUpdated(
-                countriesDict[identity.previous_value.country],
+                countriesDict[identity.previousValue.country],
                 countriesDict[identity.value?.country],
               )}
             </TableCell>
@@ -132,10 +132,10 @@ export function IdentitiesToEditTable({
           <TableRow>
             <TableCell />
             <TableCell align="left">{t('Identity Number')}</TableCell>
-            <TableCell align="left">{identity.previous_value.number}</TableCell>
+            <TableCell align="left">{identity.previousValue.number}</TableCell>
             <TableCell align="left">
               {renderNewOrNotUpdated(
-                identity.previous_value.number,
+                identity.previousValue.number,
                 identity.value?.number,
               )}
             </TableCell>
