@@ -55,7 +55,7 @@ function ImportedIndividualsTable({
   }, [initialVariables]);
 
   const replacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
     relationship: (_beneficiaryGroup) =>
       `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
