@@ -57,7 +57,7 @@ export function ImportXlsxPaymentPlanPaymentList({
             businessAreaSlug,
             id,
             programSlug,
-            requestBody,
+            formData: requestBody,
           },
         ),
       onSuccess: () => {
@@ -76,11 +76,7 @@ export function ImportXlsxPaymentPlanPaymentList({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
         programSlug: programId,
-        requestBody: {
-          //TODO:
-          //@ts-ignore
-          file: fileToImport,
-        },
+        requestBody: { file: fileToImport as any },
       });
     }
   };

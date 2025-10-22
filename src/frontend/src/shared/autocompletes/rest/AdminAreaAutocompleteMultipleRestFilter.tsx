@@ -9,8 +9,8 @@ import {
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
 import { useQuery } from '@tanstack/react-query';
+import { AreaList } from '@restgenerated/models/AreaList';
 
 export function AdminAreaAutocompleteMultipleRestFilter({
   value,
@@ -35,7 +35,6 @@ export function AdminAreaAutocompleteMultipleRestFilter({
 
   const [queryVariables, setQueryVariables] = useState({
     level: level,
-    limit: 100,
     search: debouncedInputText || undefined,
     parentId: parentId || undefined,
   });
@@ -59,17 +58,15 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     data: areasData,
     isLoading,
     refetch,
-  } = useQuery<PaginatedAreaListList>({
+  } = useQuery<AreaList[]>({
     queryKey: ['areas', businessArea, queryVariables],
-    queryFn: async() => {
+    queryFn: async () => {
       try {
-        const result = await RestService.restBusinessAreasGeoAreasList({
+        return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: businessArea,
           level: queryVariables.level,
           name: queryVariables.search,
-          limit: queryVariables.limit || 100,
         });
-        return result;
       } catch (error) {
         console.error('Error fetching areas:', error);
         throw error;
@@ -91,9 +88,9 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       ) {
         setNewValue(value);
       } else {
-        if (areasData?.results) {
+        if (areasData) {
           const areaMap = new Map(
-            areasData.results.map((area) => [area.id, area]),
+            areasData.map((area) => [area.id, area]),
           );
 
           const formattedValue = value.map((id) => {
@@ -124,15 +121,14 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     }
   }, [value]);
 
-  const options = areasData?.results
-    ? areasData.results
+  const options = areasData
+    ? areasData
         .map((area) => {
           if (!area || !area.id) return null;
-          const option = {
+          return {
             name: area.name || '',
             value: area.id,
           };
-          return option;
         })
         .filter(Boolean)
     : [];
