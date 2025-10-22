@@ -268,11 +268,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert payment.order_number is None
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        export_service.export_per_fsp(self.user)
-
+        export_service.generate_token_and_order_numbers(
+            self.payment_plan.eligible_payments.all(), self.payment_plan.program
+        )
         payment.refresh_from_db(fields=["token_number", "order_number"])
         assert len(str(payment.token_number)) == 7
         assert len(str(payment.order_number)) == 9
+
+        export_service.export_per_fsp(self.user)
 
         assert self.payment_plan.has_export_file
         assert self.payment_plan.payment_list_export_file_link is not None

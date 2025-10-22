@@ -6,6 +6,8 @@ import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
+from django.db import transaction
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
@@ -15,6 +17,11 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pyzipper
 
+from hope.apps.account.models import User
+from hope.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    get_core_fields_attributes,
+)
 from hope.apps.core.models import FileTemp, FlexibleAttribute
 from hope.apps.payment.models import (
     DeliveryMechanism,
@@ -23,9 +30,11 @@ from hope.apps.payment.models import (
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
 )
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hope.apps.program.models import Program
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -34,43 +43,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
-    return Payment.objects.filter(
-        parent__program_cycle__program=payment.parent.program_cycle.program,
-        **{field_name: token},
-    ).exists()
-
-
-def generate_token_and_order_numbers(payment: Payment) -> Payment:
-    # AB#134721
-    if payment.order_number and payment.token_number:
-        return payment
-
-    order_number = generate_numeric_token(9)
-    token_number = generate_numeric_token(7)
-
-    while check_if_token_or_order_number_exists_per_program(payment, "order_number", order_number):
-        order_number = generate_numeric_token(9)
-
-    while check_if_token_or_order_number_exists_per_program(payment, "token_number", token_number):
-        token_number = generate_numeric_token(7)
-
-    payment.order_number = order_number
-    payment.token_number = token_number
-    payment.save(update_fields=["order_number", "token_number"])
-    return payment
-
-
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: str | None = None):
-        self.batch_size = 5000
+        self.batch_size = 2000
         self.payment_plan = payment_plan
         self.is_social_worker_program = self.payment_plan.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
-        flexible_attributes = FlexibleAttribute.objects.all()
         self.flexible_attributes = {
-            flexible_attribute.name: flexible_attribute for flexible_attribute in flexible_attributes
+            flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
         }
         self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
@@ -81,10 +62,76 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.core_fields = []
         self.flex_fields = []
         self.document_fields = []
+        self.core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
+        self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
+
+    def generate_token_and_order_numbers(
+        self,
+        qs: QuerySet[Payment],
+        program: Program,
+    ) -> None:
+        """Ensure order_number/token_number for all rows in qs."""
+        existing_orders: set[int] = set(
+            Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
+                "order_number", flat=True
+            )
+        )
+        existing_tokens: set[int] = set(
+            Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
+                "token_number", flat=True
+            )
+        )
+
+        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
+        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
+
+        if not payments_ids:
+            return
+
+        payments = list(qs.only("id", "order_number", "token_number"))
+        if not payments:  # pragma: no cover
+            return
+
+        to_update: list[Payment] = []
+
+        for payment in payments:
+            need_order = payment.order_number is None
+            need_token = payment.token_number is None
+
+            if not (need_order or need_token):  # pragma: no cover
+                continue
+
+            if need_order:
+                n9 = generate_numeric_token(9)
+                while n9 in existing_orders:  # pragma: no cover
+                    n9 = generate_numeric_token(9)
+                payment.order_number = n9
+                existing_orders.add(n9)
+
+            if need_token:
+                n7 = generate_numeric_token(7)
+                while n7 in existing_tokens:  # pragma: no cover
+                    n7 = generate_numeric_token(7)
+                payment.token_number = n7
+                existing_tokens.add(n7)
+
+            to_update.append(payment)
+
+        if to_update:
+            Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
     def get_account_fields_headers(self) -> list[str]:
         # Iterate over eligible payments to find the first with valid account_data
-        for payment in self.payment_plan.eligible_payments.all():
+        qs = (
+            self.payment_plan.eligible_payments.select_related("household_snapshot")
+            .only("id", "household_snapshot__snapshot_data")  # keep it minimal
+            .filter(
+                Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
+                | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
+            )
+        )
+        for payment in qs:
             snapshot = getattr(payment, "household_snapshot", None)
             snapshot_data = snapshot.snapshot_data if snapshot else {}
             collector_data = (
@@ -189,26 +236,32 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def add_rows(
         self,
-        payment_ids: list[int],
+        split: PaymentPlanSplit,
         ws: "Worksheet",
     ) -> None:
-        for i in range(0, len(payment_ids), self.batch_size):
-            batch_ids = payment_ids[i : i + self.batch_size]
-            payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
-
-            for payment in payment_qs:
-                ws.append(self.get_payment_row(payment))
+        qs = (
+            split.split_payment_items.eligible()
+            .select_related(
+                "household_snapshot",
+                "delivery_type",
+                "financial_service_provider",
+            )
+            .order_by("unicef_id")
+        )
+        for payment in qs.iterator(chunk_size=self.batch_size):
+            ws.append(self.get_payment_row(payment))
 
     def get_payment_row(self, payment: Payment) -> list[str]:
-        if self.payment_generate_token_and_order_numbers:
-            payment = generate_token_and_order_numbers(payment)
-
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, column_name, self.admin_areas_dict
+            )
             for column_name in self.template_columns
         ]
         core_fields_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+                payment, column_name, self.admin_areas_dict, self.countries_dict
+            )
             for column_name in self.core_fields
         ]
         payment_row.extend(core_fields_row)
@@ -216,7 +269,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row.extend(flex_field_row)
         # get document number by document type key
         documents_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, doc_type_key)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, doc_type_key, self.admin_areas_dict
+            )
             for doc_type_key in self.document_fields
         ]
         payment_row.extend(documents_row)
@@ -288,9 +343,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 filename += f"-chunk{i + 1}"
             wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(split.split_payment_items.eligible().order_by("unicef_id").values_list("id", flat=True))
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))  # type: ignore
-            self.add_rows(payment_ids, ws_fsp)
+            self.add_rows(split, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
             workbook_name = (
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
@@ -333,11 +387,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 xlsx_password=xlsx_password,
             )
             tmp_zip.seek(0)
-            # remove old file
-            self.payment_plan.remove_export_files()
-            file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_file_per_fsp = file_temp_obj
-            self.payment_plan.save()
+            with transaction.atomic():
+                self.payment_plan.remove_export_files()
+                file_temp_obj.file.save(zip_file_name, File(tmp_zip))
+                self.payment_plan.export_file_per_fsp = file_temp_obj
+                self.payment_plan.background_action_status_none()
+                self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
 
     @staticmethod
     def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
