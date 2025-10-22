@@ -197,6 +197,7 @@ PROJECT_APPS = [
     "hope.contrib.aurora.apps.Config",
     "hope.contrib.vision.apps.Config",
     "hope.apps.universal_update_script.apps.Config",
+    "hope.apps.streaming_handler.apps.StreamingHandlerConfig",
     "hct_mis_api",
 ]
 
@@ -218,6 +219,7 @@ DJANGO_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "streaming.apps.StreamingConfig",
 ]
 
 OTHER_APPS = [
@@ -491,6 +493,7 @@ from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.streaming_handler import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

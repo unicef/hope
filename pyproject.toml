@@ -67,6 +67,7 @@ dependencies = [
   "django-sql-explorer[xls]>=3,<4",
   "django-storages[azure]>=1.12.3,<2",
   "django-strategy-field>=3,<4",
+  "django-streaming>=0.8",
   "django-sysinfo>=2.6,<3",
   "djangorestframework>=3.13.1,<4",
   "drf-extensions==0.7.1",

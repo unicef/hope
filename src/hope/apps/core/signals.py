@@ -2,20 +2,12 @@ from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import Signal, receiver
 
 from hope.apps.account.models import Partner, Role, RoleAssignment
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
 from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.core.services.hope_live import HopeLiveService
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.payment.signals import payment_plan_approved_signal, payment_reconciled_signal
-from hope.apps.program.models import Program
-from hope.apps.program.signals import program_closed_signal, program_opened_signal
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.registration_datahub.signals import rdi_merged
 
 post_bulk_update = Signal()
 post_bulk_create = Signal()
@@ -66,37 +58,3 @@ def business_area_created(sender: Any, instance: BusinessArea, created: bool, **
             business_area=instance,
             program=None,
         )
-
-
-@receiver(rdi_merged)
-def rdi_fully_merged(sender: Any, instance: RegistrationDataImport, **kwargs):
-    transaction.on_commit(lambda: None)
-
-
-@receiver(payment_reconciled_signal)
-def payment_reconciled(sender: Any, instance: Payment, **kwargs):
-    transaction.on_commit(lambda: None)
-
-
-@receiver(payment_plan_approved_signal)
-def payment_plan_approved(sender: Any, instance: PaymentPlan, **kwargs):
-    transaction.on_commit(lambda: None)
-
-
-@receiver(program_opened_signal)
-def program_opened(sender: Any, instance: Program, **kwargs):
-    transaction.on_commit(lambda: None)
-
-
-@receiver(program_closed_signal)
-def program_closed(sender: Any, instance: Program, **kwargs):
-    {
-        "action": HopeLiveService.ACTION_PROGRAM_CLOSED,
-        "data": {
-            "business_area": instance.business_area.slug,
-            "program": instance.name,
-            "number_of_beneficiaries": instance.individual_count,
-            "total_amount_paid": instance.get_total_amount_paid()["delivered_quantity_usd"],
-        },
-    }
-    transaction.on_commit(lambda: None)
