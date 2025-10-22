@@ -83,9 +83,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "admin_url",
         )
 
-    def get_batch_duplicates_count_and_percentage(
-        self, obj: RegistrationDataImport
-    ) -> list[dict[str, int | float]]:
+    def get_batch_duplicates_count_and_percentage(self, obj: RegistrationDataImport) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(obj.batch_duplicates, obj.number_of_individuals),  # biographical
         ]
