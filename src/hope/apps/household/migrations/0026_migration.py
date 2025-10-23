@@ -78,14 +78,13 @@ class Migration(migrations.Migration):
         # --- RECREATE the trigger ---
         migrations.RunSQL(
             sql="""
-                CREATE TRIGGER vector_column_trigger
-                    BEFORE INSERT OR
-                UPDATE OF observed_disability, full_name, vector_column
-                ON household_individual
+                    CREATE OR REPLACE TRIGGER vector_column_trigger
+                      BEFORE INSERT OR UPDATE OF observed_disability, full_name, vector_column
+                      ON household_individual
                     FOR EACH ROW EXECUTE PROCEDURE
-                    tsvector_update_trigger(
-                    vector_column, 'pg_catalog.english', observed_disability, full_name
-                    );
+                      tsvector_update_trigger(
+                        vector_column, 'pg_catalog.english', observed_disability, full_name
+                      );
                 """,
             reverse_sql="""
                     DROP TRIGGER IF EXISTS vector_column_trigger
