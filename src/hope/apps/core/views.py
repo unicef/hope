@@ -67,7 +67,7 @@ class UploadFile(UploadFilePermissionMixin, View):
         return form.errors.get_json_data()["__all__"][0]["message"]
 
 
-class BaseHopeTemplate(View):
+class BaseHopeTemplateView(View):
     def get(self, request):
         # You can pass context here if needed
         return render(request, "example_extended_template.html", {})

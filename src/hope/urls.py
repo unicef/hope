@@ -10,7 +10,7 @@ import hope.apps.account.views
 import hope.apps.accountability.views
 from hope.apps.core.rest_api import all_fields_attributes
 from hope.apps.core.views import (
-    BaseHopeTemplate,
+    BaseHopeTemplateView,
     UploadFile,
     homepage,
     logout_view,
@@ -105,7 +105,7 @@ urlpatterns = (
     [
         path("_health", homepage),
         path("api/", include(api_patterns)),
-        path("base-hope-template/", BaseHopeTemplate.as_view(), name="base-hope-template"),
+        path("base-hope-template/", BaseHopeTemplateView.as_view(), name="base-hope-template-view"),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
