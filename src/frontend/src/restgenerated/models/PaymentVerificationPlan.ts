@@ -29,6 +29,6 @@ export type PaymentVerificationPlan = {
     readonly ageFilterMax: number | null;
     excludedAdminAreasFilter?: any;
     rapidProFlowId?: string;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
 };
 
