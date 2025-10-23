@@ -146,7 +146,6 @@ TEMPLATES: list[dict[str, Any]] = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
-            os.path.join(PROJECT_ROOT, "hct_mis_api", "templates", "hct_mis_api"),
         ],
         "OPTIONS": {
             "loaders": [
