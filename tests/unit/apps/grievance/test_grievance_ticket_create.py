@@ -26,6 +26,8 @@ from hope.apps.grievance.models import (
     TicketIndividualDataUpdateDetails,
 )
 from hope.models import country as geo_models
+from hope.models.account import Account
+from hope.models.account_type import AccountType
 from hope.models.business_area import BusinessArea
 from hope.models.document_type import DocumentType
 from hope.models.household import (
@@ -40,8 +42,6 @@ from hope.models.household import (
     WIDOWED,
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.account import Account
-from hope.models.account_type import AccountType
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 

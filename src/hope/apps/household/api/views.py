@@ -45,7 +45,6 @@ from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.household import DUPLICATE, Household
 from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
 

@@ -2,10 +2,6 @@ from datetime import timedelta
 import logging
 from typing import TYPE_CHECKING, Any, Optional
 
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVectorField
-from django.core.cache import cache
 from django.core.validators import validate_image_file_extension
 from django.db import models
 from django.db.models import (

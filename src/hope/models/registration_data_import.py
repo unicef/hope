@@ -1,8 +1,7 @@
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -23,9 +22,6 @@ from hope.models.household import (
 )
 from hope.models.individual import Individual, PendingIndividual
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
-
-if TYPE_CHECKING:
-    from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 

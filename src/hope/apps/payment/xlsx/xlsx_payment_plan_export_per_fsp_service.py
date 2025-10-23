@@ -11,30 +11,20 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
+from models.payment_plan_split import PaymentPlanSplit
+from models.program import Program
 import msoffcrypto
 import openpyxl
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pyzipper
 
-from hope.apps.account.models import User
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hope.apps.core.models import FileTemp, FlexibleAttribute
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.program.models import Program
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models.delivery_mechanism import DeliveryMechanism
 from hope.models.file_temp import FileTemp
@@ -43,14 +33,10 @@ from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.fsp_xlsx_template_per_delivery_mechanism import FspXlsxTemplatePerDeliveryMechanism
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
-from hope.models.user import User
 
 if TYPE_CHECKING:
     from hope.models.financial_service_provider import FinancialServiceProvider
-
-
-if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

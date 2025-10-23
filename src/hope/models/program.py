@@ -3,7 +3,6 @@ import secrets
 import string
 from typing import Any, Collection
 
-from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
