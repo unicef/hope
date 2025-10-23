@@ -270,7 +270,8 @@ class AdminUrlSerializerMixin(serializers.Serializer):
     admin_url = serializers.SerializerMethodField()
 
     def get_admin_url(self, obj: Any) -> str | None:
-        if self.context["request"].user.is_superuser:
+        request = self.context.get("request")
+        if request and request.user.is_superuser:
             return obj.admin_url
         return None
 
