@@ -602,7 +602,7 @@ class TestHouseholdDetail:
         assert data["active_individuals_count"] == 1
         assert data["geopoint"] == self.household.geopoint
         assert data["import_id"] == self.household.unicef_id
-        assert data["admin_url"] == self.household.admin_url
+        assert data["admin_url"] is None
         assert data["male_children_count"] == self.household.male_children_count
         assert data["female_children_count"] == self.household.female_children_count
         assert data["children_disabled_count"] == self.household.children_disabled_count
@@ -676,6 +676,24 @@ class TestHouseholdDetail:
                 },
             }
         ]
+
+    def test_household_detail_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.household.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == self.household.admin_url
 
     @pytest.mark.parametrize(
         "permissions",
