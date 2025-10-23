@@ -15,6 +15,7 @@ from extras.test_utils.factories.account import (
     PartnerFactory,
     UserFactory,
 )
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import (
@@ -36,12 +37,14 @@ class TestBusinessAreaList:
         create_user_role_with_permissions: Any,
         create_partner_role_with_permissions: Any,
     ) -> None:
-        self.afghanistan = BusinessAreaFactory(slug="afghanistan", active=True)
+        self.afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan", active=True)
         self.ukraine = BusinessAreaFactory(slug="ukraine", active=True)
         self.syria = BusinessAreaFactory(slug="syria", active=True)
         self.croatia = BusinessAreaFactory(slug="croatia", active=True)
         self.sudan = BusinessAreaFactory(slug="sudan", active=True)
         self.somalia = BusinessAreaFactory(slug="somalia", active=False)
+        country_afg = CountryFactory(name="Afghanistan")
+        self.afghanistan.countries.set([country_afg])
         self.list_url = reverse(
             "api:core:business-areas-list",
         )
@@ -113,6 +116,11 @@ class TestBusinessAreaList:
             assert response_data[i]["parent"] == business_area.parent
             assert response_data[i]["is_split"] == business_area.is_split
             assert response_data[i]["active"] == business_area.active
+            if response_data[i]["slug"] == "afghanistan":
+                assert len(response_data[i]["countries"]) == 1
+                assert response_data[i]["countries"][0]["name"] == "Afghanistan"
+            else:
+                assert len(response_data[i]["countries"]) == 0
 
     def test_business_area_count(
         self,
@@ -130,7 +138,7 @@ class TestBusinessAreaList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 5
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -151,7 +159,7 @@ class TestBusinessAreaList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
         create_user_role_with_permissions(
             self.user,
@@ -167,7 +175,7 @@ class TestBusinessAreaList:
             assert json.loads(cache.get(etag_fourth_call)[0].decode("utf8")) == response.json()
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
