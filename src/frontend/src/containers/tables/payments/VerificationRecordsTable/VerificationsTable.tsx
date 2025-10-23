@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
@@ -62,6 +63,8 @@ export function VerificationsTable({
       ),
     enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, verificationCountData);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -120,7 +123,7 @@ export function VerificationsTable({
       data={paymentsData}
       page={page}
       setPage={setPage}
-      itemsCount={verificationCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}

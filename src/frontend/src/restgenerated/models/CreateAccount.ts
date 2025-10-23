@@ -3,8 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CreateAccount = {
-    name: string;
-    approveStatus: boolean;
-    value: any;
+    accountType: string;
+    financialInstitution?: string;
+    number: string;
+    dataFields?: any;
+    approveStatus?: boolean;
 };
 

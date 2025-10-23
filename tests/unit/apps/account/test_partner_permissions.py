@@ -123,7 +123,7 @@ class UserPartnerTest(TestCase):
 
     def test_get_partner_area_limits_per_program(self) -> None:
         other_partner_areas = self.other_user.partner.get_area_limits_for_program(self.program.pk)
-        self.assertQuerysetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
+        self.assertQuerySetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
 
     def test_has_area_access(self) -> None:
         assert self.other_user.partner.has_area_access(self.area_1.pk, self.program.pk)

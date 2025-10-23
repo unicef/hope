@@ -52,19 +52,25 @@ def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
 
 
 def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
-    payments_queryset = (
-        Payment.objects.filter(id__in=payments_ids)
-        .select_related("household")
-        .prefetch_related(
-            "household__individuals",
-            "household__individuals__documents",
-            "household__individuals_and_roles",
-        )
-        .order_by("id")
-    )
-    paginator = Paginator(payments_queryset, page_size)
+    base_queryset = Payment.objects.filter(id__in=payments_ids).order_by("id")
+    paginator = Paginator(base_queryset, page_size)
+
     for page_number in paginator.page_range:
-        payments = paginator.page(page_number).object_list
+        # Slice without prefetch
+        page_ids = list(paginator.page(page_number).object_list.values_list("id", flat=True))
+
+        # Re-fetch with select/prefetch
+        payments = (
+            Payment.objects.filter(id__in=page_ids)
+            .select_related("household")
+            .prefetch_related(
+                "household__individuals",
+                "household__individuals__documents",
+                "household__individuals_and_roles",
+            )
+            .order_by("id")
+        )
+
         to_create = [create_payment_snapshot_data(payment) for payment in payments]
         PaymentHouseholdSnapshot.objects.bulk_create(to_create)
 

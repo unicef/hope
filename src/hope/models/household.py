@@ -2,7 +2,10 @@ from datetime import timedelta
 import logging
 from typing import TYPE_CHECKING, Any, Optional
 
-from django.contrib.postgres.fields import CICharField
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
+from django.core.cache import cache
 from django.core.validators import validate_image_file_extension
 from django.db import models
 from django.db.models import (
@@ -520,7 +523,7 @@ class Household(
         help_text="Household residence status",
     )
 
-    address = CICharField(max_length=1024, blank=True, help_text="Household address")
+    address = models.CharField(max_length=1024, blank=True, help_text="Household address", db_collation="und-ci-det")
     zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
 
     size = models.PositiveIntegerField(db_index=True, null=True, blank=True, help_text="Household size")
@@ -688,7 +691,7 @@ class Household(
         max_length=8,
         help_text="Household collect type [sys]",
     )
-    program_registration_id = CICharField(
+    program_registration_id = models.CharField(
         max_length=100,
         blank=True,
         null=True,
@@ -696,6 +699,7 @@ class Household(
         unique=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration id [sys]",
+        db_collation="und-ci-det",
     )
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -781,6 +785,20 @@ class Household(
             models.Index(
                 name="hh_prog_cre_active_merged",
                 fields=["program", "created_at"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hh_prog_unicef_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hh_size_id_idx",
+                fields=["size", "id"],
+            ),
+            models.Index(
+                name="hi_prog_ltreg_act_merg_idx",
+                fields=["program", "last_registration_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
         ]

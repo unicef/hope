@@ -9,10 +9,10 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
+from django.contrib.staticfiles.handlers import StaticFilesHandler
 from environ import Env
 from flags.models import FlagState
 import pytest
-from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
@@ -236,24 +236,39 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
     with suppress(FileExistsError):
         os.makedirs(download_path)
-    prefs = {
-        "download.default_directory": download_path,
-    }
+
+    prefs = {"download.default_directory": download_path}
     chrome_options.add_experimental_option("prefs", prefs)
+
     return Chrome(options=chrome_options)
 
 
 @pytest.fixture
-def live_server() -> LiveServer:
-    return LiveServer("localhost")
+def live_server_with_static(live_server, settings):
+    """
+    Wrap the live_server with StaticFilesHandler for Selenium tests.
+    Also override storages for testing.
+    """
+    settings.STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+
+    # Wrap the existing live_server with static files handler
+    live_server._static_handler = StaticFilesHandler(live_server._live_server_modified_settings)
+    return live_server
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
+def browser(driver: Chrome, live_server_with_static) -> Chrome:
+    """
+    Provide a Chrome driver bound to Django's static live server.
+    """
     try:
-        driver.live_server = live_server
+        driver.live_server = live_server_with_static
         yield driver
     finally:
         driver.quit()

@@ -10,6 +10,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
@@ -45,6 +46,7 @@ export const PeopleListTable = ({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      orderBy: filter.orderBy,
       page,
     }),
     [
@@ -60,6 +62,7 @@ export const PeopleListTable = ({
       filter.status,
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
+      filter.orderBy,
       programId,
       businessArea,
       page,
@@ -88,6 +91,8 @@ export const PeopleListTable = ({
       ),
     enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
@@ -119,7 +124,7 @@ export const PeopleListTable = ({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: IndividualList) => (

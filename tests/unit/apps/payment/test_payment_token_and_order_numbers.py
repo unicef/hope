@@ -53,26 +53,13 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
             assert payment.token_number is None
 
     def test_generate_token_and_order_numbers_for_payments(self) -> None:
-        for payment in self.payment_plan.eligible_payments.all():
-            enriched_payment = generate_token_and_order_numbers(payment)
+        service = XlsxPaymentPlanExportPerFspService(self.payment_plan, None)
+        service.generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
+        payment = self.payment_plan.eligible_payments.first()
+        assert len(str(payment.order_number)) == 9
+        assert len(str(payment.token_number)) == 7
 
-            assert len(str(enriched_payment.order_number)) == 9
-            assert len(str(enriched_payment.token_number)) == 7
-
-    def test_check_if_token_or_order_number_exists_per_program(self) -> None:
-        payment = Payment.objects.first()
-        payment.token_number = 1234567
-        payment.order_number = 987654321
-        payment.save(update_fields=["token_number", "order_number"])
-        payment.refresh_from_db()
-        assert check_if_token_or_order_number_exists_per_program(payment, "token_number", 1234567) is True
-        assert check_if_token_or_order_number_exists_per_program(payment, "token_number", 7777777) is False
-        assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 987654321) is True
-        assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 123456789) is False
-
-    def test_validation_token_must_not_has_the_same_digit_more_than_three_times(
-        self,
-    ) -> None:
+    def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
         with pytest.raises(ValidationError):
             payment_token_and_order_number_validator(1111111)
 

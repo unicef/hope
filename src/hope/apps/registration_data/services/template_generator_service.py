@@ -36,7 +36,9 @@ class TemplateFileGeneratorService:
         self._add_households_columns()
         self._add_individuals_columns()
         self._add_people_columns()
-        self._handle_choices({**self.households_fields, **self.individuals_fields})
+        self._handle_choices(
+            {**self.households_fields, **self.individuals_fields, **FinancialInstitution.get_rdi_template_choices()}
+        )
         return wb
 
     def _add_households_columns(self) -> None:

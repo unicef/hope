@@ -330,7 +330,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(97):
+        with self.assertNumQueries(98):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -473,7 +473,7 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp.follow_ups.count() == 2
 
-        with self.assertNumQueries(46):
+        with self.assertNumQueries(47):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         assert follow_up_pp_2.payment_items.count() == 1
@@ -617,7 +617,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[9].split_payment_items.count() == 1
 
         # split by records
-        with self.assertNumQueries(17):
+        with self.assertNumQueries(16):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
         pp_splits = pp.splits.all().order_by("order")
         assert pp_splits.count() == 3
@@ -627,7 +627,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[2].split_payment_items.count() == 2
 
         # split by admin2
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(14):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         assert unique_admin2_count == 2
@@ -792,7 +792,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(70):
+        with self.assertNumQueries(71):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN

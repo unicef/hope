@@ -99,6 +99,7 @@ else:
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
+        "ENGINE": "django.db.backends.postgresql",
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
         "TEST": {
             "READ_ONLY": True,
@@ -145,7 +146,6 @@ TEMPLATES: list[dict[str, Any]] = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
-            os.path.join(PROJECT_ROOT, "hct_mis_api", "templates", "hct_mis_api"),
         ],
         "OPTIONS": {
             "loaders": [
@@ -195,7 +195,6 @@ PROJECT_APPS = [
     "hope.contrib.aurora.apps.Config",
     "hope.contrib.vision.apps.Config",
     "hope.apps.universal_update_script.apps.Config",
-    "hct_mis_api",
 ]
 
 DJANGO_APPS = [
@@ -492,3 +491,5 @@ from hope.config.fragments.storages import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
+
+SALT_KEY = SECRET_KEY

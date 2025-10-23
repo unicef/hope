@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 from parameterized import parameterized
 import pytest
 from rest_framework import status
@@ -30,7 +31,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
 
         cls.user = UserFactory()
         cls.user.username = "admin"
-        cls.password = User.objects.make_random_password()
+        cls.password = get_random_string(12)
         cls.user.set_password(cls.password)
         cls.user.is_staff = True
         cls.user.is_superuser = True

@@ -1646,7 +1646,7 @@ def capture_on_commit_callbacks(
     finally:
         while True:
             callback_count = len(connections[using].run_on_commit)
-            for _, callback in connections[using].run_on_commit[start_count:]:
+            for _, callback, _ in connections[using].run_on_commit[start_count:]:
                 callbacks.append(callback)
                 if execute:
                     callback()

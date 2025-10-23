@@ -327,7 +327,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     linked_tickets = models.ManyToManyField(
         to="self",
         through="GrievanceTicketThrough",
-        related_name="linked_tickets_related",
         symmetrical=True,
     )
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)

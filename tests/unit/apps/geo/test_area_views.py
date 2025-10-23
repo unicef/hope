@@ -65,12 +65,22 @@ class TestAreaViews:
             name="Area 1 Area Type 2",
             area_type=self.area_type_2_afg,
             p_code="AREA1-ARTYPE2",
+            parent=self.area_1_area_type_1,
         )
         self.area_2_area_type_2 = AreaFactory(
             name="Area 2 Area Type 2",
             area_type=self.area_type_2_afg,
             p_code="AREA2-ARTYPE2",
+            parent=self.area_2_area_type_1,
         )
+
+        self.area_3_area_type_2 = AreaFactory(
+            name="Area 3 Area Type 2",
+            area_type=self.area_type_2_afg,
+            p_code="AREA3-ARTYPE2",
+            parent=self.area_1_area_type_1,
+        )
+
         self.area_1_area_type_afg_2 = AreaFactory(
             name="Area 1 Area Type Afg 2",
             area_type=self.area_type_afg_2,
@@ -149,64 +159,66 @@ class TestAreaViews:
         )
         response = self.client.get(self.url_list)
         assert response.status_code == status.HTTP_200_OK
-
-        response_json = response.json()["results"]
-        assert len(response_json) == 6
+        response_json = response.json()
+        assert len(response_json) == 7
         assert {
             "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
         assert {
             "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_1_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_2_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_1_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_2_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json
+        assert {
+            "id": str(self.area_3_area_type_2.id),
+            "name": self.area_3_area_type_2.name,
+            "p_code": self.area_3_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        }
         assert {
             "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
             "area_type": str(self.area_type_other.id),
-            "updated_at": self.area_other.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_other.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } not in response_json
 
-    def test_list_areas_filter(
+    def test_list_areas_filter_by_level(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -222,45 +234,168 @@ class TestAreaViews:
         response_level_1 = self.client.get(self.url_list, {"level": 1})
         assert response_level_1.status_code == status.HTTP_200_OK
 
-        response_json_1 = response_level_1.json()["results"]
+        response_json_1 = response_level_1.json()
         assert len(response_json_1) == 4
         assert {
             "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json_1
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_1_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_2_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
         } in response_json_1
 
         response_level_2 = self.client.get(self.url_list, {"level": 2})
         assert response_level_2.status_code == status.HTTP_200_OK
-        response_json_2 = response_level_2.json()["results"]
-        assert len(response_json_2) == 2
+        response_json_2 = response_level_2.json()
+        assert len(response_json_2) == 3
+
+    def test_list_areas_filter_by_id(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            self.afghanistan,
+        )
+
+        response = self.client.get(self.url_list, {"id": self.area_1_area_type_1.id})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert len(response_json) == 1
+        assert {
+            "id": str(self.area_1_area_type_1.id),
+            "name": self.area_1_area_type_1.name,
+            "p_code": self.area_1_area_type_1.p_code,
+            "area_type": str(self.area_type_1_afg.id),
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+
+    def test_list_areas_filter_by_parent_id(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            self.afghanistan,
+        )
+
+        response = self.client.get(self.url_list, {"parent_id": self.area_1_area_type_1.id})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert len(response_json) == 2
+        assert {
+            "id": str(self.area_1_area_type_2.id),
+            "name": self.area_1_area_type_2.name,
+            "p_code": self.area_1_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+        assert {
+            "id": str(self.area_3_area_type_2.id),
+            "name": self.area_3_area_type_2.name,
+            "p_code": self.area_3_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+
+        # Different parent - should only return one child
+        response = self.client.get(self.url_list, {"parent_id": self.area_2_area_type_1.id})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert len(response_json) == 1
+        assert {
+            "id": str(self.area_2_area_type_2.id),
+            "name": self.area_2_area_type_2.name,
+            "p_code": self.area_2_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+
+        # Test filtering by parent that has no children
+        response = self.client.get(self.url_list, {"parent_id": self.area_1_area_type_2.id})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert len(response_json) == 0
+
+    def test_list_areas_filter_by_parent_p_code(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            self.afghanistan,
+        )
+
+        response = self.client.get(self.url_list, {"parent_p_code": "AREA1-ARTYPE1"})
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert len(response_json) == 2
+        assert {
+            "id": str(self.area_1_area_type_2.id),
+            "name": self.area_1_area_type_2.name,
+            "p_code": self.area_1_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+        assert {
+            "id": str(self.area_3_area_type_2.id),
+            "name": self.area_3_area_type_2.name,
+            "p_code": self.area_3_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
+
+        response = self.client.get(self.url_list, {"parent_p_code": "AREA2-ARTYPE1"})
+        assert response.status_code == status.HTTP_200_OK
+
+        # Different parent - should only return one child
+        response_json = response.json()
+        assert len(response_json) == 1
+        assert {
+            "id": str(self.area_2_area_type_2.id),
+            "name": self.area_2_area_type_2.name,
+            "p_code": self.area_2_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+        } in response_json
 
     def test_list_areas_search_by_name(
         self,
@@ -278,7 +413,7 @@ class TestAreaViews:
         response = self.client.get(self.url_list, {"name": "Area 1"})
         assert response.status_code == status.HTTP_200_OK
 
-        response_json_1 = response.json()["results"]
+        response_json_1 = response.json()
         assert len(response_json_1) == 3
 
     def test_list_areas_caching(

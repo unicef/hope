@@ -15,7 +15,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 import { UserChoices } from '@restgenerated/models/UserChoices';
@@ -34,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissionInModule } from '../../../config/permissions';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export const CreateProgramPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData } =
-    useQuery<PaginatedAreaTreeList>({
+    useQuery<AreaTree[]>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGeoAreasAllAreasTreeList({

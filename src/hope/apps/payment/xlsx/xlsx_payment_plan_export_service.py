@@ -26,6 +26,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
     def __init__(self, payment_plan: PaymentPlan):
         self.batch_size = 5000
         self.payment_plan = payment_plan
+        self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
         self.payment_ids_list = (
             payment_plan.eligible_payments.order_by("unicef_id").only("id").values_list("id", flat=True)
         )
@@ -36,17 +37,25 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                payment, column_name, self.admin_areas_dict
+            )
             for column_name in self.headers
         ]
         self.ws_export_list.append(payment_row)
 
     def _add_payment_list(self) -> None:
-        for i in range(0, len(self.payment_ids_list), self.batch_size):
-            batch_ids = self.payment_ids_list[i : i + self.batch_size]
-            payment_qs = Payment.objects.filter(id__in=batch_ids).order_by("unicef_id")
-            for payment in payment_qs:
-                self._add_payment_row(payment)
+        qs = (
+            self.payment_plan.eligible_payments.all()
+            .select_related(
+                "household_snapshot",
+                "delivery_type",
+                "financial_service_provider",
+            )
+            .order_by("unicef_id")
+        )
+        for payment in qs.iterator(chunk_size=self.batch_size):
+            self._add_payment_row(payment)
 
     def _add_headers(self) -> None:
         self.ws_export_list.append(self.headers)
@@ -60,7 +69,6 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             [
                 self.headers.index("entitlement_quantity") + 1,
             ],
-            no_of_columns=len(self.payment_ids_list) + 1,
         )
         return self.wb
 

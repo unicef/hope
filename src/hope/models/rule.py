@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional, Sequence
 
 from concurrency.fields import AutoIncVersionField
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, CICharField
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import JSONField, QuerySet
@@ -28,7 +28,7 @@ class Rule(LimitBusinessAreaModelMixin):
 
     LANGUAGES: Sequence[tuple] = [(a.label.lower(), a.label) for a in interpreters]
     version = AutoIncVersionField()
-    name = CICharField(
+    name = models.CharField(
         max_length=100,
         unique=True,
         validators=[
@@ -36,6 +36,7 @@ class Rule(LimitBusinessAreaModelMixin):
             StartEndSpaceValidator,
             DoubleSpaceValidator,
         ],
+        db_collation="und-ci-det",
     )
     definition = models.TextField(blank=True, default="result.value=0")
     description = models.TextField(blank=True, null=True)

@@ -264,18 +264,25 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
     items = []
     for account in accounts:
         _id = account.pop("id")
-        delivery_mechanism_data = get_object_or_404(Account, id=_id)
+        account_object = get_object_or_404(Account, id=_id)
+        data_fields = account.get("data_fields", {})
+        financial_institution = account.get("financial_institution")
+        number = account.get("number")
         data = {
-            "id": _id,
-            "name": delivery_mechanism_data.account_type.key,
+            "id": str(_id),
+            "account_type": account_object.account_type.key,
             "approve_status": False,
+            "financial_institution": financial_institution,
+            "financial_institution_previous_value": account_object.financial_institution.pk,
+            "number": number,
+            "number_previous_value": account_object.number,
             "data_fields": [
                 {
                     "name": field,
                     "value": value,
-                    "previous_value": delivery_mechanism_data.account_data.get(field),
+                    "previous_value": account_object.data.get(field),
                 }
-                for field, value in account["data_fields"].items()
+                for field, value in data_fields.items()
             ],
         }
         items.append(data)
@@ -285,6 +292,8 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
 def handle_update_account(account: dict) -> Account | None:
     account_instance = get_object_or_404(Account, id=account.get("id"))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
+    account_instance.number = account["number"]
+    account_instance.financial_institution_id = account.get("financial_institution")
     account_instance.account_data = data_fields_dict
     return account_instance
 
@@ -292,10 +301,12 @@ def handle_update_account(account: dict) -> Account | None:
 def handle_add_account(account: dict, individual: Individual) -> Account:
     account_instance = Account(
         individual=individual,
-        account_type=AccountType.objects.get(key=account["name"]),
+        account_type=AccountType.objects.get(key=account["account_type"]),
+        financial_institution_id=account.get("financial_institution"),
+        number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )
-    account_instance.account_data = account["data_fields"]
+    account_instance.data = account.get("data_fields", {})
     return account_instance
 
 

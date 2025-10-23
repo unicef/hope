@@ -1,3 +1,4 @@
+from datetime import timezone as dt_timezone
 from unittest.mock import patch
 
 from django.contrib.auth.models import Group, Permission
@@ -299,11 +300,11 @@ class AllPermissionsInBusinessAreasTest(TransactionTestCase):
     def test_expiry_date_edge_case(self, mock_now) -> None:
         """Test expiry date filtering on exact boundary."""
         # Set current time - beginning of next day so that today's date is < timezone.now()
-        current_time = timezone.datetime(2024, 1, 16, 0, 0, 1, tzinfo=timezone.utc)
+        current_time = timezone.datetime(2024, 1, 16, 0, 0, 1, tzinfo=dt_timezone.utc)
         mock_now.return_value = current_time
 
         # Role assignment expiring yesterday (should be excluded)
-        yesterday = timezone.datetime(2024, 1, 15, 0, 0, 0, tzinfo=timezone.utc).date()
+        yesterday = timezone.datetime(2024, 1, 15, 0, 0, 0, tzinfo=dt_timezone.utc).date()
         RoleAssignment.objects.create(
             role=self.role_rdi,
             business_area=self.business_area_afg,

@@ -196,6 +196,6 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="countries")
     def countries(self, request: Request) -> Response:
         countries = Country.objects.all().order_by("name")
-        country_tuples = tuple((country.name, country.iso_code3) for country in countries)
+        country_tuples = tuple((country.iso_code3, country.name) for country in countries)
         resp = ChoiceSerializer(to_choice_object(list(country_tuples)), many=True).data
         return Response(resp)

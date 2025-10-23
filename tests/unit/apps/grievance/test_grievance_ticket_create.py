@@ -6,6 +6,7 @@ from django.core.management import call_command
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
+from test_utils.factories.payment import FinancialInstitutionFactory
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -39,6 +40,8 @@ from hope.models.household import (
     WIDOWED,
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.account import Account
+from hope.models.account_type import AccountType
 from hope.models.program import Program
 from hope.models.utils import MergeStatusModel
 
@@ -157,6 +160,15 @@ class TestGrievanceTicketCreate:
             )
             for individual in self.individuals_to_create
         ]
+        self.account_type = AccountType.objects.create(key="bank_account", label="Bank Account")
+        self.financial_institution = FinancialInstitutionFactory()
+        self.account = Account.objects.create(
+            number="1",
+            individual=self.individuals[0],
+            account_type=self.account_type,
+            financial_institution=self.financial_institution,
+            rdi_merge_status=Account.MERGED,
+        )
         household_one.head_of_household = self.individuals[0]
         household_one.save()
         self.household_one = household_one
@@ -294,6 +306,13 @@ class TestGrievanceTicketCreate:
                         "individual": str(self.individuals[0].pk),
                         "individual_data": {
                             "full_name": "New full_name",
+                            "accounts_to_edit": [
+                                {
+                                    "id": str(self.account.pk),
+                                    "number": "999999999999",
+                                    "financial_institution": self.financial_institution.pk,
+                                }
+                            ],
                         },
                     }
                 },

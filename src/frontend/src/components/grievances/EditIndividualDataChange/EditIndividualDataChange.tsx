@@ -18,8 +18,9 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { IndividualList } from '@restgenerated/models/IndividualList';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -31,48 +32,54 @@ export interface EditIndividualDataChangeProps {
   setFieldValue;
   form;
   field;
+  programSlug?: string;
 }
 
 function EditIndividualDataChange({
   values,
   setFieldValue,
+  programSlug,
 }: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: IndividualList = values.selectedIndividual;
+  const individual: IndividualDetail | IndividualList =
+    values.selectedIndividual;
   const {
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
   } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessAreaSlug],
+    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         },
       ),
+    enabled: Boolean(businessArea),
   });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['grievanceTicketsChoices', businessAreaSlug],
+    queryKey: ['grievanceTicketsChoices', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
+        businessAreaSlug: businessArea,
       }),
+    enabled: Boolean(businessArea),
   });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualsChoices', businessAreaSlug],
+      queryKey: ['individualsChoices', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         }),
+      enabled: Boolean(businessArea),
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -80,24 +87,21 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
+  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery<IndividualDetail>({
     queryKey: [
       'individual',
-      businessAreaSlug,
-      programSlug,
+      businessArea,
       individual?.id,
-      individual?.program?.slug,
+      programSlug,
+      programId,
     ],
-    queryFn: () => {
-      if (!individual?.id) return null;
-      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        programSlug: individual?.program?.slug,
-        id: individual?.id,
-      });
-    },
-    enabled:
-      !!individual?.id && individual?.program?.slug && !!businessAreaSlug,
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug: businessArea,
+        id: individual.id,
+        programSlug: programSlug,
+      }),
+    enabled: Boolean(individual && businessArea && programSlug),
   });
 
   useEffect(() => {

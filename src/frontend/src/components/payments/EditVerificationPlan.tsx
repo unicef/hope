@@ -39,7 +39,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { AreaList } from '@restgenerated/models/AreaList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FullList } from '@restgenerated/models/FullList';
@@ -247,13 +247,12 @@ export const EditVerificationPlan = ({
     : null;
   const loadRapidProFlows = refetchRapidProFlows;
 
-  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
-    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+  const { data: adminAreasData } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
-      return RestService.restAreasList({
-        limit: 100,
-        areaTypeAreaLevel: 2,
-        search: undefined,
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
       });
     },
     enabled: !!businessArea,
@@ -319,8 +318,8 @@ export const EditVerificationPlan = ({
     }
   };
 
-  const mappedAdminAreas = adminAreasData?.results?.length
-    ? adminAreasData.results.map((area) => ({
+  const mappedAdminAreas = adminAreasData?.length
+    ? adminAreasData.map((area) => ({
         value: area.id,
         name: area.name || '',
       }))

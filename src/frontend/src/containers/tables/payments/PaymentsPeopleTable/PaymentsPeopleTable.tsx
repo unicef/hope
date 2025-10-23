@@ -4,7 +4,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
@@ -34,25 +36,6 @@ function PaymentsPeopleTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   const [page, setPage] = useState(0);
 
-  // Add count query for payments, only enabled on first page
-  const { data: paymentsCountData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsCount',
-      queryVariables,
-      businessArea,
-      household.id,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanPk: household.id,
-        ...queryVariables,
-      }),
-    enabled: page === 0,
-  });
-
   const {
     data: paymentsData,
     isLoading,
@@ -74,15 +57,40 @@ function PaymentsPeopleTable({
             id: household.id,
           },
           queryVariables,
+
           { withPagination: true },
         ),
       );
     },
   });
 
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsPaymentsCount',
+      programId,
+      businessArea,
+      queryVariables,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <UniversalRestTable
-      title={t('Payment Records')}
+      title={t('Payments')}
       headCells={headCells}
       data={paymentsData}
       error={error}
@@ -91,7 +99,7 @@ function PaymentsPeopleTable({
       setQueryVariables={setQueryVariables}
       page={page}
       setPage={setPage}
-      itemsCount={paymentsCountData?.count}
+      itemsCount={itemsCount}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

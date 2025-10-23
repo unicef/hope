@@ -19,6 +19,7 @@ import {
   householdStatusToColor,
 } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -124,6 +125,8 @@ export const HouseholdTable = ({
     enabled: page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
@@ -214,13 +217,13 @@ export const HouseholdTable = ({
         title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
-        initialRowsPerPage={5}
+        rowsPerPageOptions={[10, 15, 20]}
         data={data}
         error={error}
         isLoading={isLoading}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
       />

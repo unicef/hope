@@ -234,7 +234,7 @@ class PartnerAdminTest(TestCase):
 
     def test_get_form_parent_partner(self) -> None:
         form = self.admin.get_form(self.request, self.parent_partner)
-        self.assertQuerysetEqual(form.base_fields["parent"].queryset, Partner.objects.none())
+        self.assertQuerySetEqual(form.base_fields["parent"].queryset, Partner.objects.none())
 
     def test_get_form_partner(self) -> None:
         form = self.admin.get_form(self.request, self.partner)

@@ -37,15 +37,18 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
+      const errorStatuses = [
+        BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+        BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+        BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+      ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
-          data?.backgroundActionStatus !==
-            BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+          !errorStatuses.includes(data?.backgroundActionStatus))
       ) {
         return 3000;
       }
-
       return false;
     },
     refetchIntervalInBackground: true,

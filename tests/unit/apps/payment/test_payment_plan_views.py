@@ -1,3 +1,4 @@
+from datetime import timezone as dt_timezone
 from io import BytesIO
 import json
 from pathlib import Path
@@ -210,7 +211,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         self.set_up(api_client, afghanistan)
         approval_process = ApprovalProcessFactory(
             payment_plan=self.payment_plan1,
-            sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
             sent_for_approval_by=self.user,
         )
         approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)

@@ -6,10 +6,19 @@ from decimal import Decimal
 import functools
 import io
 import itertools
+from itertools import islice
 import json
 import logging
 import string
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    Iterable,
+    Iterator,
+    Optional,
+)
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
@@ -743,21 +752,20 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 }
 
 
-def chunks(lst: list, n: int) -> list:
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+def chunks(it: Iterable, size: int) -> Iterator[list]:
+    """Yield lists of up to `size` items from `it`."""
+    iterator = iter(it)
+    while True:
+        buf: list = list(islice(iterator, size))
+        if not buf:
+            return
+        yield buf
 
 
-def send_email_notification_on_commit(service: Any, user: "User") -> None:
-    context = service.get_email_context(user)
-    transaction.on_commit(
-        lambda: user.email_user(
-            subject=context["title"],
-            html_body=render_to_string(service.html_template, context=context),
-            text_body=render_to_string(service.text_template, context=context),
-        )
-    )
+def send_email_notification_on_commit(
+    service: Any, user: Optional["User"] = None, context_kwargs: dict | None = None
+) -> None:
+    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
 
 
 def send_email_notification(

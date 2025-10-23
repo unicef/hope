@@ -72,6 +72,7 @@ function FeedbackDetailsToolbar({
                     selectedIndividual: feedback?.individualId,
                     linkedFeedbackId: id,
                     isFeedbackWithHouseholdOnly,
+                    feedbackProgramId: feedback?.programId,
                   },
                 })
               }

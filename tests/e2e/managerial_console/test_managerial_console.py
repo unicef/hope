@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
@@ -82,7 +82,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
         is_follow_up=False,
     )[0]
     approval_user = UserFactory()
-    approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+    approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
     ApprovalProcessFactory(
         payment_plan=payment_plan,
         sent_for_approval_date=approval_date,
