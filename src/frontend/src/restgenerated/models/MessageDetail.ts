@@ -21,6 +21,6 @@ export type MessageDetail = {
     fullListArguments?: any;
     randomSamplingArguments?: any;
     sampleSize?: number;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
 };
 

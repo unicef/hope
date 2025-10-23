@@ -5,7 +5,7 @@ export const headCells: HeadCell<MessageList>[] = [
   {
     disablePadding: false,
     label: 'Message ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
   },
   {
