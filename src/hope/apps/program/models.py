@@ -5,7 +5,6 @@ import string
 from typing import Any, Collection
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -178,7 +177,7 @@ class Program(
         help_text="Program partners",
     )
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
-    name = CICharField(
+    name = models.CharField(
         max_length=255,
         validators=[
             MinLengthValidator(3),
@@ -189,6 +188,7 @@ class Program(
         ],
         db_index=True,
         help_text="Program name",
+        db_collation="und-ci-det",
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")

@@ -678,7 +678,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_fsps()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -695,7 +695,7 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_account_types()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -738,7 +738,7 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_records()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -776,7 +776,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_delivery_mechanisms()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
