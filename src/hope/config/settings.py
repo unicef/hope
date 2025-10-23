@@ -197,7 +197,6 @@ PROJECT_APPS = [
     "hope.contrib.vision.apps.Config",
     "hope.apps.universal_update_script.apps.Config",
     "hope.apps.streaming_handler.apps.StreamingHandlerConfig",
-    "hct_mis_api",
 ]
 
 DJANGO_APPS = [
