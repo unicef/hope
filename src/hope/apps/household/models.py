@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
@@ -21,6 +21,7 @@ from django.db.models import (
     UniqueConstraint,
     Value,
 )
+from django.db.models.functions import Upper
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -1016,10 +1017,10 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     class Meta:
         indexes = [
-            # GinIndex(
-            #     OpClass(Upper("document_number"), name="gin_trgm_ops"),
-            #     name="doc_number_upper_trgm_gin",
-            # ),
+            GinIndex(
+                OpClass(Upper("document_number"), name="gin_trgm_ops"),
+                name="doc_number_upper_trgm_gin",
+            ),
             models.Index(
                 fields=["type", "individual"],
                 name="doc_type_individual_idx",
@@ -1587,7 +1588,7 @@ class Individual(
             ),
             models.Index(
                 name="hi_prog_hh_active_merged_idx",
-                fields=["program", "household"],  # -> (program_id, household_id)
+                fields=["program", "household"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
             models.Index(
