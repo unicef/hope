@@ -33,7 +33,7 @@ export type HouseholdDetail = {
     readonly activeIndividualsCount: number;
     readonly geopoint: string | null;
     readonly importId: string;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     /**
      * Household male children count
      */
