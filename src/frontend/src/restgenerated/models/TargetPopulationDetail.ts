@@ -299,7 +299,7 @@ export type TargetPopulationDetail = {
      * record revision number
      */
     version?: number;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     readonly screenBeneficiary: boolean;
     /**
      * Exclude households with individuals (members or collectors) on sanction list.

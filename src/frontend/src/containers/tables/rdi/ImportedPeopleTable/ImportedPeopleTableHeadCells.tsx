@@ -5,7 +5,7 @@ export const headCells: HeadCell<IndividualList>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
   },
   {
