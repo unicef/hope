@@ -561,7 +561,7 @@ class GrievanceTicketGlobalViewSet(
         creator = TicketCreatorService(details_creator)
         grievances = creator.create(user, self.business_area, input_data)
 
-        resp = GrievanceTicketDetailSerializer(grievances, context={"request": request}, many=True).data
+        resp = GrievanceTicketDetailSerializer(grievances, context={"request": request}, many=True)
         headers = self.get_success_headers(resp.data)
         return Response(resp.data, status=status.HTTP_201_CREATED, headers=headers)
 
