@@ -292,12 +292,14 @@ export function registrationDataImportStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'APPROVED':
-      return theme.hctPalette.green;
-    case 'MERGED':
+    case 'Merged':
       return theme.hctPalette.gray;
-    case 'IN_PROGRESS':
+    case 'In Progress':
       return theme.hctPalette.orange;
+    case 'Import Error':
+    case 'Merge Error':
+    case 'Deduplication Failed':
+      return theme.palette.error.main;
     default:
       return theme.hctPalette.orange;
   }
@@ -323,9 +325,6 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
       return theme.hctPalette.orange;
   }
 }
-
-export const registrationDataImportErasedColor = (): string =>
-  themeObj.palette.error.main;
 
 export function paymentPlanStatusToColor(
   theme: typeof themeObj,
