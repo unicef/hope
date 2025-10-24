@@ -2,7 +2,6 @@ from typing import Any
 from uuid import UUID
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet

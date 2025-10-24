@@ -1,4 +1,5 @@
-from functools import lru_cache, cached_property
+from collections import defaultdict
+from functools import cached_property, lru_cache
 import logging
 from typing import Any
 from uuid import UUID
