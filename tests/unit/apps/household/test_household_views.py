@@ -30,13 +30,15 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     HOST,
     REFUGEE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     Household,
 )

@@ -10,7 +10,8 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from hope.apps.account.models import User
 from hope.apps.accountability.models import Survey
 from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.models import REFUGEE, Household
+from hope.apps.household.const import REFUGEE
+from hope.apps.household.models import Household
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.models import Program
 

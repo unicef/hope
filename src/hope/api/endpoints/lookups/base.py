@@ -12,7 +12,7 @@ from hope.api.endpoints.serializers import (
 )
 from hope.api.filters import CountryFilter, FinancialInstitutionFilter
 from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,

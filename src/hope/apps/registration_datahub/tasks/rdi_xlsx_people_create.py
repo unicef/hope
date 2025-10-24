@@ -13,9 +13,11 @@ from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.models import BusinessArea, FlexibleAttribute
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
 from hope.apps.geo.models import Area, Country as GeoCountry
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingHousehold,
     PendingIndividual,

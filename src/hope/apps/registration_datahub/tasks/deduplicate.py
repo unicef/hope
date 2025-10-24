@@ -14,8 +14,7 @@ from hope.apps.activity_log.models import log_create
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_dict
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
@@ -23,6 +22,9 @@ from hope.apps.household.models import (
     SIMILAR_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
+)
+from hope.apps.household.documents import IndividualDocument, get_individual_doc
+from hope.apps.household.models import (
     Document,
     Household,
     Individual,

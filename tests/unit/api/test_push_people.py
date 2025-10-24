@@ -19,7 +19,7 @@ from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSeri
 from hope.api.models import Grant
 from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -27,6 +27,8 @@ from hope.apps.household.models import (
     MALE,
     NOT_COLLECTED,
     NOT_DISABLED,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

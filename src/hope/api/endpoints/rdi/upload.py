@@ -18,13 +18,15 @@ from hope.api.models import Grant
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,

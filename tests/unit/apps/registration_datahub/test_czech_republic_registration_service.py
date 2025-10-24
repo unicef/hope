@@ -14,13 +14,15 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import DataCollectingType
 from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     GOVERNMENT_PARTNER,
     MALE,
     NOT_DISABLED,
     PRIVATE_PARTNER,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

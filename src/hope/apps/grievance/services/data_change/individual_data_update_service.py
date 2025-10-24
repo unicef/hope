@@ -43,8 +43,10 @@ from hope.apps.grievance.services.data_change.utils import (
     update_es,
     verify_flex_fields,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
+)
+from hope.apps.household.models import (
     Document,
     Household,
     Individual,

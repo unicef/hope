@@ -46,7 +46,8 @@ from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import FEMALE, MALE, DocumentType, Household, Individual
+from hope.apps.household.const import FEMALE, MALE
+from hope.apps.household.models import DocumentType, Household, Individual
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.models import Approval
@@ -1358,6 +1359,10 @@ class PaymentPlan(
         target=Status.IN_AUTHORIZATION,
     )
     def status_approve(self) -> None:
+        from hope.apps.payment.signals import payment_plan_approved_signal
+
+        payment_plan_approved_signal.send(sender=self.__class__, instance=self)
+
         self.status_date = timezone.now()
 
     @transition(
@@ -1818,36 +1823,6 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
     @property
     def is_payment_gateway(self) -> bool:
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
-
-
-# TODO MB remove in step 2
-class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
-    payment_plan = models.OneToOneField(
-        "payment.PaymentPlan",
-        on_delete=models.CASCADE,
-        related_name="delivery_mechanism_per_payment_plan",
-    )
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
-        on_delete=models.PROTECT,
-        related_name="delivery_mechanisms_per_payment_plan",
-        null=True,
-    )
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
-    delivery_mechanism_order = models.PositiveIntegerField()
-    sent_to_payment_gateway = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=[
-                    "payment_plan",
-                    "delivery_mechanism",
-                    "delivery_mechanism_order",
-                ],
-                name="unique payment_plan_delivery_mechanism",
-            ),
-        ]
 
 
 class Payment(

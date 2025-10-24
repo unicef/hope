@@ -22,10 +22,12 @@ from hope.apps.grievance.services.data_change.utils import (
     verify_flex_fields,
 )
 from hope.apps.grievance.signals import individual_added
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
+)
+from hope.apps.household.models import (
     Document,
     Household,
     Individual,

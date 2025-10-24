@@ -33,7 +33,8 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hope.apps.household.models import HOST, SEEING, Individual
+from hope.apps.household.const import HOST, SEEING
+from hope.apps.household.models import Individual
 from hope.apps.payment.models import Payment
 from hope.apps.periodic_data_update.models import (
     PDUXlsxTemplate,

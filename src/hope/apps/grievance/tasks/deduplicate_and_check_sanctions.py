@@ -4,10 +4,12 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
-from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
+)
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.models import (
     Document,
     Individual,
 )

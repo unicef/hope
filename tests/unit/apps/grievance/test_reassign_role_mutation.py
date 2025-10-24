@@ -18,7 +18,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.household.const import ROLE_PRIMARY
+from hope.apps.household.models import IndividualRoleInHousehold
 from hope.apps.program.models import Program
 from hope.apps.utils.models import MergeStatusModel
 

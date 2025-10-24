@@ -26,7 +26,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import DataCollectingType
-from hope.apps.household.models import ROLE_PRIMARY
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.models import (
     Payment,
     PaymentPlan,
@@ -208,7 +208,8 @@ class TestPaymentPlanReconciliation(BaseTestCase):
         )
 
         payment_1 = PaymentFactory(
-            parent=PaymentPlan.objects.get(id=pp.id),
+            parent=pp,
+            program=pp.program,
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
@@ -221,7 +222,8 @@ class TestPaymentPlanReconciliation(BaseTestCase):
             currency="PLN",
         )
         payment_2 = PaymentFactory(
-            parent=PaymentPlan.objects.get(id=pp.id),
+            parent=pp,
+            program=pp.program,
             business_area=self.business_area,
             household=self.household_2,
             collector=self.individual_2,
@@ -234,7 +236,8 @@ class TestPaymentPlanReconciliation(BaseTestCase):
             currency="PLN",
         )
         payment_3 = PaymentFactory(
-            parent=PaymentPlan.objects.get(id=pp.id),
+            parent=pp,
+            program=pp.program,
             business_area=self.business_area,
             household=self.household_3,
             collector=self.individual_3,

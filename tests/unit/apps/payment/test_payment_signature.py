@@ -24,7 +24,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import ROLE_PRIMARY
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import prepare_payment_plan_task
 from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hope.apps.payment.services.payment_household_snapshot_service import (

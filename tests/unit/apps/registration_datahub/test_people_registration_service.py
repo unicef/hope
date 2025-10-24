@@ -16,8 +16,10 @@ from extras.test_utils.factories.aurora import (
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import DataCollectingType
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

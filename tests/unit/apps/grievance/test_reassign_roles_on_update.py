@@ -14,10 +14,12 @@ from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_update_service,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.utils.models import MergeStatusModel

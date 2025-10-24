@@ -16,12 +16,14 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.core.models import BusinessArea
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     HEAD,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,
+)
+from hope.apps.household.models import (
     Document,
     DocumentType,
 )

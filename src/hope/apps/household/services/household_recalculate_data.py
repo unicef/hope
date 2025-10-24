@@ -2,13 +2,15 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
 
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     MALE,
     NON_BENEFICIARY,
     NOT_COLLECTED,
     OTHER,
+)
+from hope.apps.household.models import (
     Household,
     Individual,
 )

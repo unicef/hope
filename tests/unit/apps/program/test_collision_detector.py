@@ -4,9 +4,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     MALE,
+)
+from hope.apps.household.models import (
     Document,
     DocumentType,
     Household,

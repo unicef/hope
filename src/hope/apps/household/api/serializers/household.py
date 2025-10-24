@@ -10,7 +10,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     AGENCY_TYPE_CHOICES,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -26,6 +26,8 @@ from hope.apps.household.models import (
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
+)
+from hope.apps.household.models import (
     DocumentType,
     Household,
     Individual,
