@@ -6,12 +6,11 @@ from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 
-from hct_mis_api.views.base_hope_template_view import BaseHopeTemplate
-import hope.admin
 import hope.apps.account.views
 import hope.apps.accountability.views
 from hope.apps.core.rest_api import all_fields_attributes
 from hope.apps.core.views import (
+    BaseHopeTemplateView,
     UploadFile,
     homepage,
     logout_view,
@@ -106,7 +105,7 @@ urlpatterns = (
     [
         path("_health", homepage),
         path("api/", include(api_patterns)),
-        path("base-hope-template/", BaseHopeTemplate.as_view(), name="base-hope-template"),
+        path("base-hope-template/", BaseHopeTemplateView.as_view(), name="base-hope-template-view"),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

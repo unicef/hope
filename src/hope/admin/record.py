@@ -152,7 +152,7 @@ class RecordAdmin(HOPEModelAdminBase):
         ("status", StatusFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
-        ("data", JsonFieldFilter),
+        ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"

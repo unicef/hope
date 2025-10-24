@@ -94,6 +94,7 @@ def pytest_configure(config: Config) -> None:
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
+    settings.DATABASES["default"]["CONN_MAX_AGE"] = 0
     settings.CACHE_ENABLED = False
     settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
     settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")

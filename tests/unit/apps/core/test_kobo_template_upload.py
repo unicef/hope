@@ -4,20 +4,15 @@ from typing import Any, Callable, Dict
 from unittest.mock import patch
 
 from django.conf import settings
-from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.contrib.sessions.backends.base import SessionBase
-from django.core.handlers.wsgi import WSGIRequest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 import pytest
 import requests
 
-from extras.test_utils.factories.account import UserFactory
-from hope.admin.kobo_template import XLSXKoboTemplateAdmin
+from hope.apps.account.models import User
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import XLSXKoboTemplate
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
@@ -55,30 +50,28 @@ class TestKoboTemplateUpload(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        cls.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
         call_command("init_geo_fixtures")
-        cls.factory = RequestFactory()
-        cls.site = AdminSite()
-        cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
         cls.maxDiff = None
 
-    def prepare_request(self, name: str) -> WSGIRequest:
-        with open(
-            f"{settings.TESTS_ROOT}/apps/core/test_files/{name}",
-            "rb",
-        ) as f:
-            data = {"xls_file": f}
-            url = reverse("admin:core_xlsxkobotemplate_add")
-            request = self.factory.post(url, data=data, format="multipart")
-            user = UserFactory()
-            user.has_perm = lambda perm: True
-            request.user = user
+    def upload_file(self, filename: str):
+        """Helper to upload a test file via the Django test client."""
+        file_path = f"{settings.TESTS_ROOT}/apps/core/test_files/{filename}"
+        with open(file_path, "rb") as f:
+            uploaded_file = SimpleUploadedFile(
+                filename,
+                f.read(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        url = reverse("admin:core_xlsxkobotemplate_add")
+        self.client.login(username=self.admin_user.username, password="password")
 
-            return request
+        return self.client.post(url, {"xls_file": uploaded_file}, follow=True, format="multipart")
 
     def test_upload_invalid_template(self) -> None:
-        request = self.prepare_request("kobo-template-invalid.xlsx")
-        response = self.admin.add_view(request, form_url="", extra_context=None)
-        form = response.context_data["form"]
+        response = self.upload_file("kobo-template-invalid.xlsx")
+        form = response.context["form"]
+
         expected_errors = {
             "__all__": [
                 "Field: residence_status_h_c - Choice: RETURNEE is not present in the file",
@@ -122,17 +115,14 @@ class TestKoboTemplateUpload(BaseTestCase):
         new=lambda *args, **kwargs: None,
     )
     def test_upload_valid_template(self) -> None:
-        request = self.prepare_request("kobo-template-valid.xlsx")
-        request.session = SessionBase()
-        messages = FallbackStorage(request)
-        request._messages = messages
-        response = self.admin.add_view(request, form_url="", extra_context=None)
-        stored_messages = tuple(get_messages(request))
-        assert response.status_code == 302
+        response = self.upload_file("kobo-template-valid.xlsx")
+        messages = [m.message for m in get_messages(response.wsgi_request)]
+
+        assert response.status_code == 302 or response.redirect_chain
         assert (
-            stored_messages[0].message == "Core field validation successful, running KoBo Template upload task..., "
+            "Core field validation successful, running KoBo Template upload task..., "
             "Import status will change after task completion"
-        )
+        ) in messages
 
 
 class TestKoboErrorHandling(BaseTestCase):

@@ -391,6 +391,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         # remove old and create new snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payment_plan)
+        payment.refresh_from_db()
 
         payment_row = export_service.get_payment_row(payment)
         assert payment_row[decimal_flexible_attribute_index] == 123.45

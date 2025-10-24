@@ -1329,7 +1329,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                      CREATE TRIGGER vector_column_trigger
+                      CREATE OR REPLACE TRIGGER vector_column_trigger
                       BEFORE INSERT OR UPDATE OF observed_disability, full_name, vector_column
                       ON household_individual
                       FOR EACH ROW EXECUTE PROCEDURE
