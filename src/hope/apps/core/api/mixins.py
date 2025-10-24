@@ -15,12 +15,11 @@ from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import Grant
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.apps.core.models import BusinessArea
+from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models.program import Program
 
 
 class BaseAPI:
@@ -133,7 +132,7 @@ class ProgramMixin:
 
     @cached_property
     def program(self) -> "Program":
-        from hope.apps.program.models import Program
+        from hope.models.program import Program
 
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
@@ -193,7 +192,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.apps.program.models import Program
+        from hope.models.program import Program
 
         queryset = super().get_queryset()
         user = self.request.user
@@ -296,11 +295,13 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
+    from hope.models.grant import Grant
+
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
-    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-    variable token_permission.
-    """
+        If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
+        variable token_permission.
+        """
 
     token_permission = Grant.API_READ_ONLY
 

@@ -10,11 +10,14 @@ from parameterized import parameterized
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from hope.models.business_area import BusinessArea
+    from hope.models.user import User
+
 
 EXCLUDED_MODELS = []
 

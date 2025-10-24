@@ -11,13 +11,15 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import PendingHousehold, PendingIndividual
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hope.contrib.aurora.celery_tasks import process_flex_records_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor
+from hope.models.business_area import BusinessArea
+from hope.models.household import PendingHousehold
+from hope.models.import_data import ImportData
+from hope.models.individual import PendingIndividual
+from hope.models.registration_data_import import RegistrationDataImport
 
 if TYPE_CHECKING:
     from uuid import UUID

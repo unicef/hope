@@ -11,7 +11,7 @@ import django.utils.timezone
 import model_utils.fields
 import mptt.fields
 
-import hope.apps.core.models
+from hope.models.flexible_attribute import label_contains_english_en_validator
 
 
 class Migration(migrations.Migration):
@@ -319,7 +319,7 @@ class Migration(migrations.Migration):
                     "label",
                     models.JSONField(
                         default=dict,
-                        validators=[hope.apps.core.models.label_contains_english_en_validator],
+                        validators=[label_contains_english_en_validator],
                     ),
                 ),
                 ("hint", models.JSONField(default=dict)),

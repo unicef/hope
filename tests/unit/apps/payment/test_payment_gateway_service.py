@@ -22,22 +22,8 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
-)
-from hope.apps.payment.models import (
-    AccountType,
-    DeliveryMechanism,
-    FinancialInstitution,
-    FinancialInstitutionMapping,
-    FinancialServiceProvider,
-    FspNameMapping,
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
 )
 from hope.apps.payment.services.payment_gateway import (
     AccountTypeData,
@@ -54,6 +40,18 @@ from hope.apps.payment.services.payment_gateway import (
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
+from hope.models.account_type import AccountType
+from hope.models.business_area import BusinessArea
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.financial_institution_mapping import FinancialInstitutionMapping
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.household import ROLE_PRIMARY
+from hope.models.payment import Payment
+from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
 
 
 @pytest.fixture(autouse=True)
@@ -167,7 +165,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -247,7 +245,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -358,7 +356,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -437,7 +435,7 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",

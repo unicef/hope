@@ -5,10 +5,12 @@ from extras.test_utils.factories.account import PartnerFactory, RoleFactory, Use
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.program import Program
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 
 class TestCheckPermissions(TestCase):

@@ -20,14 +20,11 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from hope.apps.account.models import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hope.apps.program.models import Program
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.program import Program
 
 pytestmark = pytest.mark.django_db
 

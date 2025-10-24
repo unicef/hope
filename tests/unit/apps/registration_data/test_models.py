@@ -17,9 +17,11 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.household.models import Household, Individual, IndividualIdentity
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):

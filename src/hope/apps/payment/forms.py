@@ -3,10 +3,8 @@ from typing import Any
 from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
 
-from hope.apps.payment.models import (
-    AcceptanceProcessThreshold,
-    FinancialServiceProviderXlsxTemplate,
-)
+from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 
 
 class AcceptanceProcessThresholdForm(forms.ModelForm):

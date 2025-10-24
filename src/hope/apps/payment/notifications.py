@@ -6,10 +6,11 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.utils.mailjet import MailjetClient
+from hope.models.payment_plan import PaymentPlan
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 logger = logging.getLogger(__name__)
 

@@ -15,9 +15,10 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import Approval, PaymentPlan
 from hope.apps.payment.notifications import PaymentNotification
+from hope.models.approval import Approval
+from hope.models.business_area import BusinessArea
+from hope.models.payment_plan import PaymentPlan
 
 
 class TestPaymentNotification(BaseTestCase):
