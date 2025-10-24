@@ -1,12 +1,14 @@
-import uuid
+import re
 from typing import Any
 from unittest.mock import MagicMock, patch
+import uuid
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
-
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -28,11 +30,10 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.data_change.utils import (
+from hope.apps.account.models import AdminAreaLimitedTo
+from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
@@ -40,49 +41,49 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     to_phone_number_str,
     verify_flex_fields,
 )
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     close_needs_adjudication_ticket_service,
     create_grievance_ticket_with_details,
 )
-from hct_mis_api.apps.grievance.utils import (
+from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hct_mis_api.apps.household.models import (
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Document,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hope.apps.utils.models import MergeStatusModel
 
 
 class FlexibleAttribute:
-    class objects:
+    class Objects:
         @staticmethod
-        def filter(type: Any) -> Any:
+        def filter(field_type: Any) -> Any:
             return MagicMock()
 
 
 class TestGrievanceUtils(TestCase):
     def test_convert_to_empty_string_if_null(self) -> None:
-        self.assertEqual(convert_to_empty_string_if_null(None), "")
-        self.assertTrue(convert_to_empty_string_if_null(True))
-        self.assertFalse(convert_to_empty_string_if_null(False))
-        self.assertEqual(convert_to_empty_string_if_null("test"), "test")
-        self.assertEqual(convert_to_empty_string_if_null(123), 123)
+        assert convert_to_empty_string_if_null(None) == ""
+        assert convert_to_empty_string_if_null(True)
+        assert not convert_to_empty_string_if_null(False)
+        assert convert_to_empty_string_if_null("test") == "test"
+        assert convert_to_empty_string_if_null(123) == 123
 
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "phone_number")
-        self.assertEqual(data["phone_number"], "123456789")
+        assert data["phone_number"] == "123456789"
 
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "other_field_name")
-        self.assertEqual(data["phone_number"], 123456789)
+        assert data["phone_number"] == 123456789
 
-    @patch("hct_mis_api.apps.core.models.FlexibleAttribute.objects.filter")
+    @patch("hope.apps.core.models.FlexibleAttribute.objects.filter")
     def test_cast_flex_fields(self, mock_filter: Any) -> None:
         mock_filter.side_effect = [
             MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
@@ -96,18 +97,18 @@ class TestGrievanceUtils(TestCase):
         }
         cast_flex_fields(flex_fields)
 
-        self.assertEqual(flex_fields["string_field"], "some_string")
-        self.assertEqual(flex_fields["integer_field"], 123)
-        self.assertEqual(flex_fields["decimal_field"], 321.11)
+        assert flex_fields["string_field"] == "some_string"
+        assert flex_fields["integer_field"] == 123
+        assert flex_fields["decimal_field"] == 321.11
 
     def test_verify_flex_fields(self) -> None:
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(
+            ValueError, match=re.escape("associated_with argument must be one of ['household', 'individual']")
+        ):
             verify_flex_fields({"key": "value"}, "associated_with")
-            assert str(e.value) == "associated_with argument must be one of ['household', 'individual']"
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="key is not a correct `flex field"):
             verify_flex_fields({"key": "value"}, "individuals")
-            assert str(e.value) == "key is not a correct `flex field"
 
     def test_verify_flex_fields_with_date_type(self) -> None:
         national_id_issue_date_i_f = Core_FlexibleAttribute(
@@ -120,9 +121,8 @@ class TestGrievanceUtils(TestCase):
 
         verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
             verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
-            assert str(e.value) == "time data 'invalid' does not match format '%Y-%m-%d'"
 
     def test_handle_role(self) -> None:
         create_afghanistan()
@@ -132,22 +132,22 @@ class TestGrievanceUtils(TestCase):
             individuals_data=[{}],
         )
 
-        self.assertEqual(IndividualRoleInHousehold.objects.all().count(), 0)
-        with pytest.raises(ValidationError) as e:
-            IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
+        assert IndividualRoleInHousehold.objects.all().count() == 0
+        IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
+        with pytest.raises(DRFValidationError) as e:
             handle_role(ROLE_PRIMARY, household, individuals[0])
-            assert str(e.value) == "Ticket cannot be closed, primary collector role has to be reassigned"
+        assert "Ticket cannot be closed, primary collector role has to be reassigned" in str(e)
 
         # just remove exists roles
         IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
         handle_role("OTHER_ROLE_XD", household, individuals[0])
-        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 0)
+        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
 
         # create new role
         handle_role(ROLE_ALTERNATE, household, individuals[0])
         role = IndividualRoleInHousehold.objects.filter(household=household).first()
-        self.assertEqual(role.role, ROLE_ALTERNATE)
-        self.assertEqual(role.rdi_merge_status, MergeStatusModel.MERGED)
+        assert role.role == ROLE_ALTERNATE
+        assert role.rdi_merge_status == MergeStatusModel.MERGED
 
     def test_handle_add_document(self) -> None:
         create_afghanistan()
@@ -166,30 +166,29 @@ class TestGrievanceUtils(TestCase):
             "photo": "photo",
             "photoraw": "photo_raw",
         }
-
-        with pytest.raises(ValidationError) as e:
-            DocumentFactory(
-                document_number=111,
-                type=document_type,
-                country=country,
-                program_id=individual.program_id,
-                status=Document.STATUS_VALID,
-            )
+        DocumentFactory(
+            document_number=111,
+            type=document_type,
+            country=country,
+            program_id=individual.program_id,
+            status=Document.STATUS_VALID,
+        )
+        with pytest.raises(DRFValidationError) as e:
             handle_add_document(document_data, individual)
-            assert str(e.value) == "Document with number 111 of type tax already exists"
+        assert "Document with number 111 of type tax already exists" in str(e)
 
-        with pytest.raises(ValidationError) as e:
-            document_type.unique_for_individual = True
-            document_type.save()
+        document_type.unique_for_individual = True
+        document_type.save()
+        with pytest.raises(DRFValidationError) as e:
             handle_add_document(document_data, individual)
-            assert str(e.value) == "Document of type tax already exists for this individual"
+        assert "Document with number 111 of type tax already exists" in str(e)
 
         Document.objects.all().delete()
-        self.assertEqual(Document.objects.all().count(), 0)
+        assert Document.objects.all().count() == 0
 
         document = handle_add_document(document_data, individual)
-        self.assertIsInstance(document, Document)
-        self.assertEqual(document.rdi_merge_status, MergeStatusModel.MERGED)
+        assert isinstance(document, Document)
+        assert document.rdi_merge_status == MergeStatusModel.MERGED
 
     def test_validate_individual_for_need_adjudication(self) -> None:
         area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
@@ -247,45 +246,51 @@ class TestGrievanceUtils(TestCase):
         ticket_details.ticket = grievance
         ticket_details.save()
         partner = PartnerFactory(name="other")
+
+        area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
+        area_limits = AdminAreaLimitedTo.objects.create(
+            partner=partner,
+            program=program,
+        )
+        area_limits.areas.add(area_other)
         partner_unicef = PartnerFactory()
 
         with pytest.raises(PermissionDenied) as e:
             validate_individual_for_need_adjudication(partner, individuals_1[0], ticket_details)
-            assert str(e.value) == "Permission Denied: User does not have access to select individual"
+        assert str(e.value) == "Permission Denied: User does not have access to select individual"
 
+        _, individuals = create_household(
+            {
+                "size": 1,
+                "business_area": business_area,
+                "admin2": doshi,
+                "program": program,
+            },
+            {
+                "given_name": "Tester",
+                "family_name": "Test",
+                "middle_name": "",
+                "full_name": "Tester Test",
+            },
+        )
         with pytest.raises(ValidationError) as e:
-            _, individuals = create_household(
-                {
-                    "size": 1,
-                    "business_area": business_area,
-                    "admin2": doshi,
-                    "program": program,
-                },
-                {
-                    "given_name": "Tester",
-                    "family_name": "Test",
-                    "middle_name": "",
-                    "full_name": "Tester Test",
-                },
-            )
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-            assert (
-                str(e.value)
-                == f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
-            )
+        assert (
+            f"The selected individual {individuals[0].unicef_id} is not valid, "
+            f"must be one of those attached to the ticket" in str(e.value)
+        )
 
         ticket_details.possible_duplicates.add(individuals[0])
 
+        individuals[0].withdraw()
         with pytest.raises(ValidationError) as e:
-            individuals[0].withdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-            assert (
-                str(e.value)
-                == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
-            )
+        assert (
+            e.value.args[0] == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
+        )
 
-            individuals[0].unwithdraw()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+        individuals[0].unwithdraw()
+        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
 
         ticket_details.selected_distinct.remove(individuals[0])
         individuals[0].unwithdraw()
@@ -322,20 +327,24 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+        assert (
+            e.value.args[0]
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
+            "individuals is withdrawn or duplicate"
+        )
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-            assert (
-                str(e.value)
-                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
-            )
+        assert (
+            e.value.args[0] == "Close ticket is possible when at least one individual is flagged as distinct or one "
+            "of the individuals is withdrawn or duplicate"
+        )
 
+        ticket_details.selected_distinct.add(individuals_2[0])
+        ticket_details.save()
         with pytest.raises(ValidationError) as e:
-            ticket_details.selected_distinct.add(individuals_2[0])
-            ticket_details.save()
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-            assert str(e.value) == "Close ticket is possible when all active Individuals are flagged"
+        assert e.value.args[0] == "Close ticket is possible when all active Individuals are flagged"
 
         ticket_details.selected_individuals.add(individuals_1[0])
         validate_all_individuals_before_close_needs_adjudication(ticket_details)
@@ -393,7 +402,9 @@ class TestGrievanceUtils(TestCase):
         assert ind_1.duplicate is False
         assert ind_2.duplicate is True
 
-    def test_close_needs_adjudication_ticket_service_individual_without_household(self) -> None:
+    def test_close_needs_adjudication_ticket_service_individual_without_household(
+        self,
+    ) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
         program = ProgramFactory(business_area=ba)
@@ -436,9 +447,9 @@ class TestGrievanceUtils(TestCase):
         ind_2.refresh_from_db()
         document.refresh_from_db()
 
-        self.assertEqual(ind_1.duplicate, False)
-        self.assertEqual(ind_2.duplicate, False)
-        self.assertEqual(document.status, Document.STATUS_VALID)
+        assert ind_1.duplicate is False
+        assert ind_2.duplicate is False
+        assert document.status == Document.STATUS_VALID
 
     def test_close_needs_adjudication_ticket_service_when_just_duplicates(self) -> None:
         user = UserFactory()
@@ -488,7 +499,7 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(grievance, user)
-            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+        assert e.value.args[0] == "Close ticket is not possible when all Individuals are flagged as duplicates"
 
         gr = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -510,10 +521,11 @@ class TestGrievanceUtils(TestCase):
         ticket_details_2.save()
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(gr, user)
-            assert (
-                str(e.value)
-                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
-            )
+        assert (
+            e.value.args[0]
+            == "Close ticket is possible when at least one individual is flagged as distinct or one of the "
+            "individuals is withdrawn or duplicate"
+        )
 
     @patch.dict(
         "os.environ",
@@ -523,7 +535,10 @@ class TestGrievanceUtils(TestCase):
         },
     )
     @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_false_positive_duplicate"
     )
     def test_close_needs_adjudication_ticket_service_for_biometrics(
         self, report_false_positive_duplicate_mock: MagicMock
@@ -569,7 +584,11 @@ class TestGrievanceUtils(TestCase):
             is_multiple_duplicates_version=True,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
             dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
-                program=program, individual1=ind_1, individual2=ind_2, similarity_score=90.55, status_code="200"
+                program=program,
+                individual1=ind_1,
+                individual2=ind_2,
+                similarity_score=90.55,
+                status_code="200",
             ),
         )
         if not ticket:
@@ -595,7 +614,7 @@ class TestGrievanceUtils(TestCase):
             str(deduplication_set_id),
         )
 
-    def test_create_grievance_ticket_with_details__no_possible_duplicates(self) -> None:
+    def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
         ba = BusinessAreaFactory(slug="afghanistan")
         deduplication_set_id = uuid.uuid4()
         program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)

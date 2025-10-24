@@ -1,11 +1,11 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { IndividualMinimalFragment } from '@generated/graphql';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
-export const headCells: HeadCell<IndividualMinimalFragment>[] = [
+export const headCells: HeadCell<IndividualList>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
   },
   {

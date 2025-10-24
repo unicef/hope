@@ -1,9 +1,10 @@
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Grid2 as Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -16,7 +17,7 @@ interface LookUpHouseholdIndividualSelectionDisplayProps {
   onValueChange;
   disableUnselectIndividual: boolean;
   disableUnselectHousehold: boolean;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedHousehold: (value) => void;
   selectedIndividual;
   setSelectedIndividual: (value) => void;

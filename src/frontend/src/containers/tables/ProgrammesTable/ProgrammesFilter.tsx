@@ -1,8 +1,8 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -14,7 +14,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgrammesFilterProps {
   filter;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -55,7 +55,7 @@ function ProgrammesFilters({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <SearchTextField
             label="Search"
             value={filter.search}
@@ -63,21 +63,21 @@ function ProgrammesFilters({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label="Status"
             value={filter.status}
             data-cy="filters-status"
           >
-            {choicesData.programStatusChoices.map((item) => (
+            {choicesData.statusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
@@ -90,7 +90,7 @@ function ProgrammesFilters({
             value={filter.startDate}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
@@ -103,7 +103,7 @@ function ProgrammesFilters({
             value={filter.endDate}
           />
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label="Sector"
@@ -111,14 +111,14 @@ function ProgrammesFilters({
             value={filter.sector}
             multiple
           >
-            {choicesData.programSectorChoices.map((item) => (
+            {choicesData.sectorChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <NumberTextField
             data-cy="filters-number-of-households-min"
             topLabel="Programme Size"
@@ -130,7 +130,7 @@ function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <NumberTextField
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
@@ -141,7 +141,7 @@ function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <NumberTextField
             data-cy="filters-budget-min"
             topLabel="Budget (USD)"
@@ -150,7 +150,7 @@ function ProgrammesFilters({
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={2}>
           <NumberTextField
             data-cy="filters-budget-max"
             value={filter.budgetMax}
@@ -158,7 +158,7 @@ function ProgrammesFilters({
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('dataCollectingType', e.target.value)

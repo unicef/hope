@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { IndividualNode } from '@generated/graphql';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
-export const headCells: HeadCell<IndividualNode>[] = [
+export const headCells: HeadCell<IndividualList>[] = [
   {
     disablePadding: false,
     label: '',

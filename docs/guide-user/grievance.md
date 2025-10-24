@@ -81,26 +81,26 @@ ticket status, ticket category and tickets by category and location.
 
 ## How to view the Grievance Dashboard
 
-1. Select the Grievance Dashboard menu under Grievance module. 
+1. Select the Grievance Dashboard menu under Grievance module.
     ![Image](_screenshots/grievance/12.png)
 
 ## How to submit feedback
 
-1. Select the Feedback menu under Grievance module and click on SUBMIT NEW FEEDBACK. 
+1. Select the Feedback menu under Grievance module and click on SUBMIT NEW FEEDBACK.
     ![Image](_screenshots/grievance/_1.png)
 
-1. Select the issue type, either Negative of Positive feedback and click next. 
+1. Select the issue type, either Negative of Positive feedback and click next.
     ![Image](_screenshots/grievance/_2.png)
 
-1. In the Household/Individual Look up page select the household and individual and click next. 
+1. In the Household/Individual Look up page select the household and individual and click next.
     ![Image](_screenshots/grievance/_3.png)
 
 
-1. In the identity verification page, you have option of selecting screening questions at household level (Household Questionnaire) and individual level (Individual Questionnaire) fields. You can also have option to select if consent has been given (Received Consent). Select the received consent check box and click next. 
+1. In the identity verification page, you have option of selecting screening questions at household level (Household Questionnaire) and individual level (Individual Questionnaire) fields. You can also have option to select if consent has been given (Received Consent). Select the received consent check box and click next.
     ![Image](_screenshots/grievance/_4.png)
 
-1. In the description page enter the details of the feedback collected from the beneficiary and click save. 
+1. In the description page enter the details of the feedback collected from the beneficiary and click save.
     ![Image](_screenshots/grievance/_5.png)
 
-1. After you click save, a new feedback ticket will be created. You also have the option to edit the ticket or a create a linked ticket (grievance ticket). 
+1. After you click save, a new feedback ticket will be created. You also have the option to edit the ticket or a create a linked ticket (grievance ticket).
     ![Image](_screenshots/grievance/_6.png)

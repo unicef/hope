@@ -1,3 +1,5 @@
+import React, { ReactElement, useState } from 'react';
+import { Formik, useFormikContext } from 'formik';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
@@ -5,55 +7,56 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import AddIndividualDataChange from '@components/grievances/AddIndividualDataChange';
 import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import Description from '@components/grievances/CreateGrievance/Description/Description';
+import Selection from '@components/grievances/CreateGrievance/Selection/Selection';
+import Verification from '@components/grievances/CreateGrievance/Verification/Verification';
+import EditHouseholdDataChange from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import EditPeopleDataChange from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
 import {
   getGrievanceDetailsPath,
-  prepareVariables,
+  prepareRestVariables,
   selectedIssueType,
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
-import {
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
-  useCreateGrievanceMutation,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import FormHelperText from '@mui/material/FormHelperText';
+import Grid from '@mui/material/Grid';
+import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
-import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import {
+  showApiErrorMessages,
+  thingForSpecificGrievanceType,
+} from '@utils/utils';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
-  PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
+  PERMISSIONS,
 } from '../../../config/permissions';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import AddIndividualDataChange from '@components/grievances/AddIndividualDataChange';
-import Verification from '@components/grievances/CreateGrievance/Verification/Verification';
-import EditHouseholdDataChange from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import EditIndividualDataChange from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import EditPeopleDataChange from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
-import Selection from '@components/grievances/CreateGrievance/Selection/Selection';
-import Description from '@components/grievances/CreateGrievance/Description/Description';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -70,7 +73,29 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
+
 function EmptyComponent(): ReactElement {
+  return null;
+}
+
+function FormikSelectedEntitiesSync({
+  fetchedHousehold,
+  fetchedIndividual,
+}: {
+  fetchedHousehold: any;
+  fetchedIndividual: any;
+}) {
+  const { values, setFieldValue } = useFormikContext<any>();
+  React.useEffect(() => {
+    if (fetchedHousehold && values.selectedHousehold !== fetchedHousehold) {
+      setFieldValue('selectedHousehold', fetchedHousehold);
+    }
+  }, [fetchedHousehold, values.selectedHousehold, setFieldValue]);
+  React.useEffect(() => {
+    if (fetchedIndividual && values.selectedIndividual !== fetchedIndividual) {
+      setFieldValue('selectedIndividual', fetchedIndividual);
+    }
+  }, [fetchedIndividual, values.selectedIndividual, setFieldValue]);
   return null;
 }
 
@@ -79,10 +104,9 @@ const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
@@ -100,7 +124,67 @@ const CreateGrievancePage = (): ReactElement => {
 
   const linkedTicketId = location.state?.linkedTicketId;
   const selectedHousehold = location.state?.selectedHousehold;
+  const feedbackProgramId = location.state?.feedbackProgramId;
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, limit: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
+    });
+
+  const feedbackProgram = feedbackProgramId
+    ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
+    : undefined;
+  const feedbackProgramSlug = feedbackProgram?.slug;
+
+  // Fetch full household object if selectedHousehold is an ID (string/number)
+  const shouldFetchHousehold = Boolean(
+    selectedHousehold &&
+      (typeof selectedHousehold === 'string' ||
+        typeof selectedHousehold === 'number'),
+  );
+
+  const entityProgramSlug = feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+
+  const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
+    useQuery({
+      queryKey: ['household', businessArea, entityProgramSlug, selectedHousehold],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: entityProgramSlug,
+          id: String(selectedHousehold),
+        }),
+      enabled: shouldFetchHousehold && !!entityProgramSlug,
+    });
   const selectedIndividual = location.state?.selectedIndividual;
+
+  // Fetch full individual object if selectedIndividual is an ID (string/number)
+  const shouldFetchIndividual = Boolean(
+    selectedIndividual &&
+      (typeof selectedIndividual === 'string' ||
+        typeof selectedIndividual === 'number'),
+  );
+
+  const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
+    useQuery({
+      queryKey: ['individual', businessArea, entityProgramSlug, selectedIndividual],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: entityProgramSlug,
+          id: String(selectedIndividual),
+        }),
+      enabled: shouldFetchIndividual && !!entityProgramSlug,
+    });
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
@@ -109,7 +193,8 @@ const CreateGrievancePage = (): ReactElement => {
 
   const initialValues = {
     description: '',
-    category: category || null,
+    category:
+      typeof category === 'number' ? category : Number(category) || null,
     language: '',
     consent: false,
     admin: selectedHousehold?.admin2?.id || null,
@@ -123,53 +208,93 @@ const CreateGrievancePage = (): ReactElement => {
     priority: null,
     urgency: null,
     partner: null,
-    program: isAllPrograms ? '' : programId,
+    program: isAllPrograms ? '' : selectedProgram?.id || '',
     comments: null,
-    linkedFeedbackId: linkedFeedbackId
-      ? decodeIdString(linkedFeedbackId)
-      : null,
+    linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
+    roles: [],
   };
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
-  const [mutate, { loading }] = useCreateGrievanceMutation();
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
-    });
+  const { mutateAsync, isPending: loading } = useMutation({
+    mutationFn: (requestData: CreateGrievanceTicket) => {
+      return RestService.restBusinessAreasGrievanceTicketsCreate({
+        businessAreaSlug: businessArea,
+        formData: requestData as any,
+      });
+    },
+  });
+
 
   const {
     data: allAddIndividualFieldsData,
-    loading: allAddIndividualFieldsDataLoading,
-  } = useAllAddIndividualFieldsQuery();
+    isLoading: allAddIndividualFieldsDataLoading,
+  } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
 
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+  });
 
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
+  const {
+    data: allEditPeopleFieldsData,
+    isLoading: allEditPeopleFieldsLoading,
+  } = useQuery({
+    queryKey: ['editPeopleFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
 
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
+    //@ts-ignore
+    allAddIndividualFieldsData,
     'name',
     '*',
   );
 
   const householdFieldsDict = useArrayToDict(
-    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    //@ts-ignore
+    householdFieldsData,
     'name',
     '*',
   );
 
   const peopleFieldsDict = useArrayToDict(
-    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    //@ts-ignore
+    allEditPeopleFieldsData,
     'name',
+    '*',
+  );
+
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
     '*',
   );
 
@@ -178,33 +303,23 @@ const CreateGrievancePage = (): ReactElement => {
     : individualFieldsDict;
 
   const showIssueType = (values): boolean =>
-    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
-
+    values.category?.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    values.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    values.category?.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
   if (
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
     programsDataLoading ||
-    allEditPeopleFieldsLoading
+    allEditPeopleFieldsLoading ||
+    (fetchedIndividualLoading && shouldFetchIndividual) ||
+    fetchedHouseholdLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
     return <PermissionDenied />;
-
-  if (
-    !choicesData ||
-    !allAddIndividualFieldsData ||
-    !householdFieldsData ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !programsData ||
-    !peopleFieldsDict
-  )
-    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -261,11 +376,10 @@ const CreateGrievancePage = (): ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const { data } = await mutate(
-              prepareVariables(businessArea, values),
-            );
-            const grievanceTicket =
-              data.createGrievanceTicket.grievanceTickets[0];
+            const requestData = prepareRestVariables(values);
+            const data = await mutateAsync(requestData);
+            const grievanceTickets = data || [];
+            const grievanceTicket = grievanceTickets[0];
             let msg: string;
             let url: string;
             const paymentsNumber = values.selectedPaymentRecords.length;
@@ -283,8 +397,11 @@ const CreateGrievancePage = (): ReactElement => {
             showMessage(msg);
             navigate(url);
           } catch (e) {
-            console.log(e);
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showApiErrorMessages(
+              e,
+              showMessage,
+              'An error occurred while creating the grievance ticket',
+            );
           }
         } else {
           setValidateData(false);
@@ -307,7 +424,7 @@ const CreateGrievancePage = (): ReactElement => {
       validate={(values) =>
         validateUsingSteps(
           values,
-          allAddIndividualFieldsData,
+          allAddIndividualFieldsData || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           activeStep,
@@ -325,17 +442,23 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
+        const dynamicEntityProgramSlug = feedbackProgramSlug ||
+          (programId !== 'all' ? programId :
+            ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
+             (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug)));
+
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
           EmptyComponent,
         );
 
-        const issueTypeToDisplay = (): string =>
-          selectedIssueType(
-            values,
-            choicesData.grievanceTicketIssueTypeChoices,
-          );
+        const getIssueTypeToDisplay = (): string => {
+          if (!values.issueType) return '';
+          return selectedIssueType(values, issueTypeDict);
+        };
+
+        const issueTypeToDisplay = getIssueTypeToDisplay();
 
         const disableNextOnFirstStep = (): boolean => {
           if (!values.category) return true;
@@ -347,6 +470,18 @@ const CreateGrievancePage = (): ReactElement => {
 
         return (
           <>
+            <FormikSelectedEntitiesSync
+              fetchedHousehold={
+                shouldFetchHousehold
+                  ? fetchedHousehold
+                  : values.selectedHousehold
+              }
+              fetchedIndividual={
+                shouldFetchIndividual
+                  ? fetchedIndividual
+                  : values.selectedIndividual
+              }
+            />
             <AutoSubmitFormOnEnter />
             <PageHeader
               title="New Ticket"
@@ -379,7 +514,9 @@ const CreateGrievancePage = (): ReactElement => {
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
+                          <Box
+                            sx={{ display: 'flex', flexDirection: 'column' }}
+                          >
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -396,14 +533,14 @@ const CreateGrievancePage = (): ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === GrievanceSteps.Verification && (
-                        <Verification values={values} />
+                        <Verification values={values} programSlug={dynamicEntityProgramSlug} />
                       )}
                       {activeStep === GrievanceSteps.Description && (
                         <>
                           <Description
                             values={values}
                             showIssueType={showIssueType}
-                            selectedIssueType={issueTypeToDisplay}
+                            issueTypeToDisplay={issueTypeToDisplay}
                             baseUrl={baseUrl}
                             choicesData={choicesData}
                             programsData={programsData}
@@ -414,12 +551,15 @@ const CreateGrievancePage = (): ReactElement => {
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
+                            programSlug={dynamicEntityProgramSlug}
                           />
                         </>
                       )}
                       {dataChangeErrors(errors)}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
+                      <Box
+                        sx={{ pt: 3, display: 'flex', flexDirection: 'row' }}
+                      >
+                        <Box sx={{ mr: 3 }}>
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/tickets/user-generated`}
@@ -427,7 +567,7 @@ const CreateGrievancePage = (): ReactElement => {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display="flex" ml="auto">
+                        <Box sx={{ display: 'flex', ml: 'auto' }}>
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}

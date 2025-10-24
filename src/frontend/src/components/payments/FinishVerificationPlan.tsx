@@ -13,37 +13,59 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { getPercentage } from '@utils/utils';
-import {
-  PaymentPlanQuery,
-  useFinishPaymentVerificationPlanMutation,
-} from '@generated/graphql';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProgramContext } from '../../programContext';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 export interface FinishVerificationPlanProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
+  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
   verificationPlan,
+  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate] = useFinishPaymentVerificationPlanMutation();
+  const { businessArea, programId: programSlug } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const finish = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: { paymentVerificationPlanId: verificationPlan.id },
-        refetchQueries: ['AllPaymentVerifications'],
-        awaitRefetchQueries: true,
+  const finishVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
       });
+    },
+  });
+
+  const finish = async(): Promise<void> => {
+    try {
+      await finishVerificationPlanMutation.mutateAsync();
       setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
     }
   };
 

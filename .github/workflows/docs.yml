@@ -3,7 +3,7 @@ name: "Documentation"
 on:
   push:
     branches:
-      - '**'
+    - develop
   schedule:
     - cron: '37 23 * * 2'
 

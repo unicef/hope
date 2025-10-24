@@ -1,134 +1,135 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class People(BaseComponents):
-    pageHeaderContainer = 'div[data-cy="page-header-container"]'
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    indFiltersSearch = 'div[data-cy="ind-filters-search"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    filtersDocumentType = 'div[data-cy="filters-document-type"]'
-    filtersDocumentNumber = 'div[data-cy="filters-document-number"]'
-    indFiltersAdmin1 = 'div[data-cy="ind-filters-admin1"]'
-    adminLevel1Input = 'div[data-cy="Admin Level 1-input"]'
-    indFiltersAdmin2 = 'div[data-cy="ind-filters-admin2"]'
-    adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
-    indFiltersGender = 'div[data-cy="ind-filters-gender"]'
-    indFiltersAgeFrom = 'div[data-cy="ind-filters-age-from"]'
-    indFiltersAgeTo = 'div[data-cy="ind-filters-age-to"]'
-    indFiltersFlags = 'div[data-cy="ind-filters-flags"]'
-    indFiltersOrderBy = 'div[data-cy="ind-filters-order-by"]'
-    indFiltersStatus = 'div[data-cy="ind-filters-status"]'
-    indFiltersRegDateFrom = 'div[data-cy="ind-filters-reg-date-from"]'
-    indFiltersRegDateTo = 'div[data-cy="ind-filters-reg-date-to"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    pageDetailsContainer = 'div[data-cy="page-details-container"]'
-    tableTitle = 'h6[data-cy="table-title"]'
-    sanctionListPossibleMatch = 'th[data-cy="sanction-list-possible-match"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    individualId = 'th[data-cy="individual-id"]'
-    individualName = 'th[data-cy="individual-name"]'
-    individualAge = 'th[data-cy="individual-age"]'
-    individualSex = 'th[data-cy="individual-sex"]'
-    individualLocation = 'th[data-cy="individual-location"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"]'
+    page_header_container = 'div[data-cy="page-header-container"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
+    ind_filters_search = 'div[data-cy="ind-filters-search"]'
+    select_filter = 'div[data-cy="select-filter"]'
+    filters_document_type = 'div[data-cy="filters-document-type"]'
+    filters_document_number = 'div[data-cy="filters-document-number"]'
+    ind_filters_admin1 = 'div[data-cy="ind-filters-admin1"]'
+    admin_level_1_input = 'div[data-cy="Admin Level 1-input"]'
+    ind_filters_admin2 = 'div[data-cy="ind-filters-admin2"]'
+    admin_level_2_input = 'div[data-cy="Admin Level 2-input"]'
+    ind_filters_gender = 'div[data-cy="ind-filters-gender"]'
+    ind_filters_age_from = 'div[data-cy="ind-filters-age-from"]'
+    ind_filters_age_to = 'div[data-cy="ind-filters-age-to"]'
+    ind_filters_flags = 'div[data-cy="ind-filters-flags"]'
+    ind_filters_order_by = 'div[data-cy="ind-filters-order-by"]'
+    ind_filters_status = 'div[data-cy="ind-filters-status"]'
+    ind_filters_reg_date_from = 'div[data-cy="ind-filters-reg-date-from"]'
+    ind_filters_reg_date_to = 'div[data-cy="ind-filters-reg-date-to"]'
+    button_filters_clear = 'button[data-cy="button-filters-clear"]'
+    button_filters_apply = 'button[data-cy="button-filters-apply"]'
+    page_details_container = 'div[data-cy="page-details-container"]'
+    table_title = 'h6[data-cy="table-title"]'
+    sanction_list_possible_match = 'th[data-cy="sanction-list-possible-match"]'
+    table_label = 'span[data-cy="table-label"]'
+    individual_id = 'th[data-cy="individual-id"]'
+    individual_name = 'th[data-cy="individual-name"]'
+    individual_age = 'th[data-cy="individual-age"]'
+    individual_sex = 'th[data-cy="individual-sex"]'
+    individual_location = 'th[data-cy="individual-location"]'
+    table_row = 'tr[data-cy="table-row"]'
+    table_pagination = 'div[data-cy="table-pagination"]'
+    individual_table_row = 'tr[data-cy="individual-table-row"]'
 
-    def getPageHeaderContainer(self) -> WebElement:
-        return self.wait_for(self.pageHeaderContainer)
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
 
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
+    def get_page_header_title(self) -> WebElement:
+        return self.wait_for(self.page_header_title)
 
-    def getIndFiltersSearch(self) -> WebElement:
-        return self.wait_for(self.indFiltersSearch)
+    def get_ind_filters_search(self) -> WebElement:
+        return self.wait_for(self.ind_filters_search)
 
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
+    def get_select_filter(self) -> WebElement:
+        return self.wait_for(self.select_filter)
 
-    def getFiltersDocumentType(self) -> WebElement:
-        return self.wait_for(self.filtersDocumentType)
+    def get_filters_document_type(self) -> WebElement:
+        return self.wait_for(self.filters_document_type)
 
-    def getFiltersDocumentNumber(self) -> WebElement:
-        return self.wait_for(self.filtersDocumentNumber)
+    def get_filters_document_number(self) -> WebElement:
+        return self.wait_for(self.filters_document_number)
 
-    def getIndFiltersAdmin1(self) -> WebElement:
-        return self.wait_for(self.indFiltersAdmin1)
+    def get_ind_filters_admin1(self) -> WebElement:
+        return self.wait_for(self.ind_filters_admin1)
 
-    def getAdminLevel1Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel1Input)
+    def get_admin_level_1_input(self) -> WebElement:
+        return self.wait_for(self.admin_level_1_input)
 
-    def getIndFiltersAdmin2(self) -> WebElement:
-        return self.wait_for(self.indFiltersAdmin2)
+    def get_ind_filters_admin2(self) -> WebElement:
+        return self.wait_for(self.ind_filters_admin2)
 
-    def getAdminLevel2Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel2Input)
+    def get_admin_level_2_input(self) -> WebElement:
+        return self.wait_for(self.admin_level_2_input)
 
-    def getIndFiltersGender(self) -> WebElement:
-        return self.wait_for(self.indFiltersGender)
+    def get_ind_filters_gender(self) -> WebElement:
+        return self.wait_for(self.ind_filters_gender)
 
-    def getIndFiltersAgeFrom(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeFrom)
+    def get_ind_filters_age_from(self) -> WebElement:
+        return self.wait_for(self.ind_filters_age_from)
 
-    def getIndFiltersAgeTo(self) -> WebElement:
-        return self.wait_for(self.indFiltersAgeTo)
+    def get_ind_filters_age_to(self) -> WebElement:
+        return self.wait_for(self.ind_filters_age_to)
 
-    def getIndFiltersFlags(self) -> WebElement:
-        return self.wait_for(self.indFiltersFlags)
+    def get_ind_filters_flags(self) -> WebElement:
+        return self.wait_for(self.ind_filters_flags)
 
-    def getIndFiltersOrderBy(self) -> WebElement:
-        return self.wait_for(self.indFiltersOrderBy)
+    def get_ind_filters_order_by(self) -> WebElement:
+        return self.wait_for(self.ind_filters_order_by)
 
-    def getIndFiltersStatus(self) -> WebElement:
-        return self.wait_for(self.indFiltersStatus)
+    def get_ind_filters_status(self) -> WebElement:
+        return self.wait_for(self.ind_filters_status)
 
-    def getIndFiltersRegDateFrom(self) -> WebElement:
-        return self.wait_for(self.indFiltersRegDateFrom)
+    def get_ind_filters_reg_date_from(self) -> WebElement:
+        return self.wait_for(self.ind_filters_reg_date_from)
 
-    def getIndFiltersRegDateTo(self) -> WebElement:
-        return self.wait_for(self.indFiltersRegDateTo)
+    def get_ind_filters_reg_date_to(self) -> WebElement:
+        return self.wait_for(self.ind_filters_reg_date_to)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_button_filters_clear(self) -> WebElement:
+        return self.wait_for(self.button_filters_clear)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_button_filters_apply(self) -> WebElement:
+        return self.wait_for(self.button_filters_apply)
 
-    def getPageDetailsContainer(self) -> WebElement:
-        return self.wait_for(self.pageDetailsContainer)
+    def get_page_details_container(self) -> WebElement:
+        return self.wait_for(self.page_details_container)
 
-    def getTableTitle(self) -> WebElement:
-        return self.wait_for(self.tableTitle)
+    def get_table_title(self) -> WebElement:
+        return self.wait_for(self.table_title)
 
-    def getSanctionListPossibleMatch(self) -> WebElement:
-        return self.wait_for(self.sanctionListPossibleMatch)
+    def get_sanction_list_possible_match(self) -> WebElement:
+        return self.wait_for(self.sanction_list_possible_match)
 
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+    def get_table_label(self) -> WebElement:
+        return self.wait_for(self.table_label)
 
-    def getIndividualId(self) -> WebElement:
-        return self.wait_for(self.individualId)
+    def get_individual_id(self) -> WebElement:
+        return self.wait_for(self.individual_id)
 
-    def getIndividualName(self) -> WebElement:
-        return self.wait_for(self.individualName)
+    def get_individual_name(self) -> WebElement:
+        return self.wait_for(self.individual_name)
 
-    def getIndividualAge(self) -> WebElement:
-        return self.wait_for(self.individualAge)
+    def get_individual_age(self) -> WebElement:
+        return self.wait_for(self.individual_age)
 
-    def getIndividualSex(self) -> WebElement:
-        return self.wait_for(self.individualSex)
+    def get_individual_sex(self) -> WebElement:
+        return self.wait_for(self.individual_sex)
 
-    def getIndividualLocation(self) -> WebElement:
-        return self.wait_for(self.individualLocation)
+    def get_individual_location(self) -> WebElement:
+        return self.wait_for(self.individual_location)
 
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def get_table_row(self) -> WebElement:
+        return self.wait_for(self.table_row)
 
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)
+    def get_table_pagination(self) -> WebElement:
+        return self.wait_for(self.table_pagination)
 
-    def getIndividualTableRow(self, number: int) -> WebElement:
-        self.wait_for(self.individualTableRow)
-        return self.get_elements(self.individualTableRow)[number]
+    def get_individual_table_row(self, number: int) -> WebElement:
+        self.wait_for(self.individual_table_row)
+        return self.get_elements(self.individual_table_row)[number]

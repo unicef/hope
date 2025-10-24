@@ -23,13 +23,13 @@ const BoxWithBorderBottom = styled.div`
 
 export interface VerificationProps {
   values;
+  programSlug?: string;
 }
 
-function Verification({ values }: VerificationProps): ReactElement {
+function Verification({ values, programSlug }: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   return (
     <BoxWithBorders>
       <>
@@ -45,7 +45,7 @@ function Verification({ values }: VerificationProps): ReactElement {
               {`${beneficiaryGroup?.groupLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
-              <HouseholdQuestionnaire values={values} />
+              <HouseholdQuestionnaire values={values} programSlug={programSlug} />
             </Box>
           </Box>
         )}

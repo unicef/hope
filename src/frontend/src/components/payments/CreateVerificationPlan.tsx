@@ -3,27 +3,26 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
   Typography,
+  Grid,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  ReactElement,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import {
-  useAllAdminAreasQuery,
-  useAllRapidProFlowsLazyQuery,
-  useCreatePaymentVerificationPlanMutation,
-  useSampleSizeLazyQuery,
-} from '@generated/graphql';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -32,7 +31,7 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { getPercentage } from '@utils/utils';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
@@ -40,6 +39,12 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
+import { AreaList } from '@restgenerated/models/AreaList';
+import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -65,134 +70,218 @@ const initialValues = {
   sexCheckbox: false,
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(
-  cashOrPaymentPlanId,
+// Helper function to prepare sample size request for REST API
+function prepareSampleSizeRequest(
+  selectedTab: number,
+  formValues: any,
+  cashOrPaymentPlanId: string,
+): MessageSampleSize {
+  const samplingType =
+    selectedTab === 0
+      ? SamplingTypeE86Enum.FULL_LIST
+      : SamplingTypeE86Enum.RANDOM;
+
+  const fullListArguments =
+    selectedTab === 0
+      ? {
+          excludedAdminAreas: formValues.excludedAdminAreasFull || [],
+        }
+      : undefined;
+
+  const randomSamplingArguments =
+    selectedTab === 1
+      ? {
+          confidenceInterval: formValues.confidenceInterval * 0.01,
+          marginOfError: formValues.marginOfError * 0.01,
+          excludedAdminAreas: formValues.adminCheckbox
+            ? formValues.excludedAdminAreasRandom || []
+            : [],
+          age: formValues.ageCheckbox
+            ? {
+                min: formValues.filterAgeMin || 0,
+                max: formValues.filterAgeMax || 999,
+              }
+            : null,
+          sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
+        }
+      : undefined;
+
+  return {
+    paymentPlan: cashOrPaymentPlanId,
+    samplingType,
+    fullListArguments,
+    randomSamplingArguments,
+  };
+}
+
+function prepareMutationData(
   selectedTab,
   values,
-  businessArea,
-) {
-  const variables = {
-    input: {
-      cashOrPaymentPlanId,
-      sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-      fullListArguments:
-        selectedTab === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      verificationChannel: values.verificationChannel,
-      rapidProArguments:
-        values.verificationChannel === 'RAPIDPRO'
-          ? {
-              flowId: values.rapidProFlow,
-            }
-          : null,
-      randomSamplingArguments:
-        selectedTab === 1
-          ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
-      businessAreaSlug: businessArea,
-    },
+): PaymentVerificationPlanCreate {
+  return {
+    sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
+    verificationChannel: values.verificationChannel,
+    fullListArguments:
+      selectedTab === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : null,
+    randomSamplingArguments:
+      selectedTab === 1
+        ? {
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
+        : null,
+    rapidProArguments:
+      values.verificationChannel === 'RAPIDPRO'
+        ? {
+            flowId: values.rapidProFlow,
+          }
+        : null,
   };
-  return variables;
 }
 
 export interface Props {
   cashOrPaymentPlanId: string;
   canCreatePaymentVerificationPlan: boolean;
-  version: number;
   isPaymentPlan: boolean;
 }
+
 export const CreateVerificationPlan = ({
   cashOrPaymentPlanId,
   canCreatePaymentVerificationPlan,
-  version,
   isPaymentPlan,
 }: Props): ReactElement => {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId: programSlug } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
-  const [formValues, setFormValues] = useState(initialValues);
+  const queryClient = useQueryClient();
 
-  const [loadRapidProFlows, { data: rapidProFlows }] =
-    useAllRapidProFlowsLazyQuery({
-      variables: {
-        businessAreaSlug: businessArea,
-      },
-      fetchPolicy: 'network-only',
-    });
+  const createVerificationPlanMutation = useMutation({
+    mutationFn: (data: PaymentVerificationPlanCreate) =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsCreateVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          requestBody: data,
+        },
+      ),
 
-  const { data } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'PaymentVerificationPlanDetails',
+          businessArea,
+          cashOrPaymentPlanId,
+          programSlug,
+        ],
+      });
     },
   });
 
-  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
-    variables: prepareVariables(
-      cashOrPaymentPlanId,
-      selectedTab,
-      formValues,
-      businessArea,
-    ),
-    fetchPolicy: 'network-only',
+  const [formValues, setFormValues] = useState(initialValues);
+
+  const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
+    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
+        businessAreaSlug: businessArea,
+        programSlug: programSlug,
+      }),
+    enabled: false,
   });
+
+  const rapidProFlows = rapidProFlowsData
+    ? { allRapidProFlows: rapidProFlowsData }
+    : null;
+
+  const loadRapidProFlows = refetchRapidProFlows;
+
+  const { data: adminAreasData } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryFn: async () => {
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
+      });
+    },
+    enabled: !!businessArea,
+  });
+
+  // Sample size state management
+  const [sampleSizesData, setSampleSizesData] = useState<any>(null);
+
+  const loadSampleSize = useCallback(async () => {
+    if (!businessArea || !programSlug) return;
+
+    try {
+      const requestBody = prepareSampleSizeRequest(
+        selectedTab,
+        formValues,
+        cashOrPaymentPlanId,
+      );
+
+      const result =
+        await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
+          businessAreaSlug: businessArea,
+          programSlug: programSlug,
+          requestBody,
+        });
+
+      setSampleSizesData({
+        sampleSize: {
+          sampleSize: result.sampleSize || 0,
+          paymentRecordCount: result.numberOfRecipients || 0,
+        },
+      });
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
+    }
+  }, [
+    businessArea,
+    programSlug,
+    selectedTab,
+    formValues,
+    cashOrPaymentPlanId,
+    showMessage,
+  ]);
 
   useEffect(() => {
     if (open) {
       loadSampleSize();
     }
-  }, [formValues, open, loadSampleSize]);
+  }, [open, loadSampleSize, selectedTab]);
 
   const submit = async (values): Promise<void> => {
     try {
-      const { errors } = await mutate({
-        variables: {
-          ...prepareVariables(
-            cashOrPaymentPlanId,
-            selectedTab,
-            values,
-            businessArea,
-          ),
-          version,
-        },
-        refetchQueries,
-      });
-      setOpen(false);
+      const requestData = prepareMutationData(selectedTab, values);
+      await createVerificationPlanMutation.mutateAsync(requestData);
 
-      if (errors) {
-        showMessage(t('Error while submitting'));
-        return;
-      }
+      setOpen(false);
       showMessage(t('New verification plan created.'));
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
     }
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.length
+    ? adminAreasData.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
 
@@ -298,7 +387,10 @@ export const CreateVerificationPlan = ({
                       aria-label="full width tabs example"
                     >
                       <Tab data-cy="tab-full-list" label={t('FULL LIST')} />
-                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
+                      <Tab
+                        data-cy="tab-random-sampling"
+                        label={t('RANDOM SAMPLING')}
+                      />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
@@ -342,9 +434,21 @@ export const CreateVerificationPlan = ({
                           style={{ flexDirection: 'row' }}
                           data-cy="checkbox-verification-channel"
                           choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                            {
+                              value: 'RAPIDPRO',
+                              name: 'RAPIDPRO',
+                              dataCy: 'radio-rapidpro',
+                            },
+                            {
+                              value: 'XLSX',
+                              name: 'XLSX',
+                              dataCy: 'radio-xlsx',
+                            },
+                            {
+                              value: 'MANUAL',
+                              name: 'MANUAL',
+                              dataCy: 'radio-manual',
+                            },
                           ]}
                           component={FormikRadioGroup}
                           alignItems="center"
@@ -356,7 +460,7 @@ export const CreateVerificationPlan = ({
                             style={{ width: '90%' }}
                             choices={
                               rapidProFlows?.allRapidProFlows?.map((flow) => ({
-                                value: flow.id,
+                                value: flow.uuid,
                                 name: flow.name,
                               })) || []
                             }
@@ -447,7 +551,7 @@ export const CreateVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid size={{ xs:5 }}>
+                            <Grid size={{ xs: 5 }}>
                               <Box mt={6}>
                                 <Field
                                   name="filterSex"
@@ -490,9 +594,17 @@ export const CreateVerificationPlan = ({
                         style={{ flexDirection: 'row' }}
                         alignItems="center"
                         choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                          {
+                            value: 'RAPIDPRO',
+                            name: 'RAPIDPRO',
+                            dataCy: 'radio-rapidpro',
+                          },
+                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                          {
+                            value: 'MANUAL',
+                            name: 'MANUAL',
+                            dataCy: 'radio-manual',
+                          },
                         ]}
                         component={FormikRadioGroup}
                       />
@@ -504,7 +616,7 @@ export const CreateVerificationPlan = ({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                  value: flow.id,
+                                  value: flow.uuid,
                                   name: flow.name,
                                 }))
                               : []
@@ -518,9 +630,14 @@ export const CreateVerificationPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button data-cy="button-cancel" onClick={() => setOpen(false)}>CANCEL</Button>
+                  <Button
+                    data-cy="button-cancel"
+                    onClick={() => setOpen(false)}
+                  >
+                    CANCEL
+                  </Button>
                   <LoadingButton
-                    loading={loading}
+                    loading={createVerificationPlanMutation.isPending}
                     type="submit"
                     color="primary"
                     variant="contained"

@@ -1,11 +1,11 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { CommunicationMessageNode } from '@generated/graphql';
+import type { MessageList } from '@restgenerated/models/MessageList';
 
-export const headCells: HeadCell<CommunicationMessageNode>[] = [
+export const headCells: HeadCell<MessageList>[] = [
   {
     disablePadding: false,
     label: 'Message ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
   },
   {

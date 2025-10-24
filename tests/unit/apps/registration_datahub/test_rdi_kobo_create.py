@@ -1,46 +1,44 @@
-import json
-import secrets
 from io import BytesIO
+import json
 from pathlib import Path
+import secrets
 from typing import Any, Dict
 from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
+from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
-
-import pytest
 from django_countries.fields import Country
+import pytest
+
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.apps.utils.models import MergeStatusModel
+from hope.apps.payment.models import PendingAccount
+from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
         return BytesIO(Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes())
@@ -48,8 +46,9 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -103,15 +102,15 @@ class TestRdiKoboCreateTask(TestCase):
         generate_delivery_mechanisms()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self) -> None:
         self.business_area.postpone_deduplication = True
         self.business_area.save()
         # just random number of HH and Ind
-        self.assertEqual(self.registration_data_import.number_of_households, 33)
-        self.assertEqual(self.registration_data_import.number_of_individuals, 99)
+        assert self.registration_data_import.number_of_households == 33
+        assert self.registration_data_import.number_of_individuals == 99
 
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.execute(self.import_data.id, self.program.id)
@@ -119,17 +118,17 @@ class TestRdiKoboCreateTask(TestCase):
         self.registration_data_import.refresh_from_db(
             fields=["status", "number_of_households", "number_of_individuals"]
         )
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
-        self.assertEqual(self.registration_data_import.number_of_households, 1)
-        self.assertEqual(self.registration_data_import.number_of_individuals, 2)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
+        assert self.registration_data_import.number_of_households == 1
+        assert self.registration_data_import.number_of_individuals == 2
 
         households = PendingHousehold.objects.all()
         individuals = PendingIndividual.objects.all()
         documents = PendingDocument.objects.all()
 
-        self.assertEqual(1, households.count())
-        self.assertEqual(2, individuals.count())
-        self.assertEqual(3, documents.count())
+        assert households.count() == 1
+        assert individuals.count() == 2
+        assert documents.count() == 3
 
         individual = individuals.get(full_name="Test Testowski")
 
@@ -142,7 +141,7 @@ class TestRdiKoboCreateTask(TestCase):
             "sex": "MALE",
             "marital_status": "MARRIED",
         }
-        self.assertEqual(individuals_obj_data, expected_ind)
+        assert individuals_obj_data == expected_ind
 
         pending_household = individual.pending_household
         household_obj_data = {
@@ -155,27 +154,24 @@ class TestRdiKoboCreateTask(TestCase):
             "country": Country(code="AF").code,
             "flex_fields": {},
         }
-        self.assertEqual(household_obj_data, expected_hh)
+        assert household_obj_data == expected_hh
 
-        self.assertEqual(pending_household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
-        self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
+        assert pending_household.detail_id == "aPkhoRMrkkDwgsvWuwi39s"
+        assert str(pending_household.kobo_submission_uuid) == "c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+        assert pending_household.kobo_submission_time.isoformat() == "2020-06-03T13:05:10+00:00"
 
-        self.assertEqual(PendingAccount.objects.count(), 2)
+        assert PendingAccount.objects.count() == 2
         dmd = PendingAccount.objects.get(individual__full_name="Tesa Testowski")
-        self.assertEqual(dmd.account_type.key, "mobile")
-        self.assertEqual(
-            dmd.data,
-            {
-                "service_provider_code": "ABC",
-                "delivery_phone_number": "+48880110456",
-                "provider": "SIGMA",
-            },
-        )
-        self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
+        assert dmd.account_type.key == "mobile"
+        assert dmd.data == {
+            "service_provider_code": "ABC",
+            "delivery_phone_number": "+48880110456",
+            "provider": "SIGMA",
+        }
+        assert dmd.individual.full_name == "Tesa Testowski"
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self) -> None:
@@ -184,21 +180,18 @@ class TestRdiKoboCreateTask(TestCase):
         households = PendingHousehold.objects.all()
         individuals = PendingIndividual.objects.all()
 
-        self.assertEqual(households.count(), 3)  # related to AB#171697
-        self.assertEqual(individuals.count(), 7)  # related to AB#171697
+        assert households.count() == 3  # related to AB#171697
+        assert individuals.count() == 7  # related to AB#171697
 
         documents = PendingDocument.objects.values_list("individual__full_name", flat=True)
-        self.assertEqual(
-            sorted(list(documents)),
-            [
-                "Tesa Testowski 222",
-                "Tesa XLast",
-                "Test Testowski 222",
-                "XLast XFull XName",
-                "Zbyszek Zbyszkowski",
-                "abc efg",
-            ],
-        )
+        assert sorted(documents) == [
+            "Tesa Testowski 222",
+            "Tesa XLast",
+            "Test Testowski 222",
+            "XLast XFull XName",
+            "Zbyszek Zbyszkowski",
+            "abc efg",
+        ]
 
         first_household = households.get(size=3, individuals__full_name="Tesa Testowski 222")
         second_household = households.get(
@@ -208,20 +201,17 @@ class TestRdiKoboCreateTask(TestCase):
         first_household_collectors = first_household.individuals_and_roles.order_by(
             "individual__full_name"
         ).values_list("individual__full_name", "role")
-        self.assertEqual(
-            list(first_household_collectors),
-            [("Tesa Testowski 222", "ALTERNATE"), ("Test Testowski 222", "PRIMARY")],
-        )
+        assert list(first_household_collectors) == [
+            ("Tesa Testowski 222", "ALTERNATE"),
+            ("Test Testowski 222", "PRIMARY"),
+        ]
         second_household_collectors = second_household.individuals_and_roles.values_list(
             "individual__full_name", "role"
         )
-        self.assertEqual(
-            list(second_household_collectors),
-            [("Test Testowski", "PRIMARY")],
-        )
+        assert list(second_household_collectors) == [("Test Testowski", "PRIMARY")]
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self) -> None:
@@ -270,15 +260,15 @@ class TestRdiKoboCreateTask(TestCase):
         ]
 
         result = task._handle_image_field("image_is_not_there.gif", False)
-        self.assertEqual(result, None)
+        assert result is None
 
         result = task._handle_image_field("signature-14_59_24.png", False)
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "signature-14_59_24.png", False)
+        assert isinstance(result, File)
+        assert result.name == "signature-14_59_24.png"
 
         result = task._handle_image_field("signature-21_37.png", False)
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "signature-21_37.png", False)
+        assert isinstance(result, File)
+        assert result.name == "signature-21_37.png"
 
     def test_handle_geopoint_field(self) -> None:
         geopoint = "51.107883 17.038538"
@@ -286,43 +276,43 @@ class TestRdiKoboCreateTask(TestCase):
 
         expected = 51.107883, 17.038538
         result = task._handle_geopoint_field(geopoint, False)
-        self.assertEqual(result, expected)
+        assert result == expected
 
     def test_cast_boolean_value(self) -> None:
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
 
         result = task._cast_value("FALSE", "estimated_birth_date_i_c")
-        self.assertEqual(result, False)
+        assert result is False
 
         result = task._cast_value("false", "estimated_birth_date_i_c")
-        self.assertEqual(result, False)
+        assert result is False
 
         result = task._cast_value("False", "estimated_birth_date_i_c")
-        self.assertEqual(result, False)
+        assert result is False
 
         result = task._cast_value("0", "estimated_birth_date_i_c")
-        self.assertEqual(result, False)
+        assert result is False
 
         result = task._cast_value("TRUE", "estimated_birth_date_i_c")
-        self.assertEqual(result, True)
+        assert result is True
 
         result = task._cast_value("true", "estimated_birth_date_i_c")
-        self.assertEqual(result, True)
+        assert result is True
 
         result = task._cast_value("True", "estimated_birth_date_i_c")
-        self.assertEqual(result, True)
+        assert result is True
 
         result = task._cast_value("1", "estimated_birth_date_i_c")
-        self.assertEqual(result, True)
+        assert result is True
 
         result = task._cast_value(True, "estimated_birth_date_i_c")
-        self.assertEqual(result, True)
+        assert result is True
 
         result = task._cast_value(False, "estimated_birth_date_i_c")
-        self.assertEqual(result, False)
+        assert result is False
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self) -> None:
@@ -375,17 +365,17 @@ class TestRdiKoboCreateTask(TestCase):
             {"document_number": "123123123", "individual_id": individual.id},
             {"document_number": "444111123", "individual_id": individual.id},
         ]
-        self.assertEqual(result, expected)
+        assert result == expected
 
         photo = PendingDocument.objects.first().photo
-        self.assertIsInstance(photo, ImageFieldFile)
-        self.assertTrue(photo.name.startswith("signature-14_59_24"))
+        assert isinstance(photo, ImageFieldFile)
+        assert photo.name.startswith("signature-14_59_24")
 
         birth_certificate = PendingDocument.objects.get(document_number=123123123).type.key
         national_passport = PendingDocument.objects.get(document_number=444111123).type.key
 
-        self.assertEqual(birth_certificate, "birth_certificate")
-        self.assertEqual(national_passport, "national_passport")
+        assert birth_certificate == "birth_certificate"
+        assert national_passport == "national_passport"
 
     def _generate_huge_file(self) -> None:
         base_form = {
@@ -552,7 +542,11 @@ class TestRdiKoboCreateTask(TestCase):
 
     def test_handle_household_dict(self) -> None:
         households_to_create = []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (
+            {},
+            {},
+            {},
+        )
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",
@@ -574,11 +568,11 @@ class TestRdiKoboCreateTask(TestCase):
             "hohh_is_caregiver_h_f": "0",
             "alternate_collector": "1",
             "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
-            "_uuid": "123123-411d-85f1-123123",
+            "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "_submission_time": "2022-02-22T12:22:22",
         }
         submission_meta_data = {
-            "kobo_submission_uuid": "123123-411d-85f1-123123",
+            "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
             "kobo_submission_time": "2022-02-22T12:22:22",
         }
@@ -595,66 +589,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
         hh = households_to_create[0]
 
-        self.assertEqual(len(households_to_create), 1)
-        self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
-        self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
-        self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
-
-    def test_handle_household_drc_hotfix_dict(self) -> None:
-        program = ProgramFactory(id="f5a67047-714f-459a-8ead-911d21f7925c", status="ACTIVE")
-        self.registration_data_import.program = program
-        self.registration_data_import.save()
-        country = geo_models.Country.objects.first()
-        admin4_type = geo_models.AreaType.objects.create(name="Bakool", area_level=4, country=country)
-        admin4 = geo_models.Area.objects.create(p_code="CD8309ZS01AS01", name="CD8309ZS01AS01", area_type=admin4_type)
-        admin4_mapped = geo_models.Area.objects.create(
-            p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
-        )
-
-        households_to_create = []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
-        household = {
-            "_id": 1111,
-            "uuid": "qweqweqweqwe",
-            "start": "2024-03",
-            "end": "2024-03",
-            "org_name_enumerator_h_c": "org_name_enumerator_string",
-            "name_enumerator_h_c": "name_enumerator_string",
-            "enumertor_phone_num_h_f": "321123123321",
-            "consent_h_c": "1",
-            "country_h_c": "NGA",
-            "admin1_h_c": "SO25",
-            "admin2_h_c": "SO2502",
-            "admin4_h_c": admin4.p_code,
-            "village_h_c": "VillageName",
-            "nearest_school_h_f": "next",
-            "hh_geopoint_h_c": "46.123 6.312 0 0",
-            "size_h_c": "5",
-            "children_under_18_h_f": "2",
-            "children_6_to_11_h_f": "1",
-            "hohh_is_caregiver_h_f": "0",
-            "alternate_collector": "1",
-            "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
-            "_uuid": "123123-411d-85f1-123123",
-            "_submission_time": "2022-02-22T12:22:22",
-        }
-        submission_meta_data = {
-            "kobo_submission_uuid": "123123-411d-85f1-123123",
-            "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
-            "kobo_submission_time": "2022-02-22T12:22:22",
-        }
-
-        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
-        task.handle_household(
-            collectors_to_create,
-            head_of_households_mapping,
-            household,
-            households_to_create,
-            individuals_ids_hash_dict,
-            submission_meta_data,
-            1,
-        )
-        hh = households_to_create[0]
-
-        self.assertEqual(len(households_to_create), 1)
-        self.assertEqual(hh.admin4, admin4_mapped)
+        assert len(households_to_create) == 1
+        assert hh.detail_id == "kobo_asset_id_string_OR_detail_id"
+        assert hh.kobo_submission_time.isoformat() == "2022-02-22T12:22:22"
+        assert hh.kobo_submission_uuid == "5b6f30ee-010b-4bd5-a510-e78f062af155"

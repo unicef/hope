@@ -6,16 +6,17 @@ export type ProgramCycleList = {
     readonly id: string;
     title?: string | null;
     status: string;
-    start_date: string;
-    end_date: string;
-    program_start_date: string;
-    program_end_date: string;
-    readonly created_at: string;
-    readonly total_entitled_quantity_usd: number;
-    readonly total_undelivered_quantity_usd: number;
-    readonly total_delivered_quantity_usd: number;
-    readonly frequency_of_payments: string;
-    readonly created_by: string;
-    readonly admin_url: string | null;
+    startDate: string;
+    endDate: string;
+    programStartDate: string;
+    programEndDate: string;
+    readonly createdAt: string;
+    readonly totalEntitledQuantityUsd: number;
+    readonly totalUndeliveredQuantityUsd: number;
+    readonly totalDeliveredQuantityUsd: number;
+    readonly frequencyOfPayments: string;
+    readonly createdBy: string;
+    readonly adminUrl: string | null;
+    readonly canRemoveCycle: boolean;
 };
 

@@ -7,7 +7,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LogEntryNode } from '@generated/graphql';
+import { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
@@ -47,7 +47,7 @@ const Toolbar = styled('div')(() => ({
 }));
 
 interface ActivityLogTableProps {
-  logEntries: LogEntryNode[];
+  logEntries: ActivityLogEntry[];
   totalCount: number;
   rowsPerPage: number;
   page: number;

@@ -1,31 +1,35 @@
 import base64
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 from typing import Any
 from unittest.mock import patch
 
 from django.core.management import call_command
+from django.test import testcases
 from django.test.utils import override_settings
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from rest_framework import status
-from rest_framework.reverse import reverse
-from unit.api.base import HOPEApiTestCase
-
-from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
+from hope.api.endpoints.rdi.lax import IndividualSerializer
+from hope.api.models import Grant
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.models import (
+    DISABLED,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    NOT_DISABLED,
     PendingDocument,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hope.apps.payment.models import AccountType
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import RegistrationDataImport
+from unit.api.base import HOPEApiTestCase
 
 
 class CreateLaxIndividualsTests(HOPEApiTestCase):
@@ -95,18 +99,18 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [individual_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
-        self.assertIn("IND001", response.data["individual_id_mapping"])
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+        assert "IND001" in response.data["individual_id_mapping"]
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        self.assertEqual(individual.full_name, "John Doe")
-        self.assertEqual(individual.given_name, "John")
-        self.assertEqual(individual.family_name, "Doe")
-        self.assertEqual(individual.observed_disability, ["NONE"])
-        self.assertEqual(individual.marital_status, "SINGLE")
+        assert individual.full_name == "John Doe"
+        assert individual.given_name == "John"
+        assert individual.family_name == "Doe"
+        assert individual.observed_disability == ["NONE"]
+        assert individual.marital_status == "SINGLE"
 
     def test_create_multiple_individuals_success(self) -> None:
         individuals_data = [
@@ -134,11 +138,11 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, individuals_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 2)
-        self.assertEqual(response.data["accepted"], 2)
-        self.assertEqual(response.data["errors"], 0)
-        self.assertEqual(len(response.data["individual_id_mapping"]), 2)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 2
+        assert response.data["errors"] == 0
+        assert len(response.data["individual_id_mapping"]) == 2
 
     def test_create_individual_with_validation_errors(self) -> None:
         individual_data = {
@@ -154,11 +158,11 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [individual_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 0)
-        self.assertEqual(response.data["errors"], 1)
-        self.assertEqual(len(response.data["individual_id_mapping"]), 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 0
+        assert response.data["errors"] == 1
+        assert len(response.data["individual_id_mapping"]) == 0
 
     def test_create_individuals_mixed_success_and_errors(self) -> None:
         individuals_data = [
@@ -186,19 +190,19 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, individuals_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 2)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 1)
-        self.assertEqual(len(response.data["individual_id_mapping"]), 1)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 2
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 1
+        assert len(response.data["individual_id_mapping"]) == 1
 
     def test_empty_request_data(self) -> None:
         response = self.client.post(self.url, [], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 0)
-        self.assertEqual(response.data["accepted"], 0)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 0
+        assert response.data["accepted"] == 0
+        assert response.data["errors"] == 0
 
     def test_rdi_not_found(self) -> None:
         url = reverse(
@@ -219,7 +223,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(url, [individual_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, str(response.json()))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
 
     def test_rdi_not_in_loading_status(self) -> None:
         self.rdi.status = RegistrationDataImport.IN_REVIEW
@@ -238,7 +242,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [individual_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, str(response.json()))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
 
     def test_create_individual_with_photo(self) -> None:
         individual_data = {
@@ -255,15 +259,15 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         response = self.client.post(self.url, [individual_data], format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        self.assertIsNotNone(individual.photo)
-        self.assertTrue(individual.photo.name.startswith("photo"))
-        self.assertTrue(individual.photo.name.endswith(".png"))
+        assert individual.photo is not None
+        assert individual.photo.name.startswith("photo")
+        assert individual.photo.name.endswith(".png")
 
     def test_create_individual_with_document_image(self) -> None:
         individual_data = {
@@ -288,16 +292,16 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         }
 
         response = self.client.post(self.url, [individual_data], format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        self.assertEqual(response.data["processed"], 1)
-        self.assertEqual(response.data["accepted"], 1)
-        self.assertEqual(response.data["errors"], 0)
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         document = PendingDocument.objects.get(individual=individual)
-        self.assertIsNotNone(document.photo)
-        self.assertTrue(document.photo.name.startswith("photo"))
-        self.assertTrue(document.photo.name.endswith(".png"))
+        assert document.photo is not None
+        assert document.photo.name.startswith("photo")
+        assert document.photo.name.endswith(".png")
 
     def test_file_cleanup_on_failure(self) -> None:
         individual_data = {
@@ -326,20 +330,39 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 def fail_after_files_exist(*args: list[Any]) -> None:
                     pre_cleanup_files = []
                     for root, _, files in os.walk(media_root):
-                        for f in files:
-                            pre_cleanup_files.append(os.path.join(root, f))
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
                     assert len(pre_cleanup_files) > 0
                     raise RuntimeError("forced failure for cleanup test")
 
                 with patch(
-                    "hct_mis_api.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                    "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
                     side_effect=fail_after_files_exist,
                 ):
-                    with self.assertRaises(RuntimeError):
+                    with pytest.raises(RuntimeError):
                         self.client.post(self.url, [individual_data], format="json")
 
                 leftover_files = []
                 for root, _, files in os.walk(media_root):
-                    for f in files:
-                        leftover_files.append(os.path.join(root, f))
-                self.assertEqual(leftover_files, [])
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []
+
+
+class TestIndividualSerializer(testcases.TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.common_data = {
+            "birth_date": "2000-01-01",
+            "full_name": "John Doe",
+            "sex": "MALE",
+            "individual_id": "IND001",
+        }
+
+    def test_individual_serializer_empty_disability(self):
+        serializer = IndividualSerializer(data={**self.common_data, "disability": ""})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == NOT_DISABLED
+
+    def test_individual_serializer_disability(self):
+        serializer = IndividualSerializer(data={**self.common_data, "disability": "disabled"})
+        serializer.is_valid()
+        assert serializer.validated_data.get("disability") == DISABLED
