@@ -18,7 +18,7 @@ from hope.models.role_assignment import RoleAssignment
 
 
 class Partner(LimitBusinessAreaModelMixin, MPTTModel):
-    name = CICharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, db_collation="und-ci-det")
     parent = TreeForeignKey(
         "self",
         blank=True,

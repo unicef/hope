@@ -20,3 +20,11 @@ class FinancialInstitution(TimeStampedModel):
 
     class Meta:
         app_label = "payment"
+
+    @classmethod
+    def get_rdi_template_choices(cls) -> dict:
+        return {
+            "account__ACCOUNT_TYPE__financial_institution": {
+                "choices": [{"value": fi.pk, "label": {"English(EN)": fi.name}} for fi in cls.objects.all()]
+            }
+        }

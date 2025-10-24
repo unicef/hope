@@ -91,6 +91,14 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
                 condition=Q(partner__isnull=False, program__isnull=True),
             ),
         ]
+        indexes = [
+            # Optimize user role assignment queries with expiry_date filtering
+            models.Index(fields=["user", "expiry_date"], name="idx_ra_user_exp"),
+            # Optimize partner + business_area queries with expiry_date filtering
+            models.Index(fields=["partner", "business_area", "expiry_date"], name="idx_ra_partner_ba_exp"),
+            # Optimize business_area queries with expiry_date filtering
+            models.Index(fields=["business_area", "expiry_date"], name="idx_ra_ba_exp"),
+        ]
 
     def clean(self) -> None:
         super().clean()

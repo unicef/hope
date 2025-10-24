@@ -1,10 +1,11 @@
-from functools import lru_cache
+from functools import lru_cache, cached_property
 import logging
 from typing import Any
 from uuid import UUID
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField, Q, QuerySet
@@ -92,7 +93,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: list[Permissions]
     ) -> list[str]:
-        """Return list of program ids the user (or user's partner) has permissions for in the given BA."""
+        """Return list of program ids that the user (or user's partner) has permissions in selected business area."""
         from hope.models.program import Program
 
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
@@ -158,7 +159,36 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         return permissions_set
 
-    @property
+    @cached_property
+    def all_permissions_in_business_areas(self) -> dict[str, set[str]]:
+        """Return a dictionary mapping business area IDs to sets of permissions for the user.
+
+        Permissions are retrieved from RoleAssignments of the user and their partner, for all business areas
+        associated with the user.
+        """
+        content_types_dict = {
+            str(pk): app_label for pk, app_label in ContentType.objects.values_list("id", "app_label")
+        }
+        role_assignments = (
+            RoleAssignment.objects.filter(Q(partner__user=self) | Q(user=self))
+            .select_related("role", "group")
+            .prefetch_related("group__permissions")
+            .exclude(expiry_date__lt=timezone.now())
+        )
+        permissions_per_business_area = defaultdict(set)
+        for role_assignment in role_assignments:
+            if role_assignment.role.permissions is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    role_assignment.role.permissions
+                )
+            if role_assignment.group is not None:
+                permissions_per_business_area[str(role_assignment.business_area_id)].update(
+                    f"{content_types_dict[str(perm.content_type_id)]}.{perm.codename}"
+                    for perm in role_assignment.group.permissions.all()
+                )
+        return permissions_per_business_area
+
+    @cached_property
     def business_areas(self) -> QuerySet[BusinessArea]:
         role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
             expiry_date__lt=timezone.now()
@@ -233,3 +263,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
         )
+        indexes = [
+            # Optimize JOIN queries between User and Partner in permissions methods
+            models.Index(fields=["partner", "id"], name="idx_user_partner_id"),
+        ]
