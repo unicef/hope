@@ -26,6 +26,7 @@ pytestmark = pytest.mark.django_db
 @mock.patch(
     "hope.apps.streaming_handler.hope_live.make_event",
 )
+@mock.patch("hope.apps.streaming_handler.hope_live.config", autospec=True)
 class TestStreamingHandler(BaseTestCase):
     databases = ("default",)
 
@@ -37,9 +38,11 @@ class TestStreamingHandler(BaseTestCase):
 
     def test_rdi_merged(
         self,
+        mock_config: Any,
         make_event_mock: Any,
         manager_mock: Any,
     ) -> None:
+        mock_config.STREAMING_HANDLER_ENABLED = True
         instance = RegistrationDataImportFactory()
         rdi_merged.send(sender=instance.__class__, instance=instance)
 
@@ -55,9 +58,11 @@ class TestStreamingHandler(BaseTestCase):
 
     def test_payment_reconciled(
         self,
+        mock_config: Any,
         make_event_mock: Any,
         manager_mock: Any,
     ) -> None:
+        mock_config.STREAMING_HANDLER_ENABLED = True
         instance = PaymentFactory(program=ProgramFactory())
         country = Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -80,9 +85,11 @@ class TestStreamingHandler(BaseTestCase):
 
     def test_payment_plan_approved(
         self,
+        mock_config: Any,
         make_event_mock: Any,
         manager_mock: Any,
     ) -> None:
+        mock_config.STREAMING_HANDLER_ENABLED = True
         instance = PaymentPlanFactory()
         payment_plan_approved_signal.send(sender=instance.__class__, instance=instance)
 
@@ -97,9 +104,11 @@ class TestStreamingHandler(BaseTestCase):
 
     def test_program_opened(
         self,
+        mock_config: Any,
         make_event_mock: Any,
         manager_mock: Any,
     ) -> None:
+        mock_config.STREAMING_HANDLER_ENABLED = True
         instance = ProgramFactory()
         program_opened_signal.send(sender=instance.__class__, instance=instance)
 
@@ -113,9 +122,11 @@ class TestStreamingHandler(BaseTestCase):
 
     def test_program_closed(
         self,
+        mock_config: Any,
         make_event_mock: Any,
         manager_mock: Any,
     ) -> None:
+        mock_config.STREAMING_HANDLER_ENABLED = True
         instance = ProgramFactory()
         program_closed_signal.send(sender=instance.__class__, instance=instance)
 
