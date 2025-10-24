@@ -1,20 +1,20 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { PaymentNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { formatCurrencyWithSymbol, paymentStatusToColor } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { MouseEvent, ReactElement } from 'react';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface LookUpPaymentRecordTableRowProps {
-  paymentRecord: PaymentNode;
+  paymentRecord: PaymentList;
   openInNewTab: boolean;
-  selected: Array<PaymentNode>;
+  selected: Array<PaymentList>;
   checkboxClickHandler: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
-    selectedPaymentRecord: PaymentNode,
+    selectedPaymentRecord: PaymentList,
   ) => void;
 }
 
@@ -65,7 +65,7 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align="left">{paymentRecord.parent.program.name}</TableCell>
+      <TableCell align="left">{paymentRecord.programName}</TableCell>
       <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

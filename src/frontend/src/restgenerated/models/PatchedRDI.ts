@@ -5,5 +5,6 @@
 export type PatchedRDI = {
     name?: string;
     program?: string;
+    importedByEmail?: string;
 };
 

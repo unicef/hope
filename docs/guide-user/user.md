@@ -1,5 +1,5 @@
 ---
-title: Programme Users 
+title: Programme Users
 tags:
     - Partner
     - Programme
@@ -11,10 +11,10 @@ The Program Users module shows the HOPE users in the Programme and which roles a
 
 ## How to view Programme Users
 
-1. Select Programme users from the main menu. A list of the of all users in the Programme will be displayed include a search box with filters for the users. 
+1. Select Programme users from the main menu. A list of the of all users in the Programme will be displayed include a search box with filters for the users.
     ![Image](_screenshots/grievance/1.png)
 
-1. Click on the username to view details of roles assigned to a user. 
+1. Click on the username to view details of roles assigned to a user.
     ![Image](_screenshots/grievance/2.png)
 
 ## User Roles
@@ -36,7 +36,7 @@ The below user roles are presented for information purposes and group permission
 #### 1.5 Approver
 "Users with this role can merge an imported population into HOPE, create, edit, and activate programmes and a target populations. Can activate and discard a cash plan and payment verification plan. This role can be assigned to: HCT Programme staff."
 
-### 2. Payment Module Roles					
+### 2. Payment Module Roles
 
 #### 2.1 Payment Planner
 "Users with this role can create a Payment Plan (choose target population, dates the payment is expected to cover and dispersion dates), run the entitlement formula, choose the FSP and send a Payment Plan to approval. This role can be assigned to: HCT Programme Staff"
@@ -56,7 +56,7 @@ The below user roles are presented for information purposes and group permission
 #### 2.6 Payment Data Officer
 "Users with this role can export and import the payment data in order to generate the file needed by the FSP. This role can be assigned to: Finance Officer/Assistant."
 
-### 3. Grievance Roles					
+### 3. Grievance Roles
 
 #### 3.1 Grievance Collector
 "Users with this role can view, create, and add notes to grievance tickets (except for sensitive grievances). This role can be assigned to: Call Centre Agent (Partners)"
@@ -83,5 +83,3 @@ The below user roles are presented for information purposes and group permission
 
 #### 4.2 Accountability Manager
 "Has full access on both surveys and communication. Can create new surveys and communication messages, view list of created surveys and communication messages, review details of created surveys and communication messages. This role can be assigned to: Senior HCT Programme Staff (Accountability)."
-
-

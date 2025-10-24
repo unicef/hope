@@ -1,14 +1,14 @@
-import { FormHelperText, Grid2 as Grid } from '@mui/material';
+import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export interface ExistingDocumentationFieldArrayProps {
   values;
   setFieldValue;
   errors;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }
 
 export function ExistingDocumentationFieldArray({
@@ -24,7 +24,7 @@ export function ExistingDocumentationFieldArray({
         render={(arrayHelpers) => (
           <>
             {ticket.documentation?.map((item, index) => (
-              <Grid size={{ xs: 12 }} key={item.id}>
+              <Grid size={12} key={item.id}>
                 <EditDocumentationRow
                   setFieldValue={setFieldValue}
                   values={values}

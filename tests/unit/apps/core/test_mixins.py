@@ -5,9 +5,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests import Response, Session
 
-from hct_mis_api.apps.core.api.mixins import BaseAPI
+from hope.apps.core.api.mixins import BaseAPI
 
 
+@pytest.mark.django_db
 class TestMixinBaseAPI:
     @pytest.fixture
     def api_class(self) -> Type[BaseAPI]:
@@ -19,12 +20,15 @@ class TestMixinBaseAPI:
 
     @pytest.fixture
     def api_instance(self, api_class: Type[BaseAPI]) -> BaseAPI:
-        with patch.dict(os.environ, {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"}):
+        with patch.dict(
+            os.environ,
+            {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"},
+        ):
             return api_class()
 
     def test_init_missing_credentials(self, api_class: Type[BaseAPI]) -> None:
         with patch.dict(os.environ, {"TEST_API_KEY": "", "TEST_API_URL": ""}):
-            with pytest.raises(BaseAPI.APIMissingCredentialsException) as exc:
+            with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
                 api_class()
             assert "Missing TestAPI Key/URL" in str(exc.value)
 
@@ -44,7 +48,7 @@ class TestMixinBaseAPI:
         mock_response.ok = False
         mock_response.content = b"Error"
         mock_response.url = "http://test-hope.com"
-        with pytest.raises(BaseAPI.APIException) as exc:
+        with pytest.raises(BaseAPI.APIError) as exc:
             api_instance.validate_response(mock_response)
         assert "Invalid response" in str(exc.value)
 

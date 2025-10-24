@@ -2,13 +2,13 @@ import { ReactElement, useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;
-  followUps: PaymentPlanQuery['paymentPlan']['followUps'];
+  followUps: PaymentPlanDetail['followUps'];
 }
 
 export function RelatedFollowUpPaymentPlans({
@@ -23,16 +23,14 @@ export function RelatedFollowUpPaymentPlans({
   };
 
   let followUpLinks = null;
-  if (followUps?.edges?.length > 0) {
-    const truncatedFollowUps = showAll
-      ? followUps.edges
-      : followUps.edges.slice(0, 5);
+  if (followUps?.length > 0) {
+    const truncatedFollowUps = showAll ? followUps : followUps.slice(0, 5);
     followUpLinks = truncatedFollowUps.map((followUp) => (
       <BlackLink
-        key={followUp?.node?.id}
-        to={`/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
+        key={followUp?.id}
+        to={`/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`}
       >
-        {followUp?.node?.unicefId}
+        {followUp?.unicefId}
         <br />
       </BlackLink>
     ));
@@ -42,7 +40,7 @@ export function RelatedFollowUpPaymentPlans({
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
       <Box display="flex" flexDirection="column">
         {followUpLinks || '-'}
-        {followUps?.edges?.length > 5 && (
+        {followUps?.length > 5 && (
           <Button
             variant="outlined"
             color="primary"

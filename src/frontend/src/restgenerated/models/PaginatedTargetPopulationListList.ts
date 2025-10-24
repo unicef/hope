@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { TargetPopulationList } from './TargetPopulationList';
 export type PaginatedTargetPopulationListList = {
-    count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<TargetPopulationList>;

@@ -1,18 +1,18 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
   values;
   baseUrl: string;
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: TargetPopulationDetail;
   loading: boolean;
 }
 

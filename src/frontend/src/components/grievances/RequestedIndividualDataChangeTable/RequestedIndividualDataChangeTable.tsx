@@ -1,9 +1,5 @@
 import { ReactElement } from 'react';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import {
-  GrievanceTicketQuery,
-  useAllAddIndividualFieldsQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
@@ -14,10 +10,13 @@ import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { AccountToEditTable } from './AccountToEditTable';
 import { AccountTable } from './AccountTable';
-
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface RequestedIndividualDataChangeTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   values;
   isEdit;
@@ -29,55 +28,97 @@ export function RequestedIndividualDataChangeTable({
   values,
   isEdit,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
-  const { data, loading } = useAllAddIndividualFieldsQuery();
+  const { businessAreaSlug } = useBaseUrl();
+
+  const { data: addIndividualFieldsData, isLoading: loading } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: ['individualChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restChoicesCountriesList(),
+  });
+
+  const { data: individual, isLoading: individualLoading } = useQuery({
+    queryKey: [
+      'individualChoices',
+      businessAreaSlug,
+      ticket.individual.id,
+      ticket.individual.programSlug,
+    ],
+    queryFn: () => {
+      if (!ticket.individual.id) return null;
+      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        programSlug: ticket.individual.programSlug,
+        id: ticket.individual.id,
+      });
+    },
+  });
+
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   const {
     documents,
     identities,
-    previous_documents: previousDocuments,
-    documents_to_remove: documentsToRemove,
-    documents_to_edit: documentsToEdit,
-    previous_identities: previousIdentities,
-    identities_to_remove: identitiesToRemove,
-    identities_to_edit: identitiesToEdit,
-    accounts: accounts,
-    accounts_to_edit: accountsToEdit,
-    flex_fields: flexFields,
+    previousDocuments,
+    documentsToRemove,
+    documentsToEdit,
+    previousIdentities,
+    identitiesToRemove,
+    identitiesToEdit,
+    accounts,
+    accountsToEdit,
+    flexFields,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
   const entriesFlexFields = flexFields && Object.entries(flexFields);
-  const fieldsDict = useArrayToDict(
-    data?.allAddIndividualsFieldsAttributes,
-    'name',
-    '*',
-  );
-  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
+  //@ts-ignore
+  const fieldsDict = useArrayToDict(addIndividualFieldsData, 'name', '*');
+  const countriesDict = useArrayToDict(countriesData, 'name', 'value');
   const documentTypeDict = useArrayToDict(
-    data?.documentTypeChoices,
+    individualChoicesData?.documentTypeChoices,
     'value',
     'name',
   );
   const identityTypeDict = useArrayToDict(
-    data?.identityTypeChoices,
+    individualChoicesData?.identityTypeChoices,
     'value',
     'name',
   );
   const accountFinancialInstitutionsDict = useArrayToDict(
-    data?.accountFinancialInstitutionChoices,
+    individualChoicesData?.accountFinancialInstitutionChoices,
     'value',
     'name',
   );
 
   if (
     loading ||
+    individualChoicesLoading ||
+    countriesLoading ||
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||
     !identityTypeDict ||
-    !accountFinancialInstitutionsDict
+    !accountFinancialInstitutionsDict ||
+    individualLoading
   ) {
     return <LoadingComponent />;
   }
@@ -94,6 +135,7 @@ export function RequestedIndividualDataChangeTable({
           entries={entries}
           entriesFlexFields={entriesFlexFields}
           setFieldValue={setFieldValue}
+          individual={individual}
         />
       ) : null}
       {documents?.length ? (
@@ -108,19 +150,21 @@ export function RequestedIndividualDataChangeTable({
         />
       ) : null}
       {documentsToEdit?.length
-        ? documentsToEdit.map((document, index) => (
-            <DocumentsToEditTable
-              key={document.previous_value.number}
-              values={values}
-              isEdit={isEdit}
-              ticket={ticket}
-              setFieldValue={setFieldValue}
-              documentTypeDict={documentTypeDict}
-              countriesDict={countriesDict}
-              index={index}
-              document={document}
-            />
-          ))
+        ? documentsToEdit.map((document, index) => {
+            return (
+              <DocumentsToEditTable
+                key={document.previousValue.number}
+                values={values}
+                isEdit={isEdit}
+                ticket={ticket}
+                setFieldValue={setFieldValue}
+                documentTypeDict={documentTypeDict}
+                countriesDict={countriesDict}
+                index={index}
+                document={document}
+              />
+            );
+          })
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -138,7 +182,7 @@ export function RequestedIndividualDataChangeTable({
       {identitiesToEdit?.length
         ? identitiesToEdit.map((identity, index) => (
             <IdentitiesToEditTable
-              key={identity.previous_value.number}
+              key={identity.previousValue.number}
               values={values}
               isEdit={isEdit}
               ticket={ticket}
@@ -149,18 +193,22 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
-      {accounts?.length ? accounts.map((account, index) => (
-        <AccountTable
-          key={account.id}
-          values={values}
-          isEdit={isEdit}
-          ticket={ticket}
-          setFieldValue={setFieldValue}
-          index={index}
-          account={account}
-          accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
-        />
-      )) : null}
+      {accounts?.length
+        ? accounts.map((account, index) => (
+            <AccountTable
+              key={account.id}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              account={account}
+              accountFinancialInstitutionsDict={
+                accountFinancialInstitutionsDict
+              }
+            />
+          ))
+        : null}
       {accountsToEdit?.length
         ? accountsToEdit.map((account, index) => (
             <AccountToEditTable
@@ -171,7 +219,9 @@ export function RequestedIndividualDataChangeTable({
               setFieldValue={setFieldValue}
               index={index}
               account={account}
-              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
+              accountFinancialInstitutionsDict={
+                accountFinancialInstitutionsDict
+              }
             />
           ))
         : null}

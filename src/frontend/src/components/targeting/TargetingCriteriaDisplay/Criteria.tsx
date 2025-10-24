@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   Table,
   TableBody,
@@ -18,10 +18,6 @@ import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import {
-  TargetingCriteriaRuleObjectType,
-  useAvailableFspsForDeliveryMechanismsQuery,
-} from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useEffect, useState } from 'react';
@@ -30,6 +26,11 @@ import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FspChoices } from '@restgenerated/models/FspChoices';
+import { fieldNameToLabel } from '@utils/utils';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -96,12 +97,29 @@ const PduDataBox = styled(Box)`
   margin: ${({ theme }) => theme.spacing(3)};
 `;
 
+function getFieldLabel(field) {
+  if (field.fieldAttribute?.labelEn) {
+    if (typeof field.fieldAttribute.labelEn === 'string')
+      return field.fieldAttribute.labelEn;
+    if (
+      field.fieldAttribute.labelEn &&
+      typeof field.fieldAttribute.labelEn.englishEn === 'string'
+    )
+      return field.fieldAttribute.labelEn.englishEn;
+  }
+  const labelEn = field.labelEn;
+  if (typeof labelEn === 'string') return labelEn;
+  if (labelEn && typeof labelEn.englishEn === 'string')
+    return labelEn.englishEn;
+  return fieldNameToLabel(field.fieldName);
+}
+
 const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
   const extractChoiceLabel = (choiceField, argument) => {
-    let choices = choicesDict?.[choiceField.fieldName];
-    if (!choices) {
-      choices = choiceField?.fieldAttribute?.choices;
-    }
+    const choices =
+      choicesDict?.[choiceField.fieldName] ||
+      choiceField?.choices ||
+      choiceField?.fieldAttribute?.choices;
     return choices?.length
       ? choices.find((each) => each.value === argument)?.labelEn
       : argument;
@@ -115,7 +133,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
@@ -123,7 +141,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           <span>
             {displayValueOrEmpty(field.arguments?.[0])} -{' '}
             {displayValueOrEmpty(field.arguments?.[1])}
@@ -134,7 +152,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -170,7 +188,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
           <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
@@ -180,7 +198,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'CONTAINS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
             ? field.arguments?.map((argument, index) => (
                 <Fragment key={index}>
@@ -210,7 +228,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}:{' '}
+          {getFieldLabel(field)}:{' '}
           <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
@@ -220,21 +238,21 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
   return (
     <>
       <div data-cy={dataCy}>{fieldElement}</div>
-      {field.fieldAttribute?.type === 'PDU' &&
-        (field.pduData || field.fieldAttribute.pduData) && (
+      {(field.type === 'PDU' || field.fieldAttribute?.type === 'PDU') &&
+        (field.pduData || field.fieldAttribute?.pduData) && (
           <PduDataBox data-cy="round-number-round-name-display">
             Round {field.roundNumber}
-            {(field.pduData || field.fieldAttribute.pduData).roundsNames[
-              field.roundNumber - 1
-            ] && (
+            {(field.pduData?.roundsNames?.[field.roundNumber - 1] ||
+              field.fieldAttribute?.pduData?.roundsNames?.[
+                field.roundNumber - 1
+              ]) && (
               <>
                 {' '}
                 (
-                {
-                  (field.pduData || field.fieldAttribute.pduData).roundsNames[
+                {field.pduData?.roundsNames?.[field.roundNumber - 1] ||
+                  field.fieldAttribute?.pduData?.roundsNames?.[
                     field.roundNumber - 1
-                  ]
-                }
+                  ]}
                 )
               </>
             )}
@@ -245,7 +263,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 };
 
 interface CriteriaProps {
-  rules: [TargetingCriteriaRuleObjectType];
+  rules: [any];
   individualsFiltersBlocks;
   collectorsFiltersBlocks;
   removeFunction?;
@@ -281,12 +299,23 @@ export function Criteria({
   criteriaIndex,
   criteria,
 }: CriteriaProps): ReactElement {
+  const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const [deliveryMechanismToDisplay, setDeliveryMechanismToDisplay] =
     useState('');
   const [fspToDisplay, setFspToDisplay] = useState('');
-  const { data: availableFspsForDeliveryMechanismData } =
-    useAvailableFspsForDeliveryMechanismsQuery();
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
@@ -300,13 +329,12 @@ export function Criteria({
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
 
   useEffect(() => {
-    const mappedDeliveryMechanisms =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
-        (el) => ({
-          name: el.deliveryMechanism.name,
-          value: el.deliveryMechanism.code,
-        }),
-      );
+    const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData?.map(
+      (el) => ({
+        name: el.deliveryMechanism.name,
+        value: el.deliveryMechanism.code,
+      }),
+    );
 
     const deliveryMechanismName =
       deliveryMechanism?.name ||
@@ -315,7 +343,7 @@ export function Criteria({
       )?.name;
 
     const mappedFsps =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
+      availableFspsForDeliveryMechanismData
         ?.find(
           (el) =>
             el.deliveryMechanism.code === deliveryMechanism ||
@@ -389,13 +417,13 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {deliveryMechanismToDisplay && criteriaIndex === 0 && (
         <Grid container>
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <LabelizedField
               label={t('Delivery Mechanism')}
               value={deliveryMechanismToDisplay}
             />
           </Grid>
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <LabelizedField label={t('FSP')} value={fspToDisplay} />
           </Grid>
         </Grid>

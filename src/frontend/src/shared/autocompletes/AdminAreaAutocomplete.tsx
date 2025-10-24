@@ -1,18 +1,16 @@
-import { get } from 'lodash';
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAllAdminAreasLazyQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
-  getAutocompleteOptionLabel,
   handleAutocompleteChange,
-  handleAutocompleteClose,
-  handleOptionSelected,
 } from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
+import { AreaList } from '@restgenerated/models/AreaList';
 
 export function AdminAreaAutocomplete({
   disabled,
@@ -39,48 +37,46 @@ export function AdminAreaAutocomplete({
 }): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [inputValue, onInputTextChange] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const navigate = useNavigate();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
 
-  const [loadData, { data, loading }] = useAllAdminAreasLazyQuery({
-    variables: {
-      first: 20,
-      name: debouncedInputText,
-      businessArea,
-      level,
-    },
-    fetchPolicy: 'cache-and-network',
+  const [queryVariables, setQueryVariables] = useState({
+    limit: 20,
+    search: debouncedInputText || undefined,
   });
 
-  const isMounted = useRef(true);
-
-  const loadDataCallback = useCallback(() => {
-    const asyncLoadData = async () => {
-      if (isMounted.current && businessArea) {
-        try {
-          await loadData({
-            variables: { businessArea, name: debouncedInputText },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
-
-    void asyncLoadData();
-  }, [loadData, businessArea, debouncedInputText]);
-
   useEffect(() => {
-    if (open) {
-      loadDataCallback();
+    setQueryVariables((prev) => ({
+      ...prev,
+      search: debouncedInputText || undefined,
+    }));
+  }, [debouncedInputText]);
+
+  const {
+    data: areasData,
+    isLoading: loading,
+    refetch,
+  } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', queryVariables, businessArea, level],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: level,
+        name: queryVariables.search,
+      }),
+    enabled: open && !!businessArea,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+
+  const loadData = useCallback(() => {
+    if (businessArea) {
+      refetch();
     }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [open, debouncedInputText, loadDataCallback]);
+  }, [businessArea, refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -92,7 +88,26 @@ export function AdminAreaAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = get(data, 'allAdminAreas.edges', []);
+  const allEdges = areasData || [];
+
+  const handleOptionSelected = (option: any, selectedValue: any) => {
+    if (typeof selectedValue === 'string') {
+      return option?.id === selectedValue;
+    }
+    return option?.id === selectedValue?.id;
+  };
+
+  const handleOptionLabel = (option: any) => {
+    if (typeof option === 'string') {
+      const matching = allEdges.find((a) => a.id === option);
+      return matching ? matching.name : option;
+    }
+    return option?.name || '';
+  };
+
+  const onInputTextChange = (v: string) => {
+    setInputValue(v);
+  };
 
   return (
     <BaseAutocomplete
@@ -107,24 +122,18 @@ export function AdminAreaAutocomplete({
         if (!selectedValue) {
           onInputTextChange('');
         }
-        handleAutocompleteChange(
-          name,
-          selectedValue?.node?.id,
-          handleFilterChange,
-        );
+        handleAutocompleteChange(name, selectedValue?.id, handleFilterChange);
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
-      data={data}
+      handleClose={(_, reason) => {
+        setOpen(false);
+        if (reason === 'select-option') return;
+        onInputTextChange('');
+      }}
+      handleOptionSelected={handleOptionSelected}
+      handleOptionLabel={handleOptionLabel}
+      data={areasData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

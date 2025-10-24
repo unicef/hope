@@ -1,3 +1,12 @@
+import { Bold } from '@components/core/Bold';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { BlackLink } from '@core/BlackLink';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import {
   Box,
   Button,
@@ -11,27 +20,20 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
+import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { choicesToDict, grievanceTicketStatusToColor } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { Dialog } from '@containers/dialogs/Dialog';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  HouseholdNode,
-  useAllGrievanceTicketQuery,
-} from '@generated/graphql';
-import { BlackLink } from '@core/BlackLink';
-import { ContentLink } from '@core/ContentLink';
-import { LabelizedField } from '@core/LabelizedField';
-import { StatusBox } from '@core/StatusBox';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
-import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -48,10 +50,10 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedGrievancesModalProps {
-  household: HouseholdNode;
+  household: HouseholdDetail | HouseholdSimple;
   businessArea: string;
   baseUrl: string;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  grievancesChoices: GrievanceChoices;
 }
 
 export function LinkedGrievancesModal({
@@ -66,10 +68,33 @@ export function LinkedGrievancesModal({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: grievances } = useAllGrievanceTicketQuery({
-    variables: { businessArea, household: household.unicefId },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: 'network-only',
+  const { data: grievances } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: [
+      'linkedGrievanceTickets',
+      businessArea,
+      selectedProgram?.id,
+      household.unicefId,
+    ],
+    queryFn: () => {
+      const queryParams = {
+        household: household.unicefId,
+        limit: 1000, // Get all tickets for this household
+      };
+
+      if (selectedProgram?.id && selectedProgram.id !== 'all') {
+        return RestService.restBusinessAreasProgramsGrievanceTicketsList(
+          createApiParams(
+            {
+              businessAreaSlug: businessArea,
+              programSlug: selectedProgram.slug,
+            },
+            queryParams,
+            { withPagination: true },
+          ),
+        );
+      }
+    },
+    refetchOnWindowFocus: false,
   });
 
   const statusChoices: {
@@ -106,22 +131,22 @@ export function LinkedGrievancesModal({
     );
   };
 
-  const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
+  const allGrievances = grievances ? grievances.results : [];
 
   const renderGrievances = (): Array<ReactElement> =>
     allGrievances.length
       ? allGrievances.map((el) => {
           const grievanceDetailsPath = getGrievanceDetailsPath(
-            el.node.id,
-            el.node.category,
+            el.id,
+            el.category,
             baseUrl,
           );
           return (
-            <span key={el.node.id}>
+            <span key={el.id}>
               <ContentLink href={grievanceDetailsPath}>
-                {`${el.node.unicefId} - ${
-                  categoryChoices[el.node.category]
-                } - ${statusChoices[el.node.status]}`}
+                {`${el.unicefId} - ${
+                  categoryChoices[el.category]
+                } - ${statusChoices[el.status]}`}
               </ContentLink>{' '}
               <br />
             </span>
@@ -156,7 +181,7 @@ export function LinkedGrievancesModal({
   };
 
   const renderRows = (): ReactElement => (
-    <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
+    <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket))}</>
   );
 
   return (

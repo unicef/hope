@@ -1,10 +1,12 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
-from django.test import TestCase
-
-import pytest
 from constance.test import override_config
+from django.conf import settings
+from django.core.management import call_command
+from django.test import TestCase
+import pytest
+from strategy_field.utils import fqn
+
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -12,28 +14,25 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from strategy_field.utils import fqn
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Individual,
-)
-from hct_mis_api.apps.sanction_list.models import SanctionList
-from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
+from hope.apps.sanction_list.strategies.un import UNSanctionList
+from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
-from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+
+if TYPE_CHECKING:
+    from hope.apps.sanction_list.models import SanctionList
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@pytest.fixture()
+@pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
     from test_utils.factories.sanction_list import SanctionListFactory
 
@@ -43,9 +42,6 @@ def sanction_list(db: Any) -> "SanctionList":
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @pytest.mark.elasticsearch
 class TestSanctionListPreMerge(TestCase):
-    databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
     @classmethod
@@ -67,6 +63,7 @@ class TestSanctionListPreMerge(TestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
+        call_command("loadcountries")
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -171,18 +168,15 @@ class TestSanctionListPreMerge(TestCase):
         ]
 
         result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
-        self.assertEqual(result, expected)
+        assert result == expected
 
     def test_create_system_flag_tickets(self) -> None:
         check_against_sanction_list_pre_merge(program_id=self.program.id)
-        self.assertEqual(
-            GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(),
-            1,
-        )
+        assert GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count() == 1
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.programs.count(), 1)
-            self.assertEqual(grievance_ticket.programs.first(), self.program)
+            assert grievance_ticket.programs.count() == 1
+            assert grievance_ticket.programs.first() == self.program
 
         self.household.refresh_from_db()
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.household_unicef_id, self.household.unicef_id)
+            assert grievance_ticket.household_unicef_id == self.household.unicef_id

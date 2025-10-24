@@ -1,17 +1,18 @@
-import { Button, DialogContent, DialogTitle } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action } from '@generated/graphql';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
-import { ReactElement } from 'react';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockTargetPopulationDialogProps {
   open: boolean;
@@ -26,13 +27,42 @@ export const LockTargetPopulationDialog = ({
 }: LockTargetPopulationDialogProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
-
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
-    usePaymentPlanAction(Action.TpLock, targetPopulationId, () =>
-      showMessage(t('Payment Plan has been locked.')),
-    );
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: lock, isPending: loadingLock } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      id,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      id: string;
+    }) =>
+      RestService.restBusinessAreasProgramsTargetPopulationsLockRetrieve({
+        businessAreaSlug,
+        programSlug,
+        id,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulationId,
+          programId,
+        ],
+      });
+      showMessage(t('Payment Plan has been locked.'));
+    },
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
   return (
     <Dialog
       open={open}
@@ -64,13 +94,19 @@ export const LockTargetPopulationDialog = ({
               variant="contained"
               loading={loadingLock}
               onClick={() => {
-                lock().then(() => {
-                  setOpen(false);
-                  showMessage(t('Target Population Locked'));
-                  navigate(
-                    `/${baseUrl}/target-population/${targetPopulationId}`,
-                  );
-                });
+                lock({
+                  businessAreaSlug: businessArea,
+                  programSlug: programId,
+                  id: targetPopulationId,
+                })
+                  .then(() => {
+                    setOpen(false);
+                    showMessage(t('Target Population Locked'));
+                    navigate(
+                      `/${baseUrl}/target-population/${targetPopulationId}`,
+                    );
+                  })
+                  .catch((e) => showMessage(e.message));
               }}
               data-cy="button-target-population-modal-lock"
             >
