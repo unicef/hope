@@ -1,13 +1,13 @@
-import { Box, Button, Grid2 as Grid, IconButton } from '@mui/material';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -20,7 +20,7 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditDocumentationRowProps {
   setFieldValue;
   values;
-  document: GrievanceTicketQuery['grievanceTicket']['documentation'][number];
+  document: GrievanceTicketDetail['documentation'][number];
   arrayHelpers;
   index;
 }
@@ -38,7 +38,7 @@ export function EditDocumentationRow({
   const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
-    <Grid container spacing={3} size={{ xs: 12 }} key={document.id}>
+    <Grid container size={12} spacing={3} key={document.id}>
       <DocumentationField
         index={index}
         key={`${index}-documentation-file`}
@@ -47,7 +47,7 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Grid size={{ xs: 1 }} />
+      <Grid size={1} />
       <Grid>
         <Button
           onClick={() => {
@@ -60,25 +60,25 @@ export function EditDocumentationRow({
       </Grid>
     </Grid>
   ) : (
-    <Grid container size={{ xs: 12 }} key={document.id}>
-      <Grid size={{ xs: 3 }}>
+    <Grid container key={document.id}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Name')} value={document.name} />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('File Type')} value={document.contentType} />
         </DisabledDiv>
       </Grid>
       {document.contentType.includes('image') ? (
-        <Grid size={{ xs: 1 }}>
+        <Grid size={1}>
           <PhotoModal showRotate={false} src={document.filePath} />
         </Grid>
       ) : (
-        <Grid size={{ xs: 1 }} />
+        <Grid size={1} />
       )}
-      <Grid size={{ xs: 1 }}>
+      <Grid size={1}>
         {!removed ? (
           <Box ml={2} display="flex" align-items="center">
             <IconButton
@@ -94,18 +94,18 @@ export function EditDocumentationRow({
             >
               <Edit />
             </IconButton>
-            !isEditTicket && (
-            <IconButton
-              onClick={() => {
-                setFieldValue(
-                  `documentationToDelete[${documentsToRemove.length}]`,
-                  document.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-            )
+            {!isEdited && (
+              <IconButton
+                onClick={() => {
+                  setFieldValue(
+                    `documentationToDelete[${documentsToRemove.length}]`,
+                    document.id,
+                  );
+                }}
+              >
+                <Delete />
+              </IconButton>
+            )}
           </Box>
         ) : (
           <Box display="flex" alignItems="center" height={48} color="red">

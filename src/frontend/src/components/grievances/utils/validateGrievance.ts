@@ -1,5 +1,4 @@
 import camelCase from 'lodash/camelCase';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -9,10 +8,10 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validate(
   values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
+  addIndividualFieldsData: Array<any> | null,
   individualFieldsDict,
   householdFieldsDict,
   beneficiaryGroup,
@@ -55,7 +54,12 @@ export function validate(
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
-            const { required } = householdFieldsDict[el.fieldName];
+            const fieldDef = householdFieldsDict[el.fieldName];
+            if (!fieldDef) {
+              // Optionally add a specific error for missing field definition
+              return;
+            }
+            const { required } = fieldDef;
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
@@ -180,17 +184,19 @@ export function validate(
   ) {
     const individualDataErrors = {};
     const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
+    if (addIndividualFieldsData) {
+      for (const field of addIndividualFieldsData) {
+        const fieldName = camelCase(field.name);
+        if (
+          field.required &&
+          (individualData[fieldName] === null ||
+            individualData[fieldName] === undefined)
+        ) {
+          individualDataErrors[fieldName] = 'Field Required';
+        }
+        if (Object.keys(individualDataErrors).length > 0) {
+          errors.individualData = individualDataErrors;
+        }
       }
     }
   }
@@ -218,10 +224,10 @@ export function validate(
   return errors;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validateUsingSteps(
   values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
+  addIndividualFieldsData: Array<any> | null,
   individualFieldsDict,
   householdFieldsDict,
   activeStep,
@@ -268,6 +274,7 @@ export function validateUsingSteps(
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName &&
+        !values.roles?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
@@ -278,7 +285,12 @@ export function validateUsingSteps(
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
-            const { required } = householdFieldsDict[el.fieldName];
+            const fieldDef = householdFieldsDict[el.fieldName];
+            if (!fieldDef) {
+              // Optionally add a specific error for missing field definition
+              return;
+            }
+            const { required } = fieldDef;
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
@@ -391,17 +403,18 @@ export function validateUsingSteps(
               errors.individualDataUpdateFieldsAccounts =
                 'Account Number is required';
             }
-            if (!acc.name) {
+            if (!acc.accountType) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Type is required';
             }
-            if (!acc.financial_institution) {
+            if (acc.name == 'bank' && !acc.financialInstitution) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Financial Institution is required';
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'New Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'New Account fields need to have both key/value';
               }
             });
           });
@@ -414,13 +427,14 @@ export function validateUsingSteps(
               errors.individualDataUpdateAccountsToEdit =
                 'Account Number is required';
             }
-            if (!acc.financial_institution) {
+            if (acc.name == 'bank' && !acc.financialInstitution) {
               errors.individualDataUpdateAccountsToEdit =
                 'Account Financial Institution is required';
             }
             acc.dynamicFields?.forEach((field) => {
               if (!field.key || !field.value) {
-                errors.individualDataUpdateFieldsAccounts = 'Edited Account fields need to have both key/value';
+                errors.individualDataUpdateFieldsAccounts =
+                  'Edited Account fields need to have both key/value';
               }
             });
           });
@@ -436,17 +450,19 @@ export function validateUsingSteps(
     const individualDataErrors = {};
     const individualData = values.individualData || {};
 
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
+    if (addIndividualFieldsData) {
+      for (const field of addIndividualFieldsData) {
+        const fieldName = camelCase(field.name);
+        if (
+          field.required &&
+          (individualData[fieldName] === null ||
+            individualData[fieldName] === undefined)
+        ) {
+          individualDataErrors[fieldName] = 'Field Required';
+        }
+        if (Object.keys(individualDataErrors).length > 0) {
+          errors.individualData = individualDataErrors;
+        }
       }
     }
 

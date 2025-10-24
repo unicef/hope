@@ -1,24 +1,23 @@
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
-import { LoadingComponent } from '@components/core/LoadingComponent';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState, useRef } from 'react';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
 
-export function CommunicationPage(): ReactElement {
+export const CommunicationPage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
@@ -38,10 +37,12 @@ export function CommunicationPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
-  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissionInModule(
@@ -50,7 +51,6 @@ export function CommunicationPage(): ReactElement {
     )
   )
     return <PermissionDenied />;
-  if (!choicesData) return null;
 
   return (
     <>
@@ -72,17 +72,22 @@ export function CommunicationPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(f) => {
+          setAppliedFilter(f);
+          setShouldScroll(true);
+        }}
       />
-      <CommunicationTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissionInModule(
-          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
-          permissions,
-        )}
-      />
+      <div ref={tableRef}>
+        <CommunicationTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissionInModule(
+            PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            permissions,
+          )}
+        />
+      </div>
     </>
   );
-}
+};
 
 export default withErrorBoundary(CommunicationPage, 'CommunicationPage');

@@ -45,12 +45,12 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
 
   const columns = [
     {
-      field: 'unicef_id',
+      field: 'unicefId',
       headerName: t('Payment Plan ID'),
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programSlug}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
           newTab={true}
         >
           {params.value}
@@ -59,21 +59,33 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
     },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
-      field: 'last_approval_process_date',
+      field: 'totalEntitledQuantityUsd',
+      headerName: t('Total Entitled Quantity (USD)'),
+      width: 200,
+      renderCell: (params) => <>{params.value || '-'}</>,
+    },
+    {
+      field: 'lastApprovalProcessDate',
       headerName: t('Released on'),
       width: 200,
       renderCell: (params) => <UniversalMoment>{params.value}</UniversalMoment>,
     },
     {
-      field: 'last_approval_process_by',
+      field: 'lastApprovalProcessBy',
       headerName: t('Released by'),
       width: 200,
+    },
+    {
+      field: 'hasPaymentsReconciliationOverdue',
+      headerName: t('Payments Reconciliation Overdue'),
+      width: 100,
+      renderCell: (params) => <>{params.value ? <span style={{ color: 'red', fontWeight: 600 }}>YES</span> : ''}</>,
     },
   ];
 
   const filteredRows = filterRows(
     releasedData?.results || [],
-    'last_approval_process_date',
+    'lastApprovalProcessDate',
     searchText,
     columns,
   );
@@ -88,12 +100,14 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       size="small"
       onChange={(e) => setSearchText(e.target.value)}
       data-cy="search-released"
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon />
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        },
       }}
     />
   );

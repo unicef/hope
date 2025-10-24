@@ -15,7 +15,64 @@ import {
   Skeleton,
   TablePagination,
 } from '@mui/material';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
+import IconButton from '@mui/material/IconButton';
+import FirstPageIcon from '@mui/icons-material/FirstPage';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import LastPageIcon from '@mui/icons-material/LastPage';
+
+function TablePaginationActions(props) {
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <MuiBox sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        <FirstPageIcon />
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        <KeyboardArrowLeft />
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        <KeyboardArrowRight />
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        <LastPageIcon />
+      </IconButton>
+    </MuiBox>
+  );
+}
 import { ReactElement, ChangeEvent, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -43,6 +100,7 @@ const StyledTableRow = styled(MuiTableRow)`
 
 const StyledTableCell = styled(MuiTableCell)`
   col-span: ${(props) => props.colSpan};
+
   && {
     white-space: nowrap;
     overflow: auto;
@@ -92,6 +150,7 @@ const Icon = styled(FindInPageIcon)`
 `;
 
 interface TableRestComponentProps<T extends { [key: string]: any }> {
+  customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   data: T[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
@@ -111,6 +170,8 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event: ChangeEvent<HTMLInputElement>, rows: T[]) => void;
   numSelected?: number;
+  hidePagination?: boolean;
+  noEmptyMessage?: boolean;
 }
 
 export function TableRestComponent<T>({
@@ -133,11 +194,15 @@ export function TableRestComponent<T>({
   isOnPaper = true,
   actions = [],
   numSelected = 0,
+  hidePagination = false,
+  customHeadRenderer,
+  noEmptyMessage = false,
 }: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
-  const emptyRows =
+  let emptyRows =
     rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage);
+  if (isNaN(emptyRows) || emptyRows < 0) emptyRows = 0;
 
   let body;
 
@@ -150,34 +215,39 @@ export function TableRestComponent<T>({
       </StyledTableRow>
     ));
   } else if (!data.length) {
-    body = (
-      <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
-        <StyledTableCell colSpan={headCells.length}>
-          <EmptyMessage>
-            <IconContainer>
-              <Icon fontSize="inherit" />
-            </IconContainer>
-            <MuiBox mt={2}>{t('No results')}</MuiBox>
-            <SmallerText mt={2}>
-              {t(
-                'Try adjusting your search or your filters to find what you are looking for.',
-              )}
-            </SmallerText>
-          </EmptyMessage>
-        </StyledTableCell>
-      </StyledTableRow>
-    );
+    if (noEmptyMessage) {
+      body = (
+        <StyledTableRow
+          data-cy="table-row"
+          style={{ height: 70 * emptyRows || 70 }}
+        >
+          <StyledTableCell colSpan={headCells.length} />
+        </StyledTableRow>
+      );
+    } else {
+      body = (
+        <StyledTableRow
+          data-cy="table-row"
+          style={{ height: 70 * emptyRows || 70 }}
+        >
+          <StyledTableCell colSpan={headCells.length}>
+            <EmptyMessage>
+              <IconContainer>
+                <Icon fontSize="inherit" />
+              </IconContainer>
+              <MuiBox mt={2}>{t('No results')}</MuiBox>
+              <SmallerText mt={2}>
+                {t(
+                  'Try adjusting your search or your filters to find what you are looking for.',
+                )}
+              </SmallerText>
+            </EmptyMessage>
+          </StyledTableCell>
+        </StyledTableRow>
+      );
+    }
   } else {
-    body = (
-      <>
-        {data.map((row) => renderRow(row))}
-        {emptyRows > 0 && (
-          <StyledTableRow style={{ height: 70 * emptyRows }}>
-            <StyledTableCell colSpan={headCells.length} />
-          </StyledTableRow>
-        )}
-      </>
-    );
+    body = <>{data.map((row) => renderRow(row))}</>;
   }
 
   const table = (
@@ -189,31 +259,51 @@ export function TableRestComponent<T>({
         </StyledBox>
 
         <StyledTable>
-          <EnhancedTableHead<T>
-            order={order}
-            headCells={headCells}
-            orderBy={orderBy}
-            onRequestSort={handleRequestSort}
-            rowCount={data.length}
-            allowSort={allowSort}
-            onSelectAllClick={onSelectAllClick}
-            data={data}
-            numSelected={numSelected}
-          />
+          {customHeadRenderer ? (
+            typeof customHeadRenderer === 'function' ? (
+              customHeadRenderer({
+                order,
+                headCells,
+                orderBy,
+                onRequestSort: handleRequestSort,
+                rowCount: data.length,
+                allowSort,
+                onSelectAllClick,
+                data,
+                numSelected,
+              })
+            ) : (
+              customHeadRenderer
+            )
+          ) : (
+            <EnhancedTableHead<T>
+              order={order}
+              headCells={headCells}
+              orderBy={orderBy}
+              onRequestSort={handleRequestSort}
+              rowCount={data.length}
+              allowSort={allowSort}
+              onSelectAllClick={onSelectAllClick}
+              data={data}
+              numSelected={numSelected}
+            />
+          )}
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>
-      <TablePagination
-        rowsPerPageOptions={rowsPerPageOptions}
-        component="div"
-        count={itemsCount}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePageProp}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        ActionsComponent={TablePaginationActions}
-        data-cy="table-pagination"
-      />
+      {!hidePagination && typeof itemsCount === 'number' && itemsCount >= 0 && (
+        <TablePagination
+          rowsPerPageOptions={rowsPerPageOptions}
+          component="div"
+          count={itemsCount}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePageProp}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          ActionsComponent={TablePaginationActions}
+          data-cy="table-pagination"
+        />
+      )}
     </>
   );
 

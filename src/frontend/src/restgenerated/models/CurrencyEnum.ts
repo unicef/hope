@@ -128,7 +128,7 @@
  * * `SEK` - Swedish krona/kronor
  * * `SGD` - Singapore dollar
  * * `SHP` - Saint Helena pound
- * * `SLL` - Sierra Leonean leone
+ * * `SLE` - Sierra Leonean leone
  * * `SOS` - Somali shilling
  * * `SRD` - Surinamese dollar
  * * `SSP` - South Sudanese pound
@@ -292,7 +292,7 @@ export enum CurrencyEnum {
     SEK = 'SEK',
     SGD = 'SGD',
     SHP = 'SHP',
-    SLL = 'SLL',
+    SLE = 'SLE',
     SOS = 'SOS',
     SRD = 'SRD',
     SSP = 'SSP',

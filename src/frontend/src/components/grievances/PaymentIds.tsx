@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentNode, PaymentVerificationNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { Title } from '@core/Title';
@@ -8,8 +7,8 @@ import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ReactElement } from 'react';
 
 type VerificationId = {
-  id: PaymentVerificationNode['id'];
-  paymentId: PaymentNode['id'];
+  id: string;
+  paymentId: string;
 };
 
 interface PaymentIdsProps {

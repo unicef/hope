@@ -6,17 +6,18 @@ import { RegistrationDataImportCreateDialog } from '@components/rdi/create/Regis
 import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
 import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
+import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 const initialFilter = {
   search: '',
@@ -32,10 +33,17 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, businessAreaSlug, programSlug } =
+    useBaseUrl();
   const { showMessage } = useSnackbar();
-  const { data: deduplicationFlags, loading } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+
+  const { data: deduplicationFlags, isLoading: loading } = useQuery({
+    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug: programSlug,
+      }),
   });
 
   const [filter, setFilter] = useState(
@@ -44,12 +52,17 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const { mutateAsync } = useMutation({
     mutationFn: async () =>
       runDeduplicationDataImports(businessArea, programId),
-    onSuccess: ({ data }) => {
-      showMessage(data.message);
+    onSuccess: () => {
+      showMessage('Deduplication process started');
     },
   });
 
@@ -57,7 +70,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
     try {
       await mutateAsync();
     } catch (error) {
-      showMessage(error.message);
+      showApiErrorMessages(error, showMessage);
     }
   };
 
@@ -98,15 +111,20 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(newFilter) => {
+          setAppliedFilter(newFilter);
+          setShouldScroll(true);
+        }}
       />
-      <RegistrationDataImportForPeopleTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.RDI_VIEW_DETAILS,
-          permissions,
-        )}
-      />
+      <Box ref={tableRef}>
+        <RegistrationDataImportForPeopleTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </Box>
     </>
   );
 }

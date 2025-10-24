@@ -1,14 +1,16 @@
 from typing import Any
 from unittest import mock
 
-from django.conf import settings
-from django.test import TestCase, override_settings
-
 from constance.test import override_config
+from django.core.management import call_command
+from django.test import TestCase, override_settings
+import pytest
+from rest_framework.exceptions import ValidationError
+
 from extras.test_utils.factories.account import (
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    UserRoleFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
@@ -24,32 +26,25 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from graphql import GraphQLError
-
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import (
-    Payment,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+from hope.apps.geo.models import Area
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.models import Household
+from hope.apps.payment.models import Payment, PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
 
 
 class TestFinishVerificationPlan(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()
         role = RoleFactory(name="Releaser")
-        UserRoleFactory(user=user, role=role, business_area=business_area)
+        RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
@@ -74,7 +69,7 @@ class TestFinishVerificationPlan(TestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": afghanistan_areas_qs.order_by("?").first(),
+                    "admin2": afghanistan_areas_qs.order_by("?").first(),
                     "program": cls.program,
                 },
                 {
@@ -103,25 +98,24 @@ class TestFinishVerificationPlan(TestCase):
             EntitlementCardFactory(household=household)
         cls.verification = payment_plan.payment_verification_plans.first()
 
-    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
+    @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
     def test_create_tickets_with_admin2_same_as_in_household(self, mocked_requests_post: Any) -> None:
         VerificationPlanStatusChangeServices(self.verification).finish()
 
         ticket = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION).first()
-        self.assertEqual(ticket.programs.count(), 1)
-        self.assertEqual(ticket.programs.first().id, self.program.id)
+        assert ticket.programs.count() == 1
+        assert ticket.programs.first().id == self.program.id
         household = Household.objects.get(unicef_id=ticket.household_unicef_id)
-        self.assertIsNotNone(ticket.admin2_id)
-        self.assertIsNotNone(household.admin2_id)
-        self.assertEqual(ticket.admin2_id, household.admin2_id)
+        assert ticket.admin2_id is not None
+        assert household.admin2_id is not None
+        assert ticket.admin2_id == household.admin2_id
 
-        self.assertEqual(mocked_requests_post.call_count, 10)
+        assert mocked_requests_post.call_count == 10
 
     def test_finish_verification_if_pp_not_finished_yet(self) -> None:
         Payment.objects.all().update(status=Payment.STATUS_PENDING)
-        self.assertFalse(self.verification.payment_plan.is_reconciled)
-        with self.assertRaises(GraphQLError) as e:
+        assert not self.verification.payment_plan.is_reconciled
+        with pytest.raises(ValidationError, match="You can finish only if reconciliation is finalized"):
             VerificationPlanStatusChangeServices(self.verification).finish()
-        self.assertEqual(e.exception.message, "You can finish only if reconciliation is finalized")

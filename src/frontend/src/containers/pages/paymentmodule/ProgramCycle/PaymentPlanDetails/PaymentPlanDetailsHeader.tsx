@@ -1,31 +1,32 @@
-import { Box } from '@mui/material';
-import { PaymentPlanQuery } from '@generated/graphql';
-import { useTranslation } from 'react-i18next';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
-import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { ReactElement } from 'react';
-import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
+import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
-import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
+import { AdminButton } from '@core/AdminButton';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
-  decodeIdString,
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { useQuery } from '@tanstack/react-query';
-import { fetchProgramCycle } from '@api/programCycleApi';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetailsHeader = ({
@@ -35,19 +36,14 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery({
-    queryKey: [
-      'programCyclesDetails',
-      businessArea,
-      programId,
-      decodeIdString(programCycleId),
-    ],
-    queryFn: async () => {
-      return fetchProgramCycle(
-        businessArea,
-        programId,
-        decodeIdString(programCycleId),
-      );
+  const { data: programCycleData } = useQuery<ProgramCycleList>({
+    queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug: businessArea,
+        id: programCycleId,
+        programSlug: programId,
+      });
     },
     enabled: !!programCycleId,
   });
@@ -96,9 +92,11 @@ export const PaymentPlanDetailsHeader = ({
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
 
+  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
-    case 'OPEN':
+    case PaymentPlanStatusEnum.OPEN:
       buttons = (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -108,7 +106,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED':
+    case PaymentPlanStatusEnum.LOCKED:
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -117,7 +115,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED_FSP':
+    case PaymentPlanStatusEnum.LOCKED_FSP:
       buttons = (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -126,7 +124,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_APPROVAL':
+    case PaymentPlanStatusEnum.IN_APPROVAL:
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -138,7 +136,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_AUTHORIZATION':
+    case PaymentPlanStatusEnum.IN_AUTHORIZATION:
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -150,7 +148,7 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_REVIEW':
+    case PaymentPlanStatusEnum.IN_REVIEW:
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -162,12 +160,13 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'FINISHED':
-    case 'ACCEPTED':
+    case PaymentPlanStatusEnum.FINISHED:
+    case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
+          canClose={canClose}
           paymentPlan={paymentPlan}
         />
       );

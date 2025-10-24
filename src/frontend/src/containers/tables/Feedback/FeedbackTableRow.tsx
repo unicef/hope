@@ -1,16 +1,16 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import { FeedbackIssueType, FeedbackNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { renderSomethingOrDash, renderUserName } from '@utils/utils';
+import { renderSomethingOrDash } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 import { ReactElement } from 'react';
+import { FeedbackList } from '@restgenerated/models/FeedbackList';
 
 interface FeedbackTableRowProps {
-  feedback: FeedbackNode;
+  feedback: FeedbackList;
   canViewDetails: boolean;
 }
 
@@ -21,11 +21,13 @@ export function FeedbackTableRow({
   const navigate = useNavigate();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
-  const grievanceDetailsPath = feedback.linkedGrievance
+  const householdDetailsPath = feedback.householdId
+    ? `/${baseUrl}/population/household/${feedback.householdId}`
+    : null;
+  const grievanceDetailsPath = feedback.linkedGrievanceId
     ? getGrievanceDetailsPath(
-        feedback.linkedGrievance?.id,
-        feedback.linkedGrievance?.category,
+        feedback.linkedGrievanceId,
+        1, // Default to category 1 as we don't have category info in REST model
         baseUrl,
       )
     : null;
@@ -48,40 +50,40 @@ export function FeedbackTableRow({
         )}
       </TableCell>
       <TableCell align="left">
-        {feedback.issueType === FeedbackIssueType.PositiveFeedback
+        {feedback.issueType === 'POSITIVE_FEEDBACK'
           ? 'Positive Feedback'
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align="left">
-        {feedback.householdLookup?.id && !isAllPrograms ? (
+        {feedback.householdId && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
-            {feedback.householdLookup?.unicefId}
+            {feedback.householdUnicefId}
           </BlackLink>
         ) : (
-          renderSomethingOrDash(feedback.householdLookup?.unicefId)
+          renderSomethingOrDash(feedback.householdUnicefId)
         )}
       </TableCell>
       <TableCell align="left">
-        {feedback.linkedGrievance?.id ? (
+        {feedback.linkedGrievanceId ? (
           <BlackLink to={grievanceDetailsPath}>
-            {feedback.linkedGrievance?.unicefId}
+            {feedback.linkedGrievanceUnicefId}
           </BlackLink>
         ) : (
-          renderSomethingOrDash(feedback.linkedGrievance?.unicefId)
+          renderSomethingOrDash(feedback.linkedGrievanceUnicefId)
         )}
       </TableCell>
-      <TableCell align="left">{renderUserName(feedback.createdBy)}</TableCell>
+      <TableCell align="left">{feedback.createdBy}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
         <TableCell align="left">
-          {feedback.program?.id ? (
+          {feedback.programId ? (
             <BlackLink
-              key={feedback.program?.id}
-              to={`/${baseUrl}/details/${feedback.program?.id}`}
+              key={feedback.programId}
+              to={`/${baseUrl}/details/${feedback.programId}`}
             >
-              {feedback?.program.name}
+              {feedback.programName}
             </BlackLink>
           ) : (
             '-'

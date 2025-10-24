@@ -14,18 +14,18 @@ import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { IndividualNode } from '@generated/graphql';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
 `;
 
-//TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
-  individual: IndividualNode;
-  periodicFieldsData: any;
+  individual: IndividualDetail;
+  periodicFieldsData: PaginatedPeriodicFieldList;
 }
 
 export const ProgrammeTimeSeriesFields = ({
@@ -52,10 +52,10 @@ export const ProgrammeTimeSeriesFields = ({
           if (
             roundData &&
             pduDataDict[fieldName] &&
-            pduDataDict[fieldName].pdu_data.rounds_names
+            pduDataDict[fieldName].pduData.roundsNames
           ) {
             const roundName =
-              pduDataDict[fieldName].pdu_data.rounds_names[
+              pduDataDict[fieldName].pduData.roundsNames[
                 parseInt(roundNumber) - 1
               ];
             const value = roundData.value;
@@ -105,7 +105,7 @@ export const ProgrammeTimeSeriesFields = ({
             <TableBody>
               {rows.length > 0 ? (
                 rows.map((row) => (
-                  <TableRow key={row.key}>
+                  <TableRow key={row.fieldName}>
                     <TableCell component="th" scope="row">
                       {row.fieldName}
                     </TableCell>

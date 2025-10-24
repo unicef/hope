@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
@@ -7,17 +7,15 @@ from extras.test_utils.factories.household import (
     create_household_for_fixtures,
 )
 from extras.test_utils.factories.program import ProgramFactory
-
-from hct_mis_api.apps.household.models import Document, Household, Individual
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.apps.household.models import Document, Household, Individual
+from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
 class TestHouseholdWithdraw(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         create_afghanistan()
 
     def test_withdraw(self) -> None:
@@ -32,13 +30,13 @@ class TestHouseholdWithdraw(TestCase):
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)
             DocumentFactory.create_batch(3, individual=individual, status=Document.STATUS_NEED_INVESTIGATION)
 
-        self.assertEqual(Household.objects.filter(withdrawn=True).count(), 0)
-        self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 0)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(), 30)
+        assert Household.objects.filter(withdrawn=True).count() == 0
+        assert Individual.objects.filter(withdrawn=True).count() == 0
+        assert Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count() == 30
 
         service = HouseholdWithdraw(household)
         service.withdraw()
 
-        self.assertEqual(Household.objects.filter(withdrawn=True).count(), 1)
-        self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 5)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_INVALID).count(), 25)
+        assert Household.objects.filter(withdrawn=True).count() == 1
+        assert Individual.objects.filter(withdrawn=True).count() == 5
+        assert Document.objects.filter(status=Document.STATUS_INVALID).count() == 25

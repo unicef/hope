@@ -1,1 +1,0 @@
-export { PaymentVerificationSectionForPeople } from './PaymentVerificationSectionForPeople';

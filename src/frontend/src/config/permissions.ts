@@ -103,6 +103,7 @@ export const PERMISSIONS = {
   PM_UPLOAD_SUPPORTING_DOCUMENT: 'PM_UPLOAD_SUPPORTING_DOCUMENT',
   PM_DELETE_SUPPORTING_DOCUMENT: 'PM_DELETE_SUPPORTING_DOCUMENT',
   PM_DOWNLOAD_SUPPORTING_DOCUMENT: 'PM_DOWNLOAD_SUPPORTING_DOCUMENT',
+  PM_CLOSE_FINISHED: 'PM_CLOSE_FINISHED',
   PAYMENT_VIEW_LIST_MANAGERIAL: 'PAYMENT_VIEW_LIST_MANAGERIAL',
   PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED:
     'PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED',
@@ -221,9 +222,6 @@ export const PERMISSIONS = {
   ACCOUNTABILITY_SURVEY_VIEW_LIST: 'ACCOUNTABILITY_SURVEY_VIEW_LIST',
   ACCOUNTABILITY_SURVEY_VIEW_DETAILS: 'ACCOUNTABILITY_SURVEY_VIEW_DETAILS',
 
-  // Reporting
-  REPORTING_EXPORT: 'REPORTING_EXPORT',
-
   // Activity Log
   ACTIVITY_LOG_VIEW: 'ACTIVITY_LOG_VIEW',
 
@@ -233,14 +231,19 @@ export const PERMISSIONS = {
   // Dashboard
   DASHBOARD_VIEW_COUNTRY: 'DASHBOARD_VIEW_COUNTRY',
   DASHBOARD_EXPORT: 'DASHBOARD_EXPORT',
+
+  //PDU Online Edits
+  PDU_ONLINE_SAVE_DATA: 'PDU_ONLINE_SAVE_DATA',
+  PDU_ONLINE_APPROVE: 'PDU_ONLINE_APPROVE',
+  PDU_ONLINE_MERGE: 'PDU_ONLINE_MERGE',
 };
 
 export function hasPermissions(
   permission: string | string[],
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
   // checks to see if has one permission or at least one from the array
-
+  if (!allowedPermissions || allowedPermissions === null) return false;
   if (Array.isArray(permission)) {
     return allowedPermissions.some((perm) => permission.includes(perm));
   }
@@ -249,8 +252,9 @@ export function hasPermissions(
 
 export function hasPermissionInModule(
   module: string,
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
+  if (!allowedPermissions || allowedPermissions === null) return false;
   return allowedPermissions.some((perm) => perm.includes(module));
 }
 
@@ -260,9 +264,10 @@ export function hasCreatorOrOwnerPermissions(
   creatorPermission: string,
   isOwner: boolean,
   ownerPermission: string,
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
   // use where we have to check 3 different permissions, for ex. grievances
+  if (!allowedPermissions || allowedPermissions === null) return false;
   return (
     allowedPermissions.includes(generalPermission) ||
     (isCreator && allowedPermissions.includes(creatorPermission)) ||

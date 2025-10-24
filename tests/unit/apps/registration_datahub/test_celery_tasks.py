@@ -1,21 +1,29 @@
+from abc import ABC, abstractmethod
 import base64
+from contextlib import contextmanager
 import datetime
 import json
-import uuid
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
+import uuid
 
 from django.conf import settings
 from django.core.management import call_command
+from django.db import Error
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.functional import classproperty
-
+from openpyxl.utils.exceptions import InvalidFileException
 import pytest
+
+from extras.test_utils.factories.aurora import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -24,12 +32,11 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import (
+from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.models import BusinessArea
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.geo import models as geo_models
+from hope.apps.household.models import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -43,13 +50,13 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import (
+from hope.apps.program.models import Program
+from hope.apps.registration_data.models import (
     ImportData,
     KoboImportData,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -61,30 +68,25 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     remove_old_rdi_links_task,
     validate_xlsx_import_task,
 )
-from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
+from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
-from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.contrib.aurora.celery_tasks import (
+from hope.apps.utils.models import MergeStatusModel
+from hope.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
 )
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
-from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
+from hope.contrib.aurora.models import Record
+from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hct_mis_api.contrib.aurora.services.flex_registration_service import (
+from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
-from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
+from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
-from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
+from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
@@ -435,7 +437,7 @@ VALID_JSON = [
 
 
 def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Any:  # Record
-    # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
+    # based on backend/hope/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.jpeg").read_bytes()
 
     # need files for each Individual
@@ -459,12 +461,12 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
 
 
 def create_imported_document_types() -> None:
-    for document_key_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+    for document_key_string in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
         DocumentType.objects.create(key=document_key_string)
 
 
 def create_ukraine_business_area() -> None:
-    from hct_mis_api.contrib.aurora.models import Registration
+    from hope.contrib.aurora.models import Registration
 
     slug = "ukraine"
     BusinessArea.objects.create(
@@ -523,26 +525,28 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
         yield Mock()
 
     with patch(
-        "hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache",
+        "hope.apps.registration_datahub.celery_tasks.locked_cache",
         do_nothing_cache,
     ):
         return automate_rdi_creation_task(*args, **kwargs)
 
 
 @patch(
-    "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
+    "hope.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init_geo_fixtures")
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
     def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
         result = run_automate_rdi_creation_task(registration_id=self.registration.source_id, page_size=1)
@@ -552,7 +556,9 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
         record = create_record(
-            fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_ERROR
+            fields=UKRAINE_FIELDS,
+            registration=self.registration.source_id,
+            status=Record.STATUS_ERROR,
         )
 
         page_size = 1
@@ -571,7 +577,9 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 3
         for _ in range(amount_of_records):
             create_record(
-                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.source_id,
+                status=Record.STATUS_TO_IMPORT,
             )
 
         assert Record.objects.count() == amount_of_records
@@ -579,7 +587,9 @@ class TestAutomatingRDICreationTask(TestCase):
         assert PendingIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=self.registration.source_id, page_size=page_size, template="some template {date} {records}"
+            registration_id=self.registration.source_id,
+            page_size=page_size,
+            template="some template {date} {records}",
         )
 
         assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
@@ -598,7 +608,9 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 3
         for _ in range(amount_of_records):
             create_record(
-                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.source_id,
+                status=Record.STATUS_TO_IMPORT,
             )
 
         assert Record.objects.count() == amount_of_records
@@ -606,7 +618,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert PendingIndividual.objects.count() == 0
 
         with patch(
-            "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
+            "hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
                 registration_id=self.registration.source_id,
@@ -626,7 +638,9 @@ class TestAutomatingRDICreationTask(TestCase):
 
         for _ in range(amount_of_records):
             create_record(
-                fields=UKRAINE_FIELDS, registration=self.registration.source_id, status=Record.STATUS_TO_IMPORT
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.source_id,
+                status=Record.STATUS_TO_IMPORT,
             )
 
         assert Record.objects.count() == amount_of_records
@@ -634,7 +648,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert PendingIndividual.objects.count() == 0
 
         with patch(
-            "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
+            "hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
             result = run_automate_rdi_creation_task(
                 registration_id=self.registration.source_id,
@@ -693,7 +707,12 @@ class TestAutomatingRDICreationTask(TestCase):
                 else:
                     data = UKRAINE_FIELDS
 
-                create_record(fields=data, registration=registration_id, status=Record.STATUS_TO_IMPORT, files=files)
+                create_record(
+                    fields=data,
+                    registration=registration_id,
+                    status=Record.STATUS_TO_IMPORT,
+                    files=files,
+                )
 
             assert Record.objects.count() == records_count
             assert RegistrationDataImport.objects.count() == rdi_count
@@ -701,7 +720,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
             # NotImplementedError
             if registration_id in [999, 18, 19]:
-                with self.assertRaises(NotImplementedError):
+                with pytest.raises(NotImplementedError):
                     run_automate_rdi_creation_task(
                         registration_id=registration_id,
                         page_size=page_size,
@@ -728,7 +747,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
@@ -761,7 +780,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     @pytest.mark.skip("NEED TO BE FIXED")
     def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(
@@ -777,7 +796,6 @@ class TestAutomatingRDICreationTask(TestCase):
         rdi = UkraineRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 1
-        # assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
         assert PendingIndividual.objects.count() == 0
         assert PendingHousehold.objects.count() == 0
 
@@ -829,10 +847,10 @@ class TestAutomatingRDICreationTask(TestCase):
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
             @classproperty
             @abstractmethod
-            def PROCESS_FLEX_RECORDS_TASK(cls) -> str:
+            def process_flex_records_task(cls) -> str:  # noqa: N805
                 raise NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
 
 
@@ -881,32 +899,32 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 
-        self.assertEqual(PendingHousehold.objects.count(), 3)
-        self.assertEqual(PendingIndividual.objects.count(), 3)
-        self.assertEqual(PendingDocument.objects.count(), 3)
+        assert PendingHousehold.objects.count() == 3
+        assert PendingIndividual.objects.count() == 3
+        assert PendingDocument.objects.count() == 3
 
         remove_old_rdi_links_task.__wrapped__()
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.count(), 1)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingDocument.objects.count() == 1
 
         self.rdi_1.refresh_from_db()
         self.rdi_2.refresh_from_db()
         self.rdi_3.refresh_from_db()
 
-        self.assertEqual(self.rdi_1.erased, True)
-        self.assertEqual(self.rdi_2.erased, True)
-        self.assertEqual(self.rdi_3.erased, False)
+        assert self.rdi_1.erased is True
+        assert self.rdi_2.erased is True
+        assert self.rdi_3.erased is False
 
 
-class TestRegistrationImportCeleryTasks(APITestCase):
+class TestRegistrationImportCeleryTasks(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
 
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+        from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -925,9 +943,9 @@ class TestRegistrationImportCeleryTasks(APITestCase):
             import_data=cls.import_data,
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
-        mock_task_instance = MockRdiKoboCreateTask.return_value
+    @patch("hope.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
+    def test_registration_kobo_import_task_execute_called_once(self, mock_rdi_kobo_create_task: Mock) -> None:
+        mock_task_instance = mock_rdi_kobo_create_task.return_value
         registration_data_import_id = self.registration_data_import.id
         import_data_id = self.import_data.id
         business_area_id = self.business_area.id
@@ -943,76 +961,78 @@ class TestRegistrationImportCeleryTasks(APITestCase):
             program_id=str(program_id),
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_hourly_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
+    @patch("hope.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
+    def test_registration_kobo_import_hourly_task_execute_called_once(self, mock_rdi_kobo_create_task: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
-        mock_task_instance = MockRdiKoboCreateTask.return_value
+        mock_task_instance = mock_rdi_kobo_create_task.return_value
         registration_kobo_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
-    def test_registration_xlsx_import_hourly_task_execute_called_once(self, MockRdiXlsxCreateTask: Mock) -> None:
+    @patch("hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
+    def test_registration_xlsx_import_hourly_task_execute_called_once(self, mock_rdi_xlsx_create_task: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
-        mock_task_instance = MockRdiXlsxCreateTask.return_value
+        mock_task_instance = mock_rdi_xlsx_create_task.return_value
         registration_xlsx_import_hourly_task.delay()
         mock_task_instance.execute.assert_called_once()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task_exception(
         self,
-        MockRdiMergeTask: Mock,
+        mock_rdi_merge_task: Mock,
     ) -> None:
-        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
-        mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
+        mock_rdi_merge_task_instance.execute.side_effect = Error("Test Exception")
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.MERGE_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.MERGE_ERROR
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
+    @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(
         self,
-        MockRdiMergeTask: Mock,
+        mock_rdi_merge_task: Mock,
     ) -> None:
-        mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        mock_rdi_merge_task_instance = mock_rdi_merge_task.return_value
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         mock_rdi_merge_task_instance.execute.assert_called_once()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
+    @patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
     def test_rdi_deduplication_task_exception(
         self,
-        MockDeduplicateTask: Mock,
+        mock_deduplicate_task: Mock,
     ) -> None:
-        mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
-        mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        mock_deduplicate_task_task_instance = mock_deduplicate_task.return_value
+        mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = InvalidFileException(
+            "Test Exception"
+        )
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IMPORT_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
+    @patch("hope.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
     def test_pull_kobo_submissions_task(
         self,
-        PullKoboSubmissionsTask: Mock,
+        mock_pull_kobo_submissions_task: Mock,
     ) -> None:
         kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234", pull_pictures=True)
-        mock_task_instance = PullKoboSubmissionsTask.return_value
+        mock_task_instance = mock_pull_kobo_submissions_task.return_value
         pull_kobo_submissions_task.delay(kobo_import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
+    @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
     def test_validate_xlsx_import_task(
         self,
-        ValidateXlsxImportTask: Mock,
+        mock_validate_xlsx_import_task: Mock,
     ) -> None:
-        mock_task_instance = ValidateXlsxImportTask.return_value
+        mock_task_instance = mock_validate_xlsx_import_task.return_value
         validate_xlsx_import_task.delay(self.import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_project_submissions")
+    @patch("hope.apps.core.kobo.api.KoboAPI.get_project_submissions")
     def test_pull_kobo_submissions_execute(self, mock_get_project_submissions: Mock) -> None:
         kobo_import_data_with_pics = KoboImportData.objects.create(
             kobo_asset_id="1111",
@@ -1021,7 +1041,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics, self.program)
-        self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
+        assert str(resp_1["kobo_import_data_id"]) == str(kobo_import_data_with_pics.id)
 
         kobo_import_data_without_pics = KoboImportData.objects.create(
             kobo_asset_id="2222",
@@ -1030,7 +1050,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, self.program)
-        self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))
+        assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
 class DeduplicationEngineCeleryTasksTests(TestCase):
@@ -1047,27 +1067,33 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
         ".upload_and_process_deduplication_set"
     )
     def test_deduplication_engine_process_task(
         self,
         mock_upload_and_process: Mock,
     ) -> None:
-        self.assertIsNone(self.program.deduplication_set_id)
+        assert self.program.deduplication_set_id is None
         deduplication_engine_process(str(self.program.id))
 
         mock_upload_and_process.assert_called_once_with(self.program)
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
         ".fetch_biometric_deduplication_results_and_process"
     )
     def test_fetch_biometric_deduplication_results_and_process(
@@ -1083,4 +1109,4 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
 
         fetch_biometric_deduplication_results_and_process(deduplication_set_id)
 
-        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(deduplication_set_id)
+        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(self.program)

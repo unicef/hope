@@ -1,16 +1,17 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import {
-  AllIndividualsQueryVariables,
-  HouseholdChoiceDataQuery,
-  IndividualMinimalFragment,
-  MergedIndividualMinimalFragment,
-  useAllIndividualsQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
-import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
+import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface ImportedPeopleTableProps {
   rdi;
@@ -21,7 +22,7 @@ interface ImportedPeopleTableProps {
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoices;
   isMerged: boolean;
 }
 
@@ -38,13 +39,62 @@ export function ImportedPeopleTable({
   isMerged,
 }: ImportedPeopleTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const { programId } = useBaseUrl();
 
-  const initialVariables = {
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessArea,
-  };
+  const [page, setPage] = useState(0);
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      page,
+    }),
+    [rdiId, household, showDuplicates, businessArea, programId, page],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
+    queryKey: [
+      'businessAreasProgramsIndividualsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+  });
+
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsIndividualsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <div data-cy="imported-individuals-table">
@@ -67,18 +117,20 @@ export function ImportedPeopleTable({
         </Grid>
       )}
       {isMerged ? (
-        <UniversalTable<
-          MergedIndividualMinimalFragment,
-          AllIndividualsQueryVariables
-        >
+        <UniversalRestTable
           title={title}
           headCells={mergedPeopleTableHeadCells}
-          query={useAllIndividualsQuery}
-          queriedObjectName="allIndividuals"
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
+          data={data}
+          error={error}
+          isLoading={isLoading}
           rowsPerPageOptions={rowsPerPageOptions}
-          initialVariables={initialVariables}
           isOnPaper={isOnPaper}
-          renderRow={(row) => (
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
+          renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}
               key={row.id}
@@ -88,15 +140,20 @@ export function ImportedPeopleTable({
           )}
         />
       ) : (
-        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
+        <UniversalRestTable
           title={title}
           headCells={importedPeopleTableHeadCells}
-          query={useAllIndividualsQuery}
-          queriedObjectName="allIndividuals"
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
           rowsPerPageOptions={rowsPerPageOptions}
-          initialVariables={initialVariables}
           isOnPaper={isOnPaper}
-          renderRow={(row) => (
+          data={data}
+          error={error}
+          isLoading={isLoading}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
+          renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}
               key={row.id}

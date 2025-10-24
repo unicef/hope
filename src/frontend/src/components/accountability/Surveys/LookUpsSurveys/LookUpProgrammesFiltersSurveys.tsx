@@ -1,8 +1,7 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -12,10 +11,11 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -58,7 +58,7 @@ function LookUpProgrammesFiltersSurveys({
       clearHandler={handleClearFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             label="Search"
@@ -74,7 +74,7 @@ function LookUpProgrammesFiltersSurveys({
             value={filter.status}
             data-cy="filters-status"
           >
-            {choicesData.programStatusChoices.map((item) => (
+            {choicesData.statusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
@@ -115,7 +115,7 @@ function LookUpProgrammesFiltersSurveys({
             value={filter.sector}
             multiple
           >
-            {choicesData.programSectorChoices.map((item) => (
+            {choicesData.sectorChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>

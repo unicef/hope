@@ -1,42 +1,43 @@
-from e2e.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
 
 
 class AdminPanel(BaseComponents):
     login = "id_username"
     password = "id_password"
-    permissionText = "content-main"
-    loginButton = '//*[@id="login-form"]/div[3]/input'
-    loggedName = '//*[@class="changelink"]/a'
-    buttonLogout = '//*[@id="user-tools"]/a[3]'
-    loggedOut = '//*[@id="content"]'
-    errorNote = '//*[@class="errornote"]'
-    unicefID = '//*[@id="content"]/h2'
+    permission_text = "content-main"
+    login_button = '//*[@id="login-form"]/div[3]/input'
+    logged_name = '//*[@class="changelink"]/a'
+    button_logout = '//*[@id="user-tools"]/a[3]'
+    logged_out = '//*[@id="content"]'
+    error_note = '//*[@class="errornote"]'
+    unicef_id = '//*[@id="content"]/h2'
 
-    def getUnicefID(self) -> WebElement:
-        return self.wait_for(self.unicefID, By.XPATH)
+    def get_unicef_id(self) -> WebElement:
+        return self.wait_for(self.unicef_id, By.XPATH)
 
-    def getErrorLogin(self) -> WebElement:
-        return self.wait_for(self.errorNote, By.XPATH)
+    def get_error_login(self) -> WebElement:
+        return self.wait_for(self.error_note, By.XPATH)
 
-    def getLoggedOut(self) -> WebElement:
-        return self.wait_for(self.loggedOut, By.XPATH)
+    def get_logged_out(self) -> WebElement:
+        return self.wait_for(self.logged_out, By.XPATH)
 
-    def getButtonLogout(self) -> WebElement:
-        return self.wait_for(self.buttonLogout, By.XPATH)
+    def get_button_logout(self) -> WebElement:
+        return self.wait_for(self.button_logout, By.XPATH)
 
-    def getLogin(self) -> WebElement:
+    def get_login(self) -> WebElement:
         return self.wait_for(self.login, By.ID)
 
-    def getPassword(self) -> WebElement:
+    def get_password(self) -> WebElement:
         return self.wait_for(self.password, By.ID)
 
-    def getPermissionText(self) -> WebElement:
-        return self.wait_for(self.permissionText, By.ID)
+    def get_permission_text(self) -> WebElement:
+        return self.wait_for(self.permission_text, By.ID)
 
-    def getLoginButton(self) -> WebElement:
-        return self.wait_for(self.loginButton, By.XPATH)
+    def get_login_button(self) -> WebElement:
+        return self.wait_for(self.login_button, By.XPATH)
 
-    def getLoggedName(self) -> WebElement:
-        return self.wait_for(self.loggedName, By.XPATH)
+    def get_logged_name(self) -> WebElement:
+        return self.wait_for(self.logged_name, By.XPATH)

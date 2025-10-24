@@ -11,7 +11,7 @@
     docs/
         index.md
     src/
-        hct_mis_api/
+        hope/
             apps/
                 __init__.py
             __init__.py
