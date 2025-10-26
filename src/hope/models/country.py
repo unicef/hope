@@ -33,8 +33,8 @@ class UpgradeModel(models.Model):
 
 
 class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
-    name = CICharField(max_length=255, db_index=True)
-    short_name = CICharField(max_length=255, db_index=True)
+    name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
+    short_name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
     iso_code2 = models.CharField(max_length=2, unique=True)
     iso_code3 = models.CharField(max_length=3, unique=True)
     iso_num = models.CharField(max_length=4, unique=True)

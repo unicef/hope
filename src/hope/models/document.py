@@ -35,10 +35,10 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
         (STATUS_INVALID, _("Invalid")),
     )
 
-    individual = models.ForeignKey("household.Individual", related_name="documents", on_delete=models.CASCADE)
+    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
     document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    type = models.ForeignKey("household.DocumentType", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     photo = models.ImageField(blank=True)
@@ -66,6 +66,16 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     class Meta:
         app_label = "household"
+        indexes = [
+            # GinIndex(
+            #     OpClass(Upper("document_number"), name="gin_trgm_ops"),
+            #     name="doc_number_upper_trgm_gin",
+            # ),
+            models.Index(
+                fields=["type", "individual"],
+                name="doc_type_individual_idx",
+            ),
+        ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
             UniqueConstraint(

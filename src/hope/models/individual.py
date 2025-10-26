@@ -184,29 +184,21 @@ class Individual(
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
     photo = models.ImageField(blank=True, help_text="Photo")
-    full_name = CICharField(
+    full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
         db_index=True,
         help_text="Full Name of the Beneficiary",
+        db_collation="und-ci-det",
     )
-    given_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="First name of the Beneficiary",
+    given_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
     )
-    middle_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Middle name of the Beneficiary",
+    middle_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
     )
-    family_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Last name of the Beneficiary",
+    family_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
     )
     sex = models.CharField(
         max_length=255,
@@ -393,12 +385,13 @@ class Individual(
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]",
     )
-    program_registration_id = CICharField(
+    program_registration_id = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
+        db_collation="und-ci-det",
     )
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
@@ -523,7 +516,52 @@ class Individual(
     class Meta:
         app_label = "household"
         verbose_name = "Individual"
-        indexes = (GinIndex(fields=["vector_column"]),)
+        indexes = (
+            GinIndex(fields=["vector_column"]),
+            models.Index(
+                name="hi_prog_id_active_merged_idx",
+                fields=["program", "id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_hh_active_merged_idx",
+                fields=["program", "household"],  # -> (program_id, household_id)
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_possible_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_possible_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_confirmed_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_confirmed_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_dup_idx",
+                condition=Q(
+                    is_removed=False, rdi_merge_status="MERGED", deduplication_golden_record_status="DUPLICATE"
+                ),
+            ),
+            models.Index(
+                name="hi_hh_active_merged_idx",
+                fields=["household"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_birth_idx",
+                fields=["program", "unicef_id"],
+                include=["birth_date"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+        )
         constraints = [
             UniqueConstraint(
                 fields=["unicef_id", "program"],
@@ -533,8 +571,8 @@ class Individual(
             UniqueConstraint(
                 fields=["identification_key", "program"],
                 condition=Q(is_removed=False)
-                & Q(identification_key__isnull=False)
-                & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
+                          & Q(identification_key__isnull=False)
+                          & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
                 name="identification_key_ind_unique_constraint",
             ),
         ]

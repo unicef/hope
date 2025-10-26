@@ -4,6 +4,9 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class DocumentType(TimeStampedUUIDModel):
+    CACHE_KEY_ALL_DOC_TYPES = "DocumentType:all_doc_types"
+    CACHE_TTL_SECONDS = 60 * 10  # 10 minutes
+
     label = models.CharField(max_length=100)
     key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)

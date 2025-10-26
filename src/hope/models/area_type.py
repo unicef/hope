@@ -11,7 +11,7 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
-    name = CICharField(max_length=255, db_index=True)
+    name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     area_level = models.PositiveIntegerField(default=1)
     parent = TreeForeignKey(

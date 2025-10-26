@@ -495,7 +495,7 @@ class Household(
         help_text="Household administrative area level 4",
     )
     head_of_household = models.OneToOneField(
-        "household.Individual",
+        "Individual",
         related_name="heading_household",
         on_delete=models.CASCADE,
         null=True,
