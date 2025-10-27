@@ -41,6 +41,7 @@ export type PaymentPlanDetail = {
      * * `IN_AUTHORIZATION` - In Authorization
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
+     * * `ABORTED` - Aborted
      * * `FINISHED` - Finished
      * * `CLOSED` - Closed
      */

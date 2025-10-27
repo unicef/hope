@@ -1848,6 +1848,8 @@ class TestPaymentPlanActions:
         self.url_create_follow_up = reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs)
         self.url_funds_commitments = reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs)
         self.url_pp_close = reverse("api:payments:payment-plans-close", kwargs=url_kwargs)
+        self.url_pp_abort = reverse("api:payments:payment-plans-abort", kwargs=url_kwargs)
+        self.url_pp_reactivate_abort = reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -2851,4 +2853,67 @@ class TestPaymentPlanActions:
         if expected_status == status.HTTP_400_BAD_REQUEST:
             assert (
                 response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
+            )
+
+    @pytest.mark.parametrize(
+        ("permissions", "expected_status", "pp_status"),
+        [
+            ([Permissions.PM_ABORT], status.HTTP_200_OK, PaymentPlan.Status.ACCEPTED),
+            ([Permissions.PM_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
+            ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.OPEN),
+        ],
+    )
+    def test_pp_abort(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+        pp_status: str,
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = pp_status
+        self.pp.save()
+        self.pp.refresh_from_db()
+
+        assert self.pp.status == pp_status
+        response = self.client.get(self.url_pp_abort)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan aborted"}
+
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            assert response.json()[0] == f"Abort Payment Plan is not possible within Status {pp_status}"
+
+    @pytest.mark.parametrize(
+        ("permissions", "expected_status", "pp_status"),
+        [
+            ([Permissions.PM_REACTIVATE_ABORT], status.HTTP_200_OK, PaymentPlan.Status.ABORTED),
+            ([Permissions.PM_REACTIVATE_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.OPEN),
+            ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.ABORTED),
+        ],
+    )
+    def test_pp_reactivate_abort(
+        self,
+        permissions: List,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+        pp_status: str,
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = pp_status
+        self.pp.save()
+        self.pp.refresh_from_db()
+
+        assert self.pp.status == pp_status
+        response = self.client.get(self.url_pp_reactivate_abort)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan reactivate abort"}
+
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            assert (
+                response.json()[0]
+                == f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
             )
