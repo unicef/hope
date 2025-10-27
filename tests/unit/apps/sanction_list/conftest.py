@@ -31,7 +31,7 @@ def always_eager() -> Generator[Any, None, None]:
 
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
-    from test_utils.factories.sanction_list import SanctionListFactory
+    from extras.test_utils.factories.sanction_list import SanctionListFactory
 
     return SanctionListFactory(
         name="EU",

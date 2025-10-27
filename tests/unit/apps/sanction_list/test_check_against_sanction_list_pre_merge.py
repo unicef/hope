@@ -36,7 +36,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
-    from test_utils.factories.sanction_list import SanctionListFactory
+    from extras.test_utils.factories.sanction_list import SanctionListFactory
 
     return SanctionListFactory(strategy=fqn(UNSanctionList))
 
@@ -49,7 +49,7 @@ class TestSanctionListPreMerge(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        from test_utils.factories.sanction_list import SanctionListFactory
+        from extras.test_utils.factories.sanction_list import SanctionListFactory
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         sanction_list = SanctionListFactory()

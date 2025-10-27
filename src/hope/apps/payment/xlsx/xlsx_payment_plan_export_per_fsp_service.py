@@ -11,8 +11,8 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
-from models.payment_plan_split import PaymentPlanSplit
-from models.program import Program
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.program import Program
 import msoffcrypto
 import openpyxl
 from openpyxl import Workbook
