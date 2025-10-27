@@ -9,17 +9,20 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
+import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
   canSendForApproval: boolean;
+  canAbort: boolean;
 }
 
 export function LockedFspPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
   canSendForApproval,
+  canAbort,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -96,6 +99,11 @@ export function LockedFspPaymentPlanHeaderButtons({
           >
             {t('Send For Approval')}
           </LoadingButton>
+        </Box>
+      )}
+      {canAbort && (
+        <Box m={2}>
+          <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
     </Box>
