@@ -23,7 +23,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     individuals_filters_block = models.ForeignKey(
-        "targeting.TargetingIndividualRuleFilterBlock",
+        "TargetingIndividualRuleFilterBlock",
         related_name="individual_block_filters",
         on_delete=models.CASCADE,
     )
@@ -35,8 +35,8 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
-            Array of arguments
-            """
+                Array of arguments
+                """
     )
     round_number = models.PositiveIntegerField(null=True, blank=True)
 

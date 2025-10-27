@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db import models, transaction
 from django.db.models import QuerySet
@@ -6,6 +6,9 @@ from django.db.models import QuerySet
 from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
 from hope.models.individual import Individual
 from hope.models.registration_data_import import logger
+
+if TYPE_CHECKING:
+    from hope.models.program import Program
 
 
 class DeduplicationEngineSimilarityPair(models.Model):
@@ -57,17 +60,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod
-    def remove_pairs(cls, deduplication_set_id: str) -> None:
-        from hope.models.program import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        cls.objects.filter(program=program).delete()
-
-    @classmethod
-    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: list[SimilarityPair]) -> None:
-        from hope.models.program import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+    def bulk_add_pairs(cls, program: "Program", duplicates_data: list[SimilarityPair]) -> None:
         duplicates = []
         for pair in duplicates_data:
             if pair.first and pair.second:
@@ -119,6 +112,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
         duplicates = []
         for pair in similarity_pairs:
             duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            if not duplicate:
+                continue
             household = duplicate.household
             duplicates.append(
                 {

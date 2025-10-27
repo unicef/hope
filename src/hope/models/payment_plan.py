@@ -30,6 +30,7 @@ from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import FEMALE, MALE, Household
@@ -152,6 +153,7 @@ class PaymentPlan(
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.CLOSED,
     )
 
     CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
@@ -603,9 +605,10 @@ class PaymentPlan(
         )
 
     def get_criteria_string(self) -> str:
-        rules = self.get_rules()
-        rules_string = [x.get_criteria_string() for x in rules]
-        return " OR ".join(rules_string).strip()
+        try:
+            return super().get_criteria_string()
+        except ValueError:
+            return ""
 
     def remove_export_file_entitlement(self) -> None:
         self.export_file_entitlement.file.delete(save=False)
@@ -662,8 +665,6 @@ class PaymentPlan(
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
     def _get_last_approval_process_data(self) -> ModifiedData:
-        from hope.models.approval import Approval
-
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
@@ -703,10 +704,9 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Callable | None = None,
     ) -> QuerySet:
-        params = Q(
-            status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES,
-            delivered_quantity__gt=0,
-        )
+        from hope.models.payment_verification_plan import PaymentVerificationPlan
+
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -714,14 +714,24 @@ class PaymentPlan(
                 | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verifications__isnull=True)
+            # exclude PaymentVerificationPlan with in statuses Error or Invalid
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(
+                    payment_verifications__payment_verification_plan__status__in=[
+                        PaymentVerificationPlan.STATUS_INVALID,
+                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
+                    ]
+                )
+            )
 
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+        payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
-            payment_records = [pr.pk for pr in filter(extra_validation, payment_records)]
+            payment_records_ids = [pr.pk for pr in filter(extra_validation, payment_records)]
+            payment_records = Payment.objects.filter(pk__in=payment_records_ids)
 
-        return Payment.objects.filter(pk__in=payment_records)
+        return payment_records
 
     @property
     def program(self) -> "Program":
@@ -756,7 +766,7 @@ class PaymentPlan(
 
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
-        """Export MTCN file - xlsx file with password."""
+        """Export MTCN file xlsx file with password."""
         all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
         return self.is_payment_gateway and all_sent_to_fsp
 
@@ -785,26 +795,19 @@ class PaymentPlan(
 
     @property
     def bank_reconciliation_success(self) -> int:
-        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
+        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
 
     @property
     def bank_reconciliation_error(self) -> int:
-        return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_household_ids_targeting_level(self) -> list:
-        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+    def excluded_household_ids_targeting_level(self) -> list[str]:
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids) if self.excluded_ids else []
 
     @property
     def targeting_criteria_string(self) -> str:
         return Truncator(self.get_criteria_string()).chars(390, "...")
-
-    def get_excluded_household_ids(self) -> list[str]:
-        if not self.excluded_ids:
-            return []
-        hh_ids_list = []
-        hh_ids_list.extend(hh_id.strip() for hh_id in self.excluded_ids.split(",") if hh_id.strip())
-        return hh_ids_list
 
     def get_query(self) -> Q:
         query = super().get_query()
@@ -838,6 +841,12 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> datetime:
+        if (
+            self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            and (process := self.approval_process.first())
+            and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
+        ):
+            return approval.created_at.date()
         now = timezone.now().date()
         return min(now, self.dispersion_end_date)
 

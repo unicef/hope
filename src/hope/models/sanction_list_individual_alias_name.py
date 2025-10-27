@@ -6,7 +6,7 @@ from hope.models.utils import TimeStampedUUIDModel
 class SanctionListIndividualAliasName(TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     individual = models.ForeignKey(
-        "sanction_list.SanctionListIndividual",
+        "SanctionListIndividual",
         on_delete=models.CASCADE,
         related_name="alias_names",
     )

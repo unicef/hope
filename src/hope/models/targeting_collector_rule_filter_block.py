@@ -14,7 +14,7 @@ class TargetingCollectorRuleFilterBlock(
     TargetingCollectorRuleFilterBlockBase,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "targeting.TargetingCriteriaRule",
+        "TargetingCriteriaRule",
         on_delete=models.CASCADE,
         related_name="collectors_filters_blocks",
     )

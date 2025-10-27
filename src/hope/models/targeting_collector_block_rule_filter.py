@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     collector_block_filters = models.ForeignKey(
-        "targeting.TargetingCollectorRuleFilterBlock",
+        "TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
         on_delete=models.CASCADE,
     )
@@ -37,8 +37,8 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
     arguments = JSONField(
         help_text="""
-                Array of arguments
-                """
+            Array of arguments
+        """
     )
 
     class Meta:

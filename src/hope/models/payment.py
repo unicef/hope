@@ -66,25 +66,12 @@ class Payment(
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
-    ALLOW_CREATE_VERIFICATION = (
-        STATUS_SUCCESS,
-        STATUS_DISTRIBUTION_SUCCESS,
-        STATUS_DISTRIBUTION_PARTIAL,
-        STATUS_NOT_DISTRIBUTED,
-    )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
-    DELIVERED_STATUSES = (
-        STATUS_SUCCESS,
-        STATUS_DISTRIBUTION_SUCCESS,
-        STATUS_DISTRIBUTION_PARTIAL,
-    )
+    DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
     NOT_DELIVERED_STATUSES = (STATUS_NOT_DISTRIBUTED,)
-    FAILED_STATUSES = (
-        STATUS_FORCE_FAILED,
-        STATUS_ERROR,
-        STATUS_MANUALLY_CANCELLED,
-        STATUS_NOT_DISTRIBUTED,
-    )
+    FAILED_STATUSES = (STATUS_FORCE_FAILED, STATUS_ERROR, STATUS_MANUALLY_CANCELLED, STATUS_NOT_DISTRIBUTED)
+
+    ALLOW_CREATE_VERIFICATION = PENDING_STATUSES + DELIVERED_STATUSES + NOT_DELIVERED_STATUSES
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -139,33 +126,17 @@ class Payment(
         blank=True,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id

@@ -2,7 +2,6 @@ from datetime import date, datetime
 from typing import Any, Optional
 
 from dateutil.relativedelta import relativedelta
-from django.contrib.postgres.fields import CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
@@ -571,8 +570,8 @@ class Individual(
             UniqueConstraint(
                 fields=["identification_key", "program"],
                 condition=Q(is_removed=False)
-                          & Q(identification_key__isnull=False)
-                          & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
+                & Q(identification_key__isnull=False)
+                & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
                 name="identification_key_ind_unique_constraint",
             ),
         ]

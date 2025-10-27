@@ -21,7 +21,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     targeting_criteria_rule = models.ForeignKey(
-        "targeting.TargetingCriteriaRule",
+        "TargetingCriteriaRule",
         related_name="filters",
         on_delete=models.CASCADE,
     )
@@ -33,8 +33,8 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
-            Array of arguments
-            """
+                Array of arguments
+                """
     )
     round_number = models.PositiveIntegerField(null=True, blank=True)
 

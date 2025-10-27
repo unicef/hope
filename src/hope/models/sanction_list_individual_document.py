@@ -5,7 +5,7 @@ from hope.models.utils import TimeStampedUUIDModel
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):
     individual = models.ForeignKey(
-        "sanction_list.SanctionListIndividual",
+        "SanctionListIndividual",
         on_delete=models.CASCADE,
         related_name="documents",
     )

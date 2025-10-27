@@ -165,7 +165,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         choices=DATA_SOURCE_CHOICE,
     )
     import_data = models.OneToOneField(
-        "registration_data.ImportData",
+        "ImportData",
         related_name="registration_data_import_hope",
         on_delete=models.CASCADE,
         null=True,
