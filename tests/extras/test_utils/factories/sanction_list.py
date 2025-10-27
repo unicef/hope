@@ -12,10 +12,7 @@ class SanctionListFactory(DjangoModelFactory):
 
     class Meta:
         model = SanctionList
-        django_get_or_create = (
-            "name",
-            "strategy",
-        )
+        django_get_or_create = ("strategy",)
 
 
 class SanctionListIndividualFactory(DjangoModelFactory):
