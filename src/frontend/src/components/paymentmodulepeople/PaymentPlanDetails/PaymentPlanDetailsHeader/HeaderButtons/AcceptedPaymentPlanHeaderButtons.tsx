@@ -23,12 +23,14 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaginatedFSPXlsxTemplateList } from '@restgenerated/models/PaginatedFSPXlsxTemplateList';
 import { showApiErrorMessages } from '@utils/utils';
+import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
+  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -36,6 +38,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canClose,
+  canAbort,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -303,6 +306,11 @@ export function AcceptedPaymentPlanHeaderButtons({
             >
               {t('Close')}
             </LoadingButton>
+          </Box>
+        )}
+        {canAbort && (
+          <Box m={2}>
+            <AbortPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
       </>
