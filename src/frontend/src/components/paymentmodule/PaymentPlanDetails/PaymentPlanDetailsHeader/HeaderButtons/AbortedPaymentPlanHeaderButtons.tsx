@@ -27,11 +27,13 @@ export function AbortedPaymentPlanHeaderButtons({
   const { mutateAsync: reactivate } = useMutation({
     mutationFn: async () => {
       setLoading(true);
-      await RestService.restBusinessAreasProgramsPaymentPlansReactivateCreate({
-        businessAreaSlug: businessArea,
-        id: paymentPlan.id,
-        programSlug: programId,
-      });
+      await RestService.restBusinessAreasProgramsPaymentPlansReactivateAbortRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+        },
+      );
       setLoading(false);
     },
     onSuccess: () => {

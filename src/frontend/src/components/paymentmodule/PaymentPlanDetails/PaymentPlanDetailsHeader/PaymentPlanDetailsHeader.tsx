@@ -68,7 +68,7 @@ export function PaymentPlanDetailsHeader({
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
-  const canReactivateAbort = hasPermissions(
+  const canReactivate = hasPermissions(
     PERMISSIONS.PM_REACTIVATE_ABORT,
     permissions,
   );
@@ -159,7 +159,10 @@ export function PaymentPlanDetailsHeader({
       break;
     case PaymentPlanStatusEnum.ABORTED:
       buttons = (
-        <AbortedPaymentPlanHeaderButtons canReactivate={canReactivate} />
+        <AbortedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReactivate={canReactivate}
+        />
       );
       break;
     default:

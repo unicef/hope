@@ -50,7 +50,7 @@ export function AbortPaymentPlan({
       programSlug: string;
       requestBody: { comment?: string };
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansAbortCreate({
+      RestService.restBusinessAreasProgramsPaymentPlansAbortRetrieve({
         businessAreaSlug,
         id,
         programSlug,
