@@ -179,6 +179,11 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
+    case PaymentPlanStatusEnum.ABORTED:
+      buttons = (
+        <AbortedPaymentPlanHeaderButtons canReactivate={canReactivate} />
+      );
+      break;
     default:
       break;
   }
