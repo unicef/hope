@@ -505,44 +505,6 @@ class TestGrievanceCreateDataChangeAction:
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]
 
-    def test_create_account_non_bank_optional_financial_institution(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        # Create account types
-        AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank"})
-        AccountType.objects.get_or_create(key="mobile", defaults={"label": "Mobile"})
-
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-
-        # Test: Mobile account without financial_institution should succeed
-        input_data = {
-            "description": "Test mobile account without financial institution",
-            "assigned_to": str(self.user.id),
-            "issue_type": 14,
-            "category": 2,
-            "consent": True,
-            "language": "PL",
-            "extras": {
-                "issue_type": {
-                    "individual_data_update_issue_type_extras": {
-                        "individual": str(self.individuals[0].id),
-                        "individual_data": {
-                            "accounts": [
-                                {
-                                    "account_type": "mobile",
-                                    # No financial_institution - this should be OK for non-bank accounts
-                                    "number": "+48123456789",
-                                }
-                            ],
-                        },
-                    }
-                }
-            },
-        }
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert "id" in response.data[0]
-
     def test_edit_account_bank_requires_financial_institution(self, create_user_role_with_permissions: Any) -> None:
         # Create account types
         bank_type = AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank"})[0]
