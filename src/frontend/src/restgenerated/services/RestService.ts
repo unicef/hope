@@ -175,7 +175,7 @@ export class RestService {
         lang,
     }: {
         format?: 'json' | 'yaml',
-        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
+        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'ckb' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'ms' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'ug' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
     }): CancelablePromise<Record<string, any>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4376,6 +4376,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -4387,7 +4389,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4540,6 +4542,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -4551,7 +4555,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4812,10 +4816,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -7829,6 +7834,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -7840,7 +7847,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -8041,6 +8048,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -8052,7 +8061,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -8191,6 +8200,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -8202,7 +8213,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -8648,10 +8659,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9012,6 +9024,32 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansAbortRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/abort/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -9423,6 +9461,32 @@ export class RestService {
      * @returns PaymentPlan
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsPaymentPlansReactivateAbortRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reactivate-abort/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve({
         businessAreaSlug,
         id,
@@ -9741,10 +9805,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9869,10 +9934,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -9999,10 +10065,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10132,10 +10199,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10318,10 +10386,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -10758,10 +10827,11 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          */
-        status?: 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
         totalEntitledQuantityUsdFrom?: number,
@@ -12639,11 +12709,12 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,
@@ -13077,11 +13148,12 @@ export class RestService {
          * * `IN_AUTHORIZATION` - In Authorization
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
          * * `FINISHED` - Finished
          * * `CLOSED` - Closed
          * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        status?: 'ABORTED' | 'ACCEPTED' | 'ASSIGNED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityUsdFrom?: number,
         totalEntitledQuantityUsdTo?: number,
         totalHouseholdsCountGte?: number,

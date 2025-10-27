@@ -966,6 +966,34 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan
 
+    def abort(self) -> PaymentPlan:
+        allowed_statuses = [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+            PaymentPlan.Status.LOCKED_FSP,
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+            PaymentPlan.Status.ACCEPTED,
+        ]
+
+        if self.payment_plan.status not in allowed_statuses:
+            raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
+        self.payment_plan.status_abort()
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        return self.payment_plan
+
+    def reactivate_abort(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.ABORTED:
+            raise ValidationError(
+                f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
+            )
+        self.payment_plan.status_reactivate_abort()
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        return self.payment_plan
+
     @classmethod
     def send_reconciliation_overdue_emails(cls) -> None:
         today = datetime.date.today()

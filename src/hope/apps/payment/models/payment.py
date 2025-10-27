@@ -208,6 +208,7 @@ class PaymentPlan(
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
+        ABORTED = "ABORTED", "Aborted"
         FINISHED = "FINISHED", "Finished"
         CLOSED = "CLOSED", "Closed"
 
@@ -1416,6 +1417,30 @@ class PaymentPlan(
         target=Status.OPEN,
     )
     def status_open(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[
+            Status.OPEN,
+            Status.LOCKED,
+            Status.LOCKED_FSP,
+            Status.IN_APPROVAL,
+            Status.IN_AUTHORIZATION,
+            Status.IN_REVIEW,
+            Status.ACCEPTED,
+        ],
+        target=Status.ABORTED,
+    )
+    def status_abort(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.ABORTED,
+        target=Status.OPEN,
+    )
+    def status_reactivate_abort(self) -> None:
         self.status_date = timezone.now()
 
 
