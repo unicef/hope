@@ -4,11 +4,11 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class SanctionListIndividualNationalities(TimeStampedUUIDModel):
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    nationality = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     individual = models.ForeignKey(
         "SanctionListIndividual",
         on_delete=models.CASCADE,
-        related_name="countries",
+        related_name="nationalities",
     )
 
     class Meta:
