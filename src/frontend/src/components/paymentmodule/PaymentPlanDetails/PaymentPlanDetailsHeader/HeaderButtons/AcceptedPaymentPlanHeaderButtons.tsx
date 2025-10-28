@@ -23,7 +23,6 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -313,11 +312,6 @@ export function AcceptedPaymentPlanHeaderButtons({
             >
               {t('Send to FSP')}
             </Button>
-          </Box>
-        )}
-        {canAbort && (
-          <Box m={2}>
-            <AbortPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
       </>
