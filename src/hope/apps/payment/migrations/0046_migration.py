@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="paymentplan",
             name="abort_comment",
-            field=models.CharField(
-                blank=True, help_text="Reason for aborting", max_length=255
-            ),
+            field=models.CharField(blank=True, help_text="Reason for aborting", max_length=255),
         ),
     ]
