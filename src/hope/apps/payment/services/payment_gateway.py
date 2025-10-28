@@ -223,6 +223,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     auth_code: str
     fsp_code: str
     payout_amount: float | None = None
+    payout_date: str | None = None
     message: str | None = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -579,6 +580,7 @@ class PaymentGatewayService:
         ]
 
         delivered_quantity = matching_pg_payment.payout_amount
+        delivery_date = matching_pg_payment.payout_date
         if payment.status in [
             Payment.STATUS_DISTRIBUTION_SUCCESS,
             Payment.STATUS_DISTRIBUTION_PARTIAL,
@@ -586,8 +588,10 @@ class PaymentGatewayService:
         ]:
             if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
                 delivered_quantity = 0
+                delivery_date = None
 
-            update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
+            update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
+            payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore
