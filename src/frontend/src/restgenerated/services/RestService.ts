@@ -175,7 +175,7 @@ export class RestService {
         lang,
     }: {
         format?: 'json' | 'yaml',
-        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
+        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'ckb' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'ms' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'ug' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
     }): CancelablePromise<Record<string, any>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4376,6 +4376,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -4387,7 +4389,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4540,6 +4542,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -4551,7 +4555,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7829,6 +7833,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -7840,7 +7846,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -8041,6 +8047,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -8052,7 +8060,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -8191,6 +8199,8 @@ export class RestService {
          * * `-household__id` - Household  id (descending)
          * * `household__unicef_id` - Household  unicef id
          * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `household__size` - Household  size
+         * * `-household__size` - Household  size (descending)
          * * `birth_date` - Birth date
          * * `-birth_date` - Birth date (descending)
          * * `sex` - Sex
@@ -8202,7 +8212,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__size' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__size' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */

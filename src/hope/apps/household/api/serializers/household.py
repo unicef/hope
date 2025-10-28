@@ -22,7 +22,6 @@ from hope.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
-    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
@@ -169,9 +168,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj: Individual) -> str:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
-        if role:
-            return role.role
-        return ROLE_NO_ROLE
+        return role.role if role else None
 
 
 class RecipientSerializer(serializers.ModelSerializer):

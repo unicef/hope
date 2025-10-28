@@ -91,7 +91,7 @@ export const ReassignRoleBox = ({
   }
 
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
-    .filter((el) => el.role !== 'NO_ROLE')
+    .filter((el) => el.role !== null)
     .map((el) => (
       <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
@@ -141,7 +141,7 @@ export const ReassignRoleBox = ({
         ticket.ticketDetails?.individualData?.role?.previousValue ===
           'PRIMARY' &&
         (ticket.ticketDetails?.individualData?.role?.value === 'ALTERNATE' ||
-          ticket.ticketDetails?.individualData?.role?.value === 'NO_ROLE'))
+          ticket.ticketDetails?.individualData?.role?.value === null))
     ) {
       return (
         <Typography variant="body2">

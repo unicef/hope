@@ -119,7 +119,7 @@ function EditHouseholdDataChange({
   useEffect(() => {
     if (householdMembers && (!values.roles || values.roles.length === 0)) {
       const membersWithRole = householdMembers.results.filter(
-        (member) => member.role && member.role !== 'NO_ROLE',
+        (member) => member.role && member.role !== null,
       );
       setFieldValue(
         'roles',

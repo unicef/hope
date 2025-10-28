@@ -142,7 +142,7 @@ describe('HouseholdMembersTable', () => {
         id: 'individual-2',
         unicefId: 'IND-002',
         fullName: 'Jane Doe',
-        role: 'NO_ROLE',
+        role: null,
         sex: SexEnum.FEMALE,
         birthDate: '1991-05-20',
         relationship: RelationshipEnum.WIFE_HUSBAND,
@@ -174,7 +174,7 @@ describe('HouseholdMembersTable', () => {
         id: 'individual-3',
         unicefId: 'IND-003',
         fullName: 'Alice Doe',
-        role: 'NO_ROLE',
+        role: null,
         sex: SexEnum.FEMALE,
         birthDate: '2015-03-10',
         relationship: RelationshipEnum.SON_DAUGHTER,
@@ -229,7 +229,6 @@ describe('HouseholdMembersTable', () => {
     roleChoices: [
       { value: 'PRIMARY', label: 'Primary' },
       { value: 'ALTERNATE', label: 'Alternate' },
-      { value: 'NO_ROLE', label: 'No Role' },
     ],
     statusChoices: [
       { value: 'ACTIVE', label: 'Active' },

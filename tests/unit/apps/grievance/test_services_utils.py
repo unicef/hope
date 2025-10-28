@@ -135,16 +135,16 @@ class TestGrievanceUtils(TestCase):
         assert IndividualRoleInHousehold.objects.all().count() == 0
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
         with pytest.raises(DRFValidationError) as e:
-            handle_role(ROLE_PRIMARY, household, individuals[0])
+            handle_role(household, individuals[0], ROLE_ALTERNATE)
         assert "Ticket cannot be closed, primary collector role has to be reassigned" in str(e)
 
         # just remove exists roles
         IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
-        handle_role("OTHER_ROLE_XD", household, individuals[0])
+        handle_role(household, individuals[0], "OTHER_ROLE_XD")
         assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
 
         # create new role
-        handle_role(ROLE_ALTERNATE, household, individuals[0])
+        handle_role(household, individuals[0], ROLE_ALTERNATE)
         role = IndividualRoleInHousehold.objects.filter(household=household).first()
         assert role.role == ROLE_ALTERNATE
         assert role.rdi_merge_status == MergeStatusModel.MERGED

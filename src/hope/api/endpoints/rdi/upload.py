@@ -23,7 +23,6 @@ from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     PendingDocument,
     PendingHousehold,
@@ -143,14 +142,14 @@ class IndividualSerializer(serializers.ModelSerializer):
         ]
 
     def validate_role(self, value: str) -> str | None:
-        if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
+        if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
-        if not value:
-            return ROLE_NO_ROLE
         if value.upper()[0] == "P":
             return ROLE_PRIMARY
         if value.upper()[0] == "A":
             return ROLE_ALTERNATE
+        if not value:
+            return None
         raise ValidationError("Invalid value %s. Check values at %s" % (value, reverse("api:role-list")))
 
 
