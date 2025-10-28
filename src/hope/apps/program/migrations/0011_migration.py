@@ -5,15 +5,15 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0012_migration"),
+        ("program", "0010_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name="businessarea",
+            model_name="program",
             name="partners",
         ),
         migrations.DeleteModel(
-            name="BusinessAreaPartnerThrough",
+            name="ProgramPartnerThrough",
         ),
     ]

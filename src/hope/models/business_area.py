@@ -2,39 +2,13 @@ from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import JSONField, UniqueConstraint
+from django.db.models import JSONField
 from natural_keys import NaturalKeyModel
 
 from hope.apps.core.utils import unique_slugify
 from hope.models.utils import (
     TimeStampedUUIDModel,
 )
-
-
-class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    partner = models.ForeignKey(
-        "account.Partner",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    roles = models.ManyToManyField(
-        "account.Role",
-        related_name="business_area_partner_through",
-    )
-
-    class Meta:
-        app_label = "core"
-        constraints = [
-            UniqueConstraint(
-                fields=["business_area", "partner"],
-                name="unique_business_area_partner",
-            )
-        ]
 
 
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
@@ -66,11 +40,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-    )
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=BusinessAreaPartnerThrough,
-        related_name="business_areas",
     )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     office_country = models.ForeignKey(

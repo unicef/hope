@@ -82,11 +82,6 @@ class PartnerAreaLimitForm(forms.Form):
     )
 
 
-class ProgramPartnerInline(admin.TabularInline):
-    model = Program.partners.through
-    extra = 1
-
-
 @admin.register(Program)
 class ProgramAdmin(
     SoftDeletableAdminMixin,
@@ -130,11 +125,10 @@ class ProgramAdmin(
         "business_area",
         "data_collecting_type",
         "beneficiary_group",
-        "admin_areas",
     )
     filter_horizontal = ("admin_areas",)
 
-    inlines = (ProgramCycleAdminInline, ProgramPartnerInline)
+    inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
 
     def save_model(self, request: HttpRequest, obj: Program, *args: Any) -> None:

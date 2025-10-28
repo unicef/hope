@@ -25,7 +25,6 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
-from hope.models.program_partner_through import ProgramPartnerThrough
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
     AbstractSyncable,
@@ -128,12 +127,6 @@ class Program(
         help_text="Program beneficiary group",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=ProgramPartnerThrough,
-        related_name="programs",
-        help_text="Program partners",
-    )
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
     name = models.CharField(
         max_length=255,

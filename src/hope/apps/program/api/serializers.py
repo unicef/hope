@@ -414,7 +414,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
-    partners = PartnersDataSerializer(many=True)
+    partners = PartnersDataSerializer(many=True, write_only=True)
     pdu_fields = PDUFieldsCreateSerializer(many=True)
     slug = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
@@ -649,7 +649,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
 
 
 class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
-    partners = PartnersDataSerializer(many=True)
+    partners = PartnersDataSerializer(many=True, write_only=True)
     version = serializers.IntegerField(required=False, read_only=True)
 
     class Meta:
@@ -678,7 +678,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
-    partners = PartnersDataSerializer(many=True)
+    partners = PartnersDataSerializer(many=True, write_only=True)
     pdu_fields = PDUFieldsCreateSerializer(many=True)
 
     class Meta:
