@@ -893,7 +893,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return self.golden_records_individual
 
     def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
-        from hope.models.household import Individual
+        from hope.models.individual import Individual
 
         unique_areas_count = (
             Individual.objects.filter(

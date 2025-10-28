@@ -308,12 +308,11 @@ def disable_activity_log(monkeypatch):
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
 
 
-@pytest.fixture(scope="session", autouse=True)
-def ensure_contenttypes_and_permissions(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        ContentType.objects.clear_cache()
-        for app_config in apps.get_app_configs():
-            create_permissions(app_config, verbosity=0)
+@pytest.fixture(autouse=True)
+def ensure_contenttypes_and_permissions(db):
+    ContentType.objects.clear_cache()
+    for app_config in apps.get_app_configs():
+        create_permissions(app_config, verbosity=0)
 
 
 @pytest.fixture(scope="session", autouse=True)

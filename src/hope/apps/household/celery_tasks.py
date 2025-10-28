@@ -93,7 +93,7 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
 @log_start_and_end
 @sentry_tags
 def interval_recalculate_population_fields_task() -> None:
-    from hope.models.household import Individual
+    from hope.models.individual import Individual
 
     datetime_now = timezone.now()
     now_day, now_month = datetime_now.day, datetime_now.month

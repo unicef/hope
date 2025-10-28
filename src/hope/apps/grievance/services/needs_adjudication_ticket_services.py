@@ -214,7 +214,7 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
-    from hope.models.household import Individual
+    from hope.models.individual import Individual
 
     if not individuals_queryset:
         return

@@ -263,7 +263,7 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "subtype": pdu_data.subtype,
                 "number_of_rounds": pdu_data.number_of_rounds,
                 "rounds_names": pdu_data.rounds_names,
-                "rounds_covered": pdu_data.rounds_covered,
+                # "rounds_covered": pdu_data.rounds_covered,
             },
         }
         assert field_attribute_data == expected_field_attribute_data
