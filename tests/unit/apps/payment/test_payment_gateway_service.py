@@ -49,6 +49,7 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentInstructionData,
     PaymentInstructionStatus,
     PaymentRecordData,
+    PaymentSerializer,
 )
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -159,6 +160,8 @@ class TestPaymentGatewayService(BaseTestCase):
             ),
         ]
         create_payment_plan_snapshot_data(cls.pp)
+        for payment in cls.payments:
+            payment.refresh_from_db()
 
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
@@ -430,6 +433,10 @@ class TestPaymentGatewayService(BaseTestCase):
         self.pp.refresh_from_db()
         assert self.pp.status == PaymentPlan.Status.FINISHED
 
+    @mock.patch(
+        "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
     @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
     @mock.patch(
@@ -441,9 +448,18 @@ class TestPaymentGatewayService(BaseTestCase):
         get_quantity_in_usd_mock: Any,
         get_record_mock: Any,
         get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
     ) -> None:
         self.payments[0].status = Payment.STATUS_ERROR
         self.payments[0].save()
+
+        self.payments[1].status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        self.payments[1].save()
+
+        self.pp_split_1.sent_to_payment_gateway = True
+        self.pp_split_2.sent_to_payment_gateway = True
+        self.pp_split_1.save()
+        self.pp_split_2.save()
 
         get_record_mock.side_effect = [
             PaymentRecordData(
@@ -462,6 +478,7 @@ class TestPaymentGatewayService(BaseTestCase):
 
         pg_service = PaymentGatewayService()
         pg_service.api.get_record = get_record_mock  # type: ignore
+        pg_service.api.change_payment_instruction_status = change_payment_instruction_status_mock  # type: ignore
 
         pg_service.sync_record(self.payments[0])
         assert get_record_mock.call_count == 1
@@ -470,6 +487,10 @@ class TestPaymentGatewayService(BaseTestCase):
         assert self.payments[0].fsp_auth_code == "1"
         assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
         assert self.payments[0].delivered_quantity_usd == 100.0
+
+        self.pp.refresh_from_db()
+        assert self.pp.status == PaymentPlan.Status.FINISHED
+        assert change_payment_instruction_status_mock.call_count == 2
 
     def test_get_hope_status(self) -> None:
         p = PaymentRecordData(
@@ -634,7 +655,7 @@ class TestPaymentGatewayService(BaseTestCase):
             individual=primary_collector,
             data={
                 "provider": "Provider",
-                "code": "CBA",
+                "service_provider_code": "CBA",
             },
             account_type=AccountType.objects.get(key="mobile"),
             financial_institution=fi,
@@ -650,21 +671,6 @@ class TestPaymentGatewayService(BaseTestCase):
         create_payment_plan_snapshot_data(self.payments[0].parent)
         assert PaymentHouseholdSnapshot.objects.count() == 2
         self.payments[0].refresh_from_db()
-
-        with self.assertRaisesMessage(
-            Exception,
-            f"No Financial Institution Mapping found for"
-            f" financial_institution {fi},"
-            f" fsp {self.payments[0].financial_service_provider},"
-            f" payment {self.payments[0].id},"
-            f" collector {self.payments[0].collector}.",
-        ):
-            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-            post_mock.reset_mock()
-
-        FinancialInstitutionMapping.objects.create(
-            financial_service_provider=self.pg_fsp, financial_institution=fi, code="123"
-        )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
@@ -684,8 +690,8 @@ class TestPaymentGatewayService(BaseTestCase):
                         "delivery_mechanism": "mobile_money",
                         "account_type": "mobile",
                         "account": {
-                            "service_provider_code": "123",
                             "number": "123456789",
+                            "service_provider_code": "CBA",
                             "provider": "Provider",
                             "financial_institution": str(fi.id),
                         },
@@ -1115,8 +1121,8 @@ class TestPaymentGatewayService(BaseTestCase):
             errors={"0": "Error", "1": "Error"},
         )
 
-        with patch.object(pg_service.api, "add_records_to_payment_instruction") as mock_add_records:
-            pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        with patch.object(pg_service.api, "add_records_to_payment_instruction"):
+            pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
 
             pg_service.add_missing_records_to_payment_instructions(self.pp)
             # got one payment not in PaymentGateway -> self.payments[1]
@@ -1124,8 +1130,67 @@ class TestPaymentGatewayService(BaseTestCase):
 
             # check call arguments
             called_payments, called_split = (
-                mock_add_records.call_args[0][0],
-                mock_add_records.call_args[0][1],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][0],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][1],
             )
             assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
             assert called_split == self.pp_split_2.pk
+
+    def test_map_financial_institution_pk_and_mapping_found(self) -> None:
+        fi = FinancialInstitution.objects.create(name="Bank A", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.pg_fsp, code="BANKA_CODE_FOR_OTHER_FSP"
+        )
+        account_data = {"financial_institution": str(fi.pk), "number": "123"}
+
+        result = PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert result["service_provider_code"] == "BANKA_CODE_FOR_OTHER_FSP"
+        assert result["number"] == "123"
+
+    def test_map_financial_institution_pk_and_mapping_missing_raises(self) -> None:
+        fi = FinancialInstitution.objects.create(name="Bank B", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        account_data = {"financial_institution": str(fi.pk)}
+
+        with pytest.raises(Exception, match="No Financial Institution Mapping found"):
+            PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+
+    def test_map_financial_institution_with_code_and_fsp_is_uba_passthrough(self) -> None:
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
+        self.payments[0].financial_service_provider = uba_fsp
+        self.payments[0].save()
+        account_data = {"code": "UBA_SPECIFIC_CODE", "number": "999"}
+
+        result = PaymentSerializer()._map_financial_institution(self.payments[0], account_data)
+        assert result["service_provider_code"] == "UBA_SPECIFIC_CODE"
+        assert result["number"] == "999"
+
+    def test_map_financial_institution_with_code_and_fsp_is_not_uba_map_via_uba_mapping(self) -> None:
+        # incoming code belongs to UBA, map it to UBA FI, then map to other FSP code
+
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+        payment = self.payments[0]
+
+        # Create a Financial Institution and mappings:
+        fi = FinancialInstitution.objects.create(name="Bank C", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        # UBA mapping identified by incoming code
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=uba_fsp, code="UBA_CODE_X"
+        )
+        # Target FSP-specific code for the same FI
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.pg_fsp, code="OTHER_FSP_CODE_FOR_BANKC"
+        )
+
+        account_data = {"code": "UBA_CODE_X", "extra": "keep"}
+
+        result = PaymentSerializer()._map_financial_institution(payment, account_data)
+        assert result["service_provider_code"] == "OTHER_FSP_CODE_FOR_BANKC"
+        assert result["extra"] == "keep"
+
+    def test_map_financial_institution_with_code_mapping_missing_raises(self) -> None:
+        # No mappings created for the given code
+        account_data = {"code": "UNKNOWN_CODE"}
+
+        with pytest.raises(Exception, match="No Financial Institution Mapping found"):
+            PaymentSerializer()._map_financial_institution(self.payments[0], account_data)

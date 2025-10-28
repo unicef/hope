@@ -39,6 +39,8 @@ function RecipientsTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const { data, isLoading, error } = useQuery({
     queryKey: [
       'businessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList',
@@ -74,6 +76,8 @@ function RecipientsTable({
         setQueryVariables={setQueryVariables}
         rowsPerPageOptions={[10, 15, 20]}
         itemsCount={data?.results?.length || 0}
+        page={page}
+        setPage={setPage}
         renderRow={(row: Recipient) => (
           <RecipientsTableRow
             key={row.id}

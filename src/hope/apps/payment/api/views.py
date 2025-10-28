@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -36,6 +36,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
+from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -960,6 +961,7 @@ class PaymentPlanViewSet(
         detail=True,
         methods=["post"],
         url_path="entitlement-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1151,6 +1153,9 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
+
+        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+            raise ValidationError("Payment List Per FSP export already in progress.")
 
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,
@@ -1690,6 +1695,7 @@ class PaymentPlanManagerialViewSet(
                     PaymentPlan.Status.ACCEPTED,
                 ],
             )
+            .select_related("program_cycle__program")
         )
 
     # TODO: e2e failed probably because of cache here
@@ -1711,11 +1717,16 @@ class PaymentPlanManagerialViewSet(
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-
+        payment_plans = PaymentPlan.objects.filter(id__in=serializer.validated_data["ids"]).select_related(
+            "program_cycle__program",
+            "imported_file",
+            "export_file_entitlement",
+            "export_file_per_fsp",
+        )
         with transaction.atomic():
-            for payment_plan_id_str in serializer.validated_data["ids"]:
+            for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    payment_plan_id_str,
+                    payment_plan,
                     input_data,
                     self.business_area,
                     request,
@@ -1726,13 +1737,11 @@ class PaymentPlanManagerialViewSet(
     @transaction.atomic
     def _perform_payment_plan_status_action(
         self,
-        payment_plan_id: str,
+        payment_plan: PaymentPlan,
         input_data: dict,
         business_area: BusinessArea,
         request: Request,
     ) -> None:
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-
         if not self.request.user.has_perm(
             self._get_action_permission(input_data["action"]),  # type: ignore
             payment_plan.program_cycle.program or business_area,
@@ -1757,7 +1766,7 @@ class PaymentPlanManagerialViewSet(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
-            programs=payment_plan.program_cycle.program.pk,
+            programs=payment_plan.program_cycle.program_id,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1846,7 +1855,20 @@ class PaymentViewSet(
         return get_object_or_404(Payment, id=payment_id)
 
     def get_queryset(self) -> QuerySet:
-        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_pk"])
+        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
+        # Prefetch roles for each individual's household
+        role_prefetch = Prefetch(
+            "households_and_roles",
+            queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
+            to_attr="prefetched_roles",
+        )
+        # Prefetch individuals within households, including their roles
+        individual_prefetch = Prefetch(
+            "household__individuals",
+            queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
+            to_attr="prefetched_individuals",
+        )
+        return parent.eligible_payments.prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,

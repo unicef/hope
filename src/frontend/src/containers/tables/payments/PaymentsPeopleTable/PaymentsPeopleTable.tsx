@@ -4,7 +4,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
@@ -32,6 +34,7 @@ function PaymentsPeopleTable({
     id: household.id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -54,21 +57,49 @@ function PaymentsPeopleTable({
             id: household.id,
           },
           queryVariables,
+
           { withPagination: true },
         ),
       );
     },
   });
 
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsPaymentsCount',
+      programId,
+      businessArea,
+      queryVariables,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <UniversalRestTable
-      title={t('Payment Records')}
+      title={t('Payments')}
       headCells={headCells}
       data={paymentsData}
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}

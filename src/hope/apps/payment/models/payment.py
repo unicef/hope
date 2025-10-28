@@ -1516,10 +1516,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         blank=True,
     )
 
-    @staticmethod
+    @classmethod
     def get_data_from_payment_snapshot(
+        cls,
         household_data: dict[str, Any],
         core_field: dict[str, Any],
+        admin_areas_dict: dict[str, dict[str, Any]],
+        countries_dict: dict[str, dict[str, Any]],
     ) -> str | None:
         collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
@@ -1533,12 +1536,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
 
             if main_key in {"country_origin_id", "country_id"}:
-                country = Country.objects.filter(pk=household_data.get(main_key)).first()
-                return country.iso_code3 if country else None
+                country = countries_dict.get(household_data.get(main_key))  # type: ignore
+                return country["iso_code3"] if country else None
 
-            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id"}:
-                area = Area.objects.filter(pk=household_data.get(main_key)).first()
-                return f"{area.p_code} - {area.name}" if area else "" if area else None
+            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+                area = admin_areas_dict.get(household_data.get(main_key))  # type: ignore
+                return f"{area['p_code']} - {area['name']}" if area else None
 
             if main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
@@ -1576,6 +1579,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     def get_column_from_core_field(
         payment: "Payment",
         core_field_name: str,
+        admin_areas_dict: dict[str, dict[str, Any]],
+        countries_dict: dict[str, dict[str, Any]],
     ) -> Any:
         core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
@@ -1589,10 +1594,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
 
-        return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(snapshot.snapshot_data, core_field)
+        return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+            snapshot.snapshot_data,
+            core_field,
+            admin_areas_dict,
+            countries_dict,
+        )
 
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str | float | list | None:
+    def get_column_value_from_payment(
+        cls,
+        payment: "Payment",
+        column_name: str,
+        areas_dict: dict,
+    ) -> str | float | list | None:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
@@ -1646,18 +1661,15 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "fsp_auth_code": (payment, "fsp_auth_code"),
         }
         additional_columns = {
-            "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
-            "alternate_collector_document_numbers": (
-                cls.get_alternate_collector_doc_numbers,
-                [snapshot_data],
-            ),
+            "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
+            "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
         if column_name in DocumentType.get_all_doc_types():
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         if column_name in additional_columns:
             method, args = additional_columns[column_name]
-            return method(*args)
+            return method(*args)  # type: ignore
 
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1703,10 +1715,18 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         doc_numbers = [doc.get("document_number", "") for doc in doc_list]
         return ", ".join(doc_numbers)
 
-    @staticmethod
-    def get_admin_level_2(snapshot_data: dict[str, Any]) -> str:
-        area = Area.objects.filter(pk=snapshot_data.get("admin2_id")).first()
-        return area.name if area else ""
+    @classmethod
+    def get_admin_level_2(cls, snapshot_data: dict[str, Any], areas_dict: dict) -> str:
+        area = areas_dict.get(snapshot_data.get("admin2_id"))
+        return area["name"] if area else ""
+
+    @classmethod
+    def get_areas_dict(cls) -> dict:
+        return {str(row["pk"]): row for row in Area.objects.values("pk", "name", "p_code")}
+
+    @classmethod
+    def get_countries_dict(cls) -> dict:
+        return {str(row["pk"]): row for row in Country.objects.values("pk", "iso_code3")}
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"
@@ -2103,8 +2123,14 @@ class Payment(
 
     @property
     def people_individual(self) -> Individual | None:
-        """Return first Individual from Household for DCT social worker."""
-        return self.household.individuals.first() if self.parent.is_social_worker_program else None
+        if not getattr(self.parent, "is_social_worker_program", False):
+            return None
+
+        household = self.household
+        prefetched = getattr(household, "prefetched_individuals", None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        return household.individuals.select_related().first()
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
@@ -2140,6 +2166,14 @@ class FinancialInstitution(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
+
+    @classmethod
+    def get_rdi_template_choices(cls) -> dict:
+        return {
+            "account__ACCOUNT_TYPE__financial_institution": {
+                "choices": [{"value": fi.pk, "label": {"English(EN)": fi.name}} for fi in cls.objects.all()]
+            }
+        }
 
 
 class FinancialInstitutionMapping(TimeStampedModel):

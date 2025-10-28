@@ -77,15 +77,15 @@ export function RequestedIndividualDataChangeTable({
   const {
     documents,
     identities,
-    previous_documents: previousDocuments,
-    documents_to_remove: documentsToRemove,
-    documents_to_edit: documentsToEdit,
-    previous_identities: previousIdentities,
-    identities_to_remove: identitiesToRemove,
-    identities_to_edit: identitiesToEdit,
-    accounts: accounts,
-    accounts_to_edit: accountsToEdit,
-    flex_fields: flexFields,
+    previousDocuments,
+    documentsToRemove,
+    documentsToEdit,
+    previousIdentities,
+    identitiesToRemove,
+    identitiesToEdit,
+    accounts,
+    accountsToEdit,
+    flexFields,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -150,19 +150,21 @@ export function RequestedIndividualDataChangeTable({
         />
       ) : null}
       {documentsToEdit?.length
-        ? documentsToEdit.map((document, index) => (
-            <DocumentsToEditTable
-              key={document.previous_value.number}
-              values={values}
-              isEdit={isEdit}
-              ticket={ticket}
-              setFieldValue={setFieldValue}
-              documentTypeDict={documentTypeDict}
-              countriesDict={countriesDict}
-              index={index}
-              document={document}
-            />
-          ))
+        ? documentsToEdit.map((document, index) => {
+            return (
+              <DocumentsToEditTable
+                key={document.previousValue.number}
+                values={values}
+                isEdit={isEdit}
+                ticket={ticket}
+                setFieldValue={setFieldValue}
+                documentTypeDict={documentTypeDict}
+                countriesDict={countriesDict}
+                index={index}
+                document={document}
+              />
+            );
+          })
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -180,7 +182,7 @@ export function RequestedIndividualDataChangeTable({
       {identitiesToEdit?.length
         ? identitiesToEdit.map((identity, index) => (
             <IdentitiesToEditTable
-              key={identity.previous_value.number}
+              key={identity.previousValue.number}
               values={values}
               isEdit={isEdit}
               ticket={ticket}
@@ -201,7 +203,9 @@ export function RequestedIndividualDataChangeTable({
               setFieldValue={setFieldValue}
               index={index}
               account={account}
-              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
+              accountFinancialInstitutionsDict={
+                accountFinancialInstitutionsDict
+              }
             />
           ))
         : null}
@@ -215,7 +219,9 @@ export function RequestedIndividualDataChangeTable({
               setFieldValue={setFieldValue}
               index={index}
               account={account}
-              accountFinancialInstitutionsDict={accountFinancialInstitutionsDict}
+              accountFinancialInstitutionsDict={
+                accountFinancialInstitutionsDict
+              }
             />
           ))
         : null}

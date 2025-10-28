@@ -9,6 +9,7 @@ import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgram
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -66,6 +67,8 @@ function ProgrammesTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
@@ -92,7 +95,10 @@ function ProgrammesTable({
       RestService.restBusinessAreasProgramsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, dataProgramsCount);
 
   return (
     <>
@@ -105,7 +111,7 @@ function ProgrammesTable({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
-          itemsCount={dataProgramsCount?.count}
+          itemsCount={itemsCount}
           renderRow={(row: ProgramList) => (
             <ProgrammesTableRow
               key={row.id}
@@ -113,6 +119,8 @@ function ProgrammesTable({
               choicesData={choicesData}
             />
           )}
+          page={page}
+          setPage={setPage}
         />
       </TableWrapper>
     </>

@@ -79,6 +79,8 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const {
     data: updatesData,
     isLoading,
@@ -89,6 +91,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
       queryVariables,
       businessAreaSlug,
       programId,
+      page,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
@@ -176,6 +179,8 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={uploadsCountData?.count}
+        page={page}
+        setPage={setPage}
       />
     </>
   );

@@ -247,16 +247,7 @@ export function TableRestComponent<T>({
       );
     }
   } else {
-    body = (
-      <>
-        {data.map((row) => renderRow(row))}
-        {emptyRows > 0 && (
-          <StyledTableRow style={{ height: 70 * emptyRows }}>
-            <StyledTableCell colSpan={headCells.length} />
-          </StyledTableRow>
-        )}
-      </>
-    );
+    body = <>{data.map((row) => renderRow(row))}</>;
   }
 
   const table = (
@@ -300,13 +291,11 @@ export function TableRestComponent<T>({
           <MuiTableBody>{body}</MuiTableBody>
         </StyledTable>
       </StyledTableContainer>
-      {!hidePagination && (
+      {!hidePagination && typeof itemsCount === 'number' && itemsCount >= 0 && (
         <TablePagination
           rowsPerPageOptions={rowsPerPageOptions}
           component="div"
-          count={
-            itemsCount == null || itemsCount === undefined ? -1 : itemsCount
-          }
+          count={itemsCount}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePageProp}

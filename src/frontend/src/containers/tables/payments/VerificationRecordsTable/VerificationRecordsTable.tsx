@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './VerificationRecordsHeadCells';
@@ -60,6 +61,31 @@ export function VerificationRecordsTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
+  // Add count query for verification records, only enabled on first page
+  const { data: verificationCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
+        },
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, verificationCountData);
+
   const {
     data: paymentsData,
     isLoading,
@@ -96,6 +122,9 @@ export function VerificationRecordsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}

@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -42,6 +43,8 @@ export function LookUpTargetPopulationTableSurveys({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       totalHouseholdsCountWithValidPhoneNoMin:
@@ -58,6 +61,7 @@ export function LookUpTargetPopulationTableSurveys({
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programSlug: programId,
+      page,
     }),
     [
       filter.totalHouseholdsCountMin,
@@ -67,6 +71,7 @@ export function LookUpTargetPopulationTableSurveys({
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
       programId,
+      page,
     ],
   );
 
@@ -97,6 +102,26 @@ export function LookUpTargetPopulationTableSurveys({
     },
   });
 
+  // Count query, enabled only on page 0
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -114,6 +139,9 @@ export function LookUpTargetPopulationTableSurveys({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={itemsCount}
+        page={page}
+        setPage={setPage}
         renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowSurveys
             radioChangeHandler={enableRadioButton && handleRadioChange}

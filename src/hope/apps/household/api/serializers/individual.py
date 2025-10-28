@@ -9,7 +9,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.utils import decode_id_string, resolve_flex_fields_choices_to_string
+from hope.apps.core.utils import resolve_flex_fields_choices_to_string
 from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
@@ -191,12 +191,11 @@ class DeduplicationResultSerializer(serializers.Serializer):
         try:
             uuid.UUID(hit_id)
             pk = hit_id
-        except (ValueError, TypeError):
-            # otherwise decode the opaque ID
-            pk = decode_id_string(hit_id)
+        except (ValueError, TypeError):  # pragma: no cover
+            return None
         try:
             individual = Individual.all_objects.get(id=pk)
-        except Individual.DoesNotExist:
+        except Individual.DoesNotExist:  # pragma: no cover
             return None
         return str(individual.unicef_id)
 
@@ -285,10 +284,15 @@ class IndividualListSerializer(serializers.ModelSerializer):
         )
 
     def get_role(self, obj: dict) -> str:
-        roles = obj.prefetched_roles
+        roles = getattr(obj, "prefetched_roles", None)
         if roles:
-            return roles[0].get_role_display()
-        return ROLE_NO_ROLE
+            role = roles[0]
+        else:
+            role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
+
+        if not role:
+            return ROLE_NO_ROLE
+        return role.get_role_display()
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))
     def get_deduplication_batch_results(self, obj: Individual) -> ReturnDict:

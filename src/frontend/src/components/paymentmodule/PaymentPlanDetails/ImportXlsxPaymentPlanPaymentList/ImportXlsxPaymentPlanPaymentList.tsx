@@ -1,4 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { getApiErrorMessages } from '@utils/utils';
 import { Publish } from '@mui/icons-material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,6 @@ import { LoadingButton } from '@core/LoadingButton';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -31,6 +31,7 @@ export function ImportXlsxPaymentPlanPaymentList({
   paymentPlan,
   permissions,
 }: ImportXlsxPaymentPlanPaymentListProps): ReactElement {
+  const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
@@ -39,55 +40,51 @@ export function ImportXlsxPaymentPlanPaymentList({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const {
-    mutateAsync: mutate,
-    isPending: fileLoading,
-    error,
-  } = useMutation({
+  const { mutateAsync: mutate, isPending: fileLoading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,
       programSlug,
-      formData,
+      requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
       programSlug: string;
-      formData: PaymentPlanImportFile;
+      requestBody: PaymentPlanImportFile;
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+      RestService.restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate(
         {
           businessAreaSlug,
           id,
           programSlug,
-          formData,
+          formData: requestBody,
         },
       ),
     onSuccess: () => {
       setOpenImport(false);
       showMessage(t('Your import was successful!'));
-      // Invalidate payment plan queries to refetch updated data
+      setXlsxError(null);
       queryClient.invalidateQueries({
         queryKey: ['paymentPlan', paymentPlan.id],
       });
     },
-    onError: (e) => {
-      showApiErrorMessages(e, showMessage);
+    onError: (error: any) => {
+      setXlsxError(getApiErrorMessages(error));
     },
   });
 
-  const handleImport = async(): Promise<void> => {
+  const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
         const formData = {
           // @ts-ignore - File object is expected here despite the string type in the model
-          file: fileToImport,
+          file: fileToImport as any,
         };
         await mutate({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
           programSlug: programId,
-          formData: formData as any,
+          requestBody: formData,
         });
       } catch {
         // Error is already handled by onError in mutation
@@ -146,10 +143,10 @@ export function ImportXlsxPaymentPlanPaymentList({
                 setFileToImport(file);
               }}
             />
-            {fileToImport && error ? (
+            {fileToImport && xlsxError ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
-                <p>{error.message}</p>
+                <p>{xlsxError}</p>
               </Error>
             ) : null}
           </>

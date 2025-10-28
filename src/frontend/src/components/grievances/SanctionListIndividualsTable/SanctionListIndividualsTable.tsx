@@ -34,6 +34,8 @@ export function SanctionListIndividualsTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const { data, isLoading, error } =
     useQuery<PaginatedSanctionListIndividualList>({
       queryKey: ['restSanctionListList', queryVariables],
@@ -51,6 +53,8 @@ export function SanctionListIndividualsTable({
       isLoading={isLoading}
       error={error}
       itemsCount={data?.results?.length}
+      page={page}
+      setPage={setPage}
       renderRow={(row: SanctionListIndividual) => (
         <SanctionListIndividualsTableRow key={row.id} individual={row} />
       )}
