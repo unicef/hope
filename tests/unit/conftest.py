@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth.management import create_permissions
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.management import call_command
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
@@ -296,7 +297,15 @@ def clear_cache_before_each_test() -> None:
 def disable_activity_log(monkeypatch):
     from hope.models.log_entry import LogEntry
 
-    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: None)
+    class DummyPrograms:
+        def add(self, *args, **kwargs):
+            pass
+
+    class DummyLog:
+        def __init__(self):
+            self.programs = DummyPrograms()
+
+    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -307,8 +316,7 @@ def ensure_contenttypes_and_permissions(django_db_setup, django_db_blocker):
             create_permissions(app_config, verbosity=0)
 
 
-@pytest.fixture(autouse=True, scope="session")
-def prevent_contenttype_flush(transactional_db):
-    from django.core.management import call_command
-
-    call_command("migrate", interactive=False, run_syncdb=True)
+@pytest.fixture(scope="session", autouse=True)
+def prevent_contenttype_flush(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command("migrate", interactive=False, run_syncdb=True)
