@@ -48,9 +48,9 @@ export function AbortPaymentPlan({
       businessAreaSlug: string;
       id: string;
       programSlug: string;
-      requestBody: { comment?: string };
+      requestBody: { abortComment?: string };
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansAbortRetrieve({
+      RestService.restBusinessAreasProgramsPaymentPlansAbortCreate({
         businessAreaSlug,
         id,
         programSlug,
@@ -81,7 +81,7 @@ export function AbortPaymentPlan({
           id: paymentPlan.id,
           programSlug: programId,
           requestBody: {
-            comment: values.comment,
+            abortComment: values.comment,
           },
         });
         resetForm({});
