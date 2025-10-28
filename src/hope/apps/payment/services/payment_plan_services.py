@@ -968,13 +968,11 @@ class PaymentPlanService:
 
     def abort(self, abort_comment: str | None) -> PaymentPlan:
         allowed_statuses = [
-            PaymentPlan.Status.OPEN,
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,
             PaymentPlan.Status.IN_APPROVAL,
             PaymentPlan.Status.IN_AUTHORIZATION,
             PaymentPlan.Status.IN_REVIEW,
-            PaymentPlan.Status.ACCEPTED,
         ]
 
         if self.payment_plan.status not in allowed_statuses:
