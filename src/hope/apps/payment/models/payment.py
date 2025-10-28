@@ -174,6 +174,7 @@ class PaymentPlan(
             "total_individuals_count",
             "targeting_criteria_string",
             "excluded_ids",
+            "abort_comment",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -451,6 +452,11 @@ class PaymentPlan(
         max_digits=6,
         help_text="Written by a tool such as Engine Formula",
         blank=True,
+    )
+    abort_comment = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Reason for aborting",
     )
     # System fields
     status = FSMField(
@@ -1197,6 +1203,7 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
+                PaymentPlan.Status.OPEN,
             ]
         ],
     )
@@ -1442,6 +1449,7 @@ class PaymentPlan(
     )
     def status_reactivate_abort(self) -> None:
         self.status_date = timezone.now()
+        self.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
 
 class FlexFieldArrayField(ArrayField):
