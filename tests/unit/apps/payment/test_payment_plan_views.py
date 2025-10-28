@@ -2876,11 +2876,14 @@ class TestPaymentPlanActions:
         self.pp.refresh_from_db()
 
         assert self.pp.status == pp_status
-        response = self.client.get(self.url_pp_abort)
+        response = self.client.post(self.url_pp_abort, {"abort_comment": "test comment"}, format="json")
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json() == {"message": "Payment Plan aborted"}
+            self.pp.refresh_from_db()
+            assert self.pp.status == PaymentPlan.Status.ABORTED
+            assert self.pp.abort_comment == "test comment"
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
             assert response.json()[0] == f"Abort Payment Plan is not possible within Status {pp_status}"

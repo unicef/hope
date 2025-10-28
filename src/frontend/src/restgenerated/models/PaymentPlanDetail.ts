@@ -369,5 +369,9 @@ export type PaymentPlanDetail = {
     readonly availableFundsCommitments: Array<Record<string, any>>;
     readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
     readonly adminUrl: string;
+    /**
+     * Reason for aborting
+     */
+    abortComment?: string;
 };
 

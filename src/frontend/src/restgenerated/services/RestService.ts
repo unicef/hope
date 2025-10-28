@@ -104,6 +104,7 @@ import type { PatchedUpdateGrievanceTicket } from '../models/PatchedUpdateGrieva
 import type { PaymentChoices } from '../models/PaymentChoices';
 import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlan } from '../models/PaymentPlan';
+import type { PaymentPlanAbort } from '../models/PaymentPlanAbort';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
 import type { PaymentPlanCreateFollowUp } from '../models/PaymentPlanCreateFollowUp';
 import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate';
@@ -9032,13 +9033,14 @@ export class RestService {
         });
     }
     /**
-     * @returns PaymentPlan
+     * @returns PaymentPlanAbort
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlansAbortRetrieve({
+    public static restBusinessAreasProgramsPaymentPlansAbortCreate({
         businessAreaSlug,
         id,
         programSlug,
+        requestBody,
     }: {
         businessAreaSlug: string,
         /**
@@ -9046,15 +9048,18 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<PaymentPlan> {
+        requestBody?: PaymentPlanAbort,
+    }): CancelablePromise<PaymentPlanAbort> {
         return __request(OpenAPI, {
-            method: 'GET',
+            method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/abort/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_slug': programSlug,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

@@ -52,6 +52,7 @@ from hope.apps.payment.api.serializers import (
     PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
+    PaymentPlanAbortSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
     PaymentPlanCreateUpdateSerializer,
@@ -649,6 +650,7 @@ class PaymentPlanViewSet(
         "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
+        "abort": PaymentPlanAbortSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -1409,12 +1411,16 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["post"])
     @transaction.atomic
     def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        abort_comment = serializer.validated_data.get("abort_comment")
+
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).abort()
+        payment_plan = PaymentPlanService(payment_plan).abort(abort_comment)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
