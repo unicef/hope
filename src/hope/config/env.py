@@ -152,7 +152,7 @@ DEFAULTS = {
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
         str,
-        "django.core.files.storage.FileSystemStorage",
+        "django.contrib.staticfiles.storage.StaticFilesStorage",
     ),
     "FILE_STORAGE_MEDIA": (
         str,
