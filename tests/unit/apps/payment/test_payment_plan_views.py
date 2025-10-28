@@ -2858,8 +2858,8 @@ class TestPaymentPlanActions:
     @pytest.mark.parametrize(
         ("permissions", "expected_status", "pp_status"),
         [
-            ([Permissions.PM_ABORT], status.HTTP_200_OK, PaymentPlan.Status.ACCEPTED),
-            ([Permissions.PM_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
+            ([Permissions.PM_ABORT], status.HTTP_200_OK, PaymentPlan.Status.IN_REVIEW),
+            ([Permissions.PM_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
             ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.OPEN),
         ],
     )
