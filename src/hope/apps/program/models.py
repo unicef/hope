@@ -38,29 +38,6 @@ from hope.apps.utils.models import (
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
-class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
-    program = models.ForeignKey(
-        "Program",
-        on_delete=models.CASCADE,
-        related_name="program_partner_through",
-    )
-    partner = models.ForeignKey(
-        "account.Partner",
-        on_delete=models.CASCADE,
-        related_name="program_partner_through",
-    )
-    areas = models.ManyToManyField("geo.Area", related_name="program_partner_through", blank=True)
-    full_area_access = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["program", "partner"],
-                name="unique_program_partner",
-            )
-        ]
-
-
 class BeneficiaryGroup(TimeStampedUUIDModel):
     name = models.CharField(max_length=255, unique=True)
     group_label = models.CharField(max_length=255)
@@ -170,12 +147,6 @@ class Program(
         help_text="Program beneficiary group",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=ProgramPartnerThrough,
-        related_name="programs",
-        help_text="Program partners",
-    )
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
     name = models.CharField(
         max_length=255,
