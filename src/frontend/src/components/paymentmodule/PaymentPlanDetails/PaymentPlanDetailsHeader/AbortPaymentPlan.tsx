@@ -93,8 +93,8 @@ export function AbortPaymentPlan({
           {abortDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
-              color="error"
-              variant="contained"
+              color="secondary"
+              variant="outlined"
               onClick={() => setAbortDialogOpen(true)}
               data-cy="button-abort"
               disabled={!isActiveProgram}
@@ -137,7 +137,7 @@ export function AbortPaymentPlan({
                 <LoadingButton
                   loading={loadingAbort}
                   type="submit"
-                  color="error"
+                  color="primary"
                   variant="contained"
                   onClick={submitForm}
                   data-cy="button-submit-abort"

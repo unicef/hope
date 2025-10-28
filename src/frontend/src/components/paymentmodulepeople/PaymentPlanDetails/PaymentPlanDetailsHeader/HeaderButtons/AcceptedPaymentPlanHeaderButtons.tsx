@@ -308,11 +308,6 @@ export function AcceptedPaymentPlanHeaderButtons({
             </LoadingButton>
           </Box>
         )}
-        {canAbort && (
-          <Box m={2}>
-            <AbortPaymentPlan paymentPlan={paymentPlan} />
-          </Box>
-        )}
       </>
     </Box>
   );
