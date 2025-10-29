@@ -63,7 +63,7 @@ class EditAccountSerializer(serializers.Serializer):
     def validate(self, attrs):
         from rest_framework.generics import get_object_or_404
 
-        from hope.apps.payment.models import Account
+        from hope.models.account import Account
 
         account_id = attrs.get("id")
         financial_institution = attrs.get("financial_institution", "")

@@ -294,7 +294,11 @@ def clear_cache_before_each_test() -> None:
 
 
 @pytest.fixture(autouse=True)
-def disable_activity_log(monkeypatch):
+def disable_activity_log(request, monkeypatch):
+    if request.node.get_closest_marker("enable_activity_log"):
+        yield  # do nothing, let real logging work
+        return
+
     from hope.models.log_entry import LogEntry
 
     class DummyPrograms:
@@ -306,6 +310,7 @@ def disable_activity_log(monkeypatch):
             self.programs = DummyPrograms()
 
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
+    yield
 
 
 @pytest.fixture(autouse=True)

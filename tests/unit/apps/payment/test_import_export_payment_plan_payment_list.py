@@ -531,7 +531,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert value == ""
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
-        required_fields_for_account = ["name", "number", "uba_code", "holder_name"]
+        required_fields_for_account = ["number", "uba_code", "holder_name", "financial_institution"]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
         # add Accounts for collectors
@@ -573,10 +573,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         for payment in self.payment_plan.eligible_payments:
             # check payment row
             payment_row = export_service.get_payment_row(payment)
-            assert payment_row[-4] == "Union Bank"
-            assert payment_row[-3] == str(payment.id)
-            assert payment_row[-2] == "123456"
-            assert payment_row[-1] == f"Admin {payment.collector.given_name}"
+            assert payment_row[-5] == "Union Bank"
+            assert payment_row[-4] == str(payment.id)
+            assert payment_row[-3] == "123456"
+            assert payment_row[-2] == f"Admin {payment.collector.given_name}"
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
