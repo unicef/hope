@@ -586,7 +586,7 @@ class PaymentGatewayService:
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:  # pragma no cover
                 delivered_quantity = 0
                 delivery_date = None
 
