@@ -4,6 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
+from django.db.models import QuerySet
 from django.utils.timezone import now
 from rest_framework import serializers
 
@@ -222,6 +223,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     auth_code: str
     fsp_code: str
     payout_amount: float | None = None
+    payout_date: str | None = None
     message: str | None = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -463,7 +465,7 @@ class PaymentGatewayService:
                 _payment.status = Payment.STATUS_SENT_TO_PG
             Payment.objects.bulk_update(_payments, ["status"])
 
-        def _add_records(_payments: list[Payment], _container: PaymentPlanSplit) -> None:
+        def _add_records(_payments: QuerySet[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
@@ -492,8 +494,7 @@ class PaymentGatewayService:
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
-                payments = list(payments_qs.order_by("unicef_id"))
-                _add_records(payments, split)
+                _add_records(payments_qs.order_by("unicef_id"), split)
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
@@ -579,15 +580,18 @@ class PaymentGatewayService:
         ]
 
         delivered_quantity = matching_pg_payment.payout_amount
+        delivery_date = matching_pg_payment.payout_date
         if payment.status in [
             Payment.STATUS_DISTRIBUTION_SUCCESS,
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:  # pragma no cover
                 delivered_quantity = 0
+                delivery_date = None
 
-            update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
+            update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
+            payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore

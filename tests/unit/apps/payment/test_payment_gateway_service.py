@@ -160,6 +160,8 @@ class TestPaymentGatewayService(BaseTestCase):
             ),
         ]
         create_payment_plan_snapshot_data(cls.pp)
+        for payment in cls.payments:
+            payment.refresh_from_db()
 
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
@@ -1119,8 +1121,8 @@ class TestPaymentGatewayService(BaseTestCase):
             errors={"0": "Error", "1": "Error"},
         )
 
-        with patch.object(pg_service.api, "add_records_to_payment_instruction") as mock_add_records:
-            pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        with patch.object(pg_service.api, "add_records_to_payment_instruction"):
+            pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
 
             pg_service.add_missing_records_to_payment_instructions(self.pp)
             # got one payment not in PaymentGateway -> self.payments[1]
@@ -1128,8 +1130,8 @@ class TestPaymentGatewayService(BaseTestCase):
 
             # check call arguments
             called_payments, called_split = (
-                mock_add_records.call_args[0][0],
-                mock_add_records.call_args[0][1],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][0],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][1],
             )
             assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
             assert called_split == self.pp_split_2.pk

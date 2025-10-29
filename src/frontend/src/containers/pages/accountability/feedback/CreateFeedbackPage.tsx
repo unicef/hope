@@ -377,7 +377,12 @@ function CreateFeedbackPage(): ReactElement {
                                   )}
                                 </Typography>
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
+                                  <HouseholdQuestionnaire values={values} programSlug={
+                                    values.selectedHousehold?.programSlug ||
+                                    values.selectedHousehold?.program?.slug ||
+                                    values.selectedIndividual?.program?.slug ||
+                                    values.selectedIndividual?.programSlug
+                                  } />
                                 </Box>
                               </Box>
                               <Typography variant="subtitle2">

@@ -25,7 +25,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { PaginatedAreaListList } from '@restgenerated/models/PaginatedAreaListList';
+import { AreaList } from '@restgenerated/models/AreaList';
 import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -147,13 +147,12 @@ const CreateSurveyPage = (): ReactElement => {
   const [validateData, setValidateData] = useState(false);
 
   const { data: adminAreasData, isLoading: adminAreasLoading } =
-    useQuery<PaginatedAreaListList>({
+    useQuery<AreaList[]>({
       queryKey: ['adminAreas', businessArea, { level: 2 }],
       queryFn: async () => {
         return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: businessArea,
           level: 2,
-          limit: 100,
         });
       },
       enabled: !!businessArea,
@@ -291,8 +290,8 @@ const CreateSurveyPage = (): ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = adminAreasData?.results?.length
-    ? adminAreasData.results.map((area) => ({
+  const mappedAdminAreas = adminAreasData?.length
+    ? adminAreasData.map((area) => ({
         value: area.id,
         name: area.name || '',
       }))

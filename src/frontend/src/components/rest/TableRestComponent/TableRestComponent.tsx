@@ -247,16 +247,7 @@ export function TableRestComponent<T>({
       );
     }
   } else {
-    body = (
-      <>
-        {data.map((row) => renderRow(row))}
-        {emptyRows > 0 && (
-          <StyledTableRow style={{ height: 70 * emptyRows }}>
-            <StyledTableCell colSpan={headCells.length} />
-          </StyledTableRow>
-        )}
-      </>
-    );
+    body = <>{data.map((row) => renderRow(row))}</>;
   }
 
   const table = (
