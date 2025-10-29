@@ -1143,7 +1143,7 @@ class TestPaymentGatewayService(BaseTestCase):
             financial_institution=fi,
             financial_service_provider=self.pg_fsp,
             code="BANKA_CODE_FOR_OTHER_FSP",
-            country=CountryFactory(iso_code3="AFG")
+            country=CountryFactory(iso_code3="AFG"),
         )
         account_data = {"financial_institution": str(fi.pk), "number": "123"}
 
@@ -1155,7 +1155,7 @@ class TestPaymentGatewayService(BaseTestCase):
         fi = FinancialInstitution.objects.create(
             name="Bank B",
             type=FinancialInstitution.FinancialInstitutionType.BANK,
-            country=CountryFactory(iso_code3="AFG")
+            country=CountryFactory(iso_code3="AFG"),
         )
         account_data = {"financial_institution": str(fi.pk)}
 
