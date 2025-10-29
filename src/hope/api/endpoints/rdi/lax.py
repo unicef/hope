@@ -19,7 +19,6 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.models.flexible_attribute import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.phone import calculate_phone_numbers_validity
@@ -30,6 +29,7 @@ from hope.models.country import Country
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
 from hope.models.financial_institution import FinancialInstitution
+from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.grant import Grant
 from hope.models.household import (
     DATA_SHARING_CHOICES,
