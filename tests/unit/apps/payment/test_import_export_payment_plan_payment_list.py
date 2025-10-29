@@ -598,8 +598,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert len(export_service.headers) == 12
         assert "household_size" not in export_service.headers
         assert "household_id" not in export_service.headers
+        assert "individual_id" in export_service.headers
 
         import_service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         assert len(import_service.headers) == 12
         assert "household_size" not in import_service.headers
         assert "household_id" not in import_service.headers
+        assert "individual_id" in import_service.headers
