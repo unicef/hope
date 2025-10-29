@@ -102,14 +102,14 @@ class PaymentNotification:
 
         batch_size = 50
         emails: list[MailjetClient] = []
-        for i in range(0, len(recipients), batch_size):
-            chunk = recipients[i : i + batch_size]
+        for idx, start in enumerate(range(0, len(recipients), batch_size)):
+            chunk = recipients[start : start + batch_size]
             emails.append(
                 MailjetClient(
                     mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
                     subject=self.email_subject,
                     recipients=chunk,
-                    ccs=[self.action_user.email],
+                    ccs=[self.action_user.email] if idx == 0 else [],  # CC only once
                     variables=body_variables,
                 )
             )
