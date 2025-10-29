@@ -99,6 +99,9 @@ export function LookUpHouseholdTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  // Add page state for pagination
+  const [page, setPage] = useState(0);
+
   //selectedProgram
   const {
     data: dataHouseholdsProgram,
@@ -134,7 +137,7 @@ export function LookUpHouseholdTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
       }),
-    enabled: !!businessArea && !isAllPrograms,
+    enabled: !!businessArea && !isAllPrograms && page === 0,
   });
 
   //allPrograms
@@ -145,7 +148,7 @@ export function LookUpHouseholdTable({
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
     queryFn: () => {
-      // eslint-disable-next-line no-unused-vars
+      //eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { programSlug, ...restQueryVariables } = queryVariables;
       return RestService.restBusinessAreasHouseholdsList(
         createApiParams(
@@ -166,13 +169,13 @@ export function LookUpHouseholdTable({
       queryVariables,
     ],
     queryFn: () => {
-      // eslint-disable-next-line no-unused-vars
+      //eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { programSlug, ...restQueryVariables } = queryVariables;
       return RestService.restBusinessAreasHouseholdsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
       );
     },
-    enabled: isAllPrograms,
+    enabled: isAllPrograms && page === 0,
   });
 
   const [selected, setSelected] = useState<string[]>(
@@ -292,6 +295,8 @@ export function LookUpHouseholdTable({
       }
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
     />
   );
   return noTableStyling ? (

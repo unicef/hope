@@ -12,12 +12,13 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -59,6 +60,11 @@ export const HouseholdMembersPage = (): ReactElement => {
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
   );
 
   // Tab index: 0 = individuals, 1 = periodic-data-updates
@@ -174,12 +180,16 @@ export const HouseholdMembersPage = (): ReactElement => {
                 setFilter={setFilter}
                 initialFilter={initialFilter}
                 appliedFilter={appliedFilter}
-                setAppliedFilter={setAppliedFilter}
+                setAppliedFilter={(newFilter) => {
+                  setAppliedFilter(newFilter);
+                  setShouldScroll(true);
+                }}
               />
               <Box
                 display="flex"
                 flexDirection="column"
                 data-cy="page-details-container"
+                ref={tableRef}
               >
                 <IndividualsListTable
                   filter={appliedFilter}

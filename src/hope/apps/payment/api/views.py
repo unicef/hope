@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -36,6 +36,7 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
+from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -681,6 +682,7 @@ class PaymentPlanViewSet(
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        "close": [Permissions.PM_CLOSE_FINISHED],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -904,7 +906,9 @@ class PaymentPlanViewSet(
                     raise ValidationError("Rule Engine run in progress")
                 payment_plan.background_action_status_steficon_run()
                 payment_plan.save()
-                payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                transaction.on_commit(
+                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+                )
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -914,6 +918,7 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            payment_plan.refresh_from_db(fields=["background_action_status"])
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -956,6 +961,7 @@ class PaymentPlanViewSet(
         detail=True,
         methods=["post"],
         url_path="entitlement-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1141,13 +1147,15 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    # TODO:
     @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
     @transaction.atomic
     def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
+
+        if payment_plan.background_action_status in [PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING]:
+            raise ValidationError("Payment List Per FSP export already in progress.")
 
         if payment_plan.status not in [
             PaymentPlan.Status.ACCEPTED,
@@ -1158,7 +1166,7 @@ class PaymentPlanViewSet(
             )
         if payment_plan.export_file_per_fsp is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
             raise ValidationError(
                 "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
             )
@@ -1382,6 +1390,22 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).close()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
 
 
 class TargetPopulationViewSet(
@@ -1639,6 +1663,7 @@ class TargetPopulationViewSet(
             old_object=old_tp,
             new_object=tp,
         )
+        tp.refresh_from_db(fields=["background_action_status"])
         response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
         return Response(
             data=response_serializer.data,
@@ -1670,6 +1695,7 @@ class PaymentPlanManagerialViewSet(
                     PaymentPlan.Status.ACCEPTED,
                 ],
             )
+            .select_related("program_cycle__program")
         )
 
     # TODO: e2e failed probably because of cache here
@@ -1691,11 +1717,16 @@ class PaymentPlanManagerialViewSet(
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-
+        payment_plans = PaymentPlan.objects.filter(id__in=serializer.validated_data["ids"]).select_related(
+            "program_cycle__program",
+            "imported_file",
+            "export_file_entitlement",
+            "export_file_per_fsp",
+        )
         with transaction.atomic():
-            for payment_plan_id_str in serializer.validated_data["ids"]:
+            for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    payment_plan_id_str,
+                    payment_plan,
                     input_data,
                     self.business_area,
                     request,
@@ -1706,13 +1737,11 @@ class PaymentPlanManagerialViewSet(
     @transaction.atomic
     def _perform_payment_plan_status_action(
         self,
-        payment_plan_id: str,
+        payment_plan: PaymentPlan,
         input_data: dict,
         business_area: BusinessArea,
         request: Request,
     ) -> None:
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-
         if not self.request.user.has_perm(
             self._get_action_permission(input_data["action"]),  # type: ignore
             payment_plan.program_cycle.program or business_area,
@@ -1737,7 +1766,7 @@ class PaymentPlanManagerialViewSet(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
-            programs=payment_plan.program_cycle.program.pk,
+            programs=payment_plan.program_cycle.program_id,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1826,7 +1855,20 @@ class PaymentViewSet(
         return get_object_or_404(Payment, id=payment_id)
 
     def get_queryset(self) -> QuerySet:
-        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_pk"])
+        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
+        # Prefetch roles for each individual's household
+        role_prefetch = Prefetch(
+            "households_and_roles",
+            queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
+            to_attr="prefetched_roles",
+        )
+        # Prefetch individuals within households, including their roles
+        individual_prefetch = Prefetch(
+            "household__individuals",
+            queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
+            to_attr="prefetched_individuals",
+        )
+        return parent.eligible_payments.prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,

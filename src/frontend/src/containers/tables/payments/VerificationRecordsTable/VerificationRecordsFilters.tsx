@@ -1,4 +1,4 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiltersSection } from '@components/core/FiltersSection';
@@ -74,7 +74,7 @@ export function VerificationRecordsFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             value={filter.search}
             label={t('Search')}
@@ -83,7 +83,7 @@ export function VerificationRecordsFilters({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Verification Status')}
@@ -97,7 +97,7 @@ export function VerificationRecordsFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationChannel', e.target.value)
@@ -112,7 +112,7 @@ export function VerificationRecordsFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('paymentVerificationPlan', e.target.value)

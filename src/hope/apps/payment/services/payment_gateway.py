@@ -4,6 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
+from django.db.models import QuerySet
 from django.utils.timezone import now
 from rest_framework import serializers
 
@@ -19,7 +20,10 @@ from hope.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hope.apps.payment.models.payment import FinancialInstitutionMapping
+from hope.apps.payment.models.payment import (
+    FinancialInstitution,
+    FinancialInstitutionMapping,
+)
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -112,6 +116,54 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
 
+    def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
+        if financial_institution_pk := account_data.get("financial_institution"):
+            financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
+            try:
+                fsp_mapping = FinancialInstitutionMapping.objects.get(
+                    financial_institution=financial_institution,
+                    financial_service_provider=obj.financial_service_provider,
+                )
+                account_data["service_provider_code"] = fsp_mapping.code
+
+            except FinancialInstitutionMapping.DoesNotExist:
+                raise Exception(
+                    f"No Financial Institution Mapping found for"
+                    f" financial_institution {financial_institution},"
+                    f" fsp {obj.financial_service_provider},"
+                    f" payment {obj.id},"
+                    f" collector {obj.collector}."
+                )
+
+        elif financial_institution_code := account_data.get("code"):
+            # financial_institution_code is now collected as a specific fsp code (uba_code)
+            uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+            if financial_institution_code and obj.financial_service_provider == uba_fsp:
+                account_data["service_provider_code"] = financial_institution_code
+
+            else:
+                try:
+                    uba_mapping = FinancialInstitutionMapping.objects.get(
+                        code=financial_institution_code,
+                        financial_service_provider=uba_fsp,
+                    )
+                    fsp_mapping = FinancialInstitutionMapping.objects.get(
+                        financial_institution=uba_mapping.financial_institution,
+                        financial_service_provider=obj.financial_service_provider,
+                    )
+                    account_data["service_provider_code"] = fsp_mapping.code
+
+                except FinancialInstitutionMapping.DoesNotExist:
+                    raise Exception(
+                        f"No Financial Institution Mapping found for"
+                        f" financial_institution_code {financial_institution_code},"
+                        f" fsp {obj.financial_service_provider},"
+                        f" payment {obj.id},"
+                        f" collector {obj.collector}."
+                    )
+
+        return account_data
+
     def get_extra_data(self, obj: Payment) -> dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
@@ -123,12 +175,13 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         snapshot_data = self.get_extra_data(obj)
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
         account_data = collector_data.get("account_data", {})
+        account_type = obj.delivery_type.account_type and obj.delivery_type.account_type.key
 
         payload_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
-            "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
+            "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
@@ -138,42 +191,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         }
 
         if account_data:
-            if financial_institution_code := account_data.get("code"):
-                """
-                financial_institution_code is now collected as a specific fsp code (uba_code),
-                """
-
-                try:
-                    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
-                except FinancialServiceProvider.DoesNotExist:
-                    uba_fsp = None  # pragma: no cover
-
-                if uba_fsp and obj.financial_service_provider == uba_fsp:
-                    service_provider_code = financial_institution_code
-
-                else:
-                    try:
-                        uba_mapping = FinancialInstitutionMapping.objects.get(
-                            code=financial_institution_code,
-                            financial_service_provider=uba_fsp,
-                        )
-                        fsp_mapping = FinancialInstitutionMapping.objects.get(
-                            financial_institution=uba_mapping.financial_institution,
-                            financial_service_provider=obj.financial_service_provider,
-                        )
-                        service_provider_code = fsp_mapping.code
-
-                    except FinancialInstitutionMapping.DoesNotExist:
-                        raise Exception(
-                            f"No Financial Institution Mapping found for"
-                            f" financial_institution_code {financial_institution_code},"
-                            f" fsp {obj.financial_service_provider},"
-                            f" payment {obj.id},"
-                            f" collector {obj.collector}."
-                        )
-
-                account_data["service_provider_code"] = service_provider_code
-
+            if account_type == "bank":
+                account_data = self._map_financial_institution(obj, account_data)
             payload_data["account"] = account_data
 
         payload = PaymentPayloadSerializer(data=payload_data)
@@ -204,6 +223,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     auth_code: str
     fsp_code: str
     payout_amount: float | None = None
+    payout_date: str | None = None
     message: str | None = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
@@ -445,7 +465,7 @@ class PaymentGatewayService:
                 _payment.status = Payment.STATUS_SENT_TO_PG
             Payment.objects.bulk_update(_payments, ["status"])
 
-        def _add_records(_payments: list[Payment], _container: PaymentPlanSplit) -> None:
+        def _add_records(_payments: QuerySet[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = None
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
@@ -474,8 +494,7 @@ class PaymentGatewayService:
                 if id_filters:
                     # filter by id to add missing records to payment instructions
                     payments_qs = payments_qs.filter(id__in=id_filters)
-                payments = list(payments_qs.order_by("unicef_id"))
-                _add_records(payments, split)
+                _add_records(payments_qs.order_by("unicef_id"), split)
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
@@ -561,15 +580,18 @@ class PaymentGatewayService:
         ]
 
         delivered_quantity = matching_pg_payment.payout_amount
+        delivery_date = matching_pg_payment.payout_date
         if payment.status in [
             Payment.STATUS_DISTRIBUTION_SUCCESS,
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:  # pragma no cover
                 delivered_quantity = 0
+                delivery_date = None
 
-            update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
+            update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
+            payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore
@@ -618,7 +640,8 @@ class PaymentGatewayService:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
     def sync_record(self, payment: Payment) -> None:
-        if not payment.parent.is_payment_gateway:
+        payment_plan = payment.parent
+        if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
@@ -627,9 +650,19 @@ class PaymentGatewayService:
                 payment,
                 [pg_payment_record],
                 payment.parent_split,
-                payment.parent,
-                payment.parent.exchange_rate,
+                payment_plan,
+                payment_plan.exchange_rate,
             )
+
+            if payment_plan.is_reconciled:
+                payment_plan.status_finished()
+                payment_plan.save()
+                for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
+                    self.change_payment_instruction_status(
+                        PaymentInstructionStatus.FINALIZED,
+                        instruction,
+                        validate_response=False,
+                    )
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate

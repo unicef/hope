@@ -3,8 +3,8 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
   Typography,
+  Grid,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import {
@@ -39,7 +39,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { AreaList } from '@restgenerated/models/AreaList';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -84,26 +84,26 @@ function prepareSampleSizeRequest(
   const fullListArguments =
     selectedTab === 0
       ? {
-        excludedAdminAreas: formValues.excludedAdminAreasFull || [],
-      }
+          excludedAdminAreas: formValues.excludedAdminAreasFull || [],
+        }
       : undefined;
 
   const randomSamplingArguments =
     selectedTab === 1
       ? {
-        confidenceInterval: formValues.confidenceInterval * 0.01,
-        marginOfError: formValues.marginOfError * 0.01,
-        excludedAdminAreas: formValues.adminCheckbox
-          ? formValues.excludedAdminAreasRandom || []
-          : [],
-        age: formValues.ageCheckbox
-          ? {
-            min: formValues.filterAgeMin || 0,
-            max: formValues.filterAgeMax || 999,
-          }
-          : null,
-        sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
-      }
+          confidenceInterval: formValues.confidenceInterval * 0.01,
+          marginOfError: formValues.marginOfError * 0.01,
+          excludedAdminAreas: formValues.adminCheckbox
+            ? formValues.excludedAdminAreasRandom || []
+            : [],
+          age: formValues.ageCheckbox
+            ? {
+                min: formValues.filterAgeMin || 0,
+                max: formValues.filterAgeMax || 999,
+              }
+            : null,
+          sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
+        }
       : undefined;
 
   return {
@@ -121,28 +121,31 @@ function prepareMutationData(
   return {
     sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
     verificationChannel: values.verificationChannel,
-    fullListArguments: selectedTab === 0 ? {
-      excludedAdminAreas: values.excludedAdminAreasFull || [],
-    } : null,
+    fullListArguments:
+      selectedTab === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : null,
     randomSamplingArguments:
       selectedTab === 1
         ? {
-          confidenceInterval: values.confidenceInterval * 0.01,
-          marginOfError: values.marginOfError * 0.01,
-          excludedAdminAreas: values.adminCheckbox
-            ? values.excludedAdminAreasRandom
-            : [],
-          age: values.ageCheckbox
-            ? { min: values.filterAgeMin, max: values.filterAgeMax }
-            : null,
-          sex: values.sexCheckbox ? values.filterSex : null,
-        }
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
         : null,
     rapidProArguments:
       values.verificationChannel === 'RAPIDPRO'
         ? {
-          flowId: values.rapidProFlow,
-        }
+            flowId: values.rapidProFlow,
+          }
         : null,
   };
 }
@@ -154,10 +157,10 @@ export interface Props {
 }
 
 export const CreateVerificationPlan = ({
-                                         cashOrPaymentPlanId,
-                                         canCreatePaymentVerificationPlan,
-                                         isPaymentPlan,
-                                       }: Props): ReactElement => {
+  cashOrPaymentPlanId,
+  canCreatePaymentVerificationPlan,
+  isPaymentPlan,
+}: Props): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -208,13 +211,12 @@ export const CreateVerificationPlan = ({
 
   const loadRapidProFlows = refetchRapidProFlows;
 
-  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
-    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+  const { data: adminAreasData } = useQuery<AreaList[]>({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
     queryFn: async () => {
-      return RestService.restAreasList({
-        limit: 100,
-        areaTypeAreaLevel: 2,
-        search: undefined,
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
       });
     },
     enabled: !!businessArea,
@@ -276,11 +278,11 @@ export const CreateVerificationPlan = ({
     }
   };
 
-  const mappedAdminAreas = adminAreasData?.results?.length
-    ? adminAreasData.results.map((area) => ({
-      value: area.id,
-      name: area.name || '',
-    }))
+  const mappedAdminAreas = adminAreasData?.length
+    ? adminAreasData.map((area) => ({
+        value: area.id,
+        name: area.name || '',
+      }))
     : [];
 
   const handleFormChange = (values): void => {
@@ -614,9 +616,9 @@ export const CreateVerificationPlan = ({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                value: flow.uuid,
-                                name: flow.name,
-                              }))
+                                  value: flow.uuid,
+                                  name: flow.name,
+                                }))
                               : []
                           }
                           component={FormikSelectField}

@@ -174,7 +174,7 @@ function CreateFeedbackPage(): ReactElement {
     language: null,
     consent: false,
     verificationRequired: false,
-    programId: null,
+    programId: isAllPrograms ? null : selectedProgram?.id,
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
@@ -345,12 +345,6 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
-                            {touched.issueType &&
-                              typeof errors.issueType === 'string' && (
-                                <FormHelperText error>
-                                  {errors.issueType}
-                                </FormHelperText>
-                              )}
                           </Grid>
                         </Grid>
                       )}
@@ -383,7 +377,12 @@ function CreateFeedbackPage(): ReactElement {
                                   )}
                                 </Typography>
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
+                                  <HouseholdQuestionnaire values={values} programSlug={
+                                    values.selectedHousehold?.programSlug ||
+                                    values.selectedHousehold?.program?.slug ||
+                                    values.selectedIndividual?.program?.slug ||
+                                    values.selectedIndividual?.programSlug
+                                  } />
                                 </Box>
                               </Box>
                               <Typography variant="subtitle2">

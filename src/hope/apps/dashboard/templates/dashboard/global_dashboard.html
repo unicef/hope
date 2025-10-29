@@ -48,6 +48,10 @@
 {% block scripts %}
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        const tooltipChildrenReached = document.getElementById('tooltip-children-reached');
+        if (tooltipChildrenReached) {
+            tooltipChildrenReached.innerHTML = `{% translate "Child reach calculations now include both direct beneficiaries and estimated children count based on WorldBank Fertility rate for each country. For more accurate figures, please run programme specific queries through HOPE Country Report." %}`;
+        }
         const currentYear = new Date().getFullYear();
         let isChartsInitialized = false;
 

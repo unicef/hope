@@ -32,6 +32,7 @@ export type PaymentPlan = {
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
      * * `FINISHED` - Finished
+     * * `CLOSED` - Closed
      */
     status?: PaymentPlanStatusEnum;
     statusDisplay: string;
@@ -238,10 +239,12 @@ export type PaymentPlan = {
     readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
     readonly programId: string;
+    readonly programSlug: string;
     readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
     readonly adminUrl: string;
     readonly screenBeneficiary: boolean;
+    readonly hasPaymentsReconciliationOverdue: boolean;
 };
 

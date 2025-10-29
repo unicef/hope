@@ -9,6 +9,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -41,11 +42,8 @@ export function LockedPaymentPlanHeaderButtons({
         exact: false,
       });
     },
-    onError: (error) => {
-      showMessage(
-        error.message ||
-          t('An error occurred while unlocking the payment plan.'),
-      );
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 

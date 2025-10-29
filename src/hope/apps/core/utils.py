@@ -6,10 +6,19 @@ from decimal import Decimal
 import functools
 import io
 import itertools
+from itertools import islice
 import json
 import logging
 import string
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    Iterable,
+    Iterator,
+    Optional,
+)
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
@@ -17,7 +26,6 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import F, Func, Q, Value
-from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -29,7 +37,6 @@ from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
-    from django.http import HttpHeaders
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -44,39 +51,6 @@ class CaseInsensitiveTuple(tuple):
         self, key: str, *args: Any, **kwargs: Any
     ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
-
-
-def decode_id_string_required(id_string: str) -> str:
-    from base64 import b64decode
-
-    return b64decode(id_string).decode().split(":")[1]
-
-
-def decode_id_string(id_string: str | None) -> str | None:
-    if not id_string:
-        return None
-    return decode_id_string_required(id_string)
-
-
-def encode_id_base64_required(id_string: str, model_name: str) -> str:
-    from base64 import b64encode
-
-    return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
-
-
-def encode_id_base64(id_string: str | None, model_name: str) -> str | None:
-    if not id_string:
-        return None
-    return encode_id_base64_required(id_string, model_name)
-
-
-def get_program_id_from_headers(headers: Union[dict, "HttpHeaders"]) -> str | None:
-    # TODO: need to double check if program_id is str or uuid?
-    #  decoded/encoded ??
-    # sometimes it get from info.context.headers or kwargs["Program"]: str
-
-    program_id = headers.get("Program")
-    return decode_id_string(program_id) if program_id not in ["all", "undefined"] else None
 
 
 def unique_slugify(
@@ -280,8 +254,6 @@ raise_attribute_error = object()
 
 
 def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
-    import functools
-
     try:
         return functools.reduce(getattr, attr.split("."), obj)
     except AttributeError as e:
@@ -292,8 +264,6 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
 
 
 def nested_dict_get(dictionary: dict, path: str) -> str | None:
-    import functools
-
     return functools.reduce(
         lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
         # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
@@ -306,14 +276,6 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     all_items_count = all_items_count or 1  # fix division by zero
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
-
-
-def encode_ids(results: Any, model_name: str, key: str) -> list[dict]:
-    if results:
-        for result in results:
-            result_id = result[key]
-            result[key] = encode_id_base64(result_id, model_name)
-    return results
 
 
 def to_dict(
@@ -450,35 +412,6 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None:
-    from hope.apps.payment.models import Payment
-
-    if required or encoded_id is not None:
-        decoded_id = decode_id_string(encoded_id)
-        qs = Payment.objects.filter(excluded=False, conflicted=False)
-        try:
-            return qs.get(id=decoded_id)
-        except ObjectDoesNotExist:
-            raise Http404
-    return None
-
-
-def decode_and_get_object(encoded_id: int | str | None, model: type, required: bool) -> Any | None:
-    from django.shortcuts import get_object_or_404
-
-    if required is True or encoded_id is not None:
-        if isinstance(encoded_id, int):
-            return get_object_or_404(model, id=encoded_id)
-        if isinstance(encoded_id, str) and encoded_id.isnumeric():
-            return get_object_or_404(model, id=int(encoded_id))
-        return get_object_or_404(model, id=decode_id_string(encoded_id))
-    return None
-
-
-def decode_and_get_object_required(encoded_id: str, model: type) -> Any:
-    return decode_and_get_object(encoded_id, model, required=True)
-
-
 def to_snake_case(camel_case_string: str) -> str:
     if "_" in camel_case_string:
         return camel_case_string
@@ -604,36 +537,6 @@ def sum_lists_with_values(qs_values: Iterable, list_len: int) -> list[int]:
             data[i] += value
 
     return data
-
-
-def chart_permission_decorator(chart_resolve: Callable | None = None, permissions: list | None = None) -> Callable:
-    if chart_resolve is None:
-        return functools.partial(chart_permission_decorator, permissions=permissions)
-
-    @functools.wraps(chart_resolve)
-    def resolve_f(*args: Any, **kwargs: Any) -> Any:
-        from hope.apps.core.models import BusinessArea
-        from hope.apps.program.models import Program
-
-        _, resolve_info = args
-        if resolve_info.context.user.is_authenticated:
-            business_area_slug = kwargs.get("business_area_slug", "global")
-            business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            program = Program.objects.filter(id=get_program_id_from_headers(resolve_info.context.headers)).first()
-            if any(resolve_info.context.user.has_perm(per.name, program or business_area) for per in permissions):
-                return chart_resolve(*args, **kwargs)
-            log_and_raise("Permission Denied")
-            return None
-        return None
-
-    return resolve_f
-
-
-def chart_filters_decoder(filters: dict) -> dict:
-    # in GPF we have filtering by all programs in this case need to remove key {program: "all"}
-    if "program" in filters and filters.get("program") == "all":
-        filters.pop("program")
-    return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
 def chart_create_filter_query(
@@ -850,21 +753,20 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 }
 
 
-def chunks(lst: list, n: int) -> list:
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+def chunks(it: Iterable, size: int) -> Iterator[list]:
+    """Yield lists of up to `size` items from `it`."""
+    iterator = iter(it)
+    while True:
+        buf: list = list(islice(iterator, size))
+        if not buf:
+            return
+        yield buf
 
 
-def send_email_notification_on_commit(service: Any, user: "User") -> None:
-    context = service.get_email_context(user)
-    transaction.on_commit(
-        lambda: user.email_user(
-            subject=context["title"],
-            html_body=render_to_string(service.html_template, context=context),
-            text_body=render_to_string(service.text_template, context=context),
-        )
-    )
+def send_email_notification_on_commit(
+    service: Any, user: Optional["User"] = None, context_kwargs: dict | None = None
+) -> None:
+    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
 
 
 def send_email_notification(

@@ -17,12 +17,15 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const { paymentPlanId, paymentId } = useParams();
+  const { paymentId } = useParams();
+  const location = useLocation();
+  const paymentPlanId = location.state?.parentId;
+
   const { businessArea, programId } = useBaseUrl();
 
   const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
@@ -32,7 +35,7 @@ function PaymentDetailsPage(): ReactElement {
         businessAreaSlug: businessArea,
         paymentId: paymentId,
         programSlug: programId,
-        paymentPlanId,
+        paymentPlanPk: paymentPlanId,
       }),
   });
 

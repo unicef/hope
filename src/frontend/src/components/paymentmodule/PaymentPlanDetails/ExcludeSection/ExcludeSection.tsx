@@ -3,7 +3,7 @@ import {
   Button,
   Collapse,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
@@ -120,7 +120,7 @@ function ExcludeSection({
   const handleSave = (values): void => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     mutateAsync({
-      excludedHouseholdsIds:idsToSave,
+      excludedHouseholdsIds: idsToSave,
       exclusionReason: values.exclusionReason,
     });
   };

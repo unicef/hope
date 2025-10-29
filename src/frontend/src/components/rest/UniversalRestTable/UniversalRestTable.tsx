@@ -14,6 +14,8 @@ import { isEqual } from 'lodash';
 
 //TODO MS: add correct types
 interface UniversalRestTableProps<T = any, K = any> {
+  page?: number;
+  setPage?: (page: number) => void;
   customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
   rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
@@ -38,6 +40,7 @@ interface UniversalRestTableProps<T = any, K = any> {
   itemsCount?: number;
   initialRowsPerPage?: number;
   hidePagination?: boolean;
+  noEmptyMessage?: boolean;
 }
 type QueryVariables = {
   offset: number;
@@ -67,8 +70,10 @@ export const UniversalRestTable = <T, K>({
   initialRowsPerPage,
   hidePagination,
   customHeadRenderer,
+  noEmptyMessage = false,
+  page: pageProp,
+  setPage: setPageProp,
 }: UniversalRestTableProps<T, K>): ReactElement => {
-  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(
     initialRowsPerPage || rowsPerPageOptions[0],
   );
@@ -76,6 +81,12 @@ export const UniversalRestTable = <T, K>({
   const [orderDirection, setOrderDirection] = useState<Order>(
     defaultOrderDirection,
   );
+
+  // Internal page state if not controlled
+  const [internalPage, setInternalPage] = useState(0);
+  const page = typeof pageProp === 'number' ? pageProp : internalPage;
+  const setPage =
+    typeof setPageProp === 'function' ? setPageProp : setInternalPage;
 
   const filteredQueryVariables = useMemo(() => {
     const filtered = filterEmptyParams(queryVariables);
@@ -167,6 +178,7 @@ export const UniversalRestTable = <T, K>({
       allowSort={allowSort}
       hidePagination={hidePagination}
       customHeadRenderer={customHeadRenderer}
+      noEmptyMessage={noEmptyMessage}
     />
   );
 };

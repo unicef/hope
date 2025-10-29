@@ -21,6 +21,7 @@ import {
   showApiErrorMessages,
 } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 
 interface ProgramCyclesTablePaymentModuleProps {
@@ -33,6 +34,8 @@ const ProgramCyclesTablePaymentModule = ({
   filters,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState<ProgramCycleList>({
     offset: 0,
     limit: 5,
@@ -44,9 +47,20 @@ const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  const rowsPerPage =
+    queryVariables && typeof (queryVariables as any).limit === 'number'
+      ? (queryVariables as any).limit
+      : 5;
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', businessArea, program.slug, queryVariables],
+      queryKey: [
+        'programCycles',
+        businessArea,
+        program.slug,
+        queryVariables,
+        page,
+        rowsPerPage,
+      ],
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
           createApiParams(
@@ -54,7 +68,7 @@ const ProgramCyclesTablePaymentModule = ({
               businessAreaSlug: businessArea,
               programSlug: program.slug,
             },
-            queryVariables,
+            { ...queryVariables, offset: page * rowsPerPage },
             { withPagination: true },
           ),
         );
@@ -75,7 +89,10 @@ const ProgramCyclesTablePaymentModule = ({
           queryVariables,
         ),
       ),
+    enabled: page === 0,
   });
+
+  const itemsCount = usePersistedCount(page, dataProgramCyclesCount);
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -210,12 +227,14 @@ const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
-      itemsCount={dataProgramCyclesCount?.count}
+      itemsCount={itemsCount}
       data={data}
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
     />
   );
 };

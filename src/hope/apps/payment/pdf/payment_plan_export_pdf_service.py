@@ -1,12 +1,11 @@
 import logging
 from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
 from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
 
-from hope.apps.core.utils import encode_id_base64
 from hope.apps.payment.models import Approval, Payment, PaymentPlan
+from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
 
 if TYPE_CHECKING:
@@ -26,21 +25,13 @@ class PaymentPlanPDFExportService:
         self.payment_plan_link: str = ""
         self.is_social_worker_program = payment_plan.program.is_social_worker_program
 
-    @staticmethod
-    def get_link(api_url: str | None = None) -> str:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-        if api_url:
-            return link
-        return ""
-
     def generate_web_links(self) -> None:
-        payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        program_id = encode_id_base64(self.payment_plan.program.id, "Program")
+        payment_plan_id = str(self.payment_plan.id)
+        program_slug = self.payment_plan.program.slug
         path_name = "download-payment-plan-summary-pdf"
-        self.download_link = self.get_link(reverse(path_name, args=[payment_plan_id]))
-        self.payment_plan_link = self.get_link(
-            f"/{self.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{str(payment_plan_id)}"
+        self.download_link = get_link(reverse(path_name, args=[payment_plan_id]))
+        self.payment_plan_link = get_link(
+            f"/{self.payment_plan.business_area.slug}/programs/{program_slug}/payment-module/payment-plans/{payment_plan_id}"
         )
 
     def get_email_context(self, user: "User") -> dict:
@@ -60,10 +51,7 @@ class PaymentPlanPDFExportService:
 
     def generate_pdf_summary(self) -> Any:
         self.generate_web_links()
-        if self.is_social_worker_program:
-            template_name = "payment/people_payment_plan_summary_pdf_template.html"
-        else:
-            template_name = "payment/payment_plan_summary_pdf_template.html"
+        template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
         fsp = self.payment_plan.financial_service_provider
         delivery_mechanism = self.payment_plan.delivery_mechanism
@@ -85,21 +73,15 @@ class PaymentPlanPDFExportService:
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
-            pending_usd=Sum(
-                "entitlement_quantity_usd",
-                filter=Q(status__in=Payment.PENDING_STATUSES),
-            ),
-            pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=Q(status__in=Payment.DELIVERED_STATUSES)),  # Redeemed
             reconciled_usd=Sum("delivered_quantity_usd", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
             reconciled_local=Sum("delivered_quantity", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
-            failed=Count("id", filter=failed_base),
             failed_usd=Sum("entitlement_quantity_usd", filter=failed_base),
             failed_local=Sum("entitlement_quantity", filter=failed_base),
         )
 
         # Normalize None → 0
-        for key in ["pending_usd", "pending_local", "reconciled_usd", "reconciled_local", "failed_usd", "failed_local"]:
+        for key in ["reconciled_usd", "reconciled_local", "failed_usd", "failed_local"]:
             reconciliation_qs[key] = reconciliation_qs[key] or 0
 
         # Add partials in Python (cannot mix inside aggregate)
@@ -109,6 +91,7 @@ class PaymentPlanPDFExportService:
         pdf_context_data = {
             "title": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
+            "is_social_worker_program": self.is_social_worker_program,
             "fsp": fsp,
             "delivery_mechanism_per_payment_plan": delivery_mechanism,
             "approval_process": self.payment_plan.approval_process.first(),

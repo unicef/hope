@@ -9,13 +9,15 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid2 as Grid, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
+  safeStringify,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -48,9 +50,7 @@ function PaymentDetails({
     'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
-  const collectorAccountData = payment?.snapshotCollectorAccountData
-  ? JSON.parse(payment.snapshotCollectorAccountData)
-  : {};
+  const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
 
   return (
     <>
@@ -220,14 +220,14 @@ function PaymentDetails({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-           {Object.entries(collectorAccountData).map(([key, value]) => (
-              <Grid key={key} size={{ xs: 3 }}>
-                <LabelizedField
-                  label={t(`Account ${key}`)}
-                  value={String(value)}
-                />
-              </Grid>
-            ))}
+          {Object.entries(collectorAccountData).map(([key, value]) => (
+            <Grid key={key} size={{ xs: 3 }}>
+              <LabelizedField
+                label={t(`Account ${key}`)}
+                value={safeStringify(value)}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Overview>
       <Overview>

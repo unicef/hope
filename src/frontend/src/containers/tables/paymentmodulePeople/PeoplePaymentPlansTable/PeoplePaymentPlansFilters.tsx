@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid2 as Grid,
-  MenuItem,
-} from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -70,7 +64,7 @@ export const PeoplePaymentPlansFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -78,7 +72,7 @@ export const PeoplePaymentPlansFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -94,7 +88,7 @@ export const PeoplePaymentPlansFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
@@ -106,7 +100,7 @@ export const PeoplePaymentPlansFilters = ({
             data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
@@ -123,7 +117,7 @@ export const PeoplePaymentPlansFilters = ({
             data-cy="filters-total-entitled-quantity-to"
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -147,7 +141,7 @@ export const PeoplePaymentPlansFilters = ({
             value={filter.dispersionStartDate}
           />
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid size={3}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -162,7 +156,7 @@ export const PeoplePaymentPlansFilters = ({
           />
         </Grid>
         isFollowUp
-        <Grid size={{ xs: 12 }}>
+        <Grid size={12}>
           <Box ml={2}>
             <FormControlLabel
               control={

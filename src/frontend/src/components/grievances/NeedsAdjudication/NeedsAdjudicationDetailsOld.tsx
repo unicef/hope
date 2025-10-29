@@ -34,7 +34,7 @@ export const NeedsAdjudicationDetailsOld = ({
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { businessAreaSlug, baseUrl, isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
@@ -61,7 +61,11 @@ export const NeedsAdjudicationDetailsOld = ({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: ['grievanceTicket', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
   });

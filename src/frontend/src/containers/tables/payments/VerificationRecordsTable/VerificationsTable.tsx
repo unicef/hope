@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
@@ -20,6 +21,7 @@ interface VerificationsTableProps {
 }
 
 export function VerificationsTable({
+  // ...existing code...
   paymentPlanId,
   filter,
   canViewRecordDetails,
@@ -39,6 +41,30 @@ export function VerificationsTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
+
+  // Add count query for verification records, only enabled on first page
+  const { data: verificationCountData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsVerificationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
+        },
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, verificationCountData);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
@@ -95,6 +121,9 @@ export function VerificationsTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       data={paymentsData}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
           key={payment.id}

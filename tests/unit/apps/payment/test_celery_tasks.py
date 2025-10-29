@@ -25,9 +25,11 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
+    send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
@@ -146,17 +148,20 @@ class TestPaymentCeleryTask(TestCase):
             status=PaymentPlan.Status.TP_STEFICON_WAIT,
             steficon_rule_targeting=RuleCommitFactory(version=33),
         )
-        PaymentFactory(parent=payment_plan)
+        payment = PaymentFactory(parent=payment_plan)
         payment_plan.refresh_from_db()
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_WAIT
 
         engine_rule = RuleFactory(name="Rule-test", type=Rule.TYPE_TARGETING)
-        RuleCommitFactory(definition="result.value=Decimal('500')", rule=engine_rule, version=11)
+        RuleCommitFactory(definition="result.value=Decimal('500.33333333')", rule=engine_rule, version=11)
 
         payment_plan_apply_steficon_hh_selection(str(payment_plan.pk), str(engine_rule.id))
 
         payment_plan.refresh_from_db()
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_COMPLETED
+
+        payment.refresh_from_db(fields=["vulnerability_score"])
+        assert payment.vulnerability_score == Decimal("500.333")
 
     @patch("hope.apps.steficon.models.RuleCommit.execute")
     @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
@@ -264,20 +269,25 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        # create zip file with passwords
-        create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
+            # override property to always return True
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+            # create zip file with passwords
+            create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
 
-        assert payment_plan.background_action_status is None
-        assert payment_plan.has_export_file
-        assert payment_plan.export_file_per_fsp.file.name.startswith(
-            f"payment_plan_payment_list_{payment_plan.unicef_id}"
-        )
-        assert payment_plan.export_file_per_fsp.file.name.endswith(".zip")
-        assert file_obj.password is not None
-        assert file_obj.xlsx_password is not None
+            payment_plan.refresh_from_db()
+            file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+
+            assert payment_plan.background_action_status is None
+            assert payment_plan.has_export_file
+            assert payment_plan.export_file_per_fsp.file.name.startswith(
+                f"payment_plan_payment_list_{payment_plan.unicef_id}"
+            )
+            assert payment_plan.export_file_per_fsp.file.name.endswith(".zip")
+            assert file_obj.password is not None
+            assert file_obj.xlsx_password is not None
 
     @patch("hope.apps.payment.notifications.MailjetClient.send_email")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password(self, mock_mailjet_send: Mock) -> None:
@@ -290,21 +300,26 @@ class TestPaymentCeleryTask(TestCase):
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-        # create zip file with passwords
-        create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
+        with patch.object(type(payment_plan), "is_payment_gateway_and_all_sent_to_fsp", new_callable=property):
+            # override property to always return True
+            type(payment_plan).is_payment_gateway_and_all_sent_to_fsp = property(lambda _: True)
+            assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
 
-        assert payment_plan.background_action_status is None
-        assert payment_plan.export_file_per_fsp == file_obj
-        assert file_obj.password is not None
-        assert file_obj.xlsx_password is not None
+            # create zip file with passwords
+            create_payment_plan_payment_list_xlsx_per_fsp(str(payment_plan.pk), str(self.user.pk), str(fsp_template.pk))
+            payment_plan.refresh_from_db()
+            file_obj = FileTemp.objects.get(object_id=payment_plan.id)
 
-        send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
+            assert payment_plan.background_action_status is None
+            assert payment_plan.export_file_per_fsp == file_obj
+            assert file_obj.password is not None
+            assert file_obj.xlsx_password is not None
 
-        # first call from > create_payment_plan_payment_list_xlsx_per_fsp
-        # second call from > send_payment_plan_payment_list_xlsx_per_fsp_password
-        assert mock_mailjet_send.call_count == 2
+            send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
+
+            # 2 first calls from > create_payment_plan_payment_list_xlsx_per_fsp
+            # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
+            assert mock_mailjet_send.call_count == 3
 
     @patch("hope.apps.payment.celery_tasks.logger")
     @patch("hope.apps.payment.celery_tasks.get_user_model")
@@ -368,6 +383,28 @@ class TestPaymentCeleryTask(TestCase):
 
         mock_logger.exception.assert_called_once_with("PaymentPlan Update Exchange Rate On Release Payments Error")
         mock_retry.assert_called_once()
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_periodic_send_payment_plan_reconciliation_overdue_emails(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        periodic_send_payment_plan_reconciliation_overdue_emails()
+        mock_service_cls.send_reconciliation_overdue_emails.assert_called_once()
+
+    @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
+    def test_send_payment_plan_reconciliation_overdue_email(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        create_afghanistan()
+        pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+
+        mock_service = mock_service_cls.return_value
+        send_payment_plan_reconciliation_overdue_email(str(pp.id))
+        mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

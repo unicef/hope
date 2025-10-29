@@ -1,12 +1,13 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
@@ -40,6 +41,8 @@ export function ImportedPeopleTable({
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { programId } = useBaseUrl();
 
+  const [page, setPage] = useState(0);
+
   const initialQueryVariables = useMemo(
     () => ({
       rdiId,
@@ -47,8 +50,9 @@ export function ImportedPeopleTable({
       duplicatesOnly: showDuplicates,
       businessAreaSlug: businessArea,
       programSlug: programId,
+      page,
     }),
-    [rdiId, household, showDuplicates, businessArea, programId],
+    [rdiId, household, showDuplicates, businessArea, programId, page],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -72,6 +76,25 @@ export function ImportedPeopleTable({
         ),
       ),
   });
+
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsIndividualsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <div data-cy="imported-individuals-table">
@@ -104,6 +127,9 @@ export function ImportedPeopleTable({
           isLoading={isLoading}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}
@@ -124,6 +150,9 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}

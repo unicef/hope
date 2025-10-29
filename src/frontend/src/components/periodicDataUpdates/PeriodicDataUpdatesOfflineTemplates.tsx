@@ -85,6 +85,7 @@ const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
 ];
 
 export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
+  const [page, setPage] = useState(0);
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
@@ -251,6 +252,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
       <UniversalRestTable
         itemsCount={templateCountData?.count}
         isOnPaper={true}
+        noEmptyMessage={true}
         renderRow={renderTemplateRow}
         headCells={templatesHeadCells}
         data={templatesData ?? {}}
@@ -258,6 +260,8 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        page={page}
+        setPage={setPage}
       />
       {selectedTemplate && (
         <PeriodicDataUpdatesTemplateDetailsDialog

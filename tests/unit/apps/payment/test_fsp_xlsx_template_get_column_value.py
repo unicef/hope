@@ -41,6 +41,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             vision_vendor_number=123456789,
         )
+        cls.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
 
     def test_get_column_value_registration_token_empty(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -61,8 +62,11 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             delivery_type=self.dm_cash,
         )
         create_payment_plan_snapshot_data(payment_plan)
+        payment.refresh_from_db()
 
-        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
+        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+            payment, "registration_token", self.admin_areas_dict
+        )
         # return empty string if no document
         assert result == ""
 
@@ -107,8 +111,11 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
         document = DocumentFactory(individual=primary, type=document_type)
 
         create_payment_plan_snapshot_data(payment_plan)
+        payment.refresh_from_db()
 
-        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, field_name)
+        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+            payment, field_name, self.admin_areas_dict
+        )
 
         accepted_results = {
             "payment_id": payment.unicef_id,

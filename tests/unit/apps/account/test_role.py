@@ -17,12 +17,14 @@ class RoleTest(WebTest):
         url = reverse("admin:account_role_change", args=[self.role_1.pk])
         res = self.app.get(url, user=self.superuser)
         url = reverse("admin:account_role_change", args=[self.role_1.pk])
-        res.form["permissions"] = ["RDI_VIEW_LIST"]
-        res.form.submit().follow()
+        form = res.forms["role_form"]
+        form["permissions"] = ["RDI_VIEW_LIST"]
+        form.submit().follow()
 
         res = self.app.get(url, user=self.superuser)
-        res.form["permissions"] = ["RDI_IMPORT_DATA"]
-        res.form.submit().follow()
+        form = res.forms["role_form"]
+        form["permissions"] = ["RDI_IMPORT_DATA"]
+        form.submit().follow()
 
         res = self.app.get(url, user=self.superuser)
         res = res.click("History")

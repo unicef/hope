@@ -99,6 +99,7 @@ else:
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
+        "ENGINE": "django.db.backends.postgresql",
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
         "TEST": {
             "READ_ONLY": True,
@@ -491,3 +492,5 @@ from hope.config.fragments.storages import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
+
+SALT_KEY = SECRET_KEY

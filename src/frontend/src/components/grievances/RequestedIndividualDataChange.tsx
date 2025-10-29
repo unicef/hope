@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
@@ -22,6 +20,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
+import { showApiErrorMessages } from '@utils/utils';
 
 export type RoleReassignData = {
   role: string;
@@ -37,6 +36,7 @@ export function RequestedIndividualDataChange({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
+  const { businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const queryClient = useQueryClient();
@@ -143,37 +143,33 @@ export function RequestedIndividualDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          ticket.id,
+        ],
       });
     },
     onError: (error: any) => {
-      if (error?.body?.errors) {
-        Object.values(error.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage('An error occurred while approving changes');
-      }
+      showApiErrorMessages(error, showMessage);
     },
   });
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   const selectedDocumentsToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documents?.length; i++) {
     if (documents[i]?.approveStatus) {
       selectedDocuments.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documentsToRemove?.length; i++) {
     if (documentsToRemove[i]?.approveStatus) {
       selectedDocumentsToRemove.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < documentsToEdit?.length; i++) {
     if (documentsToEdit[i]?.approveStatus) {
       selectedDocumentsToEdit.push(i);
@@ -182,19 +178,19 @@ export function RequestedIndividualDataChange({
   const selectedIdentities = [];
   const selectedIdentitiesToRemove = [];
   const selectedIdentitiesToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identities?.length; i++) {
     if (identities[i]?.approveStatus) {
       selectedIdentities.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identitiesToRemove?.length; i++) {
     if (identitiesToRemove[i]?.approveStatus) {
       selectedIdentitiesToRemove.push(i);
     }
   }
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < identitiesToEdit?.length; i++) {
     if (identitiesToEdit[i]?.approveStatus) {
       selectedIdentitiesToEdit.push(i);
@@ -202,14 +198,14 @@ export function RequestedIndividualDataChange({
   }
 
   const selectedAccounts = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < accounts?.length; i++) {
     if (accounts[i]?.approve_status) {
       selectedAccounts.push(i);
     }
   }
   const selectedAccountsToEdit = [];
-  // eslint-disable-next-line no-plusplus
+
   for (let i = 0; i < accountsToEdit?.length; i++) {
     if (accountsToEdit[i]?.approve_status) {
       selectedAccountsToEdit.push(i);
@@ -322,7 +318,6 @@ export function RequestedIndividualDataChange({
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
           prev[curr] = true;
           return prev;
         }, {});
@@ -337,7 +332,6 @@ export function RequestedIndividualDataChange({
         // Removed unused approvedAccountsToCreate and approvedAccountsToEdit
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
-            // eslint-disable-next-line no-param-reassign
             prev[curr] = true;
             return prev;
           },
@@ -345,7 +339,7 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            individualApproveData: JSON.stringify(individualApproveData),
+            individualApproveData: individualApproveData,
             approvedDocumentsToCreate,
             approvedDocumentsToRemove,
             approvedDocumentsToEdit,
@@ -354,11 +348,11 @@ export function RequestedIndividualDataChange({
             approvedIdentitiesToEdit,
             approvedAccountsToCreate,
             approvedAccountsToEdit,
-            flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
+            flexFieldsApproveData: flexFieldsApproveData,
           });
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
-        } catch (e) {
+        } catch {
           // Error handling is already in the mutation onError callback
         }
       }}

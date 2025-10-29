@@ -15,7 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramCopy } from '@restgenerated/models/ProgramCopy';
@@ -63,7 +63,7 @@ const DuplicateProgramPage = (): ReactElement => {
   });
 
   const { data: treeData, isLoading: treeLoading } =
-    useQuery<PaginatedAreaTreeList>({
+    useQuery<AreaTree[]>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGeoAreasAllAreasTreeList({
@@ -113,7 +113,11 @@ const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode', 'beneficiaryGroup']);
+    const requestValues = omit(values, [
+      'editMode',
+      'beneficiaryGroup',
+      'isActive',
+    ]);
     const initialPduFieldState = {
       label: '',
       pduData: {
@@ -259,6 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const initialValues = {
     editMode: false,
+    isActive: false,
     name: `Copy of Programme: (${name})`,
     programmeCode: null,
     startDate,

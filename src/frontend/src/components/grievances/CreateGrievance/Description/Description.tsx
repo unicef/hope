@@ -5,13 +5,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  Box,
-  FormHelperText,
-  Grid2 as Grid,
-  GridSize,
-  Typography,
-} from '@mui/material';
+import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -85,10 +79,10 @@ function Description({
 
   // Set program value based on selected household or individual
   useEffect(() => {
-    if (values.selectedIndividual?.program.id) {
-      setFieldValue('program', values.selectedIndividual.program.id);
+    if (values.selectedIndividual?.program?.id) {
+      setFieldValue('program', values.selectedIndividual?.program?.id);
     } else if (values.selectedHousehold?.programId) {
-      setFieldValue('program', values.selectedHousehold.programId);
+      setFieldValue('program', values.selectedHousehold?.programId);
     }
   }, [values.selectedHousehold, values.selectedIndividual, setFieldValue]);
   const categoryChoices: {
@@ -126,7 +120,7 @@ function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 4,
+                size: 6,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
@@ -135,7 +129,7 @@ function Description({
                     {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
-                size: 8,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -145,7 +139,7 @@ function Description({
                     canViewHouseholdDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
+                        to={`/${baseUrl}/population/household/${values.selectedHousehold?.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
@@ -154,7 +148,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
               {
                 label: `${beneficiaryGroup?.memberLabel} ID`,
@@ -164,7 +158,7 @@ function Description({
                     canViewIndividualDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
+                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual?.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
@@ -173,7 +167,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 6,
               },
             ]
               .filter((el) =>
@@ -287,11 +281,11 @@ function Description({
             />
           </Grid>
         </Grid>
-        <Box pt={5}>
+        <Box sx={{ pt: 5 }}>
           <BoxWithBorders>
             <Grid container spacing={4}>
               <Grid size={{ xs: 6 }}>
-                <Box py={3}>
+                <Box sx={{ py: 3 }}>
                   <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
@@ -301,7 +295,7 @@ function Description({
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                 <Grid size={{ xs: 6 }}>
-                  <Box py={3}>
+                  <Box sx={{ py: 3 }}>
                     <LookUpPaymentRecord
                       values={values}
                       onValueChange={setFieldValue}
@@ -317,7 +311,7 @@ function Description({
         </Box>
       </BoxPadding>
       {canAddDocumentation && (
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <BoxWithBorderBottom>
             <Title>
               <Typography variant="h6">

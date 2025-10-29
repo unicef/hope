@@ -1,10 +1,10 @@
 from typing import Any
 
 from constance import config
-from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
+from django.db.models import Exists, F, OuterRef, Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -43,7 +43,7 @@ from hope.apps.household.api.serializers.individual import (
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
 from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.models import Program
 
 
@@ -79,6 +79,10 @@ class HouseholdViewSet(
             Permissions.RDI_VIEW_DETAILS,
         ],
         "payments": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PM_VIEW_DETAILS,
+        ],
+        "payments_count": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.PM_VIEW_DETAILS,
         ],
@@ -190,9 +194,7 @@ class HouseholdViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()
-        payments = Payment.objects.filter(
-            Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        )
+        payments = hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
 
         page = self.paginate_queryset(payments)
         if page is not None:
@@ -201,6 +203,20 @@ class HouseholdViewSet(
 
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
+        },
+        filters=True,
+    )
+    @action(detail=True, methods=["get"], url_path="payments/count")
+    def payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+        hh = self.get_object()
+        payments_count = (
+            hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).count()
+        )
+        return Response({"count": payments_count}, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={
@@ -358,10 +374,28 @@ class IndividualViewSet(
         "household__admin3",
     ]
 
+    def get_queryset_list(self) -> QuerySet:
+        qs = super().get_queryset()
+        return (
+            qs.select_related("household", "household__admin2", "program")
+            .prefetch_related("program__sanction_lists")
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                    .only("id", "individual_id", "household_id", "role", "created_at")
+                    .order_by("id"),
+                    to_attr="prefetched_roles",
+                )
+            )
+        )
+
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
-
+        if self.action == "list":
+            return self.get_queryset_list()
         return (
             super()
             .get_queryset()
@@ -421,6 +455,7 @@ class IndividualGlobalViewSet(
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = IndividualFilter
@@ -431,7 +466,22 @@ class IndividualGlobalViewSet(
     ]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
+        return (
+            super()
+            .get_queryset()
+            .select_related("household", "household__admin2", "program")
+            .prefetch_related("program__sanction_lists")
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_objects.filter(household=F("individual__household"))
+                    .only("id", "individual_id", "household_id", "role", "created_at")
+                    .order_by("id"),
+                    to_attr="prefetched_roles",
+                )
+            )
+        )
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:

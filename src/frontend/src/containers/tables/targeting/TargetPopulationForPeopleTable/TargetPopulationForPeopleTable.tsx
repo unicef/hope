@@ -13,6 +13,7 @@ import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface TargetPopulationProps {
   filter;
@@ -76,11 +77,35 @@ export function TargetPopulationForPeopleTable({
     handleChange(id);
   };
 
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  // Count query (enabled only on page 0)
+  const { data: countData } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsCount',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const persistedCount = usePersistedCount(page, countData);
+
+  // Main data query
   const {
     data: targetPopulationsData,
     isLoading,
@@ -91,12 +116,13 @@ export function TargetPopulationForPeopleTable({
       queryVariables,
       businessArea,
       programId,
+      page,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
-          queryVariables,
+          { ...queryVariables, offset: page * 10 },
           { withPagination: true },
         ),
       );
@@ -138,6 +164,9 @@ export function TargetPopulationForPeopleTable({
             canViewDetails={canViewDetails}
           />
         )}
+        page={page}
+        setPage={setPage}
+        itemsCount={persistedCount}
       />
     </TableWrapper>
   );

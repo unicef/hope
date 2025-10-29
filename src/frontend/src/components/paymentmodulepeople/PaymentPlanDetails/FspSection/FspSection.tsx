@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
@@ -29,17 +29,15 @@ export function FspSection({ paymentPlan }: FspSectionProps): ReactElement {
           <Typography variant="h6">{t('FSPs')}</Typography>
         </Box>
         <Grid container spacing={3}>
-          <>
-            <Grid
-              key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`}
-              size={{ xs: 3 }}
-            >
-              <LabelizedField
-                label={deliveryMechanism?.name || '-'}
-                value={financialServiceProvider?.name || '-'}
-              />
-            </Grid>
-          </>
+          <Grid
+            key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`}
+            size={3}
+          >
+            <LabelizedField
+              label={deliveryMechanism?.name || '-'}
+              value={financialServiceProvider?.name || '-'}
+            />
+          </Grid>
         </Grid>
         <DividerLine />
         <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan} />

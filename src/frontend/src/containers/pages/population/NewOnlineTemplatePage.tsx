@@ -122,7 +122,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
         numberOfRounds: roundsNames.length,
         roundsCovered: roundsCovered || 0,
         roundNumber: initialRoundNumber,
-        roundName: roundsNames[initialRoundNumber - 1],
+        roundName:
+          Array.isArray(roundsNames) && roundsNames[initialRoundNumber - 1]
+            ? roundsNames[initialRoundNumber - 1]
+            : '',
       };
     });
   };
@@ -199,7 +202,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
-        round_name: data.roundName,
+        round_name: data.roundName || '',
         id: data.id ?? undefined, // Fix: ensure id is included if present
       }));
 

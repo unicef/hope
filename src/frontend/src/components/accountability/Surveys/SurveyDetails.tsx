@@ -6,7 +6,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
 import { Survey } from '@restgenerated/models/Survey';
 import { ReactElement } from 'react';
@@ -54,7 +54,7 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
                 <BlackLink
                   to={`/${baseUrl}/target-population/${survey?.paymentPlan}`}
                 >
-                  {survey?.paymentPlan}
+                  {survey?.paymentPlanName}
                 </BlackLink>
               ) : (
                 '-'

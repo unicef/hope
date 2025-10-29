@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   Table,
   TableBody,
@@ -417,13 +417,13 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {deliveryMechanismToDisplay && criteriaIndex === 0 && (
         <Grid container>
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <LabelizedField
               label={t('Delivery Mechanism')}
               value={deliveryMechanismToDisplay}
             />
           </Grid>
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <LabelizedField label={t('FSP')} value={fspToDisplay} />
           </Grid>
         </Grid>

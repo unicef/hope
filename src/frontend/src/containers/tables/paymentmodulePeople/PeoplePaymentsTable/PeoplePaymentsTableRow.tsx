@@ -128,7 +128,12 @@ export const PeoplePaymentsTableRow = ({
       </TableCell>
       <TableCell align="left">
         {canViewDetails ? (
-          <BlackLink to={paymentDetailsPath}>{payment.unicefId}</BlackLink>
+          <BlackLink
+            to={paymentDetailsPath}
+            state={{ parentId: payment.parentId }}
+          >
+            {payment.unicefId}
+          </BlackLink>
         ) : (
           payment.unicefId
         )}

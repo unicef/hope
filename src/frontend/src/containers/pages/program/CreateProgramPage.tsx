@@ -15,7 +15,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 import { UserChoices } from '@restgenerated/models/UserChoices';
@@ -34,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissionInModule } from '../../../config/permissions';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -45,8 +45,8 @@ export const CreateProgramPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: treeData, isLoading: treeLoading } =
-    useQuery<PaginatedAreaTreeList>({
+  const { data: treeData } =
+    useQuery<AreaTree[]>({
       queryKey: ['allAreasTree', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGeoAreasAllAreasTreeList({
@@ -114,7 +114,7 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode']);
+    const requestValues = omit(values, ['editMode', 'isActive']);
 
     const initialPduFieldState = {
       label: '',
@@ -210,6 +210,8 @@ export const CreateProgramPage = (): ReactElement => {
         pduFields: pduFieldsToSend || [],
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
+        reconciliationWindowInDays: values.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications: values.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await createProgram(programData);
@@ -222,6 +224,7 @@ export const CreateProgramPage = (): ReactElement => {
   };
 
   const initialValues = {
+    isActive: false,
     editMode: false,
     name: '',
     programmeCode: '',
@@ -237,6 +240,8 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
+    reconciliationWindowInDays: 0,
+    sendReconciliationWindowExpiryNotifications: false,
     partnerAccess: 'ALL_PARTNERS_ACCESS',
     pduFields: [],
   };
@@ -255,15 +260,17 @@ export const CreateProgramPage = (): ReactElement => {
       'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
+      'reconciliationWindowInDays',
+      'sendReconciliationWindowExpiryNotifications',
     ],
     ['pduField'],
     ['partnerAccess'],
   ];
 
-  if (treeLoading || userPartnerChoicesLoading || choicesLoading)
+  if ( userPartnerChoicesLoading || choicesLoading)
     return <LoadingComponent />;
 
-  if (!treeData || !userPartnerChoicesData || !choicesData) return null;
+  if (!userPartnerChoicesData || !choicesData) return null;
 
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 

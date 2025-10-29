@@ -4,11 +4,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
@@ -34,6 +36,7 @@ function PaymentsHouseholdTable({
     programSlug: programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [page, setPage] = useState(0);
 
   const {
     data: paymentsData,
@@ -61,6 +64,28 @@ function PaymentsHouseholdTable({
       );
     },
   });
+
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsPaymentsCount',
+      programId,
+      businessArea,
+      queryVariables,
+      household?.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household?.id,
+          },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -78,6 +103,8 @@ function PaymentsHouseholdTable({
     replacements,
   );
 
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <UniversalRestTable
       title={t('Payments')}
@@ -87,6 +114,9 @@ function PaymentsHouseholdTable({
       isLoading={isLoading}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
       renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow
           key={row.id}

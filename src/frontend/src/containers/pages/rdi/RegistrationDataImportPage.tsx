@@ -12,11 +12,12 @@ import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 const initialFilter = {
   search: '',
@@ -43,18 +44,24 @@ function RegistrationDataImportPage(): ReactElement {
       }),
   });
 
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
 
   const { mutateAsync } = useMutation({
     mutationFn: async () =>
       runDeduplicationDataImports(businessArea, programId),
-    onSuccess: ({ data }) => {
-      showMessage(data.message);
+    onSuccess: () => {
+      showMessage('Deduplication process started');
     },
   });
 
@@ -104,15 +111,20 @@ function RegistrationDataImportPage(): ReactElement {
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
+        setAppliedFilter={(newFilter) => {
+          setAppliedFilter(newFilter);
+          setShouldScroll(true);
+        }}
       />
-      <RegistrationDataImportTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.RDI_VIEW_DETAILS,
-          permissions,
-        )}
-      />
+      <Box ref={tableRef}>
+        <RegistrationDataImportTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </Box>
     </>
   );
 }

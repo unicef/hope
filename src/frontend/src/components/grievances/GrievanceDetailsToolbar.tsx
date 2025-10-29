@@ -328,7 +328,7 @@ export const GrievanceDetailsToolbar = ({
         }).then(async () => {
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch (e) {
+          } catch {
             // Error handling is done in the mutation onError callback
           }
         })

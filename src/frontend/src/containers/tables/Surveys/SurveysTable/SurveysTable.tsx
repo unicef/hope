@@ -1,7 +1,8 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { dateToIsoString, restChoicesToDict } from '@utils/utils';
+import { dateToIsoString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -12,23 +13,22 @@ import { createApiParams } from '@utils/apiUtils';
 import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
 import { Survey } from '@restgenerated/models/Survey';
 import { CountResponse } from '@restgenerated/models/CountResponse';
-import { Choice } from '@restgenerated/models/Choice';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface SurveysTableProps {
   filter;
   canViewDetails: boolean;
-  choicesData: Array<Choice> | null;
 }
 
 function SurveysTable({
   filter,
   canViewDetails,
-  choicesData,
 }: SurveysTableProps): ReactElement {
   const { programId, baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const businessAreaSlug = baseUrl.split('/')[0];
+
+  const [page, setPage] = useState(0);
 
   const initialQueryVariables = useMemo(
     () => ({
@@ -42,6 +42,7 @@ function SurveysTable({
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
       ordering: '-created_at',
+      page,
     }),
     [
       businessAreaSlug,
@@ -51,6 +52,7 @@ function SurveysTable({
       filter.createdBy,
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
+      page,
     ],
   );
 
@@ -96,10 +98,11 @@ function SurveysTable({
           queryVariables,
         ),
       ),
-    enabled: !!businessAreaSlug && !!programId,
+    enabled: page === 0,
   });
 
-  const categoryDict = restChoicesToDict(choicesData);
+  const itemsCount = usePersistedCount(page, dataSurveysCount);
+
 
   return (
     <TableWrapper>
@@ -113,14 +116,15 @@ function SurveysTable({
         setQueryVariables={setQueryVariables}
         defaultOrderBy="created_at"
         defaultOrderDirection="desc"
-        itemsCount={dataSurveysCount?.count}
+        itemsCount={itemsCount}
         initialRowsPerPage={10}
+        page={page}
+        setPage={setPage}
         renderRow={(row: Survey) => (
           <SurveysTableRow
             key={row.id}
             survey={row}
             canViewDetails={canViewDetails}
-            categoryDict={categoryDict}
           />
         )}
       />

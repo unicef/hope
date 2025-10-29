@@ -21,6 +21,7 @@ function PaymentVerificationTable({
   canViewDetails,
   businessArea,
 }: PaymentVerificationTableProps): ReactElement {
+  const [page, setPage] = useState(0);
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialQueryVariables = useMemo(
@@ -65,6 +66,7 @@ function PaymentVerificationTable({
           queryVariables,
         ),
       ),
+    enabled: !!businessArea && !!programId && page === 0,
   });
   const {
     data: paymentPlansData,
@@ -97,6 +99,8 @@ function PaymentVerificationTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      page={page}
+      setPage={setPage}
       itemsCount={countData?.count}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow

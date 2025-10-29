@@ -3,14 +3,13 @@ import decimal
 import logging
 from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
 from django.urls import reverse
 import openpyxl
 from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
-from hope.apps.core.utils import encode_id_base64
+from hope.apps.payment.utils import get_link
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -59,31 +58,22 @@ class XlsxExportBaseService:
         self,
         col: list | None = None,
         hex_code: str = "A0FDB0",
-        no_of_columns: int | None = None,
     ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
             bd = Side(style="thin", color="999999")
             for y in range(
                 1,
-                (self.ws_export_list.max_column if no_of_columns is None else no_of_columns) + 1,
+                self.ws_export_list.max_row + 1,
             ):
                 cell = self.ws_export_list.cell(row=y, column=row_index)
                 cell.fill = fill
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
-    @staticmethod
-    def get_link(api_url: str | None = None) -> str:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
-        if api_url:
-            return link
-        return ""
-
     def get_email_context(self, user: "User") -> dict:
-        payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        payment_plan_id = str(self.payment_plan.id)
         path_name = "download-payment-plan-payment-list"
-        link = self.get_link(reverse(path_name, args=[payment_verification_id]))
+        link = get_link(reverse(path_name, args=[payment_plan_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 

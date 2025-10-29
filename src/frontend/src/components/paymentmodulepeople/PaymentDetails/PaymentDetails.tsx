@@ -1,4 +1,5 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '@hooks/useBusinessArea';
@@ -8,6 +9,7 @@ import {
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
+  safeStringify,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -49,9 +51,7 @@ export function PaymentDetails({
     'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
-  const collectorAccountData = payment?.snapshotCollectorAccountData
-  ? JSON.parse(payment.snapshotCollectorAccountData)
-  : {};
+  const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
 
   return (
     <>
@@ -225,7 +225,7 @@ export function PaymentDetails({
             <Grid key={key} size={{ xs: 3 }}>
               <LabelizedField
                 label={t(`Account ${key}`)}
-                value={String(value)}
+                value={safeStringify(value)}
               />
             </Grid>
           ))}

@@ -59,6 +59,8 @@ function PaymentPlansTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const [page, setPage] = useState(0);
+
   const {
     data: paymentPlansData,
     isLoading,
@@ -95,6 +97,7 @@ function PaymentPlansTable({
           queryVariables,
         ),
       ),
+    enabled: !!businessArea && !!programId && page === 0,
   });
 
   const replacements = {
@@ -119,6 +122,8 @@ function PaymentPlansTable({
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       itemsCount={dataPaymentPlansCount?.count}
+      page={page}
+      setPage={setPage}
       renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}

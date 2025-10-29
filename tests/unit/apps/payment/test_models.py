@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone as dt_timezone
 import json
 from typing import Any
 from unittest import mock
@@ -13,6 +13,7 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
+from django.utils.timezone import now
 import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
@@ -75,7 +76,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_in_approval(self, afghanistan: BusinessAreaFactory) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=PaymentPlan.Status.IN_APPROVAL)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
@@ -140,7 +141,7 @@ class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_other_status(self, afghanistan: BusinessAreaFactory, status: str) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=status)
         approval_user = UserFactory()
-        approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
+        approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
         ApprovalProcessFactory(
             payment_plan=payment_plan,
             sent_for_approval_date=approval_date,
@@ -421,6 +422,33 @@ class TestPaymentPlanModel(TestCase):
             individual_ids="IND-01, IND-02",
         )
         assert not pp.has_empty_ids_criteria
+
+    def test_has_payments_reconciliation_overdue(self) -> None:
+        pp = PaymentPlanFactory(
+            dispersion_start_date=now().date() - timedelta(days=20),
+            dispersion_end_date=now().date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        program = pp.program
+        program.reconciliation_window_in_days = 10
+        program.save()
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_SUCCESS, delivered_quantity=100)
+        assert pp.has_payments_reconciliation_overdue is False
+
+        PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
+        assert pp.has_payments_reconciliation_overdue is True
+
+        program.reconciliation_window_in_days = 30
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
+
+        program.reconciliation_window_in_days = 0
+        program.save()
+        assert pp.has_payments_reconciliation_overdue is False
 
 
 class TestPaymentModel(TestCase):
@@ -808,21 +836,32 @@ class TestFinancialServiceProviderModel(TestCase):
         )
         generate_delivery_mechanisms()
 
+        admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
+        countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
+
         # get None if no snapshot
-        none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        none_resp = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", admin_areas_dict, countries_dict
+        )
         assert none_resp is None
 
         create_payment_plan_snapshot_data(payment.parent)
         payment.refresh_from_db()
 
         # check invalid filed name
-        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
+        result = fsp_xlsx_template.get_column_from_core_field(
+            payment, "invalid_people_field_name", admin_areas_dict, countries_dict
+        )
         assert result is None
 
         # People program
-        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        given_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", admin_areas_dict, countries_dict
+        )
         assert given_name == primary.given_name
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "individual_unicef_id", admin_areas_dict, countries_dict
+        )
         assert ind_unicef_id == primary.unicef_id
 
         # Standard program
@@ -830,41 +869,61 @@ class TestFinancialServiceProviderModel(TestCase):
         payment.parent.program.data_collecting_type.save()
 
         # check fields value
-        size = fsp_xlsx_template.get_column_from_core_field(payment, "size")
+        size = fsp_xlsx_template.get_column_from_core_field(payment, "size", admin_areas_dict, countries_dict)
         assert size == 1
-        admin1 = fsp_xlsx_template.get_column_from_core_field(payment, "admin1")
+        admin1 = fsp_xlsx_template.get_column_from_core_field(payment, "admin1", admin_areas_dict, countries_dict)
         assert admin1 == f"{area1.p_code} - {area1.name}"
-        admin2 = fsp_xlsx_template.get_column_from_core_field(payment, "admin2")
+        admin2 = fsp_xlsx_template.get_column_from_core_field(payment, "admin2", admin_areas_dict, countries_dict)
         assert admin2 == f"{area2.p_code} - {area2.name}"
-        admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3")
+        admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3", admin_areas_dict, countries_dict)
         assert admin3 == f"{area3.p_code} - {area3.name}"
-        given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        given_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "given_name", admin_areas_dict, countries_dict
+        )
         assert given_name == primary.given_name
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "individual_unicef_id", admin_areas_dict, countries_dict
+        )
         assert ind_unicef_id == primary.unicef_id
-        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "household_unicef_id")
+        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "household_unicef_id", admin_areas_dict, countries_dict
+        )
         assert hh_unicef_id == household.unicef_id
-        phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no")
+        phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no", admin_areas_dict, countries_dict)
         assert phone_no == primary.phone_no
-        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative")
+        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(
+            payment, "phone_no_alternative", admin_areas_dict, countries_dict
+        )
         assert phone_no_alternative == primary.phone_no_alternative
-        national_id_no = fsp_xlsx_template.get_column_from_core_field(payment, "national_id_no")
+        national_id_no = fsp_xlsx_template.get_column_from_core_field(
+            payment, "national_id_no", admin_areas_dict, countries_dict
+        )
         assert national_id_no == document.document_number
-        wallet_name = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_name")
+        wallet_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_name", admin_areas_dict, countries_dict
+        )
         assert wallet_name == primary.wallet_name
-        blockchain_name = fsp_xlsx_template.get_column_from_core_field(payment, "blockchain_name")
+        blockchain_name = fsp_xlsx_template.get_column_from_core_field(
+            payment, "blockchain_name", admin_areas_dict, countries_dict
+        )
         assert blockchain_name == primary.blockchain_name
-        wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
+        wallet_address = fsp_xlsx_template.get_column_from_core_field(
+            payment, "wallet_address", admin_areas_dict, countries_dict
+        )
         assert wallet_address == primary.wallet_address
 
-        role = fsp_xlsx_template.get_column_from_core_field(payment, "role")
+        role = fsp_xlsx_template.get_column_from_core_field(payment, "role", admin_areas_dict, countries_dict)
         assert role == "PRIMARY"
 
-        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
+        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(
+            payment, "primary_collector_id", admin_areas_dict, countries_dict
+        )
         assert primary_collector_id == str(primary.pk)
 
         # country_origin
-        country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
+        country_origin = fsp_xlsx_template.get_column_from_core_field(
+            payment, "country_origin", admin_areas_dict, countries_dict
+        )
         assert household.country_origin.iso_code3 == country_origin
 
 

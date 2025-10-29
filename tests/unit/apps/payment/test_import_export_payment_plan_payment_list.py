@@ -266,11 +266,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert payment.order_number is None
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        export_service.export_per_fsp(self.user)
-
+        export_service.generate_token_and_order_numbers(
+            self.payment_plan.eligible_payments.all(), self.payment_plan.program
+        )
         payment.refresh_from_db(fields=["token_number", "order_number"])
         assert len(str(payment.token_number)) == 7
         assert len(str(payment.order_number)) == 9
+
+        export_service.export_per_fsp(self.user)
 
         assert self.payment_plan.has_export_file
         assert self.payment_plan.payment_list_export_file_link is not None
@@ -388,8 +391,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         # remove old and create new snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payment_plan)
+        payment.refresh_from_db()
 
-        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        payment_row = export_service.get_payment_row(payment)
         assert payment_row[decimal_flexible_attribute_index] == 123.45
         assert payment_row[date_flexible_attribute_index] == "2021-01-01"
 
@@ -439,7 +443,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
 
-        template_column_list = export_service.prepare_headers(fsp_xlsx_template)
+        template_column_list = export_service.prepare_headers(fsp_xlsx_template)  # type: ignore
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
         assert (
@@ -519,10 +523,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             label={"English(EN)": "value"},
         )
         flex_field.save()
-        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
+        FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         payment = PaymentFactory(parent=self.payment_plan)
-        empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        empty_payment_row = export_service.get_payment_row(payment)
         for value in empty_payment_row:
             assert value == ""
 
@@ -568,7 +572,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row
-            payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+            payment_row = export_service.get_payment_row(payment)
             assert payment_row[-5] == "Union Bank"
             assert payment_row[-4] == str(payment.id)
             assert payment_row[-3] == "123456"
@@ -577,9 +581,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
-        payment_row_without_snapshot = export_service.get_payment_row(
-            self.payment_plan.eligible_payments.first(), fsp_xlsx_template
-        )
+        payment_row_without_snapshot = export_service.get_payment_row(self.payment_plan.eligible_payments.first())
         assert payment_row_without_snapshot[-4] == ""
 
     def test_headers_for_social_worker_program(self) -> None:

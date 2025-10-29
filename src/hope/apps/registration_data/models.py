@@ -1,8 +1,7 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -25,6 +24,9 @@ from hope.apps.household.models import (
 from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
 from hope.apps.utils.models import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+
+if TYPE_CHECKING:
+    from hope.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +127,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (DEDUP_ENGINE_ERROR, _("Error")),
         (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
     )
-    name = CICharField(
+    name = models.CharField(
         max_length=255,
         unique=True,
         db_index=True,
@@ -136,6 +138,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
         ],
+        db_collation="und-ci-det",
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
     deduplication_engine_status = models.CharField(
@@ -430,17 +433,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
     @classmethod
-    def remove_pairs(cls, deduplication_set_id: str) -> None:
-        from hope.apps.program.models import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        cls.objects.filter(program=program).delete()
-
-    @classmethod
-    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: list[SimilarityPair]) -> None:
-        from hope.apps.program.models import Program
-
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+    def bulk_add_pairs(cls, program: "Program", duplicates_data: list[SimilarityPair]) -> None:
         duplicates = []
         for pair in duplicates_data:
             if pair.first and pair.second:
@@ -492,6 +485,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
         duplicates = []
         for pair in similarity_pairs:
             duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            if not duplicate:
+                continue
             household = duplicate.household
             duplicates.append(
                 {

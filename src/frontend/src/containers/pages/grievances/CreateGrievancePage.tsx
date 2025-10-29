@@ -30,7 +30,10 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import FormHelperText from '@mui/material/FormHelperText';
+import Grid from '@mui/material/Grid';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -101,10 +104,9 @@ const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
@@ -122,6 +124,26 @@ const CreateGrievancePage = (): ReactElement => {
 
   const linkedTicketId = location.state?.linkedTicketId;
   const selectedHousehold = location.state?.selectedHousehold;
+  const feedbackProgramId = location.state?.feedbackProgramId;
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, limit: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
+    });
+
+  const feedbackProgram = feedbackProgramId
+    ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
+    : undefined;
+  const feedbackProgramSlug = feedbackProgram?.slug;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
@@ -129,16 +151,19 @@ const CreateGrievancePage = (): ReactElement => {
       (typeof selectedHousehold === 'string' ||
         typeof selectedHousehold === 'number'),
   );
+
+  const entityProgramSlug = feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
-      queryKey: ['household', businessArea, programId, selectedHousehold],
+      queryKey: ['household', businessArea, entityProgramSlug, selectedHousehold],
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: entityProgramSlug,
           id: String(selectedHousehold),
         }),
-      enabled: shouldFetchHousehold,
+      enabled: shouldFetchHousehold && !!entityProgramSlug,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
@@ -151,14 +176,14 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
-      queryKey: ['individual', businessArea, programId, selectedIndividual],
+      queryKey: ['individual', businessArea, entityProgramSlug, selectedIndividual],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: entityProgramSlug,
           id: String(selectedIndividual),
         }),
-      enabled: shouldFetchIndividual,
+      enabled: shouldFetchIndividual && !!entityProgramSlug,
     });
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
@@ -183,7 +208,7 @@ const CreateGrievancePage = (): ReactElement => {
     priority: null,
     urgency: null,
     partner: null,
-    program: isAllPrograms ? '' : programId,
+    program: isAllPrograms ? '' : selectedProgram?.id || '',
     comments: null,
     linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
@@ -208,19 +233,6 @@ const CreateGrievancePage = (): ReactElement => {
     },
   });
 
-  const { data: programsData, isLoading: programsDataLoading } =
-    useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
-    });
 
   const {
     data: allAddIndividualFieldsData,
@@ -244,7 +256,7 @@ const CreateGrievancePage = (): ReactElement => {
             businessAreaSlug: businessArea,
           },
         ),
-    });
+  });
 
   const {
     data: allEditPeopleFieldsData,
@@ -364,7 +376,7 @@ const CreateGrievancePage = (): ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const requestData = prepareRestVariables(businessArea, values);
+            const requestData = prepareRestVariables(values);
             const data = await mutateAsync(requestData);
             const grievanceTickets = data || [];
             const grievanceTicket = grievanceTickets[0];
@@ -430,6 +442,11 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
+        const dynamicEntityProgramSlug = feedbackProgramSlug ||
+          (programId !== 'all' ? programId :
+            ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
+             (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug)));
+
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -497,7 +514,9 @@ const CreateGrievancePage = (): ReactElement => {
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
+                          <Box
+                            sx={{ display: 'flex', flexDirection: 'column' }}
+                          >
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -514,7 +533,7 @@ const CreateGrievancePage = (): ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === GrievanceSteps.Verification && (
-                        <Verification values={values} />
+                        <Verification values={values} programSlug={dynamicEntityProgramSlug} />
                       )}
                       {activeStep === GrievanceSteps.Description && (
                         <>
@@ -532,12 +551,15 @@ const CreateGrievancePage = (): ReactElement => {
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
+                            programSlug={dynamicEntityProgramSlug}
                           />
                         </>
                       )}
                       {dataChangeErrors(errors)}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
+                      <Box
+                        sx={{ pt: 3, display: 'flex', flexDirection: 'row' }}
+                      >
+                        <Box sx={{ mr: 3 }}>
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/tickets/user-generated`}
@@ -545,7 +567,7 @@ const CreateGrievancePage = (): ReactElement => {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display="flex" ml="auto">
+                        <Box sx={{ display: 'flex', ml: 'auto' }}>
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}

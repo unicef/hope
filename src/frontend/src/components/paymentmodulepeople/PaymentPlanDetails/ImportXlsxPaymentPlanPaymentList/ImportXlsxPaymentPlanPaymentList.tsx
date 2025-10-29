@@ -1,4 +1,5 @@
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { getApiErrorMessages } from '@utils/utils';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -30,6 +31,7 @@ export function ImportXlsxPaymentPlanPaymentList({
   paymentPlan,
   permissions,
 }: ImportXlsxPaymentPlanPaymentListProps): ReactElement {
+  const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
@@ -37,38 +39,36 @@ export function ImportXlsxPaymentPlanPaymentList({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const {
-    mutateAsync: importEntitlementXlsx,
-    isPending: fileLoading,
-    error: xlsxErrors,
-  } = useMutation({
-    mutationFn: ({
-      businessAreaSlug,
-      id,
-      programSlug,
-      requestBody,
-    }: {
-      businessAreaSlug: string;
-      id: string;
-      programSlug: string;
-      requestBody: PaymentPlanImportFile;
-    }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate(
-        {
-          businessAreaSlug,
-          id,
-          programSlug,
-          requestBody,
-        },
-      ),
-    onSuccess: () => {
-      setOpenImport(false);
-      showMessage(t('Your import was successful!'));
-    },
-    onError: (e) => {
-      showMessage(e.message);
-    },
-  });
+  const { mutateAsync: importEntitlementXlsx, isPending: fileLoading } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody: PaymentPlanImportFile;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            formData: requestBody,
+          },
+        ),
+      onSuccess: () => {
+        setOpenImport(false);
+        showMessage(t('Your import was successful!'));
+        setXlsxError(null);
+      },
+      onError: (error: any) => {
+        setXlsxError(getApiErrorMessages(error));
+      },
+    });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -76,11 +76,7 @@ export function ImportXlsxPaymentPlanPaymentList({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
         programSlug: programId,
-        requestBody: {
-          //TODO:
-          //@ts-ignore
-          file: fileToImport,
-        },
+        requestBody: { file: fileToImport as any },
       });
     }
   };
@@ -136,12 +132,10 @@ export function ImportXlsxPaymentPlanPaymentList({
                 setFileToImport(file);
               }}
             />
-            {fileToImport && xlsxErrors ? (
+            {fileToImport && xlsxError ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
-                <p>{xlsxErrors.message}</p>
-                {/* //TODO: fix */}
-                {/* <ImportErrors errors={xlsxErrors} /> */}
+                <p>{xlsxError}</p>
               </Error>
             ) : null}
           </>

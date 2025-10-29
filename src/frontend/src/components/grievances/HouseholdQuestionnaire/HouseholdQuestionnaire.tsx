@@ -1,4 +1,4 @@
-import { Grid2 as Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +14,12 @@ import { RestService } from '@restgenerated/services/RestService';
 
 interface HouseholdQuestionnaireProps {
   values;
+  programSlug?: string;
 }
 
 function HouseholdQuestionnaire({
   values,
+  programSlug,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
@@ -38,19 +40,16 @@ function HouseholdQuestionnaire({
       'household',
       businessArea,
       householdId,
+      programSlug,
       programId,
-      values.selectedHousehold?.programSlug,
-      values.selectedHousehold?.program?.slug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: householdId,
-        programSlug:
-          values.selectedHousehold?.programSlug ||
-          values.selectedHousehold?.program?.slug,
+        programSlug: programSlug,
       }),
-    enabled: !!householdId,
+    enabled: !!householdId && !!programSlug,
   });
 
   if (isLoading) return <LoadingComponent />;

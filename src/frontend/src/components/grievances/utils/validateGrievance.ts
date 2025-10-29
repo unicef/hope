@@ -8,7 +8,7 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validate(
   values,
   addIndividualFieldsData: Array<any> | null,
@@ -224,7 +224,7 @@ export function validate(
   return errors;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+ 
 export function validateUsingSteps(
   values,
   addIndividualFieldsData: Array<any> | null,
@@ -403,11 +403,11 @@ export function validateUsingSteps(
               errors.individualDataUpdateFieldsAccounts =
                 'Account Number is required';
             }
-            if (!acc.name) {
+            if (!acc.accountType) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Type is required';
             }
-            if (!acc.financial_institution) {
+            if (acc.name == 'bank' && !acc.financialInstitution) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Financial Institution is required';
             }
@@ -427,7 +427,7 @@ export function validateUsingSteps(
               errors.individualDataUpdateAccountsToEdit =
                 'Account Number is required';
             }
-            if (!acc.financial_institution) {
+            if (acc.name == 'bank' && !acc.financialInstitution) {
               errors.individualDataUpdateAccountsToEdit =
                 'Account Financial Institution is required';
             }

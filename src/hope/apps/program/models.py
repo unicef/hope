@@ -5,7 +5,6 @@ import string
 from typing import Any, Collection
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -37,29 +36,6 @@ from hope.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-
-
-class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
-    program = models.ForeignKey(
-        "Program",
-        on_delete=models.CASCADE,
-        related_name="program_partner_through",
-    )
-    partner = models.ForeignKey(
-        "account.Partner",
-        on_delete=models.CASCADE,
-        related_name="program_partner_through",
-    )
-    areas = models.ManyToManyField("geo.Area", related_name="program_partner_through", blank=True)
-    full_area_access = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["program", "partner"],
-                name="unique_program_partner",
-            )
-        ]
 
 
 class BeneficiaryGroup(TimeStampedUUIDModel):
@@ -171,14 +147,8 @@ class Program(
         help_text="Program beneficiary group",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=ProgramPartnerThrough,
-        related_name="programs",
-        help_text="Program partners",
-    )
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
-    name = CICharField(
+    name = models.CharField(
         max_length=255,
         validators=[
             MinLengthValidator(3),
@@ -189,6 +159,7 @@ class Program(
         ],
         db_index=True,
         help_text="Program name",
+        db_collation="und-ci-det",
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
@@ -259,6 +230,14 @@ class Program(
         related_name="programs",
         help_text="Program sanction lists",
     )
+
+    reconciliation_window_in_days = models.PositiveIntegerField(
+        default=0, help_text="Payment Plan reconciliation window in days"
+    )
+    send_reconciliation_window_expiry_notifications = models.BooleanField(
+        default=False, help_text="Send Payment Plan reconciliation window expiry notifications"
+    )
+
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:

@@ -10,6 +10,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useQuery } from '@tanstack/react-query';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { filterEmptyParams } from '@utils/utils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 interface UsersTableProps {
   filter;
 }
@@ -40,6 +41,9 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     ],
   );
 
+  // Controlled pagination state
+  const [page, setPage] = useState(0);
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
@@ -50,10 +54,10 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     return {
       ...filtered,
       businessAreaSlug: businessArea,
-      offset: queryVariables.offset,
-      limit: queryVariables.limit,
+      offset: page * 10,
+      limit: 10,
     };
-  }, [initialQueryVariables, queryVariables, businessArea]);
+  }, [initialQueryVariables, businessArea, page]);
 
   const {
     data: dataUsers,
@@ -69,7 +73,10 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     queryKey: ['businessAreasUsersCount', businessArea, filteredQueryVariables],
     queryFn: () =>
       RestService.restBusinessAreasUsersCountRetrieve(filteredQueryVariables),
+    enabled: page === 0,
   });
+
+  const persistedCount = usePersistedCount(page, dataUsersCount);
 
   return (
     <TableWrapper>
@@ -81,11 +88,13 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
         data={dataUsers}
         isLoading={isLoadingUsers}
         error={errorUsers}
-        itemsCount={dataUsersCount?.count}
+        itemsCount={persistedCount}
         rowsPerPageOptions={[10, 15, 20]}
         defaultOrderBy="status"
         defaultOrderDirection="desc"
         renderRow={(row) => <UsersTableRow user={row} key={row.id} />}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );

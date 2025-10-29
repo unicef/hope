@@ -13,6 +13,7 @@ import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
+    readonly parentId: string;
     readonly householdId: string;
     householdUnicefId: string;
     householdSize: number;
@@ -66,6 +67,6 @@ export type PaymentDetail = {
      */
     additionalCollectorName?: string | null;
     transactionReferenceId?: string | null;
-    readonly snapshotCollectorAccountData: any;
+    readonly snapshotCollectorAccountData: Record<string, any> | null;
 };
 

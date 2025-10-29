@@ -1,4 +1,4 @@
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -18,8 +18,9 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { IndividualList } from '@restgenerated/models/IndividualList';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -31,48 +32,54 @@ export interface EditIndividualDataChangeProps {
   setFieldValue;
   form;
   field;
+  programSlug?: string;
 }
 
 function EditIndividualDataChange({
   values,
   setFieldValue,
+  programSlug,
 }: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: IndividualList = values.selectedIndividual;
+  const individual: IndividualDetail | IndividualList =
+    values.selectedIndividual;
   const {
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
   } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessAreaSlug],
+    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         },
       ),
+    enabled: Boolean(businessArea),
   });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['grievanceTicketsChoices', businessAreaSlug],
+    queryKey: ['grievanceTicketsChoices', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
+        businessAreaSlug: businessArea,
       }),
+    enabled: Boolean(businessArea),
   });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualsChoices', businessAreaSlug],
+      queryKey: ['individualsChoices', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         }),
+      enabled: Boolean(businessArea),
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -80,17 +87,21 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
-    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
-    queryFn: () => {
-      if (!individual?.id) return null;
-      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
+  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery<IndividualDetail>({
+    queryKey: [
+      'individual',
+      businessArea,
+      individual?.id,
+      programSlug,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug: businessArea,
+        id: individual.id,
         programSlug: programSlug,
-        id: individual?.id,
-      });
-    },
-    enabled: !!individual?.id && !!programSlug && !!businessAreaSlug,
+      }),
+    enabled: Boolean(individual && businessArea && programSlug),
   });
 
   useEffect(() => {
@@ -150,7 +161,7 @@ function EditIndividualDataChange({
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
-                    <Grid size={{ xs: 12 }} key={`${index}-${item?.fieldName}`}>
+                    <Grid size={12} key={`${index}-${item?.fieldName}`}>
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
@@ -162,7 +173,7 @@ function EditIndividualDataChange({
                       />
                     </Grid>
                   ))}
-                  <Grid size={{ xs: 4 }}>
+                  <Grid size={4}>
                     <Button
                       color="primary"
                       onClick={() => {
