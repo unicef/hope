@@ -1374,6 +1374,11 @@ class TestIndividualChoices:
             "deduplication_golden_record_status_choices": to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE),
             "relationship_choices": to_choice_object(RELATIONSHIP_CHOICE),
             "role_choices": to_choice_object(ROLE_CHOICE),
+            "role_choices_for_grievance": [
+                {"name": "Alternate collector", "value": "ALTERNATE"},
+                {"name": "Primary collector", "value": "PRIMARY"},
+                {"name": "No role", "value": None},
+            ],
             "marital_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
             "identity_type_choices": to_choice_object(AGENCY_TYPE_CHOICES),
             "observed_disability_choices": to_choice_object(OBSERVED_DISABILITY_CHOICE),

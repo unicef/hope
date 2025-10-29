@@ -39,7 +39,7 @@ function EditHouseholdDataChange({
       }),
     enabled: Boolean(businessArea),
   });
-  const roleChoices = individualsChoices?.roleChoices || [];
+  const roleChoices = individualsChoices?.roleChoicesForGrievance || [];
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
@@ -238,7 +238,7 @@ function EditHouseholdDataChange({
                 <Grid size={4}>
                   {currentRoleObj
                     ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
-                    : 'None'}
+                    : 'No role'}
                 </Grid>
                 <Grid size={3}>
                   <Field

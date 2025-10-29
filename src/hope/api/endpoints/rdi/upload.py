@@ -141,7 +141,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "program",
         ]
 
-    def validate_role(self, value: str) -> str | None:
+    def validate_role(self, value: str | None) -> str | None:
         if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if value.upper()[0] == "P":
