@@ -214,7 +214,13 @@ def get_documents_issuer_query(document_type: str, country_alpha3: str, is_socia
 
 def get_role_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
-    return Q(**{f"{lookup_prefix}households_and_roles__role": args[0]})
+    role_value = args[0]
+
+    # Handle "No role" case - filter for individuals with no role
+    if not role_value:
+        return Q(**{f"{lookup_prefix}households_and_roles__isnull": True})
+
+    return Q(**{f"{lookup_prefix}households_and_roles__role": role_value})
 
 
 def get_scope_id_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
