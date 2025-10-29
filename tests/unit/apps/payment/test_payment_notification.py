@@ -597,7 +597,7 @@ class TestPaymentNotification(BaseTestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        assert payment_notification.email.subject == "[test] Payment pending for Approval"
+        assert payment_notification.emails[0].subject == "[test] Payment pending for Approval"
 
     @mock.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -609,7 +609,7 @@ class TestPaymentNotification(BaseTestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        assert payment_notification.email.subject == "Payment pending for Approval"
+        assert payment_notification.emails[0].subject == "Payment pending for Approval"
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -626,9 +626,9 @@ class TestPaymentNotification(BaseTestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        assert len(payment_notification.email.recipients) == 2
-        assert "catchallemail@email.com" in payment_notification.email.recipients
-        assert "catchallemail2@email.com" in payment_notification.email.recipients
+        assert len(payment_notification.emails[0].recipients) == 2
+        assert "catchallemail@email.com" in payment_notification.emails[0].recipients
+        assert "catchallemail2@email.com" in payment_notification.emails[0].recipients
         assert mock_post.call_count == 1
 
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
@@ -645,7 +645,7 @@ class TestPaymentNotification(BaseTestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        assert len(payment_notification.email.recipients) == 20
+        assert len(payment_notification.emails[0].recipients) == 20
         for recipient in [
             self.user_with_partner_unicef_in_ba,
             self.user_with_approval_permission_partner_unicef_in_ba,
@@ -667,7 +667,7 @@ class TestPaymentNotification(BaseTestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            assert recipient.email in payment_notification.email.recipients
+            assert recipient.email in payment_notification.emails[0].recipients
 
         assert mock_post.call_count == 1
 
@@ -688,8 +688,8 @@ class TestPaymentNotification(BaseTestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        assert len(payment_notification.email.recipients) == 19
-        assert self.user_with_partner_unicef_hq.email not in payment_notification.email.recipients
+        assert len(payment_notification.emails[0].recipients) == 19
+        assert self.user_with_partner_unicef_hq.email not in payment_notification.emails[0].recipients
 
         for recipient in [
             self.user_with_partner_unicef_in_ba,
@@ -712,6 +712,6 @@ class TestPaymentNotification(BaseTestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            assert recipient.email in payment_notification.email.recipients
+            assert recipient.email in payment_notification.emails[0].recipients
 
         assert mock_post.call_count == 1
