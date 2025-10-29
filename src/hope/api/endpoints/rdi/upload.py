@@ -144,12 +144,12 @@ class IndividualSerializer(serializers.ModelSerializer):
     def validate_role(self, value: str | None) -> str | None:
         if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
+        if not value:
+            return None
         if value.upper()[0] == "P":
             return ROLE_PRIMARY
         if value.upper()[0] == "A":
             return ROLE_ALTERNATE
-        if not value:
-            return None
         raise ValidationError("Invalid value %s. Check values at %s" % (value, reverse("api:role-list")))
 
 
