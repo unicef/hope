@@ -1,6 +1,6 @@
+from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError
-from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
@@ -8,7 +8,8 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.utils import handle_role
 from hope.apps.household.models import (
     ROLE_ALTERNATE,
-    IndividualRoleInHousehold, ROLE_PRIMARY,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
 )
 from hope.apps.program.models import Program
 from hope.apps.utils.models import MergeStatusModel
@@ -127,5 +128,7 @@ class TestHandleRole(TestCase):
         assert IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count() == 1
 
         # Attempting to remove PRIMARY role should raise ValidationError
-        with pytest.raises(ValidationError, match="Ticket cannot be closed, primary collector role has to be reassigned"):
+        with pytest.raises(
+            ValidationError, match="Ticket cannot be closed, primary collector role has to be reassigned"
+        ):
             handle_role(household, individual, None)

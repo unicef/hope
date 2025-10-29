@@ -21,7 +21,6 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
-    PendingIndividualRoleInHousehold,
 )
 from hope.apps.payment.models import Payment, PaymentPlan
 
