@@ -9,6 +9,7 @@ import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
@@ -1139,7 +1140,10 @@ class TestPaymentGatewayService(BaseTestCase):
     def test_map_financial_institution_pk_and_mapping_found(self) -> None:
         fi = FinancialInstitution.objects.create(name="Bank A", type=FinancialInstitution.FinancialInstitutionType.BANK)
         FinancialInstitutionMapping.objects.create(
-            financial_institution=fi, financial_service_provider=self.pg_fsp, code="BANKA_CODE_FOR_OTHER_FSP"
+            financial_institution=fi,
+            financial_service_provider=self.pg_fsp,
+            code="BANKA_CODE_FOR_OTHER_FSP",
+            country=CountryFactory(iso_code3="AFG")
         )
         account_data = {"financial_institution": str(fi.pk), "number": "123"}
 
@@ -1148,7 +1152,11 @@ class TestPaymentGatewayService(BaseTestCase):
         assert result["number"] == "123"
 
     def test_map_financial_institution_pk_and_mapping_missing_raises(self) -> None:
-        fi = FinancialInstitution.objects.create(name="Bank B", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        fi = FinancialInstitution.objects.create(
+            name="Bank B",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+            country=CountryFactory(iso_code3="AFG")
+        )
         account_data = {"financial_institution": str(fi.pk)}
 
         with pytest.raises(Exception, match="No Financial Institution Mapping found"):
