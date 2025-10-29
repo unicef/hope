@@ -1138,12 +1138,15 @@ class TestPaymentGatewayService(BaseTestCase):
             assert called_split == self.pp_split_2.pk
 
     def test_map_financial_institution_pk_and_mapping_found(self) -> None:
-        fi = FinancialInstitution.objects.create(name="Bank A", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        fi = FinancialInstitution.objects.create(
+            name="Bank A",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+            country=CountryFactory(iso_code3="AFG"),
+        )
         FinancialInstitutionMapping.objects.create(
             financial_institution=fi,
             financial_service_provider=self.pg_fsp,
             code="BANKA_CODE_FOR_OTHER_FSP",
-            country=CountryFactory(iso_code3="AFG"),
         )
         account_data = {"financial_institution": str(fi.pk), "number": "123"}
 
