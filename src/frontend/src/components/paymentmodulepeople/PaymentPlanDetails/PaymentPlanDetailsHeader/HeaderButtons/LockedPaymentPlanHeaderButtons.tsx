@@ -10,17 +10,20 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
+import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
   permissions: string[];
+  canAbort: boolean;
 }
 
 export function LockedPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
   permissions,
+  canAbort,
 }: LockedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -63,6 +66,11 @@ export function LockedPaymentPlanHeaderButtons({
         </Box>
       )}
       <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
+      {canAbort && (
+        <Box m={2}>
+          <AbortPaymentPlan paymentPlan={paymentPlan} />
+        </Box>
+      )}
     </Box>
   );
 }
