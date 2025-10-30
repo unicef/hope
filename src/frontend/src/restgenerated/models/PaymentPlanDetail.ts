@@ -41,6 +41,7 @@ export type PaymentPlanDetail = {
      * * `IN_AUTHORIZATION` - In Authorization
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
+     * * `ABORTED` - Aborted
      * * `FINISHED` - Finished
      * * `CLOSED` - Closed
      */
@@ -367,6 +368,10 @@ export type PaymentPlanDetail = {
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;
     readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
-    readonly adminUrl: string | null;
+    readonly adminUrl: string;
+    /**
+     * Reason for aborting
+     */
+    abortComment?: string;
 };
 
