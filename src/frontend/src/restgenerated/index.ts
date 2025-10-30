@@ -224,6 +224,7 @@ export type { PaymentChoices as PaymentChoicesCamelCase } from './models/Payment
 export type { PaymentDetail as PaymentDetailCamelCase } from './models/PaymentDetail';
 export type { PaymentList as PaymentListCamelCase } from './models/PaymentList';
 export type { PaymentPlan as PaymentPlanCamelCase } from './models/PaymentPlan';
+export type { PaymentPlanAbort as PaymentPlanAbortCamelCase } from './models/PaymentPlanAbort';
 export { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatusEnumCamelCase } from './models/PaymentPlanBackgroundActionStatusEnum';
 export type { PaymentPlanBulkAction as PaymentPlanBulkActionCamelCase } from './models/PaymentPlanBulkAction';
 export type { PaymentPlanCreateFollowUp as PaymentPlanCreateFollowUpCamelCase } from './models/PaymentPlanCreateFollowUp';
