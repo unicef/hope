@@ -54,6 +54,7 @@ export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum'
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';
+export type { CountrySmall as CountrySmallCamelCase } from './models/CountrySmall';
 export type { CreateAccount as CreateAccountCamelCase } from './models/CreateAccount';
 export type { CreateGrievanceDocument as CreateGrievanceDocumentCamelCase } from './models/CreateGrievanceDocument';
 export type { CreateGrievanceTicket as CreateGrievanceTicketCamelCase } from './models/CreateGrievanceTicket';

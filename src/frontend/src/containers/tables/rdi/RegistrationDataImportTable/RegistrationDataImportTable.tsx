@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -130,7 +131,7 @@ function RegistrationDataImportTable({
       programSlug,
       queryVariables,
     ],
-    queryFn: async() => {
+    queryFn: async () => {
       const params = createApiParams(
         { businessAreaSlug: businessArea, programSlug },
         queryVariables,
@@ -141,6 +142,9 @@ function RegistrationDataImportTable({
       );
     },
   });
+
+  const [page, setPage] = useState(0);
+  const itemsCount = usePersistedCount(page, countData);
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
@@ -157,14 +161,14 @@ function RegistrationDataImportTable({
             }
           />
         )}
-        title={
-          noTitle ? null : `${t('List of Imports')} (${countData?.count || 0})`
-        }
-        itemsCount={countData?.count || 0}
+        title={noTitle ? null : `${t('List of Imports')} (${itemsCount || 0})`}
+        itemsCount={itemsCount || 0}
         headCells={prepareHeadCells()}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         query={RestService.restBusinessAreasProgramsRegistrationDataImportsList}
+        page={page}
+        setPage={setPage}
       />
     </TableWrapper>
   );

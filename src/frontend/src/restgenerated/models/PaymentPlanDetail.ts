@@ -368,7 +368,7 @@ export type PaymentPlanDetail = {
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;
     readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     /**
      * Reason for aborting
      */
