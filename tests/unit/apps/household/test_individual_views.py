@@ -1377,7 +1377,7 @@ class TestIndividualChoices:
             "role_choices_for_grievance": [
                 {"name": "Alternate collector", "value": "ALTERNATE"},
                 {"name": "Primary collector", "value": "PRIMARY"},
-                {"name": "No role", "value": None},
+                {"name": "No role", "value": "NO_ROLE"},
             ],
             "marital_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
             "identity_type_choices": to_choice_object(AGENCY_TYPE_CHOICES),

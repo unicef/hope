@@ -2031,7 +2031,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [
             {"label": {"English(EN)": label}, "value": value}
-            for value, label in [(None, "No role")] + list(ROLE_CHOICE)
+            for value, label in [("NO_ROLE", "No role")] + list(ROLE_CHOICE)
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
