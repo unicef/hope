@@ -208,6 +208,9 @@ class PaymentPlanDetailSerializerTest(TestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123id",
         )
+        cls.pp.financial_service_provider = cls.fsp_xlsx
+        cls.pp.delivery_mechanism = DeliveryMechanismFactory()
+        cls.pp.save()
 
     @staticmethod
     def _create_user_with_permissions_in_ba(user: User, ba: BusinessArea, perms: List[Any]) -> None:
@@ -351,6 +354,7 @@ class VolumeByDeliveryMechanismSerializerTest(TestCase):
             dispersion_start_date=None,
             dispersion_end_date=None,
             financial_service_provider=None,
+            delivery_mechanism=DeliveryMechanismFactory(),
         )
         cls.hoh = IndividualFactory(household=None)
         cls.hh1 = HouseholdFactory(head_of_household=cls.hoh, size=2)
@@ -365,14 +369,14 @@ class VolumeByDeliveryMechanismSerializerTest(TestCase):
         cls.fsp = cls.payment.financial_service_provider
 
     def test_get_volume_fields(self) -> None:
-        data = VolumeByDeliveryMechanismSerializer(instance=self.dm_per_pp).data
+        data = VolumeByDeliveryMechanismSerializer(instance=self.pp).data
 
         assert data["volume"] is None
         assert data["volume_usd"] is None
 
         self.pp.financial_service_provider = self.fsp
         self.pp.save()
-        data = VolumeByDeliveryMechanismSerializer(instance=self.dm_per_pp).data
+        data = VolumeByDeliveryMechanismSerializer(instance=self.pp).data
 
         assert data["volume"] == 222
         assert data["volume_usd"] == 111
