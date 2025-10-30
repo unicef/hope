@@ -672,6 +672,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "available_funds_commitments",
             "payment_verification_plans",
             "admin_url",
+            "abort_comment",
         )
 
     @staticmethod
@@ -1422,3 +1423,7 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
     fund_commitment_items_ids = serializers.ListSerializer(child=serializers.CharField(), required=False)
+
+
+class PaymentPlanAbortSerializer(serializers.Serializer):
+    abort_comment = serializers.CharField(max_length=255, required=False)
