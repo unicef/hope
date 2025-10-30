@@ -122,7 +122,6 @@ class ProgramAdmin(
         "business_area",
         "data_collecting_type",
         "beneficiary_group",
-        "admin_areas",
     )
     filter_horizontal = ("admin_areas",)
 
