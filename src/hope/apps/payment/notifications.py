@@ -67,7 +67,7 @@ class PaymentNotification:
         self.action_name = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["action_name"]
         self.recipient_title = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["recipient_title"]
         self.user_recipients = self._prepare_user_recipients()
-        self.emails = self._prepare_emails()
+        self.email = self._prepare_email()
         self.enable_email_notification = self.payment_plan.business_area.enable_email_notification
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
@@ -96,32 +96,22 @@ class PaymentNotification:
             users = users.exclude(is_superuser=True)
         return users
 
-    def _prepare_emails(self) -> list[MailjetClient]:
+    def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()
-        recipients = [user_recipient.email for user_recipient in self.user_recipients]
-
-        batch_size = 50
-        emails: list[MailjetClient] = []
-        for idx, start in enumerate(range(0, len(recipients), batch_size)):
-            chunk = recipients[start : start + batch_size]
-            emails.append(
-                MailjetClient(
-                    mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
-                    subject=self.email_subject,
-                    recipients=chunk,
-                    ccs=[self.action_user.email] if idx == 0 else [],  # CC only once
-                    variables=body_variables,
-                )
-            )
-        return emails
+        return MailjetClient(
+            mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
+            subject=self.email_subject,
+            recipients=[user_recipient.email for user_recipient in self.user_recipients],
+            ccs=[self.action_user.email],
+            variables=body_variables,
+        )
 
     def send_email_notification(self) -> None:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
-            for email in self.emails:
-                try:
-                    email.send_email()
-                except Exception:  # pragma: no cover
-                    logger.exception("Failed to send payment plan notification")
+            try:
+                self.email.send_email()
+            except Exception:  # pragma: no cover
+                logger.exception("Failed to send payment plan notification")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
