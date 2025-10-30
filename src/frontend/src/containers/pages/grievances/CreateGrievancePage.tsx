@@ -152,11 +152,17 @@ const CreateGrievancePage = (): ReactElement => {
         typeof selectedHousehold === 'number'),
   );
 
-  const entityProgramSlug = feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+  const entityProgramSlug =
+    feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
 
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
-      queryKey: ['household', businessArea, entityProgramSlug, selectedHousehold],
+      queryKey: [
+        'household',
+        businessArea,
+        entityProgramSlug,
+        selectedHousehold,
+      ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsRetrieve({
           businessAreaSlug: businessArea,
@@ -176,7 +182,12 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
-      queryKey: ['individual', businessArea, entityProgramSlug, selectedIndividual],
+      queryKey: [
+        'individual',
+        businessArea,
+        entityProgramSlug,
+        selectedIndividual,
+      ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
@@ -233,7 +244,6 @@ const CreateGrievancePage = (): ReactElement => {
     },
   });
 
-
   const {
     data: allAddIndividualFieldsData,
     isLoading: allAddIndividualFieldsDataLoading,
@@ -256,7 +266,7 @@ const CreateGrievancePage = (): ReactElement => {
             businessAreaSlug: businessArea,
           },
         ),
-  });
+    });
 
   const {
     data: allEditPeopleFieldsData,
@@ -442,10 +452,14 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
-        const dynamicEntityProgramSlug = feedbackProgramSlug ||
-          (programId !== 'all' ? programId :
-            ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
-             (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug)));
+        const dynamicEntityProgramSlug =
+          feedbackProgramSlug ||
+          (programId !== 'all'
+            ? programId
+            : (typeof values.selectedHousehold === 'object' &&
+                values.selectedHousehold?.program?.slug) ||
+              (typeof values.selectedIndividual === 'object' &&
+                values.selectedIndividual?.program?.slug));
 
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
@@ -533,7 +547,10 @@ const CreateGrievancePage = (): ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === GrievanceSteps.Verification && (
-                        <Verification values={values} programSlug={dynamicEntityProgramSlug} />
+                        <Verification
+                          values={values}
+                          programSlug={dynamicEntityProgramSlug}
+                        />
                       )}
                       {activeStep === GrievanceSteps.Description && (
                         <>
