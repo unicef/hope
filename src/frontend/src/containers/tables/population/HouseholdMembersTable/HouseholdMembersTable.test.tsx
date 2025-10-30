@@ -230,6 +230,11 @@ describe('HouseholdMembersTable', () => {
       { value: 'PRIMARY', label: 'Primary' },
       { value: 'ALTERNATE', label: 'Alternate' },
     ],
+    roleChoicesForGrievance: [
+      { value: 'PRIMARY', label: 'Primary collector' },
+      { value: 'ALTERNATE', label: 'Alternate collector' },
+      { value: null, label: 'No role' },
+    ],
     statusChoices: [
       { value: 'ACTIVE', label: 'Active' },
       { value: 'INACTIVE', label: 'Inactive' },

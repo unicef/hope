@@ -113,7 +113,7 @@ def handle_role(household: Household, individual: Individual, role: str | None) 
             raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
         already_with_another_role.delete(soft=False)
 
-    if role and household:
+    if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         IndividualRoleInHousehold.objects.update_or_create(
             household=household,
             role=role,

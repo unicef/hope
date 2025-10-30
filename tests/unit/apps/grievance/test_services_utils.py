@@ -140,7 +140,7 @@ class TestGrievanceUtils(TestCase):
 
         # just remove exists roles
         IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
-        handle_role(household, individuals[0], "OTHER_ROLE_XD")
+        handle_role(household, individuals[0], None)
         assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
 
         # create new role
