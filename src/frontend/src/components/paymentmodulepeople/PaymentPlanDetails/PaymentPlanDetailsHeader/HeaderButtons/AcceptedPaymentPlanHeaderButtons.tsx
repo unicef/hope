@@ -37,6 +37,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canClose,
+  canAbort,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();

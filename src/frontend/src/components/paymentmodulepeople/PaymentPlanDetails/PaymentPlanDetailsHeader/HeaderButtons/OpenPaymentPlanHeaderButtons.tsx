@@ -14,6 +14,7 @@ export interface OpenPaymentPlanHeaderButtonsProps {
   canRemove: boolean;
   canEdit: boolean;
   canLock: boolean;
+  canAbort: boolean;
 }
 
 export function OpenPaymentPlanHeaderButtons({
@@ -21,6 +22,7 @@ export function OpenPaymentPlanHeaderButtons({
   canRemove,
   canEdit,
   canLock,
+  canAbort,
 }: OpenPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
