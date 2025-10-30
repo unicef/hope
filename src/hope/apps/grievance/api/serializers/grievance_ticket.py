@@ -422,13 +422,13 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     who_answers_alt_phone = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     documents_to_edit = EditIndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentityGTSerializer(many=True, required=False)
     identities_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     identities_to_edit = EditIndividualIdentitySerializer(many=True, required=False)
