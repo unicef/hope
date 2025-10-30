@@ -8,12 +8,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canRemove: boolean;
   canEdit: boolean;
   canLock: boolean;
+  canAbort: boolean;
 }
 
 export function OpenPaymentPlanHeaderButtons({
@@ -21,6 +23,7 @@ export function OpenPaymentPlanHeaderButtons({
   canRemove,
   canEdit,
   canLock,
+  canAbort,
 }: OpenPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
