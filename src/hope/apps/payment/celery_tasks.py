@@ -864,7 +864,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
+def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fields: bool = False) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models.payment_plan import PaymentPlan
 
@@ -882,6 +882,8 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
                 PaymentPlanService(payment_plan).full_rebuild()
                 payment_plan.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
+                if update_money_fields:
+                    payment_plan.update_money_fields()
         except Exception as e:
             logger.exception(e)
             payment_plan.build_status_failed()
