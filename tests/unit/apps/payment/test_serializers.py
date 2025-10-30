@@ -34,7 +34,6 @@ from hope.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hope.apps.payment.models.payment import (
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
 )
@@ -220,12 +219,6 @@ class PaymentPlanDetailSerializerTest(TestCase):
     def test_serializer_all_data(self) -> None:
         self.pp.status = PaymentPlan.Status.ACCEPTED
         self.pp.save()
-        DeliveryMechanismPerPaymentPlan.objects.create(
-            payment_plan=self.pp,
-            delivery_mechanism_order=1,
-            financial_service_provider=self.fsp_xlsx,
-            delivery_mechanism=DeliveryMechanismFactory(),
-        )
 
         serializer = PaymentPlanDetailSerializer(instance=self.pp, context={"request": Mock(user=self.user)})
         data = serializer.data
@@ -370,12 +363,6 @@ class VolumeByDeliveryMechanismSerializerTest(TestCase):
             financial_service_provider__name="FSP_TEST_1",
         )
         cls.fsp = cls.payment.financial_service_provider
-        cls.dm_per_pp = DeliveryMechanismPerPaymentPlan.objects.create(
-            payment_plan=cls.pp,
-            delivery_mechanism_order=1,
-            financial_service_provider=cls.fsp,
-            delivery_mechanism=DeliveryMechanismFactory(),
-        )
 
     def test_get_volume_fields(self) -> None:
         data = VolumeByDeliveryMechanismSerializer(instance=self.dm_per_pp).data
