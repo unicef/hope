@@ -525,7 +525,7 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     issueType
   ) {
     if (issueType === parseInt(GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL, 10)) {
-      let { flexFields } = values.individualData;
+      let flexFields = values.individualData?.flexFields;
       if (flexFields) {
         flexFields = { ...flexFields };
         for (const [key, value] of Object.entries(flexFields)) {
@@ -536,10 +536,10 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
       }
 
       const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
-        values.individualData.documents,
+        values.individualData?.documents,
       );
       const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
-        values.individualData.identities,
+        values.individualData?.identities,
       );
 
       extras.issueType = {

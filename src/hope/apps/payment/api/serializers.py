@@ -692,6 +692,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "available_funds_commitments",
             "payment_verification_plans",
             "admin_url",
+            "abort_comment",
         )
 
     @staticmethod
@@ -731,7 +732,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_households(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
             else Household.objects.none()
         )
@@ -740,7 +741,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_individuals(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
             else Individual.objects.none()
         )
@@ -1443,3 +1444,7 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
     fund_commitment_items_ids = serializers.ListSerializer(child=serializers.CharField(), required=False)
+
+
+class PaymentPlanAbortSerializer(serializers.Serializer):
+    abort_comment = serializers.CharField(max_length=255, required=False)
