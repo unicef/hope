@@ -350,9 +350,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // Map role values for display
 export const roleDisplayMap = {
-  PRIMARY: 'Primary Collector',
-  ALTERNATE: 'Alternate Collector',
-  NO_ROLE: 'No Role',
+  PRIMARY: 'Primary collector',
+  ALTERNATE: 'Alternate collector',
 };
 
 function prepareEditHouseholdVariables(requiredVariables, values) {

@@ -5,6 +5,6 @@
 import type { NewRoleEnum } from './NewRoleEnum';
 export type HouseholdUpdateRoles = {
     individual: string;
-    newRole: NewRoleEnum;
+    newRole?: NewRoleEnum;
 };
 

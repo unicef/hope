@@ -100,7 +100,12 @@ class TicketNoteSerializer(serializers.ModelSerializer):
 
 class HouseholdUpdateRolesSerializer(serializers.Serializer):
     individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
-    new_role = serializers.ChoiceField(choices=ROLE_CHOICE, required=True)
+    new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
+
+    def validate_new_role(self, value):
+        if value == "NO_ROLE":
+            return None
+        return value
 
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
@@ -318,7 +323,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     @staticmethod
     def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
         new_roles = [item["new_role"] for item in value]
-        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role != "NO_ROLE"}
+        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role is not None}
         if duplicates:
             raise serializers.ValidationError(f"Duplicate roles are not allowed: {', '.join(duplicates)}")
         return value
