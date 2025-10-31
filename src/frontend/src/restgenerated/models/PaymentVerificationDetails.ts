@@ -9,7 +9,7 @@ export type PaymentVerificationDetails = {
     status?: PaymentVerificationDetailsStatusEnum;
     paymentVerificationPlanUnicefId: string;
     verificationChannel: string;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     /**
      * record revision number
      */
