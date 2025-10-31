@@ -36,6 +36,7 @@ from hope.apps.household.models import (
     PendingIndividual,
 )
 from hope.apps.payment.models import (
+    Account,
     AccountType,
     FinancialInstitution,
     PendingAccount,
@@ -93,6 +94,16 @@ class AccountLaxSerializer(serializers.ModelSerializer):
     class Meta:
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("financial_institution"):
+            account_type = attrs["account_type"]
+            number = attrs["number"]
+            attrs["financial_institution"] = FinancialInstitution.get_generic_one(
+                account_type, Account.is_valid_iban(number)
+            )
+        return attrs
 
 
 class IndividualSerializer(serializers.ModelSerializer):

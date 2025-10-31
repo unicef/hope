@@ -121,6 +121,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
         if financial_institution_pk := account_data.get("financial_institution"):
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
+            if financial_institution.is_generic:
+                return account_data
             try:
                 fsp_mapping = FinancialInstitutionMapping.objects.get(
                     financial_institution=financial_institution,
