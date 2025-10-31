@@ -81,9 +81,12 @@ export function DocumentsToRemoveTable({
         {documentsTableHead}
         <TableBody>
           {documentsToRemove?.map((row, index) => {
-            const document = previousDocuments[row.value];
+            const document = Object.values(previousDocuments || {})
+              .find((doc: any) => doc.id === row.value) as any;
+
+
             return (
-              <TableRow key={`${document.label}-${document.country}`}>
+              <TableRow key={`${document?.key || 'doc'}-${document?.country || index}`}>
                 <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
@@ -111,7 +114,7 @@ export function DocumentsToRemoveTable({
                   {countriesDict[document?.country] || '-'}
                 </TableCell>
                 <TableCell align="left">
-                  {document?.document_number || '-'}
+                  {document?.documentNumber || '-'}
                 </TableCell>
               </TableRow>
             );
