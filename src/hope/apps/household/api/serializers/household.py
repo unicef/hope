@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db.models import Q
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -466,7 +467,7 @@ class IndividualChoicesSerializer(serializers.Serializer):
         business_area = self.context.get("business_area")
         fis = FinancialInstitution.objects.all()
         if business_area:
-            fis = fis.filter(country__business_areas=business_area).distinct()
+            fis = fis.filter(Q(country__business_areas=business_area) | Q(country__isnull=True)).distinct()
 
         return [{"name": x.name, "value": x.id} for x in fis]
 
