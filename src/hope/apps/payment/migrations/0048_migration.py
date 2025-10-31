@@ -35,15 +35,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="paymentplan",
             name="exchange_rate_assigned_offline",
-            field=models.BooleanField(
-                default=False, help_text="Exchange Rate assigned offline [sys]"
-            ),
+            field=models.BooleanField(default=False, help_text="Exchange Rate assigned offline [sys]"),
         ),
         migrations.AddField(
             model_name="paymentplan",
             name="use_offline_exchange_rate",
-            field=models.BooleanField(
-                default=False, help_text="Use Offline Exchange Rate [sys]"
-            ),
+            field=models.BooleanField(default=False, help_text="Use Offline Exchange Rate [sys]"),
         ),
     ]
