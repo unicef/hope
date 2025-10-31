@@ -184,7 +184,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{household.unicef_id}",
                     "individual_ids": "",
@@ -302,7 +301,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -701,14 +699,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [
-                        {
-                            "comparison_method": "EQUALS",
-                            "arguments": ["No"],
-                            "field_name": "mobile_phone_number__cash_over_the_counter",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ],
                     "household_filters_blocks": [],
                     "household_ids": "",
                     "individual_ids": "",
@@ -767,7 +757,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -1245,7 +1234,6 @@ class TestPaymentPlanServices(BaseTestCase):
                             ]
                         }
                     ],
-                    "collectors_filters_blocks": [],
                 }
             ],
             "flag_exclude_if_on_sanction_list": True,
