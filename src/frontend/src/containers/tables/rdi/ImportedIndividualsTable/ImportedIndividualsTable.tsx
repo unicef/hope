@@ -11,6 +11,11 @@ import { useProgramContext } from 'src/programContext';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
+import { usePersistedCount } from '@hooks/usePersistedCount';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -35,7 +40,9 @@ function ImportedIndividualsTable({
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { selectedProgram } = useProgramContext();
+  const { programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const [page, setPage] = useState(0);
 
   const initialVariables = useMemo(
     () => ({
@@ -55,7 +62,7 @@ function ImportedIndividualsTable({
   }, [initialVariables]);
 
   const replacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
     relationship: (_beneficiaryGroup) =>
       `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
@@ -71,6 +78,26 @@ function ImportedIndividualsTable({
     beneficiaryGroup,
     replacements,
   );
+
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
@@ -100,6 +127,9 @@ function ImportedIndividualsTable({
           query={RestService.restBusinessAreasProgramsIndividualsList}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
               key={row.id}
@@ -116,6 +146,9 @@ function ImportedIndividualsTable({
           query={RestService.restBusinessAreasProgramsIndividualsList}
           title={title}
           headCells={adjustedImportedIndividualsHeadCells}
+          itemsCount={itemsCount}
+          page={page}
+          setPage={setPage}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
               key={row.id}
