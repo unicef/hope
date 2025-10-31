@@ -38,7 +38,7 @@ class TemplateFileGeneratorService:
         self._add_individuals_columns()
         self._add_people_columns()
         self._handle_choices(
-            {**self.households_fields, **self.individuals_fields, **FinancialInstitution.get_rdi_template_choices()}
+            {**self.households_fields, **self.individuals_fields, **self._get_filtered_financial_institutions()}
         )
         return wb
 
@@ -97,6 +97,24 @@ class TemplateFileGeneratorService:
             )
             label_row.append(f"{self._get_label(flexible_attribute)} - First round collection date - DATE")
         return name_row, label_row
+
+    def _get_filtered_financial_institutions(self) -> dict:
+        countries = self.business_area.countries.all()
+        country_fi_pks = set(FinancialInstitution.objects.filter(country__in=countries).values_list("pk", flat=True))
+
+        fin_fields = FinancialInstitution.get_rdi_template_choices()
+        country_fields = {}
+
+        for field_name, field_definition in fin_fields.items():
+            new_field = field_definition.copy()
+            if "choices" in new_field:
+                all_choices = new_field["choices"]
+                fchoices = [choice for choice in all_choices if choice.get("value") in country_fi_pks]
+                new_field["choices"] = fchoices
+
+            country_fields[field_name] = new_field
+
+        return country_fields
 
     def _get_label(self, flexible_attribute: FlexibleAttribute) -> str:
         if flexible_attribute.label and "English(EN)" in flexible_attribute.label:
