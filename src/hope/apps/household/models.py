@@ -40,12 +40,6 @@ from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
     IndividualDeliveryDataMixin,
 )
-from hope.apps.household.signals import (
-    household_deleted,
-    household_withdrawn,
-    individual_deleted,
-    individual_withdrawn,
-)
 from hope.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -64,6 +58,10 @@ from hope.apps.utils.phone import (
 
 if TYPE_CHECKING:
     from hope.contrib.aurora.models import Record
+
+
+logger = logging.getLogger(__name__)
+
 
 BLANK = ""
 IDP = "IDP"
@@ -319,8 +317,6 @@ INDIVIDUAL_FLAGS_CHOICES = (
     (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
     (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
 )
-
-logger = logging.getLogger(__name__)
 
 
 class HouseholdCollection(UnicefIdentifiedModel):
@@ -832,6 +828,10 @@ class Household(
         ]
 
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        from hope.apps.household.signals import (
+            household_deleted,
+        )
+
         household_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -840,6 +840,10 @@ class Household(
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
     def withdraw(self, tag: Any | None = None) -> None:
+        from hope.apps.household.signals import (
+            household_withdrawn,
+        )
+
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.internal_data["withdrawn_tag"] = tag
@@ -1472,6 +1476,10 @@ class Individual(
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        from hope.apps.household.signals import (
+            individual_deleted,
+        )
+
         individual_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -1533,6 +1541,10 @@ class Individual(
         return None
 
     def withdraw(self) -> None:
+        from hope.apps.household.signals import (
+            individual_withdrawn,
+        )
+
         self.documents.update(status=Document.STATUS_INVALID)
         self.accounts.update(active=False)
         self.withdrawn = True

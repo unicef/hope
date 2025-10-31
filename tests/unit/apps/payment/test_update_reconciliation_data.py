@@ -70,6 +70,7 @@ class TestDeliveryDate(BaseTestCase):
         household_1 = HouseholdFactory(head_of_household=hoh1)
         cls.payment_1 = PaymentFactory(
             parent=cls.payment_plan,
+            program=cls.payment_plan.program,
             unicef_id="RCPT-0060-24-0.000.001",
             household=household_1,
             entitlement_quantity=212,
@@ -81,6 +82,7 @@ class TestDeliveryDate(BaseTestCase):
         household_2 = HouseholdFactory(head_of_household=hoh2)
         cls.payment_2 = PaymentFactory(
             parent=cls.payment_plan,
+            program=cls.payment_plan.program,
             unicef_id="RCPT-0060-24-0.000.002",
             household=household_2,
             entitlement_quantity=212,
@@ -92,6 +94,7 @@ class TestDeliveryDate(BaseTestCase):
         household_3 = HouseholdFactory(head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(
             parent=cls.payment_plan,
+            program=cls.payment_plan.program,
             unicef_id="RCPT-0060-24-0.000.003",
             household=household_3,
             entitlement_quantity=212,
@@ -187,12 +190,12 @@ class TestDeliveryDate(BaseTestCase):
             status=PaymentPlan.Status.ACCEPTED,
         )
 
-        payment_1 = PaymentFactory(parent=pp)
+        payment_1 = PaymentFactory(parent=pp, program=pp.program)
         payment_1.unicef_id = "RCPT-0060-24-0.000.665"
         payment_1.entitlement_quantity = 212  # the same value like in file
         payment_1.save()
 
-        payment_2 = PaymentFactory(parent=pp)
+        payment_2 = PaymentFactory(parent=pp, program=pp.program)
         payment_2.unicef_id = "RCPT-0060-24-0.000.666"
         payment_2.entitlement_quantity = 212  # the same value like in file
         payment_2.save()
@@ -218,12 +221,12 @@ class TestDeliveryDate(BaseTestCase):
             status=PaymentPlan.Status.ACCEPTED,
         )
 
-        payment_1 = PaymentFactory(parent=pp)
+        payment_1 = PaymentFactory(parent=pp, program=pp.program)
         payment_1.unicef_id = "RCPT-0060-24-0.000.665"
         payment_1.entitlement_quantity = 212  # the same value like in file
         payment_1.save()
 
-        payment_2 = PaymentFactory(parent=pp)
+        payment_2 = PaymentFactory(parent=pp, program=pp.program)
         payment_2.unicef_id = "RCPT-0060-24-0.000.666"
         payment_2.entitlement_quantity = 212  # the same value like in file
         payment_2.save()

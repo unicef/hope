@@ -1194,6 +1194,24 @@ wheels = [
 ]
 
 [[package]]
+name = "django-streaming"
+version = "0.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "colorama" },
+    { name = "django" },
+    { name = "django-stubs-ext" },
+    { name = "markdown" },
+    { name = "pika" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/03/663e6f08b2c6e85a9c7341676f5f02d4ddf35de6c06dc3612c4fc5c09273/django_streaming-0.8.0.tar.gz", hash = "sha256:1260406b73976d7c29f152a8baef55322f0a6a9b70f17b5f0dda0a69f3613325", size = 12663 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/65/b2/c0298a375b0004111c1756041c21080143da3e50e62643e705e424fba3b4/django_streaming-0.8.0-py3-none-any.whl", hash = "sha256:3a6b3f8274754d1dff4686291d5d2254f4a114a76bec3e78ed6612fc232343c5", size = 18455 },
+]
+
+[[package]]
 name = "django-stubs"
 version = "1.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1769,6 +1787,7 @@ dependencies = [
     { name = "django-sql-explorer", extra = ["xls"] },
     { name = "django-storages", extra = ["azure"] },
     { name = "django-strategy-field" },
+    { name = "django-streaming" },
     { name = "django-sysinfo" },
     { name = "djangorestframework" },
     { name = "drf-extensions" },
@@ -1950,6 +1969,7 @@ requires-dist = [
     { name = "django-sql-explorer", extras = ["xls"], specifier = ">=3,<4" },
     { name = "django-storages", extras = ["azure"], specifier = ">=1.12.3,<2" },
     { name = "django-strategy-field", specifier = ">=3,<4" },
+    { name = "django-streaming", specifier = ">=0.8" },
     { name = "django-sysinfo", specifier = ">=2.6,<3" },
     { name = "djangorestframework", specifier = ">=3.13.1,<4" },
     { name = "drf-extensions", specifier = "==0.7.1" },
@@ -3061,6 +3081,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pika"
+version = "1.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/db/d4102f356af18f316c67f2cead8ece307f731dd63140e2c71f170ddacf9b/pika-1.3.2.tar.gz", hash = "sha256:b2a327ddddf8570b4965b3576ac77091b850262d34ce8c1d8cb4e4146aa4145f", size = 145029 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/f3/f412836ec714d36f0f4ab581b84c491e3f42c6b5b97a6c6ed1817f3c16d0/pika-1.3.2-py3-none-any.whl", hash = "sha256:0779a7c1fafd805672796085560d290213a465e4f6f76a6fb19e378d8041a14f", size = 155415 },
+]
+
+[[package]]
 name = "pillow"
 version = "10.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3704,7 +3733,7 @@ wheels = [
 
 [[package]]
 name = "requests"
-version = "2.32.4"
+version = "2.32.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -3712,9 +3741,9 @@ dependencies = [
     { name = "idna" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/0a/929373653770d8a0d7ea76c37de6e41f11eb07559b103b1c02cafb3f7cf8/requests-2.32.4.tar.gz", hash = "sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422", size = 135258 }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/74/b3ff8e6c8446842c3f5c837e9c3dfcfe2018ea6ecef224c710c85ef728f4/requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf", size = 134517 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/e4/56027c4a6b4ae70ca9de302488c5ca95ad4a39e190093d6c1a8ace08341b/requests-2.32.4-py3-none-any.whl", hash = "sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c", size = 64847 },
+    { url = "https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6", size = 64738 },
 ]
 
 [[package]]
