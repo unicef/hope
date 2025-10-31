@@ -3,6 +3,7 @@ class XlsxPaymentPlanBaseService:
     HEADERS = (
         "payment_id",
         "household_id",
+        "individual_id",
         "household_size",
         "admin_level_2",
         "village",

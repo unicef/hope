@@ -23,7 +23,6 @@ from hope.apps.household.api.serializers.registration_data_import import (
 from hope.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
-    ROLE_NO_ROLE,
     Document,
     DocumentType,
     Individual,
@@ -154,9 +153,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj: Individual) -> str:
         role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
-        if role:
-            return role.get_role_display()
-        return "-"
+        return role.get_role_display() if role else "-"
 
     def get_documents(self, obj: Individual) -> dict:
         return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
@@ -291,7 +288,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
 
         if not role:
-            return ROLE_NO_ROLE
+            return None
         return role.get_role_display()
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))
@@ -389,11 +386,9 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "payment_delivery_phone_no",
         )
 
-    def get_role(self, obj: Individual) -> str:
+    def get_role(self, obj: Individual) -> str | None:
         role = obj.households_and_roles(manager="all_merge_status_objects").order_by("created_at").first()
-        if role:
-            return role.role
-        return ROLE_NO_ROLE
+        return role.role if role else None
 
     @extend_schema_field(DocumentSerializer(many=True))
     def get_documents(self, obj: Individual) -> dict:

@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `NO_ROLE` - None
  * * `ALTERNATE` - Alternate collector
  * * `PRIMARY` - Primary collector
+ * * `NO_ROLE` - No role
  */
 export enum NewRoleEnum {
-    NO_ROLE = 'NO_ROLE',
     ALTERNATE = 'ALTERNATE',
     PRIMARY = 'PRIMARY',
+    NO_ROLE = 'NO_ROLE',
 }

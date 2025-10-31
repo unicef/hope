@@ -349,6 +349,7 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
     [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
     [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
   };
   if (status in colorsMap) {
     return colorsMap[status];

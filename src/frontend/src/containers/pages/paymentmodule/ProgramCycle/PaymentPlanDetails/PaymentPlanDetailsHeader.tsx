@@ -23,6 +23,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -93,6 +94,11 @@ export const PaymentPlanDetailsHeader = ({
     paymentPlan.canSendToPaymentGateway;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
+  const canReactivate = hasPermissions(
+    PERMISSIONS.PM_REACTIVATE_ABORT,
+    permissions,
+  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -103,6 +109,7 @@ export const PaymentPlanDetailsHeader = ({
           canRemove={canRemove}
           canEdit={canEdit}
           canLock={canLock}
+          canAbort={canAbort}
         />
       );
       break;
@@ -112,6 +119,7 @@ export const PaymentPlanDetailsHeader = ({
           paymentPlan={paymentPlan}
           canUnlock={canLock}
           permissions={permissions}
+          canAbort={canAbort}
         />
       );
       break;
@@ -121,6 +129,7 @@ export const PaymentPlanDetailsHeader = ({
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           canSendForApproval={canSendForApproval}
+          canAbort={canAbort}
         />
       );
       break;
@@ -133,6 +142,7 @@ export const PaymentPlanDetailsHeader = ({
             permissions,
           )}
           canApprove={canApprove}
+          canAbort={canAbort}
         />
       );
       break;
@@ -145,6 +155,7 @@ export const PaymentPlanDetailsHeader = ({
             permissions,
           )}
           canAuthorize={canAuthorize}
+          canAbort={canAbort}
         />
       );
       break;
@@ -157,6 +168,7 @@ export const PaymentPlanDetailsHeader = ({
             permissions,
           )}
           canMarkAsReleased={canMarkAsReleased}
+          canAbort={canAbort}
         />
       );
       break;
@@ -168,6 +180,15 @@ export const PaymentPlanDetailsHeader = ({
           canSplit={canSplit}
           canClose={canClose}
           paymentPlan={paymentPlan}
+          canAbort={canAbort}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.ABORTED:
+      buttons = (
+        <AbortedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReactivate={canReactivate}
         />
       );
       break;

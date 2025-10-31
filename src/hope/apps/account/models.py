@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField, CICharField
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -49,7 +49,7 @@ USER_STATUS_CHOICES = (
 
 
 class Partner(LimitBusinessAreaModelMixin, MPTTModel):
-    name = CICharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, db_collation="und-ci-det")
     parent = TreeForeignKey(
         "self",
         blank=True,

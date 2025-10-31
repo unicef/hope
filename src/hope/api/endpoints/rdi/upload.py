@@ -23,13 +23,12 @@ from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
+from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 
@@ -111,6 +110,16 @@ class AccountSerializerUpload(serializers.ModelSerializer):
         model = PendingAccount
         exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("financial_institution"):
+            account_type = attrs["account_type"]
+            number = attrs["number"]
+            attrs["financial_institution"] = FinancialInstitution.get_generic_one(
+                account_type, Account.is_valid_iban(number)
+            )
+        return attrs
+
 
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -142,11 +151,11 @@ class IndividualSerializer(serializers.ModelSerializer):
             "program",
         ]
 
-    def validate_role(self, value: str) -> str | None:
-        if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
+    def validate_role(self, value: str | None) -> str | None:
+        if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if not value:
-            return ROLE_NO_ROLE
+            return None
         if value.upper()[0] == "P":
             return ROLE_PRIMARY
         if value.upper()[0] == "A":

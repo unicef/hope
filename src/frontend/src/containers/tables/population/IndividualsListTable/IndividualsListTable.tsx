@@ -50,6 +50,7 @@ export function IndividualsListTable({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      orderBy: filter.orderBy,
       page,
     }),
     [
@@ -64,6 +65,7 @@ export function IndividualsListTable({
       filter.status,
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
+      filter.orderBy,
       programId,
       businessArea,
       page,
@@ -107,17 +109,43 @@ export function IndividualsListTable({
   });
 
   const { data: countData } = useQuery<CountResponse>({
+    // Count should depend only on filters (not pagination). Keep fetching only on page 0.
     queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
+      'businessAreasProgramsIndividualsCountRetrieve',
       businessArea,
-      queryVariables,
+      programId,
+      filter.search,
+      filter.sex,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin2,
+      filter.flags,
+      filter.status,
+      filter.lastRegistrationDateMin,
+      filter.lastRegistrationDateMax,
+      filter.ageMin,
+      filter.ageMax,
+      filter.orderBy,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
-          queryVariables,
+          {
+            ageMax: filter.ageMax,
+            ageMin: filter.ageMin,
+            sex: [filter.sex],
+            search: filter.search?.trim(),
+            documentType: filter.documentType,
+            documentNumber: filter.documentNumber?.trim(),
+            admin2: filter.admin2,
+            flags: filter.flags,
+            status: filter.status,
+            lastRegistrationDateBefore: filter.lastRegistrationDateMin,
+            lastRegistrationDateAfter: filter.lastRegistrationDateMax,
+            rdiMergeStatus: 'MERGED',
+            orderBy: filter.orderBy,
+          },
         ),
       ),
     enabled: page === 0,

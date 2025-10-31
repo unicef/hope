@@ -7,11 +7,16 @@ from django.contrib.postgres.fields import ArrayField
 
 class DynamicChoiceField(forms.MultipleChoiceField):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        # Set the choices callable to be evaluated later
         kwargs.pop("base_field", None)
         kwargs.pop("max_length", None)
-        choices = kwargs.pop("choices_callable", ())
-        super().__init__(choices=choices, **kwargs)
+
+        choices_callable = kwargs.pop("choices_callable", None)
+        if callable(choices_callable):
+            choices = choices_callable()
+        else:
+            choices = choices_callable or ()
+
+        super().__init__(*args, choices=choices, **kwargs)
 
 
 class DynamicChoiceArrayField(ArrayField):

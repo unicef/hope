@@ -6,6 +6,7 @@ from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
@@ -74,6 +75,7 @@ class PushToRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
@@ -122,7 +124,7 @@ class PushToRDITests(HOPEApiTestCase):
                             {
                                 "account_type": "bank",
                                 "number": "123",
-                                "financial_institution": self.fi.id,
+                                # "financial_institution": self.fi.id,  # use generic financial institution
                                 "data": {"field_name": "field_value"},
                             }
                         ],
@@ -158,7 +160,7 @@ class PushToRDITests(HOPEApiTestCase):
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
         assert account is not None
         assert account.account_type.key == "bank"
-        assert account.financial_institution.id == self.fi.id
+        assert account.financial_institution.name == "Generic Bank"
         assert account.number == "123"
         assert account.data == {"field_name": "field_value"}
 

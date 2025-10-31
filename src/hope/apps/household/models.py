@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, CICharField
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
@@ -187,9 +187,7 @@ WORK_STATUS_CHOICE = (
 )
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
-ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_NO_ROLE, "None"),
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )
@@ -538,7 +536,7 @@ class Household(
         help_text="Household residence status",
     )
 
-    address = CICharField(max_length=1024, blank=True, help_text="Household address")
+    address = models.CharField(max_length=1024, blank=True, help_text="Household address", db_collation="und-ci-det")
     zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
 
     size = models.PositiveIntegerField(db_index=True, null=True, blank=True, help_text="Household size")
@@ -706,7 +704,7 @@ class Household(
         max_length=8,
         help_text="Household collect type [sys]",
     )
-    program_registration_id = CICharField(
+    program_registration_id = models.CharField(
         max_length=100,
         blank=True,
         null=True,
@@ -714,6 +712,7 @@ class Household(
         unique=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration id [sys]",
+        db_collation="und-ci-det",
     )
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -798,6 +797,20 @@ class Household(
             models.Index(
                 name="hh_prog_cre_active_merged",
                 fields=["program", "created_at"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hh_prog_unicef_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hh_size_id_idx",
+                fields=["size", "id"],
+            ),
+            models.Index(
+                name="hi_prog_ltreg_act_merg_idx",
+                fields=["program", "last_registration_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
         ]
@@ -1009,6 +1022,16 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
                 raise ValidationError("Document number is not validating")
 
     class Meta:
+        indexes = [
+            # GinIndex(
+            #     OpClass(Upper("document_number"), name="gin_trgm_ops"),
+            #     name="doc_number_upper_trgm_gin",
+            # ),
+            models.Index(
+                fields=["type", "individual"],
+                name="doc_type_individual_idx",
+            ),
+        ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
             UniqueConstraint(
@@ -1224,29 +1247,21 @@ class Individual(
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
     photo = models.ImageField(blank=True, help_text="Photo")
-    full_name = CICharField(
+    full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
         db_index=True,
         help_text="Full Name of the Beneficiary",
+        db_collation="und-ci-det",
     )
-    given_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="First name of the Beneficiary",
+    given_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
     )
-    middle_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Middle name of the Beneficiary",
+    middle_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
     )
-    family_name = CICharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Last name of the Beneficiary",
+    family_name = models.CharField(
+        max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
     )
     sex = models.CharField(
         max_length=255,
@@ -1433,12 +1448,13 @@ class Individual(
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]",
     )
-    program_registration_id = CICharField(
+    program_registration_id = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
+        db_collation="und-ci-det",
     )
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
@@ -1470,9 +1486,9 @@ class Individual(
         return relativedelta(date.today(), self.birth_date).years
 
     @property
-    def role(self) -> str:
+    def role(self) -> str | None:
         role = self.households_and_roles.first()
-        return role.role if role is not None else ROLE_NO_ROLE
+        return role.role if role else None
 
     @property
     def get_hash_key(self) -> str:
@@ -1562,7 +1578,52 @@ class Individual(
 
     class Meta:
         verbose_name = "Individual"
-        indexes = (GinIndex(fields=["vector_column"]),)
+        indexes = (
+            GinIndex(fields=["vector_column"]),
+            models.Index(
+                name="hi_prog_id_active_merged_idx",
+                fields=["program", "id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_hh_active_merged_idx",
+                fields=["program", "household"],  # -> (program_id, household_id)
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_possible_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_possible_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_sanction_confirmed_idx",
+                condition=Q(is_removed=False, rdi_merge_status="MERGED", sanction_list_confirmed_match=True),
+            ),
+            models.Index(
+                fields=["household"],
+                name="hi_hh_dup_idx",
+                condition=Q(
+                    is_removed=False, rdi_merge_status="MERGED", deduplication_golden_record_status="DUPLICATE"
+                ),
+            ),
+            models.Index(
+                name="hi_hh_active_merged_idx",
+                fields=["household"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_idx",
+                fields=["program", "unicef_id"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="hi_prog_uni_act_merg_birth_idx",
+                fields=["program", "unicef_id"],
+                include=["birth_date"],
+                condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+        )
         constraints = [
             UniqueConstraint(
                 fields=["unicef_id", "program"],
@@ -1605,7 +1666,7 @@ class Individual(
         return self, update_fields
 
     def count_all_roles(self) -> int:
-        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+        return self.households_and_roles.count()
 
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()

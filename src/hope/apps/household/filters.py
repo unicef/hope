@@ -325,6 +325,7 @@ class IndividualFilter(UpdatedAtFilter):
             Lower("full_name"),
             "household__id",
             "household__unicef_id",
+            "household__size",
             "birth_date",
             "sex",
             "relationship",

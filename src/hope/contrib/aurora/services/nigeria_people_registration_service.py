@@ -110,6 +110,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
 
     def create_account(self, account_data: dict, individual: PendingIndividual) -> PendingAccount:
         account = super().create_account(account_data, individual)
+        # TODO: remove this when fully switched to FI_pk import
         if financial_institution_code := account.data.get("uba_code"):
             uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
 

@@ -1,7 +1,7 @@
 from io import BytesIO
 import logging
-import string
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.utils.crypto import get_random_string
 import msoffcrypto
 import openpyxl
 from openpyxl import Workbook
@@ -35,6 +36,9 @@ from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.program.models import Program
 from hope.apps.utils.exceptions import log_and_raise
+
+if TYPE_CHECKING:
+    from hope.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -362,9 +366,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             # generate passwords only if allow_export_fsp_auth_code=True
             password, xlsx_password, encryption_arg = None, None, {}
             if self.allow_export_fsp_auth_code:
-                allowed_chars = f"{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}{string.punctuation}"
-                password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
-                xlsx_password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
+                password = get_random_string(12)
+                xlsx_password = get_random_string(12)
                 encryption_arg = {"encryption": pyzipper.WZ_AES}
 
             with pyzipper.AESZipFile(

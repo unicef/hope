@@ -83,7 +83,7 @@ export type IndividualDetail = {
      */
     pregnant?: boolean | null;
     household: HouseholdSimple;
-    readonly role: string;
+    readonly role: string | null;
     /**
      * This represents the MEMBER relationship. can be blank
      * as well if household is null!

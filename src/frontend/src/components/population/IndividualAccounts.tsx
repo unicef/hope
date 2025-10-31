@@ -5,7 +5,7 @@ import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
 import { Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { renderSomethingOrDash } from '@utils/utils';
+import { renderSomethingOrDash, splitCamelCase } from '@utils/utils';
 import { t } from 'i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
@@ -45,6 +45,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
   }
+
   return (
     <Overview>
       <Title>
@@ -57,15 +58,15 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
           const tabData = mechanism.dataFields;
           return (
             <Grid size={12} key={index}>
-              <Typography variant="h6">{mechanism.accountType}</Typography>
+              <Typography variant="h6">{mechanism.name}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => {
-                  if (key === 'financial_institution') {
-                    value = accountFinancialInstitutionsDict[value as string];
+                  if (key === 'financialInstitution') {
+                    value = accountFinancialInstitutionsDict[value] || value;
                   }
                   return (
                     <Grid key={idx} size={3}>
-                      <LabelizedField label={key.replace(/_/g, ' ')}>
+                      <LabelizedField label={splitCamelCase(key)}>
                         {renderSomethingOrDash(value)}
                       </LabelizedField>
                     </Grid>

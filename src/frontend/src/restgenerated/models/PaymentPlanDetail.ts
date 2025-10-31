@@ -6,7 +6,6 @@ import type { ApprovalProcess } from './ApprovalProcess';
 import type { BackgroundActionStatusEnum } from './BackgroundActionStatusEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
-import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaymentPlan';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
@@ -41,6 +40,7 @@ export type PaymentPlanDetail = {
      * * `IN_AUTHORIZATION` - In Authorization
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
+     * * `ABORTED` - Aborted
      * * `FINISHED` - Finished
      * * `CLOSED` - Closed
      */
@@ -293,7 +293,6 @@ export type PaymentPlanDetail = {
     importedFileDate?: string | null;
     readonly paymentsConflictsCount: number;
     readonly deliveryMechanism: DeliveryMechanism;
-    readonly deliveryMechanismPerPaymentPlan: DeliveryMechanismPerPaymentPlan;
     readonly volumeByDeliveryMechanism: Record<string, any>;
     readonly splitChoices: Array<Record<string, any>>;
     /**
@@ -368,5 +367,9 @@ export type PaymentPlanDetail = {
     readonly availableFundsCommitments: Array<Record<string, any>>;
     readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
     readonly adminUrl: string | null;
+    /**
+     * Reason for aborting
+     */
+    abortComment?: string;
 };
 

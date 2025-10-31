@@ -29,6 +29,7 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
+  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -36,6 +37,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canClose,
+  canAbort,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();

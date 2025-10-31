@@ -46,7 +46,7 @@ function EditHouseholdDataChange({
       }),
     enabled: Boolean(businessArea),
   });
-  const roleChoices = individualsChoices?.roleChoices || [];
+  const roleChoices = individualsChoices?.roleChoicesForGrievance || [];
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
@@ -125,7 +125,7 @@ function EditHouseholdDataChange({
   useEffect(() => {
     if (householdMembers && (!values.roles || values.roles.length === 0)) {
       const membersWithRole = householdMembers.results.filter(
-        (member) => member.role && member.role !== 'NO_ROLE',
+        (member) => member.role && member.role !== null,
       );
       setFieldValue(
         'roles',
@@ -244,7 +244,7 @@ function EditHouseholdDataChange({
                 <Grid size={4}>
                   {currentRoleObj
                     ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
-                    : 'None'}
+                    : 'No role'}
                 </Grid>
                 <Grid size={3}>
                   <Field

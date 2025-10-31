@@ -110,7 +110,7 @@ export function LookUpReassignRole({
       default:
         break;
     }
-    const role = JSON.parse(roleReassignData)[individualRole.id];
+    const role = roleReassignData?.[individualRole.id];
     if (role) {
       setReAssigneeRole(role);
     }

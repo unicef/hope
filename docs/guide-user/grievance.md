@@ -29,49 +29,49 @@ UNICEF’s efforts to advance its commitment to Accountability to Affected Popul
 
 1. Select Grievance on the main menu and then select Grievance Tickets. Click on NEW TICKET to create a new grievance
    ticket.
-   ![Image](_screenshots/grievance/1.png)
+   ![Image](_screenshots/grievance/g_37.png)
 
 1. Select the grievance category and issue type then click next.
-   ![Image](_screenshots/grievance/2.png)
+   ![Image](_screenshots/grievance/g_38.png)
 
 1. Select the individual that you will be making changes on and click next.
-   ![Image](_screenshots/grievance/3.png)
+   ![Image](_screenshots/grievance/g_39.png)
 
 1. On the identity verification page, you have option of selecting screening questions at household level (Household
    Questionnaire) and individual level (Individual Questionnaire) fields. You can also have option to select if consent
    has been given (Received Consent). Select the received consent check box and click next.
-   ![Image](_screenshots/grievance/4.png)
+   ![Image](_screenshots/grievance/g_40.png)
 
 1. In the description page enter the details of the changes that you will making. In this example we will be adding the
    mobile number.
-   ![Image](_screenshots/grievance/5.png)
+   ![Image](_screenshots/grievance/g_41.png)
 
 1. In the bio data section, select the Mobile Money Number field and enter the mobile number then click save.
-   ![Image](_screenshots/grievance/6.png)
+   ![Image](_screenshots/grievance/g_42.png)
 
 1. After you click save, a new grievance ticket will be created. The next step is to assign the ticket to someone who
    will work on the ticket.
-   ![Image](_screenshots/grievance/7.png)
+   ![Image](_screenshots/grievance/g_43.png)
 
 1. Once the ticket is assigned the status of the ticket will change from new to assigned. The next step is to click on
    SET TO IN PROGRESS so that you take action on the ticket.
-   ![Image](_screenshots/grievance/8.png)
+   ![Image](_screenshots/grievance/g_44.png)
 
 1. Once the ticket is in progress the status of the ticket will change from assigned to in progress. At this stage the
    information collected is verified then the ticket is sent for approval. Click on SEND FOR APPROVAL.
-   ![Image](_screenshots/grievance/9.png)
+   ![Image](_screenshots/grievance/g_45.png)
 
 1. Once the ticket is sent for approval the status of the ticket will change from in progress to for approval. Select
     the checkbox under Requested Data Change field and click APPROVE to approve the grievance ticket.
-    ![Image](_screenshots/grievance/10.png)
+    ![Image](_screenshots/grievance/g_46.png)
 
 1. Once the ticket is approved the status of the ticket will change from in progress to for approval. Click on CLOSE
     Ticket to close the grievance ticket. You also have the option to send back or edit ticket if the approver is not
     satisfied with the resolution of the ticket.
-    ![Image](_screenshots/grievance/11.png)
+    ![Image](_screenshots/grievance/g_47.png)
 
 1. Once the ticket is closed the status of the ticket will change from for approval to for closed.
-    ![Image](_screenshots/grievance/12.png)
+    ![Image](_screenshots/grievance/g_48.png)
 
 ## The Grievance Dashboard
 
@@ -82,25 +82,25 @@ ticket status, ticket category and tickets by category and location.
 ## How to view the Grievance Dashboard
 
 1. Select the Grievance Dashboard menu under Grievance module.
-    ![Image](_screenshots/grievance/12.png)
+    ![Image](_screenshots/grievance/g_49.png)
 
 ## How to submit feedback
 
 1. Select the Feedback menu under Grievance module and click on SUBMIT NEW FEEDBACK.
-    ![Image](_screenshots/grievance/_1.png)
+    ![Image](_screenshots/grievance/g_50.png)
 
-1. Select the issue type, either Negative of Positive feedback and click next.
-    ![Image](_screenshots/grievance/_2.png)
+1. Select the issue type, either Negative or Positive feedback and click next.
+    ![Image](_screenshots/grievance/g_51.png)
 
 1. In the Household/Individual Look up page select the household and individual and click next.
-    ![Image](_screenshots/grievance/_3.png)
+    ![Image](_screenshots/grievance/g_52.png)
 
 
 1. In the identity verification page, you have option of selecting screening questions at household level (Household Questionnaire) and individual level (Individual Questionnaire) fields. You can also have option to select if consent has been given (Received Consent). Select the received consent check box and click next.
-    ![Image](_screenshots/grievance/_4.png)
+    ![Image](_screenshots/grievance/g_53.png)
 
 1. In the description page enter the details of the feedback collected from the beneficiary and click save.
-    ![Image](_screenshots/grievance/_5.png)
+    ![Image](_screenshots/grievance/g_54.png)
 
-1. After you click save, a new feedback ticket will be created. You also have the option to edit the ticket or a create a linked ticket (grievance ticket).
-    ![Image](_screenshots/grievance/_6.png)
+1. After you click save, a new feedback ticket will be created. You also have the option to edit the ticket or create a linked ticket (grievance ticket).
+    ![Image](_screenshots/grievance/g_55.png)

@@ -1,25 +1,23 @@
 # noqa
 from hope.config.env import env
 
-# TODO update when upgrading django: secrets are already in place
-# STORAGES = {
-#     "default": {
-#         "BACKEND": env.storage("FILE_STORAGE_MEDIA"),
-#     },
-#     "staticfiles": {
-#         "BACKEND": env.storage("FILE_STORAGE_STATIC"),
-#     },
-# }
+STORAGES = {
+    "default": {
+        "BACKEND": env("FILE_STORAGE_MEDIA"),
+    },
+    "staticfiles": {
+        "BACKEND": env("FILE_STORAGE_STATIC"),
+    },
+}
 
 AZURE_URL_EXPIRATION_SECS = 10800
 
 AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME")
 AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY")
+STATIC_LOCATION = env("STATIC_LOCATION")
+MEDIA_LOCATION = env("MEDIA_LOCATION")
 
 if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
-    STATIC_LOCATION = env("STATIC_LOCATION")
-    MEDIA_LOCATION = env("MEDIA_LOCATION")
-
     MEDIA_STORAGE_AZURE_ACCOUNT_NAME = env("MEDIA_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
     MEDIA_STORAGE_AZURE_ACCOUNT_KEY = env("MEDIA_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
     STATIC_STORAGE_AZURE_ACCOUNT_NAME = env("STATIC_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)

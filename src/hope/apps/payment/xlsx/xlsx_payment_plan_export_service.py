@@ -35,6 +35,8 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         if self.payment_plan.is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
+        else:
+            self.headers.remove("individual_id")
 
     def _add_payment_row(self, payment: Payment) -> None:
         payment_row = [

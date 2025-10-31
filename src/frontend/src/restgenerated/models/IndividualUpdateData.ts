@@ -39,7 +39,7 @@ export type IndividualUpdateData = {
     documentsToRemove?: Array<string>;
     documentsToEdit?: Array<EditIndividualDocument>;
     identities?: Array<IndividualIdentityGT>;
-    identitiesToRemove?: Array<number>;
+    identitiesToRemove?: Array<string>;
     identitiesToEdit?: Array<EditIndividualIdentity>;
     accounts?: Array<CreateAccount>;
     accountsToEdit?: Array<EditAccount>;

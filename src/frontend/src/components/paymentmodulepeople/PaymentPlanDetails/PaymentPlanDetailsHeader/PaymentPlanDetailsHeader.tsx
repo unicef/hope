@@ -65,6 +65,7 @@ export function PaymentPlanDetailsHeader({
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -75,6 +76,7 @@ export function PaymentPlanDetailsHeader({
           canRemove={canRemove}
           canEdit={canEdit}
           canLock={canLock}
+          canAbort={canAbort}
         />
       );
       break;
@@ -84,6 +86,7 @@ export function PaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canUnlock={canLock}
           permissions={permissions}
+          canAbort={canAbort}
         />
       );
       break;
@@ -93,6 +96,7 @@ export function PaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           canSendForApproval={canSendForApproval}
+          canAbort={canAbort}
         />
       );
       break;
@@ -105,6 +109,7 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canApprove={canApprove}
+          canAbort={canAbort}
         />
       );
       break;
@@ -117,6 +122,7 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canAuthorize={canAuthorize}
+          canAbort={canAbort}
         />
       );
       break;
@@ -129,6 +135,7 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canMarkAsReleased={canMarkAsReleased}
+          canAbort={canAbort}
         />
       );
       break;
@@ -140,6 +147,7 @@ export function PaymentPlanDetailsHeader({
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}
+          canAbort={canAbort}
         />
       );
       break;

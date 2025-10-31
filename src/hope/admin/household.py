@@ -355,6 +355,11 @@ class HouseholdWithdrawFromListMixin:
         )
 
 
+class RepresentativesInline(admin.TabularInline):
+    model = IndividualRoleInHousehold
+    extra = 1
+
+
 @admin.register(Household)
 class HouseholdAdmin(
     SoftDeletableAdminMixin,
@@ -401,7 +406,6 @@ class HouseholdAdmin(
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("representatives",)
     raw_id_fields = (
         "admin1",
         "admin2",
@@ -458,7 +462,7 @@ class HouseholdAdmin(
         "mass_enroll_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
-    inlines = [HouseholdRepresentationInline]
+    inlines = [HouseholdRepresentationInline, RepresentativesInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(

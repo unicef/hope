@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.payment import FinancialInstitutionFactory
+from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
@@ -26,7 +26,7 @@ from hope.apps.household.models import (
     PendingDocument,
     PendingIndividual,
 )
-from hope.apps.payment.models import AccountType
+from hope.apps.payment.models import AccountType, PendingAccount
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
@@ -41,6 +41,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         super().setUpTestData()
         call_command("loadcountries")
         call_command("loadcountrycodes")
+        generate_delivery_mechanisms()
 
         image = Path(__file__).parent / "logo.png"
         cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
@@ -87,6 +88,31 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "expiry_date": "2030-01-01",
                 }
             ],
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+        assert "IND001" in response.data["individual_id_mapping"]
+
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+        assert individual.full_name == "John Doe"
+        assert individual.given_name == "John"
+        assert individual.family_name == "Doe"
+        assert individual.observed_disability == ["NONE"]
+        assert individual.marital_status == "SINGLE"
+
+    def test_create_single_individual_accounts(self) -> None:
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
             "accounts": [
                 {
                     "type": self.account_type.key,
@@ -105,12 +131,28 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert response.data["errors"] == 0
         assert "IND001" in response.data["individual_id_mapping"]
 
-        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-        assert individual.full_name == "John Doe"
-        assert individual.given_name == "John"
-        assert individual.family_name == "Doe"
-        assert individual.observed_disability == ["NONE"]
-        assert individual.marital_status == "SINGLE"
+        assert PendingIndividual.objects.count() == 1
+        assert PendingAccount.objects.count() == 1
+        account = PendingAccount.objects.first()
+        assert account.number == "123456789"
+        assert account.financial_institution == self.fi
+        assert account.data == {"field_name": "field_value"}
+        assert account.account_type == self.account_type
+
+        PendingIndividual.objects.all().delete()
+        PendingAccount.objects.all().delete()
+
+        individual_data["accounts"][0].pop("financial_institution")
+        response = self.client.post(self.url, [individual_data], format="json")
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        assert PendingIndividual.objects.count() == 1
+        assert PendingAccount.objects.count() == 1
+        account = PendingAccount.objects.first()
+        assert account.financial_institution.name == "Generic Bank"
 
     def test_create_multiple_individuals_success(self) -> None:
         individuals_data = [
