@@ -922,7 +922,7 @@ class TestHouseholdMembers:
                 "id": str(self.individual1_2.id),
                 "unicef_id": self.individual1_2.unicef_id,
                 "full_name": self.individual1_2.full_name,
-                "role": "NO_ROLE",
+                "role": None,
                 "relationship": self.individual1_2.relationship,
                 "status": self.individual1_2.status,
                 "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
