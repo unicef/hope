@@ -1368,9 +1368,16 @@ export function showApiErrorMessages(
 
   const messages: string[] = [];
 
+  // Helper to show message or fallback if empty
+  function showOrFallback(msg: string) {
+    const out = (msg || '').toString().trim();
+    if (out) showMessage(out);
+    else showMessage(fallbackMsg);
+  }
+
   // Handle plain array of strings (e.g. ["msg1", "msg2"])
   if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
-    showMessage(error.join('  \n'));
+    showOrFallback(error.join('  \n'));
     return;
   }
 
@@ -1378,7 +1385,7 @@ export function showApiErrorMessages(
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
     // If error.body is a plain array of strings
     if (error.body.every((item) => typeof item === 'string')) {
-      showMessage(error.body.join('  \n'));
+      showOrFallback(error.body.join('  \n'));
       return;
     }
     const errors = collectErrors(error.body);
@@ -1387,12 +1394,12 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle string error in error.body
   if (error && typeof error === 'object' && typeof error.body === 'string') {
-    showMessage(error.body);
+    showOrFallback(error.body);
     return;
   }
   // Handle object of arrays/objects in error.body (field errors)
@@ -1408,7 +1415,7 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle top-level object of arrays (field errors)
@@ -1419,15 +1426,15 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle string error in error.message
   if (error && typeof error === 'object' && typeof error.message === 'string') {
-    showMessage(error.message);
+    showOrFallback(error.message);
     return;
   }
-  showMessage(fallbackMsg);
+  showOrFallback(fallbackMsg);
 }
 
 export function getApiErrorMessages(

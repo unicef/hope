@@ -129,7 +129,6 @@ class TargetingCriteriaInputValidator:
                 for key in [
                     "households_filters_blocks",
                     "individuals_filters_blocks",
-                    "collectors_filters_blocks",
                 ]
             )
 

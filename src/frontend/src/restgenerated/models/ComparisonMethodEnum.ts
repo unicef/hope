@@ -13,7 +13,7 @@
  * * `LESS_THAN` - Less than
  * * `IS_NULL` - Is null
  */
-export enum ComparisonMethod7bbEnum {
+export enum ComparisonMethodEnum {
     EQUALS = 'EQUALS',
     NOT_EQUALS = 'NOT_EQUALS',
     CONTAINS = 'CONTAINS',

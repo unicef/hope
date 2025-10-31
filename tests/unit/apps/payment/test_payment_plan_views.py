@@ -1300,7 +1300,6 @@ class TestTargetPopulationCreateUpdate:
                     }
                 ],
                 "individuals_filters_blocks": [],
-                "collectors_filters_blocks": [],
             }
         ]
 

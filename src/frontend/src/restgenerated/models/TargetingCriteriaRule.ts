@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TargetingCollectorRuleFilterBlock } from './TargetingCollectorRuleFilterBlock';
 import type { TargetingCriteriaRuleFilter } from './TargetingCriteriaRuleFilter';
 import type { TargetingIndividualRuleFilterBlock } from './TargetingIndividualRuleFilterBlock';
 export type TargetingCriteriaRule = {
@@ -10,6 +9,5 @@ export type TargetingCriteriaRule = {
     individualIds?: string;
     householdsFiltersBlocks?: Array<TargetingCriteriaRuleFilter>;
     individualsFiltersBlocks?: Array<TargetingIndividualRuleFilterBlock>;
-    collectorsFiltersBlocks?: Array<TargetingCollectorRuleFilterBlock>;
 };
 

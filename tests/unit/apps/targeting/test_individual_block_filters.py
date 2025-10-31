@@ -10,7 +10,6 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import (
-    AccountFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
@@ -23,20 +22,14 @@ from hope.apps.core.models import (
 from hope.apps.household.models import (
     FEMALE,
     MALE,
-    ROLE_PRIMARY,
     Household,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import AccountType
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.models import (
-    TargetingCollectorBlockRuleFilter,
-    TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
-from hope.apps.utils.models import MergeStatusModel
 
 
 class TestIndividualBlockFilter(TestCase):
@@ -346,37 +339,6 @@ class TestIndividualBlockFilter(TestCase):
         }
         self.individual_1.save()
 
-        query = query.filter(payment_plan.get_query())
-        assert query.count() == 1
-        assert query.first().id == self.household_1_indiv.id
-
-    def test_collector_blocks(self) -> None:
-        query = Household.objects.all().order_by("unicef_id")
-        hh = self.household_1_indiv
-        IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(),
-            household=hh,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        AccountFactory(
-            individual=collector,
-            data={"phone_number": "test123"},
-            account_type=AccountType.objects.get(key="mobile"),
-        )
-
-        # Target population
-        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
-        TargetingCollectorBlockRuleFilter.objects.create(
-            collector_block_filters=col_block,
-            comparison_method="EQUALS",
-            field_name="mobile__phone_number",
-            arguments=[True],
-        )
-        payment_plan.rules.set([tcr])
         query = query.filter(payment_plan.get_query())
         assert query.count() == 1
         assert query.first().id == self.household_1_indiv.id

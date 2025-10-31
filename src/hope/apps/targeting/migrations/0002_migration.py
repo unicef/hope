@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
             },
             bases=(
                 models.Model,
-                hope.apps.targeting.services.targeting_service.TargetingCollectorRuleFilterBlockBase,
+                hope.apps.targeting.services.targeting_service.TargetingIndividualRuleFilterBlockBase,
             ),
         ),
         migrations.CreateModel(

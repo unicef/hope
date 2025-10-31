@@ -52,11 +52,6 @@ interface Values {
       isNull?: boolean;
     }[];
   }[];
-  collectorsFiltersBlocks?: {
-    collectorBlockFilters?: {
-      isNull?: boolean;
-    }[];
-  }[];
 }
 
 interface SubFieldProps {
@@ -94,7 +89,6 @@ const SubField: FC<SubFieldProps> = ({
 
   const isNullSelected =
     checkIsNullInBlocks(values?.individualsFiltersBlocks, blockIndex, index) ||
-    checkIsNullInBlocks(values?.collectorsFiltersBlocks, blockIndex, index) ||
     (values.householdsFiltersBlocks?.some((filter) => filter.isNull) ?? false);
 
   useEffect(() => {

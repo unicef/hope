@@ -2,7 +2,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
-import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -102,22 +101,13 @@ const AddFilterTargetingCriteriaDisplay = ({
         programId: selectedProgram?.id,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
-    enabled: !!selectedProgram?.id && !isAllPrograms, // Ensure the query runs only when programId is available
+    enabled: !!selectedProgram?.id && !isAllPrograms,
   });
-  const { data: allCollectorFieldsAttributesData } =
-    useQuery<PaginatedCollectorAttributeList>({
-      queryKey: ['collectorFieldsAttributes'],
-      queryFn: () =>
-        RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
-      staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
-    });
 
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(0);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
-  const [allCollectorDataChoicesDict, setAllCollectorDataChoicesDict] =
-    useState(null);
 
   useEffect(() => {
     if (loading) return;
@@ -130,16 +120,6 @@ const AddFilterTargetingCriteriaDisplay = ({
     );
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
-
-  useEffect(() => {
-    if (loading) return;
-    const allCollectorDataChoicesDictTmp =
-      allCollectorFieldsAttributesData?.results?.reduce((acc, item) => {
-        acc[item.name] = item.choices;
-        return acc;
-      }, {});
-    setAllCollectorDataChoicesDict(allCollectorDataChoicesDictTmp);
-  }, [allCollectorFieldsAttributesData, loading]);
 
   const regex = /(create|edit-tp)/;
   const isDetailsPage = !regex.test(location.pathname);
@@ -169,7 +149,6 @@ const AddFilterTargetingCriteriaDisplay = ({
     const criteria = {
       householdsFiltersBlocks: [...values.householdsFiltersBlocks],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
-      collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
       deliveryMechanism: values.deliveryMechanism,
@@ -194,9 +173,6 @@ const AddFilterTargetingCriteriaDisplay = ({
     setIndex(null); // Set to null so payment channel validation doesn't appear for additional criteria
     setOpen(true);
   };
-
-  // const  collectorFiltersAvailable =
-  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
 
   let individualFiltersAvailable =
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
@@ -243,7 +219,6 @@ const AddFilterTargetingCriteriaDisplay = ({
           addCriteria={addCriteria}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
-          collectorsFiltersAvailable={true}
           criteriaIndex={criteriaIndex}
         />
         <ContentWrapper>
@@ -251,22 +226,15 @@ const AddFilterTargetingCriteriaDisplay = ({
             <Box display="flex" flexWrap="wrap">
               {rules.length
                 ? rules?.map((criteria, index) => (
-                     
                     <Fragment key={criteria.id || index}>
                       <Criteria
                         criteriaIndex={index}
                         isEdit={isEdit}
                         allDataFieldsChoicesDict={allDataChoicesDict}
-                        allCollectorFieldsChoicesDict={
-                          allCollectorDataChoicesDict
-                        }
                         canRemove={rules.length > 1}
                         rules={criteria.householdsFiltersBlocks || []}
                         individualsFiltersBlocks={
                           criteria.individualsFiltersBlocks || []
-                        }
-                        collectorsFiltersBlocks={
-                          criteria.collectorsFiltersBlocks || []
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
