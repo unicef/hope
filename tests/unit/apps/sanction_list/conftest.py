@@ -31,20 +31,22 @@ def always_eager() -> Generator[Any, None, None]:
     app.conf.task_always_eager = status
 
 
-# @pytest.fixture
-# def sanction_list(db: Any) -> SanctionList:
-#     obj, _ = SanctionList.objects.get_or_create(
+# @pytest.fixture # ORIGINAL
+# def sanction_list(db: Any) -> "SanctionList":
+#     from extras.test_utils.factories.sanction_list import SanctionListFactory
+#
+#     return SanctionListFactory(
 #         name="EU",
 #         strategy="hope.apps.sanction_list.strategies.eu.EUSanctionList",
 #         config={
 #             "url": "http://example.com/sl.xml",
 #         },
 #     )
-#     return obj
-
-
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
     from extras.test_utils.factories.sanction_list import SanctionListFactory
 
+    # E   psycopg2.errors.UniqueViolation: duplicate key value violates
+    # unique constraint "sanction_list_sanctionlist_pkey"
+    #   E   DETAIL:  Key (id)=(1) already exists.
     return SanctionListFactory(name="EU", strategy=fqn(EUSanctionList), config={"url": "http://example.com/sl.xml"})

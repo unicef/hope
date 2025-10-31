@@ -22,6 +22,7 @@ def test_upload(
     django_app: "DjangoTestApp",
     admin_user: "User",
     sample_file: bytes,
+    # sanction_list: "SanctionList",
 ) -> None:
     sanction_list: SanctionList = SanctionList.objects.all().first()
     assert sanction_list is not None
