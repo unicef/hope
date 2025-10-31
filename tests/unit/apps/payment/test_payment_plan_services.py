@@ -702,16 +702,18 @@ class TestPaymentPlanServices(BaseTestCase):
                     "household_filters_blocks": [],
                     "household_ids": "",
                     "individual_ids": "",
-                    "individuals_filters_blocks": [{
-                        "individual_block_filters": [
-                            {
-                                "comparison_method": "RANGE",
-                                "arguments": [1, 99],
-                                "field_name": "age_at_registration",
-                                "flex_field_classification": "NOT_FLEX_FIELD",
-                            },
-                        ],
-                    }],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [1, 99],
+                                    "field_name": "age_at_registration",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                },
+                            ],
+                        }
+                    ],
                 }
             ],
         }
