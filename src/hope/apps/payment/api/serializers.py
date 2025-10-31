@@ -667,6 +667,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "steficon_rule",
             "source_payment_plan",
             "exchange_rate",
+            "exchange_rate_assigned_offline",
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",

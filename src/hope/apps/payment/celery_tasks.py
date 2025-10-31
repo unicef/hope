@@ -13,6 +13,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from requests import HTTPError
 
 from hope.apps.account.models import User
 from hope.apps.core.celery import app
@@ -340,9 +341,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
             "entitlement_date",
         )
 
-        pp_currency = payment_plan.currency
         pp_exchange_rate = payment_plan.exchange_rate
-        pp_currency_exchange_date = payment_plan.currency_exchange_date
 
         updates_buffer = []
         with transaction.atomic():
@@ -352,9 +351,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_quantity = result.value
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=result.value,
-                    currency=pp_currency,
                     exchange_rate=pp_exchange_rate,
-                    currency_exchange_date=pp_currency_exchange_date,
                 )
                 payment.entitlement_date = now
                 updates_buffer.append(payment)
@@ -396,17 +393,15 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     try:
-        payment_plan.exchange_rate = payment_plan.get_exchange_rate()
-        payment_plan.save(update_fields=["exchange_rate"])
-        payment_plan.refresh_from_db(fields=["exchange_rate"])
+        payment_plan.update_exchange_rate()
+        payment_plan.save(update_fields=["exchange_rate", "exchange_rate_assigned_offline"])
+        payment_plan.refresh_from_db(fields=["exchange_rate", "exchange_rate_assigned_offline"])
         updates = []
         with transaction.atomic():
             for payment in payment_plan.eligible_payments:
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=payment.entitlement_quantity,
-                    currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
                 )
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"])
@@ -1021,3 +1016,22 @@ def send_payment_plan_reconciliation_overdue_email(self: Any, payment_plan_id: s
         except Exception as e:  # pragma no cover
             logger.exception(f"Failed to send PP reconciliation overdue email for {payment_plan}")
             raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_update_exchange_rates(self: Any) -> None:
+    try:
+        from hope.apps.core.exchange_rates import ExchangeRates
+        from hope.apps.payment.models.payment import OfflineExchangeRates
+
+        client = ExchangeRates()
+        exchange_rates = client.api_client.fetch_exchange_rates()
+        OfflineExchangeRates.objects.update_or_create(
+            rates=exchange_rates,
+        )
+
+    except HTTPError as e:
+        logger.exception("Failed to periodic fetch exchange rates")
+        raise self.retry(exc=e)

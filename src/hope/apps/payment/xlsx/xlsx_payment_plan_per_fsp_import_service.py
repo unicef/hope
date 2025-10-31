@@ -351,9 +351,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,
-                    currency=self.payment_plan.currency,
                     exchange_rate=Decimal(exchange_rate),
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 payment.status = status
                 if delivery_date:

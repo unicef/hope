@@ -33,6 +33,7 @@ export function FollowUpPaymentPlanDetails({
       unicefId: sourcePaymentPlanUnicefId,
     },
     exchangeRate,
+    exchangeRateAssignedOffline,
   } = paymentPlan;
 
   return (
@@ -100,7 +101,7 @@ export function FollowUpPaymentPlanDetails({
               <Box display="flex" alignItems="center">
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchangeRate}{exchangeRateAssignedOffline ? '!' : ''}
                   </LabelizedField>
                 </Box>
                 <Tooltip

@@ -54,13 +54,12 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_imported_file()
 
     def import_payment_list(self) -> None:
-        exchange_rate = self.payment_plan.get_exchange_rate()
         payments_to_save = []
 
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
-            if payment := self._import_row(row, exchange_rate):
+            if payment := self._import_row(row, self.payment_plan.exchange_rate):
                 payments_to_save.append(payment)
 
             if len(payments_to_save) == self.BATCH_SIZE:
@@ -153,9 +152,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 entitlement_date = timezone.now()
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
-                    currency=self.payment_plan.currency,
                     exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 return Payment(
                     id=payment.id,

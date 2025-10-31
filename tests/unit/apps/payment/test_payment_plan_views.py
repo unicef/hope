@@ -2180,7 +2180,7 @@ class TestPaymentPlanActions:
         assert status.HTTP_400_BAD_REQUEST
         assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.apps.payment.models.PaymentPlan.update_exchange_rate", return_value=2.0)
     def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
