@@ -810,7 +810,7 @@ class TestIndividualDetail:
             "data_source": self.registration_data_import.data_source,
         }
         assert data["import_id"] == self.individual1.unicef_id
-        assert data["admin_url"] == self.individual1.admin_url
+        assert data["admin_url"] is None
         assert data["preferred_language"] == self.individual1.preferred_language
         assert data["roles_in_households"] == [
             {
@@ -1040,6 +1040,24 @@ class TestIndividualDetail:
         assert data["who_answers_phone"] == self.individual1.who_answers_phone
         assert data["who_answers_alt_phone"] == self.individual1.who_answers_alt_phone
         assert data["payment_delivery_phone_no"] == self.individual1.payment_delivery_phone_no
+
+    def test_individual_detail_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.individual1.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == self.individual1.admin_url
 
     def test_get_individual_photos(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
