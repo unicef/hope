@@ -14,8 +14,6 @@ interface FspSectionProps {
 export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
   const { t } = useTranslation();
 
-  const { deliveryMechanismPerPaymentPlan } = paymentPlan;
-
   return (
     <Box m={5}>
       <ContainerColumnWithBorder>
@@ -30,12 +28,12 @@ export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
         <Grid container spacing={3}>
           <>
             <Grid
-              key={`${deliveryMechanismPerPaymentPlan?.name}-${deliveryMechanismPerPaymentPlan?.fsp?.name}`}
+              key={`${paymentPlan.deliveryMechanism?.name}-${paymentPlan?.financialServiceProvider?.name}`}
               size={{ xs: 3 }}
             >
               <LabelizedField
-                label={deliveryMechanismPerPaymentPlan?.name || '-'}
-                value={deliveryMechanismPerPaymentPlan?.fsp?.name || '-'}
+                label={paymentPlan.deliveryMechanism?.name || '-'}
+                value={paymentPlan.financialServiceProvider?.name || '-'}
               />
             </Grid>
           </>
