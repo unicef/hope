@@ -9,10 +9,15 @@ import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
   const { programId } = useBaseUrl();
+  const [page, setPage] = useState(0);
 
   const initialQueryVariables = useMemo(
     () => ({
@@ -29,10 +34,27 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+    enabled: page === 0,
+  });
+
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
     size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
@@ -44,8 +66,10 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     mergedReplacements,
   );
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const importedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
     size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
@@ -67,6 +91,9 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
         headCells={adjustedMergedHeadCells}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        page={page}
+        setPage={setPage}
+        itemsCount={itemsCount}
       />
     );
   }
@@ -84,6 +111,9 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       query={RestService.restBusinessAreasProgramsHouseholdsList}
+      page={page}
+      setPage={setPage}
+      itemsCount={itemsCount}
     />
   );
 }

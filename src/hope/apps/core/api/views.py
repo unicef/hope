@@ -65,7 +65,12 @@ class BusinessAreaViewSet(
         role_assignments = RoleAssignment.objects.filter(Q(user=user) | Q(partner__user=user)).exclude(
             expiry_date__lt=timezone.now()
         )
-        return BusinessArea.objects.filter(role_assignments__in=role_assignments).order_by("id").distinct()
+        return (
+            BusinessArea.objects.filter(role_assignments__in=role_assignments)
+            .order_by("id")
+            .distinct()
+            .prefetch_related("countries")
+        )
 
     @etag_decorator(BusinessAreaKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=BusinessAreaKeyConstructor())

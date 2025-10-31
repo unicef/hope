@@ -48,7 +48,7 @@ export type PaymentDetail = {
     readonly peopleIndividual: IndividualList;
     programName: string;
     parent: PaymentPlanDetail;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     sourcePayment: PaymentList;
     household: HouseholdDetail;
     deliveryMechanism: DeliveryMechanism;
