@@ -14,6 +14,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunication';
 import { LookUpRegistrationDataImportTableRowCommunication } from './LookUpRegistrationDataImportTableRowCommunication';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface LookUpRegistrationDataImportTableCommunicationProps {
   filter;
@@ -132,6 +133,8 @@ function LookUpRegistrationDataImportTableCommunication({
     />
   );
 
+  const itemsCount = usePersistedCount(page, countData);
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalRestTable
@@ -143,7 +146,7 @@ function LookUpRegistrationDataImportTableCommunication({
         isLoading={isLoading}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
       />

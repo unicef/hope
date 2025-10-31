@@ -25,6 +25,8 @@ interface UniversalRestQueryTableProps<T = any, K = any> {
   queryVariables: any;
   setQueryVariables: (variables: K) => void;
   itemsCount?: number;
+  page: number;
+  setPage: (page: number) => void;
   query: (variables: K) => Promise<any>;
 }
 
