@@ -91,7 +91,7 @@ export const ReassignRoleBox = ({
   }
 
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
-    .filter((el) => el.role !== 'NO_ROLE')
+    .filter((el) => el.role !== null)
     .map((el) => (
       <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
