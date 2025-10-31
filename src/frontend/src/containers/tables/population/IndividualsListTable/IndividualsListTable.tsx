@@ -50,6 +50,7 @@ export function IndividualsListTable({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      orderBy: filter.orderBy,
       page,
     }),
     [
@@ -64,6 +65,7 @@ export function IndividualsListTable({
       filter.status,
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
+      filter.orderBy,
       programId,
       businessArea,
       page,

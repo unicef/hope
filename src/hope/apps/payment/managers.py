@@ -70,7 +70,12 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         soft_conflicting_pps = (
             self.eligible()
             .select_related("parent")
-            .exclude(Q(id=OuterRef("id")) | Q(parent__id=OuterRef("parent_id")) | Q(parent__is_removed=True))
+            .exclude(
+                Q(id=OuterRef("id"))
+                | Q(parent__id=OuterRef("parent_id"))
+                | Q(parent__is_removed=True)
+                | Q(parent__status=PaymentPlan.Status.ABORTED)
+            )
             .filter(
                 Q(parent__program_cycle_id=OuterRef("parent__program_cycle_id")),
                 ~Q(status__in=Payment.FAILED_STATUSES),
@@ -83,7 +88,12 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         hard_conflicting_pps = (
             self.eligible()
             .select_related("parent")
-            .exclude(Q(id=OuterRef("id")) | Q(parent__id=OuterRef("parent_id")) | Q(parent__is_removed=True))
+            .exclude(
+                Q(id=OuterRef("id"))
+                | Q(parent__id=OuterRef("parent_id"))
+                | Q(parent__is_removed=True)
+                | Q(parent__status=PaymentPlan.Status.ABORTED)
+            )
             .filter(
                 Q(parent__program_cycle_id=OuterRef("parent__program_cycle_id")),
                 ~Q(status__in=Payment.FAILED_STATUSES),
