@@ -110,8 +110,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
     }
     return data.results.map((item) => {
       const { name, pduData, label } = item;
-      const { roundsNames, roundsCovered } = pduData;
-      const initialRoundNumber = (roundsCovered || 0) + 1;
+      const { roundsNames } = pduData;
       return {
         field: name,
         label,
@@ -120,12 +119,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
           roundName: roundsNames[roundIndex],
         })),
         numberOfRounds: roundsNames.length,
-        roundsCovered: roundsCovered || 0,
-        roundNumber: initialRoundNumber,
-        roundName:
-          Array.isArray(roundsNames) && roundsNames[initialRoundNumber - 1]
-            ? roundsNames[initialRoundNumber - 1]
-            : '',
+        roundNumber: 1,
+        roundName: roundsNames[0],
       };
     });
   };

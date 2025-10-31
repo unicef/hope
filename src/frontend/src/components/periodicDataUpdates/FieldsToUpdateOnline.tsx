@@ -20,7 +20,6 @@ interface Field {
     round_name: string;
   }[];
   numberOfRounds: number;
-  roundsCovered: number;
   roundNumber: number;
   roundName: string;
   checked?: boolean;
@@ -89,12 +88,7 @@ export const FieldsToUpdateOnline: FC<FieldsToUpdateOnlineProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {values.roundsData
-                .filter(
-                  (field) =>
-                    field.numberOfRounds - (field.roundsCovered || 0) > 0,
-                )
-                .map((field) => (
+              {values.roundsData.map((field) => (
                   <TableRow
                     key={`${field.field}-${field.round}`}
                     data-cy={`table-row-${field.field}`}
@@ -140,16 +134,10 @@ export const FieldsToUpdateOnline: FC<FieldsToUpdateOnlineProps> = ({
                         }}
                       >
                         {Array.from(
-                          {
-                            length:
-                              field.numberOfRounds - (field.roundsCovered || 0),
-                          },
+                          { length: field.numberOfRounds },
                           (_, num) => (
-                            <MenuItem
-                              key={num + 1 + (field.roundsCovered || 0)}
-                              value={num + 1 + (field.roundsCovered || 0)}
-                            >
-                              {num + 1 + (field.roundsCovered || 0)}
+                            <MenuItem key={num + 1} value={num + 1}>
+                              {num + 1}
                             </MenuItem>
                           ),
                         )}
