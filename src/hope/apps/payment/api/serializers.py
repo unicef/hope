@@ -45,7 +45,6 @@ from hope.apps.payment.models import (
 )
 from hope.apps.payment.models.payment import (
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProviderXlsxTemplate,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -490,23 +489,6 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
         return FilteredActionsListSerializer(actions_data).data
 
 
-class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="delivery_mechanism.name", read_only=True)
-    code = serializers.CharField(source="delivery_mechanism.code", read_only=True)
-    order = serializers.CharField(source="delivery_mechanism_order", read_only=True)
-    fsp = FinancialServiceProviderSerializer(read_only=True)
-
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-        fields = (
-            "id",
-            "name",
-            "code",
-            "order",
-            "fsp",
-        )
-
-
 def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Decimal | None:
     if not payment_plan.financial_service_provider:
         return None
@@ -533,14 +515,14 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     volume = serializers.SerializerMethodField()
     volume_usd = serializers.SerializerMethodField()
 
-    def get_volume(self, obj: DeliveryMechanismPerPaymentPlan) -> Decimal | None:  # non-usd
-        return _calculate_volume(obj.payment_plan, "entitlement_quantity")
+    def get_volume(self, obj: PaymentPlan) -> Decimal | None:  # non-usd
+        return _calculate_volume(obj, "entitlement_quantity")
 
-    def get_volume_usd(self, obj: DeliveryMechanismPerPaymentPlan) -> Decimal | None:
-        return _calculate_volume(obj.payment_plan, "entitlement_quantity_usd")
+    def get_volume_usd(self, obj: PaymentPlan) -> Decimal | None:
+        return _calculate_volume(obj, "entitlement_quantity_usd")
 
     class Meta:
-        model = DeliveryMechanismPerPaymentPlan
+        model = PaymentPlan
         fields = (
             "id",
             "delivery_mechanism",
@@ -606,7 +588,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
-    delivery_mechanism_per_payment_plan = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -650,7 +631,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "imported_file_date",
             "payments_conflicts_count",
             "delivery_mechanism",
-            "delivery_mechanism_per_payment_plan",
             "volume_by_delivery_mechanism",
             "split_choices",
             "exclusion_reason",
@@ -732,7 +712,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_households(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
             else Household.objects.none()
         )
@@ -741,7 +721,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_individuals(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
             else Individual.objects.none()
         )
@@ -843,8 +823,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
-        qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=obj).order_by("delivery_mechanism_order")
-        return VolumeByDeliveryMechanismSerializer(qs, many=True).data
+        return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
     def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
         return obj.eligible_payments.count()

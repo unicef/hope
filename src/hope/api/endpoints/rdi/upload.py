@@ -29,7 +29,7 @@ from hope.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
+from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 
@@ -110,6 +110,16 @@ class AccountSerializerUpload(serializers.ModelSerializer):
     class Meta:
         model = PendingAccount
         exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("financial_institution"):
+            account_type = attrs["account_type"]
+            number = attrs["number"]
+            attrs["financial_institution"] = FinancialInstitution.get_generic_one(
+                account_type, Account.is_valid_iban(number)
+            )
+        return attrs
 
 
 class IndividualSerializer(serializers.ModelSerializer):

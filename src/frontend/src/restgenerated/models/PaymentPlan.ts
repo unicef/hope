@@ -244,7 +244,7 @@ export type PaymentPlan = {
     readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     readonly screenBeneficiary: boolean;
     readonly hasPaymentsReconciliationOverdue: boolean;
 };

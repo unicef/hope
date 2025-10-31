@@ -4,6 +4,7 @@ from decimal import Decimal
 from functools import cached_property
 import hashlib
 import logging
+import re
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
@@ -1853,36 +1854,6 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
 
-# TODO MB remove in step 2
-class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
-    payment_plan = models.OneToOneField(
-        "payment.PaymentPlan",
-        on_delete=models.CASCADE,
-        related_name="delivery_mechanism_per_payment_plan",
-    )
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
-        on_delete=models.PROTECT,
-        related_name="delivery_mechanisms_per_payment_plan",
-        null=True,
-    )
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
-    delivery_mechanism_order = models.PositiveIntegerField()
-    sent_to_payment_gateway = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=[
-                    "payment_plan",
-                    "delivery_mechanism",
-                    "delivery_mechanism_order",
-                ],
-                name="unique payment_plan_delivery_mechanism",
-            ),
-        ]
-
-
 class Payment(
     TimeStampedUUIDModel,
     InternalDataFieldModel,
@@ -2208,6 +2179,26 @@ class FinancialInstitution(TimeStampedModel):
             }
         }
 
+    @classmethod
+    def get_generic_one(cls, account_type: str, is_valid_iban: bool) -> "FinancialInstitution":
+        if account_type == "mobile":
+            return cls.objects.get(name="Generic Telco Company")
+
+        if account_type == "bank":
+            if is_valid_iban:
+                return cls.objects.get(name="IBAN Provider Bank")
+            return cls.objects.get(name="Generic Bank")
+
+        if account_type == "card":
+            return cls.objects.get(name="Generic Bank")
+
+        logger.error(f"Unknown account type for generic Financial Institution: {account_type}")
+        return cls.objects.get(name="Generic Bank")
+
+    @property
+    def is_generic(self) -> bool:
+        return self.country is None
+
 
 class FinancialInstitutionMapping(TimeStampedModel):
     financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
@@ -2264,6 +2255,105 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
+
+    @classmethod
+    def is_valid_iban(cls, number: str | None) -> bool:
+        if not number:
+            return False
+
+        # Country code -> length
+        iban_lengths = {
+            "AL": 28,
+            "AD": 24,
+            "AT": 20,
+            "AZ": 28,
+            "BH": 22,
+            "BE": 16,
+            "BA": 20,
+            "BR": 29,
+            "BG": 22,
+            "CR": 22,
+            "HR": 21,
+            "CY": 28,
+            "CZ": 24,
+            "DK": 18,
+            "DO": 28,
+            "EE": 20,
+            "FO": 18,
+            "FI": 18,
+            "FR": 27,
+            "GE": 22,
+            "DE": 22,
+            "GI": 23,
+            "GR": 27,
+            "GL": 18,
+            "GT": 28,
+            "HU": 28,
+            "IS": 26,
+            "IE": 22,
+            "IL": 23,
+            "IT": 27,
+            "JO": 30,
+            "KZ": 20,
+            "KW": 30,
+            "LV": 21,
+            "LB": 28,
+            "LI": 21,
+            "LT": 20,
+            "LU": 20,
+            "MK": 19,
+            "MT": 31,
+            "MR": 27,
+            "MU": 30,
+            "MD": 24,
+            "MC": 27,
+            "ME": 22,
+            "NL": 18,
+            "NO": 15,
+            "PK": 24,
+            "PS": 29,
+            "PL": 28,
+            "PT": 25,
+            "QA": 29,
+            "RO": 24,
+            "SM": 27,
+            "SA": 24,
+            "RS": 22,
+            "SK": 24,
+            "SI": 19,
+            "ES": 24,
+            "SE": 24,
+            "CH": 21,
+            "TN": 24,
+            "TR": 26,
+            "AE": 23,
+            "GB": 22,
+            "VG": 24,
+            "DZ": 24,
+            "AO": 25,
+            "BJ": 28,
+            "BF": 27,
+            "BI": 16,
+            "CM": 27,
+            "CV": 25,
+            "IR": 26,
+            "CI": 28,
+            "MG": 27,
+            "ML": 28,
+            "MZ": 25,
+            "SN": 28,
+            "UA": 29,
+        }
+
+        iban_format = re.compile(r"^[A-Z]{2}\d{2}[A-Z0-9]+$")
+
+        number = number.replace(" ", "").upper()
+        if not iban_format.match(number):
+            return False
+
+        cc = number[:2]
+        expected_length = iban_lengths.get(cc)
+        return len(number) == expected_length if expected_length is not None else True
 
     @property
     def account_data(self) -> dict:
