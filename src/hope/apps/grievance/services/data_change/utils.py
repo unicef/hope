@@ -270,7 +270,8 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
             "account_type": account_object.account_type.key,
             "approve_status": False,
             "financial_institution": financial_institution,
-            "financial_institution_previous_value": account_object.financial_institution.pk,
+            "financial_institution_previous_value": account_object.financial_institution
+            and account_object.financial_institution.pk,
             "number": number,
             "number_previous_value": account_object.number,
             "data_fields": [
