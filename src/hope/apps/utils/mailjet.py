@@ -4,6 +4,7 @@ from typing import Any
 from constance import config
 from django.conf import settings
 
+from hope.apps.core.utils import chunks
 from hope.apps.utils.celery_tasks import send_email_task
 
 
@@ -45,35 +46,37 @@ class MailjetClient:
     def send_email(self) -> None:
         if not config.ENABLE_MAILJET:
             return
-
         self._validate_email_data()
 
         email_body = self._get_email_body()
         attachments = {"Attachments": self.attachments} if self.attachments else {}
-        data = {
-            "Messages": [
-                {
-                    "From": {"Email": self.from_email, "Name": self.from_email_display},
-                    "Subject": self.subject,
-                    "To": [
-                        {
-                            "Email": recipient,
-                        }
-                        for recipient in self.recipients
-                    ],
-                    "Cc": [
-                        {
-                            "Email": cc,
-                        }
-                        for cc in self.ccs
-                    ],
-                    **email_body,
-                    **attachments,
-                }
-            ]
-        }
-        data_json = json.dumps(data)
-        send_email_task.delay(data_json)
+
+        # Mailjet has a limit of 50 recipients per request
+        for batch_recipients in chunks(self.recipients, 50):
+            data = {
+                "Messages": [
+                    {
+                        "From": {"Email": self.from_email, "Name": self.from_email_display},
+                        "Subject": self.subject,
+                        "To": [
+                            {
+                                "Email": recipient,
+                            }
+                            for recipient in batch_recipients
+                        ],
+                        "Cc": [
+                            {
+                                "Email": cc,
+                            }
+                            for cc in self.ccs
+                        ],
+                        **email_body,
+                        **attachments,
+                    }
+                ]
+            }
+            data_json = json.dumps(data)
+            send_email_task.delay(data_json)
 
     def _get_email_body(self) -> dict[str, Any]:
         """Construct the dictionary with the data responsible for email body.
