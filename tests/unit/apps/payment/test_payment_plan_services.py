@@ -326,7 +326,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(98):
+        with self.assertNumQueries(97):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -702,7 +702,16 @@ class TestPaymentPlanServices(BaseTestCase):
                     "household_filters_blocks": [],
                     "household_ids": "",
                     "individual_ids": "",
-                    "individuals_filters_blocks": [],
+                    "individuals_filters_blocks": [{
+                        "individual_block_filters": [
+                            {
+                                "comparison_method": "RANGE",
+                                "arguments": [1, 99],
+                                "field_name": "age_at_registration",
+                                "flex_field_classification": "NOT_FLEX_FIELD",
+                            },
+                        ],
+                    }],
                 }
             ],
         }
@@ -779,7 +788,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(71):
+        with self.assertNumQueries(70):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
