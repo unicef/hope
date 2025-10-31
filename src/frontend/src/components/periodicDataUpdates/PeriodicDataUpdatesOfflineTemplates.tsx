@@ -22,6 +22,7 @@ import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesT
 import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
 import { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
 import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
   {
@@ -98,7 +99,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
           programSlug: programId,
         },
       ),
-    enabled: !!businessAreaSlug && !!programId,
+    enabled: !!businessAreaSlug && !!programId && page === 0,
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -182,6 +183,8 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     permissions,
   );
 
+  const itemsCount = usePersistedCount(page, templateCountData);
+
   const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
@@ -250,7 +253,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   return (
     <>
       <UniversalRestTable
-        itemsCount={templateCountData?.count}
+        itemsCount={itemsCount}
         isOnPaper={true}
         noEmptyMessage={true}
         renderRow={renderTemplateRow}

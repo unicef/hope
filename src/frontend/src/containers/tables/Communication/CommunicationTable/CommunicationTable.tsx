@@ -13,6 +13,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface CommunicationTableProps {
   filter;
@@ -94,6 +95,7 @@ function CommunicationTable({
       canViewDetails={canViewDetails}
     />
   );
+  const itemsCount = usePersistedCount(page, countData);
 
   return (
     <TableWrapper>
@@ -106,7 +108,7 @@ function CommunicationTable({
         isLoading={isLoading}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={countData?.count}
+        itemsCount={itemsCount}
         initialRowsPerPage={10}
         page={page}
         setPage={setPage}

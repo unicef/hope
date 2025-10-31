@@ -142,7 +142,7 @@ export function RegistrationDataImportForPeopleTable({
         error={error || countError}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={itemsCount ?? (data as any)?.count ?? 0}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row) => (

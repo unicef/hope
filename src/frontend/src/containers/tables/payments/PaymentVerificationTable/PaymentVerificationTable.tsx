@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface PaymentVerificationTableProps {
   filter?;
@@ -90,6 +91,8 @@ function PaymentVerificationTable({
     },
   });
 
+  const itemsCount = usePersistedCount(page, countData);
+
   return (
     <UniversalRestTable
       title={t('List of Payment Plans')}
@@ -101,7 +104,7 @@ function PaymentVerificationTable({
       setQueryVariables={setQueryVariables}
       page={page}
       setPage={setPage}
-      itemsCount={countData?.count}
+      itemsCount={itemsCount}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
           key={paymentPlan.id}

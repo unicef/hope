@@ -11,6 +11,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface PeoplePaymentPlansTableProps {
   filter;
@@ -96,6 +97,8 @@ export const PeoplePaymentPlansTable = ({
     enabled: !!businessArea && !!programId && page === 0,
   });
 
+  const itemsCount = usePersistedCount(page, dataPaymentPlansCount);
+
   return (
     <UniversalRestTable
       defaultOrderBy="-createdAt"
@@ -106,7 +109,7 @@ export const PeoplePaymentPlansTable = ({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      itemsCount={dataPaymentPlansCount?.count}
+      itemsCount={itemsCount}
       page={page}
       setPage={setPage}
       renderRow={(row: PaymentPlanList) => (

@@ -152,7 +152,7 @@ class PaymentVerificationViewSet(
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("created_at")
+    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentVerificationPlanListSerializer,
@@ -514,7 +514,7 @@ class PaymentVerificationRecordViewSet(
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("created_at")
+    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -629,7 +629,7 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("created_at")
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
@@ -1975,7 +1975,7 @@ class PaymentGlobalViewSet(
                 "financial_service_provider",
                 "program",
             )
-            .order_by("created_at")
+            .order_by("-created_at")
         )
 
     @action(detail=False, methods=["get"])

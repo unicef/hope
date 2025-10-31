@@ -14,6 +14,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
 import { FeedbackList } from '@restgenerated/models/FeedbackList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface FeedbackTableProps {
   filter;
@@ -159,6 +160,11 @@ function FeedbackTable({
     },
   ];
 
+  const itemsCount = usePersistedCount(
+    page,
+    isAllPrograms ? allProgramsFeedbacksCount : selectedProgramFeedbacksCount,
+  );
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -180,11 +186,7 @@ function FeedbackTable({
         isLoading={
           isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
         }
-        itemsCount={
-          isAllPrograms
-            ? allProgramsFeedbacksCount?.count
-            : selectedProgramFeedbacksCount?.count
-        }
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
         renderRow={(row: FeedbackList) => (

@@ -13,6 +13,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface PaymentPlansTableProps {
   filter;
@@ -105,6 +106,8 @@ function PaymentPlansTable({
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
+  const itemsCount = usePersistedCount(page, dataPaymentPlansCount);
+
   const adjustedHeadCells = adjustHeadCells(
     headCells,
     beneficiaryGroup,
@@ -121,7 +124,7 @@ function PaymentPlansTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      itemsCount={dataPaymentPlansCount?.count}
+      itemsCount={itemsCount}
       page={page}
       setPage={setPage}
       renderRow={(row: PaymentPlanList) => (

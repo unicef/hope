@@ -7,9 +7,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Paper, Typography } from '@mui/material';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -77,6 +79,32 @@ function PaymentsTable({
     },
   });
 
+  // Payments count
+  const { data: paymentsCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentsCountRetrieve',
+      businessArea,
+      programId,
+      paymentPlan.id,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanPk: paymentPlan.id,
+          },
+          queryVariables,
+        ),
+      ),
+    // fetch count only on the first page and persist it across pages
+    enabled: !!businessArea && !!paymentPlan?.id && page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, paymentsCount);
+
   const replacements = {
     household__unicef_id: (_beneficiaryGroup) =>
       `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
@@ -117,6 +145,7 @@ function PaymentsTable({
             queryVariables={queryVariables}
             setQueryVariables={setQueryVariables}
             data={paymentsData}
+            itemsCount={itemsCount}
             page={page}
             setPage={setPage}
             renderRow={(row: PaymentList) => (

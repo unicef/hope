@@ -14,6 +14,7 @@ import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicData
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
 import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 
 const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
   {
@@ -126,6 +127,8 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     setSelectedUploadId(null);
   };
 
+  const itemsCount = usePersistedCount(page, uploadsCountData);
+
   const renderUpdateRow = (row: PDUXlsxUploadList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
       <TableCell data-cy={`update-id-${row.id}`}>{row.id}</TableCell>
@@ -178,7 +181,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        itemsCount={uploadsCountData?.count}
+        itemsCount={itemsCount}
         page={page}
         setPage={setPage}
       />

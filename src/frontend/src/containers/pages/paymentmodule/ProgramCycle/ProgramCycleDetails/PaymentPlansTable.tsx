@@ -2,6 +2,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -108,6 +109,8 @@ export const PaymentPlansTable = ({
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
+  const itemsCount = usePersistedCount(page, dataPaymentPlansCount);
+
   const adjustedHeadCells = adjustHeadCells(
     headCells,
     beneficiaryGroup,
@@ -124,7 +127,7 @@ export const PaymentPlansTable = ({
       error={errorPaymentPlans}
       isLoading={isLoadingPaymentPlans}
       setQueryVariables={setQueryVariables}
-      itemsCount={dataPaymentPlansCount?.count}
+      itemsCount={itemsCount}
       page={page}
       setPage={setPage}
       renderRow={(row: PaymentPlanList) => (
