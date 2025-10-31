@@ -712,7 +712,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_households(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
             else Household.objects.none()
         )
@@ -721,7 +721,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def get_excluded_individuals(obj: PaymentPlan) -> dict[str, Any]:
         qs = (
-            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
             else Individual.objects.none()
         )

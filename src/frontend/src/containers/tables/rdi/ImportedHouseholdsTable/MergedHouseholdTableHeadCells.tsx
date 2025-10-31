@@ -11,7 +11,7 @@ export const headCells: HeadCell<HouseholdList>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
   },
   {
