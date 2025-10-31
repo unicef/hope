@@ -31,6 +31,13 @@ function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
+  const dynamicProgramSlug = programSlug ||
+    (programId !== 'all' ? programId :
+      ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
+      (typeof values.selectedHousehold === 'object' && values.selectedHousehold?.programSlug) ||
+      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug) ||
+      (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.programSlug)));
+
   const { data: individualsChoices } = useQuery({
     queryKey: ['individualsChoices', businessArea],
     queryFn: () =>
@@ -65,19 +72,18 @@ function EditHouseholdDataChange({
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
     queryKey: [
-      'household',
       businessArea,
       household.id,
-      programSlug,
+      dynamicProgramSlug,
       programId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: programSlug,
+        programSlug: dynamicProgramSlug,
       }),
-    enabled: Boolean(household && businessArea && programSlug),
+    enabled: Boolean(household && businessArea && dynamicProgramSlug),
   });
 
   // Fetch household members for roles logic
@@ -86,15 +92,15 @@ function EditHouseholdDataChange({
       'householdMembers',
       businessArea,
       household.id,
-      programSlug,
+      dynamicProgramSlug,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
         id: household.id,
-        programSlug: programSlug,
+        programSlug: dynamicProgramSlug,
       }),
-    enabled: Boolean(household && businessArea && programSlug),
+    enabled: Boolean(household && businessArea && dynamicProgramSlug),
   });
 
   useEffect(() => {

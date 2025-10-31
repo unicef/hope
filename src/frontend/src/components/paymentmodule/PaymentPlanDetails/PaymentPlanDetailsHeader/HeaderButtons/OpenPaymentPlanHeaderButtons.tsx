@@ -13,6 +13,7 @@ export interface OpenPaymentPlanHeaderButtonsProps {
   canRemove: boolean;
   canEdit: boolean;
   canLock: boolean;
+  canAbort: boolean;
 }
 
 export function OpenPaymentPlanHeaderButtons({

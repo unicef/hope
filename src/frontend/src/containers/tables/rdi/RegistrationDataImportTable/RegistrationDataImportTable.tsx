@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -145,6 +146,7 @@ function RegistrationDataImportTable({
     enabled: page === 0,
   });
 
+  const [page, setPage] = useState(0);
   const itemsCount = usePersistedCount(page, countData);
 
   const renderTable = (): ReactElement => (
@@ -162,10 +164,8 @@ function RegistrationDataImportTable({
             }
           />
         )}
-        title={
-          noTitle ? null : `${t('List of Imports')} (${countData?.count || 0})`
-        }
-        itemsCount={itemsCount}
+        title={noTitle ? null : `${t('List of Imports')} (${itemsCount || 0})`}
+        itemsCount={itemsCount || 0}
         headCells={prepareHeadCells()}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
