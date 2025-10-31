@@ -120,7 +120,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
         })),
         numberOfRounds: roundsNames.length,
         roundNumber: 1,
-        roundName: roundsNames[0]
+        roundName: roundsNames[0],
       };
     });
   };
