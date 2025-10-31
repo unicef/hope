@@ -3,12 +3,9 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
-from hope.apps.account.models import Partner, User
-from hope.apps.accountability.models import Feedback
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaListSerializer
-from hope.apps.geo.models import Area
 from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
@@ -19,18 +16,22 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
-from hope.apps.household.models import (
-    ROLE_CHOICE,
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-    IndividualIdentity,
-)
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
-from hope.apps.payment.models import Payment
 from hope.apps.program.api.serializers import ProgramSmallSerializer
-from hope.apps.program.models import Program
+from hope.models.area import Area
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models.feedback import Feedback
+from hope.models.household import (
+    ROLE_CHOICE,
+    Household,
+)
+from hope.models.individual import Individual
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.partner import Partner
+from hope.models.payment import Payment
+from hope.models.program import Program
+from hope.models.user import User
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -62,7 +63,7 @@ class EditAccountSerializer(serializers.Serializer):
     def validate(self, attrs):
         from rest_framework.generics import get_object_or_404
 
-        from hope.apps.payment.models import Account
+        from hope.models.account import Account
 
         account_id = attrs.get("id")
         financial_institution = attrs.get("financial_institution", "")

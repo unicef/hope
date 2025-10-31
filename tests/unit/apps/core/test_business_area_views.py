@@ -17,13 +17,11 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    PeriodicFieldData,
-)
 from hope.apps.core.utils import get_fields_attr_generators
+from hope.models.business_area import (
+    BusinessArea,
+)
+from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice, PeriodicFieldData
 
 pytestmark = pytest.mark.django_db
 
@@ -450,7 +448,6 @@ class TestAllFieldsAttributes:
                         "subtype": attr.pdu_data.subtype,
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
-                        "rounds_covered": attr.pdu_data.rounds_covered,
                     }
                 )
                 if attr.pdu_data
@@ -518,7 +515,6 @@ class TestAllFieldsAttributes:
                         "subtype": attr.pdu_data.subtype,
                         "number_of_rounds": attr.pdu_data.number_of_rounds,
                         "rounds_names": attr.pdu_data.rounds_names,
-                        "rounds_covered": attr.pdu_data.rounds_covered,
                     }
                 )
                 if attr.pdu_data

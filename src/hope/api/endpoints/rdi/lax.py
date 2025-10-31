@@ -19,33 +19,32 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.api.models import Grant
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models.account import PendingAccount
+from hope.models.account_type import AccountType
+from hope.models.area import Area
+from hope.models.country import Country
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.grant import Grant
+from hope.models.household import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    IndividualRoleInHousehold,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
 )
-from hope.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models.individual import PendingIndividual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.registration_data_import import RegistrationDataImport
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from hope.models.business_area import BusinessArea
 
 BATCH_SIZE = 100
 

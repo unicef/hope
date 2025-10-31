@@ -10,12 +10,19 @@ from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_dict
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.registration_datahub.utils import post_process_dedupe_results
+from hope.apps.utils.elasticsearch_utils import (
+    populate_index,
+    remove_elasticsearch_documents_by_matching_ids,
+    wait_until_es_healthy,
+)
+from hope.apps.utils.querysets import evaluate_qs
+from hope.models.business_area import BusinessArea
+from hope.models.document import Document
+from hope.models.household import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
@@ -23,21 +30,13 @@ from hope.apps.household.models import (
     SIMILAR_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Document,
     Household,
-    Individual,
-    PendingIndividual,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.registration_datahub.utils import post_process_dedupe_results
-from hope.apps.utils.elasticsearch_utils import (
-    populate_index,
-    remove_elasticsearch_documents_by_matching_ids,
-    wait_until_es_healthy,
-)
-from hope.apps.utils.models import MergeStatusModel
-from hope.apps.utils.querysets import evaluate_qs
+from hope.models.individual import Individual, PendingIndividual
+from hope.models.log_entry import log_create
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.utils import MergeStatusModel
 
 log = logging.getLogger(__name__)
 

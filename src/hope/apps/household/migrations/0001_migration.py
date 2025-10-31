@@ -13,8 +13,8 @@ import multiselectfield.db.fields
 import phonenumber_field.modelfields
 import sorl.thumbnail.fields
 
-import hope.apps.core.utils
-import hope.apps.utils.models
+from hope.apps.core.utils import FlexFieldsEncoder
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -723,7 +723,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Household",
                 "permissions": (("can_withdrawn", "Can withdrawn Household"),),
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="HouseholdCollection",
@@ -911,7 +911,7 @@ class Migration(migrations.Migration):
                     models.JSONField(
                         blank=True,
                         default=dict,
-                        encoder=hope.apps.core.utils.FlexFieldsEncoder,
+                        encoder=FlexFieldsEncoder,
                     ),
                 ),
                 ("user_fields", models.JSONField(blank=True, default=dict)),
@@ -1171,7 +1171,7 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Individual",
             },
-            bases=(models.Model, hope.apps.utils.models.AdminUrlMixin),
+            bases=(models.Model, AdminUrlMixin),
         ),
         migrations.CreateModel(
             name="IndividualCollection",

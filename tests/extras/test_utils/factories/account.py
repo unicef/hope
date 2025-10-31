@@ -4,19 +4,18 @@ import time
 from typing import Any, List
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import (
-    AdminAreaLimitedTo,
-    Partner,
-    Role,
-    RoleAssignment,
+from hope.models.admin_area_limited_to import AdminAreaLimitedTo
+from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import (
     User,
 )
-from hope.apps.core.models import BusinessArea
 
 
 class PartnerFactory(DjangoModelFactory):
@@ -45,7 +44,7 @@ class BusinessAreaFactory(DjangoModelFactory):
 
 class UserFactory(DjangoModelFactory):
     class Meta:
-        model = get_user_model()
+        model = User
         django_get_or_create = ("username", "email")
 
     first_name = factory.Faker("first_name")
@@ -58,7 +57,7 @@ class UserFactory(DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
-        user_model = get_user_model()
+        user_model = User
         manager = cls._get_manager(model_class)
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:

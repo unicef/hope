@@ -17,18 +17,14 @@ from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
-    DISABLED,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NOT_DISABLED,
-    PendingDocument,
-    PendingIndividual,
-)
-from hope.apps.payment.models import AccountType
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.account_type import AccountType
+from hope.models.document import PendingDocument
+from hope.models.grant import Grant
+from hope.models.household import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
+from hope.models.individual import PendingIndividual
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
 
 

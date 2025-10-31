@@ -2,7 +2,8 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hope.apps.sanction_list.models import SanctionList, SanctionListIndividual
+from hope.models.sanction_list import SanctionList
+from hope.models.sanction_list_individual import SanctionListIndividual
 
 
 class SanctionListFactory(DjangoModelFactory):
@@ -11,7 +12,7 @@ class SanctionListFactory(DjangoModelFactory):
 
     class Meta:
         model = SanctionList
-        django_get_or_create = ("name",)
+        django_get_or_create = ("strategy",)
 
 
 class SanctionListIndividualFactory(DjangoModelFactory):

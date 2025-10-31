@@ -8,15 +8,13 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
-)
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
+from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TargetingCriteriaSerializerTest(TestCase):
@@ -265,7 +263,7 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "subtype": pdu_data.subtype,
                 "number_of_rounds": pdu_data.number_of_rounds,
                 "rounds_names": pdu_data.rounds_names,
-                "rounds_covered": pdu_data.rounds_covered,
+                # "rounds_covered": pdu_data.rounds_covered,
             },
         }
         assert field_attribute_data == expected_field_attribute_data

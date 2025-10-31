@@ -9,9 +9,15 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hope.apps.geo.models import Area, Country as GeoCountry
 from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
+from hope.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hope.models.area import Area
+from hope.models.country import Country as GeoCountry
+from hope.models.document import PendingDocument
+from hope.models.document_type import DocumentType
+from hope.models.household import (
     GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,
@@ -19,16 +25,11 @@ from hope.apps.household.models import (
     PRIVATE_PARTNER,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
     PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
+from hope.models.individual import PendingIndividual
+from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
+from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

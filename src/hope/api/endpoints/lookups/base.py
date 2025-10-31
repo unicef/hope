@@ -11,8 +11,9 @@ from hope.api.endpoints.serializers import (
     FinancialInstitutionListSerializer,
 )
 from hope.api.filters import CountryFilter, FinancialInstitutionFilter
-from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.models.country import Country
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.household import (
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
@@ -21,8 +22,7 @@ from hope.apps.household.models import (
     ROLE_CHOICE,
     SEX_CHOICE,
 )
-from hope.apps.payment.models import FinancialInstitution
-from hope.apps.program.models import Program
+from hope.models.program import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

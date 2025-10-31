@@ -1,10 +1,8 @@
 from rest_framework import serializers
 
-from hope.apps.sanction_list.models import (
-    SanctionListIndividual,
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
-)
+from hope.models.sanction_list_individual import SanctionListIndividual
+from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
 
 
 class SanctionListIndividualDocumentSerializer(serializers.ModelSerializer):

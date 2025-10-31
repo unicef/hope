@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from hope.api.endpoints.rdi.lax import HandleFlexFieldsMixin
-from hope.apps.core.models import FlexibleAttribute
+from hope.models.flexible_attribute import FlexibleAttribute
 
 
 class TestHandleFlexFieldsMixin(TestCase):

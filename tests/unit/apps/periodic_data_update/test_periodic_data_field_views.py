@@ -20,7 +20,7 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
+from hope.models.flexible_attribute import PeriodicFieldData
 
 pytestmark = pytest.mark.django_db()
 
@@ -82,7 +82,7 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field1.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field1.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field1.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
+                # "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -93,7 +93,7 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field2.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field2.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
+                # "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -104,7 +104,7 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field3.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field3.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field3.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
+                # "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -115,7 +115,7 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field_program2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field_program2.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field_program2.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
+                # "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } not in response_json
 

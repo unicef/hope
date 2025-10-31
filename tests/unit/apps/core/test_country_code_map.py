@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from parameterized import parameterized
 
-from hope.apps.core.models import CountryCodeMap
+from hope.models.country_code_map import CountryCodeMap
 
 
 class TestCountryCodeMap(TestCase):

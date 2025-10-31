@@ -15,16 +15,9 @@ from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
-    ROLE_PRIMARY,
-    Individual,
-    IndividualRoleInHousehold,
-)
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -39,36 +32,39 @@ from hope.apps.payment.celery_tasks import (
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 from hope.apps.payment.utils import get_link
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.targeting.models import (
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteriaRule,
-    TargetingIndividualRuleFilterBlock,
-)
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
+from hope.models.approval import Approval
+from hope.models.approval_process import ApprovalProcess
+from hope.models.business_area import BusinessArea
+from hope.models.delivery_mechanism import DeliveryMechanism
+from hope.models.file_temp import FileTemp
+from hope.models.financial_service_provider import FinancialServiceProvider
+from hope.models.household import (
+    ROLE_PRIMARY,
+)
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.payment import Payment
+from hope.models.payment_data_collector import PaymentDataCollector
+from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_split import PaymentPlanSplit
+from hope.models.program import Program
+from hope.models.program_cycle import ProgramCycle
+from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
+from hope.models.targeting_criteria_rule import TargetingCriteriaRule
+from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models.user import User
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser
+    from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 
 class PaymentPlanService:

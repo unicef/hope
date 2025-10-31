@@ -13,8 +13,6 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentVerificationFactory,
 )
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -33,10 +31,12 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.household.models import Individual
-from hope.apps.payment.models import PaymentVerification
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.individual import Individual
+from hope.models.payment_verification import PaymentVerification
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class GrievanceTicketFactory(DjangoModelFactory):

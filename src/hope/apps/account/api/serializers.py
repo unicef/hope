@@ -8,18 +8,18 @@ from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hope.apps.account.models import (
-    USER_STATUS_CHOICES,
-    Partner,
-    Role,
-    RoleAssignment,
-    User,
-)
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.partner import Partner
+from hope.models.program import Program
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import (
+    USER_STATUS_CHOICES,
+    User,
+)
 
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
@@ -79,7 +79,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
     user_roles = serializers.SerializerMethodField()
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = (
             "id",
             "username",
@@ -183,7 +183,7 @@ class ProfileSerializer(ProgramUsersSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ("id", "first_name", "last_name", "email", "username")
 
 

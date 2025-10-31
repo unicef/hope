@@ -8,12 +8,12 @@ from extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.geo.models import Area
-from hope.apps.payment.models import (
+from hope.models.area import Area
+from hope.models.payment_verification_plan import (
     PaymentVerificationPlan,
-    PaymentVerificationSummary,
     build_summary,
 )
+from hope.models.payment_verification_summary import PaymentVerificationSummary
 
 
 class TestBuildSummary(TestCase):

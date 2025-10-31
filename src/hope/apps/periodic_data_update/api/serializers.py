@@ -6,18 +6,18 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
-from hope.apps.periodic_data_update.models import (
-    PDUOnlineEdit,
-    PDUOnlineEditSentBackComment,
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
 from hope.apps.periodic_data_update.utils import update_rounds_covered_for_template
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
+from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models.pdu_online_edit_sent_back_comment import PDUOnlineEditSentBackComment
+from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models.pdu_xlsx_upload import PDUXlsxUpload
+from hope.models.program import Program
+from hope.models.role_assignment import RoleAssignment
+from hope.models.user import User
 
 PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_SAVE_DATA,
@@ -134,7 +134,7 @@ class PDUXlsxUploadSerializer(serializers.ModelSerializer):
 class PeriodicFieldDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicFieldData
-        fields = ("subtype", "number_of_rounds", "rounds_names", "rounds_covered")
+        fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):

@@ -5,11 +5,11 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import serialize_flex_attributes
-from hope.apps.geo.models import Area
-from hope.apps.payment.models import FinancialInstitution
-from hope.apps.program.models import Program
+from hope.models.area import Area
+from hope.models.financial_institution import FinancialInstitution
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.program import Program
 
 
 class TemplateFileGeneratorService:

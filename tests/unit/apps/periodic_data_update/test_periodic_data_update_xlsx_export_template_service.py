@@ -25,12 +25,12 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.household.models import FEMALE, MALE
-from hope.apps.payment.models import Payment
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
-from hope.apps.program.models import Program
+from hope.models.household import FEMALE, MALE
+from hope.models.payment import Payment
+from hope.models.program import Program
 
 
 class TestPDUXlsxExportTemplateService(TestCase):

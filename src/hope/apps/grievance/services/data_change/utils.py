@@ -12,8 +12,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import Partner
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_DATE,
@@ -21,24 +19,29 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
 )
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.core.utils import serialize_flex_attributes
-from hope.apps.geo import models as geo_models
+from hope.apps.core.utils import (
+    serialize_flex_attributes,
+)
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.models.account import Account
+from hope.models.account_type import AccountType
+from hope.models.country import Country
+from hope.models.document import Document
+from hope.models.document_type import DocumentType
+from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models.household import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Document,
-    DocumentType,
     Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.individual import Individual
+from hope.models.individual_identity import IndividualIdentity
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models.log_entry import log_create
+from hope.models.partner import Partner
+from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -154,7 +157,7 @@ def handle_add_document(document_data: dict, individual: Individual) -> Document
     ):
         raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
 
     return Document(
         document_number=number,
@@ -208,7 +211,7 @@ def handle_edit_document(document_data: dict) -> Document:
 
     document.document_number = number
     document.type = document_type
-    document.country = geo_models.Country.objects.get(iso_code3=country_code)
+    document.country = Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
     return document
@@ -217,7 +220,7 @@ def handle_edit_document(document_data: dict) -> Document:
 def handle_add_identity(identity: dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -241,7 +244,7 @@ def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     identity_id = updated_identity.get("id")
     country_code = updated_identity.get("country")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
