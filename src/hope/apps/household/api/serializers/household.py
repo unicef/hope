@@ -23,7 +23,6 @@ from hope.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
-    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
@@ -170,9 +169,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj: Individual) -> str:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
-        if role:
-            return role.role
-        return ROLE_NO_ROLE
+        return role.role if role else None
 
 
 class RecipientSerializer(serializers.ModelSerializer):
@@ -408,6 +405,7 @@ class IndividualChoicesSerializer(serializers.Serializer):
     # choices for grievance tickets
     relationship_choices = serializers.SerializerMethodField()
     role_choices = serializers.SerializerMethodField()
+    role_choices_for_grievance = serializers.SerializerMethodField()
     marital_status_choices = serializers.SerializerMethodField()
     identity_type_choices = serializers.SerializerMethodField()
     observed_disability_choices = serializers.SerializerMethodField()
@@ -439,6 +437,13 @@ class IndividualChoicesSerializer(serializers.Serializer):
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(ROLE_CHOICE)
+
+    def get_role_choices_for_grievance(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        choices = []
+        for value, name in ROLE_CHOICE:
+            choices.append({"name": name, "value": value})
+        choices.append({"name": "No role", "value": "NO_ROLE"})
+        return choices
 
     def get_marital_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(MARITAL_STATUS_CHOICE)
