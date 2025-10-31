@@ -13,7 +13,6 @@ import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
-import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface RegistrationDataImportProps {
   filter;
@@ -146,7 +145,6 @@ function RegistrationDataImportTable({
     enabled: page === 0,
   });
 
-  const [page, setPage] = useState(0);
   const itemsCount = usePersistedCount(page, countData);
 
   const renderTable = (): ReactElement => (
