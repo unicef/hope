@@ -21,7 +21,7 @@ export type FeedbackDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly feedbackMessages: Array<FeedbackMessage>;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     description: string;
     area?: string;
     language?: string;
