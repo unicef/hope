@@ -11,11 +11,11 @@ The Program Users module shows the HOPE users in the Programme and which roles a
 
 ## How to view Programme Users
 
-1. Select Programme users from the main menu. A list of the of all users in the Programme will be displayed include a search box with filters for the users.
-    ![Image](_screenshots/grievance/1.png)
+1. Select Programme users from the main menu. A list of all users in the Programme will be displayed including a search box with filters for the users.
+    ![Image](_screenshots/user/user_56.png)
 
-1. Click on the username to view details of roles assigned to a user.
-    ![Image](_screenshots/grievance/2.png)
+1. Click on the the arrow before the username to view details of roles assigned to a user.
+    ![Image](_screenshots/user/user_57.png)
 
 ## User Roles
 The below user roles are presented for information purposes and group permission that are typically used in HOPE
@@ -79,7 +79,7 @@ The below user roles are presented for information purposes and group permission
 ### 4. Accountability Roles
 
 #### 4.1 Accountability Viewer
-"Can view list of created surveys and communication messages. Can review details of created surveys and communication messages.This role can be assigned to: HCT Programme Staff (Accountability)."
+"Can view list of created surveys and communication messages. Can review details of created surveys and communication messages. This role can be assigned to: HCT Programme Staff (Accountability)."
 
 #### 4.2 Accountability Manager
 "Has full access on both surveys and communication. Can create new surveys and communication messages, view list of created surveys and communication messages, review details of created surveys and communication messages. This role can be assigned to: Senior HCT Programme Staff (Accountability)."
