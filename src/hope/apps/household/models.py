@@ -999,11 +999,11 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, blank=True)
     photo = models.ImageField(blank=True)
-    cleared = models.BooleanField(default=False)
-    cleared_date = models.DateTimeField(default=timezone.now)
-    cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
+    cleared = models.BooleanField(default=False, blank=True)
+    cleared_date = models.DateTimeField(default=timezone.now, blank=True)
+    cleared_by = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
     copied_from = models.ForeignKey(
@@ -1080,9 +1080,10 @@ class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
         "account.Partner",
         related_name="individual_identities",
         null=True,
+        blank=True,
         on_delete=models.PROTECT,
     )
-    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", null=True, blank=True, on_delete=models.PROTECT)
     number = models.CharField(max_length=255)
     copied_from = models.ForeignKey(
         "self",

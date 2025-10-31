@@ -96,7 +96,7 @@ class MergeStatusModel(models.Model):
         (MERGED, _("Merged")),
     )
 
-    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING)
+    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, blank=True)
 
     class Meta:
         abstract = True
