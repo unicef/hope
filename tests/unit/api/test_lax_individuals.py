@@ -19,12 +19,10 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     DISABLED,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NOT_DISABLED,
-)
-from hope.apps.household.models import (
     PendingDocument,
     PendingIndividual,
 )

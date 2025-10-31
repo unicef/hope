@@ -11,8 +11,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
-from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.household.models import Household
+from hope.apps.household.models import ROLE_PRIMARY, Household
 from hope.apps.program.models import Program
 
 

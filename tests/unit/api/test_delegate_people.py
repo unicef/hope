@@ -10,11 +10,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.api.models import Grant
 from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
-)
-from hope.apps.household.models import (
     DocumentType,
     PendingHousehold,
     PendingIndividual,

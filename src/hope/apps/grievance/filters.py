@@ -17,8 +17,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.apps.household.const import HEAD
-from hope.apps.household.models import Individual
+from hope.apps.household.models import HEAD, Individual
 from hope.apps.program.models import Program
 
 logger = logging.getLogger(__name__)

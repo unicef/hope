@@ -13,12 +13,10 @@ from hope.apps.grievance.utils import (
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,

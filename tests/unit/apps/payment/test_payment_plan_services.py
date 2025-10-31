@@ -39,8 +39,7 @@ from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.models import FileTemp
-from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.household.models import IndividualRoleInHousehold
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,

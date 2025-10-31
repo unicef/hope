@@ -13,8 +13,7 @@ from extras.test_utils.factories.payment import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.household.models import IndividualRoleInHousehold
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
     AccountType,
     DeliveryMechanism,

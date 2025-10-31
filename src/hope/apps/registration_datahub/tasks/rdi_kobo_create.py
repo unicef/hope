@@ -20,13 +20,11 @@ from hope.apps.core.kobo.common import (
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import chunks, rename_dict_keys
 from hope.apps.geo.models import Area, Country as GeoCountry
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

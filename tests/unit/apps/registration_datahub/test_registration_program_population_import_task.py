@@ -16,12 +16,10 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     MALE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Document,
     Household,
     Individual,

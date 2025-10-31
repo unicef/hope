@@ -37,11 +37,9 @@ from hope.apps.core.models import (
     FlexibleAttribute,
 )
 from hope.apps.geo import models as geo_models
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Document,
     Household,
     IndividualRoleInHousehold,

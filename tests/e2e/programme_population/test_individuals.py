@@ -15,8 +15,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
-from hope.apps.household.const import FEMALE, MARRIED
-from hope.apps.household.models import Household
+from hope.apps.household.models import FEMALE, MARRIED, Household
 from hope.apps.program.models import BeneficiaryGroup, Program
 
 pytestmark = pytest.mark.django_db()

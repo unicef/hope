@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.models import BusinessArea
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
 )

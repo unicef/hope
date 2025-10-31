@@ -34,7 +34,7 @@ from hope.apps.core.utils import (
 )
 from hope.apps.core.validators import BaseValidator
 from hope.apps.geo.models import Area
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,

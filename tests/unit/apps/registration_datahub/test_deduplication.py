@@ -6,7 +6,8 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.models import BusinessArea
-from hope.apps.household.const import (
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.models import (
     DUPLICATE,
     FEMALE,
     HEAD,
@@ -15,9 +16,6 @@ from hope.apps.household.const import (
     SON_DAUGHTER,
     UNIQUE,
     WIFE_HUSBAND,
-)
-from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import (
     Individual,
     PendingIndividual,
 )

@@ -5,13 +5,11 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-)
-from hope.apps.household.models import (
     Individual,
     PendingIndividual,
 )

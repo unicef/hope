@@ -13,8 +13,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import (
     HouseholdDataUpdateService,
 )
-from hope.apps.household.const import ROLE_ALTERNATE
-from hope.apps.household.models import IndividualRoleInHousehold
+from hope.apps.household.models import ROLE_ALTERNATE, IndividualRoleInHousehold
 from hope.apps.program.models import Program
 from hope.apps.utils.models import MergeStatusModel
 

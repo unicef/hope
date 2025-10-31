@@ -25,10 +25,8 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import PeriodicFieldData
-from hope.apps.household.const import (
-    ROLE_PRIMARY,
-)
 from hope.apps.household.models import (
+    ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,

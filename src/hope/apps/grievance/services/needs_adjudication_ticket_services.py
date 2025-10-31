@@ -19,9 +19,8 @@ from hope.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
 )
-from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import Household, Individual
+from hope.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
 from hope.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,

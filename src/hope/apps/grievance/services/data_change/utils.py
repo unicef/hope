@@ -24,14 +24,12 @@ from hope.apps.core.field_attributes.fields_types import (
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import serialize_flex_attributes
 from hope.apps.geo import models as geo_models
-from hope.apps.household.const import (
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.household.models import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
     Document,
     DocumentType,
     Household,

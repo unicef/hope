@@ -3,7 +3,7 @@ from typing import Any
 from dateutil.parser import parse
 
 from hope.apps.core.models import BusinessArea
-from hope.apps.household.const import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
+from hope.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 

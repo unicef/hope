@@ -6,14 +6,12 @@ from hope.apps.core.utils import (
     build_flex_arg_dict_from_list_if_exists,
 )
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BANK_STATEMENT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

@@ -8,10 +8,8 @@ from model_utils import Choices
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.household.const import (
-    ROLE_PRIMARY,
-)
 from hope.apps.household.models import (
+    ROLE_PRIMARY,
     Individual,
     IndividualRoleInHousehold,
 )

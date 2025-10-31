@@ -10,12 +10,10 @@ from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )

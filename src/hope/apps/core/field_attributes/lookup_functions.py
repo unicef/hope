@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_ELECTORAL_CARD,

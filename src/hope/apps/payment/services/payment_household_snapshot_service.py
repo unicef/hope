@@ -8,11 +8,9 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.geo.models import Country
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,

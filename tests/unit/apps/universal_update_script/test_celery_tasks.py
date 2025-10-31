@@ -5,8 +5,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.const import MALE
-from hope.apps.household.models import Document, DocumentType, Individual
+from hope.apps.household.models import MALE, Document, DocumentType, Individual
 from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
 from hope.apps.program.models import Program
 from hope.apps.universal_update_script.celery_tasks import (

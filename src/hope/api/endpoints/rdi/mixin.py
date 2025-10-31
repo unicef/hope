@@ -5,14 +5,12 @@ import logging
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from hope.apps.geo.models import Country
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     DocumentType,
     Household,
     PendingDocument,

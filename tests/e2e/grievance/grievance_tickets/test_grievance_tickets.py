@@ -35,8 +35,7 @@ from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.const import HOST
-from hope.apps.household.models import Household, Individual
+from hope.apps.household.models import HOST, Household, Individual
 from hope.apps.payment.models import Payment
 from hope.apps.program.models import BeneficiaryGroup, Program
 

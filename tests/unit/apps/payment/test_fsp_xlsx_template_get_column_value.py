@@ -15,8 +15,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.household.models import IndividualRoleInHousehold
+from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hope.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,

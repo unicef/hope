@@ -12,11 +12,9 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hope.apps.account.models import User
 from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     MALE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Household,
     HouseholdCollection,
     Individual,

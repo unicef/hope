@@ -23,7 +23,7 @@ from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     FEMALE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -32,8 +32,6 @@ from hope.apps.household.const import (
     SINGLE,
     UNHCR,
     WIDOWED,
-)
-from hope.apps.household.models import (
     DocumentType,
 )
 from hope.apps.payment.models import AccountType

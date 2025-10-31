@@ -40,9 +40,8 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualPhotoDetailSerializer,
 )
-from hope.apps.household.const import DUPLICATE
 from hope.apps.household.filters import HouseholdFilter, IndividualFilter
-from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.models import Program

@@ -44,11 +44,9 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.currencies import USDC
 from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField

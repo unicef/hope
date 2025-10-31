@@ -9,11 +9,9 @@ from django.utils import timezone
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area
-from hope.apps.household.const import (
-    ROLE_PRIMARY,
-)
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import (
+    ROLE_PRIMARY,
     Document,
     EntitlementCard,
     Household,

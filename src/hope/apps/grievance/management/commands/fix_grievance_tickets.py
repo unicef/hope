@@ -6,8 +6,7 @@ from django.db import transaction
 
 from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.const import DISABLED, NOT_DISABLED
-from hope.apps.household.models import Individual
+from hope.apps.household.models import DISABLED, NOT_DISABLED, Individual
 
 
 # for copying & pasting into the terminal purposes

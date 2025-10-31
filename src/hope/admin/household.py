@@ -39,11 +39,6 @@ from hope.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
 )
-from hope.apps.household.const import (
-    HEAD,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
 from hope.apps.household.forms import (
     MassEnrollForm,
     MassRestoreForm,
@@ -52,6 +47,9 @@ from hope.apps.household.forms import (
     WithdrawHouseholdsForm,
 )
 from hope.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
     Document,
     Household,
     HouseholdCollection,

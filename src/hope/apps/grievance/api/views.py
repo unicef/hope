@@ -111,8 +111,7 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.apps.household.const import HEAD
-from hope.apps.household.models import Household, IndividualRoleInHousehold
+from hope.apps.household.models import HEAD, Household, IndividualRoleInHousehold
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:

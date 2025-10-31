@@ -20,12 +20,10 @@ from hope.apps.core.models import (
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     FEMALE,
     MALE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.models import (
     Household,
     IndividualRoleInHousehold,
 )

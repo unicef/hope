@@ -7,17 +7,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from hope.apps.core.countries import Countries
-from hope.apps.household.const import (
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_DRIVERS_LICENSE,
-    IDENTIFICATION_TYPE_ELECTORAL_CARD,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-    IDENTIFICATION_TYPE_OTHER,
-    IDENTIFICATION_TYPE_TAX_ID,
-    UNHCR,
-    WFP,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +70,10 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
 
 
 def get_birth_certificate_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         args[0],
@@ -89,6 +82,10 @@ def get_birth_certificate_document_number_query(_: Any, args: Any, is_social_wor
 
 
 def get_tax_id_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_TAX_ID,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_TAX_ID,
         args[0],
@@ -97,6 +94,10 @@ def get_tax_id_document_number_query(_: Any, args: Any, is_social_worker_query: 
 
 
 def get_drivers_license_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_DRIVERS_LICENSE,
         args[0],
@@ -105,6 +106,10 @@ def get_drivers_license_document_number_query(_: Any, args: Any, is_social_worke
 
 
 def get_national_id_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_NATIONAL_ID,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_NATIONAL_ID,
         args[0],
@@ -113,6 +118,10 @@ def get_national_id_document_number_query(_: Any, args: Any, is_social_worker_qu
 
 
 def get_national_passport_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         args[0],
@@ -121,6 +130,10 @@ def get_national_passport_document_number_query(_: Any, args: Any, is_social_wor
 
 
 def get_electoral_card_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_ELECTORAL_CARD,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_ELECTORAL_CARD,
         args[0],
@@ -129,6 +142,10 @@ def get_electoral_card_document_number_query(_: Any, args: Any, is_social_worker
 
 
 def get_other_document_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_OTHER,
+    )
+
     return get_documents_number_query(
         IDENTIFICATION_TYPE_OTHER,
         args[0],
@@ -147,6 +164,10 @@ def get_documents_number_query(document_type: str, number: str, is_social_worker
 
 
 def get_birth_certificate_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         args[0],
@@ -155,6 +176,10 @@ def get_birth_certificate_issuer_query(_: Any, args: Any, is_social_worker_query
 
 
 def get_tax_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_TAX_ID,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_TAX_ID,
         args[0],
@@ -163,6 +188,10 @@ def get_tax_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = Fa
 
 
 def get_drivers_licensee_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_DRIVERS_LICENSE,
         args[0],
@@ -171,6 +200,10 @@ def get_drivers_licensee_issuer_query(_: Any, args: Any, is_social_worker_query:
 
 
 def get_national_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_NATIONAL_ID,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_NATIONAL_ID,
         args[0],
@@ -179,6 +212,10 @@ def get_national_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool
 
 
 def get_national_passport_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         args[0],
@@ -187,6 +224,10 @@ def get_national_passport_issuer_query(_: Any, args: Any, is_social_worker_query
 
 
 def get_electoral_card_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_ELECTORAL_CARD,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_ELECTORAL_CARD,
         args[0],
@@ -195,6 +236,10 @@ def get_electoral_card_issuer_query(_: Any, args: Any, is_social_worker_query: b
 
 
 def get_other_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        IDENTIFICATION_TYPE_OTHER,
+    )
+
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_OTHER,
         args[0],
@@ -218,6 +263,10 @@ def get_role_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q
 
 
 def get_scope_id_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        WFP,
+    )
+
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -228,6 +277,10 @@ def get_scope_id_number_query(_: Any, args: Any, is_social_worker_query: bool = 
 
 
 def get_scope_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        WFP,
+    )
+
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -238,6 +291,10 @@ def get_scope_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = 
 
 
 def get_unhcr_id_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        UNHCR,
+    )
+
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -248,6 +305,10 @@ def get_unhcr_id_number_query(_: Any, args: Any, is_social_worker_query: bool = 
 
 
 def get_unhcr_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
+    from hope.apps.household.models import (
+        UNHCR,
+    )
+
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{

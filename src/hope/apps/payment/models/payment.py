@@ -46,8 +46,7 @@ from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.const import FEMALE, MALE
-from hope.apps.household.models import DocumentType, Household, Individual
+from hope.apps.household.models import FEMALE, MALE, DocumentType, Household, Individual
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.models import Approval

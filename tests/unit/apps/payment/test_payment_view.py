@@ -11,7 +11,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import DataCollectingType
-from hope.apps.household.const import ROLE_ALTERNATE
+from hope.apps.household.models import ROLE_ALTERNATE
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
 

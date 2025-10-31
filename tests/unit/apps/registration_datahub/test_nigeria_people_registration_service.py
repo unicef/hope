@@ -16,11 +16,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import DataCollectingType
 from hope.apps.geo import models as geo_models
 from hope.apps.geo.models import Area, AreaType
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     MALE,
-)
-from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

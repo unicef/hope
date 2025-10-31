@@ -24,14 +24,12 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
-)
-from hope.apps.household.models import (
     Household,
     Individual,
     PendingHousehold,

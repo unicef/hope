@@ -74,7 +74,7 @@ from hope.apps.core.field_attributes.lookup_functions import (
 )
 from hope.apps.core.languages import Languages
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,

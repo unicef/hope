@@ -10,7 +10,8 @@ from hope.apps.core.utils import (
     build_flex_arg_dict_from_list_if_exists,
 )
 from hope.apps.geo.models import Area, Country
-from hope.apps.household.const import (
+from hope.apps.household.forms import DocumentForm, IndividualForm
+from hope.apps.household.models import (
     BLANK,
     DISABLED,
     HEAD,
@@ -23,9 +24,6 @@ from hope.apps.household.const import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-)
-from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
     DocumentType,
     PendingDocument,
     PendingHousehold,

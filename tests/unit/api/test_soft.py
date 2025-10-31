@@ -10,15 +10,13 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.program import ProgramFactory
 from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import (
+from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SON_DAUGHTER,
-)
-from hope.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )

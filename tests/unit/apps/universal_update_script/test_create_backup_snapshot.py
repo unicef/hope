@@ -11,8 +11,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.const import MALE
-from hope.apps.household.models import Individual
+from hope.apps.household.models import MALE, Individual
 from hope.apps.program.models import Program
 from hope.apps.universal_update_script.models import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (

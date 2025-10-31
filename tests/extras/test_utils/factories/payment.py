@@ -36,8 +36,7 @@ from hope.apps.account.models import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Area
-from hope.apps.household.const import MALE, ROLE_PRIMARY
-from hope.apps.household.models import Household, Individual
+from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hope.apps.payment.models import (
     Account,
     AccountType,
