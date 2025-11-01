@@ -1,16 +1,14 @@
 from base64 import b64decode
-import datetime
 from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
-from typing import TYPE_CHECKING, Any, Optional, no_type_check
+from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hope.apps.payment.models import (
     Payment,
@@ -21,8 +19,6 @@ from hope.apps.payment.models import (
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
-
-    from hope.apps.core.exchange_rates.api import ExchangeRateClient
 
 
 def get_number_of_samples(
@@ -120,20 +116,13 @@ def get_payment_items_for_dashboard(
 
 def get_quantity_in_usd(
     amount: Decimal,
-    currency: str,
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.datetime,
-    exchange_rates_client: Optional["ExchangeRateClient"] = None,
 ) -> Decimal | None:
     if amount is None:
         return None
 
     if amount == 0:
         return Decimal(0)
-
-    if not exchange_rate and exchange_rates_client is None:
-        exchange_rates_client = ExchangeRates()
-        exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
 
     if exchange_rate is None:
         return None

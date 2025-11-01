@@ -561,7 +561,6 @@ class PaymentGatewayService:
         payment: Payment,
         pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
-        payment_plan: PaymentPlan,
         exchange_rate: float,
     ) -> None:
         try:
@@ -597,9 +596,7 @@ class PaymentGatewayService:
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore
-                currency=payment_plan.currency,
                 exchange_rate=Decimal(exchange_rate),
-                currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
         payment.save(update_fields=update_fields)
@@ -630,7 +627,6 @@ class PaymentGatewayService:
                                 payment,
                                 pg_payment_records,
                                 instruction,
-                                payment_plan,
                                 exchange_rate,
                             )
                         payment_plan.update_money_fields()
@@ -652,7 +648,6 @@ class PaymentGatewayService:
                 payment,
                 [pg_payment_record],
                 payment.parent_split,
-                payment_plan,
                 payment_plan.exchange_rate,
             )
 
@@ -682,7 +677,6 @@ class PaymentGatewayService:
                     payment,
                     pg_payment_records,
                     instruction,
-                    payment_plan,
                     exchange_rate,
                 )
 

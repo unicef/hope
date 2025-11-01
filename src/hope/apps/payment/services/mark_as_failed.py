@@ -22,9 +22,7 @@ def revert_mark_as_failed(payment_item: Payment, delivered_quantity: Decimal, de
     payment_item.revert_mark_as_failed(delivered_quantity, delivery_date)
     payment_item.delivered_quantity_usd = get_quantity_in_usd(
         amount=delivered_quantity,
-        currency=payment_item.parent.currency,
         exchange_rate=payment_item.parent.exchange_rate,
-        currency_exchange_date=delivery_date,
     )
     payment_item.save()
 

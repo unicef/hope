@@ -1,15 +1,20 @@
 import dataclasses
 from datetime import datetime
+import logging
 
 from dateutil.parser import parse
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
+from requests import HttpError
 
 from hope.apps.core.exchange_rates.api import (
     ExchangeRateClient,
     get_exchange_rate_client,
 )
+from hope.apps.payment.models.payment import OfflineExchangeRates
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -90,11 +95,16 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
+    class ExchangeRatesError(Exception):
+        pass
+
     CACHE_KEY = "exchange_rates"
 
-    def __init__(self, api_client: ExchangeRateClient | None = None) -> None:
+    def __init__(self, api_client: ExchangeRateClient | None = None, use_offline_exchange_rates: bool = False) -> None:
         self.api_client = api_client or get_exchange_rate_client()
         self.exchange_rates_dict = self._convert_response_json_to_exchange_rates()
+        self.use_offline_exchange_rates = use_offline_exchange_rates
+        self.used_offline_exchange_rates = False
 
     def _convert_response_json_to_exchange_rates(self) -> dict[str, SingleExchangeRate]:
         response_json = self._get_response()
@@ -109,10 +119,21 @@ class ExchangeRates:
             if cached_response is not None:
                 return cached_response
 
+        try:
             response_json = self.api_client.fetch_exchange_rates()
-            cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
+            if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+                cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
             return response_json
-        return self.api_client.fetch_exchange_rates()
+
+        except HttpError:
+            logger.exception("Failed to fetch exchange rates")
+
+        if self.use_offline_exchange_rates:
+            response_json = OfflineExchangeRates.objects.first().rates
+            self.used_offline_exchange_rates = True
+            return response_json
+
+        raise self.ExchangeRatesError("Failed to get exchange rates")
 
     def get_exchange_rate_for_currency_code(self, currency_code: str, dispersion_date: datetime) -> float | None:
         currency: SingleExchangeRate | None = self.exchange_rates_dict.get(currency_code)

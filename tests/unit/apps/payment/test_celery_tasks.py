@@ -189,7 +189,7 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_ERROR
 
     @patch(
-        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.apps.payment.models.PaymentPlan.update_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -334,7 +334,7 @@ class TestPaymentCeleryTask(TestCase):
 
     @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
     @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.apps.payment.models.PaymentPlan.update_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,
@@ -377,7 +377,7 @@ class TestPaymentCeleryTask(TestCase):
         )
         mock_retry.side_effect = Retry("force retry just for testing")
 
-        with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test test uuu")):
+        with patch.object(PaymentPlan, "update_exchange_rate", side_effect=Exception("test test uuu")):
             with pytest.raises(Retry):
                 update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
 

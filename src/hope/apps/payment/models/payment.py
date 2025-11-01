@@ -37,7 +37,6 @@ from psycopg2._range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
-from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
@@ -493,6 +492,10 @@ class PaymentPlan(
         max_digits=15,
         help_text="Exchange Rate [sys]",
     )
+    exchange_rate_assigned_offline = models.BooleanField(
+        default=False, help_text="Exchange Rate assigned offline [sys]"
+    )
+    use_offline_exchange_rate = models.BooleanField(default=False, help_text="Use Offline Exchange Rate [sys]")
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
     female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
@@ -775,15 +778,20 @@ class PaymentPlan(
         return ModifiedData(self.updated_at)
 
     # from generic pp
-    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+    def update_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> None:
+        from hope.apps.core.exchange_rates import ExchangeRates
+
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
-            return 1.0
+            self.exchange_rate = 1.0
 
         if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
+            exchange_rates_client = ExchangeRates(use_offline_exchange_rates=self.use_offline_exchange_rates)
 
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+        self.exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+            self.currency, self.currency_exchange_date
+        )
+        self.exchange_rate_assigned_offline = exchange_rates_client.used_offline_exchange_rates
 
     def available_payment_records(
         self,
@@ -2711,3 +2719,13 @@ class WesternUnionInvoicePayment(models.Model):
 
     def __str__(self) -> str:
         return f"{self.payment.unicef_id} - {self.transaction_status}"
+
+
+class OfflineExchangeRates(TimeStampedModel):
+    rates = models.JSONField(
+        help_text="Offline Exchange Rates",
+        default=dict,
+    )
+
+    def __str__(self) -> str:
+        return f"Offline Exchange Rates - {self.updated_at}"

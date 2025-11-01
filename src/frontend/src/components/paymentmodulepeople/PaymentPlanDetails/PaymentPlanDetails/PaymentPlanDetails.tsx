@@ -34,6 +34,7 @@ export const PaymentPlanDetails = ({
     dispersionEndDate,
     followUps,
     exchangeRate,
+    exchangeRateAssignedOffline,
   } = paymentPlan;
 
   return (
@@ -92,7 +93,7 @@ export const PaymentPlanDetails = ({
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchangeRate}{exchangeRateAssignedOffline ? '!' : ''}
                   </LabelizedField>
                 </Box>
                 <Tooltip

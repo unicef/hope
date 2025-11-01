@@ -65,4 +65,8 @@ TASKS_SCHEDULES = {
         "task": "hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails",
         "schedule": crontab(hour="*/24"),
     },
+    "periodic_update_exchange_rates": {
+        "task": "hope.apps.payment.celery_tasks.periodic_update_exchange_rates",
+        "schedule": crontab(hour="*/24"),
+    },
 }

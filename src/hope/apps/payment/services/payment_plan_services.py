@@ -215,7 +215,7 @@ class PaymentPlanService:
         self.payment_plan.currency = input_data["currency"]
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        self.payment_plan.update_exchange_rate()
 
         self.payment_plan.save(
             update_fields=(
@@ -225,6 +225,8 @@ class PaymentPlanService:
                 "dispersion_start_date",
                 "dispersion_end_date",
                 "exchange_rate",
+                "exchange_rate",
+                "exchange_rate_assigned_offline",
                 "updated_at",
             )
         )
@@ -733,8 +735,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def create_follow_up_payments(self) -> None:
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
+        self.payment_plan.update_exchange_rate()
+        self.payment_plan.save(update_fields=["exchange_rate", "exchange_rate_assigned_offline", "updated_at"])
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
         if not (split := self.payment_plan.splits.first()):
