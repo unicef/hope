@@ -93,7 +93,7 @@ export const restBusinessAreasProgramsIndividualsList = {
       relationship: 'SON_DAUGHTER',
       age: 12,
       sex: 'MALE',
-      role: 'NO_ROLE',
+      role: null,
       relationshipDisplay: 'Son / Daughter',
       birthDate: '2011-03-10',
       deduplicationBatchStatus: 'UNIQUE_IN_BATCH',

@@ -28,7 +28,6 @@ from hope.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     RELATIONSHIP_UNKNOWN,
-    ROLE_NO_ROLE,
     SINGLE,
     UNHCR,
     WIDOWED,
@@ -212,7 +211,7 @@ class TestGrievanceCreateDataChangeAction:
                             "marital_status": SINGLE,
                             "estimated_birth_date": False,
                             "relationship": RELATIONSHIP_UNKNOWN,
-                            "role": ROLE_NO_ROLE,
+                            "role": None,
                             "documents": [
                                 {
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
