@@ -63,9 +63,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
 
   const { status } = paymentPlan;
 
-  const shouldDisplayEntitlement =
-    status !== PaymentPlanStatusEnum.OPEN &&
-    status !== PaymentPlanStatusEnum.ACCEPTED;
+  const shouldDisplayEntitlement = status !== PaymentPlanStatusEnum.OPEN;
 
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
