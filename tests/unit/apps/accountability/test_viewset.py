@@ -1117,9 +1117,12 @@ class TestMessageViewSet:
             business_area=self.afghanistan,
             program_cycle=self.program_active.cycles.first(),
         )
+
+        birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50*365)
         self.households = [
             create_household(
                 household_args={"program": self.program_active},
+                individual_args={"birth_date": birth_date_for_50yo, "sex": "MALE"},
             )[0]
             for _ in range(14)
         ]
@@ -1702,7 +1705,10 @@ class TestSurveyViewSet:
             business_area=self.afghanistan,
             status=Program.ACTIVE,
         )
-        hoh1 = IndividualFactory(household=None)
+        today = timezone.now().date()
+        birth_date_for_50yo = today - datetime.timedelta(days=50*365)
+
+        hoh1 = IndividualFactory(household=None, birth_date=birth_date_for_50yo, sex="MALE")
         self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
         self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
