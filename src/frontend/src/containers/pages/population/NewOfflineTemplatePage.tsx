@@ -85,8 +85,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
     }
     return data.results.map((item) => {
       const { name, pduData, label } = item;
-      const { roundsNames, roundsCovered } = pduData;
-      const initialRoundNumber = (roundsCovered || 0) + 1;
+      const { roundsNames } = pduData;
       return {
         field: name,
         label,
@@ -95,9 +94,8 @@ const NewOfflineTemplatePage = (): ReactElement => {
           roundName: roundsNames[roundIndex],
         })),
         numberOfRounds: roundsNames.length,
-        roundsCovered: roundsCovered || 0,
-        roundNumber: initialRoundNumber,
-        roundName: roundsNames[initialRoundNumber - 1],
+        roundNumber: 1,
+        roundName: roundsNames[0],
       };
     });
   };
