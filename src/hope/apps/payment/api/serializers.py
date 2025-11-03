@@ -24,28 +24,6 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
-    Household,
-    Individual,
-)
-from hope.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
-from hope.apps.payment.models.payment import (
-    DeliveryMechanism,
-    FinancialServiceProviderXlsxTemplate,
-)
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
@@ -59,7 +37,6 @@ from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models.approval import Approval
 from hope.models.approval_process import ApprovalProcess
 from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 from hope.models.household import (
