@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ComparisonMethod7bbEnum } from './ComparisonMethod7bbEnum';
+import type { ComparisonMethodEnum } from './ComparisonMethodEnum';
 import type { FlexFieldClassificationEnum } from './FlexFieldClassificationEnum';
 export type TargetingIndividualBlockRuleFilter = {
-    comparisonMethod: ComparisonMethod7bbEnum;
+    comparisonMethod: ComparisonMethodEnum;
     flexFieldClassification?: FlexFieldClassificationEnum;
     fieldName: string;
     /**
