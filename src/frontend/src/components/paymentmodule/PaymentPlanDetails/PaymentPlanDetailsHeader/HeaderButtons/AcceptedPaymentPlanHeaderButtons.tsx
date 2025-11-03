@@ -37,7 +37,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canClose,
-  canAbort,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -73,6 +72,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         },
       );
     },
+    enabled: open,
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
