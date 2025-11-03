@@ -785,7 +785,7 @@ class PaymentPlan(
             self.exchange_rate = 1.0
 
         if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates(use_offline_exchange_rates=self.use_offline_exchange_rates)
+            exchange_rates_client = ExchangeRates(use_offline_exchange_rates=self.use_offline_exchange_rate)
 
         self.exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
             self.currency, self.currency_exchange_date
