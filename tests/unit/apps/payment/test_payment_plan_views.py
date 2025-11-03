@@ -839,8 +839,8 @@ class TestPaymentPlanFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 2
-        assert response_data[0]["name"] == "PP_1"
-        assert response_data[1]["name"] == "PP_2"
+        assert response_data[0]["name"] == "PP_2"
+        assert response_data[1]["name"] == "PP_1"
 
         response = self.client.get(self.list_url, {"total_entitled_quantity__lte": 101})
         assert response.status_code == status.HTTP_200_OK
