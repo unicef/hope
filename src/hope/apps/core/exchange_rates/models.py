@@ -6,7 +6,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
-from requests import HttpError
+from requests import HTTPError
 
 from hope.apps.core.exchange_rates.api import (
     ExchangeRateClient,
@@ -125,7 +125,7 @@ class ExchangeRates:
                 cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
             return response_json
 
-        except HttpError:
+        except HTTPError:
             logger.exception("Failed to fetch exchange rates")
 
         if self.use_offline_exchange_rates:
