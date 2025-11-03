@@ -102,9 +102,9 @@ class ExchangeRates:
 
     def __init__(self, api_client: ExchangeRateClient | None = None, use_offline_exchange_rates: bool = False) -> None:
         self.api_client = api_client or get_exchange_rate_client()
-        self.exchange_rates_dict = self._convert_response_json_to_exchange_rates()
         self.use_offline_exchange_rates = use_offline_exchange_rates
         self.used_offline_exchange_rates = False
+        self.exchange_rates_dict = self._convert_response_json_to_exchange_rates()
 
     def _convert_response_json_to_exchange_rates(self) -> dict[str, SingleExchangeRate]:
         response_json = self._get_response()
@@ -128,10 +128,9 @@ class ExchangeRates:
         except HTTPError:
             logger.exception("Failed to fetch exchange rates")
 
-        if self.use_offline_exchange_rates:
-            response_json = OfflineExchangeRates.objects.first().rates
+        if self.use_offline_exchange_rates and (offline_rates := OfflineExchangeRates.objects.first()):
             self.used_offline_exchange_rates = True
-            return response_json
+            return offline_rates.rates
 
         raise self.ExchangeRatesError("Failed to get exchange rates")
 

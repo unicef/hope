@@ -2,14 +2,19 @@ from datetime import datetime, timedelta
 import os
 from typing import Any, Optional
 from unittest import mock
+from unittest.mock import Mock
 
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from parameterized import parameterized
+import pytest
+from requests import HTTPError
 import requests_mock
 
 from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
+from hope.apps.payment.models.payment import OfflineExchangeRates
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {
@@ -266,6 +271,52 @@ class TestExchangeRates(TestCase):
         assert datetime(9999, 12, 31) == cup1.valid_to
 
         assert cup1.historical_exchange_rates == []
+
+    def test_get_response_w_cache(self) -> None:
+        rates_response = {"live": True}
+        exchange_rates_client = ExchangeRateClientDummy(rates_response)
+
+        with override_settings(EXCHANGE_RATE_CACHE_EXPIRY=60):
+            cache.clear()
+            resp = ExchangeRates(api_client=exchange_rates_client)._get_response()
+            assert resp == rates_response
+            assert cache.get(ExchangeRates.CACHE_KEY) == rates_response
+
+            cache.clear()
+            cached_response = {"cached": True}
+            cache.set(ExchangeRates.CACHE_KEY, cached_response, timeout=300)
+            resp = ExchangeRates(api_client=exchange_rates_client)._get_response()
+            assert resp == cached_response
+
+    def test_get_response_wo_cache(self) -> None:
+        rates_response = {"live": True}
+        exchange_rates_client = ExchangeRateClientDummy(rates_response)
+
+        with override_settings(EXCHANGE_RATE_CACHE_EXPIRY=0):
+            resp = ExchangeRates(api_client=exchange_rates_client)._get_response()
+            assert resp == rates_response
+
+    def test_get_response_wo_cache_http_error(self) -> None:
+        exchange_rates_client = ExchangeRateClientDummy({})
+
+        with override_settings(EXCHANGE_RATE_CACHE_EXPIRY=0):
+            exchange_rates_client.fetch_exchange_rates = Mock(side_effect=HTTPError)
+            with pytest.raises(ExchangeRates.ExchangeRatesError):
+                ExchangeRates(api_client=exchange_rates_client)._get_response()
+
+    def test_get_response_offline_rates(self) -> None:
+        exchange_rates_client = ExchangeRateClientDummy({})
+
+        with override_settings(EXCHANGE_RATE_CACHE_EXPIRY=0):
+            exchange_rates_client.fetch_exchange_rates = Mock(side_effect=HTTPError)
+            with pytest.raises(ExchangeRates.ExchangeRatesError):
+                ExchangeRates(api_client=exchange_rates_client, use_offline_exchange_rates=True)._get_response()
+
+            OfflineExchangeRates.objects.create(rates={"a": 1, "b": 2})
+            service = ExchangeRates(api_client=exchange_rates_client, use_offline_exchange_rates=True)
+            resp = service._get_response()
+            assert resp == {"a": 1, "b": 2}
+            assert service.used_offline_exchange_rates is True
 
     @parameterized.expand(
         [

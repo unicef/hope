@@ -2051,6 +2051,7 @@ class TestPaymentPlanActions:
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.save()
         self.pp.refresh_from_db()
+        PaymentFactory(parent=self.pp)
         data = {
             "engine_formula_rule_id": str(rule_for_pp.pk),
             "version": self.pp.version,

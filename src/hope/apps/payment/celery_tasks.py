@@ -1032,6 +1032,6 @@ def periodic_update_exchange_rates(self: Any) -> None:
             rates=exchange_rates,
         )
 
-    except HTTPError as e:
+    except HTTPError as e:  # pragma no cover
         logger.exception("Failed to periodic fetch exchange rates")
         raise self.retry(exc=e)
