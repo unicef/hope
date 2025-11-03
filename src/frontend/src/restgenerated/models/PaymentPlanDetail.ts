@@ -362,6 +362,10 @@ export type PaymentPlanDetail = {
      * Exchange Rate [sys]
      */
     exchangeRate?: string | null;
+    /**
+     * Exchange Rate assigned offline [sys]
+     */
+    exchangeRateAssignedOffline?: boolean;
     readonly eligiblePaymentsCount: number;
     readonly fundsCommitments: Record<string, any> | null;
     readonly availableFundsCommitments: Array<Record<string, any>>;
