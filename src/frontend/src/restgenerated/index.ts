@@ -75,7 +75,6 @@ export type { DelegatePeople as DelegatePeopleCamelCase } from './models/Delegat
 export type { DeliveredQuantity as DeliveredQuantityCamelCase } from './models/DeliveredQuantity';
 export type { DeliveryMechanism as DeliveryMechanismCamelCase } from './models/DeliveryMechanism';
 export type { DeliveryMechanismChoice as DeliveryMechanismChoiceCamelCase } from './models/DeliveryMechanismChoice';
-export type { DeliveryMechanismPerPaymentPlan as DeliveryMechanismPerPaymentPlanCamelCase } from './models/DeliveryMechanismPerPaymentPlan';
 export type { DetailedChartData as DetailedChartDataCamelCase } from './models/DetailedChartData';
 export type { DetailedChartDataset as DetailedChartDatasetCamelCase } from './models/DetailedChartDataset';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';

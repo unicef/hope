@@ -2029,7 +2029,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Role"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in [("NO_ROLE", "No role")] + list(ROLE_CHOICE)
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
         "get_query": get_role_query,
