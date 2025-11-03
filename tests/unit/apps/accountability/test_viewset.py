@@ -2035,7 +2035,7 @@ class TestSurveyViewSet:
 
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 1}
 
         data = {
             "sampling_type": Survey.SAMPLING_FULL_LIST,
