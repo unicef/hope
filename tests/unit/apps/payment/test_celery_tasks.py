@@ -27,6 +27,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_rebuild_stats,
     periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
+    periodic_update_exchange_rates,
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_payment_plan_reconciliation_overdue_email,
@@ -40,6 +41,7 @@ from hope.apps.payment.models import (
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
+from hope.apps.payment.models.payment import OfflineExchangeRates
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.steficon.models import Rule
 
@@ -403,6 +405,20 @@ class TestPaymentCeleryTask(TestCase):
         mock_service = mock_service_cls.return_value
         send_payment_plan_reconciliation_overdue_email(str(pp.id))
         mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
+
+    @patch("hope.apps.core.exchange_rates.ExchangeRates")
+    def test_periodic_update_exchange_rates(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        instance = mock_service_cls.return_value
+        instance.api_client.fetch_exchange_rates.return_value = {"a": 1, "b": 2}
+
+        periodic_update_exchange_rates()
+        instance.api_client.fetch_exchange_rates.assert_called_once()
+        obj = OfflineExchangeRates.objects.first()
+        assert obj is not None
+        assert obj.rates == {"a": 1, "b": 2}
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
