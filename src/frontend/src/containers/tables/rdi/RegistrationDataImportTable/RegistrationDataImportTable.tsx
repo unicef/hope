@@ -123,6 +123,7 @@ function RegistrationDataImportTable({
     }
     return header;
   };
+  const [page, setPage] = useState(0);
 
   const { data: countData } = useQuery<{ count: number }>({
     queryKey: [
@@ -141,9 +142,9 @@ function RegistrationDataImportTable({
         params,
       );
     },
+    enabled: page === 0,
   });
 
-  const [page, setPage] = useState(0);
   const itemsCount = usePersistedCount(page, countData);
 
   const renderTable = (): ReactElement => (
