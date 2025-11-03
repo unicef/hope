@@ -23,7 +23,6 @@ from hope.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     PendingDocument,
     PendingHousehold,
@@ -152,11 +151,11 @@ class IndividualSerializer(serializers.ModelSerializer):
             "program",
         ]
 
-    def validate_role(self, value: str) -> str | None:
-        if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
+    def validate_role(self, value: str | None) -> str | None:
+        if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if not value:
-            return ROLE_NO_ROLE
+            return None
         if value.upper()[0] == "P":
             return ROLE_PRIMARY
         if value.upper()[0] == "A":
