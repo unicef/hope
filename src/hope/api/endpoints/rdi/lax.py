@@ -22,7 +22,7 @@ from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.phone import calculate_phone_numbers_validity
-from hope.models.account import PendingAccount
+from hope.models.account import Account, PendingAccount
 from hope.models.account_type import AccountType
 from hope.models.area import Area
 from hope.models.country import Country

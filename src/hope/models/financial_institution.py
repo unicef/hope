@@ -1,9 +1,9 @@
 import logging
+
 from django.db import models
 
 from hope.models.country import Country
 from hope.models.utils import TimeStampedModel
-
 
 logger = logging.getLogger(__name__)
 

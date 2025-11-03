@@ -13,11 +13,12 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.payment import FinancialInstitutionFactory
+from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.models.account import PendingAccount
 from hope.models.account_type import AccountType
 from hope.models.document import PendingDocument
 from hope.models.grant import Grant

@@ -22,7 +22,6 @@ from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
 

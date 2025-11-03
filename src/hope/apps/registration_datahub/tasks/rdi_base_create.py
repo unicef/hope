@@ -14,8 +14,9 @@ from hope.apps.registration_datahub.value_caster import (
     SelectOneValueCaster,
     StringValueCaster,
 )
-from hope.models.account import PendingAccount
+from hope.models.account import Account, PendingAccount
 from hope.models.account_type import AccountType
+from hope.models.financial_institution import FinancialInstitution
 from hope.models.individual import PendingIndividual
 from hope.models.utils import MergeStatusModel
 

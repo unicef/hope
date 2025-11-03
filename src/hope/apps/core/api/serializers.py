@@ -6,9 +6,9 @@ from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSeri
 from hope.models.business_area import (
     BusinessArea,
 )
+from hope.models.country import Country
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice
-from hope.models.country import Country
 
 
 class CountrySmallSerializer(serializers.ModelSerializer):

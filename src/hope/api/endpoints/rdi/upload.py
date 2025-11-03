@@ -16,7 +16,7 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.account import PendingAccount
+from hope.models.account import Account, PendingAccount
 from hope.models.account_type import AccountType
 from hope.models.area import Area
 from hope.models.document import PendingDocument

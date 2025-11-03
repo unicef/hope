@@ -27,7 +27,6 @@ from hope.apps.payment.api.serializers import (
 )
 from hope.models.approval import Approval
 from hope.models.business_area import BusinessArea
-from hope.models.delivery_mechanism_per_payment_plan import DeliveryMechanismPerPaymentPlan
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.payment import Payment
 from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot

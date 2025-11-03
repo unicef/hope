@@ -6,12 +6,13 @@ from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hope.models.account import PendingAccount
+from hope.models.account import Account, PendingAccount
 from hope.models.account_type import AccountType
 from hope.models.area import Area
 from hope.models.country import Country
 from hope.models.document import PendingDocument
 from hope.models.document_type import DocumentType
+from hope.models.financial_institution import FinancialInstitution
 from hope.models.household import (
     DISABLED,
     HEAD,

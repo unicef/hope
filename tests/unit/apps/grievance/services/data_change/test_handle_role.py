@@ -7,7 +7,8 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.utils import handle_role
 from hope.models.household import (
-    ROLE_ALTERNATE, ROLE_PRIMARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
 )
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 from hope.models.program import Program
