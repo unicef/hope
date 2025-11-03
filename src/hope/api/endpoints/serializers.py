@@ -35,5 +35,8 @@ class FinancialInstitutionListSerializer(serializers.Serializer):
     country_iso_code3 = serializers.SerializerMethodField()
     updated_at = serializers.DateTimeField(allow_null=True)
 
-    def get_country_iso_code3(self, obj: FinancialInstitution) -> str:
-        return obj.country.iso_code3
+    def get_country_iso_code3(self, obj: FinancialInstitution) -> str | None:
+        if country := obj.country:
+            return country.iso_code3
+
+        return None
