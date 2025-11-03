@@ -104,7 +104,7 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def handle_role(role: str, household: Household, individual: Individual) -> None:
+def handle_role(household: Household, individual: Individual, role: str | None) -> None:
     if already_with_another_role := IndividualRoleInHousehold.objects.filter(
         household=household,
         individual=individual,
