@@ -453,7 +453,7 @@ class TestSmokePaymentModule:
         assert "0" in page_payment_module_details.get_label_total_number_of_households().text
         assert "0" in page_payment_module_details.get_label_targeted_individuals().text
         assert "Payee List" in page_payment_module_details.get_table_title().text
-        assert "UPLOAD RECONCILIATION INFO" in page_payment_module_details.get_button_import().text
+        assert "UPLOAD FILE" in page_payment_module_details.get_button_import().text
         assert "Payment ID" in page_payment_module_details.get_table_label()[1].text
         assert "Items Group ID" in page_payment_module_details.get_table_label()[2].text
         assert "Items Group Size" in page_payment_module_details.get_table_label()[3].text
