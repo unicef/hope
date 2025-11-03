@@ -9,6 +9,7 @@ import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
@@ -160,6 +161,8 @@ class TestPaymentGatewayService(BaseTestCase):
             ),
         ]
         create_payment_plan_snapshot_data(cls.pp)
+        for payment in cls.payments:
+            payment.refresh_from_db()
 
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
@@ -1119,8 +1122,8 @@ class TestPaymentGatewayService(BaseTestCase):
             errors={"0": "Error", "1": "Error"},
         )
 
-        with patch.object(pg_service.api, "add_records_to_payment_instruction") as mock_add_records:
-            pg_service.api.add_records_to_payment_instruction_mock = add_records_to_payment_instruction_mock
+        with patch.object(pg_service.api, "add_records_to_payment_instruction"):
+            pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
 
             pg_service.add_missing_records_to_payment_instructions(self.pp)
             # got one payment not in PaymentGateway -> self.payments[1]
@@ -1128,16 +1131,22 @@ class TestPaymentGatewayService(BaseTestCase):
 
             # check call arguments
             called_payments, called_split = (
-                mock_add_records.call_args[0][0],
-                mock_add_records.call_args[0][1],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][0],
+                pg_service.api.add_records_to_payment_instruction.call_args[0][1],
             )
             assert called_payments == list(Payment.objects.filter(pk=self.payments[1].pk))
             assert called_split == self.pp_split_2.pk
 
     def test_map_financial_institution_pk_and_mapping_found(self) -> None:
-        fi = FinancialInstitution.objects.create(name="Bank A", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        fi = FinancialInstitution.objects.create(
+            name="Bank A",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+            country=CountryFactory(iso_code3="AFG"),
+        )
         FinancialInstitutionMapping.objects.create(
-            financial_institution=fi, financial_service_provider=self.pg_fsp, code="BANKA_CODE_FOR_OTHER_FSP"
+            financial_institution=fi,
+            financial_service_provider=self.pg_fsp,
+            code="BANKA_CODE_FOR_OTHER_FSP",
         )
         account_data = {"financial_institution": str(fi.pk), "number": "123"}
 
@@ -1146,7 +1155,11 @@ class TestPaymentGatewayService(BaseTestCase):
         assert result["number"] == "123"
 
     def test_map_financial_institution_pk_and_mapping_missing_raises(self) -> None:
-        fi = FinancialInstitution.objects.create(name="Bank B", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        fi = FinancialInstitution.objects.create(
+            name="Bank B",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+            country=CountryFactory(iso_code3="AFG"),
+        )
         account_data = {"financial_institution": str(fi.pk)}
 
         with pytest.raises(Exception, match="No Financial Institution Mapping found"):

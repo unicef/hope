@@ -1417,7 +1417,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1489,7 +1489,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1594,7 +1594,7 @@ class TestMessageViewSet:
             "payment_plan": str(self.payment_plan.pk),
             "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
+                "age": {"max": 80, "min": 15},
                 "sex": "MALE",
                 "margin_of_error": 20.0,
                 "confidence_interval": 0.9,

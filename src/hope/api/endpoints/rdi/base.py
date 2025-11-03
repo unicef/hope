@@ -19,7 +19,7 @@ from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.models import Grant
 from hope.api.utils import humanize_errors
 from hope.apps.geo.models import Country
-from hope.apps.household.models import PendingHousehold
+from hope.apps.household.models import PendingHousehold, PendingIndividual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import RegistrationDataImport
 
@@ -209,6 +209,12 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
     @atomic()
     def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.selected_rdi.status = RegistrationDataImport.IN_REVIEW
+        self.selected_rdi.number_of_households = PendingHousehold.objects.filter(
+            registration_data_import=self.selected_rdi
+        ).count()
+        self.selected_rdi.number_of_individuals = PendingIndividual.objects.filter(
+            registration_data_import=self.selected_rdi
+        ).count()
         self.selected_rdi.save()
 
         return Response(
