@@ -337,7 +337,7 @@ class TestPaymentCeleryTask(TestCase):
     @patch("hope.apps.payment.models.PaymentPlan.update_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
-        mock_get_exchange_rate: Mock,
+        mock_update_exchange_rate: Mock,
         mock_update_money_fields: Mock,
         mock_get_quantity_in_usd: Mock,
     ) -> None:
@@ -352,12 +352,10 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.exchange_rate == Decimal("0.10000000")
         payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
 
-        mock_get_exchange_rate.return_value = 1.25
         mock_get_quantity_in_usd.return_value = 125.0
 
         update_exchange_rate_on_release_payments(payment_plan_id=str(payment_plan.pk))
-        payment_plan.refresh_from_db()
-        assert payment_plan.exchange_rate == 1.25
+        mock_update_exchange_rate.assert_called_once()
 
         payment.refresh_from_db()
         assert payment.entitlement_quantity_usd == 125.0
