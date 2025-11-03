@@ -16,7 +16,6 @@ from hope.apps.periodic_data_update.models import (
     PDUXlsxTemplate,
     PDUXlsxUpload,
 )
-from hope.apps.periodic_data_update.utils import update_rounds_covered_for_template
 from hope.apps.program.models import Program
 
 PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
@@ -74,9 +73,7 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)
         validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        pdu_template = super().create(validated_data)
-        update_rounds_covered_for_template(pdu_template, validated_data["rounds_data"])
-        return pdu_template
+        return super().create(validated_data)
 
 
 class PDUXlsxTemplateDetailSerializer(serializers.ModelSerializer):
@@ -134,7 +131,7 @@ class PDUXlsxUploadSerializer(serializers.ModelSerializer):
 class PeriodicFieldDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicFieldData
-        fields = ("subtype", "number_of_rounds", "rounds_names", "rounds_covered")
+        fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):
@@ -291,12 +288,11 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
 
         # Pop fields that are not on the model before creating the instance
         validated_data.pop("filters", None)
-        rounds_data = validated_data.pop("rounds_data", None)
+        validated_data.pop("rounds_data", None)
 
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
-        update_rounds_covered_for_template(pdu_online_edit, rounds_data)
 
         if authorized_users:
             pdu_online_edit.authorized_users.set(authorized_users)
