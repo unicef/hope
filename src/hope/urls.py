@@ -93,6 +93,7 @@ api_patterns = [
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("sanction-list/", include("hope.apps.sanction_list.urls")),
+    path("generic-import/", include("hope.apps.generic_import.urls", namespace="generic_import")),
     path("hh-status", hope.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
     path("aurora/", include("hope.contrib.aurora.urls", namespace="aurora")),
