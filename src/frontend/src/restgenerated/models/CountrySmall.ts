@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- * * `EQUALS` - Equals
- */
-export enum TargetingCollectorBlockRuleFilterComparisonMethodEnum {
-    EQUALS = 'EQUALS',
-}
+export type CountrySmall = {
+    name: string;
+};
+

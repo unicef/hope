@@ -4,10 +4,6 @@ from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
-from hope.models.targeting_collector_block_rule_filter import (
-    TargetingCollectorBlockRuleFilter,
-)
-from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
@@ -34,7 +30,6 @@ def from_input_to_targeting_criteria(
         individual_ids = rule.get("individual_ids", "")
         households_filters_blocks = rule.get("households_filters_blocks", [])
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
-        collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
         if household_ids:
             household_ids = get_existing_unicef_ids(household_ids, Household, program)
         if individual_ids:
@@ -58,12 +53,3 @@ def from_input_to_targeting_criteria(
                     individuals_filters_block=ind_block, **ind_filter
                 )
                 individual_filter.save()
-
-        for collector_filter_block in collectors_filters_blocks:
-            collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
-            collector_block.save()
-            for collectors_filter in collector_filter_block.get("collector_block_filters", []):
-                collector_block_filters = TargetingCollectorBlockRuleFilter(
-                    collector_block_filters=collector_block, **collectors_filter
-                )
-                collector_block_filters.save()

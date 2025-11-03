@@ -21,7 +21,6 @@ from hope.models.business_area import BusinessArea
 from hope.models.household import (
     HEAD,
     IDENTIFICATION_TYPE_TAX_ID,
-    ROLE_NO_ROLE,
 )
 from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 from hope.models.payment import Payment
@@ -73,11 +72,6 @@ class TestDetails(TestCase):
         pending_household.head_of_household = pending_individual
         pending_household.detail_id = "HOPE-2022530111222"
         pending_household.save()
-        PendingIndividualRoleInHousehold.objects.create(
-            individual=pending_individual,
-            role=ROLE_NO_ROLE,
-            household=pending_household,
-        )
 
         detail_id = pending_household.detail_id
 
@@ -99,11 +93,6 @@ class TestDetails(TestCase):
         pending_individual = PendingIndividualFactory(household=pending_household, relationship=HEAD)
         pending_household.head_of_household = pending_individual
         pending_household.save()
-        PendingIndividualRoleInHousehold.objects.create(
-            individual=pending_individual,
-            role=ROLE_NO_ROLE,
-            household=pending_household,
-        )
 
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         pending_document = PendingDocumentFactory(individual=pending_individual, type=document_type)
@@ -119,7 +108,7 @@ class TestDetails(TestCase):
         individual = info["individual"]
         assert individual is not None
         assert individual["relationship"] == HEAD
-        assert individual["role"] == ROLE_NO_ROLE
+        assert individual["role"] is None
         assert individual["tax_id"] == tax_id
 
     def test_getting_individual_with_status_merged_to_population(self) -> None:
@@ -216,11 +205,6 @@ class TestDetails(TestCase):
         pending_household.head_of_household = pending_individual
         pending_household.detail_id = "HOPE-2022530111222"
         pending_household.save()
-        PendingIndividualRoleInHousehold.objects.create(
-            individual=pending_individual,
-            role=ROLE_NO_ROLE,
-            household=pending_household,
-        )
 
         detail_id = pending_household.detail_id
 

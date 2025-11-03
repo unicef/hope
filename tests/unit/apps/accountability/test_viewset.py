@@ -286,7 +286,17 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area"
             assert resp_data["language"] == "test language"
             assert resp_data["comments"] == "test comments"
-            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
+            assert resp_data["admin_url"] is None
+
+    def test_feedback_details_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -712,7 +722,17 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area 111"
             assert resp_data["language"] == "test language 111"
             assert resp_data["comments"] == "test comments 111"
-            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_1.id)}/change/"
+            assert resp_data["admin_url"] is None
+
+    def test_feedback_details_per_program_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -1275,7 +1295,17 @@ class TestMessageViewSet:
             assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
             assert resp_data["random_sampling_arguments"] is None
             assert resp_data["sample_size"] == 0
-            assert resp_data["admin_url"] is not None
+            assert resp_data["admin_url"] is None
+
+    def test_msg_details_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == self.msg_1.admin_url
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -1384,7 +1414,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1456,7 +1486,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1561,7 +1591,7 @@ class TestMessageViewSet:
             "payment_plan": str(self.payment_plan.pk),
             "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
+                "age": {"max": 80, "min": 15},
                 "sex": "MALE",
                 "margin_of_error": 20.0,
                 "confidence_interval": 0.9,

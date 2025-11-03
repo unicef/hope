@@ -165,9 +165,7 @@ WORK_STATUS_CHOICE = (
 )
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
-ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_NO_ROLE, "None"),
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )

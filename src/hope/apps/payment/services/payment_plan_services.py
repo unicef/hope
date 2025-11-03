@@ -55,7 +55,6 @@ from hope.models.payment_plan import PaymentPlan
 from hope.models.payment_plan_split import PaymentPlanSplit
 from hope.models.program import Program
 from hope.models.program_cycle import ProgramCycle
-from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 from hope.models.user import User
@@ -941,14 +940,6 @@ class PaymentPlanService:
                     ind_filter.pk = None
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
-
-            for col_filter_block in rule.collectors_filters_blocks.all():
-                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
-                col_filter_block_copy.save()
-                for col_filter in col_filter_block.collector_block_filters.all():
-                    col_filter.pk = None
-                    col_filter.collector_block_filters = col_filter_block_copy
-                    col_filter.save()
 
     def send_xlsx_password(self) -> PaymentPlan:
         send_payment_plan_payment_list_xlsx_per_fsp_password.delay(str(self.payment_plan.pk), str(self.user.pk))

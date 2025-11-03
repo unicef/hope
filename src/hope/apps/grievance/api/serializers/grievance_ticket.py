@@ -36,49 +36,18 @@ from hope.models.user import User
 
 class CreateAccountSerializer(serializers.Serializer):
     account_type = serializers.CharField(required=True)
-    financial_institution = serializers.CharField(required=False, allow_blank=True)
+    financial_institution = serializers.CharField(required=True)
     number = serializers.CharField(required=True)
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
-
-    def validate(self, attrs):
-        account_type = attrs.get("account_type", "").lower()
-        financial_institution = attrs.get("financial_institution", "")
-
-        if account_type == "bank" and not financial_institution:
-            raise serializers.ValidationError(
-                {"financial_institution": "Financial institution is required when account type is bank."}
-            )
-
-        return attrs
 
 
 class EditAccountSerializer(serializers.Serializer):
     id = serializers.UUIDField()
-    financial_institution = serializers.CharField(required=False, allow_blank=True)
+    financial_institution = serializers.CharField(required=True)
     number = serializers.CharField(required=True)
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
-
-    def validate(self, attrs):
-        from rest_framework.generics import get_object_or_404
-
-        from hope.models.account import Account
-
-        account_id = attrs.get("id")
-        financial_institution = attrs.get("financial_institution", "")
-
-        # Get the existing account to check its type
-        account = get_object_or_404(Account, id=account_id)
-        account_type_key = account.account_type.key.lower() if account.account_type else ""
-
-        # Check if financial_institution is required based on account type
-        if account_type_key == "bank" and not financial_institution:
-            raise serializers.ValidationError(
-                {"financial_institution": "Financial institution is required when account type is bank."}
-            )
-
-        return attrs
 
 
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
@@ -132,7 +101,12 @@ class TicketNoteSerializer(serializers.ModelSerializer):
 
 class HouseholdUpdateRolesSerializer(serializers.Serializer):
     individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
-    new_role = serializers.ChoiceField(choices=ROLE_CHOICE, required=True)
+    new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
+
+    def validate_new_role(self, value):
+        if value == "NO_ROLE":
+            return None
+        return value
 
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
@@ -350,7 +324,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     @staticmethod
     def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
         new_roles = [item["new_role"] for item in value]
-        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role != "NO_ROLE"}
+        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role is not None}
         if duplicates:
             raise serializers.ValidationError(f"Duplicate roles are not allowed: {', '.join(duplicates)}")
         return value
@@ -423,13 +397,13 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     who_answers_alt_phone = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     documents_to_edit = EditIndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentityGTSerializer(many=True, required=False)
     identities_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     identities_to_edit = EditIndividualIdentitySerializer(many=True, required=False)

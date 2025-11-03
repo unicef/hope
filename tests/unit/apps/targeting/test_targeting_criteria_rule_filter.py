@@ -19,7 +19,6 @@ from extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from extras.test_utils.factories.payment import (
-    AccountFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
@@ -33,10 +32,6 @@ from hope.models.household import (
 )
 from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.targeting_collector_block_rule_filter import (
-    TargetingCollectorBlockRuleFilter,
-)
-from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
@@ -316,79 +311,6 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         assert queryset.count() == 1
-
-    def test_rule_filter_collector_arg_yes(self) -> None:
-        # add Ind role and wallet
-        hh = self.households[0]
-        IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(),
-            household=hh,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        AccountFactory(
-            individual=collector,
-            data={"number": "test123"},
-            account_type=AccountType.objects.get(key="bank"),
-        )
-        payment_plan = PaymentPlanFactory(program_cycle=hh.program.cycles.first(), created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        rule_filter = TargetingCollectorBlockRuleFilter(
-            collector_block_filters=col_block,
-            comparison_method="EQUALS",
-            field_name="bank__number",
-            arguments=[True],
-        )
-        query = rule_filter.get_query()
-        queryset = self.get_households_queryset().filter(query).distinct()
-        assert queryset.count() == 1
-        assert queryset.first().unicef_id == hh.unicef_id
-
-    def test_rule_filter_collector_arg_no(self) -> None:
-        # add Ind role and wallet
-        hh = self.households[2]
-        IndividualRoleInHousehold.objects.create(
-            individual=hh.individuals.first(),
-            household=hh,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        AccountFactory(individual=collector, data={"other__random_name": "test123"})
-        # Target population
-        payment_plan = PaymentPlanFactory(program_cycle=hh.program.cycles.first(), created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        rule_filter = TargetingCollectorBlockRuleFilter(
-            collector_block_filters=col_block,
-            comparison_method="EQUALS",
-            field_name="delivery_data_field__random_name",
-            arguments=[False],
-        )
-        query = rule_filter.get_query()
-        queryset = self.get_households_queryset().filter(query).distinct()
-        assert queryset.count() == 1
-        assert queryset.first().unicef_id == hh.unicef_id
-
-    def test_rule_filter_collector_without_arg(self) -> None:
-        # all HH list, no collector' filter
-        payment_plan = PaymentPlanFactory(
-            program_cycle=self.households[0].program.cycles.first(),
-            created_by=self.user,
-        )
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        rule_filter = TargetingCollectorBlockRuleFilter(
-            collector_block_filters=col_block,
-            comparison_method="EQUALS",
-            field_name="delivery_data_field__random_name",
-            arguments=[],
-        )
-        query = rule_filter.get_query()
-        queryset = self.get_households_queryset().filter(query).distinct()
-        assert queryset.count() == 4
 
     def test_tc_rule_query_for_ind_hh_ids(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.households[0].program.cycles.first())

@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from typing import Any, Dict, Optional, Tuple
 
@@ -602,7 +603,7 @@ class TestHouseholdDetail:
         assert data["active_individuals_count"] == 1
         assert data["geopoint"] == self.household.geopoint
         assert data["import_id"] == self.household.unicef_id
-        assert data["admin_url"] == self.household.admin_url
+        assert data["admin_url"] is None
         assert data["male_children_count"] == self.household.male_children_count
         assert data["female_children_count"] == self.household.female_children_count
         assert data["children_disabled_count"] == self.household.children_disabled_count
@@ -676,6 +677,24 @@ class TestHouseholdDetail:
                 },
             }
         ]
+
+    def test_household_detail_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.household.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == self.household.admin_url
 
     @pytest.mark.parametrize(
         "permissions",
@@ -904,7 +923,7 @@ class TestHouseholdMembers:
                 "id": str(self.individual1_2.id),
                 "unicef_id": self.individual1_2.unicef_id,
                 "full_name": self.individual1_2.full_name,
-                "role": "NO_ROLE",
+                "role": None,
                 "relationship": self.individual1_2.relationship,
                 "status": self.individual1_2.status,
                 "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
@@ -1013,6 +1032,9 @@ class TestHouseholdGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
+        self.household_afghanistan1.created_at = timezone.make_aware(datetime(2025, 1, 1, 12, 0, 0))
+        self.household_afghanistan1.save()
+        self.household_afghanistan1.refresh_from_db()
         self.household_afghanistan2, _ = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1026,6 +1048,9 @@ class TestHouseholdGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
+        self.household_afghanistan2.created_at = timezone.make_aware(datetime(2025, 1, 2, 12, 0, 0))
+        self.household_afghanistan2.save()
+        self.household_afghanistan2.refresh_from_db()
 
         self.household_ukraine, _ = create_household_and_individuals(
             household_data={

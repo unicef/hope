@@ -186,7 +186,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{household.unicef_id}",
                     "individual_ids": "",
@@ -304,7 +303,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -330,7 +328,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(98):
+        with self.assertNumQueries(97):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -703,18 +701,21 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [
-                        {
-                            "comparison_method": "EQUALS",
-                            "arguments": ["No"],
-                            "field_name": "mobile_phone_number__cash_over_the_counter",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ],
                     "household_filters_blocks": [],
                     "household_ids": "",
                     "individual_ids": "",
-                    "individuals_filters_blocks": [],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [1, 99],
+                                    "field_name": "age_at_registration",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                },
+                            ],
+                        }
+                    ],
                 }
             ],
         }
@@ -769,7 +770,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -792,7 +792,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.total_households_count == 0
         assert pp.total_individuals_count == 0
         assert pp.payment_items.count() == 0
-        with self.assertNumQueries(71):
+        with self.assertNumQueries(70):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -1247,7 +1247,6 @@ class TestPaymentPlanServices(BaseTestCase):
                             ]
                         }
                     ],
-                    "collectors_filters_blocks": [],
                 }
             ],
             "flag_exclude_if_on_sanction_list": True,

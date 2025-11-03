@@ -1071,7 +1071,7 @@ class TestGrievanceTicketApprove:
                         "unicef_id": "IND-45",
                         "individual_id": "9cac5264-7f50-4f39-8a5f-0b19bbe80ddf",
                         "approve_status": False,
-                        "previous_value": "NO_ROLE",
+                        "previous_value": None,
                     },
                     {
                         "value": "ALTERNATE",
@@ -1079,7 +1079,7 @@ class TestGrievanceTicketApprove:
                         "unicef_id": "IND-46",
                         "individual_id": "15f93b1a-522e-42c1-a85e-8c329ea950f2",
                         "approve_status": False,
-                        "previous_value": "NO_ROLE",
+                        "previous_value": None,
                     },
                 ],
             },

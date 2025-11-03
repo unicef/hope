@@ -199,7 +199,7 @@ class HouseholdDataUpdateService(DataChangeService):
             if role.get("approve_status") is True:
                 individual_id = role["individual_id"]
                 individual = get_object_or_404(Individual, id=individual_id)
-                handle_role(role.get("value"), household, individual)
+                handle_role(household, individual, role.get("value"))
 
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)

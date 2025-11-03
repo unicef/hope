@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type EditAccount = {
     id: string;
-    financialInstitution?: string;
+    financialInstitution: string;
     number: string;
     dataFields?: any;
     approveStatus?: boolean;

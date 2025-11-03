@@ -145,7 +145,6 @@ class TestPaymentSignature(BaseTestCase):
 
         rules = [
             {
-                "collectors_filters_blocks": [],
                 "household_filters_blocks": [],
                 "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                 "individual_ids": "",

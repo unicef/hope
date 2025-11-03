@@ -1185,6 +1185,31 @@ class TestAccountModel(TestCase):
                 else:
                     AccountFactory(**kwargs)
 
+    def test_is_valid_iban(self) -> None:
+        cases = [
+            (None, False),
+            ("", False),
+            (" ", False),
+            ("1", False),
+            ("PL", False),  # too short
+            ("PL00", False),  # too short
+            ("PL00ABC", False),  # too short
+            ("PL00123456789012345678901234X", False),  # invalid char at end
+            ("PL00 1234 5678 9012 3456 7890 1234", True),  # spaces tolerated, length 28
+            ("pl00 1234 5678 9012 3456 7890 1234", True),  # lowercase accepted
+            ("DE89370400440532013000", True),  # DE length 22
+            ("GB82WEST12345698765432", True),  # GB length 22
+            ("NO9386011117947", True),  # NO length 15
+            ("NL91ABNA0417164300", True),  # NL length 18
+            ("FR1420041010050500013M02606", True),  # FR length 27
+            ("DE8937040044053201300", False),  # DE too short
+            ("DE893704004405320130000", False),  # DE too long
+            ("ZZ0012345678901234", True),  # unknown country code but valid
+        ]
+        for number, expected in cases:
+            with self.subTest(number=number, expected=expected):
+                assert Account.is_valid_iban(number) == expected
+
 
 @tag("isolated")
 class TestAccountModelUniqueField(TransactionTestCase):
@@ -1251,3 +1276,22 @@ class TestAccountTypeModel(TestCase):
             "bank__number",
             "mobile__number",
         ]
+
+
+class TestFinancialInstitutionModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        generate_delivery_mechanisms()
+
+    def test_get_generic_one(self) -> None:
+        cases = [
+            ("mobile", True, "Generic Telco Company"),
+            ("card", True, "Generic Bank"),
+            ("xxx", True, "Generic Bank"),
+            ("bank", True, "IBAN Provider Bank"),
+            ("bank", False, "Generic Bank"),
+        ]
+        for account_type, is_valid_iban, expected_fi_name in cases:
+            with self.subTest(account_type=account_type, is_valid_iban=is_valid_iban):
+                assert FinancialInstitution.get_generic_one(account_type, is_valid_iban).name == expected_fi_name

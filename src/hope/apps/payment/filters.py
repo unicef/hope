@@ -222,7 +222,7 @@ class PaymentPlanFilter(FilterSet):
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         if not self.form.cleaned_data.get("order_by"):
-            queryset = queryset.order_by("unicef_id")
+            queryset = queryset.order_by("-created_at")
         return super().filter_queryset(queryset)
 
     order_by = OrderingFilter(
@@ -389,7 +389,7 @@ class PaymentFilter(FilterSet):
             )
         )
         if not self.form.cleaned_data.get("order_by"):
-            queryset = queryset.order_by("unicef_id")
+            queryset = queryset.order_by("-created_at")
 
         return super().filter_queryset(queryset)
 

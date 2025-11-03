@@ -30,9 +30,6 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
-    def get_collectors_filters_blocks(self) -> "QuerySet":
-        return self.collectors_filters_blocks.all()
-
     def get_query(self) -> Q:
         query = super().get_query()
 

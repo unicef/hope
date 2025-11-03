@@ -83,7 +83,7 @@ export type IndividualDetail = {
      */
     pregnant?: boolean | null;
     household: HouseholdSimple;
-    readonly role: string;
+    readonly role: string | null;
     /**
      * This represents the MEMBER relationship. can be blank
      * as well if household is null!
@@ -110,7 +110,7 @@ export type IndividualDetail = {
     relationship?: RelationshipEnum;
     registrationDataImport: RegistrationDataImport;
     readonly importId: string;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     /**
      * Preferred language
      *

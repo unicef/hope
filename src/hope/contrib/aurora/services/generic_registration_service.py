@@ -248,11 +248,14 @@ class GenericRegistrationService(BaseRegistrationService):
         return self._create_object_and_validate(household_data, PendingHousehold)
 
     def create_account(self, account_data: dict, individual: PendingIndividual) -> PendingAccount:
+        number = account_data["data"].pop("number", None)
+        if not (fi_id := account_data["data"].pop("financial_institution", None)):
+            fi_id = FinancialInstitution.get_generic_one("bank", Account.is_valid_iban(number)).id
         return PendingAccount.objects.create(
             individual_id=individual.id,
             account_type=AccountType.objects.get(key="bank"),
-            number=account_data["data"].pop("number", None),
-            financial_institution_id=account_data["data"].pop("financial_institution", None),
+            number=number,
+            financial_institution_id=fi_id,
             **account_data,
         )
 

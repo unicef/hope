@@ -38,7 +38,6 @@ from hope.models.household import (
     NOT_PROVIDED,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
@@ -422,9 +421,9 @@ class Individual(
         return relativedelta(date.today(), self.birth_date).years
 
     @property
-    def role(self) -> str:
+    def role(self) -> str | None:
         role = self.households_and_roles.first()
-        return role.role if role is not None else ROLE_NO_ROLE
+        return role.role if role else None
 
     @property
     def get_hash_key(self) -> str:
@@ -603,7 +602,7 @@ class Individual(
         return self, update_fields
 
     def count_all_roles(self) -> int:
-        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+        return self.households_and_roles.count()
 
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()

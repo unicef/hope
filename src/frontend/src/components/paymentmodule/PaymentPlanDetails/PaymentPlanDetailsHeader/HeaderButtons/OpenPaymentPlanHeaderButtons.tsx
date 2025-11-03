@@ -7,7 +7,6 @@ import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -22,7 +21,6 @@ export function OpenPaymentPlanHeaderButtons({
   canRemove,
   canEdit,
   canLock,
-  canAbort,
 }: OpenPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();

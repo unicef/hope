@@ -8,9 +8,18 @@ from hope.models.business_area import (
 )
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.flexible_attribute import FlexibleAttribute, FlexibleAttributeChoice
+from hope.models.country import Country
+
+
+class CountrySmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ("name",)
 
 
 class BusinessAreaSerializer(serializers.ModelSerializer):
+    countries = CountrySmallSerializer(many=True, read_only=True)
+
     class Meta:
         model = BusinessArea
         fields = (
@@ -23,6 +32,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "is_split",
             "active",
             "is_accountability_applicable",
+            "countries",
         )
 
 

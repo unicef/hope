@@ -8,10 +8,6 @@ from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment_plan import PaymentPlan
 from hope.models.program import Program
-from hope.models.targeting_collector_block_rule_filter import (
-    TargetingCollectorBlockRuleFilter,
-)
-from hope.models.targeting_collector_rule_filter_block import TargetingCollectorRuleFilterBlock
 from hope.models.targeting_criteria_rule import TargetingCriteriaRule
 from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
 from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
@@ -38,25 +34,6 @@ class TargetPopulationListSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_status(obj: PaymentPlan) -> str:
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
-
-
-class TargetingCollectorBlockRuleFilterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TargetingCollectorBlockRuleFilter
-        fields = (
-            "comparison_method",
-            "flex_field_classification",
-            "field_name",
-            "arguments",
-        )
-
-
-class TargetingCollectorRuleFilterBlockSerializer(serializers.ModelSerializer):
-    collector_block_filters = TargetingCollectorBlockRuleFilterSerializer(many=True)
-
-    class Meta:
-        model = TargetingCollectorRuleFilterBlock
-        fields = ("collector_block_filters",)
 
 
 class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
@@ -141,7 +118,6 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
 class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
     households_filters_blocks = TargetingCriteriaRuleFilterSerializer(many=True, required=False)
     individuals_filters_blocks = TargetingIndividualRuleFilterBlockSerializer(many=True, required=False)
-    collectors_filters_blocks = TargetingCollectorRuleFilterBlockSerializer(many=True, required=False)
 
     class Meta:
         model = TargetingCriteriaRule
@@ -150,7 +126,6 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             "individual_ids",
             "households_filters_blocks",
             "individuals_filters_blocks",
-            "collectors_filters_blocks",
         )
 
     def to_representation(self, instance: TargetingCriteriaRule) -> dict:

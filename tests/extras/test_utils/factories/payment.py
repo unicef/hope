@@ -851,6 +851,15 @@ def generate_delivery_mechanisms() -> None:
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )
 
+    generic_fis = [
+        ("IBAN Provider Bank", FinancialInstitution.FinancialInstitutionType.BANK),
+        ("Generic Bank", FinancialInstitution.FinancialInstitutionType.BANK),
+        ("Generic Telco Company", FinancialInstitution.FinancialInstitutionType.TELCO),
+    ]
+
+    for fi_name, fi_type in generic_fis:
+        FinancialInstitution.objects.get_or_create(name=fi_name, type=fi_type)
+
 
 class FinancialInstitutionFactory(DjangoModelFactory):
     country = factory.SubFactory(CountryFactory)

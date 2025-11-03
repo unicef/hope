@@ -562,7 +562,7 @@ class GrievanceTicketGlobalViewSet(
         creator = TicketCreatorService(details_creator)
         grievances = creator.create(user, self.business_area, input_data)
 
-        resp = GrievanceTicketDetailSerializer(grievances, many=True)
+        resp = GrievanceTicketDetailSerializer(grievances, context={"request": request}, many=True)
         headers = self.get_success_headers(resp.data)
         return Response(resp.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -625,7 +625,7 @@ class GrievanceTicketGlobalViewSet(
             old_grievance_ticket,
             grievance_ticket,
         )
-        resp = GrievanceTicketDetailSerializer(grievance_ticket)
+        resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
 
     @transaction.atomic
@@ -653,7 +653,7 @@ class GrievanceTicketGlobalViewSet(
 
         if grievance_ticket.status == new_status:
             return Response(
-                GrievanceTicketDetailSerializer(grievance_ticket).data,
+                GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
                 status=status.HTTP_202_ACCEPTED,
             )
         if permissions_to_use := self.get_permissions_for_status_change(
@@ -835,7 +835,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
 
         return Response(
-            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -898,7 +898,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
 
         return Response(
-            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -951,7 +951,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
 
         return Response(
-            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -1005,7 +1005,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
 
         return Response(
-            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -1123,7 +1123,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.payment_verification_ticket_details.save()
         grievance_ticket.refresh_from_db()
         return Response(
-            GrievanceTicketDetailSerializer(grievance_ticket).data,
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
