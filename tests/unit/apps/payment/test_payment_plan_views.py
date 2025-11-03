@@ -40,6 +40,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FileTemp
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
+from hope.apps.payment.celery_tasks import payment_plan_apply_engine_rule
 from hope.apps.payment.models import (
     Approval,
     FinancialServiceProvider,
@@ -2064,6 +2065,10 @@ class TestPaymentPlanActions:
             self.pp.refresh_from_db(fields=["background_action_status"])
             assert self.pp.background_action_status == "RULE_ENGINE_RUN"
             assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
+
+            payment_plan_apply_engine_rule(str(self.pp.id), str(rule_for_pp.pk))
+            self.pp.refresh_from_db(fields=["background_action_status"])
+            assert self.pp.background_action_status is None
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
