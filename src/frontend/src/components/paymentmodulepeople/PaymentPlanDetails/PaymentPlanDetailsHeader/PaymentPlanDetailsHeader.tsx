@@ -76,7 +76,6 @@ export function PaymentPlanDetailsHeader({
           canRemove={canRemove}
           canEdit={canEdit}
           canLock={canLock}
-          canAbort={canAbort}
         />
       );
       break;
