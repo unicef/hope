@@ -43,22 +43,14 @@ export const validate = (values, beneficiaryGroup) => {
   const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
     values.individualsFiltersBlocks,
   );
-  const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
-    values.collectorsFiltersBlocks,
-  );
 
   const errors: { nonFieldErrors?: string[] } = {};
-  if (
-    hasHouseholdsFiltersBlocksErrors ||
-    hasIndividualsFiltersBlocksErrors ||
-    hasCollectorsFiltersBlocksErrors
-  ) {
+  if (hasHouseholdsFiltersBlocksErrors || hasIndividualsFiltersBlocksErrors) {
     errors.nonFieldErrors = ['You need to fill out missing values.'];
   }
   if (
     values.householdsFiltersBlocks.length +
-      values.individualsFiltersBlocks.length +
-      values.collectorsFiltersBlocks.length ===
+      values.individualsFiltersBlocks.length ===
       0 &&
     (!values.householdIds || values.householdIds.length === 0) &&
     (!values.individualIds || values.individualIds.length === 0)
@@ -68,9 +60,6 @@ export const validate = (values, beneficiaryGroup) => {
     ];
   } else if (
     values.individualsFiltersBlocks.filter(
-      (block) => block.blockFilters && block.blockFilters.length === 0,
-    ).length > 0 ||
-    values.collectorsFiltersBlocks.filter(
       (block) => block.blockFilters && block.blockFilters.length === 0,
     ).length > 0
   ) {
@@ -168,7 +157,6 @@ export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
 export const clearField = (arrayHelpers, index): void =>
   arrayHelpers.replace(index, {});
 
- 
 export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
   if (filters) {
@@ -258,19 +246,6 @@ export function mapCriteriaToInitialValues(criteria) {
   const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
-  const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
-
-  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
-    (block) => ({
-      ...block,
-      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
-        ...filter,
-        arguments: filter.arguments.map((arg) =>
-          arg === true ? 'Yes' : arg === false ? 'No' : arg,
-        ),
-      })),
-    }),
-  );
 
   return {
     deliveryMechanism,
@@ -282,15 +257,11 @@ export function mapCriteriaToInitialValues(criteria) {
       individualsFiltersBlocks,
       'individual',
     ),
-    collectorsFiltersBlocks: mapBlockFilters(
-      adjustedCollectorsFiltersBlocks,
-      'collector',
-    ),
   };
 }
 
 // TODO Marącin make Type to this function
- 
+
 export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
@@ -306,11 +277,7 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
-        if (
-          each.associatedWith === 'Account' ||
-          //trick for Collector fields
-          each.associatedWith === undefined
-        ) {
+        if (each.associatedWith === 'Account') {
           comparisonMethod = 'EQUALS';
         }
         values = [each.value];
@@ -390,18 +357,12 @@ export function formatCriteriaFilters(filters) {
 }
 
 // TODO Marcin make Type to this function
- 
+
 export function formatCriteriaIndividualsFiltersBlocks(
   individualsFiltersBlocks,
 ) {
   return individualsFiltersBlocks.map((block) => ({
     individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
-  }));
-}
-
-export function formatCriteriaCollectorsFiltersBlocks(collectorsFiltersBlocks) {
-  return collectorsFiltersBlocks.map((block) => ({
-    collectorBlockFilters: formatCriteriaFilters(block.collectorBlockFilters),
   }));
 }
 
@@ -449,7 +410,7 @@ function mapFilterToVariable(filter: Filter): Result {
 }
 
 // TODO Marcin make Type to this function
- 
+
 export function getTargetingCriteriaVariables(values) {
   return {
     rules: values.criterias.map((criteria) => ({
@@ -461,12 +422,6 @@ export function getTargetingCriteriaVariables(values) {
         (block) => ({
           individualBlockFilters:
             block.individualBlockFilters.map(mapFilterToVariable),
-        }),
-      ),
-      collectorsFiltersBlocks: criteria.collectorsFiltersBlocks.map(
-        (block) => ({
-          collectorBlockFilters:
-            block.collectorBlockFilters.map(mapFilterToVariable),
         }),
       ),
     })),
