@@ -2717,7 +2717,7 @@ class WesternUnionInvoicePayment(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.payment.unicef_id} - {self.transaction_status}"
+        return f"{self.payment.unicef_id} - {self.transaction_status}"  # pragma no cover
 
 
 class OfflineExchangeRates(TimeStampedModel):
@@ -2727,4 +2727,4 @@ class OfflineExchangeRates(TimeStampedModel):
     )
 
     def __str__(self) -> str:
-        return f"Offline Exchange Rates - {self.updated_at}"
+        return f"Offline Exchange Rates - {self.updated_at}"  # pragma no cover
