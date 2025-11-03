@@ -17,6 +17,8 @@ import { headCells } from './PeoplePaymentsTableHeadCells';
 import { PeoplePaymentsTableRow } from './PeoplePaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { createApiParams } from '@utils/apiUtils';
+import { usePersistedCount } from '@hooks/usePersistedCount';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -73,6 +75,32 @@ const PeoplePaymentsTable = ({
     },
   });
 
+  // Payments count
+  const { data: paymentsCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentsCountRetrieve',
+      businessArea,
+      programId,
+      paymentPlan.id,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanPk: paymentPlan.id,
+          },
+          queryVariables,
+        ),
+      ),
+    // fetch count only on the first page and persist it across pages
+    enabled: !!businessArea && !!paymentPlan?.id && page === 0,
+  });
+
+  const itemsCount = usePersistedCount(page, paymentsCount);
+
   return (
     <>
       <TableWrapper>
@@ -100,6 +128,7 @@ const PeoplePaymentsTable = ({
             queryVariables={queryVariables}
             setQueryVariables={setQueryVariables}
             data={paymentsData}
+            itemsCount={itemsCount}
             page={page}
             setPage={setPage}
             renderRow={(row: PaymentList) => (
