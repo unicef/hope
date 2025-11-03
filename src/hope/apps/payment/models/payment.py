@@ -777,7 +777,6 @@ class PaymentPlan(
                 return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
 
-    # from generic pp
     def update_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> None:
         from hope.apps.core.exchange_rates import ExchangeRates
 

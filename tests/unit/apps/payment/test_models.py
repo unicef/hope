@@ -292,10 +292,6 @@ class TestPaymentPlanModel(TestCase):
         payment_plan = PaymentPlanFactory(created_by=self.user, status=PaymentPlan.Status.TP_PROCESSING)
         assert payment_plan.is_population_finalized()
 
-    def test_get_exchange_rate_for_usdc_currency(self) -> None:
-        pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
-        assert pp.get_exchange_rate() == 1.0
-
     def test_is_reconciled(self) -> None:
         pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
         assert pp.is_reconciled is False

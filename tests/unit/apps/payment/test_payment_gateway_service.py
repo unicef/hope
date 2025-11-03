@@ -168,7 +168,6 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -178,7 +177,6 @@ class TestPaymentGatewayService(BaseTestCase):
         self,
         get_quantity_in_usd_mock: Any,
         get_records_for_payment_instruction_mock: Any,
-        get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
         self.pp_split_1.sent_to_payment_gateway = True
@@ -248,7 +246,6 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -258,7 +255,6 @@ class TestPaymentGatewayService(BaseTestCase):
         self,
         get_quantity_in_usd_mock: Any,
         get_records_for_payment_instruction_mock: Any,
-        get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
         self.pp_split_1.sent_to_payment_gateway = True
@@ -359,7 +355,6 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -369,7 +364,6 @@ class TestPaymentGatewayService(BaseTestCase):
         self,
         get_quantity_in_usd_mock: Any,
         get_records_for_payment_instruction_mock: Any,
-        get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
         self.pp_split_1.sent_to_payment_gateway = True
@@ -438,7 +432,6 @@ class TestPaymentGatewayService(BaseTestCase):
         "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
     @mock.patch(
         "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -448,7 +441,6 @@ class TestPaymentGatewayService(BaseTestCase):
         self,
         get_quantity_in_usd_mock: Any,
         get_record_mock: Any,
-        get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
         self.payments[0].status = Payment.STATUS_ERROR

@@ -192,7 +192,7 @@ class TestPaymentCeleryTask(TestCase):
         "hope.apps.payment.models.PaymentPlan.update_exchange_rate",
         return_value=2.0,
     )
-    def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
+    def test_payment_plan_rebuild_stats(self, update_exchange_rate: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.program.cycles.first(),
             created_by=self.user,

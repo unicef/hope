@@ -265,8 +265,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.status == PaymentPlan.Status.OPEN
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_create(self, get_exchange_rate_mock: Any) -> None:
+    def test_create(self) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
@@ -338,8 +337,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.payment_items.count() == 2
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
+    def test_update_validation_errors(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
         hoh1 = IndividualFactory(household=None)
@@ -368,8 +366,7 @@ class TestPaymentPlanServices(BaseTestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
+    def test_create_follow_up_pp(self) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
             created_by=self.user,
@@ -515,9 +512,8 @@ class TestPaymentPlanServices(BaseTestCase):
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
-    def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
+    def test_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
         pp = PaymentPlanFactory(created_by=self.user)
@@ -643,8 +639,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[0].split_payment_items.count() == 12
 
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
+    def test_send_to_payment_gateway(self) -> None:
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -742,8 +737,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
+    def test_full_rebuild(self) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),

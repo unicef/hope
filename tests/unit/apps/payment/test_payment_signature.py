@@ -112,8 +112,7 @@ class TestPaymentSignature(BaseTestCase):
         assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
+    def test_signature_after_prepare_payment_plan(self) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
