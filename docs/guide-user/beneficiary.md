@@ -127,3 +127,29 @@ Import data from Kobo: choose the option(s) of “only approved submissions” a
 Import data from Program Population: name the title, choose the Program Name, and choose the program data requirement needed. Click IMPORT.
 
 ![Image](_screenshots/reg/bnf_4.png)
+
+#### How to manage Periodic Data Update (PDU) values online?
+
+Apart from importing XLS template, users can utilize the online editing feature directly from the user interface, after defining the PDU fields following the regular process.
+Access to Online PDU feature:
+1. Find Household module and choose “Individuals” where users can find Periodic Data Updates. 
+2. Navigate to “Online Edits” tab.
+3. Click 'NEW ONLINE EDIT'.
+![Image](_screenshots/reg/bnf_5.png)
+
+4. Filter the individuals of update.
+![Image](_screenshots/reg/bnf_6.png)
+
+5. Specify the field(s) and the round(s).
+![Image](_screenshots/reg/bnf_8.png)
+
+6. Authorize users to access the template; specify who can edit, approve and merge.
+![Image](_screenshots/reg/bnf_9.png)
+
+7. Specify template name (optionally).
+![Image](_screenshots/reg/bnf_10.png)
+   
+The online edits will be added, segregated by status. Users will be able to contribute based on their authorized access and user permissions. Automatic email notifications will be sent to relevant users on key status changes.
+![Image](_screenshots/reg/bnf_11.png)
+![Image](_screenshots/reg/bnf_12.png)
+
