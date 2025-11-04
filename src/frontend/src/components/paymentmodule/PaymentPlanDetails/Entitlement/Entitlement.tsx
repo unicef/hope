@@ -144,12 +144,13 @@ function Entitlement({
 
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: ['engineRules'],
+      queryKey: ['engineRules', businessArea],
       queryFn: () =>
         RestService.restEngineRulesList({
           type: 'PAYMENT_PLAN',
           deprecated: false,
           enabled: true,
+          businessArea: businessArea,
         }),
     });
 
