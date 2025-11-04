@@ -13,11 +13,11 @@ import such data:Registration
 
    b) Aurora is available in online settings Import
 
-   a) Import data directly from Kobo and Aurora
+   c) Import data directly from Kobo and Aurora
 
-   b) Import data from an excel sheet
+   d) Import data from an excel sheet
 
-   c) Import data through API
+   e) Import data through API
 
 #### Beneficiary Registration with KOBO
 
@@ -108,3 +108,22 @@ Ensure the following when selecting file to import:
     ![Image](_screenshots/reg/6.png)
 
 This is the template provided when you select download.
+
+#### How to import data
+
+1. Select the respective Programme and go to the Registration Data Import module and click import on the top right, a window will appear to select file to import
+2. Select file to import data from Excel, Kobo, or Program Population.
+
+ ![Image](_screenshots/reg/bnf_1.png)
+
+Import data from Excel: upload file and name the title, then click IMPORT.
+
+![Image](_screenshots/reg/bnf_2.png)
+
+Import data from Kobo: choose the option(s) of “only approved submissions” and/or “Pull pictures”, then select project and name the title. Click IMPORT.
+
+![Image](_screenshots/reg/bnf_3.png)
+
+Import data from Program Population: name the title, choose the Program Name, and choose the program data requirement needed. Click IMPORT.
+
+![Image](_screenshots/reg/bnf_4.png)
