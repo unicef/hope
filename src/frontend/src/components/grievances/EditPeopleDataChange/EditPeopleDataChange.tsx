@@ -121,7 +121,7 @@ function EditPeopleDataChange({
   }
 
   const combinedData = {
-    results: editPeopleFieldsData?.results || [],
+    results: editPeopleFieldsData || [],
     countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
