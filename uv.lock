@@ -640,11 +640,14 @@ sdist = { url = "https://files.pythonhosted.org/packages/79/7d/5ffc8dc775108f640
 
 [[package]]
 name = "django-admin-extra-buttons"
-version = "1.6.0"
+version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1e/ad/100d68b4a7410d3cb2c0b56032c19816e73790b3db70639906b6aac6ffcb/django_admin_extra_buttons-1.6.0.tar.gz", hash = "sha256:bf260aa654f82e125718aa337f8acdaef46959dc981cf46cd5cde2db577c0bd5", size = 188130, upload-time = "2024-10-10T07:42:22.405Z" }
+dependencies = [
+    { name = "django-stubs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/26/5f/ed95a22ea69fdb661896f42bc2d3343685e5126c8206464004c674d5ac3f/django_admin_extra_buttons-2.1.1.tar.gz", hash = "sha256:3c9e5cdcf05c7c8003748c07960a56bb77c46a85a9bef2714777a715397f3288", size = 12903, upload-time = "2025-05-20T11:43:51.339Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e2/0c/cd02498331a6bf9ff4472765f650296afa058c24da596ac340a639dba7be/django_admin_extra_buttons-1.6.0-py2.py3-none-any.whl", hash = "sha256:fb79cca443866679a97d769d781ff4ff921ea68cdb28873d7e00a70a9c90e24f", size = 21334, upload-time = "2024-10-10T07:42:19.244Z" },
+    { url = "https://files.pythonhosted.org/packages/18/8f/db79e3fc78e5ac4972d760d43fedf99ad4bf7ed410031c6de0c72b237c41/django_admin_extra_buttons-2.1.1-py3-none-any.whl", hash = "sha256:4ebd96d67c1992d8d81ed6816545a9035007e00dec64b58bbd73f3ac3999e7e6", size = 21748, upload-time = "2025-05-20T11:43:48.745Z" },
 ]
 
 [[package]]
@@ -670,9 +673,16 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/63/4428328cc0ca60ee0
 
 [[package]]
 name = "django-adminfilters"
-version = "2.4.2"
+version = "2.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ab/b3/c956051da6b88e365feb9ccbb4dad649ea06465465bf1654c8cf00b1a449/django-adminfilters-2.4.2.tar.gz", hash = "sha256:65ba270dc11ebde95262bee55f80db66d23c5ab2333714f3dc9b810a4642ec71", size = 56743, upload-time = "2024-03-08T18:20:59.021Z" }
+dependencies = [
+    { name = "django-stubs" },
+    { name = "django-stubs-ext" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6b/2f/f7a6605117e2adf2a69be8d32dd5d2df94769f39473e433fba35cc354bc5/django_adminfilters-2.6.tar.gz", hash = "sha256:e9d57869a7f696a0b972b2b482d7ac69285f38a28d527270670bc7588653fdfd", size = 27183, upload-time = "2025-04-02T13:31:56.544Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/5d/f58005d14f062a448d4bda26f799e84e675576bfe0a669a83d138e0a8dad/django_adminfilters-2.6-py3-none-any.whl", hash = "sha256:b5bd60a73ff8ea154fd109ff7e85e623096653a0bf4c087dee14d044f8a5fa73", size = 53913, upload-time = "2025-04-02T13:31:54.81Z" },
+]
 
 [[package]]
 name = "django-advanced-filters"
@@ -1127,15 +1137,16 @@ wheels = [
 
 [[package]]
 name = "django-smart-admin"
-version = "2.6.0"
+version = "3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django-admin-extra-buttons" },
-    { name = "django-adminactions" },
     { name = "django-adminfilters" },
-    { name = "django-sysinfo" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a0/8e/f43d154a9b84a10cdb635d5a1c4845cdea7b3d54e3f63b172a4d56a150f0/django-smart-admin-2.6.0.tar.gz", hash = "sha256:9ac878433c57eb285360e0c019258fc7fef9d5557805dafb55d2f965e4fe02e2", size = 40521, upload-time = "2022-11-22T12:11:29.38Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/54/c3/f30bb687b280cac27a9890866566c09697ccfb740a35fbeb4c176dc948ac/django_smart_admin-3.0.tar.gz", hash = "sha256:96094d32f4694a41ed6399d65a693996afb5eda9ad8f9ac9580ca2417d2088e1", size = 25767, upload-time = "2025-04-28T17:17:26.08Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ea/c9/252aea7776f4636579de95ac427943b916efdfb12718550aaecf30e92f32/django_smart_admin-3.0-py3-none-any.whl", hash = "sha256:0605339a7e966a27ee901081cf3b41cf59a1c47f36f6dea29d3b97b82d6bcd6c", size = 47501, upload-time = "2025-04-28T17:17:24.385Z" },
+]
 
 [[package]]
 name = "django-smart-env"
@@ -1196,33 +1207,30 @@ wheels = [
 
 [[package]]
 name = "django-stubs"
-version = "1.12.0"
+version = "5.2.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-stubs-ext" },
-    { name = "mypy" },
-    { name = "tomli" },
-    { name = "types-pytz" },
     { name = "types-pyyaml" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/d9/4f18d932a35a4368078f97619fc4820639fa283cc5a972eaaad16465ca73/django-stubs-1.12.0.tar.gz", hash = "sha256:ea8b35d0da49f7b2ee99a79125f1943e033431dd114726d6643cc35de619230e", size = 230030, upload-time = "2022-06-17T15:16:02.508Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/a8/bc8c55212978f1e666486b60a4bfb0bc3a066de8212fa7389ff0f3dca639/django_stubs-5.2.7.tar.gz", hash = "sha256:2a07e47a8a867836a763c6bba8bf3775847b4fd9555bfa940360e32d0ee384a1", size = 257339, upload-time = "2025-10-08T08:01:18.237Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/fe/fe15374aa553c9929be4adc8c56db69af3c29fb6b02eaa0a7a548bac8567/django_stubs-1.12.0-py3-none-any.whl", hash = "sha256:0dff8ec0ba3abe046450b3d8a29ce9e72629893d2c1ef679189cc2bfdb6d2f64", size = 428409, upload-time = "2022-06-17T15:16:01.104Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/66/1c8063eee88a943f01d073dbbbda34ed093bf6e19738178506a66abbd5ad/django_stubs-5.2.7-py3-none-any.whl", hash = "sha256:2864e74b56ead866ff1365a051f24d852f6ed02238959664f558a6c9601c95bf", size = 507733, upload-time = "2025-10-08T08:01:16.172Z" },
 ]
 
 [[package]]
 name = "django-stubs-ext"
-version = "0.8.0"
+version = "5.2.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/de/27/518a5c6326d4444a4d59d8a6ff50ec131ab67da7460c645745d13d2c168f/django-stubs-ext-0.8.0.tar.gz", hash = "sha256:9a9ba9e2808737949de96a0fce8b054f12d38e461011d77ebc074ffe8c43dfcb", size = 5949, upload-time = "2023-03-16T14:11:50.778Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/6f/a0bab0e6a7676ab3ca02d51b459444e9bd6dd747e3a43b9c24cae6d0a1c6/django_stubs_ext-5.2.7.tar.gz", hash = "sha256:b690655bd4cb8a44ae57abb314e0995dc90414280db8f26fff0cb9fb367d1cac", size = 6524, upload-time = "2025-10-08T08:00:38.895Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/1c/952f81adc763424c5f429814b289ede729dc6ee4ed0cc087b3260744d96b/django_stubs_ext-0.8.0-py3-none-any.whl", hash = "sha256:a454d349d19c26d6c50c4c6dbc1e8af4a9cda4ce1dc4104e3dd4c0330510cc56", size = 6669, upload-time = "2023-03-16T14:11:49.214Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/c9/60445606e26706d3fccadf3b80ee1a9f32c1012683ff2ada7580937b2da9/django_stubs_ext-5.2.7-py3-none-any.whl", hash = "sha256:0466a7132587d49c5bbe12082ac9824d117a0dedcad5d0ada75a6e0d3aca6f60", size = 9979, upload-time = "2025-10-08T08:00:37.499Z" },
 ]
 
 [[package]]
@@ -1909,10 +1917,10 @@ requires-dist = [
     { name = "defusedxml", specifier = "==0.7.0rc1" },
     { name = "django", specifier = "~=5.2" },
     { name = "django-admin-cursor-paginator", specifier = ">=0.1.3,<1" },
-    { name = "django-admin-extra-buttons", specifier = ">=1.5.4,<2" },
+    { name = "django-admin-extra-buttons", specifier = ">=2,<3" },
     { name = "django-admin-sync", specifier = ">=0.7,<1" },
     { name = "django-adminactions", specifier = ">=2.1,<3" },
-    { name = "django-adminfilters", specifier = "==2.4.2" },
+    { name = "django-adminfilters", specifier = "==2.6" },
     { name = "django-advanced-filters", specifier = ">=2,<3" },
     { name = "django-auditlog", specifier = ">=2.1.1,<3" },
     { name = "django-celery-beat", specifier = ">=2.3,<3" },
@@ -1946,7 +1954,7 @@ requires-dist = [
     { name = "django-rest-extensions", specifier = ">=0.2" },
     { name = "django-reversion", specifier = ">=5.0.2,<6" },
     { name = "django-silk", specifier = ">=5.0.1,<6" },
-    { name = "django-smart-admin", specifier = ">=2,<3" },
+    { name = "django-smart-admin", specifier = ">=3,<4" },
     { name = "django-smart-env" },
     { name = "django-sql-explorer", extras = ["xls"], specifier = ">=3,<4" },
     { name = "django-storages", extras = ["azure"], specifier = ">=1.12.3,<2" },
@@ -2008,8 +2016,8 @@ dev = [
     { name = "aniso8601", specifier = ">=10.0.1" },
     { name = "argh", specifier = ">=0.28,<1" },
     { name = "coverage", specifier = ">=7.3.2,<8" },
-    { name = "django-stubs", specifier = "~=1.12.0" },
-    { name = "django-stubs-ext", specifier = ">=0.7,<1" },
+    { name = "django-stubs", specifier = ">=5,<6" },
+    { name = "django-stubs-ext", specifier = ">=5,<6" },
     { name = "django-webtest", specifier = ">=1.9.10,<2" },
     { name = "djangorestframework-stubs", specifier = "~=1.7.0" },
     { name = "faker", specifier = ">=17,<18" },
