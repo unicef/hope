@@ -1117,9 +1117,12 @@ class TestMessageViewSet:
             business_area=self.afghanistan,
             program_cycle=self.program_active.cycles.first(),
         )
+
+        birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
         self.households = [
             create_household(
                 household_args={"program": self.program_active},
+                individual_args={"birth_date": birth_date_for_50yo, "sex": "MALE"},
             )[0]
             for _ in range(14)
         ]
@@ -1414,7 +1417,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1486,7 +1489,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1591,7 +1594,7 @@ class TestMessageViewSet:
             "payment_plan": str(self.payment_plan.pk),
             "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
+                "age": {"max": 80, "min": 15},
                 "sex": "MALE",
                 "margin_of_error": 20.0,
                 "confidence_interval": 0.9,
@@ -1702,7 +1705,9 @@ class TestSurveyViewSet:
             business_area=self.afghanistan,
             status=Program.ACTIVE,
         )
-        hoh1 = IndividualFactory(household=None)
+        birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+
+        hoh1 = IndividualFactory(household=None, birth_date=birth_date_for_50yo, sex="MALE")
         self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
         self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
@@ -2030,7 +2035,7 @@ class TestSurveyViewSet:
 
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 1}
 
         data = {
             "sampling_type": Survey.SAMPLING_FULL_LIST,

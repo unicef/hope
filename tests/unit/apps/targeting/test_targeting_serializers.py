@@ -40,7 +40,6 @@ class TargetingCriteriaSerializerTest(TestCase):
         assert data["household_ids"] == ""
         assert data["individual_ids"] == ""
         assert data["individuals_filters_blocks"] == []
-        assert data["collectors_filters_blocks"] == []
         assert data["households_filters_blocks"][0]["comparison_method"] == "EQUALS"
         assert data["households_filters_blocks"][0]["flex_field_classification"] == "NOT_FLEX_FIELD"
         assert data["households_filters_blocks"][0]["field_name"] == "size"
@@ -84,7 +83,6 @@ class TargetingCriteriaSerializerTest(TestCase):
         assert data["household_ids"] == ""
         assert data["individual_ids"] == ""
         assert data["households_filters_blocks"] == []
-        assert data["collectors_filters_blocks"] == []
         assert not data["individuals_filters_blocks"][0]["target_only_hoh"]
         assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
         assert (
@@ -135,7 +133,6 @@ class TargetingCriteriaSerializerTest(TestCase):
         assert data["household_ids"] == ""
         assert data["individual_ids"] == ""
         assert data["individuals_filters_blocks"] == []
-        assert data["collectors_filters_blocks"] == []
         assert data["households_filters_blocks"][0]["comparison_method"] == "EQUALS"
         assert data["households_filters_blocks"][0]["flex_field_classification"] == "FLEX_FIELD_BASIC"
         assert data["households_filters_blocks"][0]["field_name"] == "flex_field"
@@ -179,7 +176,6 @@ class TargetingCriteriaSerializerTest(TestCase):
         assert data["household_ids"] == ""
         assert data["individual_ids"] == ""
         assert data["households_filters_blocks"] == []
-        assert data["collectors_filters_blocks"] == []
         assert not data["individuals_filters_blocks"][0]["target_only_hoh"]
         assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
         assert (
@@ -242,7 +238,6 @@ class TargetingCriteriaSerializerTest(TestCase):
         assert data["household_ids"] == ""
         assert data["individual_ids"] == ""
         assert data["households_filters_blocks"] == []
-        assert data["collectors_filters_blocks"] == []
         assert data["individuals_filters_blocks"][0]["individual_block_filters"][0]["comparison_method"] == "EQUALS"
         assert (
             data["individuals_filters_blocks"][0]["individual_block_filters"][0]["flex_field_classification"]
@@ -265,7 +260,6 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "subtype": pdu_data.subtype,
                 "number_of_rounds": pdu_data.number_of_rounds,
                 "rounds_names": pdu_data.rounds_names,
-                "rounds_covered": pdu_data.rounds_covered,
             },
         }
         assert field_attribute_data == expected_field_attribute_data

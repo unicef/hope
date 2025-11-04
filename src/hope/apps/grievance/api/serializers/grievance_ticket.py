@@ -100,7 +100,12 @@ class TicketNoteSerializer(serializers.ModelSerializer):
 
 class HouseholdUpdateRolesSerializer(serializers.Serializer):
     individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
-    new_role = serializers.ChoiceField(choices=ROLE_CHOICE, required=True)
+    new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
+
+    def validate_new_role(self, value):
+        if value == "NO_ROLE":
+            return None
+        return value
 
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
@@ -318,7 +323,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     @staticmethod
     def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
         new_roles = [item["new_role"] for item in value]
-        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role != "NO_ROLE"}
+        duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role is not None}
         if duplicates:
             raise serializers.ValidationError(f"Duplicate roles are not allowed: {', '.join(duplicates)}")
         return value
@@ -391,13 +396,13 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     who_answers_alt_phone = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     documents_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     documents_to_edit = EditIndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentityGTSerializer(many=True, required=False)
     identities_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all()),
+        child=serializers.CharField(),
         required=False,
     )
     identities_to_edit = EditIndividualIdentitySerializer(many=True, required=False)

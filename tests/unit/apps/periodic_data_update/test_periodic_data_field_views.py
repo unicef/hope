@@ -82,7 +82,6 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field1.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field1.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field1.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -93,7 +92,6 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field2.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field2.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -104,7 +102,6 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field3.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field3.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field3.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } in response_json
         assert {
@@ -115,7 +112,6 @@ class TestPeriodicFieldViews:
                 "subtype": self.periodic_field_program2.pdu_data.subtype,
                 "number_of_rounds": self.periodic_field_program2.pdu_data.number_of_rounds,
                 "rounds_names": self.periodic_field_program2.pdu_data.rounds_names,
-                "rounds_covered": self.periodic_field1.pdu_data.rounds_covered,
             },
         } not in response_json
 
