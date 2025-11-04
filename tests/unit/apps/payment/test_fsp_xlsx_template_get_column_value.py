@@ -62,6 +62,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             delivery_type=self.dm_cash,
         )
         create_payment_plan_snapshot_data(payment_plan)
+        payment.refresh_from_db()
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
             payment, "registration_token", self.admin_areas_dict
@@ -110,6 +111,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
         document = DocumentFactory(individual=primary, type=document_type)
 
         create_payment_plan_snapshot_data(payment_plan)
+        payment.refresh_from_db()
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
             payment, field_name, self.admin_areas_dict
