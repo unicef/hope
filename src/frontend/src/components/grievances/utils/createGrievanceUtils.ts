@@ -465,7 +465,7 @@ export function prepareVariables(businessArea, values) {
   return prepareFunction(requiredVariables, values);
 }
 
-export function prepareExistingAccountValues(individualDataUpdateAccountsToEdit: any){
+export function prepareExistingAccountValues(individualDataUpdateAccountsToEdit: any) {
   function popKey(obj: any, key: string) {
     const value = obj[key];
     delete obj[key];
