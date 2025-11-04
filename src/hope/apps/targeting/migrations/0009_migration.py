@@ -12,15 +12,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="targetingcriteriarulefilter",
             name="arguments",
-            field=models.JSONField(
-                help_text="\n                Array of arguments\n                "
-            ),
+            field=models.JSONField(help_text="\n                Array of arguments\n                "),
         ),
         migrations.AlterField(
             model_name="targetingindividualblockrulefilter",
             name="arguments",
-            field=models.JSONField(
-                help_text="\n                Array of arguments\n                "
-            ),
+            field=models.JSONField(help_text="\n                Array of arguments\n                "),
         ),
     ]
