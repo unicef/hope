@@ -217,7 +217,6 @@ class TestProgramUpdate:
             ],
         }
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -344,7 +343,6 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program.programme_code == self.initial_program_data["programme_code"]
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_programme_code_existing(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -579,7 +577,6 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program.beneficiary_group == self.bg_household
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_beneficiary_group_invalid_with_population(
         self, create_user_role_with_permissions: Callable
     ) -> None:
@@ -607,7 +604,6 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program.beneficiary_group == self.bg_household
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_start_and_end_dates(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -748,7 +744,6 @@ class TestProgramUpdate:
         assert "name" in response.json()
         assert "Programme with this name already exists in this business area" in str(response.json()["name"])
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_program_with_same_name_same_program(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -770,7 +765,6 @@ class TestProgramUpdate:
         assert self.program.name == self.initial_program_data["name"]
         assert self.program.budget == 200000
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_multiple_fields(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -901,7 +895,6 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_pdu_fields_and_add_new(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -1077,7 +1070,6 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_removed.is_removed is False
         assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(
         self, create_user_role_with_permissions: Callable
     ) -> None:
@@ -1258,7 +1250,6 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_pdu_fields_with_same_name_in_different_program(
         self, create_user_role_with_permissions: Callable
     ) -> None:
@@ -1504,7 +1495,6 @@ class TestProgramUpdate:
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False
 
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
     def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
         self, create_user_role_with_permissions: Callable
     ) -> None:
