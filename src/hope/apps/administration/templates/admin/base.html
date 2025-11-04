@@ -1,27 +1,37 @@
 {% extends "admin/base.html" %}
 
 {% block extrahead %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function(event) {
-      const url = window.location.href;
-      let color = '';
-      if (window.location.hostname === 'localhost') {
-        color = '#FF6600';
-      } else if (url.includes('trn')) {
-        color = '#BF360C';
-      } else if (url.includes('stg')) {
-        color = '#673AB7';
-      } else if (url.includes('dev')) {
-        color = '#00796B';
-      } else if (url.includes('eph')) {
-          color = '#CC00EF'
-      } else if (url.includes('tst')) {
-          color = '#EF00A7'
-      } else {
-        color = '#00ADEF';
-      }
-      document.getElementById('header').style.backgroundColor = color;
-    });
-  </script>
-  {% include 'matomo.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const header = document.getElementById('header');
+    if (!header) return;
+
+    const url = window.location.href;
+    const host = window.location.hostname;
+
+    const colorMap = {
+        'localhost': '#FF6600',
+        'trn': '#BF360C',
+        'stg': '#673AB7',
+        'dev': '#00796B',
+        'eph': '#CC00EF',
+        'tst': '#EF00A7'
+    };
+
+    let color = '#00ADEF';
+
+    if (host === 'localhost') {
+        color = colorMap['localhost'];
+    } else {
+        for (const env_key of ['dev', 'trn','stg', 'eph','tst']) {
+            if (url.includes(env_key)) {
+                color = colorMap[env_key];
+                break;
+            }
+        }
+    }
+    header.style.backgroundColor = color;
+});
+</script>
+{% include 'matomo.html' %}
 {% endblock extrahead %}

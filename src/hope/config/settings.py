@@ -145,6 +145,7 @@ TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
+            os.path.join(PROJECT_ROOT, "../apps", "administration", "templates"),
             os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
         ],
         "OPTIONS": {
@@ -159,7 +160,6 @@ TEMPLATES: list[dict[str, Any]] = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.static",
-                "django.template.context_processors.request",
                 # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
