@@ -92,14 +92,11 @@ class TargetingCriteriaRuleQueryingBase:
         self,
         filters: Any | None = None,
         individuals_filters_blocks: Any | None = None,
-        collectors_filters_blocks: Any | None = None,
     ) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
-        if collectors_filters_blocks is not None:
-            self.collectors_filters_blocks = collectors_filters_blocks
 
     def get_filters(self) -> Any:
         return self.filters
@@ -107,40 +104,28 @@ class TargetingCriteriaRuleQueryingBase:
     def get_individuals_filters_blocks(self) -> Any:
         return self.individuals_filters_blocks
 
-    def get_collectors_filters_blocks(self) -> Any:
-        return self.collectors_filters_blocks
-
     def get_criteria_string(self) -> str:
         filters = self.get_filters()
         filters_strings = [x.get_criteria_string() for x in filters]
         individuals_filters_blocks = self.get_individuals_filters_blocks()
-        collectors_filters_blocks = self.get_collectors_filters_blocks()
         individuals_filters_blocks_strings = [x.get_criteria_string() for x in individuals_filters_blocks]
-        collectors_filters_blocks_strings = [x.get_criteria_string() for x in collectors_filters_blocks]
         all_strings = []
         if filters_strings:
             all_strings.append(f"H({' AND '.join(filters_strings).strip()})")
         if individuals_filters_blocks_strings:
             all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
-        if collectors_filters_blocks_strings:
-            all_strings.append(f"C({' AND '.join(collectors_filters_blocks_strings).strip()})")
         return " AND ".join(all_strings).strip()
 
     def get_query(self) -> Q:
         query = Q()
         filters = self.get_filters()
         individuals_filters_blocks = self.get_individuals_filters_blocks()
-        collectors_filters_blocks = self.get_collectors_filters_blocks()
         # That's household filters
         for rule_filter in filters:
             query &= rule_filter.get_query()
         # filter individual block
         for individuals_filters_block in individuals_filters_blocks:
             query &= individuals_filters_block.get_query()
-        # filter collector block
-        for collectors_filters_block in collectors_filters_blocks:
-            query &= collectors_filters_block.get_query()
-
         return query
 
 
@@ -193,32 +178,6 @@ class TargetingIndividualRuleFilterBlockBase:
 
         households_id = q.values_list("household_id", flat=True)
         return Q(id__in=households_id)
-
-
-class TargetingCollectorRuleFilterBlockBase:
-    def __init__(
-        self,
-        collector_block_filters: Any | None = None,
-    ) -> None:
-        if collector_block_filters is not None:
-            self.collector_block_filters = collector_block_filters
-
-    def get_collector_block_filters(self) -> Any:
-        return self.collector_block_filters
-
-    def get_criteria_string(self) -> str:
-        filters = self.get_collector_block_filters()
-        filters_string = [x.get_criteria_string() for x in filters]
-        return f"({' AND '.join(filters_string).strip()})"
-
-    def get_query(self) -> Q:
-        hh_query = Q(withdrawn=False)
-        filters = self.get_collector_block_filters()
-
-        for collector_filter in filters:
-            hh_query &= collector_filter.get_query()
-
-        return hh_query
 
 
 class TargetingCriteriaFilterBase:

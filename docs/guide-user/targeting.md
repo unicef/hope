@@ -25,27 +25,27 @@ For more information on the Targeting module and the key functionalities of this
 ## How to setup a target population
 
 1. Select the targeting tab on the left menu and click on the ‘CREATE NEW’ button to create a new target population.
-    ![Image](_screenshots/targeting/1.png)
+    ![Image](_screenshots/targeting/targ_12.png)
 
     !!! note
 
         Note: The information icon next to the ‘Create New’ button displays the fields that are available for targeting.
 
-1. Enter the Target Population.
-    ![Image](_screenshots/targeting/2.png)
+1. Enter the New Target Population. Set Targeting Criteria by selecting programme cycle and the target population name.
+    ![Image](_screenshots/targeting/targ_13.png)
 
-4. Click "Add Filter" to apply the relevant targeting criteria that will filter the households or individuals needed for your Programme. For example, if your Programme targeting is based on RDI, search for 'Registration Data Import' field and select the respective RDI then click save.
-    ![Image](_screenshots/targeting/3.png)
+4. Click "Add Filter" to apply the relevant targeting criteria that will filter the households or individuals needed for your Programme. For example, if your Programme targeting is based on RDI, search for 'Registration Data Import' field and select the respective RDI then click save. Delivery mechanism and FPS must be selected by clicking Payment Channel Validation.
+    ![Image](_screenshots/targeting/targ_14.png)
 
 4. Once you save the target population a summary of the selected households will be displayed. If the targeted population meets your Programme criteria, you can proceed to lock the target population in preparation to create the payment plan. If the Programme criteria is not met you can edit the target population and select the relevant criteria.
-    ![Image](_screenshots/targeting/4.png)
+    ![Image](_screenshots/targeting/targ_15.png)
 
     !!! note
 
         You have the option to exclude households with active adjudication tickets. Below the targeting criteria you can also exclude households or individuals using a list of households IDs or Individual IDs.
 
 5. Once your done with targeting click on ‘MARK READY’ so that target population can be used to create a payment plan.
-    ![Image](_screenshots/targeting/5.png)
+    ![Image](_screenshots/targeting/targ_16.png)
 
 ## Custom target populations
 
