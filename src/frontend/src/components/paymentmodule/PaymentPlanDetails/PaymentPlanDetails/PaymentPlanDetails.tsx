@@ -12,6 +12,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
+import { WarningTooltip } from '@core/WarningTooltip';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
@@ -94,9 +95,17 @@ const PaymentPlanDetails = ({
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}{exchangeRateAssignedOffline ? '!' : ''}
+                    {exchangeRate}
                   </LabelizedField>
                 </Box>
+                {
+                  exchangeRateAssignedOffline && (
+                    <WarningTooltip
+                      confirmed
+                      message={t('FX Assigned Offline')}
+                    />
+                  )
+                }
                 <Tooltip
                   title={t(
                     'If displayed exchange rate differs from Vision, please contact your designated focal point for resolution',
