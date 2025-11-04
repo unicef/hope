@@ -1,5 +1,4 @@
 from typing import Any, List
-from unittest.mock import patch
 
 import pytest
 from rest_framework import status
@@ -123,7 +122,6 @@ class TestPDUOnlineEditCreate:
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
         )
 
-    @patch("from hope.models.pdu_online_edit import PDUOnlineEdit.PDUOnlineEdit.queue")
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -133,7 +131,6 @@ class TestPDUOnlineEditCreate:
     )
     def test_create_pdu_online_edit_permissions(
         self,
-        task_mock: Any,
         permissions: List,
         expected_status: int,
         create_user_role_with_permissions: Any,

@@ -45,6 +45,7 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
+from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.pdu_online_edit import PDUOnlineEdit
@@ -257,9 +258,7 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Authorized users updated successfully."})
 
     @action(detail=True, methods=["post"])
-    def send_for_approval(
-        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
-    ) -> Response:
+    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         if instance.status != PDUOnlineEdit.Status.NEW:
@@ -314,9 +313,7 @@ class PDUOnlineEditViewSet(
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
-    def send_back(
-        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
-    ) -> Response:
+    def send_back(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -345,9 +342,7 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
 
     @action(detail=False, methods=["post"])
-    def bulk_approve(
-        self, request: Request, send_pdu_online_edit_notification_emails=None, *args: Any, **kwargs: Any
-    ) -> Response:
+    def bulk_approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
