@@ -1,6 +1,5 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
-from test_utils.factories.program import ProgramFactory
 
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -8,6 +7,7 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
@@ -258,7 +258,6 @@ class TargetingCriteriaSerializerTest(TestCase):
                 "subtype": pdu_data.subtype,
                 "number_of_rounds": pdu_data.number_of_rounds,
                 "rounds_names": pdu_data.rounds_names,
-                # "rounds_covered": pdu_data.rounds_covered,
             },
         }
         assert field_attribute_data == expected_field_attribute_data

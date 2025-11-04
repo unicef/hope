@@ -522,11 +522,6 @@ class TestPDUXlsxTemplateViews:
         assert template.filters == data["filters"]
         assert template.status == PDUXlsxTemplate.Status.EXPORTED
         assert PDUXlsxTemplate.objects.filter(id=response_json["id"]).first().file is not None
-        # check update of rounds_covered for the fields
-        self.pdu_field_vaccination.refresh_from_db()
-        self.pdu_field_health.refresh_from_db()
-        assert self.pdu_field_vaccination.pdu_data.rounds_covered == 2
-        assert self.pdu_field_health.pdu_data.rounds_covered == 4
 
     def test_create_periodic_data_update_template_duplicate_field(
         self,
@@ -563,71 +558,6 @@ class TestPDUXlsxTemplateViews:
 
         response_json = response.json()
         assert response_json == {"rounds_data": ["Each Field can only be used once in the template."]}
-
-    def test_create_periodic_data_update_template_already_covered_round(
-        self,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PDU_TEMPLATE_CREATE],
-            self.afghanistan,
-            self.program1,
-        )
-        data_1 = {
-            "rounds_data": [
-                {
-                    "field": "vaccination_records_update",
-                    "round": 2,
-                    "round_name": "February vaccination",
-                },
-                {
-                    "field": "health_records_update",
-                    "round": 4,
-                    "round_name": "April",
-                },
-            ],
-            "filters": {
-                "received_assistance": True,
-            },
-        }
-        response_1 = self.client.post(self.url_create_pdu_template_program1, data=data_1)
-        assert response_1.status_code == status.HTTP_201_CREATED
-
-        response_json_1 = response_1.json()
-        assert PDUXlsxTemplate.objects.filter(id=response_json_1["id"]).exists()
-        self.pdu_field_vaccination.refresh_from_db()
-        self.pdu_field_health.refresh_from_db()
-        assert self.pdu_field_vaccination.pdu_data.rounds_covered == 2
-        assert self.pdu_field_health.pdu_data.rounds_covered == 4
-
-        # Test creating a template with a round that is already covered by the first template
-        data_2 = {
-            "rounds_data": [
-                {
-                    "field": "vaccination_records_update",
-                    "round": 2,  # This round is already covered by the first template
-                    "round_name": "February vaccination",
-                },
-                {
-                    "field": "health_records_update",
-                    "round": 5,  # This round is not covered by the first template
-                    "round_name": "April",
-                },
-            ],
-            "filters": {
-                "received_assistance": True,
-            },
-        }
-        response_2 = self.client.post(self.url_create_pdu_template_program1, data=data_2)
-        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-        response_json_2 = response_2.json()
-        assert response_json_2 == [
-            "Template for round 2 of field 'Vaccination Records Update' has already been created."
-        ]
 
     @pytest.mark.parametrize(
         ("permissions", "partner_permissions", "access_to_program", "expected_status"),

@@ -315,7 +315,7 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
         cls.fi_other = FinancialInstitutionFactory(
             name="Test Other Institution",
             type=FinancialInstitution.FinancialInstitutionType.OTHER,
-            country=cls.country_poland,
+            country=None,
             swift_code="",
         )
 
