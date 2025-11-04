@@ -2815,10 +2815,12 @@ class TestPaymentPlanActions:
             {"fund_commitment_items_ids": ["333"]},
             format="json",
         )
+
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 2
-        assert response.json()[0]["name"] == "XLSX_1"
-        assert response.json()[1]["name"] == "XLSX_2"
+        results = response.json()["results"]
+        assert len(results) == 2
+        assert results[0]["name"] == "XLSX_1"
+        assert results[1]["name"] == "XLSX_2"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status", "pp_status"),

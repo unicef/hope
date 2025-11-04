@@ -14293,6 +14293,7 @@ export class RestService {
      */
     public static restEngineRulesList({
         type,
+        businessArea,
         deprecated,
         enabled,
         limit,
@@ -14306,6 +14307,7 @@ export class RestService {
          * * `TARGETING` - Targeting
          */
         type: 'PAYMENT_PLAN' | 'TARGETING',
+        businessArea?: string,
         deprecated?: boolean,
         enabled?: boolean,
         /**
@@ -14325,6 +14327,7 @@ export class RestService {
             method: 'GET',
             url: '/api/rest/engine-rules/',
             query: {
+                'business_area': businessArea,
                 'deprecated': deprecated,
                 'enabled': enabled,
                 'limit': limit,
