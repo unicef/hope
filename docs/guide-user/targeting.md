@@ -41,16 +41,16 @@ Click Payment Channel Validation, and select delivery mechanism and FSP.
 
 !!! note
 
-        Payment Channel Validation aims to the targeting module that validates FSP and Delivery mechanism requirements for beneficiaries selected in the Target Population. This rule ensures that beneficiary data is compliant with FSPs data requirements for payments. This will allow early validation of the TP against payment requirements. Once the TP is built, the user is able to see individuals that failed requirements within TP results: “COLLECTORS FAILED PAYMENT CHANNEL VALIDATION” to make an informed decision on sending this TP for payment module.
+         Payment Channel Validation validates FSP and Delivery mechanism requirements for beneficiaries selected in the Target Population. This rule ensures that beneficiary data is compliant with FSPs data requirements for payments. This will allow early validation of the TP against payment requirements. Once the TP is built, the user is able to see individuals that failed requirements within TP results: “COLLECTORS FAILED PAYMENT CHANNEL VALIDATION” to make an informed decision on sending this TP for payment module.
 
-3. Once you save the target population a summary of the selected households will be displayed. If the targeted population meets your Programme criteria, you can proceed to lock the target population in preparation to create the payment plan. If the Programme criteria is not met you can edit the target population and select the relevant criteria.
+1. Once you save the target population a summary of the selected households will be displayed. If the targeted population meets your Programme criteria, you can proceed to lock the target population in preparation to create the payment plan. If the Programme criteria is not met you can edit the target population and select the relevant criteria.
     ![Image](_screenshots/targeting/targ_15.png)
 
     !!! note
 
         You have the option to exclude households with active adjudication tickets. Below the targeting criteria you can also exclude households or individuals using a list of households IDs or Individual IDs.
 
-4. Once your done with targeting click on ‘MARK READY’ so that target population can be used to create a payment plan.
+2. Once your done with targeting click on ‘MARK READY’ so that target population can be used to create a payment plan.
     ![Image](_screenshots/targeting/targ_16.png)
 
 ## Custom target populations
