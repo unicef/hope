@@ -7,7 +7,7 @@ import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Tooltip } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -303,6 +303,32 @@ export const GrievanceDetailsToolbar = ({
     ((isMultipleDuplicatesVersion && selectedIndividualsLength) ||
       (!isMultipleDuplicatesVersion && selectedIndividual));
 
+  // Determine if closing should be disabled because a PRIMARY role was
+  // previously present but no role currently has value === 'PRIMARY'.
+  const roles: any[] =
+    ticket.ticketDetails?.householdData?.roles ||
+    ticket.ticketDetails?.roles ||
+    [];
+  const primaryPreviouslyPresent = roles.some(
+    (r) => r?.previous_value === 'PRIMARY',
+  );
+  const primaryCurrentlyPresent = roles.some((r) => r?.value === 'PRIMARY');
+  const disableCloseDueToPrimaryNotReassigned =
+    primaryPreviouslyPresent && !primaryCurrentlyPresent;
+
+  const wrapWithTooltip = (node: ReactElement) =>
+    disableCloseDueToPrimaryNotReassigned ? (
+      <Tooltip
+        title={t(
+          'Ticket cannot be closed, primary collector role has to be reassigned',
+        )}
+      >
+        <span>{node}</span>
+      </Tooltip>
+    ) : (
+      node
+    );
+
   const closeButton = shouldShowButtonDialog ? (
     <ButtonDialog
       title={t('Duplicate Document Conflict')}
@@ -334,7 +360,7 @@ export const GrievanceDetailsToolbar = ({
         })
       }
       data-cy="button-close-ticket"
-      disabled={!isActiveProgram}
+      disabled={!isActiveProgram || disableCloseDueToPrimaryNotReassigned}
     >
       {t('Close Ticket')}
     </LoadingButton>
@@ -435,22 +461,26 @@ export const GrievanceDetailsToolbar = ({
                 </LoadingButton>
               </Box>
             )}
-            {isFeedbackType && canClose && (
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() =>
-                  confirm({
-                    content: closingConfirmationText,
-                    continueText: 'close ticket',
-                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
-                }
-                data-cy="button-close-ticket"
-                disabled={!isActiveProgram}
-              >
-                {t('Close Ticket')}
-              </Button>
-            )}
+            {isFeedbackType &&
+              canClose &&
+              wrapWithTooltip(
+                <Button
+                  color="primary"
+                  variant="contained"
+                  onClick={() =>
+                    confirm({
+                      content: closingConfirmationText,
+                      continueText: 'close ticket',
+                    }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
+                  }
+                  data-cy="button-close-ticket"
+                  disabled={
+                    !isActiveProgram || disableCloseDueToPrimaryNotReassigned
+                  }
+                >
+                  {t('Close Ticket')}
+                </Button>,
+              )}
           </>
         )}
         {isOnHold && (
@@ -487,23 +517,27 @@ export const GrievanceDetailsToolbar = ({
                 </LoadingButton>
               </Box>
             )}
-            {isFeedbackType && canClose && (
-              <LoadingButton
-                loading={loading}
-                color="primary"
-                variant="contained"
-                onClick={() =>
-                  confirm({
-                    content: closingConfirmationText,
-                    continueText: 'close ticket',
-                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
-                }
-                data-cy="button-close-ticket"
-                disabled={!isActiveProgram}
-              >
-                {t('Close Ticket')}
-              </LoadingButton>
-            )}
+            {isFeedbackType &&
+              canClose &&
+              wrapWithTooltip(
+                <LoadingButton
+                  loading={loading}
+                  color="primary"
+                  variant="contained"
+                  onClick={() =>
+                    confirm({
+                      content: closingConfirmationText,
+                      continueText: 'close ticket',
+                    }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
+                  }
+                  data-cy="button-close-ticket"
+                  disabled={
+                    !isActiveProgram || disableCloseDueToPrimaryNotReassigned
+                  }
+                >
+                  {t('Close Ticket')}
+                </LoadingButton>,
+              )}
           </>
         )}
         {isForApproval && (
@@ -546,7 +580,7 @@ export const GrievanceDetailsToolbar = ({
                 </Button>
               </Box>
             )}
-            {canClose && closeButton}
+            {canClose && wrapWithTooltip(closeButton)}
           </>
         )}
       </Box>
