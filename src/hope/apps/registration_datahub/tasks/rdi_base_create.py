@@ -79,7 +79,7 @@ class RdiBaseCreateTask:
                 continue
             for account_type, values in data.items():
                 number = values.pop("number", None)
-                if not (fi_id := data.pop("financial_institution", None)):
+                if not (fi_id := values.pop("financial_institution", None)):
                     fi_id = FinancialInstitution.get_generic_one(account_type, Account.is_valid_iban(number)).id
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
