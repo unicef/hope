@@ -224,11 +224,6 @@ Clear Cache,clear-cache/
         "Default Beneficiary Group name",
         str,
     ),
-    "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": (
-        False,
-        "Send Western Union QCF Payment Plans Reports Notifications",
-        bool,
-    ),
 }
 
 CONSTANCE_DBS = ("default",)

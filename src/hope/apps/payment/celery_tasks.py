@@ -4,7 +4,6 @@ from typing import Any
 
 from celery.exceptions import MaxRetriesExceededError
 from concurrency.api import disable_concurrency
-from constance import config
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -967,7 +966,9 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
-    if not config.WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED:
+    from flags.state import flag_state
+
+    if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
         return
 
     from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
