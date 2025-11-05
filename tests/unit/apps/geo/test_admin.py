@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, override_settings
@@ -25,7 +26,11 @@ from hope.models.user import User
 @pytest.fixture
 def superuser() -> User:
     user = UserFactory(is_superuser=True, is_staff=True, is_active=True, email="test123@mail.com")
-    perm = Permission.objects.get(codename="import_areas", content_type__app_label="geo")
+    content_type, _ = ContentType.objects.get_or_create(
+        app_label="geo",
+        model="area",
+    )
+    perm, _ = Permission.objects.get_or_create(codename="import_areas", content_type=content_type)
     user.user_permissions.add(perm)
     return user
 
@@ -69,7 +74,6 @@ def test_modeladmin_str(site: AdminSite) -> None:
     assert str(ma) == "geo.ModelAdmin"
 
 
-@pytest.mark.xfail(reason="Failing On ONE MODEL PR")
 def test_login(app: DjangoTestApp, superuser: User, rf: RequestFactory, site: AdminSite) -> None:
     url = reverse("admin:geo_area_changelist")
     resp = app.get(url)
@@ -82,7 +86,6 @@ def test_login(app: DjangoTestApp, superuser: User, rf: RequestFactory, site: Ad
     assert resp.status_code == 200, "You need to be logged in and superuser"
 
 
-@pytest.mark.xfail(reason="Failing On ONE MODEL PR")
 @flaky(max_runs=3, min_passes=1)
 @patch("hope.apps.geo.celery_tasks.import_areas_from_csv_task.delay")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
@@ -128,7 +131,6 @@ def test_upload(
     mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
 
 
-@pytest.mark.xfail(reason="Failing On ONE MODEL PR")
 @pytest.mark.parametrize(
     ("csv_content", "expected_message"),
     [
