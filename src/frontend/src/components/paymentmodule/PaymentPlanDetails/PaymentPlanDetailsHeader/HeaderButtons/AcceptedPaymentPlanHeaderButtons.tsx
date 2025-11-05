@@ -62,7 +62,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       },
     });
 
-  const { data, isLoading: loading } = useQuery({
+  const { data: templateData, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
     queryFn: async () => {
       return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
@@ -148,7 +148,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -243,7 +243,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               size="small"
               data-cy="select-template"
             >
-              {data?.results?.map((template) => (
+              {templateData?.results?.map((template) => (
                 <MenuItem key={template.id} value={template.id}>
                   {template.name}
                 </MenuItem>
