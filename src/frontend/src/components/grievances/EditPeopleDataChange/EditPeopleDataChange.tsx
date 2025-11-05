@@ -121,7 +121,7 @@ function EditPeopleDataChange({
   }
 
   const combinedData = {
-    results: editPeopleFieldsData?.results || [],
+    results: editPeopleFieldsData || [],
     countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
@@ -147,7 +147,7 @@ function EditPeopleDataChange({
                     itemValue={item}
                     index={index}
                     individual={fullIndividual}
-                    fields={combinedData.results}
+                    fields={combinedData.results as any[]}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}

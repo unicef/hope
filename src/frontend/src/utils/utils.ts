@@ -1270,7 +1270,8 @@ export const filterEmptyParams = (params) => {
 };
 
 export function deepCamelize(data) {
-  const notCalizedKeys = ['form_errors', 'household_data'];
+  const notCamelizedKeys = ['form_errors', 'household_data'];
+
   if (_.isArray(data)) {
     return data.map(deepCamelize);
   } else if (_.isObject(data)) {
@@ -1278,11 +1279,17 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
-        if (notCalizedKeys.includes(key)) {
+
+        if (notCamelizedKeys.includes(key)) {
           // Special handling for error_info to keep it as is
           result[camelKey] = value;
           return result;
         }
+        if (key.endsWith('_i_f') || key.endsWith('_h_f')) {
+          result[key] = deepCamelize(value);
+          return result;
+        }
+
         result[camelKey] = deepCamelize(value);
         return result;
       },
