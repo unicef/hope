@@ -202,6 +202,8 @@ export function Entitlement({
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
       BackgroundActionStatusEnum.XLSX_EXPORTING ||
+    paymentPlan?.backgroundActionStatus ===
+      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
     !isActiveProgram;
 
   return (
