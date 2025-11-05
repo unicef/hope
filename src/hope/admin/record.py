@@ -34,6 +34,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
 
+
 # test
 class StatusFilter(ChoicesFieldComboFilter):
     def choices(self, changelist: ChangeList) -> Generator:
@@ -150,9 +151,9 @@ class RecordAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("status", StatusFilter),
-        # ("source_id", NumberFilter),
-        # ("id", NumberFilter),
-        # ("fields", JsonFieldFilter),
+        ("source_id", NumberFilter),
+        ("id", NumberFilter),
+        ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
