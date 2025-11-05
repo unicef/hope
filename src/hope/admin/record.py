@@ -6,8 +6,8 @@ from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
-from adminfilters.json_filter import JsonFieldFilter
-from adminfilters.num import NumberFilter
+from adminfilters.json import JsonFieldFilter
+from adminfilters.numbers import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages
@@ -34,7 +34,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
 
-
+# test
 class StatusFilter(ChoicesFieldComboFilter):
     def choices(self, changelist: ChangeList) -> Generator:
         yield {
@@ -150,9 +150,9 @@ class RecordAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("status", StatusFilter),
-        ("source_id", NumberFilter),
-        ("id", NumberFilter),
-        ("fields", JsonFieldFilter),
+        # ("source_id", NumberFilter),
+        # ("id", NumberFilter),
+        # ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
