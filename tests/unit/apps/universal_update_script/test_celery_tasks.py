@@ -132,11 +132,12 @@ def individual(
 
 @pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
+    account_type, _ = AccountType.objects.get_or_create(key="mobile")
     return Account.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
         rdi_merge_status=Account.MERGED,
-        account_type=AccountType.objects.create(key="mobile"),
+        account_type=account_type,
     )
 
 
@@ -155,10 +156,6 @@ def document_national_id(individual: Individual, program: Program, poland: Count
 
 @pytest.mark.elasticsearch
 class TestUniversalIndividualUpdateCeleryTasks:
-    @pytest.mark.xfail(reason="Failing On ONE MODEL PR")
-    # E   psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint
-    # "payment_accounttype_key_key"
-    # E   DETAIL:  Key (key)=(mobile) already exists.
     def test_run_universal_individual_update(
         self,
         individual: Individual,
