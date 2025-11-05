@@ -110,14 +110,13 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         try:
             for record_id in records_ids_to_import:
                 record = Record.objects.defer("data").get(id=record_id)
-
-                with atomic():
-                    try:
+                try:
+                    with atomic():
                         self.create_household_for_rdi_household(record, rdi)
-                        imported_records_ids.append(record_id)
-                    except ValidationError as e:
-                        records_with_error.append((record, str(e)))
-                        continue
+                    imported_records_ids.append(record_id)
+                except ValidationError as e:
+                    records_with_error.append((record, str(e)))
+                    continue
 
             if records_with_error:
                 for record, error in records_with_error:
