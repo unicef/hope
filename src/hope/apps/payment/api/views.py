@@ -1359,6 +1359,12 @@ class PaymentPlanViewSet(
         qs = FinancialServiceProviderXlsxTemplate.objects.filter(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
         ).order_by("name")
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = FSPXlsxTemplateSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         return Response(
             data=FSPXlsxTemplateSerializer(qs, many=True).data,
             status=status.HTTP_200_OK,
