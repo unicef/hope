@@ -452,12 +452,14 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
-        const dynamicEntityProgramSlug = feedbackProgramSlug ||
-          (programId !== 'all' ? programId :
-            ((typeof values.selectedHousehold === 'object' && values.selectedHousehold?.program?.slug) ||
-            (typeof values.selectedHousehold === 'object' && values.selectedHousehold?.programSlug) ||
-            (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.program?.slug) ||
-            (typeof values.selectedIndividual === 'object' && values.selectedIndividual?.programSlug)));
+        const dynamicEntityProgramSlug =
+          feedbackProgramSlug ||
+          (programId !== 'all'
+            ? programId
+            : (typeof values.selectedHousehold === 'object' &&
+                values.selectedHousehold?.program?.slug) ||
+              (typeof values.selectedIndividual === 'object' &&
+                values.selectedIndividual?.program?.slug));
 
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
