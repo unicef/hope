@@ -13,6 +13,7 @@ export type BusinessArea = {
     isSplit?: boolean;
     active?: boolean;
     isAccountabilityApplicable?: boolean;
+    readonly rdiImportXlsxDisabled: boolean;
     readonly countries: Array<CountrySmall>;
 };
 
