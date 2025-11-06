@@ -226,7 +226,7 @@ class TestRdiMergeTask(TestCase):
 
         cls.individuals = [PendingIndividualFactory(**individual) for individual in individuals_to_create]
 
-    @pytest.mark.xfail(reason="Failing In ONEMODEL xD")
+    # @pytest.mark.xfail(reason="Failing In ONE MODEL")
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
         hh = PendingHouseholdFactory(

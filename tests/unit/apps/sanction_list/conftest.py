@@ -1,15 +1,11 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator
+from typing import Any, Generator
 
 import pytest
 from responses import RequestsMock
-from strategy_field.utils import fqn
 
 from hope.apps.core.celery import app
-from hope.apps.sanction_list.strategies.eu import EUSanctionList
-
-if TYPE_CHECKING:
-    from hope.models.sanction_list import SanctionList
+from hope.models.sanction_list import SanctionList
 
 
 @pytest.fixture
@@ -31,22 +27,14 @@ def always_eager() -> Generator[Any, None, None]:
     app.conf.task_always_eager = status
 
 
-# @pytest.fixture # ORIGINAL
-# def sanction_list(db: Any) -> "SanctionList":
-#     from extras.test_utils.factories.sanction_list import SanctionListFactory
-#
-#     return SanctionListFactory(
-#         name="EU",
-#         strategy="hope.apps.sanction_list.strategies.eu.EUSanctionList",
-#         config={
-#             "url": "http://example.com/sl.xml",
-#         },
-#     )
 @pytest.fixture
-def sanction_list(db: Any) -> "SanctionList":
-    from extras.test_utils.factories.sanction_list import SanctionListFactory
-
-    # E   psycopg2.errors.UniqueViolation: duplicate key value violates
-    # unique constraint "sanction_list_sanctionlist_pkey"
-    #   E   DETAIL:  Key (id)=(1) already exists.
-    return SanctionListFactory(name="EU", strategy=fqn(EUSanctionList), config={"url": "http://example.com/sl.xml"})
+def sanction_list(db: Any) -> SanctionList:
+    sanction_list, _ = SanctionList.objects.get_or_create(
+        pk=123,
+        name="EU",
+        strategy="hope.apps.sanction_list.strategies.eu.EUSanctionList",
+        config={
+            "url": "http://example.com/sl.xml",
+        },
+    )
+    return sanction_list

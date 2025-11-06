@@ -29,7 +29,8 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_chunk_task(households_ids: list[UUID], program_id: str | None = None) -> None:
-    from hope.models.household import Household, Individual
+    from hope.models.household import Household
+    from hope.models.individual import Individual
 
     # memory optimization
     paginator = Paginator(households_ids, 200)

@@ -87,6 +87,7 @@ def pytest_configure(config: Config) -> None:
         os.getenv("DOMAIN", ""),
     ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.CELERY_TASK_EAGER_PROPAGATES = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
     settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
