@@ -10,19 +10,22 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
     UniversalIndividualUpdateService,
 )
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.area import Area
-from hope.models.area_type import AreaType
-from hope.models.country import Country
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import FEMALE, MALE
-from hope.models.individual import Individual
-from hope.models.program import Program
-from hope.models.universal_update_script import UniversalUpdate
+from hope.models import (
+    FEMALE,
+    MALE,
+    Account,
+    AccountType,
+    Area,
+    AreaType,
+    Country,
+    Document,
+    DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
+    Individual,
+    Program,
+    UniversalUpdate,
+)
 
 pytestmark = pytest.mark.django_db()
 

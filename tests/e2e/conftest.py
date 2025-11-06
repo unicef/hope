@@ -79,14 +79,7 @@ from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.document_type import DocumentType
-from hope.models.partner import Partner
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
