@@ -34,15 +34,17 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
-from hope.models.account_type import AccountType
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.feedback import Feedback
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.payment_verification_summary import PaymentVerificationSummary
-from hope.models.role_assignment import RoleAssignment
+from hope.models import (
+    AccountType,
+    BusinessArea,
+    Country,
+    DeliveryMechanism,
+    Feedback,
+    PaymentPlan,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
+    RoleAssignment,
+)
 
 
 class BusinessAreaViewSet(
