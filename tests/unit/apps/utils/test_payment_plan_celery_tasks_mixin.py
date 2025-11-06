@@ -10,7 +10,6 @@ from django.utils.crypto import get_random_string
 from parameterized import parameterized
 from rest_framework import status
 
-from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
@@ -191,8 +190,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         payment_plan.save()
         payment_plan.refresh_from_db()
 
-        with mock.patch("hope.apps.utils.celery_utils.get_task_in_queue_or_running", return_value=None):
-            print("==>> Mock resp ", get_task_in_queue_or_running(name="test", args={"a": "b"}))
+        with mock.patch("hope.admin.utils.get_task_in_queue_or_running", return_value=None):
             response = self.client.post(
                 reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
                 HTTP_X_ROOT_TOKEN="test-token123",
