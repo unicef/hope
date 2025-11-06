@@ -36,19 +36,15 @@ export const PAYMENT_PLAN_STATES = {
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [BackgroundActionStatusEnum.RULE_ENGINE_RUN]:
-    'Entitlement Formula Run',
-  [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
-    'Entitlement Formula Error',
+  [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: 'Entitlement Formula Run',
+  [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: 'Entitlement Formula Error',
   [BackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
-  [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
-    'XLSX Export Error',
+  [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: 'XLSX Export Error',
   [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
   [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
-    'XLSX Import Error',
+  [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
 };
 
 export const PAYMENT_PLAN_ACTIONS = {
@@ -137,9 +133,9 @@ export const GRIEVANCE_ISSUE_TYPES_NAMES = {
   12: 'MISCELLANEOUS',
   13: 'EDIT_HOUSEHOLD',
   14: 'EDIT_INDIVIDUAL',
-  15: 'DELETE_INDIVIDUAL',
+  15: 'WITHDRAW_INDIVIDUAL',
   16: 'ADD_INDIVIDUAL',
-  17: 'DELETE_HOUSEHOLD',
+  17: 'WITHDRAW_HOUSEHOLD',
   18: 'PAYMENT_COMPLAINT',
   19: 'FSP_COMPLAINT',
   20: 'REGISTRATION_COMPLAINT',
@@ -313,7 +309,10 @@ export const generateTableOrderOptionsMember = (
       name: `${beneficiaryGroup.memberLabel}: descending`,
       value: '-unicef_id',
     },
-    { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'household__size' },
+    {
+      name: `${beneficiaryGroup.groupLabel} Size: ascending`,
+      value: 'household__size',
+    },
     {
       name: `${beneficiaryGroup.groupLabel} Size: descending`,
       value: '-household__size',
