@@ -425,7 +425,7 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files."""
     try:
-        from hope.models.business_area import FileTemp
+        from hope.models.file_temp import FileTemp
         from hope.models.payment_plan import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
@@ -635,7 +635,7 @@ def payment_plan_exclude_beneficiaries(
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
     """Create PDF file with summary and sent an email to request user."""
     try:
-        from hope.models.business_area import FileTemp
+        from hope.models.file_temp import FileTemp
         from hope.models.payment_plan import PaymentPlan
         from hope.models.user import User
 
