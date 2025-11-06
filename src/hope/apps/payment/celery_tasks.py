@@ -966,6 +966,11 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
+    from flags.state import flag_state
+
+    if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
+        return
+
     from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
 
