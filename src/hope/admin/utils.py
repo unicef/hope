@@ -233,7 +233,7 @@ class PaymentPlanCeleryTasksMixin:
             return redirect(reverse(self.url, args=[pk]))
 
         if request.method == "POST":
-            prepare_payment_plan_task.delay(payment_plan.id)
+            prepare_payment_plan_task.delay(str(payment_plan.id))
             messages.add_message(
                 request,
                 messages.SUCCESS,
