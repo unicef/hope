@@ -746,17 +746,17 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[0][1] == page_size
                 assert result[1][1] == page_size
 
-    def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
+    def test_some_records_invalid(self, mock_validate_data_collection_type: Any) -> None:
         for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
-        create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
-        create_record(
+        record_ok = create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
+        record_error = create_record(
             fields={"household": [{"aa": "bbb"}], "individuals": [{"abc": "xyz"}]},
             registration=3,
             status=Record.STATUS_TO_IMPORT,
         )
-        records_ids = Record.objects.all().values_list("id", flat=True)
+        records_ids = [record_ok.id, record_error.id]
 
         rdi = UkraineBaseRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
 
@@ -767,12 +767,47 @@ class TestAutomatingRDICreationTask(TestCase):
 
         process_flex_records_task(self.registration.pk, rdi.pk, list(records_ids))
         rdi.refresh_from_db()
+        record_ok.refresh_from_db()
+        record_error.refresh_from_db()
+        assert record_ok.status == Record.STATUS_IMPORTED
+        assert record_error.status == Record.STATUS_ERROR
+        assert rdi.status == RegistrationDataImport.DEDUPLICATION
+        assert rdi.number_of_individuals == 1
+        assert rdi.number_of_households == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingHousehold.objects.count() == 1
 
-        assert Record.objects.filter(status=Record.STATUS_TO_IMPORT).count() == 1
-        assert Record.objects.filter(status=Record.STATUS_ERROR).count() == 1
+    def test_all_records_invalid(self, mock_validate_data_collection_type: Any) -> None:
+        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
+            DocumentType.objects.get_or_create(key=document_key, label="abc")
+        create_ukraine_business_area()
+        record_error1 = create_record(
+            fields={"household": [{"aa": "bbb"}], "individuals": [{"abc": "xyz"}]},
+            registration=3,
+            status=Record.STATUS_TO_IMPORT,
+        )
+        record_error2 = create_record(
+            fields={"household": [{"aa": "bbb"}], "individuals": [{"abc": "xyz"}]},
+            registration=3,
+            status=Record.STATUS_TO_IMPORT,
+        )
+        records_ids = [record_error1.id, record_error2.id]
 
-        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORT_ERROR).count() == 1
-        assert rdi.error_message == "Records with errors were found during processing"
+        rdi = UkraineBaseRegistrationService(self.registration).create_rdi(None, "ukraine rdi timezone UTC")
+
+        assert Record.objects.count() == 2
+        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
+        assert PendingIndividual.objects.count() == 0
+        assert PendingHousehold.objects.count() == 0
+
+        process_flex_records_task(self.registration.pk, rdi.pk, list(records_ids))
+        rdi.refresh_from_db()
+        record_error1.refresh_from_db()
+        record_error2.refresh_from_db()
+        assert record_error1.status == Record.STATUS_ERROR
+        assert record_error2.status == Record.STATUS_ERROR
+        assert rdi.status == RegistrationDataImport.IMPORT_ERROR
+        assert rdi.error_message == "All Records failed validation during processing"
         assert rdi.number_of_individuals == 0
         assert rdi.number_of_households == 0
         assert PendingIndividual.objects.count() == 0

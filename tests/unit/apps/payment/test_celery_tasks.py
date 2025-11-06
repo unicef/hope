@@ -6,6 +6,7 @@ from celery.exceptions import Retry
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -436,6 +437,13 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         self,
         mock_service_cls: Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         create_afghanistan()
         wu_qcf_file = WesternUnionInvoice.objects.create(
             name="TEST",
@@ -450,6 +458,31 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         qcf_report.refresh_from_db()
         assert qcf_report.sent
 
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_sends_email_disabled(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="False",
+            required=False,
+        )
+        create_afghanistan()
+        wu_qcf_file = WesternUnionInvoice.objects.create(
+            name="TEST",
+        )
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
+            qcf_file=wu_qcf_file,
+            payment_plan=PaymentPlanFactory(),
+        )
+        mock_service = mock_service_cls.return_value
+        send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
+        mock_service.send_notification_emails.assert_not_called()
+        qcf_report.refresh_from_db()
+        assert not qcf_report.sent
+
     @patch("hope.apps.payment.celery_tasks.logger.exception")
     @patch("hope.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
     @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
@@ -459,6 +492,12 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_retry: Mock,
         mock_logger_exception: Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
         create_afghanistan()
         wu_qcf_file = WesternUnionInvoice.objects.create(name="TEST")
         qcf_report = WesternUnionPaymentPlanReport.objects.create(

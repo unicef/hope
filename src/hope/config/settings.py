@@ -437,6 +437,7 @@ FLAGS = {
     "FRONT_DOOR_BYPASS": [],
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
+    "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {

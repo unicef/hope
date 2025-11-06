@@ -110,37 +110,37 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         records_with_error = []
 
         try:
-            with atomic():
-                for record_id in records_ids_to_import:
-                    record = Record.objects.defer("data").get(id=record_id)
-                    try:
+            for record_id in records_ids_to_import:
+                record = Record.objects.defer("data").get(id=record_id)
+                try:
+                    with atomic():
                         self.create_household_for_rdi_household(record, rdi)
-                        imported_records_ids.append(record_id)
-                    except ValidationError as e:
-                        logger.exception(e)
-                        records_with_error.append((record, str(e)))
+                    imported_records_ids.append(record_id)
+                except ValidationError as e:
+                    records_with_error.append((record, str(e)))
+                    continue
 
-                # rollback if at least one Record is invalid
-                if records_with_error:
-                    transaction.set_rollback(True)
+            if records_with_error:
+                for record, error in records_with_error:
+                    record.mark_as_invalid(error)
 
-            if not records_with_error:
+                if not imported_records_ids:
+                    rdi.status = RegistrationDataImport.IMPORT_ERROR
+                    rdi.error_message = "All Records failed validation during processing"
+                    rdi.save(
+                        update_fields=(
+                            "status",
+                            "error_message",
+                        )
+                    )
+
+            if imported_records_ids:
                 number_of_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).count()
                 number_of_households = PendingHousehold.objects.filter(registration_data_import=rdi).count()
 
                 import_data.number_of_individuals = number_of_individuals
-                rdi.number_of_individuals = number_of_individuals
                 import_data.number_of_households = number_of_households
-                rdi.number_of_households = number_of_households
-                rdi.status = RegistrationDataImport.DEDUPLICATION
 
-                rdi.save(
-                    update_fields=(
-                        "number_of_individuals",
-                        "number_of_households",
-                        "status",
-                    )
-                )
                 import_data.save(
                     update_fields=(
                         "number_of_individuals",
@@ -149,25 +149,22 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                 )
                 Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
 
+                rdi.number_of_individuals = number_of_individuals
+                rdi.number_of_households = number_of_households
+
                 if not rdi.business_area.postpone_deduplication:
+                    rdi.status = RegistrationDataImport.DEDUPLICATION
                     transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi.id))
                 else:
                     rdi.status = RegistrationDataImport.IN_REVIEW
-                    rdi.save()
 
-            else:
-                # at least one Record from records_ids_to_import has error
-                rdi.status = RegistrationDataImport.IMPORT_ERROR
-                rdi.error_message = "Records with errors were found during processing"
                 rdi.save(
                     update_fields=(
+                        "number_of_individuals",
+                        "number_of_households",
                         "status",
-                        "error_message",
                     )
                 )
-                # mark invalid Records
-                for record, error in records_with_error:
-                    record.mark_as_invalid(error)
 
         except Exception as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
