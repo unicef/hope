@@ -3,8 +3,8 @@ from unittest import mock
 from unittest.mock import ANY
 
 from django.core.management import call_command
-import pytest
 from flags.models import FlagState
+import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory

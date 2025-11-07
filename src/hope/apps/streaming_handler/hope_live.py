@@ -1,6 +1,5 @@
 from typing import Any, Callable
 
-from constance import config
 from flags.state import flag_state
 from streaming.manager import manager
 from streaming.utils import make_event
