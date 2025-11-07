@@ -224,11 +224,6 @@ Clear Cache,clear-cache/
         "Default Beneficiary Group name",
         str,
     ),
-    "STREAMING_HANDLER_ENABLED": (
-        False,
-        "Enable streaming handler signals",
-        bool,
-    ),
 }
 
 CONSTANCE_DBS = ("default",)

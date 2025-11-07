@@ -1,6 +1,7 @@
 from typing import Any, Callable
 
 from constance import config
+from flags.state import flag_state
 from streaming.manager import manager
 from streaming.utils import make_event
 
@@ -72,5 +73,5 @@ class HopeLiveService:
         return builder(obj)
 
     def notify(self, event_name: str, obj: Any) -> None:
-        if config.STREAMING_HANDLER_ENABLED:
+        if bool(flag_state("STREAMING_HANDLER_ENABLED")):
             manager.notify(event_name, make_event(self.get_payload(event_name, obj)))
