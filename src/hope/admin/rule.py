@@ -35,8 +35,7 @@ from hope.apps.steficon.forms import (
     RuleForm,
 )
 from hope.apps.utils.security import is_root
-from hope.models.rule import MONITORED_FIELDS, Rule, RuleCommit
-from hope.models.user import User
+from hope.models import MONITORED_FIELDS, Rule, RuleCommit, User
 
 from .steficon import TestRuleMixin
 

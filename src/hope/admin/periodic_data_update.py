@@ -5,9 +5,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
+from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
 
 
 class PDUXlsxUploadInline(admin.TabularInline):

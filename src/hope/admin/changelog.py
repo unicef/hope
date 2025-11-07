@@ -4,7 +4,7 @@ from django.db import models
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.changelog.widget import HTMLEditor
-from hope.models.changelog import Changelog
+from hope.models import Changelog
 
 
 class ChangelogAdminForm(forms.ModelForm):

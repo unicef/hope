@@ -12,10 +12,7 @@ from hope.admin.account_forms import (
     RoleAssignmentInlineFormSet,
 )
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.business_area import BusinessArea
-from hope.models.partner import Partner
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
+from hope.models import BusinessArea, Partner, Role, RoleAssignment
 
 logger = logging.getLogger(__name__)
 

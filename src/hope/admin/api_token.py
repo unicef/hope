@@ -16,8 +16,7 @@ from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.utils.security import is_root
-from hope.models.api_token import APIToken
-from hope.models.business_area import BusinessArea
+from hope.models import APIToken, BusinessArea
 
 if TYPE_CHECKING:
     from uuid import UUID

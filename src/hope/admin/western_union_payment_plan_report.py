@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
+from hope.models import WesternUnionPaymentPlanReport
 
 
 @admin.register(WesternUnionPaymentPlanReport)

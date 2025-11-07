@@ -31,10 +31,7 @@ from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
-from hope.models.business_area import BusinessArea
-from hope.models.incompatible_roles import IncompatibleRoles
-from hope.models.partner import Partner
-from hope.models.user import User
+from hope.models import BusinessArea, IncompatibleRoles, Partner, User
 
 if TYPE_CHECKING:
     from uuid import UUID

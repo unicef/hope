@@ -2,7 +2,7 @@ import logging
 
 from django.contrib import admin
 
-from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models import PeriodicFieldData
 
 logger = logging.getLogger(__name__)
 

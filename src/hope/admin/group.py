@@ -20,8 +20,7 @@ from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
-from hope.models.user import User
-from hope.models.user_group import UserGroup
+from hope.models import User, UserGroup
 
 logger = logging.getLogger(__name__)
 

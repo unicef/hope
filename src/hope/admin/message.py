@@ -7,7 +7,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.message import Message
+from hope.models import Message
 
 
 class MessageRecipientMapInline(admin.TabularInline):

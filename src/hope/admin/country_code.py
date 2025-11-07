@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.country_code_map import CountryCodeMap
+from hope.models import CountryCodeMap
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet

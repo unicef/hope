@@ -17,9 +17,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.all_u
     household_fields,
     individual_fields,
 )
-from hope.models.account_type import AccountType
-from hope.models.document_type import DocumentType
-from hope.models.universal_update_script import UniversalUpdate
+from hope.models import AccountType, DocumentType, UniversalUpdate
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):

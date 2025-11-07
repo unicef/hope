@@ -25,13 +25,7 @@ from hope.apps.registration_datahub.services.biometric_deduplication import (
 )
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.area import Area
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.partner import Partner
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import AdminAreaLimitedTo, Area, Household, Individual, Partner, Program, ProgramCycle
 
 
 @admin.register(ProgramCycle)

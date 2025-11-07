@@ -25,8 +25,7 @@ from hope.apps.core.celery import app as celery_app
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from hope.apps.utils.security import is_root
-from hope.models.business_area import BusinessArea
-from hope.models.payment_plan import PaymentPlan
+from hope.models import BusinessArea, PaymentPlan
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
@@ -117,7 +116,7 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         return BusinessArea.objects.values_list("code", "name").distinct()
 

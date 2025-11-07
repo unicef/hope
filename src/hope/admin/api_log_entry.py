@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 from smart_admin.modeladmin import SmartModelAdmin
 
-from hope.models.api_log_entry import APILogEntry
+from hope.models import APILogEntry
 
 
 @admin.register(APILogEntry)

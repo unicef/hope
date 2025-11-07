@@ -47,18 +47,18 @@ from hope.apps.household.forms import (
 )
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.apps.utils.security import is_root
-from hope.models.business_area import BusinessArea
-from hope.models.document import Document
-from hope.models.household import (
+from hope.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    BusinessArea,
+    Document,
     Household,
     HouseholdCollection,
+    Individual,
+    IndividualRoleInHousehold,
+    Program,
 )
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.program import Program
 
 logger = logging.getLogger(__name__)
 

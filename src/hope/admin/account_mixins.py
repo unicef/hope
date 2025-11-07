@@ -18,7 +18,7 @@ from django.utils.crypto import get_random_string
 import requests
 from requests import RequestException, Response
 
-from hope.models.user import User
+from hope.models import User
 
 logger = logging.getLogger(__name__)
 

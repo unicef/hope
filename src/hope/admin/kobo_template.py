@@ -24,7 +24,7 @@ from hope.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
 from hope.apps.core.validators import KoboTemplateValidator
-from hope.models.xlsx_kobo_template import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 if TYPE_CHECKING:
     from uuid import UUID

@@ -5,7 +5,7 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 from django.contrib import admin
 from django.http import HttpRequest
 
-from hope.models.storage_file import StorageFile
+from hope.models import StorageFile
 
 logger = logging.getLogger(__name__)
 

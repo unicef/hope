@@ -32,7 +32,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import RegistrationDataImport
 
 
 class StatusFilter(ChoicesFieldComboFilter):

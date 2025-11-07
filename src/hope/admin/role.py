@@ -17,8 +17,7 @@ from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.permissions import Permissions
-from hope.models.incompatible_roles import IncompatibleRoles
-from hope.models.role import Role
+from hope.models import IncompatibleRoles, Role
 
 if TYPE_CHECKING:
     from uuid import UUID

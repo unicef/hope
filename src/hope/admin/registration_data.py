@@ -30,9 +30,7 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.security import is_root
-from hope.models.individual import Individual, PendingIndividual
-from hope.models.payment import Payment
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import Individual, Payment, PendingIndividual, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

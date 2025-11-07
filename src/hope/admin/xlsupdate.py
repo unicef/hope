@@ -15,7 +15,7 @@ from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
-from hope.models.xlsx_update_file import XlsxUpdateFile
+from hope.models import XlsxUpdateFile
 
 if TYPE_CHECKING:
     from django import forms

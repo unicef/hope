@@ -3,7 +3,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
+from hope.models import SanctionListIndividualNationalities
 
 
 @admin.register(SanctionListIndividualNationalities)

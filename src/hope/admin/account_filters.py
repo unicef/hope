@@ -7,9 +7,8 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
-from hope import models
 from hope.apps.account.permissions import Permissions
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea, Role
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     parameter_name = "role"
 
     def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
-        types = models.role.Role.objects.values_list("id", "name")
+        types = Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:

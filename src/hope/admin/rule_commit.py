@@ -13,8 +13,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.steficon.forms import RuleCommitAdminForm
 from hope.apps.utils.security import is_root
-from hope.models.rule import Rule, RuleCommit
-from hope.models.user import User
+from hope.models import Rule, RuleCommit, User
 
 from .steficon import TestRuleMixin
 
