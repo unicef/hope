@@ -8,7 +8,7 @@ from django.db import models as dj_models
 models_dir = pathlib.Path(__file__).parent
 package = __package__
 
-for path in sorted(models_dir.glob("*.py")):
+for path in models_dir.glob("*.py"):
     if path.name == "__init__.py":
         continue
 
