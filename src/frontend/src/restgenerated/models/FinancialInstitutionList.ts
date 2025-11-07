@@ -7,7 +7,7 @@ export type FinancialInstitutionList = {
     name: string;
     type: string | null;
     swiftCode: string | null;
-    readonly countryIsoCode3: string;
+    readonly countryIsoCode3: string | null;
     updatedAt: string | null;
 };
 
