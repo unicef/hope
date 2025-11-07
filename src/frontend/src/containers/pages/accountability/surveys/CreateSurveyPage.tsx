@@ -757,6 +757,14 @@ const CreateSurveyPage = (): ReactElement => {
                           0
                         )}
                       </Box>
+                      {!sampleSizeLoading && (sampleSizesData?.excluded_recipients_count || sampleSizesData?.excludedRecipientsCount) &&
+                        (sampleSizesData.excluded_recipients_count > 0 || sampleSizesData.excludedRecipientsCount > 0) && (
+                        <Box mt={1} color="text.secondary">
+                          <Typography variant="body2">
+                            {t('Excluded due to missing/invalid phone number')}: {sampleSizesData.excluded_recipients_count || sampleSizesData.excludedRecipientsCount}
+                          </Typography>
+                        </Box>
+                      )}
                     </Grid>
                   </>
                 )}
