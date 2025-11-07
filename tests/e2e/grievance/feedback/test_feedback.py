@@ -18,7 +18,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.area import (
+from hope.models import (
     HOST,
     Area,
     BeneficiaryGroup,

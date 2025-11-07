@@ -22,29 +22,30 @@ from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.phone import calculate_phone_numbers_validity
-from hope.models.account import Account, PendingAccount
-from hope.models.account_type import AccountType
-from hope.models.area import Area
-from hope.models.country import Country
-from hope.models.document import PendingDocument
-from hope.models.document_type import DocumentType
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.grant import Grant
-from hope.models.household import (
+from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Account,
+    AccountType,
+    Area,
+    Country,
+    DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
+    IndividualRoleInHousehold,
+    PendingAccount,
+    PendingDocument,
     PendingHousehold,
+    PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.grant import Grant
 
 if TYPE_CHECKING:
-    from hope.models.business_area import BusinessArea
+    from hope.models import BusinessArea
 
 BATCH_SIZE = 100
 

@@ -33,13 +33,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.utils import to_choice_object
-from hope.models.business_area import BusinessArea
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.partner import Partner
-from hope.models.program import Program
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import BusinessArea, Household, Individual, Partner, Program, RoleAssignment, User
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

@@ -8,7 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-from hope.models.user import User
+from hope.models import User
 
 if TYPE_CHECKING:
     from hope.models.api_token import APIToken

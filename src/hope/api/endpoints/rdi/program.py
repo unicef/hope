@@ -12,8 +12,8 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.models import Program
 from hope.models.grant import Grant
-from hope.models.program import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

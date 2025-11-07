@@ -19,7 +19,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.beneficiary_group import (
+from hope.models import (
     HOST,
     SEEING,
     BeneficiaryGroup,

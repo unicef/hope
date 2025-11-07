@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.models.household import NOT_DISABLED
+from hope.models import NOT_DISABLED
 
 
 class NullableChoiceField(serializers.ChoiceField):
