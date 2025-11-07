@@ -148,6 +148,7 @@ export function CreateFollowUpPaymentPlan({
               variant="outlined"
               color="primary"
               onClick={() => setDialogOpen(true)}
+              data-perm={PERMISSIONS.PM_CREATE}
               disabled={
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
                 !isActiveProgram
