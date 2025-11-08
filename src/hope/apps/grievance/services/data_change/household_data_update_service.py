@@ -21,11 +21,7 @@ from hope.apps.grievance.services.data_change.utils import (
 from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
-from hope.models import country as geo_models
-from hope.models.area import Area
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.log_entry import log_create
+from hope.models import Area, Household, Individual, country as geo_models, log_create
 
 
 def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list[dict[str, Any]]:

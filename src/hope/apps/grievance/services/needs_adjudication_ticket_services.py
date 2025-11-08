@@ -17,22 +17,23 @@ from hope.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
 )
+from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
-from hope.models.household import UNIQUE, UNIQUE_IN_BATCH, Household
-from hope.models.individual import Individual
-from hope.models.log_entry import log_create
-from hope.models.registration_data_import import (
+from hope.models import (
+    BusinessArea,
+    DeduplicationEngineSimilarityPair,
+    Household,
+    Individual,
     RegistrationDataImport,
+    log_create,
 )
 
 if TYPE_CHECKING:
-    from hope.models.program import Program
+    from hope.models import Program
 
 logger = logging.getLogger(__name__)
 

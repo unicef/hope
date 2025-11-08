@@ -22,25 +22,27 @@ from hope.apps.core.field_attributes.fields_types import (
 from hope.apps.core.utils import (
     serialize_flex_attributes,
 )
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.country import Country
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import (
+from hope.apps.household.const import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.log_entry import log_create
-from hope.models.partner import Partner
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.models import (
+    Account,
+    AccountType,
+    Country,
+    Document,
+    DocumentType,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+    Partner,
+    log_create,
+)
 from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:

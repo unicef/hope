@@ -23,10 +23,7 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.models.individual import Individual
-from hope.models.payment import Payment
-from hope.models.payment_verification import PaymentVerification
-from hope.models.user import User
+from hope.models import Individual, Payment, PaymentVerification, User
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -35,7 +32,7 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.models.household import Household
+    from hope.models import Household
 
 logger = logging.getLogger(__name__)
 

@@ -9,8 +9,7 @@ from django.utils import timezone
 
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import RoleAssignment, User
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet

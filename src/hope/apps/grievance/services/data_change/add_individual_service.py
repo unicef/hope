@@ -21,19 +21,15 @@ from hope.apps.grievance.services.data_change.utils import (
     verify_flex_fields,
 )
 from hope.apps.grievance.signals import individual_added
-from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.querysets import evaluate_qs
-from hope.models.document import Document
-from hope.models.household import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.log_entry import log_create
+from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.querysets import evaluate_qs
+from hope.models import Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.utils import MergeStatusModel
 
 

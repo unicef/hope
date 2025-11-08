@@ -41,19 +41,10 @@ from hope.apps.grievance.services.data_change.utils import (
     update_es,
     verify_flex_fields,
 )
+from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models.account import Account
-from hope.models.area import Area
-from hope.models.country import Country
-from hope.models.document import Document
-from hope.models.household import (
-    HEAD,
-    Household,
-)
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.log_entry import log_create
+from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 
 
 @dataclasses.dataclass

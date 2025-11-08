@@ -8,8 +8,7 @@ from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models.individual import Individual
-from hope.models.log_entry import log_create
+from hope.models import Individual, log_create
 
 
 class IndividualDeleteService(DataChangeService):

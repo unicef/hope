@@ -5,7 +5,7 @@ from django.utils import timezone
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models.payment_verification import PaymentVerification
+from hope.models import PaymentVerification
 
 
 def update_payment_verification_service(

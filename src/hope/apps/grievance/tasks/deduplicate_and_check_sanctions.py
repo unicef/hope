@@ -4,6 +4,10 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
+from hope.apps.household.const import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
+)
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
@@ -13,12 +17,7 @@ from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import 
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
-from hope.models.document import Document
-from hope.models.household import (
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
-)
-from hope.models.individual import Individual
+from hope.models import Document, Individual
 
 logger = logging.getLogger(__name__)
 

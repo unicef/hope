@@ -15,7 +15,7 @@ from hope.apps.grievance.documents import (
     bulk_update_urgency,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.models.user import User
+from hope.models import User
 
 
 class BulkActionService:
