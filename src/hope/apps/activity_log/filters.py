@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from django.db.models import Q
 from django_filters import CharFilter, FilterSet
 
-from hope.models.log_entry import LogEntry
+from hope.models import LogEntry
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet

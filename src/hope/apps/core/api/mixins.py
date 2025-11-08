@@ -16,10 +16,10 @@ from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 if TYPE_CHECKING:
-    from hope.models.program import Program
+    from hope.models import Program
 
 
 class BaseAPI:

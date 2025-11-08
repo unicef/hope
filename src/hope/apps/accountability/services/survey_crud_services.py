@@ -3,10 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.accountability.services.sampling import Sampling
-from hope.models.business_area import BusinessArea
-from hope.models.household import Household
-from hope.models.program import Program
-from hope.models.survey import Survey
+from hope.models import BusinessArea, Household, Program, Survey
 
 
 class SurveyCrudServices:

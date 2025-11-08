@@ -10,8 +10,7 @@ from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import send_email_notification
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models.business_area import BusinessArea
-from hope.models.survey import Survey
+from hope.models import BusinessArea, Survey
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def export_survey_sample_task(survey_id: str, user_id: str) -> None:
-    from hope.models.user import User
+    from hope.models import User
 
     try:
         survey = Survey.objects.get(id=survey_id)

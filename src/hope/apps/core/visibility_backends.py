@@ -4,8 +4,7 @@ from uuid import UUID
 from django.db.models import QuerySet
 
 if TYPE_CHECKING:
-    from hope.models.area import Area
-    from hope.models.partner import Partner
+    from hope.models import Area, Partner
 
 
 class VisibilityBackend:

@@ -4,14 +4,13 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied
 
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.models.program import Program
-    from hope.models.user import User
+    from hope.models import Program, User
 
 logger = logging.getLogger(__name__)
 

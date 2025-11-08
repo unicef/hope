@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def invalidate_permissions_cache_for_user_if_expired_role(self: Any) -> bool:
     # Invalidate permissions cache for users with roles that expired a day before
-    from hope.models.user import User
+    from hope.models import User
 
     day_ago = timezone.now() - datetime.timedelta(days=1)
     users = User.objects.filter(

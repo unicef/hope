@@ -5,8 +5,7 @@ from django.core.management import BaseCommand
 from django.db.models import Q
 
 from hope.apps.account.permissions import Permissions
-from hope.models.incompatible_roles import IncompatibleRoles
-from hope.models.role import Role
+from hope.models import IncompatibleRoles, Role
 
 
 class Command(BaseCommand):

@@ -8,8 +8,7 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.utils import get_column_letter
 
-from hope.models.household import Household
-from hope.models.survey import Survey
+from hope.models import Household, Survey
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,7 @@ from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.models.partner import Partner
-from hope.models.user import USER_STATUS_CHOICES, User
+from hope.models import USER_STATUS_CHOICES, Partner, User
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet

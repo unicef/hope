@@ -6,8 +6,7 @@ from django.db.models import Q, QuerySet
 
 from hope.apps.core.filters import filter_age
 from hope.apps.payment.utils import get_number_of_samples
-from hope.models.household import Household
-from hope.models.message import Message
+from hope.models import Household, Message
 
 
 class BaseSampling(abc.ABC):

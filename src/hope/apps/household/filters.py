@@ -19,9 +19,7 @@ from django_filters import (
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models.document_type import DocumentType
-from hope.models.household import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -33,10 +31,9 @@ from hope.models.household import (
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
     STATUS_WITHDRAWN,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.program import Program
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.models import DocumentType, Household, Individual, Program
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)

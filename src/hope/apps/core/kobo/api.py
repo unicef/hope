@@ -12,7 +12,7 @@ from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
 
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models.xlsx_kobo_template import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 

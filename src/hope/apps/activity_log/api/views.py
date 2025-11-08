@@ -21,7 +21,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import to_choice_object
-from hope.models.log_entry import LogEntry
+from hope.models import LogEntry
 
 logger = logging.getLogger(__name__)
 

@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
-    from hope.models.user import User
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 
