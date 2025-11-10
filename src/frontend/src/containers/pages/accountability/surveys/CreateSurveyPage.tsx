@@ -141,7 +141,7 @@ const CreateSurveyPage = (): ReactElement => {
   };
 
   const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
-  const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.PROGRAM);
+  const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.WHOLE_PROGRAM_POPULATION);
   const [selectedSampleSizeType, setSelectedSampleSizeType] = useState(0);
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
