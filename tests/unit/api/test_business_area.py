@@ -50,6 +50,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
             "is_split": self.business_area.is_split,
             "active": self.business_area.active,
             "is_accountability_applicable": self.business_area.is_accountability_applicable,
+            "rdi_import_xlsx_disabled": self.business_area.rdi_import_xlsx_disabled,
             "countries": [],
         } in response.json()["results"]
         assert {
@@ -62,6 +63,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
             "is_split": business_area1.is_split,
             "active": business_area1.active,
             "is_accountability_applicable": business_area1.is_accountability_applicable,
+            "rdi_import_xlsx_disabled": self.business_area.rdi_import_xlsx_disabled,
             "countries": [],
         } in response.json()["results"]
         assert {
@@ -74,5 +76,6 @@ class APIBusinessAreaTests(HOPEApiTestCase):
             "is_split": business_area2.is_split,
             "active": business_area2.active,
             "is_accountability_applicable": business_area2.is_accountability_applicable,
+            "rdi_import_xlsx_disabled": self.business_area.rdi_import_xlsx_disabled,
             "countries": [],
         } in response.json()["results"]
