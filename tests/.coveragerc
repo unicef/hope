@@ -13,7 +13,6 @@ omit =
         */**/fixtures.py
         */**/migrations/*.py
         hope/one_time_scripts/*
-        hope/libs/*
         hope/config/settings.py
         hope/apps/core/management/commands/*
 

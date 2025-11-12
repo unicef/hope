@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 
 const initialFilter = {
   search: '',
@@ -41,6 +42,13 @@ function RegistrationDataImportPage(): ReactElement {
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug: businessArea,
         slug: programId,
+      }),
+  });
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
       }),
   });
 
@@ -93,7 +101,7 @@ function RegistrationDataImportPage(): ReactElement {
             </ButtonTooltip>
           </Box>
         )}
-        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
+        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && !businessAreaData.rdiImportXlsxDisabled && (
           <Box>
             <RegistrationDataImportCreateDialog />
           </Box>
