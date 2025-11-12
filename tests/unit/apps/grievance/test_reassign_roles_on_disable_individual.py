@@ -13,13 +13,12 @@ from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.household import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.models import BusinessArea, IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
 

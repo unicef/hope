@@ -12,8 +12,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.log_entry import LogEntry
-from hope.models.program import Program
+from hope.models import LogEntry, Program
 
 pytestmark = pytest.mark.django_db
 

@@ -11,7 +11,7 @@ from hope.apps.dashboard.celery_tasks import (
     update_recent_dashboard_figures,
 )
 from hope.apps.dashboard.services import DashboardDataCache
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)

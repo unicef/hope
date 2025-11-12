@@ -13,8 +13,7 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country
+from hope.models import BusinessArea, Country
 
 pytestmark = pytest.mark.django_db
 

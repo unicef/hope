@@ -25,12 +25,7 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.models import country as geo_models
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.business_area import BusinessArea
-from hope.models.document_type import DocumentType
-from hope.models.household import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -41,8 +36,15 @@ from hope.models.household import (
     UNHCR,
     WIDOWED,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.program import Program
+from hope.models import (
+    Account,
+    AccountType,
+    BusinessArea,
+    DocumentType,
+    IndividualRoleInHousehold,
+    Program,
+    country as geo_models,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()

@@ -20,9 +20,7 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import country as geo_models
-from hope.models.business_area import BusinessArea
-from hope.models.sanction_list_individual import SanctionListIndividual
+from hope.models import BusinessArea, SanctionListIndividual, country as geo_models
 
 pytestmark = pytest.mark.django_db()
 

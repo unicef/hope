@@ -18,9 +18,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets_for_biometrics,
 )
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models.business_area import BusinessArea
-from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
-from hope.models.individual import Individual
+from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, Individual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

@@ -29,11 +29,7 @@ from hope.apps.dashboard.services import (
     get_fertility_rate,
     get_pwd_count_expression,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.household import Household
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
+from hope.models import BusinessArea, Household, Payment, PaymentPlan, Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),

@@ -6,12 +6,11 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.utils import handle_role
-from hope.models.household import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.program import Program
+from hope.models import IndividualRoleInHousehold, Program
 from hope.models.utils import MergeStatusModel
 
 

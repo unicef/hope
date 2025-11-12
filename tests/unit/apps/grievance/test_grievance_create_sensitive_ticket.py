@@ -13,8 +13,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import country as geo_models
-from hope.models.program import Program
+from hope.models import Program, country as geo_models
 
 pytestmark = pytest.mark.django_db()
 

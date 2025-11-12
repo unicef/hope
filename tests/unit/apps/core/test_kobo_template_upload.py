@@ -18,7 +18,7 @@ from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
-from hope.models.xlsx_kobo_template import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 
 class MockSuperUser:

@@ -8,8 +8,7 @@ from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.models.message import Message
-from hope.models.program import Program
+from hope.models import Message, Program
 
 pytestmark = pytest.mark.django_db
 

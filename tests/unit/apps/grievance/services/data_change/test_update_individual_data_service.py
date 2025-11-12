@@ -26,9 +26,7 @@ from hope.apps.grievance.services.data_change.individual_data_update_service imp
     IndividualDataUpdateService,
 )
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models.account_type import AccountType
-from hope.models.country import Country
-from hope.models.document import Document
+from hope.models import AccountType, Country, Document
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

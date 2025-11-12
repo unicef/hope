@@ -17,10 +17,7 @@ import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
-from hope.models.area import Area
-from hope.models.area_type import AreaType
-from hope.models.country import Country
-from hope.models.user import User
+from hope.models import Area, AreaType, Country, User
 
 
 @pytest.fixture

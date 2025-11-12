@@ -49,12 +49,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketNote,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import country as geo_models
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.business_area import BusinessArea
-from hope.models.document_type import DocumentType
-from hope.models.household import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -64,10 +59,17 @@ from hope.models.household import (
     SINGLE,
     WIDOWED,
 )
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.program import Program
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    AdminAreaLimitedTo,
+    BusinessArea,
+    DocumentType,
+    IndividualRoleInHousehold,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    Program,
+    country as geo_models,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
