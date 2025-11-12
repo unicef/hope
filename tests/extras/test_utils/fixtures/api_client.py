@@ -4,7 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories.account import UserFactory
-from hope.models.user import User
+from hope.models import User
 
 
 class ReauthenticateAPIClient(APIClient):

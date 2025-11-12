@@ -17,11 +17,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.document import PendingDocument
-from hope.models.document_type import DocumentType
-from hope.models.grant import Grant
-from hope.models.household import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -29,11 +25,17 @@ from hope.models.household import (
     MALE,
     NOT_COLLECTED,
     NOT_DISABLED,
-    PendingHousehold,
 )
-from hope.models.individual import PendingIndividual
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import (
+    DataCollectingType,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.grant import Grant
 from unit.api.base import HOPEApiTestCase
 
 

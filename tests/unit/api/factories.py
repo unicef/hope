@@ -3,7 +3,7 @@ from factory import SubFactory
 from factory.django import DjangoModelFactory
 
 from extras.test_utils.factories.account import UserFactory
-from hope.models.api_token import APIToken
+from hope.models import APIToken
 from hope.models.grant import Grant
 
 

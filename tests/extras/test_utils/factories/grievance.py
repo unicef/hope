@@ -31,12 +31,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.individual import Individual
-from hope.models.payment_verification import PaymentVerification
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import Area, BusinessArea, Individual, PaymentVerification, Program, RegistrationDataImport
 
 
 class GrievanceTicketFactory(DjangoModelFactory):

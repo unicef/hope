@@ -4,7 +4,7 @@ import pytest
 from rest_framework import serializers
 
 from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
-from hope.models.household import DISABILITY_CHOICES, NOT_DISABLED
+from hope.apps.household.const import DISABILITY_CHOICES, NOT_DISABLED
 
 
 class NullableChoiceFieldTests(TestCase):

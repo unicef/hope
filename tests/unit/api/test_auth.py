@@ -18,7 +18,7 @@ from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
 
 if TYPE_CHECKING:
-    from hope.models.api_token import APIToken
+    from hope.models import APIToken
 
 
 class HOPEPermissionTest(TestCase):

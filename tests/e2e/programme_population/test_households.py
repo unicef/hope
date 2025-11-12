@@ -12,13 +12,8 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.models.area import Area
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.household import REFUGEE, Household
-from hope.models.program import Program
-from hope.models.user import User
+from hope.apps.household.const import REFUGEE
+from hope.models import Area, BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program, User
 
 pytestmark = pytest.mark.django_db()
 

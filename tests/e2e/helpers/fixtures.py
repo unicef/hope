@@ -4,11 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 
 def get_program_with_dct_type_and_name(

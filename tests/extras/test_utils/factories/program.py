@@ -11,11 +11,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 
 from extras.test_utils.factories.core import DataCollectingTypeFactory
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Program, ProgramCycle
 
 fake = Faker()
 
@@ -173,7 +169,7 @@ def generate_people_program() -> None:
         create_household,
         create_individual_document,
     )
-    from hope.models.household import HOST, SEEING
+    from hope.apps.household.const import HOST, SEEING
 
     ba = BusinessArea.objects.get(name="Afghanistan")
     people_program = ProgramFactory(

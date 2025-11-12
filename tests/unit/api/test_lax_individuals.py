@@ -18,14 +18,9 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.models.account import PendingAccount
-from hope.models.account_type import AccountType
-from hope.models.document import PendingDocument
+from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
+from hope.models import AccountType, PendingAccount, PendingDocument, PendingIndividual, Program, RegistrationDataImport
 from hope.models.grant import Grant
-from hope.models.household import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
-from hope.models.individual import PendingIndividual
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
 
 

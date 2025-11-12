@@ -6,10 +6,8 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.household import PendingIndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.models import PendingHousehold, Program, RegistrationDataImport
 from hope.models.grant import Grant
-from hope.models.household import PendingHousehold
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
 from unit.api.base import HOPEApiTestCase
 
 

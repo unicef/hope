@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from extras.test_utils.factories.account import UserFactory
-from hope.models.user import User
+from hope.models import User
 
 pytestmark = pytest.mark.django_db()
 

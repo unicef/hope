@@ -19,8 +19,7 @@ from hope.apps.account.celery_tasks import (
     invalidate_permissions_cache_for_user_if_expired_role,
 )
 from hope.apps.account.signals import _invalidate_user_permissions_cache
-from hope.models.program import Program
-from hope.models.user import User
+from hope.models import Program, User
 
 pytestmark = pytest.mark.django_db()
 

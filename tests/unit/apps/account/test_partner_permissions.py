@@ -6,13 +6,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.program import Program
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import AdminAreaLimitedTo, Area, BusinessArea, Program, Role, RoleAssignment, User
 
 
 class UserPartnerTest(TestCase):

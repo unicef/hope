@@ -20,11 +20,14 @@ from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.individual import Individual
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import (
+    FlexibleAttribute,
+    Individual,
+    PDUXlsxTemplate,
+    PeriodicFieldData,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db()
 

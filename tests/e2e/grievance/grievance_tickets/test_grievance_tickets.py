@@ -32,15 +32,18 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.models.area import Area
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.household import HOST, Household
-from hope.models.individual import Individual
-from hope.models.payment import Payment
-from hope.models.program import Program
-from hope.models.user import User
+from hope.apps.household.const import HOST
+from hope.models import (
+    Area,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    Household,
+    Individual,
+    Payment,
+    Program,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
