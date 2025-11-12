@@ -150,6 +150,7 @@ export function CreateFollowUpPaymentPlan({
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
                 !isActiveProgram
               }
+              data-perm={PERMISSIONS.PM_CREATE}
             >
               {t('Create Follow-up PP')}
             </Button>
