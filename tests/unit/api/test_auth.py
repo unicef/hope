@@ -13,7 +13,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
 

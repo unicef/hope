@@ -17,7 +17,7 @@ from hope.apps.household.const import (
     SON_DAUGHTER,
 )
 from hope.models import DocumentType, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 

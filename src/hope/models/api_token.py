@@ -8,8 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.account.fields import ChoiceArrayField
 from hope.models.business_area import BusinessArea
-from hope.models.grant import Grant
 from hope.models.user import User
+from hope.models.utils import Grant
 
 
 class APIToken(models.Model):

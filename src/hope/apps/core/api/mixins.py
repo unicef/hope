@@ -16,10 +16,9 @@ from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
-    from hope.models import Program
+    from hope.models import BusinessArea, Program
 
 
 class BaseAPI:
@@ -107,7 +106,9 @@ class BusinessAreaMixin:
         return self.kwargs.get("business_area_slug")
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
+        from hope.models import BusinessArea
+
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
@@ -119,7 +120,7 @@ class ProgramMixin:
     program_model_field_is_many = False
 
     @cached_property
-    def business_area(self) -> BusinessArea:
+    def business_area(self) -> "BusinessArea":
         return self.program.business_area
 
     @property
@@ -296,7 +297,7 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    from hope.models.grant import Grant
+    from hope.models.utils import Grant
 
     """Mixin to allow using the same viewset for both internal and external endpoints.
 

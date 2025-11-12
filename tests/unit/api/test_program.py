@@ -7,7 +7,7 @@ from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hope.models import BusinessArea, Program
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

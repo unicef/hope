@@ -16,7 +16,7 @@ from hope.contrib.aurora.caches import (
     RegistrationListVersionsKeyBit,
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

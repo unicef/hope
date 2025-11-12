@@ -43,6 +43,8 @@ if TYPE_CHECKING:
     from hope.contrib.aurora.models import Record
     from hope.models.individual import Individual
 
+# TODO: remove later
+# please use hope.apps.household.const
 BLANK = ""
 IDP = "IDP"
 REFUGEE = "REFUGEE"

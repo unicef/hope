@@ -12,7 +12,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from hope.models import APIToken, BusinessArea
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.factories import APITokenFactory
 
 

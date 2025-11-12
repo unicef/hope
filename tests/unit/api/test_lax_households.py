@@ -7,7 +7,7 @@ from extras.test_utils.factories.household import PendingIndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.models import PendingHousehold, Program, RegistrationDataImport
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 

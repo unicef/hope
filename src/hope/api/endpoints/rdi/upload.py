@@ -33,7 +33,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

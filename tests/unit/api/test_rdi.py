@@ -27,7 +27,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
-from hope.models.grant import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import UserFactory
 
