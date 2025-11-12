@@ -11,8 +11,7 @@ from hope.apps.household.api.caches import (
     get_household_list_program_key,
     get_individual_list_program_key,
 )
-from hope.models.household import Household
-from hope.models.individual import Individual
+from hope.models import Household, Individual
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

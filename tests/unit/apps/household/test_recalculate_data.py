@@ -10,9 +10,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
-from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models.business_area import BusinessArea
-from hope.models.household import (
+from hope.apps.household.const import (
     AUNT_UNCLE,
     BROTHER_SISTER,
     COUSIN,
@@ -21,8 +19,9 @@ from hope.models.household import (
     HEAD,
     MALE,
     NON_BENEFICIARY,
-    Household,
 )
+from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.models import BusinessArea, Household
 
 
 class TestRecalculateData(TestCase):

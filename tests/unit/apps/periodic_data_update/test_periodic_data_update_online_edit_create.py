@@ -15,10 +15,7 @@ from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.payment import Payment
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.program import Program
+from hope.models import Payment, PDUOnlineEdit, PeriodicFieldData, Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

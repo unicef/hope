@@ -10,7 +10,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from hope.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):

@@ -11,8 +11,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
-from hope.models.business_area import BusinessArea
-from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models import BusinessArea, PDUOnlineEdit
 
 
 class TestPDUOnlineEditNotification(BaseTestCase):

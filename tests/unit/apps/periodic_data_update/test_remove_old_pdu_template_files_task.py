@@ -13,8 +13,7 @@ from extras.test_utils.factories.periodic_data_update import (
 from hope.apps.periodic_data_update.celery_tasks import (
     remove_old_pdu_template_files_task,
 )
-from hope.models.file_temp import FileTemp
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models import FileTemp, PDUXlsxTemplate
 
 pytestmark = pytest.mark.django_db
 

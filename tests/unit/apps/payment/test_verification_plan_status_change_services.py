@@ -24,9 +24,7 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hope.models.area import Area
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import Area, PaymentVerification, PaymentVerificationPlan
 
 
 class TestPhoneNumberVerification(TestCase):

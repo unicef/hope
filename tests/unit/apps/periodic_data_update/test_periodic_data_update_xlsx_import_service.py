@@ -24,10 +24,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_import_service 
     PDUXlsxImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
-from hope.models.program import Program
+from hope.models import PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData, Program
 
 
 def add_pdu_data_to_xlsx(

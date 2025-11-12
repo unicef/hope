@@ -25,9 +25,7 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.file_temp import FileTemp
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models import FileTemp, PDUXlsxTemplate, PeriodicFieldData
 
 pytestmark = pytest.mark.django_db
 

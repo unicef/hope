@@ -30,11 +30,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hope.models.area import Area
-from hope.models.household import Household
-from hope.models.payment import Payment
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import Area, Household, Payment, PaymentVerification, PaymentVerificationPlan
 
 
 class TestFinishVerificationPlan(TestCase):

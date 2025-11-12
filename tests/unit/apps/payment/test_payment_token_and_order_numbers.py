@@ -9,10 +9,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
-from hope.models.country import Country
-from hope.models.household import Household
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
+from hope.models import Country, Household, Payment, PaymentPlan
 
 
 class TestPaymentTokenAndOrderNumbers(TestCase):

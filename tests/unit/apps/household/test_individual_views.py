@@ -36,13 +36,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models.account_type import AccountType
-from hope.models.document_type import DocumentType
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.household import (
+from hope.apps.household.const import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -70,10 +64,19 @@ from hope.models.household import (
     STATUS_ACTIVE,
     UNIQUE,
     WORK_STATUS_CHOICE,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.program import Program
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    AccountType,
+    DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    PeriodicFieldData,
+    Program,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()

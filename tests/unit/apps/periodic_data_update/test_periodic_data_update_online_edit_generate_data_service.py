@@ -26,13 +26,11 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
     PDUOnlineEditGenerateDataService,
 )
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.household import FEMALE, MALE
-from hope.models.payment import Payment
-from hope.models.program import Program
+from hope.models import Payment, PeriodicFieldData, Program
 
 
 class TestPDUOnlineEditGenerateDataService(TestCase):

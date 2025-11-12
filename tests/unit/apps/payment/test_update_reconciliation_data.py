@@ -17,8 +17,7 @@ from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.payment_plan import PaymentPlan
+from hope.models import BusinessArea, PaymentPlan
 
 
 def file_without_delivery_dates() -> BytesIO:

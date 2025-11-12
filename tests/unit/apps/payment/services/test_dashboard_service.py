@@ -16,11 +16,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.payment.services.dashboard_service import (
     payment_verification_chart_query,
 )
-from hope.models.area import Area
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.household import Household
-from hope.models.payment import Payment
-from hope.models.program import Program
+from hope.models import Area, DeliveryMechanism, Household, Payment, Program
 
 pytestmark = pytest.mark.django_db()
 

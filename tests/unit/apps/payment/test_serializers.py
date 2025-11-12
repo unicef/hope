@@ -25,16 +25,18 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.models.approval import Approval
-from hope.models.business_area import BusinessArea
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.payment import Payment
-from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_split import PaymentPlanSplit
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import (
+    Approval,
+    BusinessArea,
+    FinancialServiceProvider,
+    Payment,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanSplit,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 
 class TPHouseholdListSerializerTest(TestCase):

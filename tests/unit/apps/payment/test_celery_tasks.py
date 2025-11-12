@@ -34,13 +34,15 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments,
 )
 from hope.apps.payment.utils import generate_cache_key
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.file_temp import FileTemp
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.payment_plan import PaymentPlan
-from hope.models.rule import Rule
-from hope.models.western_union_invoice import WesternUnionInvoice
-from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
+from hope.models import (
+    DeliveryMechanism,
+    FileTemp,
+    FinancialServiceProvider,
+    PaymentPlan,
+    Rule,
+    WesternUnionInvoice,
+    WesternUnionPaymentPlanReport,
+)
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -321,7 +323,7 @@ class TestPaymentCeleryTask(TestCase):
             assert mock_mailjet_send.call_count == 3
 
     @patch("hope.apps.payment.celery_tasks.logger")
-    @patch("hope.models.user.User")
+    @patch("hope.models.User")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:

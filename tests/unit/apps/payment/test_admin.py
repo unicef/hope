@@ -15,9 +15,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from hope.admin.payment_plan import can_regenerate_export_file_per_fsp, can_sync_with_payment_gateway
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.payment_plan import PaymentPlan
-from hope.models.user import User
+from hope.models import FinancialServiceProvider, PaymentPlan, User
 
 
 @pytest.fixture(autouse=True)
