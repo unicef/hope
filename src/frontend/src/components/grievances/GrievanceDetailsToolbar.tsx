@@ -24,6 +24,7 @@ import { useProgramContext } from '../../programContext';
 import { MiśTheme } from '../../theme';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`
   width: 1px;
@@ -395,6 +396,7 @@ export const GrievanceDetailsToolbar = ({
               startIcon={<EditIcon />}
               data-cy="button-edit"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.GRIEVANCES_UPDATE}
             >
               {t('Edit')}
             </Button>
@@ -467,6 +469,9 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   color="primary"
                   variant="contained"
+                  data-perm={
+                    PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK
+                  }
                   onClick={() =>
                     confirm({
                       content: closingConfirmationText,

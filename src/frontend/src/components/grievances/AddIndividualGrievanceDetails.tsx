@@ -22,6 +22,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import camelCase from 'lodash/camelCase';
+import { PERMISSIONS } from 'src/config/permissions';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -185,6 +186,7 @@ function AddIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
+              data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
               onClick={async () => {
                 try {
                   await confirm({

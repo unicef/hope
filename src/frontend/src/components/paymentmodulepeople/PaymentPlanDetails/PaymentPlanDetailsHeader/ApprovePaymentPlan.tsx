@@ -24,6 +24,7 @@ import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -111,6 +112,7 @@ export function ApprovePaymentPlan({
               variant="contained"
               onClick={() => setApproveDialogOpen(true)}
               data-cy="button-approve"
+              data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE}
               disabled={!isActiveProgram}
             >
               {t('Approve')}

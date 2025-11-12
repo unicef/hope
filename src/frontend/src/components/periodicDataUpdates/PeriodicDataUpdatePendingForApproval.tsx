@@ -302,6 +302,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
                 onClick={handleApprove}
                 disabled={selected.length === 0}
                 sx={{ mr: 1 }}
+                data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
               >
                 {t('Approve')}
               </Button>,

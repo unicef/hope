@@ -7,6 +7,7 @@ import { ReactElement, useState, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const StyledMenu = styled(Menu)(() => ({
   '.MuiPaper-root': {
@@ -60,6 +61,7 @@ export function CreateSurveyMenu(): ReactElement {
               }
               data-cy="button-new-survey"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE}
             >
               {t('New Survey')}
             </Button>
@@ -76,6 +78,7 @@ export function CreateSurveyMenu(): ReactElement {
             anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
           }
           data-cy="button-new-survey"
+          data-perm={PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE}
         >
           {t('New Survey')}
         </Button>
