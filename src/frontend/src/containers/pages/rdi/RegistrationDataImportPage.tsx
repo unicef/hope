@@ -44,7 +44,6 @@ function RegistrationDataImportPage(): ReactElement {
       }),
   });
 
-
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
