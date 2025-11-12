@@ -19,7 +19,6 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   chooseFieldType,
   clearField,
-  formatCriteriaCollectorsFiltersBlocks,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
   HhIdValidation,
@@ -45,13 +44,11 @@ import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
-import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const ButtonBox = styled.div`
@@ -110,16 +107,6 @@ const requiredSchema = Yup.object().shape({
       ),
     }),
   ),
-  collectorsFiltersBlocks: Yup.array().of(
-    Yup.object().shape({
-      collectorBlockFilters: Yup.array().of(
-        Yup.object().shape({
-          fieldName: Yup.string().required('Field Type is required'),
-          value: Yup.string().required('Field Value is required'),
-        }),
-      ),
-    }),
-  ),
 });
 
 const optionalSchema = Yup.object().shape({
@@ -165,16 +152,6 @@ const optionalSchema = Yup.object().shape({
       ),
     }),
   ),
-  collectorsFiltersBlocks: Yup.array().of(
-    Yup.object().shape({
-      collectorBlockFilters: Yup.array().of(
-        Yup.object().shape({
-          fieldName: Yup.string().required('Field Type is required'),
-          value: Yup.string().required('Field Value is required'),
-        }),
-      ),
-    }),
-  ),
 });
 
 interface ArrayFieldWrapperProps {
@@ -200,7 +177,6 @@ interface TargetingCriteriaFormPropTypes {
   onClose: () => void;
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
-  collectorsFiltersAvailable: boolean;
   criteriaIndex: number;
 }
 
@@ -214,7 +190,6 @@ export const TargetingCriteriaForm = ({
   onClose,
   individualFiltersAvailable,
   householdFiltersAvailable,
-  collectorsFiltersAvailable,
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
@@ -228,13 +203,6 @@ export const TargetingCriteriaForm = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: allCollectorFieldsAttributesData } =
-    useQuery<PaginatedCollectorAttributeList>({
-      queryKey: ['collectorFieldsAttributes'],
-      queryFn: () =>
-        RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
-      staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
-    });
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
@@ -264,13 +232,10 @@ export const TargetingCriteriaForm = ({
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
-  const collectorsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
-  const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
-    useState(null);
 
   const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] = useState(
     !!initialValue.deliveryMechanism,
@@ -312,29 +277,13 @@ export const TargetingCriteriaForm = ({
     [data],
   );
 
-  const allCollectorFieldsChoicesDictTmp = useMemo(
-    () =>
-      // @ts-ignore
-      allCollectorFieldsAttributesData?.reduce((acc, item) => {
-        acc[item.name] = item.choices;
-        return acc;
-      }, {}),
-    [allCollectorFieldsAttributesData],
-  );
-
   useEffect(() => {
     setIndividualData(filteredIndividualData);
     setHouseholdData(filteredHouseholdData);
     setAllDataChoicesDict(allDataChoicesDictTmp);
-    setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
-  }, [
-    filteredIndividualData,
-    filteredHouseholdData,
-    allDataChoicesDictTmp,
-    allCollectorFieldsChoicesDictTmp,
-  ]);
+  }, [filteredIndividualData, filteredHouseholdData, allDataChoicesDictTmp]);
 
-  if (!data || !allCollectorFieldsAttributesData) return null;
+  if (!data) return null;
 
   const handleSubmit = (values, bag): void => {
     const householdsFiltersBlocks = formatCriteriaFilters(
@@ -347,14 +296,10 @@ export const TargetingCriteriaForm = ({
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
-    const collectorsFiltersBlocks = formatCriteriaCollectorsFiltersBlocks(
-      values.collectorsFiltersBlocks,
-    );
 
     addCriteria({
       householdsFiltersBlocks,
       individualsFiltersBlocks,
-      collectorsFiltersBlocks,
       individualIds,
       householdIds,
       deliveryMechanism,
@@ -582,125 +527,81 @@ export const TargetingCriteriaForm = ({
                     </Box>
                   </>
                 ) : null}
-                {collectorsFiltersAvailable ? (
-                  <>
-                    <AndDivider>
-                      <AndDividerLabel>And</AndDividerLabel>
-                    </AndDivider>
-                    <FieldArray
-                      name="collectorsFiltersBlocks"
-                      render={(arrayHelpers) => (
-                        <ArrayFieldWrapper
-                          arrayHelpers={arrayHelpers}
-                          ref={collectorsFiltersBlocksWrapperRef}
-                        >
-                          {values.collectorsFiltersBlocks.map(
-                            (_each, index) => (
-                              <TargetingCriteriaCollectorFilterBlocks
-                                key={index}
-                                blockIndex={index}
-                                data={allCollectorFieldsAttributesData}
-                                values={values}
-                                choicesToDict={allCollectorFieldsChoicesDict}
-                                onDelete={() => arrayHelpers.remove(index)}
-                              />
-                            ),
-                          )}
-                        </ArrayFieldWrapper>
-                      )}
-                    />
-                    <Box display="flex" flexDirection="column">
-                      <ButtonBox>
+                <>
+                  <AndDivider>
+                    <AndDividerLabel>And</AndDividerLabel>
+                  </AndDivider>
+                  {criteriaIndex === 0 && (
+                    <Box mt={2} display="flex" flexDirection="column">
+                      <ButtonBox style={{ width: '600px' }}>
                         <Button
-                          data-cy="button-collector-rule"
-                          onClick={() =>
-                            collectorsFiltersBlocksWrapperRef.current
-                              .getArrayHelpers()
-                              .push({
-                                collectorBlockFilters: [{ fieldName: '' }],
-                              })
-                          }
+                          data-cy="button-payment-channel-rule"
+                          onClick={() => handlePaymentChannelButtonClick()}
                           color="primary"
                           startIcon={<AddCircleOutline />}
                         >
-                          ADD COLLECTOR RULE GROUP
+                          <Box
+                            style={{ textAlign: 'left' }}
+                            display="flex"
+                            flexDirection="column"
+                          >
+                            <Box>PAYMENT CHANNEL VALIDATION</Box>
+                            <Box>(Delivery mechanism and FSP requirements)</Box>
+                          </Box>
                         </Button>
                       </ButtonBox>
-                    </Box>
-                    {criteriaIndex === 0 && (
-                      <Box mt={2} display="flex" flexDirection="column">
-                        <ButtonBox style={{ width: '600px' }}>
-                          <Button
-                            data-cy="button-collector-rule"
-                            onClick={() => handlePaymentChannelButtonClick()}
-                            color="primary"
-                            startIcon={<AddCircleOutline />}
-                          >
-                            <Box
-                              style={{ textAlign: 'left' }}
-                              display="flex"
-                              flexDirection="column"
-                            >
-                              <Box>PAYMENT CHANNEL VALIDATION</Box>
-                              <Box>
-                                (Delivery mechanism and FSP requirements)
-                              </Box>
-                            </Box>
-                          </Button>
-                        </ButtonBox>
-                        <Collapse in={openPaymentChannelCollapse}>
-                          <Box mt={4}>
-                            <Grid container spacing={3}>
-                              <Grid size={{ xs: 12 }}>
-                                <Field
-                                  name="deliveryMechanism"
-                                  label="Select Delivery Mechanism"
-                                  type="text"
-                                  fullWidth
-                                  required={openPaymentChannelCollapse}
-                                  variant="outlined"
-                                  choices={mappedDeliveryMechanisms}
-                                  component={FormikSelectField}
-                                  onChange={() => {
-                                    setFieldValue('fsp', '');
-                                  }}
-                                  onClear={() => {
-                                    setFieldValue('fsp', '');
-                                  }}
-                                  data-cy="input-delivery-mechanism"
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12 }}>
-                                <Tooltip
-                                  title={
-                                    !values.deliveryMechanism
-                                      ? 'Select delivery mechanism first'
-                                      : ''
-                                  }
-                                >
-                                  <div>
-                                    <Field
-                                      name="fsp"
-                                      label="Select FSP"
-                                      type="text"
-                                      fullWidth
-                                      disabled={!values.deliveryMechanism}
-                                      required={openPaymentChannelCollapse}
-                                      variant="outlined"
-                                      component={FormikSelectField}
-                                      choices={mappedFsps}
-                                      data-cy="input-fsp"
-                                    />
-                                  </div>
-                                </Tooltip>
-                              </Grid>
+                      <Collapse in={openPaymentChannelCollapse}>
+                        <Box mt={4}>
+                          <Grid container spacing={3}>
+                            <Grid size={{ xs: 12 }}>
+                              <Field
+                                name="deliveryMechanism"
+                                label="Select Delivery Mechanism"
+                                type="text"
+                                fullWidth
+                                required={openPaymentChannelCollapse}
+                                variant="outlined"
+                                choices={mappedDeliveryMechanisms}
+                                component={FormikSelectField}
+                                onChange={() => {
+                                  setFieldValue('fsp', '');
+                                }}
+                                onClear={() => {
+                                  setFieldValue('fsp', '');
+                                }}
+                                data-cy="input-delivery-mechanism"
+                              />
                             </Grid>
-                          </Box>
-                        </Collapse>
-                      </Box>
-                    )}
-                  </>
-                ) : null}
+                            <Grid size={{ xs: 12 }}>
+                              <Tooltip
+                                title={
+                                  !values.deliveryMechanism
+                                    ? 'Select delivery mechanism first'
+                                    : ''
+                                }
+                              >
+                                <div>
+                                  <Field
+                                    name="fsp"
+                                    label="Select FSP"
+                                    type="text"
+                                    fullWidth
+                                    disabled={!values.deliveryMechanism}
+                                    required={openPaymentChannelCollapse}
+                                    variant="outlined"
+                                    component={FormikSelectField}
+                                    choices={mappedFsps}
+                                    data-cy="input-fsp"
+                                  />
+                                </div>
+                              </Tooltip>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      </Collapse>
+                    </Box>
+                  )}
+                </>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>

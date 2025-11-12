@@ -91,7 +91,7 @@ export const ReassignRoleBox = ({
   }
 
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
-    .filter((el) => el.role !== 'NO_ROLE')
+    .filter((el) => el.role !== null)
     .map((el) => (
       <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
@@ -136,12 +136,7 @@ export const ReassignRoleBox = ({
       (ticket.issueType.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
         (ticket.individual?.role === 'PRIMARY' ||
-          ticket.individual?.relationship === 'HEAD')) ||
-      (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-        ticket.ticketDetails?.individualData?.role?.previousValue ===
-          'PRIMARY' &&
-        (ticket.ticketDetails?.individualData?.role?.value === 'ALTERNATE' ||
-          ticket.ticketDetails?.individualData?.role?.value === 'NO_ROLE'))
+          ticket.individual?.relationship === 'HEAD'))
     ) {
       return (
         <Typography variant="body2">

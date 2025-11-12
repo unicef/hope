@@ -21,7 +21,7 @@ def adjust_program_size(program: Program) -> None:
     transaction.on_commit(lambda: adjust_program_size_task.delay(program.id))
 
 
-pre_save_partner_access_change = Signal(providing_args=["old_partner_access"])
+pre_save_partner_access_change = Signal()
 
 
 @receiver(pre_save, sender=Program)

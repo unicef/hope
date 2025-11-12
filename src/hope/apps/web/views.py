@@ -1,33 +1,25 @@
 import json
 import logging
+from pathlib import Path
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.decorators.cache import never_cache
-import requests
 
 logger = logging.getLogger(__name__)
 
 
 def get_manifest() -> dict[str, dict[str, str]]:
     manifest_path = settings.MANIFEST_FILE
-    manifest_url = staticfiles_storage.url(manifest_path)
+    path = Path(settings.PROJECT_ROOT) / "apps/web/static" / manifest_path
+    if not path.exists():
+        logger.error("Manifest file does not exist at %s", path)
+        return {}
 
-    if manifest_url.startswith("http"):
-        response = requests.get(manifest_url, timeout=60)
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.warning(e)
-            raise
-        return response.json()
-
-    path = f"{settings.PROJECT_ROOT}/apps/web/static/{manifest_path}"
-    with open(path) as f:
-        return json.loads(f.read())
+    with path.open() as f:
+        return json.load(f)
 
 
 @never_cache
