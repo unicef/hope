@@ -6,7 +6,7 @@ from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import Signal, receiver
 
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-from hope.models import BusinessArea
+from hope.models.business_area import BusinessArea
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.partner import Partner
 from hope.models.role import Role
