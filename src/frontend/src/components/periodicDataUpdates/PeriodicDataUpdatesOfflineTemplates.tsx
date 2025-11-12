@@ -229,6 +229,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
                 disabled={
                   row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }
+                dataPerm={PERMISSIONS.PDU_TEMPLATE_DOWNLOAD}
               >
                 Download
               </ButtonTooltip>
@@ -242,6 +243,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
             startIcon={<UploadIcon />}
             data-cy={`export-btn-${row.id}`}
             disabled={!canExportOrDownloadTemplate}
+            dataPerm={PERMISSIONS.PDU_TEMPLATE_DOWNLOAD}
           >
             Export
           </ButtonTooltip>
