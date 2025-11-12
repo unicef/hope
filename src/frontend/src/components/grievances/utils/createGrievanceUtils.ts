@@ -464,20 +464,25 @@ export function prepareVariables(businessArea, values) {
   return prepareFunction(requiredVariables, values);
 }
 
-export function prepareExistingAccountValues(individualDataUpdateAccountsToEdit: any) {
+export function prepareExistingAccountValues(
+  individualDataUpdateAccountsToEdit: any,
+) {
+  if (!individualDataUpdateAccountsToEdit) {
+    return [];
+  }
   function popKey(obj: any, key: string) {
     const value = obj[key];
     delete obj[key];
     return value;
   }
-  return individualDataUpdateAccountsToEdit.map(item=>{
+  return individualDataUpdateAccountsToEdit.map((item) => {
     return {
       number: popKey(item, 'number'),
-        financialInstitution: popKey(item, 'financialInstitution'),
+      financialInstitution: popKey(item, 'financialInstitution'),
       id: popKey(item, 'id'),
       dataFields: { ...item },
     };
-    });
+  });
 }
 
 export function prepareRestVariables(values: any): CreateGrievanceTicket {
@@ -624,7 +629,9 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
             identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
             identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
             accounts: individualDataUpdateFieldsAccountsWithoutIds,
-            accounts_to_edit: prepareExistingAccountValues(values.individualDataUpdateAccountsToEdit),
+            accounts_to_edit: prepareExistingAccountValues(
+              values.individualDataUpdateAccountsToEdit,
+            ),
           },
         },
       };
