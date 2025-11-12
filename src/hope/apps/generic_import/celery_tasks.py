@@ -1,17 +1,6 @@
-import traceback
 
-from celery.exceptions import SoftTimeLimitExceeded
-from django.core.cache import cache
-from django.core.files.base import ContentFile
 
 from hope.apps.core.celery import app
-from hope.apps.universal_update_script.models import UniversalUpdate
-from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
-    create_and_save_snapshot_chunked,
-)
-from hope.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
-    UniversalIndividualUpdateService,
-)
 from hope.apps.registration_datahub.celery_tasks import locked_cache
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
@@ -33,12 +22,12 @@ def process_generic_import_task(
     registration_data_import_id: str,
     import_data_id: str,
 ) -> None:
-    """
-    Process generic import file asynchronously.
+    """Process generic import file asynchronously.
 
     Args:
         registration_data_import_id: UUID of RegistrationDataImport instance
         import_data_id: UUID of ImportData instance
+
     """
     import logging
 
@@ -102,12 +91,8 @@ def process_generic_import_task(
                 # Update stats
                 from hope.apps.household.models import Household, Individual
 
-                households_count = Household.pending_objects.filter(
-                    registration_data_import=rdi
-                ).count()
-                individuals_count = Individual.pending_objects.filter(
-                    registration_data_import=rdi
-                ).count()
+                households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
+                individuals_count = Individual.pending_objects.filter(registration_data_import=rdi).count()
 
                 import_data.status = ImportData.STATUS_FINISHED
                 import_data.number_of_households = households_count
@@ -134,6 +119,7 @@ def process_generic_import_task(
         # Update error status
         try:
             from sentry_sdk import capture_exception
+
             sentry_id = capture_exception(e)
         except Exception as exc:
             logger.exception(exc)
@@ -159,6 +145,3 @@ def process_generic_import_task(
             logger.exception(f"Failed to update RegistrationDataImport status: {exc}")
 
         raise self.retry(exc=e)
-
-
-@

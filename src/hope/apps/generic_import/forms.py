@@ -1,7 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
+from django.utils import timezone
 
+from hope.apps.account.models import RoleAssignment
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program
 
@@ -61,8 +63,22 @@ class GenericImportForm(forms.Form):
             # Programs will be filtered dynamically based on BA selection
 
     def _get_business_area_queryset(self) -> QuerySet[BusinessArea]:
-        """Get business areas accessible to the user."""
-        return BusinessArea.objects.filter(role_assignments__user=self.user).distinct()
+        """Get business areas accessible to the user.
+
+        Matches User.business_areas logic: includes partner assignments,
+        excludes expired role assignments and inactive business areas.
+        """
+        # Match User.business_areas logic: include partner assignments, exclude expired/inactive
+        partner_filter = Q(partner__user=self.user) if self.user.partner_id else Q(pk=None)
+
+        role_assignments = RoleAssignment.objects.filter(Q(user=self.user) | partner_filter).exclude(
+            expiry_date__lt=timezone.now()
+        )
+
+        # Get distinct business area IDs from role assignments
+        ba_ids = role_assignments.values_list("business_area_id", flat=True).distinct()
+
+        return BusinessArea.objects.filter(id__in=ba_ids).exclude(active=False).distinct()
 
     def _get_program_queryset(self, business_area: BusinessArea = None) -> QuerySet[Program]:
         """Get programs accessible to the user.
@@ -71,10 +87,8 @@ class GenericImportForm(forms.Form):
             business_area: Optional BA to filter programs. If None, returns all accessible programs.
 
         """
-        from hope.apps.account.models import get_program_ids_for_business_area
-
         if business_area:
-            program_ids = get_program_ids_for_business_area(self.user, business_area.id)
+            program_ids = self.user.get_program_ids_for_business_area(business_area.id)
             return Program.objects.filter(
                 id__in=program_ids,
                 business_area=business_area,
@@ -112,10 +126,8 @@ class GenericImportForm(forms.Form):
                 raise ValidationError("Selected program does not belong to the selected business area.")
 
             # Verify user has access to this program
-            from hope.apps.account.models import get_program_ids_for_business_area
-
-            program_ids = get_program_ids_for_business_area(self.user, business_area.id)
-            if program.id not in program_ids:
+            program_ids = self.user.get_program_ids_for_business_area(business_area.id)
+            if str(program.id) not in program_ids:
                 raise ValidationError("You do not have access to the selected program.")
 
         return cleaned_data
