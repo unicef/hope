@@ -18,6 +18,9 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
 from hope.apps.core.utils import chunks
+from hope.apps.household.const import (
+    ROLE_PRIMARY,
+)
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -38,26 +41,25 @@ from hope.apps.payment.services.payment_household_snapshot_service import (
 from hope.apps.payment.utils import get_link
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
-from hope.models.approval import Approval
-from hope.models.approval_process import ApprovalProcess
-from hope.models.business_area import BusinessArea
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.file_temp import FileTemp
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import (
-    ROLE_PRIMARY,
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    BusinessArea,
+    DeliveryMechanism,
+    FileTemp,
+    FinancialServiceProvider,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentDataCollector,
+    PaymentPlan,
+    PaymentPlanSplit,
+    Program,
+    ProgramCycle,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+    User,
 )
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.payment import Payment
-from hope.models.payment_data_collector import PaymentDataCollector
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_split import PaymentPlanSplit
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
-from hope.models.targeting_criteria_rule import TargetingCriteriaRule
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
-from hope.models.user import User
 
 if TYPE_CHECKING:
     from uuid import UUID

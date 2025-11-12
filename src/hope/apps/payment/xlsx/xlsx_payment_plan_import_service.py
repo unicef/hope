@@ -13,15 +13,13 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
-from hope.models.file_temp import FileTemp
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
+from hope.models import FileTemp, Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.models.user import User
+    from hope.models import User
 
 Row = tuple[Cell]
 

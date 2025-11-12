@@ -2,16 +2,15 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
 
-from hope.models.household import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     MALE,
     NON_BENEFICIARY,
     NOT_COLLECTED,
     OTHER,
-    Household,
 )
-from hope.models.individual import Individual
+from hope.models import Household, Individual
 
 # Set of Individual fields which affects Household recalculation
 RECALCULATION_INDIVIDUAL_FIELDS = {

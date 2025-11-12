@@ -15,7 +15,7 @@ from django.forms import (
 from django.utils import timezone
 from django_filters import Filter
 
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:

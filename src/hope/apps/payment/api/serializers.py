@@ -24,6 +24,10 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualSmallSerializer,
 )
+from hope.apps.household.const import (
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+)
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
@@ -34,26 +38,24 @@ from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
-from hope.models.approval import Approval
-from hope.models.approval_process import ApprovalProcess
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.household import (
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     Household,
+    Individual,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
+    Program,
+    log_create,
 )
-from hope.models.individual import Individual
-from hope.models.log_entry import log_create
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_split import PaymentPlanSplit
-from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.payment_verification_summary import PaymentVerificationSummary
-from hope.models.program import Program
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):

@@ -6,9 +6,7 @@ from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.import_program_population import (
     import_program_population,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.log_entry import log_create
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import BusinessArea, RegistrationDataImport, log_create
 
 logger = logging.getLogger(__name__)
 

@@ -109,11 +109,9 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
+from hope.apps.household.const import HEAD
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import HEAD, Household
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.log_entry import log_create
+from hope.models import FlexibleAttribute, Household, IndividualRoleInHousehold, log_create
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser

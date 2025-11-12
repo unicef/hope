@@ -17,11 +17,7 @@ from hope.apps.registration_datahub.tasks.rdi_program_population_create import (
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models.business_area import BusinessArea
-from hope.models.document import Document
-from hope.models.household import Household
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import BusinessArea, Document, Household, Program, RegistrationDataImport
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -76,7 +72,7 @@ def registration_xlsx_import_task(
         from hope.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,
         )
-        from hope.models.program import Program
+        from hope.models import Program
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
@@ -178,7 +174,7 @@ def registration_kobo_import_task(
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         set_sentry_business_area_tag(BusinessArea.objects.get(pk=business_area_id).name)
 
@@ -204,7 +200,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
 
@@ -233,7 +229,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
         from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
         if not_started_rdi is None:
@@ -265,7 +261,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             return True  # pragma: no cover
         try:
             from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-            from hope.models.registration_data_import import RegistrationDataImport
+            from hope.models import RegistrationDataImport
 
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(obj_hct.business_area.name)
@@ -277,7 +273,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             RdiMergeTask().execute(registration_data_import_id)
         except Exception as e:  # noqa
             logger.exception(e)
-            from hope.models.registration_data_import import RegistrationDataImport
+            from hope.models import RegistrationDataImport
 
             RegistrationDataImport.objects.filter(
                 id=registration_data_import_id,
@@ -313,7 +309,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
-    from hope.models.kobo_import_data import KoboImportData
+    from hope.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
@@ -338,8 +334,7 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
     from hope.apps.registration_datahub.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
-    from hope.models.import_data import ImportData
-    from hope.models.program import Program
+    from hope.models import ImportData, Program
 
     import_data = ImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)

@@ -304,7 +304,7 @@ DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DE
 
 
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
-    from hope.models.program import Program
+    from hope.models import Program
 
     if not user.is_authenticated:
         return False

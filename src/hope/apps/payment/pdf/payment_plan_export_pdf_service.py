@@ -6,12 +6,10 @@ from django.urls import reverse
 
 from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
-from hope.models.approval import Approval
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
+from hope.models import Approval, Payment, PaymentPlan
 
 if TYPE_CHECKING:
-    from hope.models.user import User
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 

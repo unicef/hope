@@ -10,11 +10,10 @@ from hope.apps.payment.services.create_payment_verifications import (
 from hope.apps.payment.services.process_verification import ProcessVerification
 from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.models.payment import Payment
-    from hope.models.payment_plan import PaymentPlan  # pragma: no cover
+    from hope.models import Payment, PaymentPlan  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)

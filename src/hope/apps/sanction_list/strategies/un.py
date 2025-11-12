@@ -21,19 +21,21 @@ from hope.apps.core.countries import SanctionListCountries as Countries
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
-from hope.models.country import Country
-from hope.models.program import Program
-from hope.models.sanction_list_individual import SanctionListIndividual
-from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
-from hope.models.sanction_list_individual_countries import SanctionListIndividualCountries
-from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
-from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
-from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
+from hope.models import (
+    Country,
+    Program,
+    SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualCountries,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+    SanctionListIndividualNationalities,
+)
 
 from ._base import BaseSanctionList
 
 if TYPE_CHECKING:
-    from hope.models.sanction_list import SanctionList
+    from hope.models import SanctionList
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +96,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualDateOfBirth]":
-        from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
+        from hope.models import SanctionListIndividualDateOfBirth
 
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -147,7 +149,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualAliasName]":
-        from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
+        from hope.models import SanctionListIndividualAliasName
 
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -191,7 +193,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualCountries]":
-        from hope.models.sanction_list_individual_countries import SanctionListIndividualCountries
+        from hope.models import SanctionListIndividualCountries
 
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
@@ -219,7 +221,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualNationalities]":
-        from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
+        from hope.models import SanctionListIndividualNationalities
 
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
@@ -240,7 +242,7 @@ class LoadSanctionListXMLTask:
         *args: Any,
         **kwargs: Any,
     ) -> "set[SanctionListIndividualDocument]":
-        from hope.models.sanction_list_individual_document import SanctionListIndividualDocument
+        from hope.models import SanctionListIndividualDocument
 
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -281,7 +283,7 @@ class LoadSanctionListXMLTask:
         return documents
 
     def _get_individual_data(self, individual_tag: Element) -> dict:
-        from hope.models.sanction_list_individual import SanctionListIndividual
+        from hope.models import SanctionListIndividual
 
         individual_data_dict = {
             "individual": SanctionListIndividual(),

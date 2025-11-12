@@ -14,8 +14,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
 )
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.utils.phone import calculate_phone_numbers_validity
-from hope.models.individual import Individual
-from hope.models.log_entry import log_create
+from hope.models import Individual, log_create
 
 
 class InvalidColumnsError(Exception):

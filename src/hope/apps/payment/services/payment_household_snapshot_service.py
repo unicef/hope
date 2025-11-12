@@ -7,18 +7,20 @@ from django.core.paginator import Paginator
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hope.models.country import Country
-from hope.models.household import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.payment import Payment
-from hope.models.payment_data_collector import PaymentDataCollector
-from hope.models.payment_household_snapshot import PaymentHouseholdSnapshot
-from hope.models.payment_plan import PaymentPlan
+from hope.models import (
+    Country,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentDataCollector,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+)
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]

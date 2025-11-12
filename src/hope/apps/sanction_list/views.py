@@ -8,7 +8,7 @@ from django.http import HttpRequest, HttpResponse
 from django.views.generic.edit import CreateView
 
 from hope.apps.sanction_list.template_generator import get_template_file
-from hope.models.sanction_list import SanctionList, UploadedXLSXFile
+from hope.models import SanctionList, UploadedXLSXFile
 
 
 class UploadForm(forms.ModelForm):

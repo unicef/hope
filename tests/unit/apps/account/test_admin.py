@@ -20,10 +20,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.partner import PartnerAdmin
 from hope.admin.user_role import RoleAssignmentAdmin, RoleAssignmentInline
-from hope.models.partner import Partner
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db()
 

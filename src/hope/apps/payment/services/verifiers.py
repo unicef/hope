@@ -1,6 +1,6 @@
 from rest_framework.exceptions import ValidationError
 
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import PaymentVerificationPlan
 
 
 class PaymentVerificationArgumentVerifier:

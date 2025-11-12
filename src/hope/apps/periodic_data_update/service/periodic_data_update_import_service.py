@@ -12,10 +12,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_base_service im
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.individual import Individual
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
+from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData
 
 
 class PDUBaseForm(forms.Form):

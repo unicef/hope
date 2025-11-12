@@ -32,22 +32,18 @@ from hope.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hope.apps.core.validators import BaseValidator
-from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-from hope.apps.registration_datahub.utils import (
-    calculate_hash_for_kobo_submission,
-    find_attachment_in_kobo,
-)
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.household import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.models.program import Program
+from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hope.apps.registration_datahub.utils import (
+    calculate_hash_for_kobo_submission,
+    find_attachment_in_kobo,
+)
+from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +137,7 @@ class ImportDataInstanceValidator:
         }
 
     def serialize_flex_attributes(self) -> dict:
-        from hope.models.flexible_attribute import FlexibleAttribute
+        from hope.models import FlexibleAttribute
 
         flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
 

@@ -5,6 +5,12 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
+from hope.apps.household.const import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+)
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
@@ -13,16 +19,11 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
-from hope.models.deduplication_engine_similarity_pair import DeduplicationEngineSimilarityPair
-from hope.models.household import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    UNIQUE,
-    UNIQUE_IN_BATCH,
-)
-from hope.models.individual import Individual, PendingIndividual
-from hope.models.program import Program
-from hope.models.registration_data_import import (
+from hope.models import (
+    DeduplicationEngineSimilarityPair,
+    Individual,
+    PendingIndividual,
+    Program,
     RegistrationDataImport,
 )
 from hope.models.utils import MergeStatusModel

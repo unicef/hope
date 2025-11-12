@@ -2,8 +2,7 @@ from django.shortcuts import get_object_or_404
 
 from hope.apps.program.utils import CopyProgramPopulation
 from hope.apps.registration_datahub.utils import get_rdi_program_population
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import Program, RegistrationDataImport
 from hope.models.utils import MergeStatusModel
 
 

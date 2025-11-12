@@ -132,7 +132,7 @@ class ProgramMixin:
 
     @cached_property
     def program(self) -> "Program":
-        from hope.models.program import Program
+        from hope.models import Program
 
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
@@ -192,7 +192,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.models.program import Program
+        from hope.models import Program
 
         queryset = super().get_queryset()
         user = self.request.user

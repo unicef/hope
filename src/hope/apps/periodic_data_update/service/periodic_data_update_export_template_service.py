@@ -10,9 +10,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_base_service im
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
-from hope.models.file_temp import FileTemp
-from hope.models.individual import Individual
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
+from hope.models import FileTemp, Individual, PDUXlsxTemplate
 
 
 class PDUXlsxExportTemplateService(PDUDataExtractionService, PDURoundValueMixin):

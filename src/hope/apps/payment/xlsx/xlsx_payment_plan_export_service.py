@@ -10,13 +10,10 @@ from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseServic
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
-from hope.models.file_temp import FileTemp
-from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
+from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, Payment, PaymentPlan
 
 if TYPE_CHECKING:
-    from hope.models.user import User
+    from hope.models import User
 
 
 logger = logging.getLogger(__name__)

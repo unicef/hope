@@ -10,7 +10,7 @@ from hope.models.individual import Individual
 from hope.models.individual_role_in_household import IndividualRoleInHousehold
 
 if TYPE_CHECKING:
-    from hope.models.program import Program
+    from hope.models import Program
 
 
 class AbstractCollisionDetector:

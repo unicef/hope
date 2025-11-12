@@ -47,13 +47,15 @@ from hope.apps.periodic_data_update.api.serializers import (
 )
 from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.pdu_online_edit_sent_back_comment import PDUOnlineEditSentBackComment
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import (
+    FlexibleAttribute,
+    PDUOnlineEdit,
+    PDUOnlineEditSentBackComment,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    RoleAssignment,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -11,13 +11,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.household.services.household_programs_with_delivered_quantity import (
-    delivered_quantity_service,
-)
-from hope.models.account_type import AccountType
-from hope.models.document_type import DocumentType
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.household import (
+from hope.apps.household.const import (
     AGENCY_TYPE_CHOICES,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -32,10 +26,18 @@ from hope.models.household import (
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.apps.household.services.household_programs_with_delivered_quantity import (
+    delivered_quantity_service,
+)
+from hope.models import (
+    AccountType,
+    DocumentType,
+    FinancialInstitution,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 
 
 class DeliveredQuantitySerializer(serializers.Serializer):

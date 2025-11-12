@@ -17,6 +17,12 @@ from hope.apps.core.kobo.common import (
     get_submission_metadata,
 )
 from hope.apps.core.utils import chunks, rename_dict_keys
+from hope.apps.household.const import (
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+)
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
@@ -25,27 +31,21 @@ from hope.apps.registration_datahub.utils import (
     find_attachment_in_kobo,
 )
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
-from hope.models.account import Account
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country as GeoCountry
-from hope.models.document import PendingDocument
-from hope.models.document_type import DocumentType
-from hope.models.household import (
-    HEAD,
-    NON_BENEFICIARY,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
+from hope.models import (
+    Account,
+    Area,
+    BusinessArea,
+    Country as GeoCountry,
+    DocumentType,
+    ImportData,
+    KoboImportedSubmission,
+    PendingDocument,
     PendingHousehold,
-)
-from hope.models.import_data import ImportData
-from hope.models.individual import PendingIndividual
-from hope.models.individual_identity import PendingIndividualIdentity
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.models.log_entry import log_create
-from hope.models.registration_data_import import (
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
     RegistrationDataImport,
+    log_create,
 )
 
 logger = logging.getLogger(__name__)

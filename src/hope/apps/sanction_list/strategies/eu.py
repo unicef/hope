@@ -8,8 +8,7 @@ from defusedxml import ElementTree
 from elasticsearch import NotFoundError
 import requests
 
-from hope.models.country import Country
-from hope.models.program import Program
+from hope.models import Country, Program
 
 from ..tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,

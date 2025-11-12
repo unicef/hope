@@ -21,13 +21,12 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models.payment import Payment
-from hope.models.payment_verification import PaymentVerification
+from hope.models import Payment, PaymentVerification
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.models.payment_plan import PaymentPlan
+    from hope.models import PaymentPlan
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):

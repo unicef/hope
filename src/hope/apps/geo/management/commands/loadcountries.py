@@ -6,7 +6,7 @@ from django.db import Error
 from django_countries import countries
 
 from hope.apps.geo.missing_countries import missing_countries
-from hope.models.country import Country
+from hope.models import Country
 
 logger = logging.getLogger(__name__)
 

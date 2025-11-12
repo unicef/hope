@@ -4,7 +4,7 @@ from typing import Any
 from hope.apps.core.celery import app
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags
-from hope.models.xlsx_kobo_template import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 

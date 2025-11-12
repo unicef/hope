@@ -12,16 +12,13 @@ from hope.apps.grievance.utils import (
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
-from hope.apps.utils.exceptions import log_and_raise
-from hope.models.household import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Household,
 )
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.user import User
+from hope.apps.utils.exceptions import log_and_raise
+from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
 class GrievancePermissionsMixin:

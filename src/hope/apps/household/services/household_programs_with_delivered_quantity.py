@@ -4,8 +4,7 @@ from typing import Any
 from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 
-from hope.models.household import Household
-from hope.models.payment import Payment
+from hope.models import Household, Payment
 
 
 def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:

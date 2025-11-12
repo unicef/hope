@@ -19,18 +19,20 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
-from hope.models.account import Account
-from hope.models.country import Country
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.household import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
 )
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
+from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
+from hope.models import (
+    Account,
+    Country,
+    Document,
+    DocumentType,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):

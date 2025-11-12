@@ -13,8 +13,7 @@ from hope.apps.registration_data.api.serializers import (
     SaveKoboImportDataSerializer,
     UploadXlsxFileSerializer,
 )
-from hope.models.import_data import ImportData
-from hope.models.kobo_import_data import KoboImportData
+from hope.models import ImportData, KoboImportData
 
 
 class ImportDataUploadViewSet(

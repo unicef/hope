@@ -8,15 +8,18 @@ from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.models.business_area import BusinessArea
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.pdu_online_edit_sent_back_comment import PDUOnlineEditSentBackComment
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
-from hope.models.program import Program
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PDUOnlineEdit,
+    PDUOnlineEditSentBackComment,
+    PDUXlsxTemplate,
+    PDUXlsxUpload,
+    PeriodicFieldData,
+    Program,
+    RoleAssignment,
+    User,
+)
 
 PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_SAVE_DATA,

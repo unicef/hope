@@ -11,14 +11,14 @@ from rest_framework.request import Request
 from hope.models import User
 
 if TYPE_CHECKING:
-    from hope.models.api_token import APIToken
+    from hope.models import APIToken
 
 
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
     def authenticate_credentials(self, key: str) -> tuple[User, "APIToken"]:
-        from hope.models.api_token import APIToken
+        from hope.models import APIToken
 
         try:
             token = (

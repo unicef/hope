@@ -16,22 +16,22 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
+from hope.apps.household.const import ROLE_CHOICE
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
 from hope.apps.program.api.serializers import ProgramSmallSerializer
-from hope.models.area import Area
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.feedback import Feedback
-from hope.models.household import (
-    ROLE_CHOICE,
+from hope.models import (
+    Area,
+    Document,
+    DocumentType,
+    Feedback,
     Household,
+    Individual,
+    IndividualIdentity,
+    Partner,
+    Payment,
+    Program,
+    User,
 )
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.partner import Partner
-from hope.models.payment import Payment
-from hope.models.program import Program
-from hope.models.user import User
 
 
 class CreateAccountSerializer(serializers.Serializer):

@@ -14,6 +14,10 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
+from hope.apps.household.const import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
+)
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hope.apps.registration_datahub.services.biometric_deduplication import (
@@ -29,21 +33,19 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.querysets import evaluate_qs
-from hope.models.account import PendingAccount
-from hope.models.document import PendingDocument
-from hope.models.household import (
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
+from hope.models import (
     Household,
     HouseholdCollection,
+    Individual,
+    IndividualCollection,
+    KoboImportedSubmission,
+    PendingAccount,
+    PendingDocument,
     PendingHousehold,
-)
-from hope.models.individual import Individual, IndividualCollection, PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.models.log_entry import log_create
-from hope.models.registration_data_import import (
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
     RegistrationDataImport,
+    log_create,
 )
 from hope.models.utils import MergeStatusModel
 

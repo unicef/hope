@@ -1,7 +1,7 @@
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.request import Request
 
-from hope.models.pdu_online_edit import PDUOnlineEdit
+from hope.models import PDUOnlineEdit
 
 
 class PDUOnlineEditAuthorizedUserMixin:

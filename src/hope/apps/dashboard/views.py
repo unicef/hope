@@ -23,7 +23,7 @@ from hope.apps.dashboard.services import (
     DashboardGlobalDataCache,
 )
 from hope.apps.utils.sentry import sentry_tags
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 log = logging.getLogger(__name__)
 

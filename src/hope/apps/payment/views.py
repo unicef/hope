@@ -8,9 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.western_union_payment_plan_report import WesternUnionPaymentPlanReport
+from hope.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.http import (

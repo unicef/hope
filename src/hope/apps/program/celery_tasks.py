@@ -6,7 +6,7 @@ from hope.apps.program.signals import program_copied
 from hope.apps.program.utils import copy_program_related_data
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models.program import Program
+from hope.models import Program
 
 
 @app.task()

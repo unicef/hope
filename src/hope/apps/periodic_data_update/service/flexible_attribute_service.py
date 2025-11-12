@@ -6,9 +6,7 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
 )
 from hope.apps.periodic_data_update.utils import field_label_to_field_name
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
+from hope.models import FlexibleAttribute, PaymentPlan, PeriodicFieldData, Program
 
 
 class FlexibleAttributeForPDUService:

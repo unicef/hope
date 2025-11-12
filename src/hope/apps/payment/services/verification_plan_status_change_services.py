@@ -13,9 +13,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models.individual import Individual
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import Individual, PaymentVerification, PaymentVerificationPlan
 
 
 class VerificationPlanStatusChangeServices:

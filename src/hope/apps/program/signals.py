@@ -10,8 +10,7 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.program import Program
+from hope.models import BeneficiaryGroup, Program
 
 program_copied = Signal()
 

@@ -18,9 +18,7 @@ from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.program import Program
+from hope.models import Household, Individual, Program
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +27,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_chunk_task(households_ids: list[UUID], program_id: str | None = None) -> None:
-    from hope.models.household import Household
-    from hope.models.individual import Individual
+    from hope.models import Household, Individual
 
     # memory optimization
     paginator = Paginator(households_ids, 200)
@@ -66,7 +63,7 @@ def recalculate_population_fields_chunk_task(households_ids: list[UUID], program
 @log_start_and_end
 @sentry_tags
 def recalculate_population_fields_task(household_ids: list[str] | None = None, program_id: str | None = None) -> None:
-    from hope.models.household import Household
+    from hope.models import Household
 
     params = {}
     if household_ids:
@@ -94,7 +91,7 @@ def recalculate_population_fields_task(household_ids: list[str] | None = None, p
 @log_start_and_end
 @sentry_tags
 def interval_recalculate_population_fields_task() -> None:
-    from hope.models.individual import Individual
+    from hope.models import Individual
 
     datetime_now = timezone.now()
     now_day, now_month = datetime_now.day, datetime_now.month
@@ -114,7 +111,7 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hope.models.registration_data_import import Household
+    from hope.models import Household
 
     return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
         # TODO: count differently or add all the fields for the new gender options

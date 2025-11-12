@@ -19,9 +19,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
     validate_phone_number,
     validate_string,
 )
-from hope.models.account_type import AccountType
-from hope.models.document_type import DocumentType
-from hope.models.flexible_attribute import FlexibleAttribute
+from hope.models import AccountType, DocumentType, FlexibleAttribute
 
 individual_fields: dict[str, tuple[str, Any, Any]] = {
     "full_name": ("full_name", validate_string, handle_simple_field),

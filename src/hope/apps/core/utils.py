@@ -177,7 +177,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.models.flexible_attribute import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -572,7 +572,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
 
 
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.models.flexible_attribute import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -657,7 +657,7 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
-    from hope.models.household import Household
+    from hope.models import Household
 
     excluded_household_ids_from_individuals_array = Household.objects.filter(
         individuals__unicef_id__in=excluded_individuals_ids_array
@@ -827,7 +827,7 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.models.business_area import BusinessArea
+    from hope.models import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
@@ -851,8 +851,7 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.models.flexible_attribute import FlexibleAttribute
-    from hope.models.program import Program
+    from hope.models import FlexibleAttribute, Program
 
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(

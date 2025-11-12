@@ -5,9 +5,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
+from hope.models import FlexibleAttribute, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData
 
 
 @receiver(post_save, sender=PDUXlsxTemplate)

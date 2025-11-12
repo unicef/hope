@@ -12,8 +12,7 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
+from hope.models import PaymentVerification, PaymentVerificationPlan
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):

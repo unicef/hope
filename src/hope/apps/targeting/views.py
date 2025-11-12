@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
-from hope.models.payment_plan import PaymentPlan
+from hope.models import PaymentPlan
 
 if TYPE_CHECKING:
     from uuid import UUID

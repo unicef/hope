@@ -9,7 +9,7 @@ from hope.apps.utils.security import is_root
 if TYPE_CHECKING:
     from django.http import HttpRequest
 
-    from hope.models.user import User
+    from hope.models import User
 
 register = template.Library()
 

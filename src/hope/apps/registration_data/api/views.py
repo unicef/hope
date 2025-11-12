@@ -48,15 +48,7 @@ from hope.apps.registration_datahub.celery_tasks import (
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.models.household import Household
-from hope.models.import_data import ImportData
-from hope.models.individual import Individual
-from hope.models.kobo_import_data import KoboImportData
-from hope.models.log_entry import log_create
-from hope.models.program import Program
-from hope.models.registration_data_import import (
-    RegistrationDataImport,
-)
+from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
 # Import moved inline to avoid circular dependency issues
 
@@ -360,7 +352,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -441,7 +433,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Kobo import data is not ready for import")
 
         # Create RDI objects inline instead of using GraphQL mutation helpers
-        from hope.models.business_area import BusinessArea
+        from hope.models import BusinessArea
 
         import_data_id = validated_data.pop("import_data_id")
         import_data_obj = KoboImportData.objects.get(id=import_data_id)

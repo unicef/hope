@@ -7,19 +7,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.const import (
+    IDENTIFICATION_TYPE_TAX_ID,
+)
 from hope.apps.household.filters import _prepare_kobo_asset_id_value
 from hope.apps.household.serializers import (
     serialize_by_household,
     serialize_by_individual,
 )
 from hope.apps.utils.profiling import profiling
-from hope.models.document import PendingDocument
-from hope.models.household import (
-    IDENTIFICATION_TYPE_TAX_ID,
-    Household,
-    PendingHousehold,
-)
-from hope.models.individual import PendingIndividual
+from hope.models import Household, PendingDocument, PendingHousehold, PendingIndividual
 
 logger = logging.getLogger(__name__)
 

@@ -105,21 +105,23 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models.business_area import BusinessArea
-from hope.models.delivery_mechanism import DeliveryMechanism
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.individual import Individual
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.log_entry import log_create
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_split import PaymentPlanSplit
-from hope.models.payment_plan_supporting_document import PaymentPlanSupportingDocument
-from hope.models.payment_verification import PaymentVerification
-from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.program_cycle import ProgramCycle
-from hope.models.rule import Rule
+from hope.models import (
+    BusinessArea,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    ProgramCycle,
+    Rule,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -72,14 +72,16 @@ from hope.apps.program.utils import (
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.log_entry import log_create
-from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import (
+    BeneficiaryGroup,
+    FlexibleAttribute,
+    Payment,
+    PaymentPlan,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 

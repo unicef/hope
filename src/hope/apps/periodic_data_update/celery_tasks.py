@@ -22,11 +22,7 @@ from hope.apps.periodic_data_update.signals import (
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models.file_temp import FileTemp
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.pdu_xlsx_upload import PDUXlsxUpload
-from hope.models.user import User
+from hope.models import FileTemp, PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload, User
 
 logger = logging.getLogger(__name__)
 

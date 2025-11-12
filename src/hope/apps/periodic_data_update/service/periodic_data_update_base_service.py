@@ -15,9 +15,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.models.individual import Individual
-from hope.models.payment import Payment
-from hope.models.program import Program
+from hope.models import Individual, Payment, Program
 
 
 class PDUDataExtractionService:

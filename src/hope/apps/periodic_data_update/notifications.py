@@ -8,9 +8,7 @@ from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models.pdu_online_edit import PDUOnlineEdit
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import PDUOnlineEdit, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 

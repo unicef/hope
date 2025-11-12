@@ -4,8 +4,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_base_service im
     PDUDataExtractionService,
     PDURoundValueMixin,
 )
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.program import Program
+from hope.models import FlexibleAttribute, Program
 
 
 class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMixin):

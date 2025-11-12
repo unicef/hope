@@ -6,9 +6,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.program import Program
+from hope.models import Area, BusinessArea, Program
 
 
 def handle_date_field(

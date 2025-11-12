@@ -9,8 +9,7 @@ from hope.apps.utils.celery_utils import (
     get_all_celery_tasks,
     get_task_in_queue_or_running,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import BusinessArea, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 

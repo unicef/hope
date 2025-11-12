@@ -1,6 +1,6 @@
 from django_filters import CharFilter, ChoiceFilter, FilterSet
 
-from hope.models.rule import Rule
+from hope.models import Rule
 
 
 class SteficonRuleFilter(FilterSet):

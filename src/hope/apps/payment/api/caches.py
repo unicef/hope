@@ -7,7 +7,7 @@ from hope.api.caches import (
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
 )
-from hope.models.business_area import BusinessArea
+from hope.models import BusinessArea
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):

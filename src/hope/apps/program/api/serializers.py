@@ -13,15 +13,18 @@ from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.api.serializers import DataCollectingTypeSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializer
-from hope.models.admin_area_limited_to import AdminAreaLimitedTo
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.household import Household
-from hope.models.partner import Partner
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import (
+    AdminAreaLimitedTo,
+    BeneficiaryGroup,
+    DataCollectingType,
+    FlexibleAttribute,
+    Household,
+    Partner,
+    PaymentPlan,
+    PeriodicFieldData,
+    Program,
+    ProgramCycle,
+)
 
 
 def validate_cycle_timeframes_overlapping(
