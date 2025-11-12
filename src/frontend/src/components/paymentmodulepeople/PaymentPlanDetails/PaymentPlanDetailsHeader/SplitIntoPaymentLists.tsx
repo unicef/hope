@@ -23,6 +23,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
 
 interface FormValues {
@@ -127,6 +128,7 @@ export const SplitIntoPaymentLists = ({
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
             disabled={!canSplit}
+            data-perm={PERMISSIONS.PM_SPLIT}
           >
             {t('Split')}
           </Button>
