@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -55,7 +56,7 @@ export function DeletePaymentPlan({
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 
-  const handleDelete = async(): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await deletePaymentPlan({
         businessAreaSlug: businessArea,
