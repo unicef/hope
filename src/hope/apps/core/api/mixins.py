@@ -16,7 +16,7 @@ from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
-from hope.models import BusinessArea
+from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
     from hope.models import Program
