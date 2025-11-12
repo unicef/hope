@@ -56,6 +56,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     region_name = models.CharField(max_length=8)
     has_data_sharing_agreement = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
+    rdi_import_xlsx_disabled = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
     # TODO: deprecated to remove in the next release
