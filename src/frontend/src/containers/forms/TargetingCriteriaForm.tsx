@@ -197,8 +197,11 @@ export const TargetingCriteriaForm = ({
   const { isSocialDctType } = useProgramContext();
 
   const confirm = useConfirmation();
-  const confirmationText = t(
+  const noPaymentChannelChosenConfirmationText = t(
     'Are you sure you want to ‘Lock’ TP without validating FSP and Delivery Mechanism requirements? This might result in individuals’ exclusion at later stages.',
+  );
+  const noPaymentChannelConfigConfirmationText = t(
+    'The selected FSP does not have configuration records available at Payment Gateway. Please contact your focal point to set up the required configuration before proceeding.',
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -335,7 +338,41 @@ export const TargetingCriteriaForm = ({
               .find(
                 (el) => el.deliveryMechanism.code === values.deliveryMechanism,
               )
-              ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+              ?.fsps.map((el) => ({ name: el.name, value: el.id, hasConfig: el.hasConfig })) || [];
+          const selectedFspHasConfig =
+            mappedFsps.find((f) => f.value === values.fsp)?.hasConfig === true || false;
+
+          const handleSave = () => {
+            // case 1: user didn't choose payment channel at all
+            if (
+              criteriaIndex === 0 &&
+              !values.deliveryMechanism &&
+              !values.fsp
+            ) {
+              return confirm({
+                title: t('Warning'),
+                content: noPaymentChannelChosenConfirmationText,
+              }).then(() => {
+                submitForm();
+              });
+            }
+            // case 2: user chose delivery mechanism and FSP without configuration
+            if (
+              criteriaIndex === 0 &&
+              values.deliveryMechanism &&
+              values.fsp &&
+              !selectedFspHasConfig
+            ) {
+              return confirm({
+                title: t('Warning'),
+                content: noPaymentChannelConfigConfirmationText,
+              }).then(() => {
+                submitForm();
+              });
+            }
+            // default: proceed
+            return submitForm();
+          };
 
           return (
             <Dialog
@@ -616,19 +653,7 @@ export const TargetingCriteriaForm = ({
                         Cancel
                       </Button>
                       <Button
-                        onClick={
-                          criteriaIndex === 0 &&
-                          !values.deliveryMechanism &&
-                          !values.fsp
-                            ? () =>
-                                confirm({
-                                  title: t('Warning'),
-                                  content: confirmationText,
-                                }).then(() => {
-                                  submitForm();
-                                })
-                            : submitForm
-                        }
+                        onClick={() => handleSave()}
                         type="submit"
                         color="primary"
                         variant="contained"
