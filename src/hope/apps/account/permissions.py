@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied
 
-from hope.models import BusinessArea
+from hope.models.business_area import BusinessArea
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
