@@ -43,7 +43,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
   const queryClient = useQueryClient();
 
-  const handleFileUpload = async(): Promise<void> => {
+  const handleFileUpload = async (): Promise<void> => {
     if (fileToImport) {
       setIsLoading(true);
       setError(null);
@@ -87,9 +87,10 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
           variant="contained"
           startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
           color="primary"
-          data-cy="button-import"
+          dataCy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={!isActiveProgram || !canPDUUpload}
+          data-perm={PERMISSIONS.PDU_UPLOAD}
         >
           {t('Upload Data')}
         </ButtonTooltip>

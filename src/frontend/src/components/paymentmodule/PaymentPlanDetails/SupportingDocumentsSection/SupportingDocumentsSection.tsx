@@ -235,6 +235,7 @@ export const SupportingDocumentsSection = ({
                 color="primary"
                 onClick={handleUploadClick}
                 data-cy="upload-file-button"
+                date-perm={PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT}
               >
                 {t('Upload File')}
               </Button>
