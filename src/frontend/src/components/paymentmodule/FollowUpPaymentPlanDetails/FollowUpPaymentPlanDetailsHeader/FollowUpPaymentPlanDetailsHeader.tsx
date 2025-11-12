@@ -71,6 +71,7 @@ export function FollowUpPaymentPlanDetailsHeader({
     paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -90,6 +91,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           permissions={permissions}
+          canAbort={canAbort}
         />
       );
       break;
@@ -99,6 +101,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           canSendForApproval={canSendForApproval}
+          canAbort={canAbort}
         />
       );
       break;
@@ -111,6 +114,7 @@ export function FollowUpPaymentPlanDetailsHeader({
             permissions,
           )}
           canApprove={canApprove}
+          canAbort={canAbort}
         />
       );
       break;
@@ -123,6 +127,7 @@ export function FollowUpPaymentPlanDetailsHeader({
             permissions,
           )}
           canAuthorize={canAuthorize}
+          canAbort={canAbort}
         />
       );
       break;
@@ -135,6 +140,7 @@ export function FollowUpPaymentPlanDetailsHeader({
             permissions,
           )}
           canMarkAsReleased={canMarkAsReleased}
+          canAbort={canAbort}
         />
       );
       break;
@@ -146,6 +152,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canSplit={canSplit}
           canClose={canClose}
+          canAbort={canAbort}
         />
       );
       break;

@@ -29,6 +29,7 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
+  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -71,6 +72,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         },
       );
     },
+    enabled: open,
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(

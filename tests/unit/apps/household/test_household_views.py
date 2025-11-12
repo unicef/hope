@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from typing import Any, Dict, Optional, Tuple
 
@@ -922,7 +923,7 @@ class TestHouseholdMembers:
                 "id": str(self.individual1_2.id),
                 "unicef_id": self.individual1_2.unicef_id,
                 "full_name": self.individual1_2.full_name,
-                "role": "NO_ROLE",
+                "role": None,
                 "relationship": self.individual1_2.relationship,
                 "status": self.individual1_2.status,
                 "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
@@ -1031,6 +1032,9 @@ class TestHouseholdGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
+        self.household_afghanistan1.created_at = timezone.make_aware(datetime(2025, 1, 1, 12, 0, 0))
+        self.household_afghanistan1.save()
+        self.household_afghanistan1.refresh_from_db()
         self.household_afghanistan2, _ = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1044,6 +1048,9 @@ class TestHouseholdGlobalViewSet:
             },
             individuals_data=[{}, {}],
         )
+        self.household_afghanistan2.created_at = timezone.make_aware(datetime(2025, 1, 2, 12, 0, 0))
+        self.household_afghanistan2.save()
+        self.household_afghanistan2.refresh_from_db()
 
         self.household_ukraine, _ = create_household_and_individuals(
             household_data={

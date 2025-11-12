@@ -5,7 +5,7 @@ from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
 from hope.apps.household.models import PendingIndividual
-from hope.apps.payment.models import AccountType, PendingAccount
+from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
 from hope.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -78,12 +78,15 @@ class RdiBaseCreateTask:
             if individual._state.adding:  # if an individual is not created because it is a collided one
                 continue
             for account_type, values in data.items():
+                number = values.pop("number", None)
+                if not (fi_id := values.pop("financial_institution", None)):
+                    fi_id = FinancialInstitution.get_generic_one(account_type, Account.is_valid_iban(number)).id
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
-                        number=values.pop("number", None),
-                        financial_institution_id=data.pop("financial_institution", None),
+                        number=number,
+                        financial_institution_id=fi_id,
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
