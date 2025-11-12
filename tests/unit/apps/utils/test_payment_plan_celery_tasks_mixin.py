@@ -16,8 +16,7 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.admin.utils import PaymentPlanCeleryTasksMixin
 from hope.apps.payment.utils import generate_cache_key
-from hope.models.file_temp import FileTemp
-from hope.models.payment_plan import PaymentPlan
+from hope.models import FileTemp, PaymentPlan
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):

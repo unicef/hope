@@ -19,17 +19,17 @@ from extras.test_utils.factories.registration_data import (
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.household import Household
-from hope.models.import_data import ImportData
-from hope.models.individual import Individual
-from hope.models.kobo_import_data import KoboImportData
-from hope.models.program import Program
-from hope.models.registration_data_import import (
+from hope.models import (
+    Household,
+    ImportData,
+    Individual,
+    KoboImportData,
+    Program,
     RegistrationDataImport,
+    Role,
+    RoleAssignment,
+    SanctionList,
 )
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.sanction_list import SanctionList
 from unit.api.base import HOPEApiTestCase
 
 

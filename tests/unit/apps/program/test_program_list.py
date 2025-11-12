@@ -24,7 +24,7 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models.program import Program
+from hope.models import Program
 
 pytestmark = pytest.mark.django_db
 

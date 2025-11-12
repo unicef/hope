@@ -9,12 +9,14 @@ from hope.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
     get_existing_unicef_ids,
 )
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.targeting_criteria_rule import TargetingCriteriaRule
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
+from hope.models import (
+    Household,
+    Individual,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+)
 
 
 class TestPaymentPlanModel(TestCase):

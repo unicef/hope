@@ -14,8 +14,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.steficon import RuleFactory
 from hope.admin.steficon import AutocompleteWidget
 from hope.apps.steficon.forms import RuleTestForm
-from hope.models.program import Program
-from hope.models.rule import Rule
+from hope.models import Program, Rule
 
 
 @pytest.mark.django_db

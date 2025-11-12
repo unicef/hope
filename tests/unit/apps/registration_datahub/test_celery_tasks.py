@@ -34,6 +34,16 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.const import (
+    DISABLED,
+    FEMALE,
+    HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_TAX_ID,
+    MALE,
+    NOT_DISABLED,
+    SON_DAUGHTER,
+)
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
@@ -67,27 +77,17 @@ from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
-from hope.models import country as geo_models
-from hope.models.business_area import BusinessArea
-from hope.models.document import PendingDocument
-from hope.models.document_type import DocumentType
-from hope.models.household import (
-    DISABLED,
-    FEMALE,
-    HEAD,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_TAX_ID,
-    MALE,
-    NOT_DISABLED,
-    SON_DAUGHTER,
+from hope.models import (
+    BusinessArea,
+    DocumentType,
+    ImportData,
+    KoboImportData,
+    PendingDocument,
     PendingHousehold,
-)
-from hope.models.import_data import ImportData
-from hope.models.individual import PendingIndividual
-from hope.models.kobo_import_data import KoboImportData
-from hope.models.program import Program
-from hope.models.registration_data_import import (
+    PendingIndividual,
+    Program,
     RegistrationDataImport,
+    country as geo_models,
 )
 from hope.models.utils import MergeStatusModel
 

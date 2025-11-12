@@ -7,8 +7,7 @@ if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
     from responses import RequestsMock
 
-    from hope.models.sanction_list import SanctionList
-    from hope.models.user import User
+    from hope.models import SanctionList, User
 
 
 def test_sanction_list_refresh(

@@ -8,7 +8,7 @@ from extras.test_utils.factories.program import get_program_with_dct_type_and_na
 from hope.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
 )
-from hope.models.flexible_attribute import PeriodicFieldData
+from hope.models import PeriodicFieldData
 
 
 class TestTemplateFileGenerator(TestCase):

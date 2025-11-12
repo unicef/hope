@@ -16,8 +16,7 @@ from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
-from hope.models.account_type import AccountType
-from hope.models.payment_plan import PaymentPlan
+from hope.models import AccountType, PaymentPlan
 
 
 class TestXlsxExportTargetingService(BaseTestCase):

@@ -13,22 +13,24 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.const import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+)
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
-from hope.models import country as geo_models
-from hope.models.area import Area
-from hope.models.area_type import AreaType
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.document import PendingDocument
-from hope.models.document_type import DocumentType
-from hope.models.household import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
+from hope.models import (
+    Area,
+    AreaType,
+    DataCollectingType,
+    DocumentType,
+    PendingDocument,
     PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    country as geo_models,
 )
-from hope.models.individual import PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
 
 
 class TestSriLankaRegistrationService(TestCase):

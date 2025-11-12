@@ -27,10 +27,7 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

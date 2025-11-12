@@ -8,11 +8,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.models.country import Country
-from hope.models.household import Household
-from hope.models.individual import PendingIndividual
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import Country, Household, PendingIndividual, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

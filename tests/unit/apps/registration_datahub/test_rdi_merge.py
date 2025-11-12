@@ -24,21 +24,22 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models.household import (
+from hope.apps.household.const import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
-    Household,
-    PendingHousehold,
 )
-from hope.models.individual import Individual, PendingIndividual
-from hope.models.individual_role_in_household import PendingIndividualRoleInHousehold
-from hope.models.kobo_imported_submission import KoboImportedSubmission
-from hope.models.registration_data_import import (
+from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    Household,
+    Individual,
+    KoboImportedSubmission,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
     RegistrationDataImport,
 )
 from hope.models.utils import MergeStatusModel

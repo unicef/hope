@@ -4,14 +4,16 @@ from typing import TYPE_CHECKING, Any
 from django.core.management import call_command
 import pytest
 
-from hope.models.sanction_list_individual import SanctionListIndividual
-from hope.models.sanction_list_individual_alias_name import SanctionListIndividualAliasName
-from hope.models.sanction_list_individual_date_of_birth import SanctionListIndividualDateOfBirth
-from hope.models.sanction_list_individual_nationalities import SanctionListIndividualNationalities
+from hope.models import (
+    SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualNationalities,
+)
 
 if TYPE_CHECKING:
     from hope.apps.sanction_list.strategies.eu import EUSanctionList
-    from hope.models.sanction_list import SanctionList
+    from hope.models import SanctionList
 
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

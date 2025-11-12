@@ -16,11 +16,7 @@ from hope.apps.targeting.validators import (
     TargetingCriteriaInputValidator,
     TargetingCriteriaRuleFilterInputValidator,
 )
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import FlexibleAttribute
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.program import Program
+from hope.models import DataCollectingType, FlexibleAttribute, Household, Individual, Program
 
 pytestmark = pytest.mark.django_db
 

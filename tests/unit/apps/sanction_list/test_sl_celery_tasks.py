@@ -4,8 +4,7 @@ from django.core.management import call_command
 import responses
 
 from hope.apps.sanction_list.celery_tasks import sync_sanction_list_task
-from hope.models.sanction_list import SanctionList
-from hope.models.sanction_list_individual import SanctionListIndividual
+from hope.models import SanctionList, SanctionListIndividual
 
 if TYPE_CHECKING:
     from responses import RequestsMock

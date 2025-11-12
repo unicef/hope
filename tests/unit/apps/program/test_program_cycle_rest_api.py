@@ -25,10 +25,7 @@ from hope.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
-from hope.models.user import User
+from hope.models import PaymentPlan, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

@@ -16,21 +16,23 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.household.const import (
+    HEAD,
+    MALE,
+    ROLE_PRIMARY,
+)
 from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models.document import Document
-from hope.models.household import (
-    HEAD,
-    MALE,
-    ROLE_PRIMARY,
+from hope.models import (
+    Document,
     Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+    RegistrationDataImport,
 )
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.individual_role_in_household import IndividualRoleInHousehold
-from hope.models.registration_data_import import RegistrationDataImport
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

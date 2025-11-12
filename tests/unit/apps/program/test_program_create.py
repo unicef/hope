@@ -19,9 +19,7 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.flexible_attribute import FlexibleAttribute, PeriodicFieldData
-from hope.models.program import Program
+from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData, Program
 
 pytestmark = pytest.mark.django_db
 

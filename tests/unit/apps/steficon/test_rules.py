@@ -8,9 +8,7 @@ from extras.test_utils.factories.household import HouseholdFactory
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
 from hope.config import settings
-from hope.models.household import Household
-from hope.models.rule import Rule
-from hope.models.user import User
+from hope.models import Household, Rule, User
 
 CODE = """
 class SteficonConfig:

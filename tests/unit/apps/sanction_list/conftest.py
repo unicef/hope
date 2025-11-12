@@ -5,7 +5,7 @@ import pytest
 from responses import RequestsMock
 
 from hope.apps.core.celery import app
-from hope.models.sanction_list import SanctionList
+from hope.models import SanctionList
 
 
 @pytest.fixture

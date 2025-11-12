@@ -18,9 +18,7 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.models.partner import Partner
-from hope.models.payment_plan import PaymentPlan
-from hope.models.program import Program
+from hope.models import Partner, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 

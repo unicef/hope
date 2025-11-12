@@ -5,12 +5,12 @@ from django.urls import reverse
 import pytest
 from webtest import Upload
 
-from hope.models.sanction_list import SanctionList, UploadedXLSXFile
+from hope.models import SanctionList, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
 
-    from hope.models.user import User
+    from hope.models import User
 
 
 @pytest.fixture

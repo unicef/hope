@@ -16,19 +16,17 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import country as geo_models
-from hope.models.business_area import BusinessArea
-from hope.models.household import IDENTIFICATION_TYPE_NATIONAL_ID
-from hope.models.individual import Individual
+from hope.models import BusinessArea, Individual, country as geo_models
 
 if TYPE_CHECKING:
-    from hope.models.sanction_list import SanctionList
+    from hope.models import SanctionList
 
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

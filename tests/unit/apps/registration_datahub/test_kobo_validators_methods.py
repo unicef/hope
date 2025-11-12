@@ -6,11 +6,10 @@ from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
+from hope.apps import BusinessArea, Program
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
-from hope.models.business_area import BusinessArea
-from hope.models.program import Program
 
 
 class TestKoboSaveValidatorsMethods(TestCase):

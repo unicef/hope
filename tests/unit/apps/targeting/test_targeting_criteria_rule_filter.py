@@ -24,15 +24,15 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.targeting.choices import FlexFieldClassification
-from hope.models.flexible_attribute import PeriodicFieldData
-from hope.models.household import (
+from hope.models import (
     Household,
+    Individual,
+    PeriodicFieldData,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
 )
-from hope.models.individual import Individual
-from hope.models.targeting_criteria_rule import TargetingCriteriaRule
-from hope.models.targeting_criteria_rule_filter import TargetingCriteriaRuleFilter
-from hope.models.targeting_individual_block_rule_filter import TargetingIndividualBlockRuleFilter
-from hope.models.targeting_individual_rule_filter_block import TargetingIndividualRuleFilterBlock
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

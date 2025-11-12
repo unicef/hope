@@ -10,9 +10,7 @@ from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.models.business_area import BusinessArea
-from hope.models.program import Program
-from hope.models.program_cycle import ProgramCycle
+from hope.models import BusinessArea, Program, ProgramCycle
 
 
 class TestProgramCycleMethods(TestCase):
