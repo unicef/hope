@@ -4,6 +4,7 @@ import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const IconContainer = styled.span`
   button {
@@ -31,7 +32,10 @@ export function FinalizedTargetPopulationHeaderButtons({
     <Box display="flex" alignItems="center">
       {canDuplicate && (
         <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
+          <Button
+            data-perm={PERMISSIONS.TARGETING_DUPLICATE}
+            onClick={() => setOpenDuplicate(true)}
+          >
             <FileCopy />
           </Button>
         </IconContainer>

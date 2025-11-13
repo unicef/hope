@@ -23,6 +23,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaginatedFSPXlsxTemplateList } from '@restgenerated/models/PaginatedFSPXlsxTemplateList';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -258,6 +259,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                 disabled={shouldDisableDownloadXlsx}
+                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
               >
                 {t('Download XLSX')}
               </Button>
@@ -288,6 +290,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               onClick={() => sendToPaymentGateway()}
               data-cy="button-send-to-payment-gateway"
               disabled={LoadingSendToPaymentGateway}
+              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
             >
               {t('Send to FSP')}
             </Button>

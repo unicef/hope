@@ -138,6 +138,7 @@ export const ProgramCycleDetailsHeader = ({
                 startIcon={<AddIcon />}
                 to="payment-plans/new-plan"
                 data-cy="button-create-payment-plan"
+                data-perm={PERMISSIONS.PM_CREATE}
               >
                 {t('Create Payment Plan')}
               </Button>

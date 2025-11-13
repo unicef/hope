@@ -261,7 +261,8 @@ function ExcludeSection({
               disabled={editExclusionsDisabled}
               variant="contained"
               onClick={() => setEdit(true)}
-              data-cy="button-edit-exclusions"
+              dataCy="button-edit-exclusions"
+              dataPerm={PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP}
             >
               {t('Edit')}
             </ButtonTooltip>
