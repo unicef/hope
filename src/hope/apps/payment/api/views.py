@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -87,6 +87,7 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -1998,14 +1999,23 @@ def available_fsps_for_delivery_mechanisms(
     delivery_mechanisms = DeliveryMechanism.get_choices()
 
     def get_fsps(mechanism_name: str) -> list[dict[str, Any]]:
-        fsps_qs = FinancialServiceProvider.objects.filter(
-            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
-            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-            delivery_mechanisms__name=mechanism_name,
-            allowed_business_areas__slug=business_area_slug,
-        ).distinct()
+        has_config_q = DeliveryMechanismConfig.objects.filter(
+            fsp=OuterRef("pk"),
+            delivery_mechanism__name=mechanism_name,
+        )
 
-        return list(fsps_qs.values("id", "name"))
+        fsps_qs = (
+            FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+                delivery_mechanisms__name=mechanism_name,
+                allowed_business_areas__slug=business_area_slug,
+            )
+            .annotate(has_config=Exists(has_config_q))
+            .distinct()
+        )
+
+        return list(fsps_qs.values("id", "name", "has_config"))
 
     list_resp = [
         {

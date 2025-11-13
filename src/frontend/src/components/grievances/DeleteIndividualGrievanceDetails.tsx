@@ -18,6 +18,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { Individual } from '@restgenerated/models/Individual';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export type RoleReassignData = {
   role: string;
@@ -210,6 +211,7 @@ export function DeleteIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
+              data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
               onClick={() =>
                 confirm({
                   title: t('Warning'),
