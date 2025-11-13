@@ -132,7 +132,7 @@ Import data from Program Population: name the title, choose the Program Name, an
 
 Apart from importing XLS template, users can utilize the online editing feature directly from the user interface, after defining the PDU fields following the regular process.
 Access to Online PDU feature:
-1. Find Household module and choose “Individuals” where users can find Periodic Data Updates. 
+1. Find Household module and choose “Individuals” where users can find Periodic Data Updates.
 2. Navigate to “Online Edits” tab.
 3. Click 'NEW ONLINE EDIT'.
 ![Image](_screenshots/reg/bnf_5.png)
@@ -148,8 +148,7 @@ Access to Online PDU feature:
 
 7. Specify template name (optionally).
 ![Image](_screenshots/reg/bnf_10.png)
-   
+
 The online edits will be added, segregated by status. Users will be able to contribute based on their authorized access and user permissions. Automatic email notifications will be sent to relevant users on key status changes.
 ![Image](_screenshots/reg/bnf_11.png)
 ![Image](_screenshots/reg/bnf_12.png)
-

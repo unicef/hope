@@ -33,13 +33,13 @@ Compose a Message
 
 3.	Define the Sample Size. Confirm whether you want to send the communication to the entire list or to a random sample of beneficiaries.
  ![Image](_screenshots/accountability/acc_61.png)
- 
+
 4.	Enter the following details:
 • Title: Provide a short, clear subject line.
-• Message Body: Write a concise and easy-to-understand message for beneficiaries. 
+• Message Body: Write a concise and easy-to-understand message for beneficiaries.
  ![Image](_screenshots/accountability/acc_62.png)
  ![Image](_screenshots/accountability/acc_63.png)
- 
+
 After the message is created, HOPE automatically generates a unique Message ID (MSG ID). You can then view the message details and the list of recipients.
  ![Image](_screenshots/accountability/acc_64.png)
 
@@ -72,7 +72,7 @@ Create a New Survey
 6.	 Review the information and click Confirm Survey to proceed.
  ![Image](_screenshots/accountability/acc_69.png)
 
- 
+
 ## Monitor and Analyze RapidPro Survey Responses
 • Go to the Surveys page.
 • Select the relevant survey.
@@ -81,4 +81,3 @@ Create a New Survey
 ## Best Practices and Recommendations
 • Language and Clarity: Use local languages or dialects when appropriate, and ensure all messages are culturally sensitive and easy to understand.
 • Consent and Privacy: Ensure that all data collection and feedback activities comply with UNICEF’s data protection and privacy policies.
-
