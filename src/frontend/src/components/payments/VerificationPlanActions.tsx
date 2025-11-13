@@ -174,7 +174,7 @@ export function VerificationPlanActions({
                       variant="outlined"
                       startIcon={<GetApp />}
                       data-cy="export-xlsx"
-                      onClick={async() => {
+                      onClick={async () => {
                         try {
                           await exportXlsxMutation.mutateAsync();
                           showMessage(
@@ -205,6 +205,7 @@ export function VerificationPlanActions({
                         variant="outlined"
                         data-cy="download-xlsx"
                         startIcon={<GetApp />}
+                        data-perm={PERMISSIONS.PAYMENT_VERIFICATION_EXPORT}
                       >
                         {t('Download Xlsx')}
                       </Button>
@@ -242,7 +243,7 @@ export function VerificationPlanActions({
                       color="primary"
                       variant="outlined"
                       data-cy="button-mark-as-invalid"
-                      onClick={async() => {
+                      onClick={async () => {
                         try {
                           await invalidVerificationPlanMutation.mutateAsync();
                           showMessage(

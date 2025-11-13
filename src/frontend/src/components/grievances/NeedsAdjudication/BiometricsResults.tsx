@@ -91,6 +91,7 @@ export const BiometricsResults = ({
               loadData();
             }}
             data-cy="button-open-biometrics-results"
+            data-perm={PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS}
           >
             {t('View Biometrics Results')}
           </Button>
