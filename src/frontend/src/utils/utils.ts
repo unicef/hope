@@ -293,7 +293,7 @@ export function registrationDataImportStatusToColor(
 ): string {
   switch (status) {
     case 'Merged':
-      return theme.hctPalette.gray;
+      return theme.hctPalette.green;
     case 'In Progress':
       return theme.hctPalette.orange;
     case 'Import Error':
@@ -333,23 +333,24 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
-    [PaymentPlanStatus.DRAFT]: theme.hctPalette.gray,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.FINISHED]: theme.hctPalette.green,
     [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
     [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
-    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
     [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
