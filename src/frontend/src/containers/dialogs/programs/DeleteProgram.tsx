@@ -14,6 +14,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const RemoveButton = styled(Button)`
   && {
@@ -109,6 +110,7 @@ export const DeleteProgram = ({
               disabled={isPendingDelete}
               onClick={() => deleteProgram()}
               data-cy="button-remove-program"
+              data-perm={PERMISSIONS.PROGRAMME_REMOVE}
             >
               {t('REMOVE')}
             </RemoveModalButton>

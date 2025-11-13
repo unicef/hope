@@ -1393,13 +1393,11 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 class FspChoiceSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    has_config = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = FinancialServiceProvider
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name", "has_config")
 
 
 class DeliveryMechanismChoiceSerializer(serializers.Serializer):
