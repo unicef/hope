@@ -25,7 +25,7 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
 ]
 
 
-class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -42,6 +42,7 @@ class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
             "status",
             "status_display",
             "can_export",
+            "admin_url",
         )
 
 
