@@ -34,7 +34,7 @@ For more information on the Targeting module and the key functionalities of this
 1. Enter the New Target Population. Set Targeting Criteria by selecting programme cycle and the target population name.
     ![Image](_screenshots/targeting/targ_13.png)
 
-2. Click "Add Filter" to apply the relevant targeting criteria that will filter the households or individuals needed for your Programme. For example, if your Programme targeting is based on RDI, search for 'Registration Data Import' field and select the respective RDI then click save. 
+2. Click "Add Filter" to apply the relevant targeting criteria that will filter the households or individuals needed for your Programme. For example, if your Programme targeting is based on RDI, search for 'Registration Data Import' field and select the respective RDI then click save.
 
 Click Payment Channel Validation, and select delivery mechanism and FSP.
     ![Image](_screenshots/targeting/targ_14.png)
