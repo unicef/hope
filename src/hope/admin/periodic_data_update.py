@@ -18,7 +18,7 @@ from hope.apps.periodic_data_update.models import (
     PDUXlsxUpload,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
 
