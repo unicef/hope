@@ -35,8 +35,10 @@ jobs:
               -H "Content-Length: $contentLength" \
               -d "$jsonBody" \
               https://dev.azure.com/$organization/$project/_apis/pipelines/$pipeline/runs?api-version=7.1-preview.1
-            if [ $? -ne 0 ]; then
-              echo "Failed to trigger deploy for pipeline $pipeline"
+            if [[ "$response" -lt 200 || "$response" -ge 300 ]]; then
+              echo "❌ Failed to trigger deploy for pipeline $pipeline"
               exit 1
+            else
+              echo "✅ Successfully triggered pipeline $pipeline"
             fi
           done
