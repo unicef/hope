@@ -36,3 +36,9 @@ class PDUAdminTest(TestCase):
             )
             in response["Location"]
         )
+
+        # test GET
+        response = self.client.get(url)
+        assert response.status_code == 200
+        assert b"Do you confirm to restart the export task?" in response.content
+        assert "admin_extra_buttons/confirm.html" in [t.name for t in response.templates]
