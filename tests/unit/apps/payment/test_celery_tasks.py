@@ -22,6 +22,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
+    payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
@@ -32,7 +33,6 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
-    payment_plan_apply_engine_rule,
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
@@ -408,14 +408,12 @@ class TestPaymentCeleryTask(TestCase):
         mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
 
     @patch("hope.apps.payment.celery_tasks.logger")
-    def test_payment_plan_apply_engine_rule_failure_if_rule_commit_not_released(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_payment_plan_apply_engine_rule_failure_if_rule_commit_not_released(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
             business_area=self.ba,
-            background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
+            background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
         )
         rule = RuleFactory(name="test_rule", type=Rule.TYPE_PAYMENT_PLAN)
         rule_commit = RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule, is_release=False)

@@ -3,7 +3,6 @@ import logging
 from typing import Any
 
 from celery.exceptions import MaxRetriesExceededError
-from celery.worker.consumer.mingle import exception
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
