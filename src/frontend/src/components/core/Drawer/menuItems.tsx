@@ -6,6 +6,7 @@ import AutorenewIcon from '@mui/icons-material/AutorenewRounded';
 import BallotIcon from '@mui/icons-material/Ballot';
 import FaceIcon from '@mui/icons-material/Face';
 import Feedback from '@mui/icons-material/Feedback';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import ForumIcon from '@mui/icons-material/Forum';
 import InfoIcon from '@mui/icons-material/Info';
 import ListIcon from '@mui/icons-material/List';
@@ -49,6 +50,15 @@ export const menuItems: MenuItem[] = [
     icon: <DashboardIcon />,
     permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
     scopes: [SCOPE_ALL_PROGRAMS, SCOPE_PROGRAM],
+  },
+  {
+    name: 'Office Search',
+    href: '/office-search',
+    selectedRegexp: /^\/office-search.*$/,
+    icon: <BusinessCenterIcon />,
+    //TODO: add permission
+    permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
+    scopes: [SCOPE_PROGRAM],
   },
   {
     name: 'Registration Data Import',
@@ -271,7 +281,7 @@ export const menuItems: MenuItem[] = [
 ];
 
 export const resourcesItems = [
-    {
+  {
     name: 'Reporting',
     href: 'https://reporting.hope.unicef.org/',
     icon: <TrendingUpRoundedIcon />,
