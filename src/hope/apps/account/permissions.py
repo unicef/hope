@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
+    def _generate_next_value_(
+        name: str, start: int, count: int, last_values: list[Any]
+    ) -> Any:
         return name
 
     # RDI
@@ -249,6 +251,9 @@ class Permissions(Enum):
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
+    # Office Search
+    SEARCH_BUSINESS_AREAS = auto()
+
     @classmethod
     def choices(cls) -> tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
@@ -301,10 +306,14 @@ DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
     Permissions.ACTIVITY_LOG_VIEW,
 )
 
-DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER]
+DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [
+    str(perm.value) for perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER
+]
 
 
-def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
+def check_permissions(
+    user: Any, permissions: Iterable[Permissions], **kwargs: Any
+) -> bool:
     from hope.apps.program.models import Program
 
     if not user.is_authenticated:
@@ -322,7 +331,9 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
         return False
     program = None
     if program_slug := kwargs.get("program"):
-        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
+        program = Program.objects.filter(
+            slug=program_slug, business_area=business_area
+        ).first()
     obj = program or business_area
 
     return any(user.has_perm(permission.name, obj) for permission in permissions)

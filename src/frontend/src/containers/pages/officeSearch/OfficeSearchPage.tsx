@@ -1,3 +1,6 @@
+// Helper to check if search contains a keyword
+const searchIncludes = (search: unknown, keyword: string) =>
+  typeof search === 'string' && search.includes(keyword);
 import { PageHeader } from '@components/core/PageHeader';
 import {
   Box,
@@ -28,6 +31,13 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import {
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+  GRIEVANCE_TICKET_STATES,
+  GRIEVANCE_TICKET_STATES_NAMES,
+} from '@utils/constants';
+import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 
 const OfficeSearchPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -81,52 +91,91 @@ const OfficeSearchPage = (): ReactElement => {
         : '',
   };
 
+  const grvQueryVariables = {
+    businessAreaSlug: businessArea,
+    program: programId,
+    search:
+      typeof appliedFilter.search === 'string'
+        ? appliedFilter.search.trim()
+        : '',
+  };
+
+  // Households query
   const {
     data: hhData,
-    isLoading,
-    error,
+    isLoading: isLoadingHouseholds,
+    error: errorHouseholds,
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
-      'businessAreasProgramsHouseholdsList',
+      'businessAreasHouseholdsList',
       hhQueryVariables,
       programId,
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(
+      RestService.restBusinessAreasHouseholdsList(
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
           hhQueryVariables,
           { withPagination: true },
         ),
       ),
-    enabled:
-      typeof appliedFilter.search === 'string' &&
-      appliedFilter.search.includes('HH'),
+    enabled: searchIncludes(appliedFilter.search, 'HH'),
   });
 
-  const { data: indData } = useQuery<PaginatedIndividualListList>({
+  // Individuals query
+  const {
+    data: indData,
+    isLoading: isLoadingIndividuals,
+    error: errorIndividuals,
+  } = useQuery<PaginatedIndividualListList>({
     queryKey: [
-      'businessAreasProgramsIndividualsList',
+      'businessAreasIndividualsList',
       indQueryVariables,
       businessArea,
       programId,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
+      RestService.restBusinessAreasIndividualsList(
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
           indQueryVariables,
           { withPagination: true },
         ),
       ),
-    enabled:
-      typeof appliedFilter.search === 'string' &&
-      appliedFilter.search.includes('IND'),
+    enabled: searchIncludes(appliedFilter.search, 'IND'),
   });
 
+  // Grievances query (if needed)
+  const {
+    data: grvData,
+    isLoading: isLoadingGrievances,
+    error: errorGrievances,
+  } = useQuery({
+    queryKey: [
+      'businessAreasGrievancesList',
+      grvQueryVariables,
+      businessArea,
+      programId,
+      appliedFilter.search,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList({
+        businessAreaSlug: businessArea,
+        search:
+          typeof appliedFilter.search === 'string'
+            ? appliedFilter.search.trim()
+            : '',
+        limit: 50,
+        offset: 0,
+      }),
+    enabled: searchIncludes(appliedFilter.search, 'GRV'),
+  });
+
+  // Debug logs
   console.log('hhData', hhData);
   console.log('indData', indData);
+  console.log('grvData', grvData);
 
   return (
     <>
@@ -152,8 +201,12 @@ const OfficeSearchPage = (): ReactElement => {
           </Grid>
         </FiltersSection>
         <BaseSection>
-          {isLoading && <div>{t('Loading...')}</div>}
-          {error && <div>{t('Error loading households')}</div>}
+          {isLoadingHouseholds && <div>{t('Loading households...')}</div>}
+          {errorHouseholds && <div>{t('Error loading households')}</div>}
+          {isLoadingIndividuals && <div>{t('Loading individuals...')}</div>}
+          {errorIndividuals && <div>{t('Error loading individuals')}</div>}
+          {isLoadingGrievances && <div>{t('Loading grievances...')}</div>}
+          {errorGrievances && <div>{t('Error loading grievances')}</div>}
           {hhData && (
             <TableContainer component={Paper} sx={{ mt: 2 }}>
               <Table size="small">
@@ -191,6 +244,7 @@ const OfficeSearchPage = (): ReactElement => {
                 <TableHead>
                   <TableRow>
                     <TableCell>{t('Unicef ID')}</TableCell>
+                    <TableCell>{t('Full Name')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -204,12 +258,61 @@ const OfficeSearchPage = (): ReactElement => {
                               {individual.unicefId}
                             </BlackLink>
                           </TableCell>
+                          <TableCell>{individual.fullName}</TableCell>
                         </TableRow>
                       );
                     })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={1}>{t('No results found')}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+
+          {grvData && (
+            <TableContainer component={Paper} sx={{ mt: 2 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('Unicef ID')}</TableCell>
+                    <TableCell>{t('Status')}</TableCell>
+                    <TableCell>{t('Category')}</TableCell>
+                    <TableCell>{t('Issue Type')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {grvData.results && grvData.results.length > 0 ? (
+                    grvData.results.map((grv) => {
+                      const grvDetailsPath = getGrievanceDetailsPath(
+                        grv.id,
+                        grv.category,
+                        baseUrl,
+                      );
+                      return (
+                        <TableRow key={grv.id} hover>
+                          <TableCell>
+                            <BlackLink to={grvDetailsPath}>
+                              {grv.unicefId}
+                            </BlackLink>
+                          </TableCell>
+                          <TableCell>
+                            {GRIEVANCE_TICKET_STATES_NAMES[grv.status]}
+                          </TableCell>
+                          <TableCell>
+                            {GRIEVANCE_CATEGORIES_NAMES[grv.category]}
+                          </TableCell>
+                          <TableCell>
+                            {GRIEVANCE_ISSUE_TYPES_NAMES[grv.issueType]}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3}>{t('No results found')}</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
