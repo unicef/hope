@@ -8,12 +8,18 @@ from django.core.management import BaseCommand
 from faker import Faker
 import openpyxl
 
+from hope.apps.geo.models import Area, AreaType, Country
+
 faker = Faker()
 
 random_number = lambda: secrets.randbelow(2**31) + 1
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
+
+country = Country.objects.get(short_name="Afghanistan")
+area_type_level_1 = AreaType.objects.filter(country=country, area_level=1).first()
+area_type_level_2 = area_type_level_1.get_children().first()
 
 household_header_mapping = {
     "A": ("household_id", random_number),
@@ -23,8 +29,8 @@ household_header_mapping = {
     "E": ("consent_origin_h_c", "POL"),
     "F": ("country_h_c", "POL"),
     "G": ("address_h_c", ""),  # SPECIAL
-    "H": ("admin1_h_c", "AF11"),
-    "I": ("admin2_h_c", "AF1115"),
+    "H": ("admin1_h_c", Area.objects.filter(area_type=area_type_level_1).first().p_code),
+    "I": ("admin2_h_c", Area.objects.filter(area_type=area_type_level_2).first().p_code),
     "J": ("hh_geopoint_h_c", "70.210209, 172.085021"),
     "K": ("unhcr_hh_id_h_c", "something"),
     "L": ("returnee_h_c", False),
@@ -117,8 +123,8 @@ individual_header_mapping = {
     "Y": ("unhcr_id_no_i_c", None),
     "Z": ("unhcr_id_issuer_i_c", None),
     "AA": ("unhcr_id_photo_i_c", None),
-    "AB": ("national_passport_no_i_c", None),
-    "AC": ("national_passport_issuer_i_c", None),
+    "AB": ("national_passport_no_i_c", random_number),
+    "AC": ("national_passport_issuer_i_c", "POL"),
     "AD": ("national_passport_photo_i_c", None),
     "AE": ("national_id_no_i_c", random_number),
     "AF": ("national_id_issuer_i_c", "POL"),
