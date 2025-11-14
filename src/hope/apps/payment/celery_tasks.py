@@ -3,6 +3,7 @@ import logging
 from typing import Any
 
 from celery.exceptions import MaxRetriesExceededError
+from celery.worker.consumer.mingle import exception
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -325,7 +326,13 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.exception("PaymentPlan Run Engine Rule Error no RuleCommit")
+        payment_plan.background_action_status_steficon_error()
+        payment_plan.save()
+        return
+
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
         payment_plan.save()

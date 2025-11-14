@@ -32,6 +32,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
+    payment_plan_apply_engine_rule,
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
@@ -405,6 +406,27 @@ class TestPaymentCeleryTask(TestCase):
         mock_service = mock_service_cls.return_value
         send_payment_plan_reconciliation_overdue_email(str(pp.id))
         mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
+
+    @patch("hope.apps.payment.celery_tasks.logger")
+    def test_payment_plan_apply_engine_rule_failure_if_rule_commit_not_released(
+        self, mock_logger: Mock
+    ) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            business_area=self.ba,
+            background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
+        )
+        rule = RuleFactory(name="test_rule", type=Rule.TYPE_PAYMENT_PLAN)
+        rule_commit = RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule, is_release=False)
+
+        assert rule_commit.is_release is False
+        payment_plan_apply_engine_rule(str(payment_plan.id), str(rule.id))
+
+        mock_logger.exception.assert_called_once_with("PaymentPlan Run Engine Rule Error no RuleCommit")
+
+        payment_plan.refresh_from_db(fields=["background_action_status"])
+        assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
