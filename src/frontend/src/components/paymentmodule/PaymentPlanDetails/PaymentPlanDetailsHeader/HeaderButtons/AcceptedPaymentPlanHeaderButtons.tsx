@@ -149,7 +149,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
