@@ -23,8 +23,17 @@ import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTempla
 import { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
 import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { AdminButton } from '@components/core/AdminButton';
 
 const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
+  {
+    id: 'admin_url',
+    disableSort: true,
+    numeric: false,
+    disablePadding: false,
+    label: 'Admin URL',
+    dataCy: 'head-cell-admin-url',
+  },
   {
     id: 'id',
     numeric: false,
@@ -187,6 +196,9 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
 
   const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
+      <TableCell data-cy={`template-id-${row.adminUrl}`}>
+        <AdminButton adminUrl={row.adminUrl} />
+      </TableCell>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`template-name-${row.id}`}>{row.name}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
