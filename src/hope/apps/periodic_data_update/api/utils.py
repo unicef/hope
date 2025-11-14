@@ -16,7 +16,7 @@ def add_round_names_to_rounds_data(rounds_data: list[dict[str, Any]], program: P
             flex_attribute = FlexibleAttribute.objects.select_related("pdu_data").get(name=field_name, program=program)
             round_index = round_number - 1
             round_data["round_name"] = flex_attribute.pdu_data.rounds_names[round_index]
-        except FlexibleAttribute.DoesNotExist:
+        except FlexibleAttribute.DoesNotExist:  # pragma: no cover
             raise serializers.ValidationError(
                 {"rounds_data": f"Field '{field_name}' does not exist in the program '{program.name}'."}
             )
