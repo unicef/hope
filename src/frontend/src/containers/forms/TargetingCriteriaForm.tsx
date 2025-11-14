@@ -360,7 +360,7 @@ export const TargetingCriteriaForm = ({
             if (
               criteriaIndex === 0 &&
               values.deliveryMechanism &&
-              values.deliveryMechanism != "cash" &&
+              values.deliveryMechanism != 'cash' &&
               values.fsp &&
               !selectedFspHasConfig
             ) {
