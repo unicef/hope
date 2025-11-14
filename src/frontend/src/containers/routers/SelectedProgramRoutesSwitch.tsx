@@ -11,12 +11,17 @@ import { AccountabilityRoutes } from './AccountabilityRoutes';
 import { ReactElement } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 import UsersPage from '@containers/pages/core/UsersPage';
+import OfficeSearchPage from '@containers/pages/officeSearch/OfficeSearchPage';
 
 export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([
     {
       path: 'country-dashboard',
       element: <NewDashboardPage />,
+    },
+    {
+      path: 'office-search',
+      element: <OfficeSearchPage />,
     },
     {
       path: 'users-list',
