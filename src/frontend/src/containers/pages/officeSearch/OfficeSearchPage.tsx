@@ -1,18 +1,5 @@
-// Helper to check if search contains a keyword
-const searchIncludes = (search: unknown, keyword: string) =>
-  typeof search === 'string' && search.includes(keyword);
 import { PageHeader } from '@components/core/PageHeader';
-import {
-  Box,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ReactElement, useState } from 'react';
@@ -25,25 +12,25 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BaseSection } from '@components/core/BaseSection';
 import { RestService } from '@restgenerated/index';
-import { BlackLink } from '@components/core/BlackLink';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import {
-  GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_TICKET_STATES,
-  GRIEVANCE_TICKET_STATES_NAMES,
-} from '@utils/constants';
-import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
+import HHDataTable from '@containers/pages/officeSearch/HHdataTable';
+import INDDataTable from '@containers/pages/officeSearch/INDdataTable';
+import GRVDataTable from '@containers/pages/officeSearch/GRVdataTable';
+import PPDataTable from '@containers/pages/officeSearch/PPdataTable';
+import PaymentsDataTable from '@containers/pages/officeSearch/PaymentsDataTable';
+
+const searchIncludes = (search: unknown, keyword: string) =>
+  typeof search === 'string' && search.includes(keyword);
 
 const OfficeSearchPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { businessArea, programId, baseUrl } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
 
   const initialFilter = {
     search: '',
@@ -166,16 +153,70 @@ const OfficeSearchPage = (): ReactElement => {
           typeof appliedFilter.search === 'string'
             ? appliedFilter.search.trim()
             : '',
-        limit: 50,
+        limit: 10,
         offset: 0,
       }),
     enabled: searchIncludes(appliedFilter.search, 'GRV'),
+  });
+
+  // Payment Plans query (for 'PP' search)
+  const {
+    data: ppData,
+    isLoading: isLoadingPaymentPlans,
+    error: errorPaymentPlans,
+  } = useQuery({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      businessArea,
+      programId,
+      appliedFilter.search,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        search:
+          typeof appliedFilter.search === 'string'
+            ? appliedFilter.search.trim()
+            : '',
+        limit: 10,
+        offset: 0,
+      }),
+    enabled: searchIncludes(appliedFilter.search, 'PP'),
+  });
+
+  // Payments query (for 'RCPT' search)
+  const {
+    data: paymentsData,
+    isLoading: isLoadingPayments,
+    error: errorPayments,
+  } = useQuery({
+    queryKey: ['businessAreasPaymentsList', businessArea, appliedFilter.search],
+    queryFn: () =>
+      RestService.restBusinessAreasPaymentsList({
+        businessAreaSlug: businessArea,
+        limit: 10,
+        offset: 0,
+      }),
+    enabled: searchIncludes(appliedFilter.search, 'RCPT'),
   });
 
   // Debug logs
   console.log('hhData', hhData);
   console.log('indData', indData);
   console.log('grvData', grvData);
+  console.log('ppData', ppData);
+  console.log('paymentsData', paymentsData);
+  //need BA and programSlug, to fetch PP
+  //need paymentPlanPk, BA, program, to fetch payments,
+  // console.log('paymentsData', paymentsData);
+
+  const nothingToDisplay =
+    !hhData?.results?.length &&
+    !indData?.results?.length &&
+    !grvData?.results?.length &&
+    !ppData?.results?.length &&
+    !paymentsData?.results?.length;
 
   return (
     <>
@@ -207,117 +248,22 @@ const OfficeSearchPage = (): ReactElement => {
           {errorIndividuals && <div>{t('Error loading individuals')}</div>}
           {isLoadingGrievances && <div>{t('Loading grievances...')}</div>}
           {errorGrievances && <div>{t('Error loading grievances')}</div>}
-          {hhData && (
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('Unicef ID')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {hhData.results && hhData.results.length > 0 ? (
-                    hhData.results.map((household) => {
-                      const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
-                      return (
-                        <TableRow key={household.id} hover>
-                          <TableCell>
-                            <BlackLink to={householdDetailsPath}>
-                              {household.unicefId}
-                            </BlackLink>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={1}>{t('No results found')}</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-          {indData && (
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('Unicef ID')}</TableCell>
-                    <TableCell>{t('Full Name')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {indData.results && indData.results.length > 0 ? (
-                    indData.results.map((individual) => {
-                      const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
-                      return (
-                        <TableRow key={individual.id} hover>
-                          <TableCell>
-                            <BlackLink to={individualDetailsPath}>
-                              {individual.unicefId}
-                            </BlackLink>
-                          </TableCell>
-                          <TableCell>{individual.fullName}</TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={1}>{t('No results found')}</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-
-          {grvData && (
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('Unicef ID')}</TableCell>
-                    <TableCell>{t('Status')}</TableCell>
-                    <TableCell>{t('Category')}</TableCell>
-                    <TableCell>{t('Issue Type')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {grvData.results && grvData.results.length > 0 ? (
-                    grvData.results.map((grv) => {
-                      const grvDetailsPath = getGrievanceDetailsPath(
-                        grv.id,
-                        grv.category,
-                        baseUrl,
-                      );
-                      return (
-                        <TableRow key={grv.id} hover>
-                          <TableCell>
-                            <BlackLink to={grvDetailsPath}>
-                              {grv.unicefId}
-                            </BlackLink>
-                          </TableCell>
-                          <TableCell>
-                            {GRIEVANCE_TICKET_STATES_NAMES[grv.status]}
-                          </TableCell>
-                          <TableCell>
-                            {GRIEVANCE_CATEGORIES_NAMES[grv.category]}
-                          </TableCell>
-                          <TableCell>
-                            {GRIEVANCE_ISSUE_TYPES_NAMES[grv.issueType]}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={3}>{t('No results found')}</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          {isLoadingPaymentPlans && <div>{t('Loading payment plans...')}</div>}
+          {errorPaymentPlans && <div>{t('Error loading payment plans')}</div>}
+          {isLoadingPayments && <div>{t('Loading payments...')}</div>}
+          {errorPayments && <div>{t('Error loading payments')}</div>}
+          {hhData && <HHDataTable hhData={hhData} />}
+          {indData && <INDDataTable indData={indData} />}
+          {grvData && <GRVDataTable grvData={grvData} />}
+          {paymentsData && <PaymentsDataTable paymentsData={paymentsData} />}
+          {ppData && <PPDataTable ppData={ppData} />}
+          {nothingToDisplay && (
+            <Box mt={4} textAlign="center">
+              <h2>
+                Search for Individuals, Households, Grievances, Payment Plans,
+                Payments
+              </h2>
+            </Box>
           )}
         </BaseSection>
       </Box>
