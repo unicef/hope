@@ -185,6 +185,15 @@ class AbstractCollisionDetector:
         destination.__class__.objects.filter(pk=destination.id).update(**data)
 
 
+class NoopCollisionDetector(AbstractCollisionDetector):
+    def detect_collision(self, household: Household) -> str | None:
+        pass
+
+    @atomic
+    def update_household(self, household_to_merge: Household) -> None:
+        pass
+
+
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def __init__(self, context: "Program"):
         super().__init__(context)
@@ -324,3 +333,4 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
 collision_detectors_registry.append(IdentificationKeyCollisionDetector)
+collision_detectors_registry.append(NoopCollisionDetector)

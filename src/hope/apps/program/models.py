@@ -25,7 +25,7 @@ from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.models import DataCollectingType
 from hope.apps.household.models import Household
 from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.program.collision_detectors import collision_detectors_registry
+from hope.apps.program.collision_detectors import NoopCollisionDetector, collision_detectors_registry
 from hope.apps.sanction_list.models import SanctionList
 from hope.apps.utils.models import (
     AbstractSyncable,
@@ -212,8 +212,7 @@ class Program(
     )
     collision_detector = StrategyField(
         registry=collision_detectors_registry,
-        null=True,
-        blank=True,
+        default=NoopCollisionDetector,
         help_text="Object which detects collisions",
     )
     # System fields
