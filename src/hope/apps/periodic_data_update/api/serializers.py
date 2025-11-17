@@ -8,14 +8,12 @@ from rest_framework import serializers
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.models import (
-    BusinessArea,
     FlexibleAttribute,
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
     PeriodicFieldData,
-    Program,
     RoleAssignment,
     User,
 )

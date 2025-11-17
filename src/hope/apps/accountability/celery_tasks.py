@@ -1,7 +1,5 @@
 import logging
 
-from django.db.models import Q
-
 from hope.apps.accountability.services.export_survey_sample_service import (
     ExportSurveySampleService,
 )

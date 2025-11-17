@@ -5,7 +5,7 @@ from django.db.models import UniqueConstraint
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.file_temp import FileTemp
-from hope.models.utils import CeleryEnabledModel, TimeStampedModel, AdminUrlMixin
+from hope.models.utils import AdminUrlMixin, CeleryEnabledModel, TimeStampedModel
 
 
 class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
