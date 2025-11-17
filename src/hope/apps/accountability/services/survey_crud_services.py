@@ -41,6 +41,12 @@ class SurveyCrudServices:
             survey.flow_id = input_data["flow"]
 
         if not result.households:
+            if result.excluded_recipients_count > 0:
+                raise ValidationError(
+                    f"No recipient meets the criteria. {result.excluded_recipients_count} recipients "
+                    "were excluded because they do not have valid phone numbers."
+                )
             raise ValidationError("There are no selected recipients or no recipient meets criteria.")
+
         survey.save()
         return survey

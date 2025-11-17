@@ -11,5 +11,6 @@ export type PDUXlsxTemplateList = {
     status: string;
     statusDisplay: string;
     canExport: boolean;
+    readonly adminUrl: string | null;
 };
 

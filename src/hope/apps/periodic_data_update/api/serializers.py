@@ -2,7 +2,6 @@ import datetime
 from typing import Any
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -28,7 +27,7 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
 ]
 
 
-class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -45,6 +44,7 @@ class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
             "status",
             "status_display",
             "can_export",
+            "admin_url",
         )
 
 
@@ -67,16 +67,6 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         if len(field_names) != len(set(field_names)):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
-
-    def create(self, validated_data: dict[str, Any]) -> PDUXlsxTemplate:
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        validated_data["created_by"] = request.user
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        return super().create(validated_data)
 
 
 class PDUXlsxTemplateDetailSerializer(serializers.ModelSerializer):
@@ -280,19 +270,6 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-
-        validated_data["created_by"] = request.user
-        validated_data["business_area"] = business_area
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-
-        # Pop fields that are not on the model before creating the instance
-        validated_data.pop("filters", None)
-        validated_data.pop("rounds_data", None)
-
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)

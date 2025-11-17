@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -45,9 +46,12 @@ from hope.apps.periodic_data_update.api.serializers import (
     PDUXlsxUploadSerializer,
     PeriodicFieldSerializer,
 )
+from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
 from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models import (
+    BusinessArea,
+    Program,
     FlexibleAttribute,
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
@@ -95,6 +99,18 @@ class PDUXlsxTemplateViewSet(
     # export the template during template creation
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = self.request.parser_context["kwargs"]["program_slug"]
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        program = get_object_or_404(Program, slug=program_slug, business_area=business_area)
+        serializer.validated_data["created_by"] = self.request.user
+        serializer.validated_data["business_area"] = business_area
+        serializer.validated_data["program"] = program
+
+        rounds_data = serializer.validated_data.get("rounds_data", [])
+        add_round_names_to_rounds_data(rounds_data, program)
+        serializer.validated_data["rounds_data"] = rounds_data
+
         pdu_template = serializer.save()
         pdu_template.queue()
 
@@ -238,8 +254,18 @@ class PDUOnlineEditViewSet(
 
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer) -> None:
-        filters = serializer.validated_data.get("filters", {})
-        rounds_data = serializer.validated_data.get("rounds_data", [])
+        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = self.request.parser_context["kwargs"]["program_slug"]
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        program = get_object_or_404(Program, slug=program_slug, business_area=business_area)
+        serializer.validated_data["created_by"] = self.request.user
+        serializer.validated_data["business_area"] = business_area
+        serializer.validated_data["program"] = program
+
+        filters = serializer.validated_data.pop("filters", {})
+        rounds_data = serializer.validated_data.pop("rounds_data", [])
+        add_round_names_to_rounds_data(rounds_data, program)
+
         pdu_online_edit = serializer.save()
         task_kwargs = {
             "filters": filters,

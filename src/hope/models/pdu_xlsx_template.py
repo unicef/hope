@@ -5,10 +5,10 @@ from django.db.models import UniqueConstraint
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.file_temp import FileTemp
-from hope.models.utils import CeleryEnabledModel, TimeStampedModel
+from hope.models.utils import CeleryEnabledModel, TimeStampedModel, AdminUrlMixin
 
 
-class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
+class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"

@@ -1,11 +1,21 @@
+from typing import TYPE_CHECKING
+
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from django.contrib import admin
-from django.db.models.query import QuerySet
-from django.http import HttpRequest
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service
 from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
+
+if TYPE_CHECKING:  # pragma: no cover
+    from uuid import UUID
 
 
 class PDUXlsxUploadInline(admin.TabularInline):
@@ -52,6 +62,21 @@ class PDUXlsxTemplateAdmin(HOPEModelAdminBase):
 
     def celery_task_result_id(self, obj: PDUXlsxTemplate) -> str:
         return obj.celery_tasks_results_ids.get("export")
+
+    @button(
+        visible=lambda btn: btn.original.status == PDUXlsxTemplate.Status.FAILED,
+        permission=lambda request, obj, handler: request.user.is_superuser,
+    )
+    def restart_export_task(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            export_periodic_data_update_export_template_service.delay(str(pk))
+            return redirect(reverse("admin:periodic_data_update_pduxlsxtemplate_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_export_task,
+            message="Do you confirm to restart the export task?",
+        )
 
 
 @admin.register(PDUXlsxUpload)
