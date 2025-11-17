@@ -1664,6 +1664,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (snapshot_data, "admin2"),
             "village": (snapshot_data, "village"),
             "collector_name": (collector_data, "full_name"),
+            "collector_id": (primary_collector, "unicef_id"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),

@@ -35,6 +35,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         if self.payment_plan.is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
+            self.headers.remove("collector_id")
         else:
             self.headers.remove("individual_id")
 

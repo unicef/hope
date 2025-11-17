@@ -197,7 +197,6 @@ const NewOnlineTemplatePage = (): ReactElement => {
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
-        round_name: data.roundName || '',
         id: data.id ?? undefined, // Fix: ensure id is included if present
       }));
 

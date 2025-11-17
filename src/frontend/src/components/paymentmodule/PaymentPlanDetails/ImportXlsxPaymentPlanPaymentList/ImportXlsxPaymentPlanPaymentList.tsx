@@ -111,6 +111,7 @@ export function ImportXlsxPaymentPlanPaymentList({
           data-cy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={shouldDisableUpload}
+          data-perm={PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS}
         >
           {t('Upload File')}
         </Button>
