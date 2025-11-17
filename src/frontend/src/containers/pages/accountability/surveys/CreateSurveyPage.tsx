@@ -449,7 +449,7 @@ const CreateSurveyPage = (): ReactElement => {
           }
         }}
       >
-        {({ submitForm, setValues, values, setFieldValue, errors }) => (
+        {({ submitForm, setValues, values, errors }) => (
           <>
             <PageHeader
               title={`${'New Survey'} > ${matchCategory(category)}`}
@@ -486,9 +486,7 @@ const CreateSurveyPage = (): ReactElement => {
                 {activeStep === SurveySteps.LookUp && (
                   <Box display="flex" flexDirection="column">
                     <LookUpSelectionSurveys
-                      businessArea={businessArea}
                       values={values}
-                      onValueChange={setFieldValue}
                       setValues={setValues}
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}

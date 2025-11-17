@@ -17,15 +17,11 @@ const BoxWithBorderBottom = styled(Box)`
 `;
 
 export function LookUpSelectionSurveys({
-  businessArea,
-  onValueChange,
   setValues,
   values,
   selectedTab,
   setSelectedTab,
 }: {
-  businessArea: string;
-  onValueChange;
   setValues;
   values;
   selectedTab;
