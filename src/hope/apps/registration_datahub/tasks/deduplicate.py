@@ -195,8 +195,6 @@ class DeduplicateTask:
         registration_data_import: RegistrationDataImport,
     ) -> list[str]:
         program = registration_data_import.program
-        if not program.collision_detector:
-            return []
         households = Household.all_objects.filter(registration_data_import=registration_data_import).iterator(1000)
         households_to_exclude = [
             household.id for household in households if program.collision_detector.detect_collision(household)
