@@ -181,7 +181,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       break;
     case 'LESS_THAN':
     case 'GREATER_THAN': {
-      const isLessThan = field?.type === 'LESS_THAN';
+      const isLessThan = field?.comparisonMethod === 'LESS_THAN';
       const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
       const altText = isLessThan ? 'less_than' : 'greater_than';
       const displayValue = field.arguments?.[0];
