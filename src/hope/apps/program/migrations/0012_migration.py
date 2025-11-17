@@ -3,14 +3,12 @@
 from django.db import migrations
 import strategy_field.fields
 
-import hope.apps.program.collision_detectors
-
 
 def populate_noop_collision_detector(apps, schema_editor):
     Program = apps.get_model("program", "Program")
     programs_to_update = []
     Program.objects.filter(collision_detector__isnull=True).update(
-        collision_detector=hope.apps.program.collision_detectors.NoopCollisionDetector
+        collision_detector="hope.apps.program.collision_detectors.NoopCollisionDetector"
     )
 
     Program.objects.bulk_update(programs_to_update, ["collision_detector"])
@@ -31,7 +29,7 @@ class Migration(migrations.Migration):
             model_name="program",
             name="collision_detector",
             field=strategy_field.fields.StrategyField(
-                default=hope.apps.program.collision_detectors.NoopCollisionDetector,
+                default="hope.apps.program.collision_detectors.NoopCollisionDetector",
                 help_text="Object which detects collisions",
             ),
         ),
