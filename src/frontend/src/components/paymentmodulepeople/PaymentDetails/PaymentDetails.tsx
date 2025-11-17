@@ -5,7 +5,6 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
-  getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
@@ -19,7 +18,6 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import { Overview } from '@components/payments/Overview';
@@ -33,13 +31,10 @@ interface PaymentDetailsProps {
 export function PaymentDetails({
   payment,
   canViewActivityLog,
-  canViewHouseholdDetails,
 }: PaymentDetailsProps): ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
   if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
@@ -140,66 +135,6 @@ export function PaymentDetails({
           </Grid>
         </ContainerColumnWithBorder>
       ) : null}
-      {isSocialDctType && (
-        <Overview>
-          <Title>
-            <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
-          </Title>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
-                {payment.household?.id && canViewHouseholdDetails ? (
-                  <BlackLink
-                    to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
-                  >
-                    {payment.household.unicefId}
-                  </BlackLink>
-                ) : (
-                  <div>
-                    {payment.household?.id ? payment.household.unicefId : '-'}
-                  </div>
-                )}
-              </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t("Collector's Name")}
-                value={payment.snapshotCollectorFullName}
-              />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t("Collector's ID")}
-                value={payment.collector?.unicefId}
-              />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('TOTAL PERSON COVERED')}
-                value={payment.household.size}
-              />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('PHONE NUMBER')}
-                value={getPhoneNoLabel(
-                  payment.collector.phoneNo,
-                  payment.collector.phoneNoValid,
-                )}
-              />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('ALT. PHONE NUMBER')}
-                value={getPhoneNoLabel(
-                  payment.collector.phoneNoAlternative,
-                  payment.collector.phoneNoAlternativeValid,
-                )}
-              />
-            </Grid>
-          </Grid>
-        </Overview>
-      )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
