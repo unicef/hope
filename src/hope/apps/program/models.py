@@ -210,7 +210,6 @@ class Program(
     biometric_deduplication_enabled = models.BooleanField(
         default=False, help_text="Enable Deduplication of Face Images"
     )
-    collision_detection_enabled = models.BooleanField(default=False, help_text="don't create duplicated")
     collision_detector = StrategyField(
         registry=collision_detectors_registry,
         null=True,
