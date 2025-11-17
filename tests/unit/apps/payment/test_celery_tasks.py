@@ -423,7 +423,7 @@ class TestPaymentCeleryTask(TestCase):
         assert rule_commit.is_release is False
         payment_plan_apply_engine_rule(str(payment_plan.id), str(rule.id))
 
-        mock_logger.exception.assert_called_once_with("PaymentPlan Run Engine Rule Error no RuleCommit")
+        mock_logger.error.assert_called_once_with("PaymentPlan Run Engine Rule Error no RuleCommit")
 
         payment_plan.refresh_from_db(fields=["background_action_status"])
         assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
