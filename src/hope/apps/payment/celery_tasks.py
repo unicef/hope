@@ -327,9 +327,9 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
     rule: RuleCommit | None = engine_rule.latest
     if not rule:
-        logger.exception("PaymentPlan Run Engine Rule Error no RuleCommit")
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
         payment_plan.background_action_status_steficon_error()
-        payment_plan.save()
+        payment_plan.save(update_fields=["background_action_status"])
         return
 
     if rule.id != payment_plan.steficon_rule_id:
