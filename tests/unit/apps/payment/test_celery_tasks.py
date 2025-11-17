@@ -428,6 +428,18 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db(fields=["background_action_status"])
         assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
 
+        # run one more time
+        rule_commit.is_release = True
+        rule_commit.save()
+        rule_commit.refresh_from_db(fields=["is_release"])
+
+        assert rule_commit.is_release is True
+        payment_plan_apply_engine_rule(str(payment_plan.id), str(rule.id))
+
+        payment_plan.refresh_from_db(fields=["background_action_status", "steficon_rule_id"])
+        assert str(payment_plan.steficon_rule_id) == str(rule_commit.id)
+        assert payment_plan.background_action_status is None
+
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
     @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
