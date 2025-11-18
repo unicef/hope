@@ -101,10 +101,7 @@ if TYPE_CHECKING:
 
 
 def _is_e2e_run(config) -> bool:
-    # Heuristics: presence of e2e marker, or a custom CLI flag, or running tests under tests/e2e
-    return (
-        any(m.name == "night" for m in config.getini("markers")) and any("tests/e2e" in a for a in config.args)
-    ) or config.getoption("--e2e", default=False)
+    return any("tests/e2e" in str(arg) for arg in getattr(config, "args", []))
 
 
 @pytest.fixture
@@ -176,7 +173,6 @@ def pytest_addoption(parser: Parser) -> None:
         default=False,
         help="Enable mapping mode",
     )
-    parser.addoption("--e2e", action="store_true", default=False, help="Enable E2E-specific setup")
 
 
 def get_redis_host() -> str:
@@ -199,11 +195,12 @@ def pytest_configure(config: Config) -> None:
 
     env = Env()
 
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
+    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
+    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
+    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
+
     if _is_e2e_run(config):
-        settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
-        settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
-        settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
-        settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
         if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
             os.makedirs(settings.SCREENSHOT_DIRECTORY)
 
@@ -450,7 +447,10 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 
 @pytest.fixture(scope="session")
-def download_path(worker_id: str) -> str:
+def download_path(pytestconfig, worker_id: str) -> str:
+    if not _is_e2e_run(pytestconfig):
+        pytest.skip("e2e-only fixture")
+
     try:
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
@@ -459,7 +459,9 @@ def download_path(worker_id: str) -> str:
 
 
 @pytest.fixture
-def driver(download_path: str) -> Chrome:
+def driver(pytestconfig, download_path: str) -> Chrome:
+    if not _is_e2e_run(pytestconfig):
+        pytest.skip("e2e-only fixture")
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
