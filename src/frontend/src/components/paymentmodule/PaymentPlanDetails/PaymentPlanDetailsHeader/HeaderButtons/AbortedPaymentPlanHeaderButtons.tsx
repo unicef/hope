@@ -61,7 +61,7 @@ export function AbortedPaymentPlanHeaderButtons({
             color="primary"
             data-cy="button-reactivate-payment-plan"
             onClick={handleReactivate}
-            disabled={!isActiveProgram || loading}
+            disabled={!isActiveProgram || loading || !canReactivate}
             data-perm={PERMISSIONS.PM_REACTIVATE_ABORT}
           >
             {loading ? t('Reactivating...') : t('Reactivate')}
