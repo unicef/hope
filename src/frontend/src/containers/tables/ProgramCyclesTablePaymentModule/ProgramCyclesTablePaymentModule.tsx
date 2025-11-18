@@ -17,7 +17,6 @@ import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
-import { useProgramContext } from 'src/programContext';
 import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 
 interface ProgramCyclesTablePaymentModuleProps {
@@ -33,7 +32,6 @@ export const ProgramCyclesTablePaymentModule = ({
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
   // Controlled pagination state
   const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState({

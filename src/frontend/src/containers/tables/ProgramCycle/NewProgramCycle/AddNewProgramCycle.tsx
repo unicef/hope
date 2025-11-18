@@ -50,7 +50,8 @@ const AddNewProgramCycle = ({
 
   const handleClose = async () => {
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles', businessArea, program.slug],
+      queryKey: ['programCycles'],
+      exact: false,
     });
     setOpen(false);
     setStep(0);
@@ -66,7 +67,7 @@ const AddNewProgramCycle = ({
   };
 
   const stepsToRender = [];
-  if (lastProgramCycle.endDate) {
+  if (lastProgramCycle?.endDate) {
     stepsToRender.push(
       <CreateProgramCycle
         program={program}
