@@ -1,5 +1,12 @@
+import {
+  Box,
+  Grid,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@mui/material';
 import { PageHeader } from '@components/core/PageHeader';
-import { Box, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ReactElement, useState } from 'react';
@@ -22,19 +29,52 @@ import INDDataTable from '@containers/pages/officeSearch/INDdataTable';
 import GRVDataTable from '@containers/pages/officeSearch/GRVdataTable';
 import PPDataTable from '@containers/pages/officeSearch/PPdataTable';
 import PaymentsDataTable from '@containers/pages/officeSearch/PaymentsDataTable';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 const searchIncludes = (search: unknown, keyword: string) =>
   typeof search === 'string' && search.includes(keyword);
 
 const OfficeSearchPage = (): ReactElement => {
+  const [whatToSearch, setWhatToSearch] = useState('');
+  const [whereToSearch, setWhereToSearch] = useState('');
+
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { businessArea, programId } = useBaseUrl();
+  const permissions = usePermissions();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const canViewHouseholds = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
+    permissions,
+  );
+  const canViewIndividuals = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
+    permissions,
+  );
+  const canViewGrievances = hasPermissions(
+    PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
+    permissions,
+  );
+  const canViewPaymentPlans = hasPermissions(
+    PERMISSIONS.PM_VIEW_LIST,
+    permissions,
+  );
+  const canViewPayments = hasPermissions(
+    PERMISSIONS.PM_VIEW_PAYMENT_LIST,
+    permissions,
+  );
 
   const initialFilter = {
+    whatToSearch: '',
+    whereToSearch: '',
     search: '',
   };
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -207,9 +247,6 @@ const OfficeSearchPage = (): ReactElement => {
   console.log('grvData', grvData);
   console.log('ppData', ppData);
   console.log('paymentsData', paymentsData);
-  //need BA and programSlug, to fetch PP
-  //need paymentPlanPk, BA, program, to fetch payments,
-  // console.log('paymentsData', paymentsData);
 
   const nothingToDisplay =
     !hhData?.results?.length &&
@@ -217,6 +254,34 @@ const OfficeSearchPage = (): ReactElement => {
     !grvData?.results?.length &&
     !ppData?.results?.length &&
     !paymentsData?.results?.length;
+
+  const whereToSearchOptions = [
+    canViewHouseholds && {
+      value: 'HH',
+      label: `${beneficiaryGroup?.groupLabelPlural || 'Households'} List`,
+    },
+    canViewIndividuals && {
+      value: 'IND',
+      label: `${beneficiaryGroup?.memberLabelPlural || 'Individuals'} List`,
+    },
+    canViewGrievances && { value: 'GRV', label: 'Grievance Tickets List' },
+    canViewPaymentPlans && { value: 'PP', label: 'Payment Plans List' },
+    canViewPayments && { value: 'RCPT', label: 'Payments List' },
+  ].filter(Boolean);
+
+  const whatToSearchOptions = [
+    canViewHouseholds && {
+      value: 'HH',
+      label: beneficiaryGroup?.groupLabel || 'HH',
+    },
+    canViewIndividuals && {
+      value: 'IND',
+      label: beneficiaryGroup?.memberLabel || 'IND',
+    },
+    canViewGrievances && { value: 'GRV', label: 'Grievance' },
+    canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
+    canViewPayments && { value: 'RCPT', label: 'Payment' },
+  ].filter(Boolean);
 
   return (
     <>
@@ -231,9 +296,53 @@ const OfficeSearchPage = (): ReactElement => {
           applyHandler={handleApplyFilter}
         >
           <Grid container alignItems="flex-end" spacing={3}>
-            <Grid size={{ xs: 8 }}>
+            <Grid size={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="what-to-search-label">
+                  What to Search
+                </InputLabel>
+                <Select
+                  labelId="what-to-search-label"
+                  id="what-to-search"
+                  value={filter.whatToSearch}
+                  label="What to Search"
+                  onChange={(e) =>
+                    handleFilterChange('whatToSearch', e.target.value)
+                  }
+                >
+                  {whatToSearchOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="where-to-search-label">
+                  Where to Search
+                </InputLabel>
+                <Select
+                  labelId="where-to-search-label"
+                  id="where-to-search"
+                  value={filter.whereToSearch}
+                  label="Where to Search"
+                  onChange={(e) =>
+                    handleFilterChange('whereToSearch', e.target.value)
+                  }
+                >
+                  {whereToSearchOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={6}>
               <SearchTextField
-                label={t('Search')}
+                label={t('Search Value')}
                 value={filter.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
                 data-cy="office-filters-search"
@@ -260,8 +369,8 @@ const OfficeSearchPage = (): ReactElement => {
           {nothingToDisplay && (
             <Box mt={4} textAlign="center">
               <h2>
-                Search for Individuals, Households, Grievances, Payment Plans,
-                Payments
+                No results found. Please adjust your search criteria and try
+                again.
               </h2>
             </Box>
           )}
