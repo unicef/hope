@@ -4,7 +4,7 @@ from django.db import migrations
 import strategy_field.fields
 
 
-def populate_noop_collision_detector(apps, schema_editor):
+def populate_noop_collision_detector(apps, schema_editor):  # pragma: no cover
     Program = apps.get_model("program", "Program")
     programs_to_update = []
     Program.objects.filter(collision_detector__isnull=True).update(
