@@ -3,7 +3,7 @@ from secrets import randbelow
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Max, Q, QuerySet
+from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
@@ -586,17 +586,6 @@ def generate_rdi_unique_name(program: Program) -> str:
 
 
 def increment_program_cycle_list_version_cache(business_area_slug: str, program_slug: str) -> None:
-    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-    queryset = ProgramCycle.objects.filter(
-        program__slug=program_slug,
-        program__business_area__slug=business_area_slug,
-    ).aggregate(
-        latest_updated_at=Max("updated_at"),
-        obj_count=Count("id"),
-    )
-    version_key = (
-        f"{business_area_slug}:{business_area_version}:{program_slug}:program_cycle_list"
-        f":{queryset['latest_updated_at']}:{queryset['obj_count']}"
-    )
-    get_or_create_cache_key(version_key, 0)
+    version_key = f"{business_area_slug}:version"
+    get_or_create_cache_key(version_key, 1)
     cache.incr(version_key)
