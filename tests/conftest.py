@@ -100,6 +100,13 @@ if TYPE_CHECKING:
     from hope.apps.sanction_list.models import SanctionList
 
 
+def _is_e2e_run(config) -> bool:
+    # Heuristics: presence of e2e marker, or a custom CLI flag, or running tests under tests/e2e
+    return (
+        any(m.name == "night" for m in config.getini("markers")) and any("tests/e2e" in a for a in config.args)
+    ) or config.getoption("--e2e", default=False)
+
+
 @pytest.fixture
 def mocked_responses() -> Generator[RequestsMock, None, None]:
     with RequestsMock() as rsps:
@@ -169,6 +176,7 @@ def pytest_addoption(parser: Parser) -> None:
         default=False,
         help="Enable mapping mode",
     )
+    parser.addoption("--e2e", action="store_true", default=False, help="Enable E2E-specific setup")
 
 
 def get_redis_host() -> str:
@@ -190,16 +198,18 @@ def pytest_configure(config: Config) -> None:
     )
 
     env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
-    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
-    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
-    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
 
-    # delete all old screenshots
-    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
-        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
+    if _is_e2e_run(config):
+        settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
+        settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
+        settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
+        settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
+        if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+            os.makedirs(settings.SCREENSHOT_DIRECTORY)
+
+        # delete all old screenshots
+        for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
+            os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
@@ -288,7 +298,8 @@ def pytest_configure(config: Config) -> None:
 def pytest_unconfigure(config: Config) -> None:
     import sys  # noqa
 
-    del sys._called_from_pytest
+    if hasattr(sys, "_called_from_pytest"):
+        del sys._called_from_pytest
 
 
 disabled_locally_test = pytest.mark.skip(
