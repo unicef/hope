@@ -238,7 +238,7 @@ OBSERVED_DISABILITY_CHOICE = (
         _("Difficulty communicating (e.g understanding or being understood)"),
     ),
 )
-NON_BENEFICIARY = "NON_BENEFICIARY"
+NON_BENEFICIARY = "NON_BENEFICIARY"  # delegate
 HEAD = "HEAD"
 SON_DAUGHTER = "SON_DAUGHTER"
 WIFE_HUSBAND = "WIFE_HUSBAND"
