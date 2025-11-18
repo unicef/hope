@@ -69,7 +69,10 @@ export function AbortPaymentPlan({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(255, 'Too long')
+      .required('Abort Reason is required'),
   });
 
   return (
@@ -123,8 +126,9 @@ export function AbortPaymentPlan({
                     multiline
                     fullWidth
                     variant="filled"
-                    label="Comment (optional)"
+                    label={t('Abort Reason')}
                     component={FormikTextField}
+                    required
                   />
                 </Form>
               </DialogContainer>
