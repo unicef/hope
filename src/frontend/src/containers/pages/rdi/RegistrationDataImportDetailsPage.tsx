@@ -64,7 +64,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
       [
         'Loading',
         'Deduplication',
-        'Import  Scheduled',
+        'Import Scheduled',
         'Importing',
         'Merge Scheduled',
         'Merging',
