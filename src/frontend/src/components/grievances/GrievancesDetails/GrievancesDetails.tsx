@@ -213,27 +213,30 @@ function GrievancesDetails({
                 ),
                 size: 3,
               },
-              !isAllPrograms && {
-                label: `${beneficiaryGroup?.groupLabel} ID`,
-                value: (
-                  <span>
-                    {ticket.household?.id &&
-                    canViewHouseholdDetails &&
-                    !isAllPrograms ? (
-                      <BlackLink
-                        to={`/${baseUrl}/population/household/${ticket.household.id}`}
-                      >
-                        {ticket.household.unicefId}
-                      </BlackLink>
-                    ) : (
-                      <div>
-                        {ticket.household?.id ? ticket.household.unicefId : '-'}
-                      </div>
-                    )}
-                  </span>
-                ),
-                size: 3,
-              },
+              !isAllPrograms &&
+                !isSocialDctType && {
+                  label: `${beneficiaryGroup?.groupLabel} ID`,
+                  value: (
+                    <span>
+                      {ticket.household?.id &&
+                      canViewHouseholdDetails &&
+                      !isAllPrograms ? (
+                        <BlackLink
+                          to={`/${baseUrl}/population/household/${ticket.household.id}`}
+                        >
+                          {ticket.household.unicefId}
+                        </BlackLink>
+                      ) : (
+                        <div>
+                          {ticket.household?.id
+                            ? ticket.household.unicefId
+                            : '-'}
+                        </div>
+                      )}
+                    </span>
+                  ),
+                  size: 3,
+                },
               {
                 label:
                   isAllPrograms || isSocialDctType
@@ -334,7 +337,9 @@ function GrievancesDetails({
               },
             ]
               .filter((el) =>
-                isSocialDctType ? el.label !== 'Household ID' : el,
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
               )
               .map(
                 (el) =>
