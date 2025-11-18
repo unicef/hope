@@ -37,7 +37,7 @@ function PaymentDetails({
 }: PaymentDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
   if (payment.verification && payment.verification.status !== 'PENDING') {
@@ -139,64 +139,66 @@ function PaymentDetails({
           </Grid>
         </ContainerColumnWithBorder>
       ) : null}
-      <Overview>
-        <Title>
-          <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
-              {payment.household?.id && canViewHouseholdDetails ? (
-                <BlackLink
-                  to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
-                >
-                  {payment.household.unicefId}
-                </BlackLink>
-              ) : (
-                <div>
-                  {payment.household?.id ? payment.household.unicefId : '-'}
-                </div>
-              )}
-            </LabelizedField>
+      {isSocialDctType && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
+                {payment.household?.id && canViewHouseholdDetails ? (
+                  <BlackLink
+                    to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
+                  >
+                    {payment.household.unicefId}
+                  </BlackLink>
+                ) : (
+                  <div>
+                    {payment.household?.id ? payment.household.unicefId : '-'}
+                  </div>
+                )}
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t("Collector's Name")}
+                value={payment.snapshotCollectorFullName}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t("Collector's ID")}
+                value={payment.collector?.unicefId}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('TOTAL PERSON COVERED')}
+                value={payment.household.size}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('PHONE NUMBER')}
+                value={getPhoneNoLabel(
+                  payment.collector.phoneNo,
+                  payment.collector.phoneNoValid,
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('ALT. PHONE NUMBER')}
+                value={getPhoneNoLabel(
+                  payment.collector.phoneNoAlternative,
+                  payment.collector.phoneNoAlternativeValid,
+                )}
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t("Collector's Name")}
-              value={payment.snapshotCollectorFullName}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t("Collector's ID")}
-              value={payment.collector?.unicefId}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('TOTAL PERSON COVERED')}
-              value={payment.household.size}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.collector.phoneNo,
-                payment.collector.phoneNoValid,
-              )}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('ALT. PHONE NUMBER')}
-              value={getPhoneNoLabel(
-                payment.collector.phoneNoAlternative,
-                payment.collector.phoneNoAlternativeValid,
-              )}
-            />
-          </Grid>
-        </Grid>
-      </Overview>
+        </Overview>
+      )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
