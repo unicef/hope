@@ -17,6 +17,8 @@ import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -31,6 +33,7 @@ export const ProgramCyclesTablePaymentModule = ({
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   // Controlled pagination state
   const [page, setPage] = useState(0);
   const [queryVariables, setQueryVariables] = useState({
@@ -186,6 +189,13 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
+
   const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
@@ -235,6 +245,7 @@ export const ProgramCyclesTablePaymentModule = ({
   return (
     <UniversalRestTable
       title="Programme Cycles"
+      actions={actions}
       renderRow={renderRow}
       headCells={adjustedHeadCells}
       itemsCount={itemsCount}
