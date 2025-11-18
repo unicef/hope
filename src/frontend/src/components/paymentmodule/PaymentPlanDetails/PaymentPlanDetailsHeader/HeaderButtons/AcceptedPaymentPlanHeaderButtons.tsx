@@ -30,7 +30,6 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
-  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
