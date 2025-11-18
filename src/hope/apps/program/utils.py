@@ -1,15 +1,13 @@
 import re
 from secrets import randbelow
 
+from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Q, QuerySet, Max, Count
+from django.db.models import Count, Max, Q, QuerySet
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
-from django.core.cache import cache
-
 from hope.api.caches import get_or_create_cache_key
-
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area
@@ -598,8 +596,7 @@ def increment_program_cycle_list_version_cache(business_area_slug: str, program_
     )
     version_key = (
         f"{business_area_slug}:{business_area_version}:{program_slug}:program_cycle_list"
-        f":{queryset["latest_updated_at"]}:{queryset["obj_count"]}"
+        f":{queryset['latest_updated_at']}:{queryset['obj_count']}"
     )
     get_or_create_cache_key(version_key, 0)
     cache.incr(version_key)
-    print("==>>> A", version_key)
