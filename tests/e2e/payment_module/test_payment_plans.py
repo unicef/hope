@@ -751,6 +751,6 @@ class TestPaymentPlans:
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_upload_file_button().click()
-        page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+        page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/e2e/helpers/document_example.png")
         page_payment_module_details.get_title_input().find_element(By.TAG_NAME, "input").send_keys("title input")
         page_payment_module_details.get_button_import_submit().click()
