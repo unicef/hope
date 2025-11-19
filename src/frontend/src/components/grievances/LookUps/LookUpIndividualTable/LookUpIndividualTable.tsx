@@ -18,7 +18,6 @@ import {
   headCellsStandardProgram,
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
-import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -231,13 +230,6 @@ export function LookUpIndividualTable({
     ? headCellsWithProgramColumn
     : adjustedHeadCells;
 
-  const itemsCount = usePersistedCount(
-    page,
-    isAllPrograms
-      ? allProgramsIndividualsCount
-      : selectedProgramIndividualsCount,
-  );
-
   const renderTable = (): ReactElement => (
     <UniversalRestTable
       headCells={preparedHeadcells}
@@ -255,7 +247,11 @@ export function LookUpIndividualTable({
       isLoading={
         isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
       }
-      itemsCount={itemsCount}
+      itemsCount={
+        isAllPrograms
+          ? allProgramsIndividualsCount?.count
+          : selectedProgramIndividualsCount?.count
+      }
       renderRow={(row: IndividualList) => (
         <LookUpIndividualTableRow
           radioChangeHandler={handleRadioChange}

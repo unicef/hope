@@ -14,7 +14,6 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
-import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -254,11 +253,6 @@ export function LookUpHouseholdTable({
     ? headCellsWithProgramColumn
     : adjustedHeadCells;
 
-  const itemsCount = usePersistedCount(
-    page,
-    isAllPrograms ? dataHouseholdsAllProgramsCount : dataHouseholdsProgramCount,
-  );
-
   const renderTable = (): ReactElement => (
     <UniversalRestTable
       renderRow={(row: PaginatedHouseholdListList['results'][number]) =>
@@ -279,7 +273,11 @@ export function LookUpHouseholdTable({
           <></>
         )
       }
-      itemsCount={itemsCount}
+      itemsCount={
+        isAllPrograms
+          ? dataHouseholdsAllProgramsCount?.count
+          : dataHouseholdsProgramCount?.count
+      }
       headCells={
         householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
       }
