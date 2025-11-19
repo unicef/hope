@@ -43,7 +43,7 @@ export function AccountField({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dataFields = account?.dataFields || {};
 
-  const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
+  const dynamicFieldsName = `${accountFieldName}.dataFields`;
   const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
   const isBank = accountType === 'bank';
 
@@ -184,7 +184,7 @@ export function AccountField({
           <>
             {form.values[baseName][
               getIndexForId(values[baseName], id)
-            ]?.dynamicFields?.map((field, idx) => (
+            ]?.dataFields?.map((field, idx) => (
               <Fragment key={idx}>
                 <Grid size={{ xs: 4 }}>
                   <Field
