@@ -24,13 +24,12 @@ import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
-import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   decodeIdString,
   isPartnerVisible,
-  mapPartnerChoicesWithoutUnicef,
+  mapPartnerChoicesFromProgramWithoutUnicef,
   showApiErrorMessages,
   deepUnderscore,
 } from '@utils/utils';
@@ -52,14 +51,13 @@ const EditProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: treeData } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
@@ -69,15 +67,6 @@ const EditProgramPage = (): ReactElement => {
         slug: id,
       }),
   });
-
-  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
@@ -136,15 +125,9 @@ const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (
-    loadingProgram ||
-    userPartnerChoicesLoading ||
-    choicesLoading
-  )
-    return <LoadingComponent />;
+  if (loadingProgram || choicesLoading) return <LoadingComponent />;
 
-  if (!program || !userPartnerChoicesData || !choicesData)
-    return null;
+  if (!program || !choicesData) return null;
 
   const {
     name,
@@ -249,8 +232,10 @@ const EditProgramPage = (): ReactElement => {
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
-        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
-        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
+        reconciliationWindowInDays:
+          requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications:
+          requestValuesDetails.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await updateProgramDetails(programData);
@@ -303,7 +288,8 @@ const EditProgramPage = (): ReactElement => {
     frequencyOfPayments: frequencyOfPayments,
     pduFields: pduFields,
     reconciliationWindowInDays: reconciliationWindowInDays,
-    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
+    sendReconciliationWindowExpiryNotifications:
+      sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
@@ -347,8 +333,6 @@ const EditProgramPage = (): ReactElement => {
     ],
     ['partnerAccess'],
   ];
-
-  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -477,10 +461,11 @@ const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
-              userPartnerChoices,
-              values.partners,
-            );
+            const mappedPartnerChoices =
+              mapPartnerChoicesFromProgramWithoutUnicef(
+                program.partners,
+                values.partners,
+              );
 
             return (
               <BaseSection title={t('Programme Partners')}>
