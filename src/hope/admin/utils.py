@@ -50,7 +50,7 @@ class JSONWidgetMixin:
     json_enabled = False
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
+        if db_field.get_internal_type() == "JSONField":
             if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
             else:
