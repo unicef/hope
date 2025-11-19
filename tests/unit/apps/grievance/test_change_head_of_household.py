@@ -49,7 +49,7 @@ class TestChangeHeadOfHousehold:
         )
         self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdeeed")
 
-        self.household = HouseholdFactory.build()
+        self.household = HouseholdFactory()
         self.household.program.save()
         self.household.household_collection.save()
         self.household.registration_data_import.imported_by.save()

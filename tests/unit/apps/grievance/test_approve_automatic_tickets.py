@@ -52,7 +52,7 @@ class TestGrievanceApproveAutomaticTickets:
             business_area=BusinessArea.objects.first(),
         )
         partner = PartnerFactory()
-        household_one = HouseholdFactory.build(
+        household_one = HouseholdFactory(
             registration_data_import__imported_by__partner=partner,
             program=self.program_one,
         )

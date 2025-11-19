@@ -44,7 +44,7 @@ class TestGrievanceTicketRelatedTickets(BaseTestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(program=program_one)
+        household_one = HouseholdFactory(program=program_one)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one

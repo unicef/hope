@@ -81,7 +81,7 @@ class TestGrievanceTicketCreate:
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(size=3, country=country, program=self.program, unicef_id="HH-0001")
+        household_one = HouseholdFactory(size=3, country=country, program=self.program, unicef_id="HH-0001")
         household_one.household_collection.save()
         household_one.program.save()
         household_one.registration_data_import.imported_by.save()

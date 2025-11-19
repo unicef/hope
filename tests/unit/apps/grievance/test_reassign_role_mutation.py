@@ -47,7 +47,7 @@ class TestRoleReassignMutation:
             area_level=2,
         )
         self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
-        self.household = HouseholdFactory.build(program=self.program)
+        self.household = HouseholdFactory(program=self.program)
         self.household.household_collection.save()
         self.household.registration_data_import.imported_by.save()
         self.household.registration_data_import.program = self.program
@@ -151,7 +151,7 @@ class TestRoleReassignMutationNewTicket:
         )
         self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        self.household = HouseholdFactory.build(program=self.program)
+        self.household = HouseholdFactory(program=self.program)
         self.household.household_collection.save()
         self.household.registration_data_import.imported_by.save()
         self.household.registration_data_import.program = self.program

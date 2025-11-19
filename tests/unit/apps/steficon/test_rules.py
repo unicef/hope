@@ -39,7 +39,7 @@ def basic_rule_setup() -> Tuple[User, Household]:
     user = UserFactory(is_superuser=True, username="test")
     user.set_password("test")
     user.save()
-    household = HouseholdFactory.build()
+    household = HouseholdFactory()
     return user, household
 
 

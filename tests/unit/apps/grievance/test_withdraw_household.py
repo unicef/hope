@@ -63,7 +63,7 @@ class TestWithdrawHousehold:
             self.business_area,
             self.program,
         )
-        household = HouseholdFactory.build(program=self.program)
+        household = HouseholdFactory(program=self.program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = self.program

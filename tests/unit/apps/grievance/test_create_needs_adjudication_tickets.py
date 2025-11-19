@@ -38,7 +38,7 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-        cls.household = HouseholdFactory.build(
+        cls.household = HouseholdFactory(
             size=2,
             program=program,
         )
@@ -147,15 +147,15 @@ class TestCreateNeedsAdjudicationTicketsBiometrics:
             name="Test HOPE2",
             business_area=BusinessArea.objects.first(),
         )
-        self.household = HouseholdFactory.build(
+        self.household = HouseholdFactory(
             size=2,
             program=self.program,
         )
-        self.household2 = HouseholdFactory.build(
+        self.household2 = HouseholdFactory(
             size=1,
             program=self.program,
         )
-        self.household3 = HouseholdFactory.build(
+        self.household3 = HouseholdFactory(
             size=1,
             program=program2,
         )

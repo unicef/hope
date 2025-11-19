@@ -20,7 +20,7 @@ class BaseTest(WebTest):
         program = ProgramFactory(business_area=business_area)
         registration_data_import = RegistrationDataImportFactory()
 
-        cls.household = HouseholdFactory.build(
+        cls.household = HouseholdFactory(
             registration_data_import=registration_data_import,
             business_area=business_area,
             program=program,

@@ -23,7 +23,7 @@ class TestHandleRole(TestCase):
             business_area=business_area,
             status=Program.ACTIVE,
         )
-        household = HouseholdFactory.build(program=program)
+        household = HouseholdFactory(program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = household.program
@@ -53,7 +53,7 @@ class TestHandleRole(TestCase):
             business_area=business_area,
             status=Program.ACTIVE,
         )
-        household = HouseholdFactory.build(program=program)
+        household = HouseholdFactory(program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = household.program
@@ -78,7 +78,7 @@ class TestHandleRole(TestCase):
             business_area=business_area,
             status=Program.ACTIVE,
         )
-        household = HouseholdFactory.build(program=program)
+        household = HouseholdFactory(program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = household.program
@@ -109,7 +109,7 @@ class TestHandleRole(TestCase):
             business_area=business_area,
             status=Program.ACTIVE,
         )
-        household = HouseholdFactory.build(program=program)
+        household = HouseholdFactory(program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = household.program

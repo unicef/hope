@@ -113,14 +113,14 @@ class TestGrievanceTicketUpdate:
             parent__program_cycle=self.program.cycles.first(),
         )
 
-        household_one = HouseholdFactory.build(size=3, country=country, program=self.program, unicef_id="HH-0001")
+        household_one = HouseholdFactory(size=3, country=country, program=self.program, unicef_id="HH-0001")
         household_one.household_collection.save()
         household_one.program.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
 
-        household_two = HouseholdFactory.build(program=self.program, unicef_id="HH-0002")
+        household_two = HouseholdFactory(program=self.program, unicef_id="HH-0002")
         household_two.household_collection.save()
         household_two.program.save()
         household_two.registration_data_import.imported_by.save()
@@ -757,7 +757,7 @@ class TestGrievanceTicketUpdate:
 
     def test_grievance_status_change_close_na_without_access(self, create_user_role_with_permissions: Any) -> None:
         program_2 = ProgramFactory()
-        household_one = HouseholdFactory.build(
+        household_one = HouseholdFactory(
             registration_data_import__imported_by__partner=self.user.partner,
             program=self.program,
             admin2=self.area_1,
@@ -767,7 +767,7 @@ class TestGrievanceTicketUpdate:
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
 
-        household_2 = HouseholdFactory.build(
+        household_2 = HouseholdFactory(
             registration_data_import__imported_by__partner=self.user.partner,
             program=program_2,
             admin2=self.area_2,
@@ -903,7 +903,7 @@ class TestGrievanceTicketApprove:
             parent__program_cycle=self.program.cycles.first(),
         )
 
-        household_one = HouseholdFactory.build(size=3, country=country, program=self.program, unicef_id="HH-0001")
+        household_one = HouseholdFactory(size=3, country=country, program=self.program, unicef_id="HH-0001")
         household_one.household_collection.save()
         household_one.program.save()
         household_one.registration_data_import.imported_by.save()
@@ -1451,7 +1451,7 @@ class TestGrievanceTicketApprove:
             self.program,
         )
         partner = PartnerFactory()
-        household_one = HouseholdFactory.build(
+        household_one = HouseholdFactory(
             registration_data_import__imported_by__partner=partner,
             program=self.program,
             admin2=self.area_1,
@@ -1536,7 +1536,7 @@ class TestGrievanceTicketApprove:
             self.program,
         )
         partner = PartnerFactory()
-        household_one = HouseholdFactory.build(
+        household_one = HouseholdFactory(
             registration_data_import__imported_by__partner=partner,
             program=self.program,
             admin2=self.area_1,
@@ -1651,7 +1651,7 @@ class TestGrievanceTicketApprove:
             p_code="another-area-code",
         )
         AdminAreaLimitedToFactory(partner=self.partner, program=self.program, areas=[area_1])
-        household_one = HouseholdFactory.build(
+        household_one = HouseholdFactory(
             registration_data_import__imported_by__partner=partner,
             program=self.program,
             admin2=self.area_1,
@@ -1787,7 +1787,7 @@ class TestGrievanceTicketApprove:
 
     def test_reassign_role(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        household = HouseholdFactory.build(program=self.program)
+        household = HouseholdFactory(program=self.program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = self.program

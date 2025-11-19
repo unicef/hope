@@ -314,7 +314,7 @@ def create_household(
     unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
     household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
-    household = HouseholdFactory.build(**household_args)
+    household = HouseholdFactory(**household_args)
     individuals = IndividualFactory.create_batch(
         household.size, household=None, program=household.program, **individual_args
     )
@@ -375,7 +375,7 @@ def create_household_with_individual_with_collectors(
     unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
     household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
-    household = HouseholdFactory.build(**household_args)
+    household = HouseholdFactory(**household_args)
     individuals = IndividualFactory.create_batch(
         household.size, household=None, program=household.program, **individual_args
     )
@@ -433,7 +433,7 @@ def create_household_for_fixtures(
         household_args = {}
     if individual_args is None:
         individual_args = {}
-    household = HouseholdFactory.build(**household_args)
+    household = HouseholdFactory(**household_args)
     individuals = IndividualFactory.create_batch(
         household.size, household=None, program=household.program, **individual_args
     )
@@ -505,7 +505,7 @@ def create_household_and_individuals(
     if "program" not in household_data:
         household_data["program"] = ProgramFactory()
 
-    household: Household = HouseholdFactory.build(**household_data)
+    household: Household = HouseholdFactory(**household_data)
     household.program.save()
     household.household_collection.save()
     household.registration_data_import.program = household.program

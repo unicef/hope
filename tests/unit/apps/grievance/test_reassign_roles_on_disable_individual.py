@@ -31,7 +31,7 @@ class TestReassignRolesOnDisableIndividual(BaseTestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
 
-        cls.household = HouseholdFactory.build(program=cls.program_one)
+        cls.household = HouseholdFactory(program=cls.program_one)
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = cls.program_one
