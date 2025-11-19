@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -52,6 +52,7 @@ from hope.apps.payment.api.serializers import (
     PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
+    PaymentPlanAbortSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanCreateFollowUpSerializer,
     PaymentPlanCreateUpdateSerializer,
@@ -86,6 +87,7 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -151,7 +153,7 @@ class PaymentVerificationViewSet(
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("created_at")
+    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentVerificationPlanListSerializer,
@@ -513,7 +515,7 @@ class PaymentVerificationRecordViewSet(
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("created_at")
+    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -628,7 +630,7 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("created_at")
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
@@ -649,6 +651,7 @@ class PaymentPlanViewSet(
         "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
+        "abort": PaymentPlanAbortSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -683,6 +686,8 @@ class PaymentPlanViewSet(
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "close": [Permissions.PM_CLOSE_FINISHED],
+        "abort": [Permissions.PM_ABORT],
+        "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1413,6 +1418,42 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
 
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        abort_comment = serializer.validated_data.get("abort_comment")
+
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).abort(abort_comment)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan aborted"})
+
+    @action(detail=True, methods=["get"], url_path="reactivate-abort")
+    @transaction.atomic
+    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).reactivate_abort()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan reactivate abort"})
+
 
 class TargetPopulationViewSet(
     CountActionMixin,
@@ -1941,7 +1982,7 @@ class PaymentGlobalViewSet(
                 "financial_service_provider",
                 "program",
             )
-            .order_by("created_at")
+            .order_by("-created_at")
         )
 
     @action(detail=False, methods=["get"])
@@ -1958,14 +1999,23 @@ def available_fsps_for_delivery_mechanisms(
     delivery_mechanisms = DeliveryMechanism.get_choices()
 
     def get_fsps(mechanism_name: str) -> list[dict[str, Any]]:
-        fsps_qs = FinancialServiceProvider.objects.filter(
-            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
-            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-            delivery_mechanisms__name=mechanism_name,
-            allowed_business_areas__slug=business_area_slug,
-        ).distinct()
+        has_config_q = DeliveryMechanismConfig.objects.filter(
+            fsp=OuterRef("pk"),
+            delivery_mechanism__name=mechanism_name,
+        )
 
-        return list(fsps_qs.values("id", "name"))
+        fsps_qs = (
+            FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+                delivery_mechanisms__name=mechanism_name,
+                allowed_business_areas__slug=business_area_slug,
+            )
+            .annotate(has_config=Exists(has_config_q))
+            .distinct()
+        )
+
+        return list(fsps_qs.values("id", "name", "has_config"))
 
     list_resp = [
         {

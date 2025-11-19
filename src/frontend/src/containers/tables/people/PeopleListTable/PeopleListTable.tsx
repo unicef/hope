@@ -46,6 +46,7 @@ export const PeopleListTable = ({
       lastRegistrationDateBefore: filter.lastRegistrationDateMin,
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
+      orderBy: filter.orderBy,
       page,
     }),
     [
@@ -61,6 +62,7 @@ export const PeopleListTable = ({
       filter.status,
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
+      filter.orderBy,
       programId,
       businessArea,
       page,

@@ -23,6 +23,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaginatedFSPXlsxTemplateList } from '@restgenerated/models/PaginatedFSPXlsxTemplateList';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -55,7 +56,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         businessAreaSlug: businessArea,
         programSlug: programId,
       }),
-    enabled: !!businessArea && !!programId,
+    enabled: open,
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
@@ -145,7 +146,6 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   if (loadingTemplates) return <LoadingComponent />;
   if (errorTemplates) return null;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -257,6 +257,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                 disabled={shouldDisableDownloadXlsx}
+                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
               >
                 {t('Download XLSX')}
               </Button>
@@ -287,6 +288,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               onClick={() => sendToPaymentGateway()}
               data-cy="button-send-to-payment-gateway"
               disabled={LoadingSendToPaymentGateway}
+              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
             >
               {t('Send to FSP')}
             </Button>

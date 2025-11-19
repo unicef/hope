@@ -195,10 +195,10 @@ function RequestedHouseholdDataChangeTable(
                   {`Roles (${role.full_name})`}
                 </TableCell>
                 <TableCell align="left">
-                  {roleDisplayMap[role.previousValue] || role.previousValue}
+                  {role.previous_value === null ? 'No role' : (roleDisplayMap[role.previous_value] || role.previous_value)}
                 </TableCell>
                 <TableCell align="left">
-                  {roleDisplayMap[role.value] || role.value}
+                  {role.value === null ? 'No role' : (roleDisplayMap[role.value] || role.value)}
                 </TableCell>
               </TableRow>
             );

@@ -47,7 +47,8 @@ jobs:
 
       - name: Launch services with Docker Compose
         run: |
-          docker-compose -f development_tools/compose.yml up -d
+          docker-compose -f development_tools/compose.yml down -v
+          docker-compose -f development_tools/compose.yml up --build -d
 
       - name: Wait for Postgres to be ready
         run: |

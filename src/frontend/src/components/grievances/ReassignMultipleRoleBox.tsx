@@ -63,7 +63,7 @@ export function ReassignMultipleRoleBox({
           selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
         const mappedLookUpsForExternalHouseholds = rolesInHouseholds
-          .filter((element) => element.role !== 'NO_ROLE')
+          .filter((element) => element.role !== null)
           .map((householdAndRole) => (
             <Box mb={2} mt={2} key={householdAndRole.id}>
               <Box mb={2}>
