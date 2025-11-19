@@ -57,7 +57,7 @@ def to_phone_number_str(data: dict, field_name: str) -> None:
 
 
 def is_approved(item: dict) -> bool:
-    return item.get("approve_status") is True
+    return item.get("approve_status") in [True, "true", "True"]
 
 
 def convert_to_empty_string_if_null(value: Any) -> Any | str:
