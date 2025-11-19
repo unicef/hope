@@ -448,9 +448,6 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 @pytest.fixture(scope="session")
 def download_path(pytestconfig, worker_id: str) -> str:
-    if not _is_e2e_run(pytestconfig):
-        pytest.skip("e2e-only fixture")
-
     try:
         assert worker_id is not None
         yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
@@ -460,8 +457,6 @@ def download_path(pytestconfig, worker_id: str) -> str:
 
 @pytest.fixture
 def driver(pytestconfig, download_path: str) -> Chrome:
-    if not _is_e2e_run(pytestconfig):
-        pytest.skip("e2e-only fixture")
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -499,10 +494,16 @@ def live_server_with_static(live_server, settings):
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome, live_server_with_static) -> Chrome:
+def browser(pytestconfig, request) -> Optional[Chrome]:
     """
     Provide a Chrome driver bound to Django's static live server.
     """
+    if not _is_e2e_run(pytestconfig):
+        yield None
+        return
+
+    live_server_with_static = request.getfixturevalue("live_server_with_static")
+    driver: Chrome = request.getfixturevalue("driver")
     try:
         driver.live_server = live_server_with_static
         yield driver
@@ -760,17 +761,19 @@ def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryD
 @pytest.fixture
 def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
-        pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
         code="0060",
-        name="Afghanistan",
-        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-        region_code="64",
-        region_name="SAR",
-        slug="afghanistan",
-        has_data_sharing_agreement=True,
-        is_accountability_applicable=True,
-        kobo_token="XXX",
-        active=True,
+        defaults=dict(
+            pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            name="Afghanistan",
+            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+            region_code="64",
+            region_name="SAR",
+            slug="afghanistan",
+            has_data_sharing_agreement=True,
+            is_accountability_applicable=True,
+            kobo_token="XXX",
+            active=True,
+        )
     )
     FlagState.objects.get_or_create(
         name="ALLOW_ACCOUNTABILITY_MODULE",
