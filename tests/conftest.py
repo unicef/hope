@@ -809,7 +809,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     return user
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def create_super_user(pytestconfig, business_area: BusinessArea) -> User | None:
     BeneficiaryGroupFactory(
         id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
@@ -973,9 +973,3 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
-
-
-def pytest_collection_modifyitems(config, items):
-    for item in items:
-        if _is_e2e_run(config):
-            item.add_marker(pytest.mark.usefixtures("create_super_user"))
