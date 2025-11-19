@@ -4,6 +4,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import sys
 from time import sleep
 from typing import TYPE_CHECKING, Any, Generator
 
@@ -162,12 +163,12 @@ def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blo
 
 
 def pytest_addoption(parser: Parser) -> None:
-    # parser.addoption(
-    #     "--localhost",
-    #     action="store_true",
-    #     default=False,
-    #     help="Tests running locally, no ES",
-    # )
+    parser.addoption(
+        "--localhost",
+        action="store_true",
+        default=False,
+        help="Tests running locally, no ES",
+    )
     parser.addoption(
         "--mapping",
         action="store_true",
@@ -209,12 +210,12 @@ def pytest_configure(config: Config) -> None:
         for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
             os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
-    # pytest.localhost = bool(config.getoption("--localhost"))
-    # here = Path(__file__).parent
-    # utils = here.parent / "extras"
-    # sys.path.append(str(utils))
+    pytest.localhost = bool(config.getoption("--localhost"))
+    here = Path(__file__).parent
+    utils = here.parent / "extras"
+    sys.path.append(str(utils))
 
-    # sys._called_from_pytest = True
+    sys._called_from_pytest = True
 
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = [
