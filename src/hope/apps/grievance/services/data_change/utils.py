@@ -303,7 +303,7 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
         number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )
-    account_instance.data = {item["key"]: item["value"] for item in account.get("data_fields", {})}
+    account_instance.data = {item["key"]: item["value"] for item in account.get("data_fields", [])}
     return account_instance
 
 
