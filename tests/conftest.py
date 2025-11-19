@@ -460,7 +460,7 @@ def download_path(pytestconfig, worker_id: str) -> str:
 @pytest.fixture
 def driver(pytestconfig, download_path: str) -> Chrome | None:
     if not _is_e2e_run(pytestconfig):
-        return
+        return None
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -499,10 +499,13 @@ def live_server_with_static(pytestconfig, request, live_server, settings):
 
 
 @pytest.fixture
-def browser(pytestconfig, request, driver: Chrome, live_server_with_static) -> Chrome:
+def browser(pytestconfig, request, driver: Chrome, live_server_with_static) -> Chrome | None:
     """
     Provide a Chrome driver bound to Django's static live server.
     """
+    if not driver:
+        yield None
+        return
     try:
         driver.live_server = live_server_with_static
         yield driver
