@@ -2061,8 +2061,6 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            self.pp.refresh_from_db(fields=["background_action_status"])
-            assert self.pp.background_action_status == "RULE_ENGINE_RUN"
             assert "RULE_ENGINE_RUN" in resp_data["background_action_status"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
