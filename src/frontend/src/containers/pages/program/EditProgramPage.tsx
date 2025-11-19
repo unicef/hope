@@ -32,6 +32,7 @@ import {
   mapPartnerChoicesFromProgramWithoutUnicef,
   showApiErrorMessages,
   deepUnderscore,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -39,6 +40,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { hasPermissionInModule } from '../../../config/permissions';
+import { UserChoices } from '@restgenerated/models/UserChoices';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -77,6 +79,15 @@ const EditProgramPage = (): ReactElement => {
         }),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
+    });
+
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
     });
 
   const queryClient = useQueryClient();
@@ -125,9 +136,10 @@ const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (loadingProgram || choicesLoading) return <LoadingComponent />;
+  if (loadingProgram || choicesLoading || userPartnerChoicesLoading)
+    return <LoadingComponent />;
 
-  if (!program || !choicesData) return null;
+  if (!program || !choicesData || !userPartnerChoicesData) return null;
 
   const {
     name,
@@ -461,11 +473,28 @@ const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices =
+            const mappedPartnerChoicesFromProgram =
               mapPartnerChoicesFromProgramWithoutUnicef(
                 program.partners,
                 values.partners,
               );
+
+            const mappedPartnerChoicesFromChoices =
+              mapPartnerChoicesFromChoicesWithoutUnicef(
+                userPartnerChoicesData.partnerChoices,
+                values.partners,
+              );
+
+            const seen = new Set();
+            const mappedPartnerChoices = [
+              ...mappedPartnerChoicesFromProgram,
+              ...mappedPartnerChoicesFromChoices,
+            ].filter((item) => {
+              const key = `${item.value}|${item.label}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
 
             return (
               <BaseSection title={t('Programme Partners')}>
