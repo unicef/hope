@@ -64,7 +64,7 @@ export function GrievancesSidebar({
     const rolesInHouseholds = individual?.rolesInHouseholds || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign = rolesInHouseholds.some(
-      (el) => el.role !== 'NO_ROLE',
+      (el) => el.role !== null,
     );
 
     let isProperDataChange = true;

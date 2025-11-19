@@ -33,6 +33,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "is_split",
             "active",
             "is_accountability_applicable",
+            "rdi_import_xlsx_disabled",
             "countries",
         )
 

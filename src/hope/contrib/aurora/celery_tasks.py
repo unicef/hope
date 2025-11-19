@@ -85,8 +85,12 @@ def automate_rdi_creation_task(
             if service is None:
                 raise NotImplementedError
 
-            qs = Record.objects.filter(registration=registration_id, **filters).exclude(
-                status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
+            qs = (
+                Record.objects.filter(registration=registration_id, **filters)
+                .exclude(
+                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR],
+                )
+                .exclude(ignored=True)
             )
             if fix_tax_id:
                 check_and_set_taxid(qs)

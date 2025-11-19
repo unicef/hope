@@ -51,7 +51,7 @@ export function LockFspPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: async() => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan FSPs are locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({
@@ -74,6 +74,7 @@ export function LockFspPaymentPlan({
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
           disabled={!canLockFsp || !isActiveProgram}
+          data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP}
         >
           {t('Lock FSP')}
         </Button>

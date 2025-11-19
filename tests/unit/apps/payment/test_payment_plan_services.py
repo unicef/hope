@@ -184,7 +184,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{household.unicef_id}",
                     "individual_ids": "",
@@ -302,7 +301,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -471,7 +469,7 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp.follow_ups.count() == 2
 
-        with self.assertNumQueries(46):
+        with self.assertNumQueries(47):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         assert follow_up_pp_2.payment_items.count() == 1
@@ -615,7 +613,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[9].split_payment_items.count() == 1
 
         # split by records
-        with self.assertNumQueries(17):
+        with self.assertNumQueries(16):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
         pp_splits = pp.splits.all().order_by("order")
         assert pp_splits.count() == 3
@@ -625,7 +623,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[2].split_payment_items.count() == 2
 
         # split by admin2
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(14):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         assert unique_admin2_count == 2
@@ -701,18 +699,21 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [
-                        {
-                            "comparison_method": "EQUALS",
-                            "arguments": ["No"],
-                            "field_name": "mobile_phone_number__cash_over_the_counter",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ],
                     "household_filters_blocks": [],
                     "household_ids": "",
                     "individual_ids": "",
-                    "individuals_filters_blocks": [],
+                    "individuals_filters_blocks": [
+                        {
+                            "individual_block_filters": [
+                                {
+                                    "comparison_method": "RANGE",
+                                    "arguments": [1, 99],
+                                    "field_name": "age_at_registration",
+                                    "flex_field_classification": "NOT_FLEX_FIELD",
+                                },
+                            ],
+                        }
+                    ],
                 }
             ],
         }
@@ -767,7 +768,6 @@ class TestPaymentPlanServices(BaseTestCase):
             "flag_exclude_if_on_sanction_list": False,
             "rules": [
                 {
-                    "collectors_filters_blocks": [],
                     "household_filters_blocks": [],
                     "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
                     "individual_ids": "",
@@ -1245,7 +1245,6 @@ class TestPaymentPlanServices(BaseTestCase):
                             ]
                         }
                     ],
-                    "collectors_filters_blocks": [],
                 }
             ],
             "flag_exclude_if_on_sanction_list": True,
