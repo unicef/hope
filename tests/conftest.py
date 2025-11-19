@@ -458,7 +458,7 @@ def download_path(pytestconfig, worker_id: str) -> str:
 @pytest.fixture
 def driver(pytestconfig, download_path: str) -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
@@ -805,7 +805,6 @@ def change_super_user(business_area: BusinessArea) -> None:
 @pytest.fixture(autouse=True)
 def create_super_user(pytestconfig, business_area: BusinessArea) -> User | None:
     if not _is_e2e_run(pytestconfig):
-        yield None
         return
 
     BeneficiaryGroupFactory(
