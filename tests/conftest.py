@@ -458,7 +458,7 @@ def download_path(pytestconfig, worker_id: str) -> str:
 @pytest.fixture
 def driver(pytestconfig, download_path: str) -> Chrome:
     chrome_options = Options()
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
