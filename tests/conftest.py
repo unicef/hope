@@ -458,7 +458,10 @@ def download_path(pytestconfig, worker_id: str) -> str:
 
 
 @pytest.fixture
-def driver(pytestconfig, download_path: str) -> Chrome:
+def driver(pytestconfig, download_path: str) -> Chrome | None:
+    if not _is_e2e_run(pytestconfig):
+        return
+
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -953,8 +956,6 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
 
 @pytest.fixture(autouse=True)
 def test_failed_check(pytestconfig, request: FixtureRequest, browser: Chrome) -> None:
-    if not _is_e2e_run(pytestconfig):
-        return
     yield
     if request.node.rep_setup.failed:
         pass
