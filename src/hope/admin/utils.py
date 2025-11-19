@@ -12,7 +12,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Field, JSONField, Model, OneToOneRel, QuerySet
+from django.db.models import Field, Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
