@@ -107,11 +107,27 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
       label: partner.name,
       disabled: selectedPartners.some((p) => p.id === partner.value),
     }));
