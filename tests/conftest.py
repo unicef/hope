@@ -953,6 +953,8 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
 
 @pytest.fixture(autouse=True)
 def test_failed_check(pytestconfig, request: FixtureRequest, browser: Chrome) -> None:
+    if not _is_e2e_run(pytestconfig):
+        return
     yield
     if request.node.rep_setup.failed:
         pass
