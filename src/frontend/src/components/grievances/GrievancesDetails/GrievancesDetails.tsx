@@ -213,7 +213,7 @@ function GrievancesDetails({
                 ),
                 size: 3,
               },
-              !isAllPrograms && {
+              !isSocialDctType && {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
