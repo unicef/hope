@@ -298,6 +298,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
                 onClick={handleMerge}
                 disabled={selected.length === 0}
                 sx={{ mr: 1 }}
+                data-perm={PERMISSIONS.PDU_ONLINE_MERGE}
               >
                 Merge
               </Button>,

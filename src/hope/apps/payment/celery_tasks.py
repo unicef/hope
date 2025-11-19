@@ -678,7 +678,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_fsps()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -695,7 +695,7 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_account_types()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -738,7 +738,7 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_records()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -776,7 +776,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
         from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
         PaymentGatewayService().sync_delivery_mechanisms()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
         return
     except Exception as e:
         logger.exception(e)
@@ -853,7 +853,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
+def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fields: bool = False) -> None:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
     with cache.lock(
@@ -870,6 +870,8 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
                 PaymentPlanService(payment_plan).full_rebuild()
                 payment_plan.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
+                if update_money_fields:
+                    payment_plan.update_money_fields()
         except Exception as e:
             logger.exception(e)
             payment_plan.build_status_failed()
@@ -964,6 +966,11 @@ def periodic_sync_payment_plan_invoices_western_union_ftp(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_qcf_report_email_notifications(self: Any, qcf_report_id: str) -> None:
+    from flags.state import flag_state
+
+    if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
+        return
+
     from hope.apps.payment.models.payment import WesternUnionPaymentPlanReport
     from hope.apps.payment.services.qcf_reports_service import QCFReportsService
 
