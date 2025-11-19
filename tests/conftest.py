@@ -202,13 +202,12 @@ def pytest_configure(config: Config) -> None:
     settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
 
-    if _is_e2e_run(config):
-        if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-            os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+        os.makedirs(settings.SCREENSHOT_DIRECTORY)
 
-        # delete all old screenshots
-        for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
-            os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
+    # delete all old screenshots
+    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
+        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
@@ -485,9 +484,6 @@ def live_server_with_static(pytestconfig, request, live_server, settings):
     Wrap the live_server with StaticFilesHandler for Selenium tests.
     Also override storages for testing.
     """
-    if not _is_e2e_run(pytestconfig):
-        return None
-
     settings.STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
@@ -498,14 +494,11 @@ def live_server_with_static(pytestconfig, request, live_server, settings):
     return live_server
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def browser(pytestconfig, request, driver: Chrome, live_server_with_static) -> Chrome:
     """
     Provide a Chrome driver bound to Django's static live server.
     """
-    if not _is_e2e_run(pytestconfig):
-        yield None
-        return
     try:
         driver.live_server = live_server_with_static
         yield driver
@@ -811,6 +804,9 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(pytestconfig, business_area: BusinessArea) -> User | None:
+    if not _is_e2e_run(pytestconfig):
+        return None
+
     BeneficiaryGroupFactory(
         id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
         name="Main Menu",
