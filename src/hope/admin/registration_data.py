@@ -243,7 +243,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 number_of_households = rdi.households.count()
                 number_of_individuals = rdi.individuals.count()
                 number_of_household_selections = Payment.objects.filter(
-                    parent__household__registration_data_import=rdi,
+                    household__registration_data_import=rdi,
                 ).count()
                 return confirm_action(
                     self,
