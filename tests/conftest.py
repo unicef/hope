@@ -803,7 +803,11 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 
 @pytest.fixture(autouse=True)
-def create_super_user(business_area: BusinessArea) -> User:
+def create_super_user(pytestconfig, business_area: BusinessArea) -> User | None:
+    if not _is_e2e_run(pytestconfig):
+        yield None
+        return
+
     BeneficiaryGroupFactory(
         id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
         name="Main Menu",
