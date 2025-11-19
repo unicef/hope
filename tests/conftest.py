@@ -494,7 +494,7 @@ def live_server_with_static(live_server, settings):
 
 
 @pytest.fixture(autouse=True)
-def browser(pytestconfig, request) -> Optional[Chrome]:
+def browser(pytestconfig, request) -> Chrome | None:
     """
     Provide a Chrome driver bound to Django's static live server.
     """
@@ -762,18 +762,18 @@ def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryD
 def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         code="0060",
-        defaults=dict(
-            pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            slug="afghanistan",
-            has_data_sharing_agreement=True,
-            is_accountability_applicable=True,
-            kobo_token="XXX",
-            active=True,
-        )
+        defaults={
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "name": "Afghanistan",
+            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+            "region_code": "64",
+            "region_name": "SAR",
+            "slug": "afghanistan",
+            "has_data_sharing_agreement": True,
+            "is_accountability_applicable": True,
+            "kobo_token": "XXX",
+            "active": True,
+        },
     )
     FlagState.objects.get_or_create(
         name="ALLOW_ACCOUNTABILITY_MODULE",
