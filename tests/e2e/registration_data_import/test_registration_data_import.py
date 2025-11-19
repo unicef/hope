@@ -246,7 +246,7 @@ class TestRegistrationDataImport:
         page_registration_data_import.get_button_import().click()
         page_registration_data_import.get_import_type_select().click()
         page_registration_data_import.get_excel_item().click()
-        page_registration_data_import.upload_file(f"{pytest.SELENIUM_PATH}/helpers/rdi_import_50_hh_50_ind.xlsx")
+        page_registration_data_import.upload_file(f"{pytest.SELENIUM_PATH}/e2e/helpers/rdi_import_50_hh_50_ind.xlsx")
         page_registration_data_import.get_input_name().send_keys("Test 1234 !")
         assert page_registration_data_import.button_import_file_is_enabled()
         assert "50" in page_registration_data_import.get_number_of_households().text
