@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 import re
-import sys
 from time import sleep
 from typing import TYPE_CHECKING, Any, Generator
 
@@ -163,12 +162,12 @@ def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blo
 
 
 def pytest_addoption(parser: Parser) -> None:
-    parser.addoption(
-        "--localhost",
-        action="store_true",
-        default=False,
-        help="Tests running locally, no ES",
-    )
+    # parser.addoption(
+    #     "--localhost",
+    #     action="store_true",
+    #     default=False,
+    #     help="Tests running locally, no ES",
+    # )
     parser.addoption(
         "--mapping",
         action="store_true",
@@ -210,12 +209,12 @@ def pytest_configure(config: Config) -> None:
         for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
             os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
-    pytest.localhost = bool(config.getoption("--localhost"))
-    here = Path(__file__).parent
-    utils = here.parent / "extras"
-    sys.path.append(str(utils))
+    # pytest.localhost = bool(config.getoption("--localhost"))
+    # here = Path(__file__).parent
+    # utils = here.parent / "extras"
+    # sys.path.append(str(utils))
 
-    sys._called_from_pytest = True
+    # sys._called_from_pytest = True
 
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = [
@@ -480,11 +479,14 @@ def driver(pytestconfig, download_path: str) -> Chrome:
 
 
 @pytest.fixture
-def live_server_with_static(live_server, settings):
+def live_server_with_static(pytestconfig, request, live_server, settings):
     """
     Wrap the live_server with StaticFilesHandler for Selenium tests.
     Also override storages for testing.
     """
+    if not _is_e2e_run(pytestconfig):
+        return None
+
     settings.STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
@@ -496,16 +498,13 @@ def live_server_with_static(live_server, settings):
 
 
 @pytest.fixture(autouse=True)
-def browser(pytestconfig, request) -> Chrome | None:
+def browser(pytestconfig, request, driver: Chrome, live_server_with_static) -> Chrome:
     """
     Provide a Chrome driver bound to Django's static live server.
     """
     if not _is_e2e_run(pytestconfig):
         yield None
         return
-
-    live_server_with_static = request.getfixturevalue("live_server_with_static")
-    driver: Chrome = request.getfixturevalue("driver")
     try:
         driver.live_server = live_server_with_static
         yield driver
