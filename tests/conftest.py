@@ -202,12 +202,13 @@ def pytest_configure(config: Config) -> None:
     settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
 
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    if _is_e2e_run(config):
+        if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+            os.makedirs(settings.SCREENSHOT_DIRECTORY)
 
-    # delete all old screenshots
-    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
-        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
+        # delete all old screenshots
+        for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
+            os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
