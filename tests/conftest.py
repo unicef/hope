@@ -908,9 +908,11 @@ def create_super_user(business_area: BusinessArea) -> User:
         data_collecting_type, _ = DataCollectingType.objects.get_or_create(
             label=dct["label"],
             code=dct["code"],
-            description=dct["description"],
-            active=dct["active"],
-            type=dct["type"],
+            defaults={
+                "description": dct["description"],
+                "active": dct["active"],
+                "type": dct["type"],
+            },
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
@@ -946,11 +948,11 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
 
 
 @pytest.fixture(autouse=True)
-def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
+def test_failed_check(pytestconfig, request: FixtureRequest, browser: Chrome) -> None:
     yield
     if request.node.rep_setup.failed:
         pass
-    elif request.node.rep_setup.passed and request.node.rep_call.failed:
+    elif request.node.rep_setup.passed and request.node.rep_call.failed and _is_e2e_run(pytestconfig):
         screenshot(browser, request.node.nodeid)
 
 
