@@ -316,6 +316,7 @@ class HouseholdGlobalViewSet(
                     )
                 )
             )
+            .order_by("created_at")
         )
 
     def get_queryset(self) -> QuerySet:

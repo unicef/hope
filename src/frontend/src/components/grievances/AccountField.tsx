@@ -44,8 +44,6 @@ export function AccountField({
   const dataFields = account?.dataFields || {};
 
   const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
-  const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
-  const isBank = accountType === 'bank';
 
   return (
     <>
@@ -123,7 +121,7 @@ export function AccountField({
                 label={t('New Value')}
                 component={FormikSelectField}
                 choices={accountFinancialInstitutionChoices}
-                required={isBank}
+                required
               />
             </Grid>
           </Fragment>
@@ -144,7 +142,7 @@ export function AccountField({
               }
               const fieldProps = {
                 component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
-                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: isBank } : {}),
+                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: true } : {}),
               };
 
             return (

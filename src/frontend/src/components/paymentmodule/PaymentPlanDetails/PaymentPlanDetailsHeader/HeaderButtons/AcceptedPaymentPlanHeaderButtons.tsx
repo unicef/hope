@@ -23,6 +23,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -71,6 +72,7 @@ export function AcceptedPaymentPlanHeaderButtons({
         },
       );
     },
+    enabled: open,
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
@@ -146,7 +148,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -277,6 +278,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                 disabled={shouldDisableDownloadXlsx}
+                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
               >
                 {t('Download XLSX')}
               </Button>
@@ -290,6 +292,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                   variant="contained"
                   data-cy="button-send-xlsx-password"
                   onClick={() => sendXlsxPassword()}
+                  data-perm={PERMISSIONS.PM_SEND_XLSX_PASSWORD}
                 >
                   {t('Send Xlsx Password')}
                 </LoadingButton>
@@ -307,6 +310,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               onClick={() => sendToPaymentGateway()}
               data-cy="button-send-to-payment-gateway"
               disabled={LoadingSendToPaymentGateway}
+              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
             >
               {t('Send to FSP')}
             </Button>

@@ -77,6 +77,7 @@ function ProgramsPage(): ReactElement {
         component={Link}
         to={`/${baseUrl}/create`}
         data-cy="button-new-program"
+        data-perm={PERMISSIONS.PROGRAMME_CREATE}
       >
         {t('Create Programme')}
       </Button>
