@@ -101,6 +101,8 @@ if TYPE_CHECKING:
 
 
 def _is_e2e_run(config) -> bool:
+    if os.getenv("PYTEST_E2E", ""):
+        return True
     return any("tests/e2e" in str(arg) for arg in getattr(config, "args", []))
 
 
@@ -112,7 +114,7 @@ def mocked_responses() -> Generator[RequestsMock, None, None]:
 
 @pytest.fixture
 def eu_file() -> str:
-    return (Path(__file__).parent / "test_files" / "eu.xml").read_text()
+    return (Path(__file__).parent / "unit" / "apps" / "sanction_list" / "test_files" / "eu.xml").read_text()
 
 
 @pytest.fixture
@@ -759,7 +761,12 @@ def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryD
 
 
 @pytest.fixture
-def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
+def business_area(
+    pytestconfig, create_unicef_partner: Any, create_role_with_all_permissions: Any
+) -> BusinessArea | None:
+    if not _is_e2e_run(pytestconfig):
+        return None
+
     business_area, _ = BusinessArea.objects.get_or_create(
         code="0060",
         defaults={
@@ -805,8 +812,7 @@ def change_super_user(business_area: BusinessArea) -> None:
 @pytest.fixture(autouse=True)
 def create_super_user(pytestconfig, business_area: BusinessArea) -> User | None:
     if not _is_e2e_run(pytestconfig):
-        return
-
+        return None
     BeneficiaryGroupFactory(
         id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
         name="Main Menu",
