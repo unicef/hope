@@ -205,15 +205,6 @@ class IndividualAdmin(
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
-            if is_root(request):
-                kwargs = {"widget": JSONEditor}
-            else:
-                kwargs = {"widget": JsonWidget}
-            return db_field.formfield(**kwargs)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
     @button(permission="household.view_individual")
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
