@@ -157,19 +157,12 @@ const ProgramCyclesTableProgramDetails = ({
     return null;
   }
 
-  const actions = [];
-
-  if (canCreateProgramCycle) {
-    actions.push(
-      <AddNewProgramCycle
-        key="add-new"
-        program={program}
-        lastProgramCycle={
-          (data?.results || [])[(data?.results || []).length - 1]
-        }
-      />,
-    );
-  }
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
 
   return (
     <UniversalRestTable
