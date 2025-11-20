@@ -476,11 +476,17 @@ export function prepareExistingAccountValues(
     return value;
   }
   return individualDataUpdateAccountsToEdit.map((item) => {
+    const dataFieldsArray = popKey(item, 'dataFields') || [];
+
+    const dataFields = {};
+    for (const field of dataFieldsArray) {
+      dataFields[field.key] = field.value;
+    }
     return {
       number: popKey(item, 'number'),
       financialInstitution: popKey(item, 'financialInstitution'),
       id: popKey(item, 'id'),
-      dataFields: { ...item },
+      dataFields: { ...item, ...dataFields },
     };
   });
 }

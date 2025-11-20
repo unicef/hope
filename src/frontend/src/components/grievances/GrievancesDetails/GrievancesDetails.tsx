@@ -213,30 +213,27 @@ function GrievancesDetails({
                 ),
                 size: 3,
               },
-              !isAllPrograms &&
-                !isSocialDctType && {
-                  label: `${beneficiaryGroup?.groupLabel} ID`,
-                  value: (
-                    <span>
-                      {ticket.household?.id &&
-                      canViewHouseholdDetails &&
-                      !isAllPrograms ? (
-                        <BlackLink
-                          to={`/${baseUrl}/population/household/${ticket.household.id}`}
-                        >
-                          {ticket.household.unicefId}
-                        </BlackLink>
-                      ) : (
-                        <div>
-                          {ticket.household?.id
-                            ? ticket.household.unicefId
-                            : '-'}
-                        </div>
-                      )}
-                    </span>
-                  ),
-                  size: 3,
-                },
+              !isSocialDctType && {
+                label: `${beneficiaryGroup?.groupLabel} ID`,
+                value: (
+                  <span>
+                    {ticket.household?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
+                      <BlackLink
+                        to={`/${baseUrl}/population/household/${ticket.household.id}`}
+                      >
+                        {ticket.household.unicefId}
+                      </BlackLink>
+                    ) : (
+                      <div>
+                        {ticket.household?.id ? ticket.household.unicefId : '-'}
+                      </div>
+                    )}
+                  </span>
+                ),
+                size: 3,
+              },
               {
                 label:
                   isAllPrograms || isSocialDctType
