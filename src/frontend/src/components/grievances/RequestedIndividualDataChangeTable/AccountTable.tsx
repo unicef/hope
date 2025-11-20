@@ -68,6 +68,16 @@ export function AccountTable({
   const handleSelectAccount = (idx): void => {
     handleSelected(idx, 'selectedAccounts', selectedAccounts, setFieldValue);
   };
+  const dataFields = account.value.dataFields || [];
+  const accountValue = {
+    accountType: account.value.accountType,
+    number: account.value.number,
+    financialInstitution: account.value.financialInstitution,
+  };
+  for (const field of dataFields) {
+    accountValue[field.key] = field.value;
+  }
+
 
   return (
     <>
@@ -108,7 +118,7 @@ export function AccountTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.entries(account.value || {})
+          {Object.entries(accountValue || {})
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             .filter(([key, _]) => key !== 'accountType')
             .map(([key, value]) => {

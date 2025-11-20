@@ -57,7 +57,7 @@ def to_phone_number_str(data: dict, field_name: str) -> None:
 
 
 def is_approved(item: dict) -> bool:
-    return item.get("approve_status") is True
+    return item.get("approve_status") in [True, "true", "True"]
 
 
 def convert_to_empty_string_if_null(value: Any) -> Any | str:
@@ -304,7 +304,7 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
         number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )
-    account_instance.data = account.get("data_fields", {})
+    account_instance.data = {item["key"]: item["value"] for item in account.get("data_fields", [])}
     return account_instance
 
 
