@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 
 from hope.apps.accountability.models import Survey
 from hope.apps.accountability.services.export_survey_sample_service import (
@@ -45,9 +44,9 @@ def send_survey_to_users(survey_id: str) -> None:
     set_sentry_business_area_tag(survey.business_area.name)
     if survey.category == Survey.CATEGORY_MANUAL:
         return
-    phone_numbers = survey.recipients.filter(
-        Q(head_of_household__phone_no__isnull=False) | ~Q(head_of_household__phone_no="")
-    ).values_list("head_of_household__phone_no", flat=True)
+    phone_numbers = survey.recipients.filter(head_of_household__phone_no_valid=True).values_list(
+        "head_of_household__phone_no", flat=True
+    )
     if survey.category == Survey.CATEGORY_SMS:
         api = RapidProAPI(survey.business_area.slug, RapidProAPI.MODE_MESSAGE)
         api.broadcast_message(phone_numbers, survey.body)
