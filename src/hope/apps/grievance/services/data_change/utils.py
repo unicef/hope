@@ -104,7 +104,7 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def handle_role(role: str, household: Household, individual: Individual) -> None:
+def handle_role(household: Household, individual: Individual, role: str | None) -> None:
     if already_with_another_role := IndividualRoleInHousehold.objects.filter(
         household=household,
         individual=individual,
@@ -270,7 +270,8 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
             "account_type": account_object.account_type.key,
             "approve_status": False,
             "financial_institution": financial_institution,
-            "financial_institution_previous_value": account_object.financial_institution.pk,
+            "financial_institution_previous_value": account_object.financial_institution
+            and account_object.financial_institution.pk,
             "number": number,
             "number_previous_value": account_object.number,
             "data_fields": [
@@ -303,7 +304,7 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
         number=account["number"],
         rdi_merge_status=individual.rdi_merge_status,
     )
-    account_instance.data = account.get("data_fields", {})
+    account_instance.data = {item["key"]: item["value"] for item in account.get("data_fields", [])}
     return account_instance
 
 

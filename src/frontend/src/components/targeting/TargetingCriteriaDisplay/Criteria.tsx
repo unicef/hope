@@ -199,29 +199,14 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       fieldElement = (
         <p>
           {getFieldLabel(field)}:{' '}
-          {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
-            ? field.arguments?.map((argument, index) => (
-                <Fragment key={index}>
-                  <span>
-                    {argument === true ? (
-                      <BlueText>{t('Yes')}</BlueText>
-                    ) : argument === false ? (
-                      <BlueText>{t('No')}</BlueText>
-                    ) : (
-                      displayValueOrEmpty(extractChoiceLabel(field, argument))
-                    )}
-                  </span>
-                  {index !== field.arguments.length - 1 && ', '}
-                </Fragment>
-              ))
-            : field.arguments?.map((argument, index) => (
-                <Fragment key={index}>
-                  <span>
-                    {displayValueOrEmpty(extractChoiceLabel(field, argument))}
-                  </span>
-                  {index !== field.arguments.length - 1 && ', '}
-                </Fragment>
-              ))}
+          {field.arguments?.map((argument, index) => (
+            <Fragment key={index}>
+              <span>
+                {displayValueOrEmpty(extractChoiceLabel(field, argument))}
+              </span>
+              {index !== field.arguments.length - 1 && ', '}
+            </Fragment>
+          ))}
         </p>
       );
       break;
@@ -265,14 +250,12 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 interface CriteriaProps {
   rules: [any];
   individualsFiltersBlocks;
-  collectorsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
   canRemove: boolean;
   alternative?: boolean;
   allDataFieldsChoicesDict;
-  allCollectorFieldsChoicesDict;
   householdIds: string;
   individualIds: string;
   deliveryMechanism;
@@ -288,10 +271,8 @@ export function Criteria({
   isEdit,
   canRemove,
   allDataFieldsChoicesDict,
-  allCollectorFieldsChoicesDict,
   alternative = null,
   individualsFiltersBlocks,
-  collectorsFiltersBlocks,
   householdIds,
   individualIds,
   deliveryMechanism,
@@ -401,17 +382,6 @@ export function Criteria({
     setOpenHH(false);
     setOpenIND(false);
   };
-  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
-    (block) => ({
-      ...block,
-      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
-        ...filter,
-        arguments: filter.arguments.map((arg) =>
-          arg === true ? 'Yes' : arg === false ? 'No' : arg,
-        ),
-      })),
-    }),
-  );
 
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
@@ -477,24 +447,6 @@ export function Criteria({
                   key={filterIndex}
                   field={filter}
                   dataCy={`individuals-criteria-field-${filterIndex}`}
-                />
-              ))}
-            </CriteriaSetBox>
-          ),
-      )}
-      {adjustedCollectorsFiltersBlocks.map(
-        (item, index) =>
-          item.collectorBlockFilters.length > 0 && (
-            <CriteriaSetBox
-              key={index}
-              data-cy={`collectors-criteria-set-box-${index}`}
-            >
-              {item.collectorBlockFilters.map((filter, filterIndex) => (
-                <CriteriaField
-                  choicesDict={allCollectorFieldsChoicesDict}
-                  key={filterIndex}
-                  field={filter}
-                  dataCy={`collectors-criteria-field-${filterIndex}`}
                 />
               ))}
             </CriteriaSetBox>

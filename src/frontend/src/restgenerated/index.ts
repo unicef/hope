@@ -46,7 +46,7 @@ export type { CollectorAttribute as CollectorAttributeCamelCase } from './models
 export { CollectTypeEnum as CollectTypeEnumCamelCase } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/CommsDisabilityEnum';
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';
-export { ComparisonMethod7bbEnum as ComparisonMethod7bbEnumCamelCase } from './models/ComparisonMethod7bbEnum';
+export { ComparisonMethodEnum as ComparisonMethodEnumCamelCase } from './models/ComparisonMethodEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
@@ -75,7 +75,6 @@ export type { DelegatePeople as DelegatePeopleCamelCase } from './models/Delegat
 export type { DeliveredQuantity as DeliveredQuantityCamelCase } from './models/DeliveredQuantity';
 export type { DeliveryMechanism as DeliveryMechanismCamelCase } from './models/DeliveryMechanism';
 export type { DeliveryMechanismChoice as DeliveryMechanismChoiceCamelCase } from './models/DeliveryMechanismChoice';
-export type { DeliveryMechanismPerPaymentPlan as DeliveryMechanismPerPaymentPlanCamelCase } from './models/DeliveryMechanismPerPaymentPlan';
 export type { DetailedChartData as DetailedChartDataCamelCase } from './models/DetailedChartData';
 export type { DetailedChartDataset as DetailedChartDatasetCamelCase } from './models/DetailedChartDataset';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';
@@ -225,6 +224,7 @@ export type { PaymentChoices as PaymentChoicesCamelCase } from './models/Payment
 export type { PaymentDetail as PaymentDetailCamelCase } from './models/PaymentDetail';
 export type { PaymentList as PaymentListCamelCase } from './models/PaymentList';
 export type { PaymentPlan as PaymentPlanCamelCase } from './models/PaymentPlan';
+export type { PaymentPlanAbort as PaymentPlanAbortCamelCase } from './models/PaymentPlanAbort';
 export { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatusEnumCamelCase } from './models/PaymentPlanBackgroundActionStatusEnum';
 export type { PaymentPlanBulkAction as PaymentPlanBulkActionCamelCase } from './models/PaymentPlanBulkAction';
 export type { PaymentPlanCreateFollowUp as PaymentPlanCreateFollowUpCamelCase } from './models/PaymentPlanCreateFollowUp';
@@ -339,9 +339,6 @@ export { SurveyCategoryEnum as SurveyCategoryEnumCamelCase } from './models/Surv
 export type { SurveyRapidProFlow as SurveyRapidProFlowCamelCase } from './models/SurveyRapidProFlow';
 export type { SurveySampleSize as SurveySampleSizeCamelCase } from './models/SurveySampleSize';
 export { SurveySampleSizeSamplingTypeEnum as SurveySampleSizeSamplingTypeEnumCamelCase } from './models/SurveySampleSizeSamplingTypeEnum';
-export type { TargetingCollectorBlockRuleFilter as TargetingCollectorBlockRuleFilterCamelCase } from './models/TargetingCollectorBlockRuleFilter';
-export { TargetingCollectorBlockRuleFilterComparisonMethodEnum as TargetingCollectorBlockRuleFilterComparisonMethodEnumCamelCase } from './models/TargetingCollectorBlockRuleFilterComparisonMethodEnum';
-export type { TargetingCollectorRuleFilterBlock as TargetingCollectorRuleFilterBlockCamelCase } from './models/TargetingCollectorRuleFilterBlock';
 export type { TargetingCriteriaRule as TargetingCriteriaRuleCamelCase } from './models/TargetingCriteriaRule';
 export type { TargetingCriteriaRuleFilter as TargetingCriteriaRuleFilterCamelCase } from './models/TargetingCriteriaRuleFilter';
 export type { TargetingIndividualBlockRuleFilter as TargetingIndividualBlockRuleFilterCamelCase } from './models/TargetingIndividualBlockRuleFilter';

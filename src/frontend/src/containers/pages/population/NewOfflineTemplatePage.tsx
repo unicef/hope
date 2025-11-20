@@ -170,7 +170,6 @@ const NewOfflineTemplatePage = (): ReactElement => {
       .map((data) => ({
         field: data.field,
         round: data.roundNumber,
-        round_name: data.roundName,
       }));
 
     // Send payload

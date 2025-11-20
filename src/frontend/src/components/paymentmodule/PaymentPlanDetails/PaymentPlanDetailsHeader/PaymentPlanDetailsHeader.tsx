@@ -18,6 +18,8 @@ import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHea
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -65,10 +67,15 @@ export function PaymentPlanDetailsHeader({
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
+  const canReactivate = hasPermissions(
+    PERMISSIONS.PM_REACTIVATE_ABORT,
+    permissions,
+  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
-    case 'OPEN':
+    case PaymentPlanStatusEnum.OPEN:
       buttons = (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -78,25 +85,27 @@ export function PaymentPlanDetailsHeader({
         />
       );
       break;
-    case 'LOCKED':
+    case PaymentPlanStatusEnum.LOCKED:
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
           permissions={permissions}
+          canAbort={canAbort}
         />
       );
       break;
-    case 'LOCKED_FSP':
+    case PaymentPlanStatusEnum.LOCKED_FSP:
       buttons = (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           canSendForApproval={canSendForApproval}
+          canAbort={canAbort}
         />
       );
       break;
-    case 'IN_APPROVAL':
+    case PaymentPlanStatusEnum.IN_APPROVAL:
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -105,10 +114,11 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canApprove={canApprove}
+          canAbort={canAbort}
         />
       );
       break;
-    case 'IN_AUTHORIZATION':
+    case PaymentPlanStatusEnum.IN_AUTHORIZATION:
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -117,10 +127,11 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canAuthorize={canAuthorize}
+          canAbort={canAbort}
         />
       );
       break;
-    case 'IN_REVIEW':
+    case PaymentPlanStatusEnum.IN_REVIEW:
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -129,17 +140,26 @@ export function PaymentPlanDetailsHeader({
             permissions,
           )}
           canMarkAsReleased={canMarkAsReleased}
+          canAbort={canAbort}
         />
       );
       break;
-    case 'ACCEPTED':
-    case 'FINISHED':
+    case PaymentPlanStatusEnum.FINISHED:
+    case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.ABORTED:
+      buttons = (
+        <AbortedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReactivate={canReactivate}
         />
       );
       break;

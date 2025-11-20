@@ -10,7 +10,7 @@ from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
-from fernet_fields import EncryptedCharField
+from encrypted_fields.fields import EncryptedTextField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
 import mptt
@@ -23,31 +23,6 @@ from hope.apps.utils.models import (
     SoftDeletionTreeModel,
     TimeStampedUUIDModel,
 )
-
-
-class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    partner = models.ForeignKey(
-        "account.Partner",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    roles = models.ManyToManyField(
-        "account.Role",
-        related_name="business_area_partner_through",
-    )
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["business_area", "partner"],
-                name="unique_business_area_partner",
-            )
-        ]
 
 
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
@@ -80,11 +55,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=BusinessAreaPartnerThrough,
-        related_name="business_areas",
-    )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     office_country = models.ForeignKey(
         "geo.Country",
@@ -100,6 +70,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     region_name = models.CharField(max_length=8)
     has_data_sharing_agreement = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
+    rdi_import_xlsx_disabled = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
     # TODO: deprecated to remove in the next release
@@ -534,8 +505,8 @@ class FileTemp(TimeStampedModel):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)
-    password = EncryptedCharField(max_length=255, null=True, blank=True)
-    xlsx_password = EncryptedCharField(max_length=255, null=True, blank=True)
+    password = EncryptedTextField(max_length=255, null=True, blank=True)
+    xlsx_password = EncryptedTextField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"
