@@ -741,7 +741,7 @@ class TestProgrammeDetails:
         page_programme_details.get_button_edit_program_cycle()[1].click()
         page_programme_details.clear_input(page_programme_details.get_input_title())
         page_programme_details.get_input_title().send_keys("New cycle with wrong date")
-        page_programme_details.get_start_date_cycle().click()
+        page_programme_details.clear_input(page_programme_details.get_start_date_cycle())
         page_programme_details.get_start_date_cycle().send_keys(
             (datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d")
         )
@@ -762,7 +762,7 @@ class TestProgrammeDetails:
         page_programme_details.get_start_date_cycle().send_keys(
             (datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d")
         )
-        page_programme_details.get_end_date_cycle().click()
+        page_programme_details.clear_input(page_programme_details.get_end_date_cycle())
         page_programme_details.get_end_date_cycle().send_keys(
             (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d")
         )

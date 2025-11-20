@@ -18,6 +18,7 @@ import { NewDocumentFieldArray } from '@components/grievances/EditIndividualData
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingAccountsFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { G } from 'msw/lib/core/HttpResponse-BbwAqLE_';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid #d8d8d8;
@@ -29,17 +30,32 @@ export interface EditPeopleDataChangeProps {
   setFieldValue;
   form;
   field;
+  programSlug?: string;
 }
 
 function EditPeopleDataChange({
   values,
   setFieldValue,
+  programSlug,
 }: EditPeopleDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, programId } = useBaseUrl();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: IndividualList = values.selectedIndividual;
+
+  const dynamicProgramSlug =
+    programSlug ||
+    (programId !== 'all'
+      ? programId
+      : (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.program?.slug) ||
+        (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.programSlug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.program?.slug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.programSlug));
   const { data: editPeopleFieldsData, isLoading: editPeopleFieldsLoading } =
     useQuery({
       queryKey: ['allEditPeopleFieldsAttributes', businessArea],
@@ -78,16 +94,17 @@ function EditPeopleDataChange({
       queryKey: [
         'businessAreaProgramIndividual',
         businessArea,
-        programId,
+        dynamicProgramSlug,
         individual?.id,
         values.selectedIndividual,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: dynamicProgramSlug,
           id: individual?.id,
         }),
+      enabled: Boolean(individual && businessArea && dynamicProgramSlug),
     });
 
   useEffect(() => {
@@ -142,16 +159,18 @@ function EditPeopleDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualDataUpdateFields.map((item, index) => (
-                  <EditPeopleDataChangeFieldRow
-                    key={`${index}-${item?.fieldName}`}
-                    itemValue={item}
-                    index={index}
-                    individual={fullIndividual}
-                    fields={combinedData.results as any[]}
-                    notAvailableFields={notAvailableItems}
-                    onDelete={() => arrayHelpers.remove(index)}
-                    values={values}
-                  />
+                  <Grid size={12} key={`${index}-${item?.fieldName}`}>
+                    <EditPeopleDataChangeFieldRow
+                      key={`${index}-${item?.fieldName}`}
+                      itemValue={item}
+                      index={index}
+                      individual={fullIndividual}
+                      fields={combinedData.results as any[]}
+                      notAvailableFields={notAvailableItems}
+                      onDelete={() => arrayHelpers.remove(index)}
+                      values={values}
+                    />
+                  </Grid>
                 ))}
                 <Grid size={4}>
                   <Button

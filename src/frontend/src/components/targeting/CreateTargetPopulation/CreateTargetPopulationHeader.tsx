@@ -29,14 +29,12 @@ const CreateTargetPopulationHeader = ({
     return criterias?.some((criteria) => {
       const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
       const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
-      const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
       const individualIds = criteria.individualIds || [];
       const householdIds = criteria.householdIds || [];
 
       return (
         householdsFiltersBlocks.length === 0 &&
         individualsFiltersBlocks.length === 0 &&
-        collectorsFiltersBlocks.length === 0 &&
         individualIds.length === 0 &&
         householdIds.length === 0
       );

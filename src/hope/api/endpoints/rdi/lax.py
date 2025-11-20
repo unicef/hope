@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.core.files import File
+from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
 from django.utils import timezone
@@ -19,6 +20,7 @@ from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceF
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.models import Grant
+from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.geo.models import Area, Country
 from hope.apps.household.models import (
@@ -34,6 +36,7 @@ from hope.apps.household.models import (
     PendingIndividual,
 )
 from hope.apps.payment.models import (
+    Account,
     AccountType,
     FinancialInstitution,
     PendingAccount,
@@ -44,7 +47,6 @@ from hope.apps.utils.phone import calculate_phone_numbers_validity
 
 if TYPE_CHECKING:
     from hope.apps.core.models import BusinessArea
-
 
 BATCH_SIZE = 100
 
@@ -93,6 +95,16 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("financial_institution"):
+            account_type = attrs["account_type"]
+            number = attrs["number"]
+            attrs["financial_institution"] = FinancialInstitution.get_generic_one(
+                account_type, Account.is_valid_iban(number)
+            )
+        return attrs
+
 
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -127,7 +139,66 @@ class IndividualSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxBaseView(HOPEAPIBusinessAreaView):
+class HandleFlexFieldsMixin:
+    suffix_mapping = {
+        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: "_i_f",
+        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: "_h_f",
+    }
+
+    def _ensure_flex_fields_cache(self) -> None:
+        if not hasattr(self, "registered_flex_fields_cache"):
+            self.registered_flex_fields_cache = {
+                FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
+                FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
+            }
+
+    def get_registered_flex_fields(self, associated_with: int) -> set[str]:
+        self._ensure_flex_fields_cache()
+        if self.registered_flex_fields_cache[associated_with] is None:
+            flex_fields = FlexibleAttribute.objects.filter(
+                associated_with=associated_with,
+                is_removed=False,
+            ).values_list("name", flat=True)
+            self.registered_flex_fields_cache[associated_with] = {
+                name.removesuffix(self.suffix_mapping[associated_with]) for name in flex_fields
+            }
+        return self.registered_flex_fields_cache[associated_with]
+
+    def get_matching_flex_fields(self, flex_field_candidates: set, associated_with: int) -> set[str]:
+        registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
+        return flex_field_candidates & registered_flex_fields
+
+    def handle_flex_fields(
+        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set = None
+    ) -> None:
+        if raw_data.get("flex_fields"):
+            return
+
+        reserved_fields = reserved_fields or set()
+
+        model_fields = {f.name for f in model._meta.get_fields() if isinstance(f, Field)}
+        flex_field_candidates = raw_data.keys() - model_fields - reserved_fields
+        flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
+        raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
+
+    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+        self.handle_flex_fields(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            model=PendingIndividual,
+            raw_data=raw_data,
+            reserved_fields=reserved_fields,
+        )
+
+    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
+        self.handle_flex_fields(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            model=PendingIndividual,
+            raw_data=raw_data,
+            reserved_fields=reserved_fields,
+        )
+
+
+class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     permission = Grant.API_RDI_CREATE
 
     @cached_property
@@ -283,6 +354,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
+                self.handle_individual_flex_fields(individual_raw_data, reserved_fields={"documents", "accounts"})
                 serializer = IndividualSerializer(data=individual_raw_data)
 
                 if serializer.is_valid():
@@ -420,6 +492,10 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
         for household_data in request.data:
             total_households += 1
+            self.handle_household_flex_fields(
+                household_data,
+                reserved_fields={"members", "primary_collector", "alternate_collector"},
+            )
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 data = dict(serializer.validated_data)

@@ -107,11 +107,27 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
       label: partner.name,
       disabled: selectedPartners.some((p) => p.id === partner.value),
     }));
@@ -292,12 +308,14 @@ export function registrationDataImportStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'APPROVED':
+    case 'Merged':
       return theme.hctPalette.green;
-    case 'MERGED':
-      return theme.hctPalette.gray;
-    case 'IN_PROGRESS':
+    case 'In Progress':
       return theme.hctPalette.orange;
+    case 'Import Error':
+    case 'Merge Error':
+    case 'Deduplication Failed':
+      return theme.palette.error.main;
     default:
       return theme.hctPalette.orange;
   }
@@ -324,9 +342,6 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
   }
 }
 
-export const registrationDataImportErasedColor = (): string =>
-  themeObj.palette.error.main;
-
 export function paymentPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -334,22 +349,24 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
-    [PaymentPlanStatus.DRAFT]: theme.hctPalette.green,
-    [PaymentPlanStatus.FINISHED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.lighterGray,
+    [PaymentPlanStatus.FINISHED]: theme.hctPalette.green,
     [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
-    [PaymentPlanStatus.LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.red,
-    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
     [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
+    [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -1300,6 +1317,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
+  const notUnderscoreKeys = ['dataFields'];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1307,7 +1325,9 @@ export function deepUnderscore(data) {
       data,
       (result, value, key) => {
         // Special handling for keys that follow the pattern of letters followed by numbers
-        if (/^[a-zA-Z]+\d+$/.test(key)) {
+        if (notUnderscoreKeys.includes(key)) {
+          result[_.snakeCase(key)] = value;
+        } else if (/^[a-zA-Z]+\d+$/.test(key)) {
           // Keep original key for letter+number pattern fields
           result[key] = deepUnderscore(value);
         } else {
@@ -1375,9 +1395,16 @@ export function showApiErrorMessages(
 
   const messages: string[] = [];
 
+  // Helper to show message or fallback if empty
+  function showOrFallback(msg: string) {
+    const out = (msg || '').toString().trim();
+    if (out) showMessage(out);
+    else showMessage(fallbackMsg);
+  }
+
   // Handle plain array of strings (e.g. ["msg1", "msg2"])
   if (Array.isArray(error) && error.every((item) => typeof item === 'string')) {
-    showMessage(error.join('  \n'));
+    showOrFallback(error.join('  \n'));
     return;
   }
 
@@ -1385,7 +1412,7 @@ export function showApiErrorMessages(
   if (error && typeof error === 'object' && Array.isArray(error.body)) {
     // If error.body is a plain array of strings
     if (error.body.every((item) => typeof item === 'string')) {
-      showMessage(error.body.join('  \n'));
+      showOrFallback(error.body.join('  \n'));
       return;
     }
     const errors = collectErrors(error.body);
@@ -1394,12 +1421,12 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle string error in error.body
   if (error && typeof error === 'object' && typeof error.body === 'string') {
-    showMessage(error.body);
+    showOrFallback(error.body);
     return;
   }
   // Handle object of arrays/objects in error.body (field errors)
@@ -1415,7 +1442,7 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle top-level object of arrays (field errors)
@@ -1426,15 +1453,15 @@ export function showApiErrorMessages(
         messages.push(`${label}: ${msg}`);
       });
     });
-    showMessage(messages.join('  \n'));
+    showOrFallback(messages.join('  \n'));
     return;
   }
   // Handle string error in error.message
   if (error && typeof error === 'object' && typeof error.message === 'string') {
-    showMessage(error.message);
+    showOrFallback(error.message);
     return;
   }
-  showMessage(fallbackMsg);
+  showOrFallback(fallbackMsg);
 }
 
 export function getApiErrorMessages(
