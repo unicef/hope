@@ -9,8 +9,7 @@ title: Documentation
 
 ## UNICEF Humanitarian cash Operations and Programme Ecosystem
 
-HOPE is UNICEF's humanitarian cash transfer corporate platform that is used since 2021 in more
-than 20 countries by UNICEF and its partners (Civil Society and Government organizations).
+[HOPE](https://www.unicef.org/hope-hct/) is UNICEF's humanitarian cash transfer corporate platform that is used since 2021 by UNICEF and its partners (Civil Society and Government organizations).
 HOPE provides a unified consolidated reporting for beneficiary data, increase accountability and
 traceability, grow cash programmes while ensuring due diligence, risk informed implementation and
 overall - simplifying a system of complex processes to pay cash transfer at scale in humanitarian

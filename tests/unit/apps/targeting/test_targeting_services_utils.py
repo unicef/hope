@@ -7,8 +7,6 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.models import Household, Individual
 from hope.apps.targeting.models import (
-    TargetingCollectorBlockRuleFilter,
-    TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -56,8 +54,6 @@ class TestPaymentPlanModel(TestCase):
         assert TargetingCriteriaRuleFilter.objects.count() == 0
         assert TargetingIndividualRuleFilterBlock.objects.count() == 0
         assert TargetingIndividualBlockRuleFilter.objects.count() == 0
-        assert TargetingCollectorRuleFilterBlock.objects.count() == 0
-        assert TargetingCollectorBlockRuleFilter.objects.count() == 0
 
         targeting_criteria_input = {
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -66,18 +62,6 @@ class TestPaymentPlanModel(TestCase):
                 {
                     "household_ids": f"{self.hh1.unicef_id}",
                     "individual_ids": f"{self.ind2.unicef_id}",
-                    "collectors_filters_blocks": [
-                        {
-                            "collector_block_filters": [
-                                {
-                                    "comparison_method": "EQUALS",
-                                    "arguments": [True],
-                                    "field_name": "mobile_phone_number__test_data",
-                                    "flex_field_classification": "NOT_FLEX_FIELD",
-                                },
-                            ]
-                        }
-                    ],
                     "households_filters_blocks": [
                         {
                             "comparison_method": "EQUALS",
@@ -107,8 +91,6 @@ class TestPaymentPlanModel(TestCase):
         assert TargetingCriteriaRuleFilter.objects.count() == 1
         assert TargetingIndividualRuleFilterBlock.objects.count() == 1
         assert TargetingIndividualBlockRuleFilter.objects.count() == 1
-        assert TargetingCollectorRuleFilterBlock.objects.count() == 1
-        assert TargetingCollectorBlockRuleFilter.objects.count() == 1
 
         assert TargetingCriteriaRule.objects.first().household_ids == self.hh1.unicef_id
         assert TargetingCriteriaRule.objects.first().individual_ids == self.ind2.unicef_id
@@ -118,6 +100,3 @@ class TestPaymentPlanModel(TestCase):
 
         assert TargetingIndividualBlockRuleFilter.objects.first().field_name == "age_at_registration"
         assert TargetingIndividualBlockRuleFilter.objects.first().arguments == [1, 99]
-
-        assert TargetingCollectorBlockRuleFilter.objects.first().field_name == "mobile_phone_number__test_data"
-        assert TargetingCollectorBlockRuleFilter.objects.first().arguments == [True]

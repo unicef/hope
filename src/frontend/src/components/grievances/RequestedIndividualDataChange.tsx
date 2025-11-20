@@ -21,6 +21,7 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export type RoleReassignData = {
   role: string;
@@ -261,6 +262,7 @@ export function RequestedIndividualDataChange({
           color="primary"
           disabled={!approveEnabled}
           data-cy="button-approve"
+          data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
         >
           {t('Approve')}
         </Button>
@@ -280,6 +282,7 @@ export function RequestedIndividualDataChange({
         color="primary"
         disabled={!approveEnabled}
         data-cy="button-approve"
+        data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
       >
         {t('Approve')}
       </Button>

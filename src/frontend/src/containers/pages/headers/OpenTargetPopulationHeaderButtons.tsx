@@ -18,6 +18,7 @@ import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTar
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 import { showApiErrorMessages } from '@utils/utils';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationDetail;
@@ -60,7 +61,12 @@ export function OpenTargetPopulationHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan has been rebuilt.'));
       queryClient.invalidateQueries({
-        queryKey: ['targetPopulation', businessArea, targetPopulation.id, programId],
+        queryKey: [
+          'targetPopulation',
+          businessArea,
+          targetPopulation.id,
+          programId,
+        ],
       });
 
       queryClient.invalidateQueries({
@@ -100,6 +106,7 @@ export function OpenTargetPopulationHeaderButtons({
             component={Link}
             to={`/${baseUrl}/target-population/edit-tp/${targetPopulation.id}`}
             disabled={!isActiveProgram}
+            data-perm={PERMISSIONS.TARGETING_UPDATE}
           >
             Edit
           </Button>
@@ -113,6 +120,7 @@ export function OpenTargetPopulationHeaderButtons({
             color="primary"
             disabled={loadingRebuild || !isActiveProgram}
             startIcon={<RefreshRounded />}
+            data-perm={PERMISSIONS.TARGETING_UPDATE}
             onClick={() =>
               rebuild({
                 businessAreaSlug: businessArea,
@@ -133,6 +141,7 @@ export function OpenTargetPopulationHeaderButtons({
             onClick={() => setOpenLock(true)}
             data-cy="button-target-population-lock"
             disabled={!isActiveProgram}
+            data-perm={PERMISSIONS.TARGETING_LOCK}
           >
             Lock
           </Button>

@@ -66,6 +66,11 @@ describe('IndividualsListTable', () => {
     statusChoices: [],
     relationshipChoices: [],
     roleChoices: [],
+    roleChoicesForGrievance: [
+      { value: 'PRIMARY', label: 'Primary collector' },
+      { value: 'ALTERNATE', label: 'Alternate collector' },
+      { value: null, label: 'No role' },
+    ],
     maritalStatusChoices: [],
     identityTypeChoices: [],
     observedDisabilityChoices: [],

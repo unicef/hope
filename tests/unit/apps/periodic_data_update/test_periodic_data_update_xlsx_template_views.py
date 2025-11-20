@@ -442,14 +442,12 @@ class TestPDUXlsxTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "Vaccination Records Update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "Health Records Update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -480,14 +478,12 @@ class TestPDUXlsxTemplateViews:
             "name": "Test Template",
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "health_records_update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -496,13 +492,13 @@ class TestPDUXlsxTemplateViews:
         }
         expected_result = [
             {
-                "field": "vaccination_records_update",
+                "field": self.pdu_field_vaccination.name,
                 "round": 2,
                 "round_name": "February vaccination",
                 "number_of_records": 0,
             },
             {
-                "field": "health_records_update",
+                "field": self.pdu_field_health.name,
                 "round": 4,
                 "round_name": "April",
                 "number_of_records": 0,
@@ -538,14 +534,12 @@ class TestPDUXlsxTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 4,
-                    "round_name": "April vaccination",
                 },
             ],
             "filters": {

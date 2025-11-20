@@ -102,6 +102,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
                     startIcon={<AddIcon />}
                     data-cy="new-template-button"
                     disabled={!canCreatePDUTemplate}
+                    dataPerm={PERMISSIONS.PDU_TEMPLATE_CREATE}
                   >
                     New Template
                   </ButtonTooltip>

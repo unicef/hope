@@ -6,14 +6,14 @@ DEFAULTS = {
     "AURORA_USER": (str, ""),
     "DATABASE_URL": (
         str,
-        "sqlite://",
+        "postgres://postgres:postgres@db:5432/postgres",
         "",
         "",
         "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
     ),
     "REP_DATABASE_URL": (
         str,
-        "sqlite://",
+        "postgres://postgres:postgres@db:5432/postgres",
         "",
         "",
         "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
@@ -46,6 +46,7 @@ DEFAULTS = {
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
     "CONSTANCE_REDIS_CONNECTION": (str, "redis://redis:6379/0"),
+    "CONSTANCE_REDIS_CODEC": (str, "pickle"),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
     "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
@@ -86,6 +87,7 @@ DEFAULTS = {
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_MANIFEST_SRC": (tuple, ("'self'",)),
@@ -95,6 +97,7 @@ DEFAULTS = {
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_IMG_SRC": (
@@ -102,6 +105,7 @@ DEFAULTS = {
         (
             "'self'",
             "data:",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_FONT_SRC": (
@@ -111,12 +115,14 @@ DEFAULTS = {
             "data:",
             "fonts.gstatic.com",
             "maxcdn.bootstrapcdn.com",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_MEDIA_SRC": (tuple, ("'self'",)),
     "CSP_CONNECT_SRC": (
         tuple,
         (
+            "'self'",
             "gov-bam.nr-data.net",
             "cdn.jsdelivr.net",
         ),
@@ -151,7 +157,7 @@ DEFAULTS = {
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
         str,
-        "django.core.files.storage.FileSystemStorage",
+        "django.contrib.staticfiles.storage.StaticFilesStorage",
     ),
     "FILE_STORAGE_MEDIA": (
         str,

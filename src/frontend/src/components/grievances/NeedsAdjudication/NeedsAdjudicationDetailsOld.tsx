@@ -25,6 +25,7 @@ import {
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export const NeedsAdjudicationDetailsOld = ({
   ticket,
@@ -135,6 +136,7 @@ export const NeedsAdjudicationDetailsOld = ({
               variant="outlined"
               color="primary"
               data-cy="button-create-linked-ticket"
+              data-perm={PERMISSIONS.GRIEVANCES_CREATE}
             >
               {t('Create Linked Ticket')}
             </Button>
