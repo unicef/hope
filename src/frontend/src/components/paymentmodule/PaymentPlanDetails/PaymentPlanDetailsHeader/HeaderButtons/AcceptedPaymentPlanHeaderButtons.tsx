@@ -30,7 +30,6 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
-  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -149,7 +148,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
