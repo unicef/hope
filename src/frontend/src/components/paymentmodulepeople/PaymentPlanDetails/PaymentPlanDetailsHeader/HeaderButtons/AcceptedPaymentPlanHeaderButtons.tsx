@@ -30,7 +30,6 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
-  canAbort: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -147,7 +146,6 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   if (loadingTemplates) return <LoadingComponent />;
   if (errorTemplates) return null;
-  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);

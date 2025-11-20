@@ -231,6 +231,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template1.created_by.get_full_name(),
             "can_export": self.pdu_template1.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template2.id,
@@ -241,6 +242,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template2.created_by.get_full_name(),
             "can_export": self.pdu_template2.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template3.id,
@@ -251,6 +253,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template3.created_by.get_full_name(),
             "can_export": self.pdu_template3.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
@@ -261,6 +264,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template_program2.created_by.get_full_name(),
             "can_export": self.pdu_template_program2.can_export,
+            "admin_url": None,
         } not in response_json
 
     def test_count_periodic_data_update_templates(
@@ -442,14 +446,12 @@ class TestPDUXlsxTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "Vaccination Records Update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "Health Records Update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -480,14 +482,12 @@ class TestPDUXlsxTemplateViews:
             "name": "Test Template",
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "health_records_update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -496,13 +496,13 @@ class TestPDUXlsxTemplateViews:
         }
         expected_result = [
             {
-                "field": "vaccination_records_update",
+                "field": self.pdu_field_vaccination.name,
                 "round": 2,
                 "round_name": "February vaccination",
                 "number_of_records": 0,
             },
             {
-                "field": "health_records_update",
+                "field": self.pdu_field_health.name,
                 "round": 4,
                 "round_name": "April",
                 "number_of_records": 0,
@@ -538,14 +538,12 @@ class TestPDUXlsxTemplateViews:
         data = {
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 4,
-                    "round_name": "April vaccination",
                 },
             ],
             "filters": {
