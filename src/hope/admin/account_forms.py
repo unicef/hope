@@ -37,7 +37,6 @@ class RoleAdminForm(forms.ModelForm):
 
 
 class RoleAssignmentAdminForm(forms.ModelForm):
-
     class Meta:
         model = account_models.RoleAssignment
         fields = (
