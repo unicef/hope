@@ -16,7 +16,6 @@ from openpyxl import Workbook
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-from test_utils.factories.household import create_household_and_individuals
 
 from extras.test_utils.factories.account import (
     BusinessAreaFactory,
@@ -24,6 +23,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
