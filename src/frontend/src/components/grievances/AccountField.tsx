@@ -42,8 +42,7 @@ export function AccountField({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dataFields = account?.dataFields || {};
-
-  const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
+  const dynamicFieldsName = `${accountFieldName}.dataFields`;
   const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
   const isBank = accountType === 'bank';
 
@@ -123,7 +122,7 @@ export function AccountField({
                 label={t('New Value')}
                 component={FormikSelectField}
                 choices={accountFinancialInstitutionChoices}
-                required={isBank}
+                required
               />
             </Grid>
           </Fragment>
@@ -144,7 +143,7 @@ export function AccountField({
               }
               const fieldProps = {
                 component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
-                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: isBank } : {}),
+                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: true } : {}),
               };
 
             return (
@@ -184,7 +183,7 @@ export function AccountField({
           <>
             {form.values[baseName][
               getIndexForId(values[baseName], id)
-            ]?.dynamicFields?.map((field, idx) => (
+            ]?.dataFields?.map((field, idx) => (
               <Fragment key={idx}>
                 <Grid size={{ xs: 4 }}>
                   <Field

@@ -334,7 +334,7 @@ const CreateGrievancePage = (): ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${baseUrl}/grievance/tickets/`,
+      to: `/${baseUrl}/grievance/tickets/user-generated`,
     },
   ];
 
@@ -458,8 +458,12 @@ const CreateGrievancePage = (): ReactElement => {
             ? programId
             : (typeof values.selectedHousehold === 'object' &&
                 values.selectedHousehold?.program?.slug) ||
+              (typeof values.selectedHousehold === 'object' &&
+                values.selectedHousehold?.programSlug) ||
               (typeof values.selectedIndividual === 'object' &&
-                values.selectedIndividual?.program?.slug));
+                values.selectedIndividual?.program?.slug) ||
+              (typeof values.selectedIndividual === 'object' &&
+                values.selectedIndividual?.programSlug));
 
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
