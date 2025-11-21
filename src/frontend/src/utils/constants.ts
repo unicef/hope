@@ -66,6 +66,15 @@ export const GRIEVANCE_TICKET_STATES = {
   CLOSED: 6,
 };
 
+export const GRIEVANCE_TICKET_STATES_NAMES = {
+  1: 'NEW',
+  2: 'ASSIGNED',
+  3: 'IN_PROGRESS',
+  4: 'ON_HOLD',
+  5: 'FOR_APPROVAL',
+  6: 'CLOSED',
+};
+
 export const GRIEVANCE_CATEGORIES = {
   PAYMENT_VERIFICATION: '1',
   DATA_CHANGE: '2',

@@ -20,6 +20,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { PERMISSIONS } from '../../../config/permissions';
 import React from 'react';
@@ -268,10 +269,18 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
     scopes: [SCOPE_PROGRAM],
   },
+  {
+    name: 'Office Search',
+    href: '/office-search',
+    selectedRegexp: /^\/office-search.*$/,
+    icon: <BusinessCenterIcon />,
+    permissions: [PERMISSIONS.SEARCH_BUSINESS_AREAS],
+    scopes: [SCOPE_ALL_PROGRAMS],
+  },
 ];
 
 export const resourcesItems = [
-    {
+  {
     name: 'Reporting',
     href: 'https://reporting.hope.unicef.org/',
     icon: <TrendingUpRoundedIcon />,
