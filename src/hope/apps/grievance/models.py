@@ -24,8 +24,7 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hope.apps.household.models import Individual
-from hope.apps.payment.models import Payment, PaymentVerification
+from hope.apps.payment.models import PaymentVerification
 from hope.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -33,8 +32,9 @@ from hope.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 
-if TYPE_CHECKING:
-    from hope.apps.household.models import Household  # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
+    from hope.apps.household.models import Household, Individual
+    from hope.apps.payment.models import Payment
 
 logger = logging.getLogger(__name__)
 
@@ -464,6 +464,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @property
     def target_id(self) -> str:
+        from hope.apps.household.models import Individual
+
         if self.has_social_worker_program:
             ticket_details = self.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):
@@ -614,7 +616,7 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         null=True,
     )
     payment = models.ForeignKey(
-        Payment,
+        "payment.Payment",
         on_delete=models.CASCADE,
         null=True,
         related_name="ticket_complaint_details",
@@ -645,7 +647,7 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
         null=True,
     )
     payment = models.ForeignKey(
-        Payment,
+        "payment.Payment",
         on_delete=models.CASCADE,
         null=True,
         related_name="ticket_sensitive_details",
