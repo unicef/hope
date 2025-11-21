@@ -1,11 +1,13 @@
 import re
 from secrets import randbelow
 
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
+from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.geo.models import Area
@@ -581,3 +583,9 @@ def generate_rdi_unique_name(program: Program) -> str:
     while RegistrationDataImport.objects.filter(business_area=program.business_area, name=default_name).exists():
         default_name = f"{default_name} ({randbelow(9000) + 1000})"
     return default_name
+
+
+def increment_program_cycle_list_version_cache(business_area_slug: str, program_slug: str) -> None:
+    version_key = f"{business_area_slug}:version"
+    get_or_create_cache_key(version_key, 1)
+    cache.incr(version_key)
