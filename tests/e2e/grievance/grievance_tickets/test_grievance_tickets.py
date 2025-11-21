@@ -1035,7 +1035,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_add_documentation().click()
         page_grievance_new_ticket.get_input_documentation_name(0).send_keys("example")
-        page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/e2e/helpers/document_example.png")
+        page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         page_grievance_new_ticket.get_button_next().click()
         assert "example" in page_grievance_details_page.get_link_show_photo().text
         page_grievance_details_page.get_link_show_photo().click()

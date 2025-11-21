@@ -1,4 +1,3 @@
-from conftest import disabled_locally_test
 from django.core.management import call_command
 from django.test import TestCase
 import pytest
@@ -28,6 +27,7 @@ from hope.apps.registration_data.models import (
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
 from hope.apps.utils.querysets import evaluate_qs
+from unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
