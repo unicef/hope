@@ -12,7 +12,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Field, JSONField, Model, OneToOneRel, QuerySet
+from django.db.models import Field, Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -49,7 +49,7 @@ class JSONWidgetMixin:
     json_enabled = False
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
+        if db_field.get_internal_type() == "JSONField":
             if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
             else:

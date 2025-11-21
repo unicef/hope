@@ -347,9 +347,7 @@ class TestUpdateIndividualDataService(TestCase):
                 "value": {
                     "number": "2222",
                     "financial_institution": str(fi1.id),
-                    "data_fields": {
-                        "new_field": "new_value",
-                    },
+                    "data_fields": [{"key": "new_field", "value": "new_value"}],
                     "account_type": "mobile",
                 },
             }

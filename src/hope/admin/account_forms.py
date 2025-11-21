@@ -35,9 +35,6 @@ class RoleAdminForm(forms.ModelForm):
 
 
 class RoleAssignmentAdminForm(forms.ModelForm):
-    role = forms.ModelChoiceField(Role.objects.order_by("name"))
-    business_area = forms.ModelChoiceField(BusinessArea.objects.filter(is_split=False))
-
     class Meta:
         model = RoleAssignment
         fields = (

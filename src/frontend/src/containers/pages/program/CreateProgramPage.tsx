@@ -22,7 +22,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  mapPartnerChoicesWithoutUnicef,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
   showApiErrorMessages,
   deepUnderscore,
 } from '@utils/utils';
@@ -45,14 +45,13 @@ export const CreateProgramPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: treeData } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
@@ -211,7 +210,8 @@ export const CreateProgramPage = (): ReactElement => {
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
         reconciliationWindowInDays: values.reconciliationWindowInDays,
-        sendReconciliationWindowExpiryNotifications: values.sendReconciliationWindowExpiryNotifications,
+        sendReconciliationWindowExpiryNotifications:
+          values.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await createProgram(programData);
@@ -267,8 +267,7 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if ( userPartnerChoicesLoading || choicesLoading)
-    return <LoadingComponent />;
+  if (userPartnerChoicesLoading || choicesLoading) return <LoadingComponent />;
 
   if (!userPartnerChoicesData || !choicesData) return null;
 
@@ -303,7 +302,7 @@ export const CreateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+        const mappedPartnerChoices = mapPartnerChoicesFromChoicesWithoutUnicef(
           userPartnerChoices,
           values.partners,
         );
