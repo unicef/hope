@@ -3,16 +3,25 @@ import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.household.models import MALE, Document, DocumentType, Individual
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hope.apps.program.models import Program
+from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
+from hope.models import (
+    Account,
+    AccountType,
+    Area,
+    AreaType,
+    Country,
+    DeliveryMechanism,
+    Document,
+    DocumentType,
+    FlexibleAttribute,
+    Individual,
+    Program,
+    UniversalUpdate,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -125,11 +134,12 @@ def individual(
 
 @pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
+    account_type, _ = AccountType.objects.get_or_create(key="mobile")
     return Account.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
         rdi_merge_status=Account.MERGED,
-        account_type=AccountType.objects.create(key="mobile"),
+        account_type=account_type,
     )
 
 

@@ -20,7 +20,6 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_engine_rule,
@@ -35,15 +34,16 @@ from hope.apps.payment.celery_tasks import (
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
+from hope.apps.payment.utils import generate_cache_key
+from hope.models import (
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
     PaymentPlan,
+    Rule,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
-from hope.apps.payment.utils import generate_cache_key
-from hope.apps.steficon.models import Rule
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -165,7 +165,7 @@ class TestPaymentCeleryTask(TestCase):
         payment.refresh_from_db(fields=["vulnerability_score"])
         assert payment.vulnerability_score == Decimal("500.333")
 
-    @patch("hope.apps.steficon.models.RuleCommit.execute")
+    @patch("hope.models.rule.RuleCommit.execute")
     @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
     def test_payment_plan_apply_steficon_hh_selection_exception_handling(
         self, mock_retry: Mock, mock_rule_execute: Mock
@@ -191,7 +191,7 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_ERROR
 
     @patch(
-        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.models.payment_plan.PaymentPlan.get_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -206,7 +206,7 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan_rebuild_stats(pp_id_str)
 
-    @patch("hope.apps.payment.models.PaymentPlan.update_population_count_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.update_population_count_fields")
     @patch("hope.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
     def test_payment_plan_rebuild_stats_exception_handling(
         self, mock_retry: Mock, mock_update_population_count_fields: Mock
@@ -324,19 +324,19 @@ class TestPaymentCeleryTask(TestCase):
             assert mock_mailjet_send.call_count == 3
 
     @patch("hope.apps.payment.celery_tasks.logger")
-    @patch("hope.apps.payment.celery_tasks.get_user_model")
+    @patch("hope.models.User")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:
         mock_get_user_model.objects.get.side_effect = Exception("User not found")
-        with pytest.raises(Exception, match="“pp_id_123” is not a valid UUID."):
+        with pytest.raises(Exception, match="User not found"):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
 
     @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
-    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea
 
 
 class BusinessAreaSerializer(serializers.ModelSerializer):

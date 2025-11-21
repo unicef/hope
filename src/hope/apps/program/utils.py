@@ -6,27 +6,33 @@ from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
-from hope.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment, User
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.geo.models import Area
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
+)
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import (
+    Account,
+    AdminAreaLimitedTo,
+    Area,
     Document,
     EntitlementCard,
+    FlexibleAttribute,
     Household,
     HouseholdCollection,
     Individual,
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Partner,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
+    RoleAssignment,
+    User,
 )
-from hope.apps.payment.models import Account
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.elasticsearch_utils import populate_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:

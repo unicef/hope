@@ -16,8 +16,7 @@ from extras.test_utils.factories.core import (
 )
 from hope.admin.business_area import AcceptanceProcessThresholdFormset
 from hope.admin.data_collecting_type import DataCollectingTypeForm
-from hope.apps.account.models import Role, RoleAssignment, User
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 

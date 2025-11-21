@@ -7,9 +7,7 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
 
-from hope.apps.account.models import Partner, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.accountability.models import Feedback
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -21,7 +19,7 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.validators import validate_file
-from hope.apps.household.models import Individual
+from hope.models import Feedback, Individual, Partner, User
 
 logger = logging.getLogger(__name__)
 

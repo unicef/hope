@@ -18,17 +18,14 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.account.models import AdminAreaLimitedTo, Partner
-from hope.apps.geo.models import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program, ProgramCycle
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import AdminAreaLimitedTo, Area, Household, Individual, Partner, Program, ProgramCycle
 
 
 @admin.register(ProgramCycle)

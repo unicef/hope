@@ -5,13 +5,12 @@ from django.urls import reverse
 import pytest
 from webtest import Upload
 
-from hope.apps.sanction_list.models import UploadedXLSXFile
+from hope.models import SanctionList, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from django_webtest import DjangoTestApp
 
-    from hope.apps.account.models import User
-    from hope.apps.sanction_list.models import SanctionList
+    from hope.models import User
 
 
 @pytest.fixture
@@ -23,8 +22,10 @@ def test_upload(
     django_app: "DjangoTestApp",
     admin_user: "User",
     sample_file: bytes,
-    sanction_list: "SanctionList",
+    # sanction_list: "SanctionList",
 ) -> None:
+    sanction_list: SanctionList = SanctionList.objects.all().first()
+    assert sanction_list is not None
     url = reverse("sanction:upload")
     res = django_app.get(url, user=admin_user)
     res.forms["upload-form"]["file"] = Upload("sample.xls", sample_file, content_type="application/vnd.ms-excel")

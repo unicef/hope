@@ -40,7 +40,7 @@ from hope.apps.core.attributes_qet_queries import (
     registration_data_import_query,
 )
 from hope.apps.core.countries import Countries
-from hope.apps.household.models import UNHCR, WFP
+from hope.models import UNHCR, WFP
 
 
 class TestAttributesGetQueries:

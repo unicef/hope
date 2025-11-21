@@ -5,16 +5,7 @@ import pytest
 
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import (
-    AdminAreaLimitedTo,
-    Partner,
-    Role,
-    RoleAssignment,
-    User,
-)
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Area
-from hope.apps.program.models import Program
+from hope.models import AdminAreaLimitedTo, Area, BusinessArea, Partner, Program, Role, RoleAssignment, User
 
 
 @pytest.fixture

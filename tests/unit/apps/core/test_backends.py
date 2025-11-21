@@ -15,8 +15,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.backends import PermissionsBackend
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Program
 
 
 class TestPermissionsBackend(TestCase):

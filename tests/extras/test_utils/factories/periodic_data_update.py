@@ -6,13 +6,7 @@ from faker import Faker
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea
-from hope.apps.periodic_data_update.models import (
-    PDUOnlineEdit,
-    PDUOnlineEditSentBackComment,
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
+from hope.models import BusinessArea, PDUOnlineEdit, PDUOnlineEditSentBackComment, PDUXlsxTemplate, PDUXlsxUpload
 
 fake = Faker()
 

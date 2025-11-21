@@ -12,10 +12,9 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
+from hope.models import BusinessArea, DeliveryMechanism, FinancialServiceProvider
 
 
 class TestGrievanceModelValidation(TestCase):

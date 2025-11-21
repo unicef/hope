@@ -4,13 +4,12 @@ from typing import TYPE_CHECKING, Any
 from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
 
-from hope.apps.payment.models import Approval, Payment, PaymentPlan
 from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
+from hope.models import Approval, Payment, PaymentPlan
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
-
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 

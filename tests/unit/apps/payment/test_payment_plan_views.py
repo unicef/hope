@@ -38,18 +38,19 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hope.apps.payment.models import (
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.models import (
     Approval,
+    FileTemp,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    Program,
+    ProgramCycle,
+    Rule,
 )
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.steficon.models import Rule
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db()
 
@@ -2179,7 +2180,7 @@ class TestPaymentPlanActions:
         assert status.HTTP_400_BAD_REQUEST
         assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,

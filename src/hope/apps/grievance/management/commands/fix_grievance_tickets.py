@@ -4,9 +4,9 @@ from typing import Any
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import DISABLED, NOT_DISABLED, Individual
+from hope.apps.household.const import DISABLED, NOT_DISABLED
+from hope.models import BusinessArea, Individual
 
 
 # for copying & pasting into the terminal purposes

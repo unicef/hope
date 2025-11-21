@@ -27,17 +27,17 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.core.models import BusinessArea
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
-from hope.apps.household.models import (
+from hope.apps.utils.security import is_root
+from hope.models import (
+    Account,
+    BusinessArea,
     Household,
     Individual,
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
-from hope.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,6 @@ import openpyxl
 import pytz
 from xlwt import Row
 
-from hope.apps.payment.models import Payment, PaymentVerification
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
@@ -22,11 +21,12 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.models import Payment, PaymentVerification
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.apps.payment.models import PaymentPlan
+    from hope.models import PaymentPlan
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):

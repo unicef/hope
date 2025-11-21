@@ -7,18 +7,20 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.api.models import Grant
-from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
+)
+from hope.models import (
+    DataCollectingType,
     DocumentType,
     PendingHousehold,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 

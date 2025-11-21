@@ -4,8 +4,6 @@ import logging
 from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
-from hope.apps.household.models import PendingIndividual
-from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
 from hope.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -16,7 +14,8 @@ from hope.apps.registration_datahub.value_caster import (
     SelectOneValueCaster,
     StringValueCaster,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import Account, AccountType, FinancialInstitution, PendingAccount, PendingIndividual
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 

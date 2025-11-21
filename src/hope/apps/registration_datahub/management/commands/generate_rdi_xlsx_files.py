@@ -9,7 +9,7 @@ from django.db import transaction
 from faker import Faker
 import openpyxl
 
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models import Area, AreaType, Country
 
 faker = Faker()
 

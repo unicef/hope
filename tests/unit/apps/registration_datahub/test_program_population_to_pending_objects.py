@@ -15,22 +15,26 @@ from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     MALE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
+from hope.models import (
+    Account,
+    AccountType,
+    DeliveryMechanism,
     Document,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account, AccountType, DeliveryMechanism
-from hope.apps.registration_datahub.tasks.import_program_population import (
-    import_program_population,
-)
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (
     "consent_sign",

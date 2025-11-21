@@ -16,10 +16,8 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
-from hope.api.models import Grant
-from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -27,13 +25,17 @@ from hope.apps.household.models import (
     MALE,
     NOT_COLLECTED,
     NOT_DISABLED,
+)
+from hope.models import (
+    DataCollectingType,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 

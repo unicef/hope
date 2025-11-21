@@ -35,25 +35,29 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import FileTemp
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hope.apps.payment.models import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.models import (
     AccountType,
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
+    IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    Program,
+    ProgramCycle,
+    Role,
+    RoleAssignment,
+    User,
 )
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.program.models import Program, ProgramCycle
 
 
 class TestPaymentPlanServices(BaseTestCase):
@@ -264,7 +268,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.status == PaymentPlan.Status.OPEN
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -336,7 +340,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp.payment_items.count() == 2
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
@@ -366,7 +370,7 @@ class TestPaymentPlanServices(BaseTestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
@@ -513,8 +517,8 @@ class TestPaymentPlanServices(BaseTestCase):
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -641,7 +645,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert pp_splits[0].split_payment_items.count() == 12
 
     @freeze_time("2023-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
@@ -743,7 +747,7 @@ class TestPaymentPlanServices(BaseTestCase):
         assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,

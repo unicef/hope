@@ -26,27 +26,24 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
 )
 from hope.apps.core.field_attributes.fields_types import _INDIVIDUAL, Scope
 from hope.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import (
     SheetImageLoader,
     rename_dict_keys,
     serialize_flex_attributes,
 )
 from hope.apps.core.validators import BaseValidator
-from hope.apps.geo.models import Area
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import KoboImportedSubmission
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hope.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
     find_attachment_in_kobo,
 )
+from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +137,7 @@ class ImportDataInstanceValidator:
         }
 
     def serialize_flex_attributes(self) -> dict:
-        from hope.apps.core.models import FlexibleAttribute
+        from hope.models import FlexibleAttribute
 
         flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
 
