@@ -4,8 +4,8 @@ from unittest import mock
 from unittest.mock import patch
 import uuid
 
-from django.conf import settings
 from django.test import TestCase
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -68,10 +68,14 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         self.program.refresh_from_db()
         assert str(self.program.deduplication_set_id) == new_uuid
+        notification_url = reverse(
+            "api:registration-data:registration-data-imports-webhook-deduplication",
+            args=[self.program.business_area.slug, self.program.slug],
+        )
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
                 reference_pk=str(self.program.id),
-                notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
+                notification_url=notification_url,
             )
         )
 
