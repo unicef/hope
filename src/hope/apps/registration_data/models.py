@@ -97,6 +97,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     KOBO = "KOBO"
     API = "API"
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
+    GENERIC_IMPORT = "GENERIC_IMPORT"
     EDOPOMOGA = "EDOPOMOGA"
     PROGRAM_POPULATION = "PROGRAM_POPULATION"
     ENROLL_FROM_PROGRAM = "ENROLL_FROM_PROGRAM"
@@ -108,6 +109,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (EDOPOMOGA, "eDopomoga"),
         (PROGRAM_POPULATION, "Programme Population"),
         (ENROLL_FROM_PROGRAM, "Enroll From Programme"),
+        (GENERIC_IMPORT, "Generic Import Service"),
     )
 
     DEDUP_ENGINE_PENDING = "PENDING"
