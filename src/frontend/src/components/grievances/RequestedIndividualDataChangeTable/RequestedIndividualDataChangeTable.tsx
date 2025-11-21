@@ -92,7 +92,7 @@ export function RequestedIndividualDataChangeTable({
   const entriesFlexFields = flexFields && Object.entries(flexFields);
   //@ts-ignore
   const fieldsDict = useArrayToDict(addIndividualFieldsData, 'name', '*');
-  const countriesDict = useArrayToDict(countriesData, 'name', 'value');
+  const countriesDict = useArrayToDict(countriesData, 'value', 'name');
   const documentTypeDict = useArrayToDict(
     individualChoicesData?.documentTypeChoices,
     'value',

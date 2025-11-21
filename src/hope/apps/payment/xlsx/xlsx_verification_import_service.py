@@ -51,7 +51,12 @@ class XlsxVerificationImportService(XlsxImportBaseService):
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
-        self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
+        try:
+            self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
+        except KeyError:  # pragma no cover
+            raise ValidationError(
+                f"Sheet '{XlsxVerificationExportService.VERIFICATION_SHEET}' not found in provided file."
+            )
         return wb
 
     def validate(self) -> None:

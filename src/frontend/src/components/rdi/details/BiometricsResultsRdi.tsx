@@ -110,6 +110,7 @@ const BiometricsResultsRdi = ({
               setDialogOpen(true);
             }}
             data-cy="button-open-biometrics-results"
+            data-perm={PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS}
           >
             {t(openLinkText)}
           </Button>

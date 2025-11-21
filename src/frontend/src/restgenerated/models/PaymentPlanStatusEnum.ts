@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * * `ABORTED` - Aborted
  * * `ACCEPTED` - Accepted
  * * `CLOSED` - Closed
  * * `DRAFT` - Draft
@@ -23,6 +24,7 @@
  * * `STEFICON_WAIT` - Steficon Wait
  */
 export enum PaymentPlanStatusEnum {
+    ABORTED = 'ABORTED',
     ACCEPTED = 'ACCEPTED',
     CLOSED = 'CLOSED',
     DRAFT = 'DRAFT',

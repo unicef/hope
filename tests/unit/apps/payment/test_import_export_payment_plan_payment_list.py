@@ -220,8 +220,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        assert to_decimal(wb.active["J2"].value) == payment_1.entitlement_quantity
-        assert to_decimal(wb.active["J3"].value) == payment_2.entitlement_quantity
+        assert to_decimal(wb.active["K2"].value) == payment_1.entitlement_quantity
+        assert to_decimal(wb.active["K3"].value) == payment_2.entitlement_quantity
 
     def test_export_payment_plan_payment_list(self) -> None:
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
@@ -245,11 +245,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         wb = export_service.generate_workbook()
 
         assert wb.active["A2"].value == str(payment.unicef_id)
-        assert wb.active["J2"].value == payment.entitlement_quantity
-        assert wb.active["K2"].value == payment.entitlement_quantity_usd
-        assert wb.active["E2"].value == "TEST_VILLAGE"
-        assert wb.active["M1"].value == "national_id"
-        assert wb.active["M2"].value == "Test_Number_National_Id_123"
+        assert wb.active["K2"].value == payment.entitlement_quantity
+        assert wb.active["L2"].value == payment.entitlement_quantity_usd
+        assert wb.active["F2"].value == "TEST_VILLAGE"
+        assert wb.active["N1"].value == "national_id"
+        assert wb.active["N2"].value == "Test_Number_National_Id_123"
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory()
@@ -595,11 +595,15 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         assert self.payment_plan.is_social_worker_program is True
 
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
-        assert len(export_service.headers) == 11
+        assert len(export_service.headers) == 12
         assert "household_size" not in export_service.headers
         assert "household_id" not in export_service.headers
+        assert "collector_id" not in export_service.headers
+        assert "individual_id" in export_service.headers
 
         import_service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
-        assert len(import_service.headers) == 11
+        assert len(import_service.headers) == 12
         assert "household_size" not in import_service.headers
         assert "household_id" not in import_service.headers
+        assert "collector_id" not in export_service.headers
+        assert "individual_id" in import_service.headers

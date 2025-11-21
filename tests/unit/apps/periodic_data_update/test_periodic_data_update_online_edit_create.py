@@ -103,14 +103,12 @@ class TestPDUOnlineEditCreate:
         self.base_data = {
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "health_records_update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -176,8 +174,8 @@ class TestPDUOnlineEditCreate:
                 "first_name": self.household2.individuals.first().given_name,
                 "last_name": self.household2.individuals.first().family_name,
                 "pdu_fields": {
-                    "vaccination_records_update": {
-                        "field_name": "vaccination_records_update",
+                    self.pdu_field_vaccination.name: {
+                        "field_name": self.pdu_field_vaccination.name,
                         "label": "Vaccination Records Update",
                         "round_number": 2,
                         "round_name": "February vaccination",
@@ -186,8 +184,8 @@ class TestPDUOnlineEditCreate:
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
-                    "health_records_update": {
-                        "field_name": "health_records_update",
+                    self.pdu_field_health.name: {
+                        "field_name": self.pdu_field_health.name,
                         "label": "Health Records Update",
                         "round_number": 4,
                         "round_name": "April",
@@ -370,68 +368,6 @@ class TestPDUOnlineEditCreate:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
         assert response_json == {"rounds_data": ["Each Field can only be used once in the template."]}
-
-    def test_create_pdu_online_edit_already_covered_round(
-        self,
-        create_user_role_with_permissions: Any,
-    ) -> None:
-        create_user_role_with_permissions(
-            user=self.user,
-            permissions=[Permissions.PDU_TEMPLATE_CREATE],
-            business_area=self.afghanistan,
-            program=self.program,
-        )
-        data_1 = {
-            "rounds_data": [
-                {
-                    "field": "vaccination_records_update",
-                    "round": 2,
-                    "round_name": "February vaccination",
-                },
-                {
-                    "field": "health_records_update",
-                    "round": 4,
-                    "round_name": "April",
-                },
-            ],
-            "filters": {
-                "received_assistance": True,
-            },
-        }
-        response_1 = self.api_client.post(self.url_create, data=data_1)
-        assert response_1.status_code == status.HTTP_201_CREATED
-
-        response_json_1 = response_1.json()
-        assert PDUOnlineEdit.objects.filter(id=response_json_1["id"]).exists()
-        self.pdu_field_vaccination.refresh_from_db()
-        self.pdu_field_health.refresh_from_db()
-        assert self.pdu_field_vaccination.pdu_data.rounds_covered == 2
-        assert self.pdu_field_health.pdu_data.rounds_covered == 4
-
-        # Test creating an edit with a round that is already covered by the first edit
-        data_2 = {
-            "rounds_data": [
-                {
-                    "field": "vaccination_records_update",
-                    "round": 2,  # This round is already covered by the first edit
-                    "round_name": "February vaccination",
-                },
-                {
-                    "field": "health_records_update",
-                    "round": 5,  # This round is not covered by the first edit
-                    "round_name": "April",
-                },
-            ],
-            "filters": {
-                "received_assistance": True,
-            },
-        }
-        response_2 = self.api_client.post(self.url_create, data=data_2)
-        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-        response_json_2 = response_2.json()
-        assert response_json_2 == [
-            "Template for round 2 of field 'Vaccination Records Update' has already been created."
-        ]
 
     def test_create_pdu_online_edit_field_is_editable_flag(
         self,

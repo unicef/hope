@@ -129,7 +129,7 @@ OBSERVED_DISABILITY_CHOICE = (
         _("Difficulty communicating (e.g understanding or being understood)"),
     ),
 )
-NON_BENEFICIARY = "NON_BENEFICIARY"
+NON_BENEFICIARY = "NON_BENEFICIARY"  # delegate
 HEAD = "HEAD"
 SON_DAUGHTER = "SON_DAUGHTER"
 WIFE_HUSBAND = "WIFE_HUSBAND"
@@ -187,9 +187,7 @@ WORK_STATUS_CHOICE = (
 )
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
-ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_NO_ROLE, "None"),
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )
@@ -1489,9 +1487,9 @@ class Individual(
         return relativedelta(date.today(), self.birth_date).years
 
     @property
-    def role(self) -> str:
+    def role(self) -> str | None:
         role = self.households_and_roles.first()
-        return role.role if role is not None else ROLE_NO_ROLE
+        return role.role if role else None
 
     @property
     def get_hash_key(self) -> str:
@@ -1669,7 +1667,7 @@ class Individual(
         return self, update_fields
 
     def count_all_roles(self) -> int:
-        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+        return self.households_and_roles.count()
 
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()

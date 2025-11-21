@@ -178,7 +178,7 @@ class FeedbackViewSet(
         headers = self.get_success_headers(serializer.data)
 
         return Response(
-            FeedbackDetailSerializer(feedback).data,
+            FeedbackDetailSerializer(feedback, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
@@ -224,7 +224,9 @@ class FeedbackViewSet(
             old_feedback,
             updated_feedback,
         )
-        return Response(FeedbackDetailSerializer(updated_feedback).data, status=status.HTTP_200_OK)
+        return Response(
+            FeedbackDetailSerializer(updated_feedback, context={"request": request}).data, status=status.HTTP_200_OK
+        )
 
     @transaction.atomic
     @extend_schema(
@@ -323,7 +325,7 @@ class MessageViewSet(
             None,
             message,
         )
-        serializer = MessageDetailSerializer(instance=message)
+        serializer = MessageDetailSerializer(instance=message, context={"request": request})
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -339,12 +341,13 @@ class MessageViewSet(
 
         households = MessageCrudServices._get_households(input_data)
         sampling = Sampling(input_data, households)
-        number_of_recipients, sample_size = sampling.generate_sampling()
+        number_of_recipients, sample_size, excluded_recipients_count = sampling.generate_sampling()
         return Response(
             SampleSizeSerializer(
                 {
                     "number_of_recipients": number_of_recipients,
                     "sample_size": sample_size,
+                    "excluded_recipients_count": excluded_recipients_count,
                 }
             ).data,
             status=status.HTTP_202_ACCEPTED,
@@ -468,12 +471,13 @@ class SurveyViewSet(
             raise ValidationError("Target population or program should be provided.")
 
         sampling = Sampling(input_data, households)
-        number_of_recipients, sample_size = sampling.generate_sampling()
+        number_of_recipients, sample_size, excluded_recipients_count = sampling.generate_sampling()
         return Response(
             SampleSizeSerializer(
                 {
                     "number_of_recipients": number_of_recipients,
                     "sample_size": sample_size,
+                    "excluded_recipients_count": excluded_recipients_count,
                 }
             ).data,
             status=status.HTTP_202_ACCEPTED,

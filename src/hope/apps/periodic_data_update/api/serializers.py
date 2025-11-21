@@ -2,22 +2,19 @@ import datetime
 from typing import Any
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 
 from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
+from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.periodic_data_update.models import (
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
 )
-from hope.apps.periodic_data_update.utils import update_rounds_covered_for_template
-from hope.apps.program.models import Program
 
 PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
     Permissions.PDU_ONLINE_SAVE_DATA,
@@ -26,7 +23,7 @@ PDU_ONLINE_EDIT_RELATED_PERMISSIONS = [
 ]
 
 
-class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
+class PDUXlsxTemplateListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="combined_status_display")
     status = serializers.CharField(source="combined_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
@@ -43,6 +40,7 @@ class PDUXlsxTemplateListSerializer(serializers.ModelSerializer):
             "status",
             "status_display",
             "can_export",
+            "admin_url",
         )
 
 
@@ -65,18 +63,6 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         if len(field_names) != len(set(field_names)):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
-
-    def create(self, validated_data: dict[str, Any]) -> PDUXlsxTemplate:
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        validated_data["created_by"] = request.user
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-        pdu_template = super().create(validated_data)
-        update_rounds_covered_for_template(pdu_template, validated_data["rounds_data"])
-        return pdu_template
 
 
 class PDUXlsxTemplateDetailSerializer(serializers.ModelSerializer):
@@ -134,7 +120,7 @@ class PDUXlsxUploadSerializer(serializers.ModelSerializer):
 class PeriodicFieldDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PeriodicFieldData
-        fields = ("subtype", "number_of_rounds", "rounds_names", "rounds_covered")
+        fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):
@@ -280,23 +266,9 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        request = self.context["request"]
-        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-
-        validated_data["created_by"] = request.user
-        validated_data["business_area"] = business_area
-        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
-
-        # Pop fields that are not on the model before creating the instance
-        validated_data.pop("filters", None)
-        rounds_data = validated_data.pop("rounds_data", None)
-
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
-        update_rounds_covered_for_template(pdu_online_edit, rounds_data)
 
         if authorized_users:
             pdu_online_edit.authorized_users.set(authorized_users)

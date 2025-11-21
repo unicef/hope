@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CountrySmall } from './CountrySmall';
 export type BusinessArea = {
     readonly id: string;
     name: string;
@@ -12,5 +13,7 @@ export type BusinessArea = {
     isSplit?: boolean;
     active?: boolean;
     isAccountabilityApplicable?: boolean;
+    rdiImportXlsxDisabled?: boolean;
+    readonly countries: Array<CountrySmall>;
 };
 

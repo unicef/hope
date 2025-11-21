@@ -177,7 +177,7 @@ export function HouseholdFilters({
               Active
             </MenuItem>
             <MenuItem key="inactive" value="true">
-              Withdrawn
+              Inactive (Withdrawn)
             </MenuItem>
           </SelectFilter>
         </Grid>
