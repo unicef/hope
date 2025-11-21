@@ -87,6 +87,7 @@ DEFAULTS = {
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_MANIFEST_SRC": (tuple, ("'self'",)),
@@ -96,6 +97,7 @@ DEFAULTS = {
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_IMG_SRC": (
@@ -103,6 +105,7 @@ DEFAULTS = {
         (
             "'self'",
             "data:",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_FONT_SRC": (
@@ -112,12 +115,14 @@ DEFAULTS = {
             "data:",
             "fonts.gstatic.com",
             "maxcdn.bootstrapcdn.com",
+            "https://*.blob.core.windows.net",
         ),
     ),
     "CSP_MEDIA_SRC": (tuple, ("'self'",)),
     "CSP_CONNECT_SRC": (
         tuple,
         (
+            "'self'",
             "gov-bam.nr-data.net",
             "cdn.jsdelivr.net",
         ),
@@ -152,7 +157,7 @@ DEFAULTS = {
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
         str,
-        "django.core.files.storage.FileSystemStorage",
+        "django.contrib.staticfiles.storage.StaticFilesStorage",
     ),
     "FILE_STORAGE_MEDIA": (
         str,

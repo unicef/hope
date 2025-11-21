@@ -213,7 +213,7 @@ function GrievancesDetails({
                 ),
                 size: 3,
               },
-              !isAllPrograms && {
+              !isSocialDctType && {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
@@ -334,7 +334,9 @@ function GrievancesDetails({
               },
             ]
               .filter((el) =>
-                isSocialDctType ? el.label !== 'Household ID' : el,
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
               )
               .map(
                 (el) =>

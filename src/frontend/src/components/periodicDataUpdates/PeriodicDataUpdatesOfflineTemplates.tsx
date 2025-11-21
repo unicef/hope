@@ -10,7 +10,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { IconButton, TableCell, Tooltip } from '@mui/material';
+import { Box, IconButton, TableCell, Tooltip } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
@@ -22,6 +22,8 @@ import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesT
 import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
 import { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
 import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
+import { usePersistedCount } from '@hooks/usePersistedCount';
+import { AdminButton } from '@components/core/AdminButton';
 
 const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
   {
@@ -98,7 +100,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
           programSlug: programId,
         },
       ),
-    enabled: !!businessAreaSlug && !!programId,
+    enabled: !!businessAreaSlug && !!programId && page === 0,
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -182,9 +184,15 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     permissions,
   );
 
+  const itemsCount = usePersistedCount(page, templateCountData);
+
   const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
-      <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
+      <TableCell data-cy={`template-id-${row.id}`}>
+        <Box display="flex" alignItems="center">
+          <Box mr={2}>{row.id}</Box> <AdminButton adminUrl={row.adminUrl} />
+        </Box>
+      </TableCell>
       <TableCell data-cy={`template-name-${row.id}`}>{row.name}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
         {row.numberOfRecords}
@@ -226,6 +234,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
                 disabled={
                   row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }
+                dataPerm={PERMISSIONS.PDU_TEMPLATE_DOWNLOAD}
               >
                 Download
               </ButtonTooltip>
@@ -239,6 +248,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
             startIcon={<UploadIcon />}
             data-cy={`export-btn-${row.id}`}
             disabled={!canExportOrDownloadTemplate}
+            dataPerm={PERMISSIONS.PDU_TEMPLATE_DOWNLOAD}
           >
             Export
           </ButtonTooltip>
@@ -250,7 +260,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   return (
     <>
       <UniversalRestTable
-        itemsCount={templateCountData?.count}
+        itemsCount={itemsCount}
         isOnPaper={true}
         noEmptyMessage={true}
         renderRow={renderTemplateRow}

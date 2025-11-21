@@ -45,6 +45,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -350,7 +351,8 @@ export const CreateVerificationPlan = ({
                 color="primary"
                 variant="contained"
                 onClick={() => setOpen(true)}
-                data-cy="button-new-plan"
+                dataCy="button-new-plan"
+                dataPerm={PERMISSIONS.PAYMENT_VERIFICATION_CREATE}
               >
                 {t('CREATE VERIFICATION PLAN')}
               </ButtonTooltip>

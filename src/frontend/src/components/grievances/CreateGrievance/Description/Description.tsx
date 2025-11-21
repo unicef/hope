@@ -65,7 +65,6 @@ function Description({
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms, businessArea } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
 
   const { data: partnerChoicesData } = useQuery({
     queryKey: ['partnerForGrievanceChoices', businessArea],
@@ -74,7 +73,7 @@ function Description({
         businessAreaSlug: businessArea,
       }),
   });
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
@@ -171,7 +170,9 @@ function Description({
               },
             ]
               .filter((el) =>
-                isSocialDctType ? el.label !== 'Household ID' : el,
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
               )
               .map((el) => (
                 <Grid key={el.label} size={{ xs: el.size as GridSize }}>

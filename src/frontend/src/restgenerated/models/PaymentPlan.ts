@@ -31,6 +31,7 @@ export type PaymentPlan = {
      * * `IN_AUTHORIZATION` - In Authorization
      * * `IN_REVIEW` - In Review
      * * `ACCEPTED` - Accepted
+     * * `ABORTED` - Aborted
      * * `FINISHED` - Finished
      * * `CLOSED` - Closed
      */
@@ -243,7 +244,7 @@ export type PaymentPlan = {
     readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
-    readonly adminUrl: string;
+    readonly adminUrl: string | null;
     readonly screenBeneficiary: boolean;
     readonly hasPaymentsReconciliationOverdue: boolean;
 };

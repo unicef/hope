@@ -12,6 +12,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface ForceFailedButtonProps {
   paymentId: string;
@@ -104,6 +105,7 @@ export function ForceFailedButton({
               onClick={() => submit()}
               data-cy="button-submit"
               disabled={loadingMarkAsFailed}
+              data-perm={PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED}
             >
               {t('Mark as failed')}
             </Button>

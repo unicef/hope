@@ -25,31 +25,6 @@ from hope.apps.utils.models import (
 )
 
 
-class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    partner = models.ForeignKey(
-        "account.Partner",
-        on_delete=models.CASCADE,
-        related_name="business_area_partner_through",
-    )
-    roles = models.ManyToManyField(
-        "account.Role",
-        related_name="business_area_partner_through",
-    )
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["business_area", "partner"],
-                name="unique_business_area_partner",
-            )
-        ]
-
-
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     """BusinessArea (EPRP called Workspace, also synonym was country/region) model.
 
@@ -80,11 +55,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
-    partners = models.ManyToManyField(
-        to="account.Partner",
-        through=BusinessAreaPartnerThrough,
-        related_name="business_areas",
-    )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     office_country = models.ForeignKey(
         "geo.Country",
@@ -100,6 +70,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     region_name = models.CharField(max_length=8)
     has_data_sharing_agreement = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
+    rdi_import_xlsx_disabled = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
     # TODO: deprecated to remove in the next release
@@ -357,11 +328,6 @@ class PeriodicFieldData(models.Model):
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
     rounds_names = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     number_of_rounds = models.IntegerField()
-    rounds_covered = models.PositiveSmallIntegerField(
-        default=0,
-        blank=True,
-        help_text="Number of rounds already used in templates and cannot be used in template creation again.",
-    )
 
     class Meta:
         verbose_name = "Periodic Field Data"
@@ -373,11 +339,6 @@ class PeriodicFieldData(models.Model):
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
         super().save(*args, **kwargs)
-
-    def clean(self) -> None:
-        if self.rounds_covered > self.number_of_rounds:
-            raise ValidationError({"rounds_covered": "Used rounds cannot exceed the total number of rounds."})
-        super().clean()
 
 
 class XLSXKoboTemplateManager(models.Manager):

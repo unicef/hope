@@ -46,6 +46,19 @@ function EditIndividualDataChange({
   const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const dynamicProgramSlug =
+    programSlug ||
+    (programId !== 'all'
+      ? programId
+      : (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.program?.slug) ||
+        (typeof values.selectedHousehold === 'object' &&
+          values.selectedHousehold?.programSlug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.program?.slug) ||
+        (typeof values.selectedIndividual === 'object' &&
+          values.selectedIndividual?.programSlug));
+
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: IndividualDetail | IndividualList =
     values.selectedIndividual;
@@ -87,22 +100,23 @@ function EditIndividualDataChange({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery<IndividualDetail>({
-    queryKey: [
-      'individual',
-      businessArea,
-      individual?.id,
-      programSlug,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug: businessArea,
-        id: individual.id,
-        programSlug: programSlug,
-      }),
-    enabled: Boolean(individual && businessArea && programSlug),
-  });
+  const { data: fullIndividual, isLoading: fullIndividualLoading } =
+    useQuery<IndividualDetail>({
+      queryKey: [
+        'individual',
+        businessArea,
+        individual?.id,
+        dynamicProgramSlug,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          id: individual.id,
+          programSlug: dynamicProgramSlug,
+        }),
+      enabled: Boolean(individual && businessArea && dynamicProgramSlug),
+    });
 
   useEffect(() => {
     if (

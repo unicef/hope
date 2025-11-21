@@ -6,6 +6,7 @@ from celery.exceptions import Retry
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -22,6 +23,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
+    payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
@@ -406,6 +408,38 @@ class TestPaymentCeleryTask(TestCase):
         send_payment_plan_reconciliation_overdue_email(str(pp.id))
         mock_service.send_reconciliation_overdue_email_for_pp.assert_called_once()
 
+    @patch("hope.apps.payment.celery_tasks.logger")
+    def test_payment_plan_apply_engine_rule_failure_if_rule_commit_not_released(self, mock_logger: Mock) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+            business_area=self.ba,
+            status=PaymentPlan.Status.LOCKED,
+            background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
+        )
+        rule = RuleFactory(name="test_rule", type=Rule.TYPE_PAYMENT_PLAN)
+        rule_commit = RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule, is_release=False)
+
+        assert rule_commit.is_release is False
+        payment_plan_apply_engine_rule(str(payment_plan.id), str(rule.id))
+
+        mock_logger.error.assert_called_once_with("PaymentPlan Run Engine Rule Error no RuleCommit")
+
+        payment_plan.refresh_from_db(fields=["background_action_status"])
+        assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
+
+        # run one more time
+        rule_commit.is_release = True
+        rule_commit.save()
+        rule_commit.refresh_from_db(fields=["is_release"])
+
+        assert rule_commit.is_release is True
+        payment_plan_apply_engine_rule(str(payment_plan.id), str(rule.id))
+
+        payment_plan.refresh_from_db(fields=["background_action_status", "steficon_rule_id"])
+        assert str(payment_plan.steficon_rule_id) == str(rule_commit.id)
+        assert payment_plan.background_action_status is None
+
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):
     @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
@@ -438,6 +472,13 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         self,
         mock_service_cls: Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         create_afghanistan()
         wu_qcf_file = WesternUnionInvoice.objects.create(
             name="TEST",
@@ -452,6 +493,31 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         qcf_report.refresh_from_db()
         assert qcf_report.sent
 
+    @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+    def test_sends_email_disabled(
+        self,
+        mock_service_cls: Mock,
+    ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="False",
+            required=False,
+        )
+        create_afghanistan()
+        wu_qcf_file = WesternUnionInvoice.objects.create(
+            name="TEST",
+        )
+        qcf_report = WesternUnionPaymentPlanReport.objects.create(
+            qcf_file=wu_qcf_file,
+            payment_plan=PaymentPlanFactory(),
+        )
+        mock_service = mock_service_cls.return_value
+        send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
+        mock_service.send_notification_emails.assert_not_called()
+        qcf_report.refresh_from_db()
+        assert not qcf_report.sent
+
     @patch("hope.apps.payment.celery_tasks.logger.exception")
     @patch("hope.apps.payment.celery_tasks.send_qcf_report_email_notifications.retry")
     @patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
@@ -461,6 +527,12 @@ class SendQCFReportEmailNotificationsTests(TestCase):
         mock_retry: Mock,
         mock_logger_exception: Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
         create_afghanistan()
         wu_qcf_file = WesternUnionInvoice.objects.create(name="TEST")
         qcf_report = WesternUnionPaymentPlanReport.objects.create(

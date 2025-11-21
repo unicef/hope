@@ -150,7 +150,7 @@ function CreateFeedbackPage(): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const steps = [
@@ -370,21 +370,28 @@ function CreateFeedbackPage(): ReactElement {
                                   'Select correctly answered questions (minimum 5)',
                                 )}
                               </Typography> */}
-                              <Box py={4}>
-                                <Typography variant="subtitle2">
-                                  {t(
-                                    `${beneficiaryGroup?.groupLabel} Questionnaire`,
-                                  )}
-                                </Typography>
+                              {!isSocialDctType && (
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} programSlug={
-                                    values.selectedHousehold?.programSlug ||
-                                    values.selectedHousehold?.program?.slug ||
-                                    values.selectedIndividual?.program?.slug ||
-                                    values.selectedIndividual?.programSlug
-                                  } />
+                                  <Typography variant="subtitle2">
+                                    {t(
+                                      `${beneficiaryGroup?.groupLabel} Questionnaire`,
+                                    )}
+                                  </Typography>
+                                  <Box py={4}>
+                                    <HouseholdQuestionnaire
+                                      values={values}
+                                      programSlug={
+                                        values.selectedHousehold?.programSlug ||
+                                        values.selectedHousehold?.program
+                                          ?.slug ||
+                                        values.selectedIndividual?.program
+                                          ?.slug ||
+                                        values.selectedIndividual?.programSlug
+                                      }
+                                    />
+                                  </Box>
                                 </Box>
-                              </Box>
+                              )}
                               <Typography variant="subtitle2">
                                 {t(
                                   `${beneficiaryGroup?.memberLabel} Questionnaire`,
@@ -427,13 +434,17 @@ function CreateFeedbackPage(): ReactElement {
                                       : 'Negative Feedback'}
                                   </LabelizedField>
                                 </Grid>
-                                <Grid size={{ xs: 6 }}>
-                                  <LabelizedField
-                                    label={t(`${beneficiaryGroup?.groupLabel}`)}
-                                  >
-                                    {values.selectedHousehold?.unicefId}
-                                  </LabelizedField>
-                                </Grid>
+                                {!isSocialDctType && (
+                                  <Grid size={{ xs: 6 }}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.groupLabel}`,
+                                      )}
+                                    >
+                                      {values.selectedHousehold?.unicefId}
+                                    </LabelizedField>
+                                  </Grid>
+                                )}
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField
                                     label={t(
@@ -460,12 +471,6 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
-                              {touched.description &&
-                                typeof errors.description === 'string' && (
-                                  <FormHelperText error>
-                                    {errors.description}
-                                  </FormHelperText>
-                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field

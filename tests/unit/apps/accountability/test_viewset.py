@@ -286,7 +286,17 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area"
             assert resp_data["language"] == "test language"
             assert resp_data["comments"] == "test comments"
-            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
+            assert resp_data["admin_url"] is None
+
+    def test_feedback_details_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -712,7 +722,17 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area 111"
             assert resp_data["language"] == "test language 111"
             assert resp_data["comments"] == "test comments 111"
-            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_1.id)}/change/"
+            assert resp_data["admin_url"] is None
+
+    def test_feedback_details_per_program_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -1097,9 +1117,12 @@ class TestMessageViewSet:
             business_area=self.afghanistan,
             program_cycle=self.program_active.cycles.first(),
         )
+
+        birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
         self.households = [
             create_household(
                 household_args={"program": self.program_active},
+                individual_args={"birth_date": birth_date_for_50yo, "sex": "MALE"},
             )[0]
             for _ in range(14)
         ]
@@ -1275,7 +1298,17 @@ class TestMessageViewSet:
             assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
             assert resp_data["random_sampling_arguments"] is None
             assert resp_data["sample_size"] == 0
-            assert resp_data["admin_url"] is not None
+            assert resp_data["admin_url"] is None
+
+    def test_msg_details_admin_url(
+        self,
+    ) -> None:
+        self.user.is_superuser = True
+        self.user.save()
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["admin_url"] == self.msg_1.admin_url
 
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
@@ -1384,7 +1417,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1456,7 +1489,7 @@ class TestMessageViewSet:
                     "body": "Thank you for tests! Looks Good To Me!",
                     "sampling_type": Survey.SAMPLING_RANDOM,
                     "random_sampling_arguments": {
-                        "age": {"max": 80, "min": 30},
+                        "age": {"max": 80, "min": 15},
                         "sex": "MALE",
                         "margin_of_error": 20.0,
                         "confidence_interval": 0.9,
@@ -1561,7 +1594,7 @@ class TestMessageViewSet:
             "payment_plan": str(self.payment_plan.pk),
             "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
+                "age": {"max": 80, "min": 15},
                 "sex": "MALE",
                 "margin_of_error": 20.0,
                 "confidence_interval": 0.9,
@@ -1571,7 +1604,11 @@ class TestMessageViewSet:
 
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 14, "sample_size": 1}
+        assert response.json() == {
+            "number_of_recipients": 14,
+            "sample_size": 1,
+            "excluded_recipients_count": 0,
+        }
 
     def test_filter_messages_by_created_at(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1672,7 +1709,9 @@ class TestSurveyViewSet:
             business_area=self.afghanistan,
             status=Program.ACTIVE,
         )
-        hoh1 = IndividualFactory(household=None)
+        birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+
+        hoh1 = IndividualFactory(household=None, birth_date=birth_date_for_50yo, sex="MALE")
         self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
         self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
@@ -1972,45 +2011,6 @@ class TestSurveyViewSet:
         resp_data = response.json()
         assert len(resp_data) == 2
 
-    def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
-            self.afghanistan,
-            self.program_active,
-        )
-        url = reverse(
-            "api:accountability:surveys-sample-size",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program_active.slug,
-            },
-        )
-        data = {
-            "payment_plan": str(self.payment_plan.pk),
-            "sampling_type": Survey.SAMPLING_RANDOM,
-            "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
-                "sex": "MALE",
-                "margin_of_error": 20.0,
-                "confidence_interval": 0.9,
-                "excluded_admin_areas": [],
-            },
-        }
-
-        response = self.client.post(url, data=data, format="json")
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
-
-        data = {
-            "sampling_type": Survey.SAMPLING_FULL_LIST,
-            "full_list_arguments": {"excluded_admin_areas": []},
-        }
-
-        response = self.client.post(url, data=data, format="json")
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 1}
-
     def test_filter_surveys_by_created_at(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -2090,3 +2090,229 @@ class TestSurveyViewSet:
             response = self.client.get(self.url_flows)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == ["Token is not provided."]
+
+    def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        url = reverse(
+            "api:accountability:surveys-sample-size",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        data = {
+            "payment_plan": str(self.payment_plan.pk),
+            "sampling_type": Survey.SAMPLING_RANDOM,
+            "random_sampling_arguments": {
+                "age": {"max": 80, "min": 30},
+                "sex": "MALE",
+                "margin_of_error": 20.0,
+                "confidence_interval": 0.9,
+                "excluded_admin_areas": [],
+            },
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == {
+            "number_of_recipients": 1,
+            "sample_size": 1,
+            "excluded_recipients_count": 0,
+        }
+
+        data = {
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == {
+            "number_of_recipients": 1,
+            "sample_size": 1,
+            "excluded_recipients_count": 0,
+        }
+
+    def test_sample_size_with_excluded_recipients_phone_validation(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+
+        # Household 1: Empty phone number
+        hoh_empty_phone = IndividualFactory(household=None, phone_no="", phone_no_valid=False)
+        hh_empty_phone = HouseholdFactory(program=self.program_active, head_of_household=hoh_empty_phone)
+        PaymentFactory(parent=self.payment_plan, program=self.program_active, household=hh_empty_phone)
+
+        # Household 2: Invalid phone number
+        hoh_invalid_phone = IndividualFactory(household=None, phone_no="invalid123", phone_no_valid=False)
+        hh_invalid_phone = HouseholdFactory(program=self.program_active, head_of_household=hoh_invalid_phone)
+        PaymentFactory(parent=self.payment_plan, program=self.program_active, household=hh_invalid_phone)
+
+        # Household 3: Valid phone number
+        hoh_valid_phone = IndividualFactory(household=None, phone_no_valid=True)
+        hh_valid_phone = HouseholdFactory(program=self.program_active, head_of_household=hoh_valid_phone)
+        PaymentFactory(parent=self.payment_plan, program=self.program_active, household=hh_valid_phone)
+
+        # Household 4: Another valid phone number
+        hoh_valid_phone2 = IndividualFactory(household=None, phone_no_valid=True)
+        hh_valid_phone2 = HouseholdFactory(program=self.program_active, head_of_household=hoh_valid_phone2)
+        PaymentFactory(parent=self.payment_plan, program=self.program_active, household=hh_valid_phone2)
+
+        url = reverse(
+            "api:accountability:surveys-sample-size",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+
+        data = {
+            "payment_plan": str(self.payment_plan.pk),
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        response_data = response.json()
+        # Should include 3 valid recipients (original hh_1 + 2 new valid phone households)
+        # Should exclude 2 recipients (empty phone, invalid phone)
+        assert response_data["number_of_recipients"] == 3
+        assert response_data["sample_size"] == 3
+        assert response_data["excluded_recipients_count"] == 2
+
+    def test_sample_size_all_excluded_recipients(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+
+        # Create a new payment plan with only invalid phone households
+        payment_plan_invalid = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+
+        # Create households with only invalid phone numbers
+        for _i in range(2):
+            hoh_invalid = IndividualFactory(
+                household=None,
+                phone_no="invalid",
+                phone_no_valid=False,
+            )
+            hh_invalid = HouseholdFactory(program=self.program_active, head_of_household=hoh_invalid)
+            PaymentFactory(parent=payment_plan_invalid, program=self.program_active, household=hh_invalid)
+
+        url = reverse(
+            "api:accountability:surveys-sample-size",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+
+        data = {
+            "payment_plan": str(payment_plan_invalid.pk),
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        response_data = response.json()
+        assert response_data["number_of_recipients"] == 0
+        assert response_data["sample_size"] == 0
+        assert response_data["excluded_recipients_count"] == 2
+
+    def test_survey_creation_with_excluded_recipients(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+
+        payment_plan_mixed = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+
+        # Valid phone household
+        hoh_valid = IndividualFactory(household=None, phone_no_valid=True)
+        hh_valid = HouseholdFactory(program=self.program_active, head_of_household=hoh_valid)
+        PaymentFactory(parent=payment_plan_mixed, program=self.program_active, household=hh_valid)
+
+        # Invalid phone household
+        hoh_invalid = IndividualFactory(household=None, phone_no="notavalidphone", phone_no_valid=False)
+        hh_invalid = HouseholdFactory(program=self.program_active, head_of_household=hoh_invalid)
+        PaymentFactory(parent=payment_plan_mixed, program=self.program_active, household=hh_invalid)
+
+        url = reverse(
+            "api:accountability:surveys-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+
+        # Test successful survey creation with mixed phone validation
+        data = {
+            "title": "Test Survey with Mixed Recipients",
+            "body": "Test survey body",
+            "category": Survey.CATEGORY_SMS,
+            "payment_plan": str(payment_plan_mixed.pk),
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        survey = Survey.objects.get(pk=response.json()["id"])
+        # Should have 1 valid recipient, 1 excluded
+        assert survey.number_of_recipients == 1
+        assert survey.recipients.count() == 1
+        assert survey.recipients.first().head_of_household.phone_no_valid is True
+
+        # Test survey creation with all invalid recipients should fail
+        payment_plan_all_invalid = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+
+        hoh_no_valid = IndividualFactory(household=None, phone_no="invalid", phone_no_valid=False)
+        hh_no_valid = HouseholdFactory(program=self.program_active, head_of_household=hoh_no_valid)
+        PaymentFactory(parent=payment_plan_all_invalid, program=self.program_active, household=hh_no_valid)
+
+        data_invalid = {
+            "title": "Test Survey All Invalid",
+            "body": "Test survey body",
+            "category": Survey.CATEGORY_SMS,
+            "payment_plan": str(payment_plan_all_invalid.pk),
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data_invalid, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "recipients were excluded because they do not have valid phone numbers" in str(response.json())

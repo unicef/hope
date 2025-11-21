@@ -144,12 +144,13 @@ function Entitlement({
 
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: ['engineRules'],
+      queryKey: ['engineRules', businessArea],
       queryFn: () =>
         RestService.restEngineRulesList({
           type: 'PAYMENT_PLAN',
           deprecated: false,
           enabled: true,
+          businessArea: businessArea,
         }),
     });
 
@@ -206,6 +207,8 @@ function Entitlement({
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
       BackgroundActionStatusEnum.XLSX_EXPORTING ||
+    paymentPlan?.backgroundActionStatus ===
+      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
     !isActiveProgram;
 
   return (
