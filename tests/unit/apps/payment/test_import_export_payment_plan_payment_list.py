@@ -220,8 +220,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        assert to_decimal(wb.active["K2"].value) == payment_1.entitlement_quantity
-        assert to_decimal(wb.active["K3"].value) == payment_2.entitlement_quantity
+        assert to_decimal(wb.active["J2"].value) == payment_1.entitlement_quantity
+        assert to_decimal(wb.active["J3"].value) == payment_2.entitlement_quantity
 
     def test_export_payment_plan_payment_list(self) -> None:
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
