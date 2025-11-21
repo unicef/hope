@@ -1,10 +1,14 @@
 from decimal import Decimal
 import logging.config
+from io import BytesIO
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
+from django.core.files.base import ContentFile, File
 from django.test import TestCase
 from flags.models import FlagState
 import pytest
@@ -33,7 +37,8 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
-    update_exchange_rate_on_release_payments,
+    update_exchange_rate_on_release_payments, import_payment_plan_payment_list_from_xlsx,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
@@ -439,6 +444,53 @@ class TestPaymentCeleryTask(TestCase):
         payment_plan.refresh_from_db(fields=["background_action_status", "steficon_rule_id"])
         assert str(payment_plan.steficon_rule_id) == str(rule_commit.id)
         assert payment_plan.background_action_status is None
+
+    def test_import_payment_plan_payment_list_from_xlsx(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+        )
+        content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_valid.xlsx").read_bytes()
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created_by=self.user,
+            file=File(BytesIO(content), name="pp_payment_list_valid.xlsx"),
+        )
+        payment_plan.imported_file = file_temp
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+
+        import_payment_plan_payment_list_from_xlsx(str(payment_plan.pk))
+
+        payment_plan.refresh_from_db()
+        assert payment_plan.background_action_status is None
+
+    def test_import_payment_plan_payment_list_per_fsp_from_xlsx(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
+        )
+        content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_reconciliation.xlsx").read_bytes()
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created_by=self.user,
+            file=File(BytesIO(content), name="pp_payment_list_reconciliation.xlsx"),
+        )
+        payment_plan.reconciliation_import_file = file_temp
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+
+        import_payment_plan_payment_list_per_fsp_from_xlsx(str(payment_plan.pk))
+
+        payment_plan.refresh_from_db()
+        assert payment_plan.background_action_status is None
+        assert payment_plan.status == PaymentPlan.Status.FINISHED
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

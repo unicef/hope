@@ -282,7 +282,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
     try:
         from hope.apps.payment.models import PaymentPlan
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-        from hope.apps.program.utils import increment_program_cycle_list_version_cache
+        from hope.apps.program.utils import increment_program_cycle_list_version_cache  # 3
+        print("teststststs ==== 333 ================================")
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -296,13 +297,15 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
                 payment_plan.background_action_status_none()
                 payment_plan.update_money_fields()
 
-                if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
+                if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:  # 4
+                    print("teststststs ==== 444 ================================")
                     payment_plan.status_finished()
 
                 payment_plan.save()
 
                 # invalidate  cache for program cycle list
-                increment_program_cycle_list_version_cache(payment_plan.program.slug, payment_plan.bussiness_area.slug)
+                increment_program_cycle_list_version_cache(payment_plan.program.slug, payment_plan.bussiness_area.slug)  # 5
+                print("teststststs ==== 555 ================================")
 
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
 
