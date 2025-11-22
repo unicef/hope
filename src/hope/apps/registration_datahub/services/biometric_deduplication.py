@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.urls import reverse
@@ -49,7 +50,7 @@ class BiometricDeduplicationService:
         )
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.id),
-            notification_url=notification_url,
+            notification_url=f"https://{settings.DOMAIN_NAME}{notification_url}",
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
         deduplication_set_id = uuid.UUID(response_data["id"])
