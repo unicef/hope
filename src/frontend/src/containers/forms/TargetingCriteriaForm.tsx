@@ -332,6 +332,7 @@ export const TargetingCriteriaForm = ({
           const mappedDeliveryMechanisms = fsps.map((el) => ({
             name: el.deliveryMechanism.name,
             value: el.deliveryMechanism.code,
+            accountType: el.deliveryMechanism.accountType,
           }));
           const mappedFsps =
             fsps
@@ -341,6 +342,8 @@ export const TargetingCriteriaForm = ({
               ?.fsps.map((el) => ({ name: el.name, value: el.id, hasConfig: el.hasConfig })) || [];
           const selectedFspHasConfig =
             mappedFsps.find((f) => f.value === values.fsp)?.hasConfig === true || false;
+          const selectedDmAccountType =
+            mappedDeliveryMechanisms.find((f) => f.value === values.deliveryMechanism)?.accountType;
 
           const handleSave = () => {
             // case 1: user didn't choose payment channel at all
@@ -360,7 +363,7 @@ export const TargetingCriteriaForm = ({
             if (
               criteriaIndex === 0 &&
               values.deliveryMechanism &&
-              values.deliveryMechanism != 'cash' &&
+              !!selectedDmAccountType &&
               values.fsp &&
               !selectedFspHasConfig
             ) {
