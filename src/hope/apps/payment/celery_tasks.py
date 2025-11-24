@@ -825,6 +825,12 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
     rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
+        payment_plan.background_action_status_steficon_error()
+        payment_plan.save(update_fields=["background_action_status"])
+        return
+
     if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])
