@@ -106,10 +106,11 @@ function AddIndividualGrievanceDetails({
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
       const fieldAttribute = fieldsDict[key];
-      if (fieldAttribute.type === 'BOOL') {
+      console.log('fieldAttribute', fieldAttribute);
+      if (fieldAttribute?.type === 'BOOL') {
         textValue = renderBoolean(value as boolean);
       }
-      if (fieldAttribute.type === 'SELECT_ONE') {
+      if (fieldAttribute?.type === 'SELECT_ONE') {
         textValue =
           fieldAttribute.choices.find((item) => item.value === value)
             ?.labelEn || '-';
