@@ -25,12 +25,14 @@ export const IndividualAdditionalRegistrationInformation = ({
   flexFieldsData,
 }: IndividualAdditionalRegistrationInformationProps): ReactElement => {
   const { t } = useTranslation();
+
   const flexAttributesDict = useArrayToDict(
     flexFieldsData?.allIndividualsFlexFieldsAttributes,
     'name',
     '*',
   );
-  if (!flexAttributesDict || Object.keys(flexAttributesDict).length === 0) {
+
+  if (Object.entries(individual?.flexFields || {}).length === 0) {
     return (
       <Overview>
         <Title>
@@ -42,11 +44,8 @@ export const IndividualAdditionalRegistrationInformation = ({
     );
   }
 
-  const fields = Object.entries(individual?.flexFields || {})
-    .filter(([key]) => {
-      return flexAttributesDict[key];
-    })
-    .map(([key, value]: [string, string | string[]]) => {
+  const fields = Object.entries(individual?.flexFields || {}).map(
+    ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
           <LabelizedField
@@ -89,7 +88,8 @@ export const IndividualAdditionalRegistrationInformation = ({
           value={value}
         />
       );
-    });
+    },
+  );
   return (
     <Overview>
       <Title>
