@@ -586,6 +586,7 @@ def generate_rdi_unique_name(program: Program) -> str:
 
 
 def increment_program_cycle_list_version_cache(business_area_slug: str, program_slug: str) -> None:
+    # TODO: this one invalidate whole BA cache FYI
     version_key = f"{business_area_slug}:version"
     get_or_create_cache_key(version_key, 1)
     cache.incr(version_key)
