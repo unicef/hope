@@ -64,7 +64,7 @@ const SubTitle = styled(Typography)`
 const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
 
   const location = useLocation();
   const permissions = usePermissions();
@@ -82,10 +82,16 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   );
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
-    queryKey: ['householdsFieldsAttributes'],
+    queryKey: ['fieldsAttributes', businessArea, programId],
     queryFn: async () => {
-      const data = await FieldsAttributesService.fieldsAttributesRetrieve();
-      return { allHouseholdsFlexFieldsAttributes: data };
+      const data =
+        await RestService.restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+        );
+      return { allHouseholdsFlexFieldsAttributes: data.results };
     },
   });
 

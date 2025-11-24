@@ -107,11 +107,27 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
       label: partner.name,
       disabled: selectedPartners.some((p) => p.id === partner.value),
     }));
@@ -1301,6 +1317,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
+  const notUnderscoreKeys = ['dataFields'];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1308,7 +1325,9 @@ export function deepUnderscore(data) {
       data,
       (result, value, key) => {
         // Special handling for keys that follow the pattern of letters followed by numbers
-        if (/^[a-zA-Z]+\d+$/.test(key)) {
+        if (notUnderscoreKeys.includes(key)) {
+          result[_.snakeCase(key)] = value;
+        } else if (/^[a-zA-Z]+\d+$/.test(key)) {
           // Keep original key for letter+number pattern fields
           result[key] = deepUnderscore(value);
         } else {

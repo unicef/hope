@@ -35,6 +35,18 @@ export const HouseholdAdditionalRegistrationInformation = ({
     '*',
   );
 
+  if (Object.entries(household?.flexFields || {}).length === 0) {
+    return (
+      <Overview>
+        <Title>
+          <Typography variant="h6">
+            {t('No additional registration information available')}
+          </Typography>
+        </Title>
+      </Overview>
+    );
+  }
+
   const fields = Object.entries(household?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {

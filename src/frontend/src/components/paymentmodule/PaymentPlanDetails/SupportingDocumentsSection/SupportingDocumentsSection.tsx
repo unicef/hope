@@ -80,15 +80,9 @@ export const SupportingDocumentsSection = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [titleError, setTitleError] = useState('');
 
-  const canUploadFile =
-    hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
-      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
+  const canUploadFile = hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions);
 
-  const canRemoveFile =
-    hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
-      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
+  const canRemoveFile = hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions);
 
   const canDownloadFile = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_SUPPORTING_DOCUMENT,
