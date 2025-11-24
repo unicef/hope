@@ -98,6 +98,7 @@ class PaymentPlan(
             "targeting_criteria_string",
             "excluded_ids",
             "abort_comment",
+            "reconciliation_import_file",
         ],
         {
             "steficon_rule": "additional_formula",

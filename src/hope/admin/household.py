@@ -357,6 +357,10 @@ class HouseholdWithdrawFromListMixin:
 
 class RepresentativesInline(admin.TabularInline):
     model = IndividualRoleInHousehold
+    autocomplete_fields = (
+        "individual",
+        "copied_from",
+    )
     extra = 1
 
 
