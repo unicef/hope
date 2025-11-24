@@ -67,7 +67,7 @@ const OfficeSearchPage = (): ReactElement => {
   const initialFilter = {
     whatToSearch: '',
     whereToSearch: '',
-    search: '',
+    office_search: '',
   };
 
   const [filter, setFilter] = useState(
@@ -98,20 +98,33 @@ const OfficeSearchPage = (): ReactElement => {
   const hhQueryVariables = {
     businessAreaSlug: businessArea,
     programSlug: programId,
-    search: appliedFilter.search,
+    office_search: appliedFilter.office_search,
   };
 
   const indQueryVariables = {
     businessAreaSlug: businessArea,
     programSlug: programId,
-    search: appliedFilter.search,
+    office_search: appliedFilter.office_search,
   };
 
   const grvQueryVariables = {
     businessAreaSlug: businessArea,
     program: programId,
-    search: appliedFilter.search,
+    office_search: appliedFilter.office_search,
   };
+
+  const ppQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    office_search: appliedFilter.office_search,
+  };
+
+  const paymentsQueryVariables = {
+    businessAreaSlug: businessArea,
+    office_search: appliedFilter.office_search,
+  };
+
+  // Query variables for Payment Plans and Payments
 
   // Households query
   const {
@@ -127,13 +140,12 @@ const OfficeSearchPage = (): ReactElement => {
     ],
     queryFn: () =>
       RestService.restBusinessAreasHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
-          hhQueryVariables,
-          { withPagination: true },
-        ),
+        createApiParams(hhQueryVariables, hhQueryVariables, {
+          withPagination: true,
+        }),
       ),
-    enabled: appliedFilter.whereToSearch === 'HH' && !!appliedFilter.search,
+    enabled:
+      appliedFilter.whereToSearch === 'HH' && !!appliedFilter.office_search,
   });
 
   // Individuals query
@@ -156,7 +168,8 @@ const OfficeSearchPage = (): ReactElement => {
           { withPagination: true },
         ),
       ),
-    enabled: appliedFilter.whereToSearch === 'IND' && !!appliedFilter.search,
+    enabled:
+      appliedFilter.whereToSearch === 'IND' && !!appliedFilter.office_search,
   });
 
   // Grievances query (if needed)
@@ -170,20 +183,17 @@ const OfficeSearchPage = (): ReactElement => {
       grvQueryVariables,
       businessArea,
       programId,
-      appliedFilter.search,
       appliedFilter.whatToSearch,
+      appliedFilter.office_search,
     ],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsList({
-        businessAreaSlug: businessArea,
-        search: buildSearchString(
-          appliedFilter.search,
-          appliedFilter.whatToSearch,
-        ),
+        ...grvQueryVariables,
         limit: 10,
         offset: 0,
       }),
-    enabled: appliedFilter.whereToSearch === 'GRV' && !!appliedFilter.search,
+    enabled:
+      appliedFilter.whereToSearch === 'GRV' && !!appliedFilter.office_search,
   });
 
   // Payment Plans query (for 'PP' search)
@@ -194,39 +204,43 @@ const OfficeSearchPage = (): ReactElement => {
   } = useQuery({
     queryKey: [
       'businessAreasProgramsPaymentPlansList',
+      ppQueryVariables,
       businessArea,
       programId,
-      appliedFilter.search,
+      appliedFilter.office_search,
       appliedFilter.whatToSearch,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        search: buildSearchString(
-          appliedFilter.search,
-          appliedFilter.whatToSearch,
-        ),
+        ...ppQueryVariables,
         limit: 10,
         offset: 0,
       }),
-    enabled: appliedFilter.whereToSearch === 'PP' && !!appliedFilter.search,
+    enabled:
+      appliedFilter.whereToSearch === 'PP' && !!appliedFilter.office_search,
   });
 
   // Payments query (for 'RCPT' search)
+
   const {
     data: paymentsData,
     isLoading: isLoadingPayments,
     error: errorPayments,
   } = useQuery({
-    queryKey: ['businessAreasPaymentsList', businessArea, appliedFilter.search],
+    queryKey: [
+      'businessAreasPaymentsList',
+      paymentsQueryVariables,
+      businessArea,
+      appliedFilter.office_search,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasPaymentsList({
-        businessAreaSlug: businessArea,
+        ...paymentsQueryVariables,
         limit: 10,
         offset: 0,
       }),
-    enabled: appliedFilter.whereToSearch === 'RCPT' && !!appliedFilter.search,
+    enabled:
+      appliedFilter.whereToSearch === 'RCPT' && !!appliedFilter.office_search,
   });
 
   // Debug logs
