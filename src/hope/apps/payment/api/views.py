@@ -42,7 +42,12 @@ from hope.apps.payment.api.caches import (
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
-from hope.apps.payment.api.filters import PaymentPlanFilter, TargetPopulationFilter
+from hope.apps.payment.api.filters import (
+    PaymentOfficeSearchFilter,
+    PaymentPlanFilter,
+    PaymentPlanOfficeSearchFilter,
+    TargetPopulationFilter,
+)
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
@@ -1455,6 +1460,23 @@ class PaymentPlanViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan reactivate abort"})
 
 
+class PaymentPlanGlobalViewSet(
+    BusinessAreaProgramsAccessMixin,
+    SerializerActionMixin,
+    CountActionMixin,
+    PaymentPlanMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+    }
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    program_model_field = "program_cycle__program"
+    filterset_class = PaymentPlanOfficeSearchFilter
+
+
 class TargetPopulationViewSet(
     CountActionMixin,
     ProgramMixin,
@@ -1966,6 +1988,7 @@ class PaymentGlobalViewSet(
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
     filter_backends = (OrderingFilter,)
+    filterset_class = PaymentOfficeSearchFilter
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
