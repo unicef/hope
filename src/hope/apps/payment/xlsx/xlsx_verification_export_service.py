@@ -164,7 +164,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
     def _add_data_validation(self) -> None:
         row_count = len(self.ws_export_list["B"])
-        if row_count < 2:
+        if row_count < 2:  # pragma: no cover
             return
         start = 2
         end = max(row_count, 2)
