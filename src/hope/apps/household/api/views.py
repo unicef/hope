@@ -40,7 +40,12 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualPhotoDetailSerializer,
 )
-from hope.apps.household.filters import HouseholdFilter, IndividualFilter
+from hope.apps.household.filters import (
+    HouseholdFilter,
+    HouseholdOfficeSearchFilter,
+    IndividualFilter,
+    IndividualOfficeSearchFilter,
+)
 from hope.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.models import PaymentPlan
@@ -284,7 +289,7 @@ class HouseholdGlobalViewSet(
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = HouseholdFilter
+    filterset_class = HouseholdOfficeSearchFilter
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
     def get_list_queryset(self) -> QuerySet:
@@ -459,7 +464,7 @@ class IndividualGlobalViewSet(
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = IndividualFilter
+    filterset_class = IndividualOfficeSearchFilter
     admin_area_model_fields = [
         "household__admin1",
         "household__admin2",
