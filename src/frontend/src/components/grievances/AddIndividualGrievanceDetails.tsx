@@ -106,7 +106,6 @@ function AddIndividualGrievanceDetails({
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
       const fieldAttribute = fieldsDict[key];
-      console.log('fieldAttribute', fieldAttribute);
       if (fieldAttribute?.type === 'BOOL') {
         textValue = renderBoolean(value as boolean);
       }
