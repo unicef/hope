@@ -40,9 +40,6 @@ class VerificationPlanCrudServices:
         sampling = Sampling(input_data, payment_plan, payment_records)
         payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
 
-        if payment_verification_plan.sample_size == 0:
-            raise ValidationError("Not possible to create Payment Verification Plan with sample size 0")
-
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
@@ -65,8 +62,6 @@ class VerificationPlanCrudServices:
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
         pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
-        if pv_plan.sample_size == 0:
-            raise ValidationError("Not possible to create Payment Verification Plan with sample size 0")
 
         ProcessVerification(input_data, pv_plan).process()
         pv_plan.save()
