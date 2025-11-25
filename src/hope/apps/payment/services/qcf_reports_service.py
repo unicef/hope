@@ -46,6 +46,7 @@ class QCFReportPaymentRowData:
     principal_amount: float
     charges_amount: float
     fee_amount: float
+    ad_name_value: str
 
 
 @dataclasses.dataclass
@@ -68,16 +69,24 @@ class QCFReportsService:
     class QCFReportsServiceError(Exception):
         pass
 
+    def __init__(self):
+        self._ftp_client = None
+
+    @property
+    def ftp_client(self) -> WesternUnionFTPClient:
+        if self._ftp_client is None:
+            self._ftp_client = WesternUnionFTPClient()
+        return self._ftp_client
+
     def process_zip_file(self, file_content: io.BytesIO, wu_qcf_file: WesternUnionInvoice) -> None:
         with zipfile.ZipFile(file_content) as z:
             for zip_info in z.infolist():
-                if zip_info.filename.endswith(".cf") or zip_info.filename.endswith(".CF"):
+                if zip_info.filename.lower().endswith(".cf"):
                     with z.open(zip_info) as txt_file:
                         self.process_qcf_report_file(zip_info.filename, txt_file, wu_qcf_file)
 
     def process_files_since(self, date_from: datetime) -> None:
-        ftp_client = WesternUnionFTPClient()
-        files: list[tuple[str, io.BytesIO]] = ftp_client.get_files_since(date_from)
+        files: list[tuple[str, io.BytesIO]] = self.ftp_client.get_files_since(date_from)
         for filename, file_like in files:
             if not WesternUnionInvoice.objects.filter(name=filename).exists():
                 wu_qcf_file = self.store_qcf_file(filename, file_like)
@@ -116,6 +125,39 @@ class QCFReportsService:
             )
         WesternUnionInvoicePayment.objects.bulk_create(objs)
 
+    def get_related_ad_name_value(self, filename: str) -> str | None:
+        """Return the internal AD report name derived from a QCF filename.
+
+        Input QCF filename example: QCF-AUS000017-SY-20251118.ZIP
+        Expected AD .zip filename: AD-AUS000017-SY-20251118.ZIP
+        Expected AD internal file: ADVCP_E_C_0007_PIIC_25911592304_18_NOV_2025.pdf
+        """
+        core_name = filename[4:]  # remove 'QCF-'
+        if "." in core_name:  # remove extension
+            core_name = core_name.rsplit(".", 1)[0]
+        core_name = core_name.upper()
+        ad_search_name = f"AD-{core_name}"  # e.g. AD-AUS000017-SY-20251118
+
+        ad_files = self.ftp_client.get_files_by_name(ad_search_name)
+
+        if not ad_files:  # pragma no cover
+            logger.error(f"No WU FTP AD files found for {filename}")
+            return None
+
+        if len(ad_files) > 1:  # pragma no cover
+            raise self.QCFReportsServiceError(
+                f"More than one AD file found for '{filename}': {[f[0] for f in ad_files]}"
+            )
+
+        _, ad_file_like = ad_files[0]
+
+        with zipfile.ZipFile(ad_file_like) as z:
+            for zip_info in z.infolist():
+                if zip_info.filename.lower().endswith(".pdf"):
+                    return zip_info.filename.rsplit(".", 1)[0]
+
+        return None
+
     def process_qcf_report_file(self, filename: str, txt_file: IO[bytes], wu_qcf_file: WesternUnionInvoice) -> None:
         file_content = txt_file.read()
         payment_plan_id_payments_lines_map = defaultdict(list)
@@ -136,12 +178,14 @@ class QCFReportsService:
                 logger.error(f"{wu_qcf_file}: File:{filename}, Payment {payment_unicef_id} does not exist")
                 continue
 
+        ad_name_value = self.get_related_ad_name_value(wu_qcf_file.name)
+
         for payment_plan_id, payment_raw_data in payment_plan_id_payments_lines_map.items():
             payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
 
             with transaction.atomic():
                 self.link_payments_with_invoice(wu_qcf_file, payment_raw_data)
-                report_name, report = self.generate_report(payment_plan, payment_raw_data)
+                report_name, report = self.generate_report(payment_plan, payment_raw_data, ad_name_value)
 
                 wu_qcf_report = WesternUnionPaymentPlanReport.objects.create(
                     qcf_file=wu_qcf_file,
@@ -166,7 +210,7 @@ class QCFReportsService:
                 )
 
     def generate_report(
-        self, payment_plan: PaymentPlan, payment_raw_data: list[tuple[Payment, list]]
+        self, payment_plan: PaymentPlan, payment_raw_data: list[tuple[Payment, list]], ad_name_value: str | None = None
     ) -> tuple[str, openpyxl.Workbook]:
         no_of_qcf_reports_for_pp = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
         report_filename = (
@@ -196,6 +240,7 @@ class QCFReportsService:
                     principal_amount=float(fields[10]),
                     charges_amount=float(fields[11]),
                     fee_amount=float(fields[12]),
+                    ad_name_value=ad_name_value or "",
                 )
             )
 
@@ -221,6 +266,7 @@ class QCFReportsService:
             "Principal Amount",
             "Charges Amount",
             "Fee Amount",
+            "Advice Filename",
         ]
         ws.append(headers)
         for cell in ws[1]:
@@ -239,6 +285,7 @@ class QCFReportsService:
                     p.principal_amount,
                     p.charges_amount,
                     p.fee_amount,
+                    p.ad_name_value,
                 ]
             )
 

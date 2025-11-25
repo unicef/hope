@@ -236,7 +236,6 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
         from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
             XlsxPaymentPlanImportService,
         )
-        from hope.apps.program.utils import increment_program_cycle_list_version_cache
         from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -259,7 +258,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
                 payment_plan.update_money_fields()
 
             # invalidate cache for program cycle list
-            increment_program_cycle_list_version_cache(payment_plan.business_area.slug, payment_plan.program.slug)
+            payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("PaymentPlan Error import from xlsx")
             payment_plan.background_action_status_xlsx_import_error()
@@ -277,7 +276,6 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str) -> bool:
     try:
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-        from hope.apps.program.utils import increment_program_cycle_list_version_cache
         from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -298,7 +296,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
                 payment_plan.save()
 
                 # invalidate  cache for program cycle list
-                increment_program_cycle_list_version_cache(payment_plan.program.slug, payment_plan.business_area.slug)
+                payment_plan.program_cycle.save()
 
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
 
@@ -321,7 +319,6 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-    from hope.apps.program.utils import increment_program_cycle_list_version_cache
     from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     bulk_size = 1000
@@ -391,7 +388,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment_plan.update_money_fields()
 
         # invalidate cache for program cycle list
-        increment_program_cycle_list_version_cache(payment_plan.business_area.slug, payment_plan.program.slug)
+        payment_plan.program_cycle.save()
 
     except Exception as e:
         logger.exception("PaymentPlan Run Engine Rule Error")
@@ -404,7 +401,6 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) -> None:
-    from hope.apps.program.utils import increment_program_cycle_list_version_cache
     from hope.models import Payment, PaymentPlan
 
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
@@ -427,7 +423,7 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
             payment_plan.update_money_fields()
 
             # invalidate cache for program cycle list
-            increment_program_cycle_list_version_cache(payment_plan.business_area.slug, payment_plan.program.slug)
+            payment_plan.program_cycle.save()
 
     except Exception as e:
         logger.exception("PaymentPlan Update Exchange Rate On Release Payments Error")
@@ -509,7 +505,6 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-        from hope.apps.program.utils import increment_program_cycle_list_version_cache
         from hope.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -521,7 +516,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan.update_money_fields()
 
         # invalidate cache for program cycle list
-        increment_program_cycle_list_version_cache(payment_plan.business_area.slug, payment_plan.program.slug)
+        payment_plan.program_cycle.save()
     except Exception as e:
         logger.exception("Prepare Follow Up Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -541,7 +536,6 @@ def payment_plan_exclude_beneficiaries(
     try:
         from django.db.models import Q
 
-        from hope.apps.program.utils import increment_program_cycle_list_version_cache
         from hope.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=payment_plan_id)
@@ -629,7 +623,7 @@ def payment_plan_exclude_beneficiaries(
                 ]
             )
             # invalidate cache for program cycle list
-            increment_program_cycle_list_version_cache(payment_plan.business_area.slug, payment_plan.program.slug)
+            payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
             payment_plan.background_action_status_exclude_beneficiaries_error()
@@ -817,6 +811,12 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
     rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
+        payment_plan.background_action_status_steficon_error()
+        payment_plan.save(update_fields=["background_action_status"])
+        return
+
     if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])
