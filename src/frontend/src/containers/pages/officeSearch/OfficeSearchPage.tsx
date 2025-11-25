@@ -35,6 +35,13 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
 const OfficeSearchPage = (): ReactElement => {
+  const NoResultsMessage = (
+    <Box mt={4} textAlign="center">
+      <Typography variant="h6">
+        No results found. Please adjust your search criteria and try again.
+      </Typography>
+    </Box>
+  );
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,7 +74,7 @@ const OfficeSearchPage = (): ReactElement => {
   const initialFilter = {
     whatToSearch: '',
     whereToSearch: '',
-    office_search: '',
+    officeSearch: '',
   };
 
   const [filter, setFilter] = useState(
@@ -97,31 +104,27 @@ const OfficeSearchPage = (): ReactElement => {
 
   const hhQueryVariables = {
     businessAreaSlug: businessArea,
-    programSlug: programId,
-    office_search: appliedFilter.office_search,
+    officeSearch: appliedFilter.officeSearch,
   };
 
   const indQueryVariables = {
     businessAreaSlug: businessArea,
-    programSlug: programId,
-    office_search: appliedFilter.office_search,
+    officeSearch: appliedFilter.officeSearch,
   };
 
   const grvQueryVariables = {
     businessAreaSlug: businessArea,
-    program: programId,
-    office_search: appliedFilter.office_search,
+    officeSearch: appliedFilter.officeSearch,
   };
 
   const ppQueryVariables = {
     businessAreaSlug: businessArea,
-    programSlug: programId,
-    office_search: appliedFilter.office_search,
+    officeSearch: appliedFilter.officeSearch,
   };
 
   const paymentsQueryVariables = {
     businessAreaSlug: businessArea,
-    office_search: appliedFilter.office_search,
+    officeSearch: appliedFilter.officeSearch,
   };
 
   // Query variables for Payment Plans and Payments
@@ -135,17 +138,17 @@ const OfficeSearchPage = (): ReactElement => {
     queryKey: [
       'businessAreasHouseholdsList',
       hhQueryVariables,
-      programId,
       businessArea,
+      appliedFilter.officeSearch,
     ],
     queryFn: () =>
       RestService.restBusinessAreasHouseholdsList(
-        createApiParams(hhQueryVariables, hhQueryVariables, {
+        createApiParams({ businessAreaSlug: businessArea }, hhQueryVariables, {
           withPagination: true,
         }),
       ),
     enabled:
-      appliedFilter.whereToSearch === 'HH' && !!appliedFilter.office_search,
+      appliedFilter.whereToSearch === 'HH' && !!appliedFilter.officeSearch,
   });
 
   // Individuals query
@@ -158,18 +161,16 @@ const OfficeSearchPage = (): ReactElement => {
       'businessAreasIndividualsList',
       indQueryVariables,
       businessArea,
-      programId,
+      appliedFilter.officeSearch,
     ],
     queryFn: () =>
       RestService.restBusinessAreasIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
-          indQueryVariables,
-          { withPagination: true },
-        ),
+        createApiParams({ businessAreaSlug: businessArea }, indQueryVariables, {
+          withPagination: true,
+        }),
       ),
     enabled:
-      appliedFilter.whereToSearch === 'IND' && !!appliedFilter.office_search,
+      appliedFilter.whereToSearch === 'IND' && !!appliedFilter.officeSearch,
   });
 
   // Grievances query (if needed)
@@ -182,18 +183,17 @@ const OfficeSearchPage = (): ReactElement => {
       'businessAreasGrievancesList',
       grvQueryVariables,
       businessArea,
-      programId,
       appliedFilter.whatToSearch,
-      appliedFilter.office_search,
+      appliedFilter.officeSearch,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList({
-        ...grvQueryVariables,
-        limit: 10,
-        offset: 0,
-      }),
+      RestService.restBusinessAreasGrievanceTicketsList(
+        createApiParams({ businessAreaSlug: businessArea }, grvQueryVariables, {
+          withPagination: true,
+        }),
+      ),
     enabled:
-      appliedFilter.whereToSearch === 'GRV' && !!appliedFilter.office_search,
+      appliedFilter.whereToSearch === 'GRV' && !!appliedFilter.officeSearch,
   });
 
   // Payment Plans query (for 'PP' search)
@@ -203,21 +203,20 @@ const OfficeSearchPage = (): ReactElement => {
     error: errorPaymentPlans,
   } = useQuery({
     queryKey: [
-      'businessAreasProgramsPaymentPlansList',
+      'businessAreasPaymentPlansList',
       ppQueryVariables,
       businessArea,
-      programId,
-      appliedFilter.office_search,
+      appliedFilter.officeSearch,
       appliedFilter.whatToSearch,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansList({
-        ...ppQueryVariables,
-        limit: 10,
-        offset: 0,
-      }),
+      RestService.restBusinessAreasPaymentPlansList(
+        createApiParams({ businessAreaSlug: businessArea }, ppQueryVariables, {
+          withPagination: true,
+        }),
+      ),
     enabled:
-      appliedFilter.whereToSearch === 'PP' && !!appliedFilter.office_search,
+      appliedFilter.whereToSearch === 'PP' && !!appliedFilter.officeSearch,
   });
 
   // Payments query (for 'RCPT' search)
@@ -231,16 +230,20 @@ const OfficeSearchPage = (): ReactElement => {
       'businessAreasPaymentsList',
       paymentsQueryVariables,
       businessArea,
-      appliedFilter.office_search,
+      appliedFilter.officeSearch,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasPaymentsList({
-        ...paymentsQueryVariables,
-        limit: 10,
-        offset: 0,
-      }),
+      RestService.restBusinessAreasPaymentsList(
+        createApiParams(
+          { businessAreaSlug: businessArea },
+          paymentsQueryVariables,
+          {
+            withPagination: true,
+          },
+        ),
+      ),
     enabled:
-      appliedFilter.whereToSearch === 'RCPT' && !!appliedFilter.office_search,
+      appliedFilter.whereToSearch === 'RCPT' && !!appliedFilter.officeSearch,
   });
 
   // Debug logs
@@ -249,13 +252,6 @@ const OfficeSearchPage = (): ReactElement => {
   console.log('grvData', grvData);
   console.log('ppData', ppData);
   console.log('paymentsData', paymentsData);
-
-  const nothingToDisplay =
-    !hhData?.results?.length &&
-    !indData?.results?.length &&
-    !grvData?.results?.length &&
-    !ppData?.results?.length &&
-    !paymentsData?.results?.length;
 
   const whereToSearchOptions = [
     canViewHouseholds && {
@@ -345,67 +341,71 @@ const OfficeSearchPage = (): ReactElement => {
             <Grid size={6}>
               <SearchTextField
                 label={t('Search Value')}
-                value={filter.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
+                value={filter.officeSearch}
+                onChange={(e) =>
+                  handleFilterChange('officeSearch', e.target.value)
+                }
                 data-cy="office-filters-search"
               />
             </Grid>
           </Grid>
         </FiltersSection>
         <BaseSection>
-          {appliedFilter.whereToSearch === 'HH' && isLoadingHouseholds && (
-            <div>{t('Loading households...')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'HH' && errorHouseholds && (
-            <div>{t('Error loading households')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'IND' && isLoadingIndividuals && (
-            <div>{t('Loading individuals...')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'IND' && errorIndividuals && (
-            <div>{t('Error loading individuals')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'GRV' && isLoadingGrievances && (
-            <div>{t('Loading grievances...')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'GRV' && errorGrievances && (
-            <div>{t('Error loading grievances')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'PP' && isLoadingPaymentPlans && (
-            <div>{t('Loading payment plans...')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'PP' && errorPaymentPlans && (
-            <div>{t('Error loading payment plans')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'RCPT' && isLoadingPayments && (
-            <div>{t('Loading payments...')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'RCPT' && errorPayments && (
-            <div>{t('Error loading payments')}</div>
-          )}
-          {appliedFilter.whereToSearch === 'HH' && hhData && (
-            <HHDataTable hhData={hhData} />
-          )}
-          {appliedFilter.whereToSearch === 'IND' && indData && (
-            <INDDataTable indData={indData} />
-          )}
-          {appliedFilter.whereToSearch === 'GRV' && grvData && (
-            <GRVDataTable grvData={grvData} />
-          )}
-          {appliedFilter.whereToSearch === 'RCPT' && paymentsData && (
-            <PaymentsDataTable paymentsData={paymentsData} />
-          )}
-          {appliedFilter.whereToSearch === 'PP' && ppData && (
-            <PPDataTable ppData={ppData} />
-          )}
-          {nothingToDisplay && (
-            <Box mt={4} textAlign="center">
-              <Typography variant="h6">
-                No results found. Please adjust your search criteria and try
-                again.
-              </Typography>
-            </Box>
-          )}
+          {/* Households */}
+          {appliedFilter.whereToSearch === 'HH' &&
+            (isLoadingHouseholds ? (
+              <div>{t('Loading households...')}</div>
+            ) : errorHouseholds ? (
+              <div>{t('Error loading households')}</div>
+            ) : hhData?.results?.length ? (
+              <HHDataTable hhData={hhData} />
+            ) : (
+              NoResultsMessage
+            ))}
+          {/* Individuals */}
+          {appliedFilter.whereToSearch === 'IND' &&
+            (isLoadingIndividuals ? (
+              <div>{t('Loading individuals...')}</div>
+            ) : errorIndividuals ? (
+              <div>{t('Error loading individuals')}</div>
+            ) : indData?.results?.length ? (
+              <INDDataTable indData={indData} />
+            ) : (
+              NoResultsMessage
+            ))}
+          {/* Grievances */}
+          {appliedFilter.whereToSearch === 'GRV' &&
+            (isLoadingGrievances ? (
+              <div>{t('Loading grievances...')}</div>
+            ) : errorGrievances ? (
+              <div>{t('Error loading grievances')}</div>
+            ) : grvData?.results?.length ? (
+              <GRVDataTable grvData={grvData} />
+            ) : (
+              NoResultsMessage
+            ))}
+          {/* Payment Plans */}
+          {appliedFilter.whereToSearch === 'PP' &&
+            (isLoadingPaymentPlans ? (
+              <div>{t('Loading payment plans...')}</div>
+            ) : errorPaymentPlans ? (
+              <div>{t('Error loading payment plans')}</div>
+            ) : ppData?.results?.length ? (
+              <PPDataTable ppData={ppData} />
+            ) : (
+              NoResultsMessage
+            ))}
+          {/* Payments */}
+          {appliedFilter.whereToSearch === 'RCPT' &&
+            (isLoadingPayments ? (
+              <div>{t('Loading payments...')}</div>
+            ) : errorPayments ? (
+              <div>{t('Error loading payments')}</div>
+            ) : paymentsData?.results?.length ? (
+              <PaymentsDataTable paymentsData={paymentsData} />
+            ) : (
+              NoResultsMessage
+            ))}
         </BaseSection>
       </Box>
     </>
