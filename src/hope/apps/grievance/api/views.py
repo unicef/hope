@@ -83,7 +83,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
-from hope.apps.grievance.filters import GrievanceTicketFilter
+from hope.apps.grievance.filters import GrievanceTicketFilter, GrievanceTicketOfficeSearchFilter
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -481,7 +481,7 @@ class GrievanceTicketGlobalViewSet(
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = GrievanceTicketFilter
+    filterset_class = GrievanceTicketOfficeSearchFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
     program_model_field_is_many = True
