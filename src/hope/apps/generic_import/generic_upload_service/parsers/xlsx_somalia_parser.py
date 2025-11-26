@@ -6,6 +6,7 @@ import uuid
 import openpyxl
 
 from hope.apps.generic_import.generic_upload_service.parsers.base_parser import BaseParser
+from hope.apps.geo.models import Area, Country
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,12 @@ class XlsxSomaliaParser(BaseParser):
         self._errors = []
         self._file_path = None
         self._parsed = False
+        self._admin_areas = dict(Area.objects.values_list("name", "id"))
+        # Cache Somalia country ID
+        try:
+            self._somalia_country_id = Country.objects.get(iso_code3="SOM").id
+        except Country.DoesNotExist:
+            self._somalia_country_id = None
 
     def parse(self, file_path: str) -> None:
         """Parse the Excel file and extract all data."""
@@ -81,32 +88,39 @@ class XlsxSomaliaParser(BaseParser):
         household_data = {
             "id": uuid.uuid4().hex,
             "size": self._parse_int(first_row.get("HouseholdSize", 0)),
-            "village": first_row.get("Village", ""),
-            "address": first_row.get("District", ""),
-            "admin1": first_row.get("District", ""),  # District as admin level 1
-            "country": "SOM",
+            "village": first_row.get("Village") or "",
+            "address": first_row.get("District") or "",
+            "admin1": self._admin_areas.get(first_row.get("District") or ""),  # District as admin level 1
+            "country": self._somalia_country_id,
             "pregnant_count": self._parse_int(first_row.get("PregnantCount", 0)),
             "flex_fields": {
                 "lactating_count_h_f": self._parse_int(first_row.get("LactatingCount", 0)),
                 "infant_count_h_f": self._parse_int(first_row.get("InfantCount", 0)),
                 "entitlement_amount_h_f": self._parse_float(first_row.get("EntitlementAmount", 0)),
-                "mpsp_h_f": first_row.get("MPSP", ""),
+                "mpsp_h_f": first_row.get("MPSP") or "",
                 "household_cssp_id_h_f": household_id,
             },
         }
 
+        # Process first individual as head of household
+        head_of_household = self._process_individual(first_row, household_data["id"])
+        household_data["head_of_household_id"] = head_of_household["id"]
+
+        # Add household to collection with head_of_household_id already set
         self._households[household_id] = household_data
-        for _idx, row in enumerate(rows):
+
+        # Process remaining individuals
+        for _idx, row in enumerate(rows[1:]):
             self._process_individual(row, household_data["id"])
 
-    def _process_individual(self, row: dict, household_id: str) -> None:
+    def _process_individual(self, row: dict, household_id: str) -> dict[str, Any]:
         custom_individual_id = row.get("IndividualID")
         individual_id = uuid.uuid4().hex
-        full_name = row.get("IndividualName", "")
-        name_parts = full_name.split()
+        full_name = row.get("IndividualName") or ""
+        name_parts = full_name.split() if full_name else []
         given_name = name_parts[0] if name_parts else ""
         family_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
-        sex = row.get("Sex", "").lower()
+        sex = (row.get("Sex") or "").lower()
         if sex in ["female", "f"]:
             sex = "FEMALE"
         elif sex in ["male", "m"]:
@@ -138,13 +152,14 @@ class XlsxSomaliaParser(BaseParser):
         if wallet_phone:
             account_data = {
                 "individual_id": individual_id,
-                "account_type": "mobile_money",
+                "account_type": "mobile",
                 "number": self._format_phone(wallet_phone),
                 "data": {
-                    "provider": row.get("MPSP", ""),
+                    "provider": row.get("MPSP") or "",
                 },
             }
             self._accounts.append(account_data)
+        return individual_data
 
     def _process_documents(self, row: dict, individual_id: str):
         doc_type = row.get("IndividualIDDocument")
@@ -177,7 +192,13 @@ class XlsxSomaliaParser(BaseParser):
     def _format_phone(self, phone: Any) -> str:
         if not phone:
             return ""
-        return str(phone).strip()
+        phone_str = str(phone).strip()
+        # Add + prefix if numeric and doesn't already have it
+        if phone_str and not phone_str.startswith("+") and phone_str.replace(".", "").isdigit():
+            # Remove any decimal point (from Excel float conversion)
+            phone_str = phone_str.split(".")[0]
+            phone_str = f"+{phone_str}"
+        return phone_str
 
     def validate_file_structure(self) -> bool:
         if not self._parsed:

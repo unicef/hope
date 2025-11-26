@@ -1,7 +1,8 @@
 from django.forms import modelform_factory
 
-from hope.apps.household.models import Document, Household, Individual, IndividualIdentity
-from hope.apps.payment.models import Account
+from hope.apps.geo.models import Country
+from hope.apps.household.models import Document, DocumentType, Household, Individual, IndividualIdentity
+from hope.apps.payment.models import Account, AccountType
 from hope.apps.registration_data.models import RegistrationDataImport
 
 
@@ -28,6 +29,21 @@ class Importer:
         self.identities_to_create = []
         self.errors = []
 
+        # Cache AccountType lookups (key -> id mapping)
+        self._account_types = {at.key: at.id for at in AccountType.objects.all()}
+
+        # Cache DocumentType lookups (key -> id mapping)
+        self._document_types = {dt.key: dt.id for dt in DocumentType.objects.all()}
+
+        # Cache Country lookups (iso_code3 -> id mapping)
+        self._countries = {c.iso_code3: c.id for c in Country.objects.all()}
+
+        # Dictionary to store household instances by their parser ID (for FK linking)
+        self._household_instances = {}
+
+        # Dictionary to store individual instances by their parser ID (for FK linking)
+        self._individual_instances = {}
+
     def import_data(self):
         """Import all data types in sequence."""
         self._import_households()
@@ -36,6 +52,7 @@ class Importer:
         self._import_accounts()
         self._import_identities()
         self._save_objects()
+        self._update_household_heads()
         return self.errors
 
     def _import_households(self):
@@ -83,16 +100,32 @@ class Importer:
             # Use UUID from parser as real DB ID
             if "id" in individual_data:
                 individual_instance.id = individual_data["id"]
-            # household_id will be used directly from parser data in _save_individuals
+                # Store in dictionary for account/document/identity FK linking
+                self._individual_instances[individual_data["id"]] = individual_instance
+            # Link individual to household via object reference (not UUID)
             if "household_id" in individual_data:
-                individual_instance.household_id = individual_data["household_id"]
+                household_obj = self._household_instances.get(individual_data["household_id"])
+                if household_obj:
+                    individual_instance.household = household_obj
+                else:
+                    # Household not found - add error
+                    self.errors.append(
+                        {
+                            "type": "individual",
+                            "data": individual_data,
+                            "errors": {
+                                "household_id": [f"Household with id {individual_data['household_id']} not found"]
+                            },
+                        }
+                    )
+                    return
             self.individuals_to_create.append(individual_instance)
 
     def _import_household(self, household_data):
         exclude = [
             "household_collection",
-            "head_of_household",
             "consent_sharing",
+            "head_of_household",
             "first_registration_date",
             "last_registration_date",
             "kobo_submission_uuid",
@@ -112,10 +145,49 @@ class Importer:
             # Use UUID from parser as real DB ID
             if "id" in household_data:
                 household_instance.id = household_data["id"]
+                # Store in dictionary for individual FK linking
+                self._household_instances[household_data["id"]] = household_instance
             self.households_to_create.append(household_instance)
 
     def _import_document(self, document_data):
         exclude = ["individual"]
+
+        # Resolve type_key string to DocumentType ID if needed
+        if "type_key" in document_data and isinstance(document_data["type_key"], str):
+            type_key = document_data["type_key"]
+            document_type_id = self._document_types.get(type_key)
+            if document_type_id:
+                # Create a copy with resolved ID and remove type_key
+                document_data = {**document_data, "type": document_type_id}
+                document_data.pop("type_key", None)
+            else:
+                # Invalid document type key
+                self.errors.append(
+                    {
+                        "type": "document",
+                        "data": document_data,
+                        "errors": {"type_key": [f"Unknown document type: {type_key}"]},
+                    }
+                )
+                return
+
+        # Resolve country ISO code to Country ID if needed
+        if "country" in document_data and isinstance(document_data["country"], str):
+            country_code = document_data["country"]
+            country_id = self._countries.get(country_code)
+            if country_id:
+                # Create a copy with resolved ID
+                document_data = {**document_data, "country": country_id}
+            else:
+                # Invalid country code - set to None or add error
+                self.errors.append(
+                    {
+                        "type": "document",
+                        "data": document_data,
+                        "errors": {"country": [f"Unknown country code: {country_code}"]},
+                    }
+                )
+                return
 
         document_instance, errors = self._build_unsaved_instance(
             model_cls=Document, data=document_data, exclude=exclude
@@ -123,21 +195,65 @@ class Importer:
         if errors:
             self.errors.append({"type": "document", "data": document_data, "errors": errors})
         else:
-            # individual_id will be used directly from parser data in _save_documents
+            # Link document to individual via object reference (not UUID)
             if "individual_id" in document_data:
-                document_instance.individual_id = document_data["individual_id"]
+                individual_obj = self._individual_instances.get(document_data["individual_id"])
+                if individual_obj:
+                    document_instance.individual = individual_obj
+                else:
+                    self.errors.append(
+                        {
+                            "type": "document",
+                            "data": document_data,
+                            "errors": {
+                                "individual_id": [f"Individual with id {document_data['individual_id']} not found"]
+                            },
+                        }
+                    )
+                    return
             self.documents_to_create.append(document_instance)
 
     def _import_account(self, account_data):
         exclude = ["individual"]
 
+        # Resolve account_type string key to database ID if needed
+        if "account_type" in account_data and isinstance(account_data["account_type"], str):
+            account_type_key = account_data["account_type"]
+            account_type_id = self._account_types.get(account_type_key)
+            if account_type_id:
+                # Create a copy with resolved ID
+                account_data = {**account_data, "account_type": account_type_id}
+            else:
+                # Invalid account_type key
+                self.errors.append(
+                    {
+                        "type": "account",
+                        "data": account_data,
+                        "errors": {"account_type": [f"Unknown account type: {account_type_key}"]},
+                    }
+                )
+                return
+
         account_instance, errors = self._build_unsaved_instance(model_cls=Account, data=account_data, exclude=exclude)
         if errors:
             self.errors.append({"type": "account", "data": account_data, "errors": errors})
         else:
-            # individual_id will be used directly from parser data in _save_accounts
+            # Link account to individual via object reference (not UUID)
             if "individual_id" in account_data:
-                account_instance.individual_id = account_data["individual_id"]
+                individual_obj = self._individual_instances.get(account_data["individual_id"])
+                if individual_obj:
+                    account_instance.individual = individual_obj
+                else:
+                    self.errors.append(
+                        {
+                            "type": "account",
+                            "data": account_data,
+                            "errors": {
+                                "individual_id": [f"Individual with id {account_data['individual_id']} not found"]
+                            },
+                        }
+                    )
+                    return
             self.accounts_to_create.append(account_instance)
 
     def _import_identity(self, identity_data):
@@ -149,8 +265,22 @@ class Importer:
         if errors:
             self.errors.append({"type": "identity", "data": identity_data, "errors": errors})
         else:
+            # Link identity to individual via object reference (not UUID)
             if "individual_id" in identity_data:
-                identity_instance.individual_id = identity_data["individual_id"]
+                individual_obj = self._individual_instances.get(identity_data["individual_id"])
+                if individual_obj:
+                    identity_instance.individual = individual_obj
+                else:
+                    self.errors.append(
+                        {
+                            "type": "identity",
+                            "data": identity_data,
+                            "errors": {
+                                "individual_id": [f"Individual with id {identity_data['individual_id']} not found"]
+                            },
+                        }
+                    )
+                    return
             self.identities_to_create.append(identity_instance)
 
     def _save_objects(self):
@@ -173,6 +303,7 @@ class Importer:
             household.program = self.registration_data_import.program
             household.registration_data_import = self.registration_data_import
             household.rdi_merge_status = Household.PENDING
+            household.is_removed = False
             if not hasattr(household, "first_registration_date") or not household.first_registration_date:
                 household.first_registration_date = timezone.now()
             if not hasattr(household, "last_registration_date") or not household.last_registration_date:
@@ -192,6 +323,7 @@ class Importer:
             individual.program = self.registration_data_import.program
             individual.registration_data_import = self.registration_data_import
             individual.rdi_merge_status = Individual.PENDING
+            individual.is_removed = False
             if not hasattr(individual, "first_registration_date") or not individual.first_registration_date:
                 individual.first_registration_date = timezone.now()
             if not hasattr(individual, "last_registration_date") or not individual.last_registration_date:
@@ -205,12 +337,17 @@ class Importer:
 
         for document in self.documents_to_create:
             document.rdi_merge_status = Document.PENDING
+            document.is_removed = False
 
         Document.objects.bulk_create(self.documents_to_create)
 
     def _save_accounts(self):
         if not self.accounts_to_create:
             return
+        for acc in self.accounts_to_create:
+            # Set merge status and is_removed like we do for other models
+            acc.rdi_merge_status = Account.PENDING
+            acc.is_removed = False
         Account.objects.bulk_create(self.accounts_to_create)
 
     def _save_identities(self):
@@ -219,8 +356,19 @@ class Importer:
 
         for identity in self.identities_to_create:
             identity.rdi_merge_status = IndividualIdentity.PENDING
+            identity.is_removed = False
 
         IndividualIdentity.objects.bulk_create(self.identities_to_create)
+
+    def _update_household_heads(self):
+        """Update household head_of_household FKs after individuals are saved."""
+        for household_data in self.households_data:
+            if "head_of_household_id" in household_data and "id" in household_data:
+                household_id = household_data["id"]
+                head_id = household_data["head_of_household_id"]
+
+                # Use all_merge_status_objects to include PENDING households (not just MERGED)
+                Household.all_merge_status_objects.filter(id=household_id).update(head_of_household_id=head_id)
 
     def _build_unsaved_instance(self, model_cls, data, files=None, exclude=None):
         from django.core.exceptions import ValidationError as DjangoValidationError

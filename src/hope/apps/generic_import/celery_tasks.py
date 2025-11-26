@@ -1,5 +1,3 @@
-
-
 from hope.apps.core.celery import app
 from hope.apps.registration_datahub.celery_tasks import locked_cache
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
@@ -12,6 +10,48 @@ HARD_TIME_LIMIT = 35 * 60
 RESULT_LOCKED = "locked"
 RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
+
+
+def format_validation_errors(errors: list) -> str:
+    """Format validation errors in a human-readable way."""
+    if not errors:
+        return "No errors"
+
+    formatted_lines = []
+
+    for idx, error_item in enumerate(errors, 1):
+        if not isinstance(error_item, dict):
+            formatted_lines.append(f"{idx}. {str(error_item)}")
+            continue
+
+        error_type = error_item.get("type", "Unknown")
+        data = error_item.get("data", {})
+        field_errors = error_item.get("errors", {})
+
+        # Get identifier for the record
+        if error_type == "household":
+            identifier = data.get("id", "Unknown")[:8]
+            header = f"{idx}. Household (ID: {identifier}...)"
+        elif error_type == "individual":
+            full_name = data.get("full_name", data.get("given_name", "Unknown"))
+            header = f"{idx}. Individual ({full_name})"
+        elif error_type == "account":
+            number = data.get("number", "Unknown")
+            header = f"{idx}. Account ({number})"
+        else:
+            header = f"{idx}. {error_type.title()}"
+
+        formatted_lines.append(header)
+
+        # Format field errors
+        for field_name, error_messages in field_errors.items():
+            if isinstance(error_messages, list):
+                for msg in error_messages:
+                    formatted_lines.append(f"   • {field_name}: {msg}")
+            else:
+                formatted_lines.append(f"   • {field_name}: {error_messages}")
+
+    return "\n".join(formatted_lines)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -61,8 +101,8 @@ def process_generic_import_task(
             rdi.save(update_fields=["status"])
 
             # Parse file
-            parser = XlsxSomaliaParser(import_data.file.path)
-            parser.parse()
+            parser = XlsxSomaliaParser()
+            parser.parse(import_data.file.path)
 
             # Run importer
             importer = Importer(
@@ -82,11 +122,15 @@ def process_generic_import_task(
                 import_data.validation_errors = str(errors)
                 import_data.save(update_fields=["status", "validation_errors"])
 
+                # Format error message with details in human-readable format
+                error_details = format_validation_errors(errors)
+                error_message = f"Validation errors ({len(errors)} errors found):\n\n{error_details}"
+
                 rdi.status = RegistrationDataImport.IMPORT_ERROR
-                rdi.error_message = f"Validation errors: {len(errors)} errors found"
+                rdi.error_message = error_message
                 rdi.save(update_fields=["status", "error_message"])
 
-                logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors")
+                logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
             else:
                 # Update stats
                 from hope.apps.household.models import Household, Individual
