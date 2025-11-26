@@ -1395,13 +1395,8 @@ class FspChoiceSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "has_config")
 
 
-class DeliveryMechanismChoiceSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    code = serializers.CharField()
-
-
 class FspChoicesSerializer(serializers.Serializer):
-    delivery_mechanism = DeliveryMechanismChoiceSerializer()
+    delivery_mechanism = DeliveryMechanismSerializer()
     fsps = FspChoiceSerializer(many=True)
 
 

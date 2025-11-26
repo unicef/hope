@@ -3,44 +3,44 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * * `73fc411f-3076-4176-a6a3-c1cfac5586b0` - A game office.
  * * `atm_card` - ATM Card
- * * `4bdbb35c-6b48-4fd4-ae00-a1ec54e4e7c3` - Can beat sister.
  * * `cardless_cash_withdrawal` - Cardless cash withdrawal
  * * `cash` - Cash
  * * `cash_by_fsp` - Cash by FSP
  * * `cash_over_the_counter` - Cash over the counter
  * * `cheque` - Cheque
  * * `deposit_to_card` - Deposit to Card
- * * `849f5975-4d8e-4177-8b53-dabe28e3af6c` - Far country us hotel.
- * * `286f5b0a-c778-4d73-b8af-b92c1c94e5f0` - Girl wind agree.
+ * * `c5b20348-35c9-4a12-b79e-901fd9ad701e` - Energy score student though.
+ * * `2897a538-a9e7-484e-9b9f-2e2f08d8236a` - Get move list memory.
+ * * `10c0d2e5-72c3-40e2-9f08-39c851b4d504` - Mind law.
  * * `mobile_money` - Mobile Money
+ * * `4978a4c2-3add-4d58-8620-262b59500623` - Piece enough dream.
  * * `pre-paid_card` - Pre-paid card
- * * `36ee82ca-1b85-4ba7-b31b-b634b42cfb64` - Receive foreign do.
  * * `referral` - Referral
- * * `f717ed16-fdbf-45a7-9a61-d5286baefafc` - Show spend ball home yard.
- * * `747296a0-9fce-4937-867b-13deb760a2da` - Side deep where.
+ * * `d91066e8-1e3c-4388-b7d8-4e276356324f` - School forward game appear.
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
  * * `voucher` - Voucher
  */
 export enum PaymentRecordDeliveryTypeEnum {
+    _73FC411F_3076_4176_A6A3_C1CFAC5586B0 = '73fc411f-3076-4176-a6a3-c1cfac5586b0',
     ATM_CARD = 'atm_card',
-    _4BDBB35C_6B48_4FD4_AE00_A1EC54E4E7C3 = '4bdbb35c-6b48-4fd4-ae00-a1ec54e4e7c3',
     CARDLESS_CASH_WITHDRAWAL = 'cardless_cash_withdrawal',
     CASH = 'cash',
     CASH_BY_FSP = 'cash_by_fsp',
     CASH_OVER_THE_COUNTER = 'cash_over_the_counter',
     CHEQUE = 'cheque',
     DEPOSIT_TO_CARD = 'deposit_to_card',
-    _849F5975_4D8E_4177_8B53_DABE28E3AF6C = '849f5975-4d8e-4177-8b53-dabe28e3af6c',
-    _286F5B0A_C778_4D73_B8AF_B92C1C94E5F0 = '286f5b0a-c778-4d73-b8af-b92c1c94e5f0',
+    C5B20348_35C9_4A12_B79E_901FD9AD701E = 'c5b20348-35c9-4a12-b79e-901fd9ad701e',
+    _2897A538_A9E7_484E_9B9F_2E2F08D8236A = '2897a538-a9e7-484e-9b9f-2e2f08d8236a',
+    _10C0D2E5_72C3_40E2_9F08_39C851B4D504 = '10c0d2e5-72c3-40e2-9f08-39c851b4d504',
     MOBILE_MONEY = 'mobile_money',
+    _4978A4C2_3ADD_4D58_8620_262B59500623 = '4978a4c2-3add-4d58-8620-262b59500623',
     PRE_PAID_CARD = 'pre-paid_card',
-    _36EE82CA_1B85_4BA7_B31B_B634B42CFB64 = '36ee82ca-1b85-4ba7-b31b-b634b42cfb64',
     REFERRAL = 'referral',
-    F717ED16_FDBF_45A7_9A61_D5286BAEFAFC = 'f717ed16-fdbf-45a7-9a61-d5286baefafc',
-    _747296A0_9FCE_4937_867B_13DEB760A2DA = '747296a0-9fce-4937-867b-13deb760a2da',
+    D91066E8_1E3C_4388_B7D8_4E276356324F = 'd91066e8-1e3c-4388-b7d8-4e276356324f',
     TRANSFER = 'transfer',
     TRANSFER_TO_ACCOUNT = 'transfer_to_account',
     TRANSFER_TO_DIGITAL_WALLET = 'transfer_to_digital_wallet',
