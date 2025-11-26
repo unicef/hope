@@ -8,6 +8,7 @@ export type { Account as AccountCamelCase } from './models/Account';
 export type { AccountabilityCommunicationMessageAgeInput as AccountabilityCommunicationMessageAgeInputCamelCase } from './models/AccountabilityCommunicationMessageAgeInput';
 export type { AccountabilityFullListArguments as AccountabilityFullListArgumentsCamelCase } from './models/AccountabilityFullListArguments';
 export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSamplingArgumentsCamelCase } from './models/AccountabilityRandomSamplingArguments';
+export type { AccountDataField as AccountDataFieldCamelCase } from './models/AccountDataField';
 export type { AccountLax as AccountLaxCamelCase } from './models/AccountLax';
 export type { AccountSerializerUpload as AccountSerializerUploadCamelCase } from './models/AccountSerializerUpload';
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';

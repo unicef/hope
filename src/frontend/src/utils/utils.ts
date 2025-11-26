@@ -1294,7 +1294,7 @@ export const filterEmptyParams = (params) => {
 };
 
 export function deepCamelize(data) {
-  const notCamelizedKeys = ['form_errors', 'household_data'];
+  const notCamelizedKeys = ['form_errors', 'household_data', 'data_fields'];
 
   if (_.isArray(data)) {
     return data.map(deepCamelize);
