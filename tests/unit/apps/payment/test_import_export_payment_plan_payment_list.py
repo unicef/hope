@@ -220,8 +220,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        assert to_decimal(wb.active["J2"].value) == payment_1.entitlement_quantity
-        assert to_decimal(wb.active["J3"].value) == payment_2.entitlement_quantity
+        assert to_decimal(wb.active["K2"].value) == payment_1.entitlement_quantity
+        assert to_decimal(wb.active["K3"].value) == payment_2.entitlement_quantity
 
     def test_export_payment_plan_payment_list(self) -> None:
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
@@ -531,7 +531,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert value == ""
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
-        required_fields_for_account = ["name", "number", "uba_code", "holder_name", "financial_institution"]
+        required_fields_for_account = [
+            "name",
+            "number",
+            "uba_code",
+            "holder_name",
+            "financial_institution",
+        ]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
         # add Accounts for collectors
