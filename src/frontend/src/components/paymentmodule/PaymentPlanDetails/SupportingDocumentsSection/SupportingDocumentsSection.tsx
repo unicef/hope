@@ -10,7 +10,6 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -80,9 +79,15 @@ export const SupportingDocumentsSection = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [titleError, setTitleError] = useState('');
 
-  const canUploadFile = hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions);
+  const canUploadFile = hasPermissions(
+    PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT,
+    permissions,
+  );
 
-  const canRemoveFile = hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions);
+  const canRemoveFile = hasPermissions(
+    PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT,
+    permissions,
+  );
 
   const canDownloadFile = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_SUPPORTING_DOCUMENT,
