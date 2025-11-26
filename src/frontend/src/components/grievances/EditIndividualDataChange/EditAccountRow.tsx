@@ -75,7 +75,7 @@ export function EditAccountRow({
         ) {
           const choice =
             individualChoicesData.accountFinancialInstitutionChoices.find(
-              (c: any) => c.value === value,
+              (c: any) => Number(c.value) === Number(value),
             );
           displayValue = choice ? choice.name : String(value);
         }
