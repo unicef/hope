@@ -94,9 +94,7 @@ class TestGrievanceApproveAutomaticTickets:
         household_one.save()
         self.household_one = household_one
 
-        # from test_utils.factories.sanction_list import SanctionListFactory
-
-        from test_utils.factories.sanction_list import SanctionListFactory
+        from extras.test_utils.factories.sanction_list import SanctionListFactory
 
         sanction_list_individual_data = {
             "sanction_list": SanctionListFactory(),
