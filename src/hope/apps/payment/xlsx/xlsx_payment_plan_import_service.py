@@ -32,10 +32,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         self.payment_plan = payment_plan
         self.file = file
         self.payments_dict: dict[str, Payment] = {
-            str(x.unicef_id): x
-            for x in payment_plan.eligible_payments.only(
-                "unicef_id", "entitlement_quantity"
-            )
+            str(x.unicef_id): x for x in payment_plan.eligible_payments.only("unicef_id", "entitlement_quantity")
         }
         self.errors: list[XlsxError] = []
         self.is_updated = False
@@ -86,9 +83,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             ),
         )
         payments_ids = [payment.id for payment in payments_to_save]
-        payments = Payment.objects.filter(id__in=payments_ids).select_related(
-            "household_snapshot"
-        )
+        payments = Payment.objects.filter(id__in=payments_ids).select_related("household_snapshot")
         for payment in payments:
             payment.update_signature_hash()
         Payment.objects.bulk_update(payments, fields=("signature_hash",))
@@ -124,9 +119,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
         entitlement_amount = row[self.headers.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
-            converted_entitlement_amount = to_decimal(
-                str(entitlement_amount)
-            ) or Decimal(0.0)
+            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
             if converted_entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
@@ -158,17 +151,13 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return None
 
         if entitlement_amount is not None and entitlement_amount != "":
-            converted_entitlement_amount = to_decimal(
-                str(entitlement_amount)
-            ) or Decimal(0.0)
+            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
             if converted_entitlement_amount != payment.entitlement_quantity:
                 entitlement_date = timezone.now()
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=(
-                        Decimal(exchange_rate) if exchange_rate is not None else 1
-                    ),
+                    exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 return Payment(
@@ -179,9 +168,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
         return None
 
-    def create_import_xlsx_file(
-        self, user: Union["User", "AbstractBaseUser", "AnonymousUser"]
-    ) -> PaymentPlan:
+    def create_import_xlsx_file(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"]) -> PaymentPlan:
         # remove old imported file
         self.payment_plan.remove_imported_file()
 
