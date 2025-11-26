@@ -571,11 +571,10 @@ class TestIndividualDetail:
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             program=self.program,
         )
-        self.flex_image_path = "flex-images/ind-1.png"
         self.individual1.flex_fields = {
             "wellbeing_index_i_f": 24,
             "school_enrolled_before_i_f": 1,
-            "profile_image_i_f": self.flex_image_path,
+            "profile_image_i_f": "profile_image_i_f.png",
         }
         pdu_data1 = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
@@ -904,11 +903,10 @@ class TestIndividualDetail:
         assert data["blockchain_name"] == self.individual1.blockchain_name
         assert data["wallet_address"] == self.individual1.wallet_address
         assert data["status"] == self.individual1.status
-
         assert data["flex_fields"] == {
             "wellbeing_index_i_f": 24,
             "school_enrolled_before_i_f": 1,
-            "profile_image_i_f": default_storage.url(self.flex_image_path),
+            "profile_image_i_f": default_storage.url("profile_image_i_f.png"),
             "pdu_field_1": {
                 "1": {"collection_date": "2021-01-01", "value": 123.45},
                 "2": {"collection_date": "2021-01-01", "value": 234.56},
