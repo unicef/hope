@@ -8,6 +8,7 @@ from typing import Any
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from conftest import COMMON_SETTINGS, LOGGERS
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
 from flags.models import FlagState
@@ -16,7 +17,6 @@ from pytest_html_reporter import attach
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from unit.conftest import COMMON_SETTINGS, LOGGERS
 
 from e2e.page_object.accountability.communication import AccountabilityCommunication
 from e2e.page_object.accountability.comunication_details import (
