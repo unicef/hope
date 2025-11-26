@@ -8,8 +8,7 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea, FlexibleAttribute
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, FlexibleAttribute, Program
 
 
 class TestFlexibleAttribute(TransactionTestCase):

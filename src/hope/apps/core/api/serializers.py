@@ -2,14 +2,8 @@ from typing import Any, Callable
 
 from rest_framework import serializers
 
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-)
-from hope.apps.geo.models import Country
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
+from hope.models import BusinessArea, Country, DataCollectingType, FlexibleAttribute, FlexibleAttributeChoice
 
 
 class CountrySmallSerializer(serializers.ModelSerializer):

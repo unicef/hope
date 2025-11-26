@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.payment.models import (
+from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,

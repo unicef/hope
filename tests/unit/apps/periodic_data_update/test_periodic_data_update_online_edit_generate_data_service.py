@@ -14,7 +14,6 @@ from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactor
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
-from hope.apps.core.models import PeriodicFieldData
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -27,12 +26,11 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.household.models import FEMALE, MALE
-from hope.apps.payment.models import Payment
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
     PDUOnlineEditGenerateDataService,
 )
-from hope.apps.program.models import Program
+from hope.models import Payment, PeriodicFieldData, Program
 
 
 class TestPDUOnlineEditGenerateDataService(TestCase):

@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 from django.test import TestCase
@@ -12,9 +13,12 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import APIToken, Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import APITokenFactory
+
+if TYPE_CHECKING:
+    from hope.models import APIToken
 
 
 class HOPEPermissionTest(TestCase):

@@ -1,27 +1,19 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from hope.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    SampleFileExpiredError,
-    Survey,
-)
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
-from hope.apps.household.models import Household
 from hope.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
     FullListSerializer,
     RandomSamplingSerializer,
 )
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Feedback, FeedbackMessage, Household, Message, PaymentPlan, RegistrationDataImport, Survey
+from hope.models.survey import SampleFileExpiredError
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):

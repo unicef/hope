@@ -2,24 +2,30 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.forms import DocumentForm, IndividualForm
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     HEAD,
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.forms import DocumentForm, IndividualForm
+from hope.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hope.models import (
+    Account,
+    AccountType,
+    Area,
+    Country,
     DocumentType,
+    FinancialInstitution,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
     PendingIndividualRoleInHousehold,
-)
-from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
+    RegistrationDataImport,
 )
 
 YES = "1"

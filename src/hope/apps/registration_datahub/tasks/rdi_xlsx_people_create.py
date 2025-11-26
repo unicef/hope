@@ -7,28 +7,33 @@ import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.core.models import BusinessArea, FlexibleAttribute
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
-from hope.apps.geo.models import Area, Country as GeoCountry
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
+from hope.models import (
+    Account,
+    Area,
+    BusinessArea,
+    Country as GeoCountry,
+    DocumentType,
+    FlexibleAttribute,
+    ImportData,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    Program,
+    RegistrationDataImport,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 

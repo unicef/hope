@@ -1,6 +1,5 @@
 from typing import Any, Iterable
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.core.cache import cache
 from django.db import transaction
@@ -11,9 +10,8 @@ from django.utils import timezone
 
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.account.profile_cache import profile_cache
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
 
 
 @receiver(post_save, sender=RoleAssignment)
@@ -24,12 +22,12 @@ def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any
         instance.user.save()
 
 
-@receiver(pre_save, sender=get_user_model())
+@receiver(pre_save, sender=User)
 def pre_save_user(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     instance.last_modify_date = timezone.now()
 
 
-@receiver(post_save, sender=get_user_model())
+@receiver(post_save, sender=User)
 def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwargs: Any) -> None:
     if created is False:
         return
@@ -140,7 +138,6 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
 
 
 # Profile cache
-User = get_user_model()
 
 
 # invalidate every UserProfile (Global)

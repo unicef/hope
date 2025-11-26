@@ -28,32 +28,12 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FileTemp,
-    FlexibleAttribute,
-)
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
-    Document,
-    Household,
-    IndividualRoleInHousehold,
 )
 from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -68,6 +48,26 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
+)
+from hope.models import (
+    BusinessArea,
+    DataCollectingType,
+    DeliveryMechanism,
+    Document,
+    FileTemp,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    FlexibleAttribute,
+    FspXlsxTemplatePerDeliveryMechanism,
+    Household,
+    IndividualRoleInHousehold,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanSplit,
+    Role,
+    RoleAssignment,
+    User,
+    country as geo_models,
 )
 
 
@@ -296,7 +296,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                     in file_list_fsp
                 )
 
-    @patch("hope.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
+    @patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -531,7 +531,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert value == ""
 
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
-        required_fields_for_account = ["name", "number", "uba_code", "holder_name", "financial_institution"]
+        required_fields_for_account = ["number", "uba_code", "holder_name", "financial_institution"]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
         # add Accounts for collectors
@@ -568,7 +568,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=[], flex_fields=[])
 
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-5:] == required_fields_for_account
+        assert headers[-4:] == required_fields_for_account
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row
@@ -577,7 +577,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert payment_row[-4] == str(payment.id)
             assert payment_row[-3] == "123456"
             assert payment_row[-2] == f"Admin {payment.collector.given_name}"
-            assert payment_row[-1] == ""
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()

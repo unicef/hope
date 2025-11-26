@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType
 
 
 def create_default_object(apps, schema_editor):

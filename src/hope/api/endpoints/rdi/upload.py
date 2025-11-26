@@ -14,28 +14,31 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hope.api.models import Grant
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo.models import Area
-from hope.apps.household.models import (
+from hope.models import (
     DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Account,
+    AccountType,
+    Area,
+    FinancialInstitution,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import Account, AccountType, FinancialInstitution, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
 
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 

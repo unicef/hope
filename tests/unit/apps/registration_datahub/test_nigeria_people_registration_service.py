@@ -13,27 +13,28 @@ from extras.test_utils.factories.aurora import (
 )
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import DataCollectingType
-from hope.apps.geo import models as geo_models
-from hope.apps.geo.models import Area, AreaType
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     MALE,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
-from hope.apps.payment.models import (
-    FinancialInstitution,
-    FinancialInstitutionMapping,
-    FinancialServiceProvider,
-    PendingAccount,
 )
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.nigeria_people_registration_service import (
     NigeriaPeopleRegistrationService,
+)
+from hope.models import (
+    Area,
+    AreaType,
+    DataCollectingType,
+    DocumentType,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    country as geo_models,
 )
 
 

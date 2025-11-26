@@ -12,9 +12,8 @@ from extras.test_utils.factories.grievance import ReferralTicketWithoutExtrasFac
 from extras.test_utils.factories.household import create_household
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.program.models import Program
+from hope.models import Program, country as geo_models
 
 pytestmark = pytest.mark.django_db()
 

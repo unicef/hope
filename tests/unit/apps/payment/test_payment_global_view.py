@@ -9,8 +9,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 

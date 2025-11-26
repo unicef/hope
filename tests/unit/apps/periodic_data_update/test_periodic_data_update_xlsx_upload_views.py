@@ -27,11 +27,11 @@ from extras.test_utils.factories.periodic_data_update import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import PeriodicFieldData
 from unit.apps.periodic_data_update.test_periodic_data_update_xlsx_import_service import (
     add_pdu_data_to_xlsx,
 )

@@ -9,12 +9,11 @@ from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hope.apps.account.models import IncompatibleRoles, Role, RoleAssignment, User
 from hope.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, IncompatibleRoles, Role, RoleAssignment, User
 
 if TYPE_CHECKING:
     from django.forms.utils import ErrorList

@@ -7,9 +7,8 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import DataCollectingType, PeriodicFieldData
 from hope.apps.core.utils import to_choice_object
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models import DataCollectingType, PeriodicFieldData, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 

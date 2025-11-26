@@ -13,8 +13,8 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
-from hope.api.models import APILogEntry, Grant
-from hope.apps.core.models import BusinessArea
+from hope.models import APILogEntry, BusinessArea
+from hope.models.utils import Grant
 
 
 class RejectPolicy(models.TextChoices):

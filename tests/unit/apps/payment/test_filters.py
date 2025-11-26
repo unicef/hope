@@ -8,12 +8,7 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     generate_delivery_mechanisms,
 )
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-)
+from hope.models import BusinessArea, DeliveryMechanism, FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
 
 
 class TestFinancialServiceProviderXlsxTemplateFilter(TestCase):

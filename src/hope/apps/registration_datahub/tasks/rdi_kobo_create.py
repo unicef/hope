@@ -10,35 +10,20 @@ from django.core.files.storage import default_storage
 from django.db import Error, transaction
 from django_countries.fields import Country
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.kobo.api import KoboAPI
 from hope.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
     get_submission_metadata,
 )
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import chunks, rename_dict_keys
-from hope.apps.geo.models import Area, Country as GeoCountry
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import (
-    ImportData,
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
 from hope.apps.registration_datahub.utils import (
@@ -46,6 +31,22 @@ from hope.apps.registration_datahub.utils import (
     find_attachment_in_kobo,
 )
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
+from hope.models import (
+    Account,
+    Area,
+    BusinessArea,
+    Country as GeoCountry,
+    DocumentType,
+    ImportData,
+    KoboImportedSubmission,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, DataCollectingType, Program
 
 
 class StorageFileForm(forms.Form):

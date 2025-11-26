@@ -6,9 +6,8 @@ import pytest
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import DocumentTypeFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.geo.models import Country
-from hope.apps.household.models import Document
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import Country, Document
+from hope.models.utils import MergeStatusModel
 
 
 class TestDocumentConstraint(TestCase):

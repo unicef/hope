@@ -12,7 +12,7 @@ from extras.test_utils.factories.payment import (
     generate_reconciled_payment_plan,
     update_fsps,
 )
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType
 
 
 class TestFixtures(TestCase):
