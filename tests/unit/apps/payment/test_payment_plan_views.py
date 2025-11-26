@@ -1735,11 +1735,64 @@ class TestPendingPaymentsAction:
             created_by=self.user,
             created_at="2022-02-24",
         )
+
         Payment.objects.create(
             household=self.household1,
             parent=self.target_population,
             business_area=self.afghanistan,
             collector_id=self.individual1_1.id,
+            head_of_household=self.individual1_1,
+            vulnerability_score=50.0,
+            status_date="2022-02-24",
+        )
+
+        (self.household2, (self.individual2_1,)) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                "unicef_id": "HH-AAA-001",
+                "size": 2,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                    "full_name": "Alice Smith",
+                }
+            ],
+        )
+        Payment.objects.create(
+            household=self.household2,
+            parent=self.target_population,
+            business_area=self.afghanistan,
+            collector_id=self.individual2_1.id,
+            head_of_household=self.individual2_1,
+            vulnerability_score=15.5,
+            status_date="2022-02-24",
+        )
+
+        (self.household3, (self.individual3_1,)) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                "unicef_id": "HH-ZZZ-001",
+                "size": 5,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                    "full_name": "Zack Brown",
+                }
+            ],
+        )
+        Payment.objects.create(
+            household=self.household3,
+            parent=self.target_population,
+            business_area=self.afghanistan,
+            collector_id=self.individual3_1.id,
+            head_of_household=self.individual3_1,
+            vulnerability_score=85.2,
             status_date="2022-02-24",
         )
 
@@ -1774,6 +1827,55 @@ class TestPendingPaymentsAction:
         )
 
         assert response.status_code == expected_status
+
+    @pytest.mark.parametrize(
+        ("ordering_param", "db_field"),
+        [
+            ("household_unicef_id", "household__unicef_id"),
+            ("-household_unicef_id", "-household__unicef_id"),
+            ("household_size", "household__size"),
+            ("-household_size", "-household__size"),
+            ("household_admin2", "household__admin2__name"),
+            ("-household_admin2", "-household__admin2__name"),
+            ("head_of_household", "head_of_household__full_name"),
+            ("-head_of_household", "-head_of_household__full_name"),
+            ("vulnerability_score", "vulnerability_score"),
+            ("-vulnerability_score", "-vulnerability_score"),
+        ],
+    )
+    def test_pending_payments_ordering(
+        self,
+        ordering_param: str,
+        db_field: str,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.TARGETING_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        url = reverse(
+            self.pending_payments_url_name,
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+                "pk": str(self.target_population.id),
+            },
+        )
+        response = self.api_client.get(url, {"ordering": ordering_param})
+        assert response.status_code == status.HTTP_200_OK
+
+        results = response.json().get("results", [])
+        returned_ids = [r["id"] for r in results]
+
+        expected_ids_qs = list(
+            Payment.objects.filter(parent=self.target_population).order_by(db_field).values_list("id", flat=True)
+        )
+        expected_ids = [str(i) for i in expected_ids_qs]
+
+        assert returned_ids == expected_ids
 
 
 class TestPaymentPlanActions:

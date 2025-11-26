@@ -11,7 +11,8 @@ from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -42,7 +43,7 @@ from hope.apps.payment.api.caches import (
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
-from hope.apps.payment.api.filters import PaymentPlanFilter, TargetPopulationFilter
+from hope.apps.payment.api.filters import PaymentPlanFilter, PendingPaymentFilter, TargetPopulationFilter
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
@@ -1574,17 +1575,28 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population rebuilding"})
 
-    @extend_schema(responses={200: PendingPaymentSerializer(many=True)})
+    @extend_schema(
+        responses={200: PendingPaymentSerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="ordering",
+            ),
+        ],
+    )
     @action(
         detail=True,
         methods=["get"],
         url_path="pending-payments",
-        filter_backends=(),
+        filter_backends=(DjangoFilterBackend,),
     )
     @transaction.atomic
     def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
-        queryset = tp.payment_items.all()
+        queryset = tp.payment_items.select_related("household", "head_of_household", "household__admin2").all()
+
+        filterset = PendingPaymentFilter(request.GET, queryset=queryset)
+        queryset = filterset.qs
+
         data = PendingPaymentSerializer(self.paginate_queryset(queryset), many=True).data
         return self.get_paginated_response(data)
 
