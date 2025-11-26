@@ -41,6 +41,8 @@
         border-radius: 4px;
         font-size: 14px;
         box-sizing: border-box;
+        min-height: 42px;
+        height: auto;
     }
 
     .form-group select:focus,
@@ -48,6 +50,13 @@
         outline: none;
         border-color: #023e90;
         box-shadow: 0 0 0 2px rgba(2, 62, 144, 0.1);
+    }
+
+    .form-group select:disabled {
+        background-color: #f5f5f5;
+        color: #999;
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 
     .file-upload-wrapper {
@@ -288,6 +297,85 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileNameDisplay = document.getElementById('file-name-display');
     const uploadForm = document.getElementById('upload-form');
     const submitButton = uploadForm.querySelector('.submit-button');
+    const businessAreaSelect = document.getElementById('{{ form.business_area.id_for_label }}');
+    const programSelect = document.getElementById('{{ form.program.id_for_label }}');
+
+    // Disable program select if no business area is selected initially
+    if (businessAreaSelect && programSelect) {
+        if (!businessAreaSelect.value) {
+            programSelect.disabled = true;
+            programSelect.innerHTML = '<option value="">{% translate "First select a Business Area" %}</option>';
+        }
+
+        // Handle business area selection change
+        businessAreaSelect.addEventListener('change', function() {
+            const businessAreaId = this.value;
+
+            if (!businessAreaId) {
+                // No BA selected - disable and clear program dropdown
+                programSelect.disabled = true;
+                programSelect.innerHTML = '<option value="">{% translate "First select a Business Area" %}</option>';
+                return;
+            }
+
+            // Get the selected business area's slug
+            const selectedOption = businessAreaSelect.options[businessAreaSelect.selectedIndex];
+            const businessAreaSlug = selectedOption.getAttribute('data-slug');
+
+            if (!businessAreaSlug) {
+                console.error('Business area slug not found');
+                programSelect.disabled = true;
+                programSelect.innerHTML = '<option value="">{% translate "Error: Business area slug not found" %}</option>';
+                return;
+            }
+
+            // Show loading state
+            programSelect.disabled = true;
+            programSelect.innerHTML = '<option value="">{% translate "Loading programs..." %}</option>';
+
+            // Fetch programs for selected business area
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch programs');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear and populate program dropdown
+                programSelect.innerHTML = '<option value="">{% translate "Select Program" %}</option>';
+
+                const programs = data.results || data;
+                if (programs && programs.length > 0) {
+                    programs.forEach(program => {
+                        const option = document.createElement('option');
+                        option.value = program.id;
+                        option.textContent = program.name;
+                        programSelect.appendChild(option);
+                    });
+                    programSelect.disabled = false;
+                } else {
+                    programSelect.innerHTML = '<option value="">{% translate "No programs available" %}</option>';
+                    programSelect.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching programs:', error);
+                programSelect.innerHTML = '<option value="">{% translate "Error loading programs" %}</option>';
+                programSelect.disabled = true;
+
+                // Show error message to user
+                alert('{% translate "Failed to load programs. Please try again or contact support." %}');
+            });
+        });
+    }
 
     // Handle file selection
     fileInput.addEventListener('change', function(e) {

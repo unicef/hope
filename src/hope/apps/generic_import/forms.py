@@ -1,11 +1,31 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
+from django.forms.widgets import Select
 from django.utils import timezone
 
 from hope.apps.account.models import RoleAssignment
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program
+
+
+class BusinessAreaSelectWidget(Select):
+    """Custom select widget that adds slug as data attribute."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        """Override to add data-slug attribute to options."""
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value:
+            # Extract actual value from ModelChoiceIteratorValue if needed
+            actual_value = value.value if hasattr(value, "value") else value
+            if actual_value:
+                # Get the BusinessArea object to extract slug
+                try:
+                    ba = BusinessArea.objects.get(pk=actual_value)
+                    option["attrs"]["data-slug"] = ba.slug
+                except (BusinessArea.DoesNotExist, ValueError, TypeError):
+                    pass
+        return option
 
 
 class GenericImportForm(forms.Form):
@@ -16,12 +36,12 @@ class GenericImportForm(forms.Form):
         required=True,
         label="Business Area",
         empty_label="Select Business Area",
+        widget=BusinessAreaSelectWidget(),
     )
-    program = forms.ModelChoiceField(
-        queryset=Program.objects.none(),
+    program = forms.CharField(
         required=True,
         label="Program",
-        empty_label="Select Program",
+        widget=forms.Select(choices=[("", "Select Program")]),
     )
     file = forms.FileField(
         required=True,
@@ -96,6 +116,24 @@ class GenericImportForm(forms.Form):
             )
         # Return empty queryset if no BA is selected
         return Program.objects.none()
+
+    def clean_program(self):
+        """Validate program field and convert to Program object.
+
+        Since we're using CharField instead of ModelChoiceField to avoid
+        queryset validation issues with dynamically loaded programs.
+        """
+        program_id = self.cleaned_data.get("program")
+
+        if not program_id:
+            raise ValidationError("Program is required.")
+
+        try:
+            program = Program.objects.get(pk=program_id)
+        except (Program.DoesNotExist, ValueError):
+            raise ValidationError("Selected program does not exist.")
+
+        return program
 
     def clean_file(self):
         """Validate uploaded file."""
