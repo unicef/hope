@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
@@ -563,9 +564,18 @@ class TestIndividualDetail:
         self.grievance_ticket = GrievanceTicketFactory(household_unicef_id=self.household.unicef_id)
         GrievanceTicketFactory()
 
+        self.image_flex_attr = FlexibleAttribute.objects.create(
+            label={"English(EN)": "profile_image_i_f"},
+            name="profile_image_i_f",
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            program=self.program,
+        )
+        self.flex_image_path = "flex-images/ind-1.png"
         self.individual1.flex_fields = {
             "wellbeing_index_i_f": 24,
             "school_enrolled_before_i_f": 1,
+            "profile_image_i_f": self.flex_image_path,
         }
         pdu_data1 = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
@@ -898,6 +908,7 @@ class TestIndividualDetail:
         assert data["flex_fields"] == {
             "wellbeing_index_i_f": 24,
             "school_enrolled_before_i_f": 1,
+            "profile_image_i_f": default_storage.url(self.flex_image_path),
             "pdu_field_1": {
                 "1": {"collection_date": "2021-01-01", "value": 123.45},
                 "2": {"collection_date": "2021-01-01", "value": 234.56},
