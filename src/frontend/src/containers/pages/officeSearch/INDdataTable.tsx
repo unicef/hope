@@ -18,7 +18,7 @@ interface INDDataTableProps {
 }
 
 const INDDataTable: React.FC<INDDataTableProps> = ({ indData }) => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -34,9 +34,9 @@ const INDDataTable: React.FC<INDDataTableProps> = ({ indData }) => {
         <TableBody>
           {indData.results && indData.results.length > 0 ? (
             indData.results.map((individual: any) => {
-              const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
-              const householdDetailsPath = `/${baseUrl}/population/households/${individual.householdId}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${individual.programSlug}`;
+              const individualDetailsPath = `/${businessArea}/programs/${individual.program.slug}/population/individuals/${individual.id}`;
+              const householdDetailsPath = `/${businessArea}/programs/${individual.program.slug}/population/household/${individual.household.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${individual?.program?.slug}`;
               return (
                 <TableRow key={individual.id} hover>
                   <TableCell>
@@ -46,12 +46,12 @@ const INDDataTable: React.FC<INDDataTableProps> = ({ indData }) => {
                   </TableCell>
                   <TableCell>
                     <BlackLink to={householdDetailsPath}>
-                      {individual.householdUnicefId}
+                      {individual?.household?.unicefId}
                     </BlackLink>
                   </TableCell>
                   <TableCell>
                     <BlackLink to={programDetailsPath}>
-                      {individual.programName}
+                      {individual?.program?.name}
                     </BlackLink>
                   </TableCell>
                   <TableCell>{individual.fullName}</TableCell>
