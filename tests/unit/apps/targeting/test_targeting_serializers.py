@@ -1,5 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
+from test_utils.factories.program import ProgramFactory
 
 from extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
@@ -7,7 +8,6 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
 )
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
