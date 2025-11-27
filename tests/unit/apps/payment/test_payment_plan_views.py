@@ -1852,6 +1852,179 @@ class TestTargetPopulationActions:
         assert payment2.is_removed is False  # Within range (score=50)
         assert payment3.is_removed is True  # Above max (score=75)
 
+        active_payments = self.target_population.payment_items.all()
+        assert active_payments.count() == 1
+        assert active_payments.first().household == household2
+
+    def test_vulnerability_score_filter_set_before_engine_formula(self, create_user_role_with_permissions: Any) -> None:
+        """Test that setting vulnerability score filters before running engine formula correctly filters payments."""
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.TARGETING_UPDATE, Permissions.TARGETING_LOCK],
+            self.afghanistan,
+            self.program_active,
+        )
+
+        (household1, (individual1,)) = create_household_and_individuals(
+            household_data={
+                "program": self.program_active,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program_active,
+                    "business_area": self.afghanistan,
+                }
+            ],
+        )
+        IndividualRoleInHouseholdFactory(household=household1, individual=individual1, role=ROLE_PRIMARY)
+
+        (household2, (individual2,)) = create_household_and_individuals(
+            household_data={
+                "program": self.program_active,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program_active,
+                    "business_area": self.afghanistan,
+                }
+            ],
+        )
+        IndividualRoleInHouseholdFactory(household=household2, individual=individual2, role=ROLE_PRIMARY)
+
+        (household3, (individual3,)) = create_household_and_individuals(
+            household_data={
+                "program": self.program_active,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program_active,
+                    "business_area": self.afghanistan,
+                }
+            ],
+        )
+        IndividualRoleInHouseholdFactory(household=household3, individual=individual3, role=ROLE_PRIMARY)
+
+        PaymentFactory(
+            parent=self.target_population,
+            household=household1,
+            head_of_household=individual1,
+            collector=individual1,
+            business_area=self.afghanistan,
+        )
+        PaymentFactory(
+            parent=self.target_population,
+            household=household2,
+            head_of_household=individual2,
+            collector=individual2,
+            business_area=self.afghanistan,
+        )
+        PaymentFactory(
+            parent=self.target_population,
+            household=household3,
+            head_of_household=individual3,
+            collector=individual3,
+            business_area=self.afghanistan,
+        )
+
+        # Lock the TP
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        steficon_rule_commit = RuleCommitFactory(
+            rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
+        )
+        self.target_population.save()
+        self.target_population.refresh_from_db()
+
+        # Step 1: Set vulnerability score filters BEFORE running engine formula
+        update_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": self.target_population.pk,
+            },
+        )
+
+        update_data = {
+            "vulnerability_score_min": 30.00,
+            "vulnerability_score_max": 70.00,
+            "version": self.target_population.version,
+        }
+        response = self.client.patch(update_url, update_data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.target_population.refresh_from_db()
+        assert self.target_population.vulnerability_score_min == 30.0
+        assert self.target_population.vulnerability_score_max == 70.0
+
+        # Verify no filtering has occurred yet (scores are still None)
+        payment1 = self.target_population.payment_items.get(household=household1)
+        payment2 = self.target_population.payment_items.get(household=household2)
+        payment3 = self.target_population.payment_items.get(household=household3)
+        assert payment1.vulnerability_score is None
+        assert payment2.vulnerability_score is None
+        assert payment3.vulnerability_score is None
+        assert payment1.is_removed is False
+        assert payment2.is_removed is False
+        assert payment3.is_removed is False
+
+        # Step 2: Apply engine formula to populate vulnerability scores
+        apply_formula_url = reverse(
+            "api:payments:target-populations-apply-engine-formula",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": self.target_population.pk,
+            },
+        )
+
+        # Mock the steficon rule execution to return predictable scores
+        def mock_execute(self, context):
+            household_id = context["household"].id
+            result = MagicMock()
+
+            if household_id == household1.id:
+                result.value = 25.0  # Below min (30)
+            elif household_id == household2.id:
+                result.value = 50.0  # Within range (30-70)
+            elif household_id == household3.id:
+                result.value = 75.0  # Above max (70)
+            else:
+                result.value = 50.0
+
+            return result
+
+        with patch("hope.apps.steficon.models.RuleCommit.execute", autospec=True, side_effect=mock_execute):
+            apply_formula_data = {
+                "engine_formula_rule_id": str(steficon_rule_commit.rule.pk),
+                "version": self.target_population.version,
+            }
+            with TestCase().captureOnCommitCallbacks(execute=True):
+                response = self.client.post(apply_formula_url, apply_formula_data, format="json")
+                assert response.status_code == status.HTTP_200_OK
+
+        self.target_population.refresh_from_db()
+        assert self.target_population.status == PaymentPlan.Status.TP_STEFICON_COMPLETED
+
+        payment1.refresh_from_db()
+        payment2.refresh_from_db()
+        payment3.refresh_from_db()
+
+        # Check scores were populated
+        assert payment1.vulnerability_score == 25.0
+        assert payment2.vulnerability_score == 50.0
+        assert payment3.vulnerability_score == 75.0
+
+        assert payment1.is_removed is True  # Below min (score=25 < 30)
+        assert payment2.is_removed is False  # Within range (30 <= score=50 <= 70)
+        assert payment3.is_removed is True  # Above max (score=75 > 70)
+
+        active_payments = self.target_population.payment_items.all()
+        assert active_payments.count() == 1
+        assert active_payments.first().household == household2
+
 
 class TestPendingPaymentsAction:
     @pytest.fixture(autouse=True)
