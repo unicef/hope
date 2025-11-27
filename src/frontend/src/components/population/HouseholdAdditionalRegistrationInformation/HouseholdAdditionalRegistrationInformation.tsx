@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
+import { formatNormalCaseValue } from '@utils/utils';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -34,6 +35,18 @@ export const HouseholdAdditionalRegistrationInformation = ({
     'name',
     '*',
   );
+
+  if (Object.entries(household?.flexFields || {}).length === 0) {
+    return (
+      <Overview>
+        <Title>
+          <Typography variant="h6">
+            {t('No additional registration information available')}
+          </Typography>
+        </Title>
+      </Overview>
+    );
+  }
 
   const fields = Object.entries(household?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
@@ -68,15 +81,23 @@ export const HouseholdAdditionalRegistrationInformation = ({
           <LabelizedField
             key={key}
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={newValue}
+            value={formatNormalCaseValue(newValue)}
           />
         );
+      }
+
+      // Fallback: if value is array, join and format each
+      let displayValue: string;
+      if (Array.isArray(value)) {
+        displayValue = value.map((v) => formatNormalCaseValue(v)).join(', ');
+      } else {
+        displayValue = formatNormalCaseValue(value);
       }
       return (
         <LabelizedField
           key={key}
           label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
-          value={value}
+          value={displayValue}
         />
       );
     },
