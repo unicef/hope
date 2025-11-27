@@ -49,9 +49,9 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                 grv.category,
                 baseUrl,
               );
-              const individualDetailsPath = `/${baseUrl}/population/individuals/${grv.individual.id}`;
-              const householdDetailsPath = `/${baseUrl}/population/households/${grv.household.id}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${grv.household.program.slug}`;
+              const individualDetailsPath = `/${baseUrl}/population/individuals/${grv?.individual?.id}`;
+              const householdDetailsPath = `/${baseUrl}/population/households/${grv?.household.id}`;
+              const programDetailsPath = `/${baseUrl}/programs/all/details/${grv.programs.slug}`;
               return (
                 <TableRow key={grv.id} hover>
                   <TableCell>
@@ -68,18 +68,26 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                   </TableCell>
                   <TableCell>
                     <BlackLink to={programDetailsPath}>
-                      {grv.program.name}
+                      {grv.programs.name}
                     </BlackLink>
                   </TableCell>
                   <TableCell>
-                    <BlackLink to={householdDetailsPath}>
-                      {grv.household.unicefId}
-                    </BlackLink>
+                    {grv?.household ? (
+                      <BlackLink to={householdDetailsPath}>
+                        {grv?.household?.unicefId}
+                      </BlackLink>
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                   <TableCell>
-                    <BlackLink to={individualDetailsPath}>
-                      {grv.individual.unicefId}
-                    </BlackLink>
+                    {grv?.individual ? (
+                      <BlackLink to={individualDetailsPath}>
+                        {grv?.individual?.unicefId}
+                      </BlackLink>
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                 </TableRow>
               );
