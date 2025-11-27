@@ -25,7 +25,7 @@ business_area_nested_router.register(
     basename="payment-plans-managerial",
 )
 business_area_nested_router.register(r"payments", PaymentGlobalViewSet, basename="payments-global")
-business_area_nested_router.register(r"payment-plans", PaymentPlanGlobalViewSet, basename="payments-plans-global")
+business_area_nested_router.register(r"payment-plans", PaymentPlanGlobalViewSet, basename="payment-plans-global")
 
 program_nested_router = program_base_router.program_nested_router
 
