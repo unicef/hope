@@ -639,7 +639,7 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self.payment_plan.is_population_open:
+        if self.payment_plan.is_population_open():
             current_fsp = self.payment_plan.financial_service_provider
             current_dm = self.payment_plan.delivery_mechanism
             has_current_values = current_fsp is not None or current_dm is not None
