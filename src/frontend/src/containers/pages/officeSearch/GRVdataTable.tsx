@@ -25,7 +25,7 @@ interface GRVDataTableProps {
 }
 
 const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -49,9 +49,9 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                 grv.category,
                 baseUrl,
               );
-              const individualDetailsPath = `/${baseUrl}/population/individuals/${grv?.individual?.id}`;
-              const householdDetailsPath = `/${baseUrl}/population/households/${grv?.household.id}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${grv.programs.slug}`;
+              const individualDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.slug}/population/individuals/${grv.individual?.id}`;
+              const householdDetailsPath = `/${businessArea}/programs/${grv.programs?.[0]?.slug}/population/household/${grv.household?.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${grv.programs?.[0]?.slug}`;
               return (
                 <TableRow key={grv.id} hover>
                   <TableCell>
@@ -68,7 +68,7 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                   </TableCell>
                   <TableCell>
                     <BlackLink to={programDetailsPath}>
-                      {grv.programs.name}
+                      {grv.programs?.[0]?.name}
                     </BlackLink>
                   </TableCell>
                   <TableCell>
