@@ -111,6 +111,7 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
     programs = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer(source="ticket_details.household", allow_null=True)
+    individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     admin = serializers.CharField(source="admin2.name", default="")
     admin2 = AreaListSerializer()
     assigned_to = UserSerializer()
@@ -126,6 +127,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "status",
             "programs",
             "household",
+            "individual",
             "admin",
             "admin2",
             "assigned_to",
@@ -155,7 +157,6 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
     partner = PartnerSerializer()
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
-    individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     payment_record = serializers.SerializerMethodField()
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
@@ -173,7 +174,6 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "description",
             "language",
             "area",
-            "individual",
             "payment_record",
             "linked_tickets",
             "existing_tickets",
