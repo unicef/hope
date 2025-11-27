@@ -684,8 +684,9 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             individual_ids.update(
                 ticket.needs_adjudication_ticket_details.selected_individuals.values_list("id", flat=True)
             )
-            if ticket.needs_adjudication_ticket_details.selected_distinct:
-                individual_ids.add(ticket.needs_adjudication_ticket_details.selected_distinct.id)
+            individual_ids.update(
+                ticket.needs_adjudication_ticket_details.selected_distinct.values_list("id", flat=True)
+            )
 
         if (
             hasattr(ticket, "delete_individual_ticket_details")
