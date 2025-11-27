@@ -11,13 +11,12 @@ from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import Error
-from django.db.models import JSONField, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hope.admin.utils import (
@@ -28,7 +27,6 @@ from hope.admin.utils import (
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.models import BusinessArea
 from hope.apps.household.celery_tasks import revalidate_phone_number_task
 from hope.apps.household.models import (
@@ -204,15 +202,6 @@ class IndividualAdmin(
         if db_field.name == "household":
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if isinstance(db_field, JSONField):
-            if is_root(request):
-                kwargs = {"widget": JSONEditor}
-            else:
-                kwargs = {"widget": JsonWidget}
-            return db_field.formfield(**kwargs)
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button(permission="household.view_individual")
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:

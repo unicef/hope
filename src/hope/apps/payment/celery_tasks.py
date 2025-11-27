@@ -325,10 +325,16 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: "RuleCommit" | None = engine_rule.latest
+    rule: RuleCommit | None = engine_rule.latest
+    if not rule:
+        logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
+        payment_plan.background_action_status_steficon_error()
+        payment_plan.save(update_fields=["background_action_status"])
+        return
+
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
-        payment_plan.save()
+        payment_plan.save(update_fields=["steficon_rule"])
 
     try:
         now = timezone.now()

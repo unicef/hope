@@ -14,7 +14,6 @@ import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHousehol
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { AdminButton } from '@core/AdminButton';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';

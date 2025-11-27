@@ -20,7 +20,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
-    from test_utils.factories.sanction_list import SanctionListFactory
+    from extras.test_utils.factories.sanction_list import SanctionListFactory
 
     return SanctionListFactory(strategy=fqn(UNSanctionList))
 
