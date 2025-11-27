@@ -463,7 +463,7 @@ def driver(pytestconfig, download_path: str) -> Chrome:
     if not _is_e2e_run(pytestconfig):
         pytest.skip("e2e-only fixture")
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
