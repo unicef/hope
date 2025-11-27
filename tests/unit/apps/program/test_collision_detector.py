@@ -217,7 +217,6 @@ def test_update_individual_identities_with_fixture_households(
         number="DEST-ID-789",
     )
 
-    program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 
@@ -310,9 +309,6 @@ def test_update_documents_with_fixture_households(
         status=Document.STATUS_NEED_INVESTIGATION,
     )
 
-    program.collision_detection_enabled = True
-    program.save()
-
     detector = IdentificationKeyCollisionDetector(program)
     detector._update_documents(destination_individual, source_individual)
 
@@ -386,9 +382,6 @@ def test_update_individual_with_fixture_households(
     destination_original_unicef_id = destination_individual.unicef_id
     destination_original_household_id = destination_individual.household_id
 
-    program.collision_detection_enabled = True
-    program.save()
-
     detector = IdentificationKeyCollisionDetector(program)
     detector._update_individual(destination_individual, source_individual)
 
@@ -447,10 +440,6 @@ def test_update_household_with_fixture_households(
     source_household_obj.returnee = True
     source_household_obj.flex_fields = {"eggs": "MODIFIED_SOURCE"}
     source_household_obj.save()
-
-    # Enable collision detection
-    program.collision_detection_enabled = True
-    program.save()
 
     # Execute the update household method
     detector = IdentificationKeyCollisionDetector(program)
@@ -567,7 +556,6 @@ def test_update_household_collision(
     destination_original_unicef_id = destination_household_obj.unicef_id
     additional_individual_key = additional_individual.identification_key
 
-    program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
 

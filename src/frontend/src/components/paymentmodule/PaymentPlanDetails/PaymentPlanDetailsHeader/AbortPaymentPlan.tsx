@@ -22,6 +22,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AbortPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -101,6 +102,7 @@ export function AbortPaymentPlan({
               onClick={() => setAbortDialogOpen(true)}
               data-cy="button-abort"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.PM_ABORT}
             >
               {t('Abort')}
             </Button>
@@ -145,6 +147,7 @@ export function AbortPaymentPlan({
                   variant="contained"
                   onClick={submitForm}
                   data-cy="button-submit-abort"
+                  data-perm={PERMISSIONS.PM_ABORT}
                 >
                   {t('Abort')}
                 </LoadingButton>

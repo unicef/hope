@@ -1,6 +1,4 @@
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { LookUpProgrammesTableSurveys } from '@containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
 import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
 import { usePermissions } from '@hooks/usePermissions';
 import { SurveyTabsValues } from '@utils/constants';
@@ -9,40 +7,20 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
-  choicesData: ProgramChoices;
   values;
-  filtersProgramApplied;
   filtersTargetPopulationApplied;
-  businessArea: string;
-  onValueChange;
   handleChange;
 }
 const LookUpSelectionTablesSurveys = ({
   selectedTab,
-  choicesData,
   values,
-  filtersProgramApplied,
   filtersTargetPopulationApplied,
-  businessArea,
-  onValueChange,
   handleChange,
 }: LookUpSelectionTablesSurveysProps): ReactElement => {
   const permissions = usePermissions();
 
   return (
     <>
-      {selectedTab === SurveyTabsValues.PROGRAM && (
-        <LookUpProgrammesTableSurveys
-          businessArea={businessArea}
-          filter={filtersProgramApplied}
-          choicesData={choicesData}
-          selectedProgram={values.program}
-          handleChange={(value) => {
-            handleChange(SurveyTabsValues.PROGRAM, value);
-          }}
-          setFieldValue={onValueChange}
-        />
-      )}
       {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
         <LookUpTargetPopulationTableSurveys
           filter={filtersTargetPopulationApplied}

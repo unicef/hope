@@ -197,6 +197,8 @@ class VerificationPlanStatusChangeServices:
             raise ValidationError("Exporting xlsx file is already started. Please wait")
         if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
             raise ValidationError("Xlsx file is already created")
+        if self.payment_verification_plan.payment_record_verifications.count() == 0:
+            raise ValidationError("Not possible to export with no records")
 
         self.payment_verification_plan.xlsx_file_exporting = True
         self.payment_verification_plan.save()

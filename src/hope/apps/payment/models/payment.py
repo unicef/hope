@@ -176,6 +176,7 @@ class PaymentPlan(
             "targeting_criteria_string",
             "excluded_ids",
             "abort_comment",
+            "reconciliation_import_file",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -792,7 +793,7 @@ class PaymentPlan(
     ) -> QuerySet:
         from hope.apps.payment.models import PaymentVerificationPlan
 
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -1660,6 +1661,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (snapshot_data, "admin2"),
             "village": (snapshot_data, "village"),
             "collector_name": (collector_data, "full_name"),
+            "collector_id": (primary_collector, "unicef_id"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),
@@ -2346,6 +2348,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         }
 
         iban_format = re.compile(r"^[A-Z]{2}\d{2}[A-Z0-9]+$")
+
+        if not isinstance(number, str):
+            number = str(number)
 
         number = number.replace(" ", "").upper()
         if not iban_format.match(number):

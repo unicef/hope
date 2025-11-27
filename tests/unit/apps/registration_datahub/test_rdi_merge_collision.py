@@ -202,11 +202,9 @@ def test_merge_rdi_with_collision(
     5. Merged individual should be updated with the pending individual data
     5. Merged household should have added in_review_rdi to extra_rdis m2m
     """
-    from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-
     # Enable collision detection in the program
-    program.collision_detection_enabled = True
     from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+    from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()

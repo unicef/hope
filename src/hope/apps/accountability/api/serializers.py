@@ -314,6 +314,7 @@ class SurveySampleSizeSerializer(serializers.Serializer):
 class SampleSizeSerializer(serializers.Serializer):
     number_of_recipients = serializers.IntegerField()
     sample_size = serializers.IntegerField()
+    excluded_recipients_count = serializers.IntegerField()
 
 
 class MessageSampleSizeSerializer(serializers.Serializer):

@@ -163,10 +163,14 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             self._add_payment_record_verification_row(payment_record_verification)
 
     def _add_data_validation(self) -> None:
+        row_count = len(self.ws_export_list["B"])
+        if row_count < 2:  # pragma: no cover
+            return
+        start = 2
+        end = max(row_count, 2)
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
-        self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
+        self.dv_received.add(f"B{start}:B{end}")
         self.ws_export_list.add_data_validation(self.dv_received)
-        self.ws_export_list["B2" : f"B{len(self.ws_export_list['B'])}"]
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()

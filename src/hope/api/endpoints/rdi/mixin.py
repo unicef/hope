@@ -78,10 +78,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
         """Detect collisions in the provided households data against the existing population."""
         program = registration_data_import.program
-        if not program.collision_detection_enabled or not program.collision_detector:
-            return None
-        colision_detector = program.collision_detector
-        return colision_detector.detect_collision(household)
+        return program.collision_detector.detect_collision(household)
 
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: dict) -> PendingIndividual:
         photo = self.get_photo(member_data.pop("photo", None))

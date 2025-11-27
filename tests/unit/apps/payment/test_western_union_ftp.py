@@ -128,3 +128,23 @@ class TestWesternUnionFTPClient(TestCase):
         ftp_client.client.getfo.assert_called_once()
         assert isinstance(fl, io.BytesIO)
         assert fl.read() == b"hello world"
+
+    def test_get_files_by_name_and_downloads(self) -> None:
+        ftp_client = WesternUnionFTPClientMock()
+        now = datetime.now()
+
+        # Prepare fake files
+        attrs = [
+            self.make_attr("QCF-123-XYZ-20250101.zip", now),
+            self.make_attr("not-matching.zip", now),
+            self.make_attr("qcf-999-ABC-20240101.zip", now),
+        ]
+
+        with (
+            mock.patch.object(ftp_client, "list_files_w_attrs", return_value=attrs),
+            mock.patch.object(ftp_client, "download", return_value=io.BytesIO(b"fake content")) as mock_download,
+        ):
+            results = ftp_client.get_files_by_name("QCF-")
+
+            assert len(results) == 2
+            assert mock_download.call_count == 2

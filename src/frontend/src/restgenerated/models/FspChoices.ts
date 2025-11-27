@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeliveryMechanismChoice } from './DeliveryMechanismChoice';
+import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FspChoice } from './FspChoice';
 export type FspChoices = {
-    deliveryMechanism: DeliveryMechanismChoice;
+    deliveryMechanism: DeliveryMechanism;
     fsps: Array<FspChoice>;
 };
 

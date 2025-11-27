@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
 export interface LockPaymentPlanProps {
@@ -72,6 +73,7 @@ export function LockPaymentPlan({
           variant="contained"
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
+          data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK}
         >
           {t('Lock')}
         </Button>

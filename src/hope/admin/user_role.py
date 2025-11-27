@@ -74,8 +74,7 @@ class RoleAssignmentInline(admin.TabularInline):
 class RoleAssignmentAdmin(HOPEModelAdminBase):
     list_display = ("user", "partner", "role", "business_area", "program")
     form = RoleAssignmentAdminForm
-    autocomplete_fields = ("role",)
-    raw_id_fields = ("user", "business_area", "role")
+    autocomplete_fields = ("user", "partner", "business_area", "role", "program", "group")
     search_fields = (
         "user__username",
         "user__first_name",
@@ -100,6 +99,13 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
                 "role",
             )
         )
+
+    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+        if db_field.name == "role":
+            kwargs["queryset"] = Role.objects.order_by("name")
+        elif db_field.name == "business_area":
+            kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_actions(self, request: HttpRequest) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride

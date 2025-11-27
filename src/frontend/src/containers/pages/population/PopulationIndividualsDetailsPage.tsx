@@ -75,7 +75,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
             programSlug: programId,
           },
         );
-      return { allIndividualsFlexFieldsAttributes: data.results };
+      return { allIndividualsFlexFieldsAttributes: data };
     },
   });
 

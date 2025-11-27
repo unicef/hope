@@ -68,10 +68,15 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         self.program.refresh_from_db()
         assert str(self.program.deduplication_set_id) == new_uuid
+        notification_url = (
+            f"https://{settings.DOMAIN_NAME}/api/rest/business-areas/"
+            f"{self.program.business_area.slug}/programs/{self.program.slug}/"
+            f"registration-data-imports/webhookdeduplication/"
+        )
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
                 reference_pk=str(self.program.id),
-                notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
+                notification_url=notification_url,
             )
         )
 

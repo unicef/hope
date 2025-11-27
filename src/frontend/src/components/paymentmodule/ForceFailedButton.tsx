@@ -73,6 +73,7 @@ export function ForceFailedButton({
           variant="contained"
           onClick={() => setOpenModal(true)}
           data-cy="button-mark-as-failed"
+          data-perm={PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED}
           disabled={disabled}
         >
           {t('Mark as failed')}

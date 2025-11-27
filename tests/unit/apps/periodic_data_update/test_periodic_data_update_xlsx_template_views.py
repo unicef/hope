@@ -231,6 +231,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template1.created_by.get_full_name(),
             "can_export": self.pdu_template1.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template2.id,
@@ -241,6 +242,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template2.created_by.get_full_name(),
             "can_export": self.pdu_template2.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template3.id,
@@ -251,6 +253,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template3.created_by.get_full_name(),
             "can_export": self.pdu_template3.can_export,
+            "admin_url": None,
         } in response_json
         assert {
             "id": self.pdu_template_program2.id,
@@ -261,6 +264,7 @@ class TestPDUXlsxTemplateViews:
             "created_at": "2022-01-01T00:00:00Z",
             "created_by": self.pdu_template_program2.created_by.get_full_name(),
             "can_export": self.pdu_template_program2.can_export,
+            "admin_url": None,
         } not in response_json
 
     def test_count_periodic_data_update_templates(

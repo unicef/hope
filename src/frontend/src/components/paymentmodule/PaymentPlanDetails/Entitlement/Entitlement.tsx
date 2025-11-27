@@ -267,6 +267,9 @@ function Entitlement({
                   !isActiveProgram
                 }
                 data-cy="button-apply-steficon"
+                data-perm={
+                  PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS
+                }
                 onClick={async () => {
                   try {
                     await setSteficonRule({

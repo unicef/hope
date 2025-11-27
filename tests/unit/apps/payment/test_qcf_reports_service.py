@@ -23,6 +23,7 @@ from hope.apps.payment.services.qcf_reports_service import QCFReportsService
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
 from hope.apps.program.models import Program
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 
 class WUClientMock(WesternUnionFTPClient):
@@ -62,7 +63,22 @@ class TestQCFReportsService(TestCase):
         )
         cls.payment_plan.refresh_from_db()
 
-        # TODO add 2 FCs
+        fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="1")
+        FundsCommitmentItem.objects.create(
+            funds_commitment_group_id=fcg.pk,
+            office=None,
+            rec_serial_number="01",
+            funds_commitment_item="001",
+            payment_plan=cls.payment_plan,
+        )
+        fcg2 = FundsCommitmentGroup.objects.create(funds_commitment_number="2")
+        FundsCommitmentItem.objects.create(
+            funds_commitment_group_id=fcg2.pk,
+            office=None,
+            rec_serial_number="02",
+            funds_commitment_item="002",
+            payment_plan=cls.payment_plan,
+        )
 
         cls.p1 = PaymentFactory(parent=cls.payment_plan, fsp_auth_code="0486455966")
         cls.p2 = PaymentFactory(parent=cls.payment_plan, fsp_auth_code="669")
@@ -81,20 +97,35 @@ class TestQCFReportsService(TestCase):
     )
     def test_process_files_since_with_real_zip(self) -> None:
         filename = "QCF-123-XYZ-20250101.zip"
+        ad_filename = "AD-123-XYZ-20250101.zip"
         test_file_path = os.path.join(
             os.path.dirname(__file__),
             "test_file",
             filename,
+        )
+        ad_test_file_path = os.path.join(
+            os.path.dirname(__file__),
+            "test_file",
+            ad_filename,
         )
 
         with open(test_file_path, "rb") as f:
             file_bytes = f.read()
         fake_file_like = io.BytesIO(file_bytes)
 
-        with mock.patch.object(
-            WesternUnionFTPClient,
-            "get_files_since",
-            return_value=[(filename, fake_file_like)],
+        with open(ad_test_file_path, "rb") as f:
+            file_bytes = f.read()
+        ad_fake_file_like = io.BytesIO(file_bytes)
+
+        with (
+            mock.patch.object(
+                WesternUnionFTPClient,
+                "get_files_since",
+                return_value=[(filename, fake_file_like)],
+            ),
+            mock.patch.object(
+                WesternUnionFTPClient, "get_files_by_name", return_value=[(ad_filename, ad_fake_file_like)]
+            ),
         ):
             service = QCFReportsService()
             service.process_files_since(datetime(2025, 1, 1))
@@ -137,6 +168,7 @@ class TestQCFReportsService(TestCase):
                 "Principal Amount",
                 "Charges Amount",
                 "Fee Amount",
+                "Advice Filename",
             ]
             actual_headers = [cell.value for cell in ws[1]]
             assert actual_headers == expected_headers
@@ -150,10 +182,11 @@ class TestQCFReportsService(TestCase):
                 "0486455966",
                 self.p1.parent.unicef_id,
                 self.program.name,
-                None,
+                "1/001, 2/002",
                 262.55,
                 7.88,
                 0,
+                "ADVCP_E_C_0007_PIIC_25911592304_18_NOV_2025",
             ]
 
             # Check 2nd payment row
@@ -165,10 +198,11 @@ class TestQCFReportsService(TestCase):
                 "669",
                 self.p2.parent.unicef_id,
                 self.program.name,
-                None,
+                "1/001, 2/002",
                 262.55,
                 7.88,
                 0,
+                "ADVCP_E_C_0007_PIIC_25911592304_18_NOV_2025",
             ]
 
             # Check 3rd payment row
@@ -180,13 +214,14 @@ class TestQCFReportsService(TestCase):
                 None,
                 self.p3.parent.unicef_id,
                 self.program.name,
-                None,
+                "1/001, 2/002",
                 665.22,
                 19.96,
                 0,
+                "ADVCP_E_C_0007_PIIC_25911592304_18_NOV_2025",
             ]
 
-            # Optionally, check totals
+            # Check totals
             last_row = ws.max_row
             principal_total = ws[f"E{last_row - 2}"].value
             charges_total = ws[f"E{last_row - 1}"].value

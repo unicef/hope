@@ -10,7 +10,7 @@ from hope.apps.utils.models import AdminUrlMixin, CeleryEnabledModel, TimeStampe
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
-class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel):
+class PDUXlsxTemplate(TimeStampedModel, CeleryEnabledModel, AdminUrlMixin):
     class Status(models.TextChoices):
         TO_EXPORT = "TO_EXPORT", "To export"
         NOT_SCHEDULED = "NOT_SCHEDULED", "Not scheduled"

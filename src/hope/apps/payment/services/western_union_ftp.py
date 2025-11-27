@@ -30,3 +30,14 @@ class WesternUnionFTPClient(FTPClient):
                 return_files.append((filename, file_like))
 
         return return_files
+
+    def get_files_by_name(self, name_substring: str) -> list[tuple[str, io.BytesIO]]:
+        name_substring_lower = name_substring.lower()
+        matched_files = []
+
+        for f in self.list_files_w_attrs():
+            if name_substring_lower in f.filename.lower():
+                file_like = self.download(f.filename)
+                matched_files.append((f.filename, file_like))
+
+        return matched_files

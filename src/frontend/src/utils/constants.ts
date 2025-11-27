@@ -266,7 +266,7 @@ export const SurveySteps = {
 };
 
 export const SurveyTabsValues = {
-  PROGRAM: 0,
+  WHOLE_PROGRAM_POPULATION: 0,
   TARGET_POPULATION: 1,
   RDI: 2,
   A_: 'Unknown',

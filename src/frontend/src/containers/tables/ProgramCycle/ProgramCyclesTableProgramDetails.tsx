@@ -17,7 +17,6 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { createApiParams } from '@utils/apiUtils';
@@ -47,10 +46,6 @@ const ProgramCyclesTableProgramDetails = ({
   }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const canCreateProgramCycle =
-    program.status === ProgramStatusEnum.ACTIVE &&
-    hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
-
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
     queryFn: () => {
@@ -157,19 +152,12 @@ const ProgramCyclesTableProgramDetails = ({
     return null;
   }
 
-  const actions = [];
-
-  if (canCreateProgramCycle) {
-    actions.push(
-      <AddNewProgramCycle
-        key="add-new"
-        program={program}
-        lastProgramCycle={
-          (data?.results || [])[(data?.results || []).length - 1]
-        }
-      />,
-    );
-  }
+  const actions = [
+    <AddNewProgramCycle
+      key="add-new"
+      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
+    />,
+  ];
 
   return (
     <UniversalRestTable

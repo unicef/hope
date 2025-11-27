@@ -257,6 +257,27 @@ class TestPaymentVerificationViewSet:
             assert pvp["excluded_admin_areas_filter"] == []
             assert resp_data["payment_verification_summary"]["status"] == "PENDING"
 
+    def test_create_pvp_validation_error_no_records(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.afghanistan, self.program_active
+        )
+        response = self.client.post(
+            self.url_create,
+            {
+                "sampling": "FULL_LIST",
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "verification_channel": PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+                "rapid_pro_arguments": None,
+                "random_sampling_arguments": None,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "There are no payment records that could be assigned to a new verification plan" in response.json()[0]
+
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
