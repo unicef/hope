@@ -37,9 +37,9 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
           {ppData.results && ppData.results.length > 0 ? (
             ppData.results.map((plan: PaymentPlanList) => {
               const paymentPlanDetailsPath = `/${baseUrl}/payment-module/payment-plans/${plan.id}`;
-              const householdDetailsPath = `/${baseUrl}/population/households/${plan.householdId}`;
-              const individualDetailsPath = `/${baseUrl}/population/individuals/${plan.individualId}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${plan.programSlug}`;
+              // const householdDetailsPath = `/${baseUrl}/population/households/${plan.householdId}`;
+              // const individualDetailsPath = `/${baseUrl}/population/individuals/${plan.individualId}`;
+              // const programDetailsPath = `/${baseUrl}/programs/all/details/${plan.programSlug}`;
 
               return (
                 <TableRow key={plan.id} hover>
@@ -48,7 +48,7 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
                       {plan.unicefId}
                     </BlackLink>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <BlackLink to={householdDetailsPath}>
                       {plan.householdUnicefId}
                     </BlackLink>
@@ -67,7 +67,7 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
                     <BlackLink to={individualDetailsPath}>
                       {plan.individualFullName}
                     </BlackLink>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               );
             })
