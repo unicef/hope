@@ -314,8 +314,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
         q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
         q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
 
-        q_filters |= Q(system_flagging_ticket_details__sanction_list_individual__unicef_id=unicef_id)
-
         q_filters |= Q(delete_individual_ticket_details__individual__unicef_id=unicef_id)
 
         return queryset.filter(q_filters).distinct()
