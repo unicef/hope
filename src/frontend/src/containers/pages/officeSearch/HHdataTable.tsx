@@ -18,7 +18,7 @@ interface HHDataTableProps {
 }
 
 const HHDataTable: React.FC<HHDataTableProps> = ({ hhData }) => {
-  const { baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -32,8 +32,8 @@ const HHDataTable: React.FC<HHDataTableProps> = ({ hhData }) => {
         <TableBody>
           {hhData.results && hhData.results.length > 0 ? (
             hhData.results.map((household: any) => {
-              const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${household.programSlug}`;
+              const householdDetailsPath = `/${businessArea}/programs/${household.programSlug}/population/household/${household.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${household.programSlug}`;
               return (
                 <TableRow key={household.id} hover>
                   <TableCell>
