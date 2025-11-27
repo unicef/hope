@@ -10,5 +10,6 @@ export type Account = {
     accountType: number;
     number?: string | null;
     financialInstitution?: number | null;
+    accountTypeKey: string;
 };
 

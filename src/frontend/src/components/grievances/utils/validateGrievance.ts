@@ -427,7 +427,7 @@ export function validateUsingSteps(
               errors.individualDataUpdateAccountsToEdit =
                 'Account Number is required';
             }
-            if (!acc.financial_institution) {
+            if (!acc.financialInstitution) {
               errors.individualDataUpdateAccountsToEdit =
                 'Account Financial Institution is required';
             }

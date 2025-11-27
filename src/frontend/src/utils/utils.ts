@@ -816,6 +816,7 @@ export function thingForSpecificGrievanceType(
   defaultThing = null,
   categoryWithIssueTypeDict = grievanceTypeIssueTypeDict,
 ) {
+  console.log("thingForSpecificGrievanceType", ticket, thingDict);
   const category = ticket.category?.toString();
   const issueType = ticket.issueType?.toString();
   if (!(category in thingDict)) {
@@ -1294,7 +1295,7 @@ export const filterEmptyParams = (params) => {
 };
 
 export function deepCamelize(data) {
-  const notCamelizedKeys = ['form_errors', 'household_data', 'data_fields'];
+  const notCamelizedKeys = ['form_errors', 'household_data'];
 
   if (_.isArray(data)) {
     return data.map(deepCamelize);
@@ -1324,7 +1325,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
-  const notUnderscoreKeys = ['dataFields'];
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {

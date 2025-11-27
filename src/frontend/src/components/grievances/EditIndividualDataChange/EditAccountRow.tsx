@@ -27,6 +27,10 @@ export function EditAccountRow({
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
   const dataFields = account.dataFields;
+  const financialInstitutionName =
+    individualChoicesData.accountFinancialInstitutionChoices.find(
+      (c: any) => c.value === account.financialInstitution,
+    )?.name || account.financialInstitution;
   return isEdited ? (
     <>
       <AccountField
@@ -62,24 +66,20 @@ export function EditAccountRow({
   ) : (
     <Fragment key={account.id}>
       <Grid size={4} key="type">
-        <LabelizedField label="type" value={String(account.accountType)} />
+        <LabelizedField label="type" value={String(account.name)} />
       </Grid>
-      {Object.entries(dataFields).map(([key, value]) => {
-        let displayValue = String(value);
 
-        if (
-          key === 'financial_institution' &&
-          Array.isArray(
-            individualChoicesData.accountFinancialInstitutionChoices,
-          )
-        ) {
-          const choice =
-            individualChoicesData.accountFinancialInstitutionChoices.find(
-              (c: any) => Number(c.value) === Number(value),
-            );
-          displayValue = choice ? choice.name : String(value);
-        }
-
+      <Grid size={4}>
+        <LabelizedField label="Number" value={account.number} />
+      </Grid>
+      <Grid size={4}>
+        <LabelizedField
+          label="Financial Institution"
+          value={financialInstitutionName}
+        />
+      </Grid>
+      {dataFields.map(({ key, value }) => {
+        const displayValue = String(value);
         return (
           <Grid size={4} key={key}>
             <LabelizedField label={key} value={displayValue} />
@@ -90,7 +90,13 @@ export function EditAccountRow({
         <Box display="flex" alignItems="center">
           <IconButton
             onClick={() => {
-              arrayHelpers.push({ id: account.id, ...dataFields });
+              arrayHelpers.push({
+                id: account.id,
+                dataFields: [ ...account.dataFields ],
+                financialInstitution: account.financialInstitution,
+                number: account.number,
+                accountType: account.accountTypeKey,
+              });
               setEdit(true);
             }}
             disabled={isEditTicket}

@@ -276,11 +276,11 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
             "number_previous_value": account_object.number,
             "data_fields": [
                 {
-                    "name": field,
-                    "value": value,
-                    "previous_value": account_object.data.get(field),
+                    "name": item["key"],
+                    "value": item["value"],
+                    "previous_value": account_object.data.get(item["key"]),
                 }
-                for field, value in data_fields.items()
+                for item in data_fields
             ],
         }
         items.append(data)
