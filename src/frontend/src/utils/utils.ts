@@ -816,7 +816,6 @@ export function thingForSpecificGrievanceType(
   defaultThing = null,
   categoryWithIssueTypeDict = grievanceTypeIssueTypeDict,
 ) {
-  console.log("thingForSpecificGrievanceType", ticket, thingDict);
   const category = ticket.category?.toString();
   const issueType = ticket.issueType?.toString();
   if (!(category in thingDict)) {

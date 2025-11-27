@@ -63,7 +63,6 @@ export function AccountToEditTable({
     }
     return <span>{curr}</span>;
   };
-  console.log('account', account);
 
   return (
     <>
