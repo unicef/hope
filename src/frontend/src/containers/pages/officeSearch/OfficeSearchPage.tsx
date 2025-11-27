@@ -45,7 +45,7 @@ const OfficeSearchPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -72,8 +72,8 @@ const OfficeSearchPage = (): ReactElement => {
   );
 
   const initialFilter = {
-    whatToSearch: '',
-    whereToSearch: '',
+    searchFor: '',
+    basedOnId: '',
     officeSearch: '',
   };
 
@@ -147,8 +147,7 @@ const OfficeSearchPage = (): ReactElement => {
           withPagination: true,
         }),
       ),
-    enabled:
-      appliedFilter.whereToSearch === 'HH' && !!appliedFilter.officeSearch,
+    enabled: appliedFilter.searchFor === 'HH' && !!appliedFilter.officeSearch,
   });
 
   // Individuals query
@@ -169,8 +168,7 @@ const OfficeSearchPage = (): ReactElement => {
           withPagination: true,
         }),
       ),
-    enabled:
-      appliedFilter.whereToSearch === 'IND' && !!appliedFilter.officeSearch,
+    enabled: appliedFilter.searchFor === 'IND' && !!appliedFilter.officeSearch,
   });
 
   // Grievances query (if needed)
@@ -183,7 +181,7 @@ const OfficeSearchPage = (): ReactElement => {
       'businessAreasGrievancesList',
       grvQueryVariables,
       businessArea,
-      appliedFilter.whatToSearch,
+      appliedFilter.searchFor,
       appliedFilter.officeSearch,
     ],
     queryFn: () =>
@@ -192,8 +190,7 @@ const OfficeSearchPage = (): ReactElement => {
           withPagination: true,
         }),
       ),
-    enabled:
-      appliedFilter.whereToSearch === 'GRV' && !!appliedFilter.officeSearch,
+    enabled: appliedFilter.searchFor === 'GRV' && !!appliedFilter.officeSearch,
   });
 
   // Payment Plans query (for 'PP' search)
@@ -207,7 +204,7 @@ const OfficeSearchPage = (): ReactElement => {
       ppQueryVariables,
       businessArea,
       appliedFilter.officeSearch,
-      appliedFilter.whatToSearch,
+      appliedFilter.searchFor,
     ],
     queryFn: () =>
       RestService.restBusinessAreasPaymentPlansList(
@@ -215,8 +212,7 @@ const OfficeSearchPage = (): ReactElement => {
           withPagination: true,
         }),
       ),
-    enabled:
-      appliedFilter.whereToSearch === 'PP' && !!appliedFilter.officeSearch,
+    enabled: appliedFilter.searchFor === 'PP' && !!appliedFilter.officeSearch,
   });
 
   // Payments query (for 'RCPT' search)
@@ -242,8 +238,7 @@ const OfficeSearchPage = (): ReactElement => {
           },
         ),
       ),
-    enabled:
-      appliedFilter.whereToSearch === 'RCPT' && !!appliedFilter.officeSearch,
+    enabled: appliedFilter.searchFor === 'RCPT' && !!appliedFilter.officeSearch,
   });
 
   // Debug logs
@@ -253,28 +248,28 @@ const OfficeSearchPage = (): ReactElement => {
   console.log('ppData', ppData);
   console.log('paymentsData', paymentsData);
 
-  const whereToSearchOptions = [
+  const basedOnIdOptions = [
     canViewHouseholds && {
       value: 'HH',
-      label: `${beneficiaryGroup?.groupLabelPlural || 'Households'} List`,
+      label: `${beneficiaryGroup?.groupLabel || 'Household'}`,
     },
     canViewIndividuals && {
       value: 'IND',
-      label: `${beneficiaryGroup?.memberLabelPlural || 'Individuals'} List`,
+      label: `${beneficiaryGroup?.memberLabel || 'Individual'}`,
     },
-    canViewGrievances && { value: 'GRV', label: 'Grievance Tickets List' },
-    canViewPaymentPlans && { value: 'PP', label: 'Payment Plans List' },
-    canViewPayments && { value: 'RCPT', label: 'Payments List' },
+    canViewGrievances && { value: 'GRV', label: 'Grievance' },
+    canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
+    canViewPayments && { value: 'RCPT', label: 'Payment' },
   ].filter(Boolean);
 
-  const whatToSearchOptions = [
+  const searchForOptions = [
     canViewHouseholds && {
       value: 'HH',
-      label: beneficiaryGroup?.groupLabel || 'HH',
+      label: beneficiaryGroup?.groupLabel || 'Household',
     },
     canViewIndividuals && {
       value: 'IND',
-      label: beneficiaryGroup?.memberLabel || 'IND',
+      label: beneficiaryGroup?.memberLabel || 'Individual',
     },
     canViewGrievances && { value: 'GRV', label: 'Grievance' },
     canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
@@ -296,19 +291,17 @@ const OfficeSearchPage = (): ReactElement => {
           <Grid container alignItems="flex-end" spacing={3}>
             <Grid size={3}>
               <FormControl fullWidth size="small">
-                <InputLabel id="what-to-search-label">
-                  What to Search
-                </InputLabel>
+                <InputLabel id="search-for-label">Search For</InputLabel>
                 <Select
-                  labelId="what-to-search-label"
-                  id="what-to-search"
-                  value={filter.whatToSearch}
-                  label="What to Search"
+                  labelId="search-for-label"
+                  id="search-for"
+                  value={filter.searchFor}
+                  label="Search For"
                   onChange={(e) =>
-                    handleFilterChange('whatToSearch', e.target.value)
+                    handleFilterChange('searchFor', e.target.value)
                   }
                 >
-                  {whatToSearchOptions.map((option) => (
+                  {searchForOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
@@ -318,19 +311,17 @@ const OfficeSearchPage = (): ReactElement => {
             </Grid>
             <Grid size={3}>
               <FormControl fullWidth size="small">
-                <InputLabel id="where-to-search-label">
-                  Where to Search
-                </InputLabel>
+                <InputLabel id="based-on-id-label">Based on ID</InputLabel>
                 <Select
-                  labelId="where-to-search-label"
-                  id="where-to-search"
-                  value={filter.whereToSearch}
-                  label="Where to Search"
+                  labelId="based-on-id-label"
+                  id="based-on-id"
+                  value={filter.basedOnId}
+                  label="Based on ID"
                   onChange={(e) =>
-                    handleFilterChange('whereToSearch', e.target.value)
+                    handleFilterChange('basedOnId', e.target.value)
                   }
                 >
-                  {whereToSearchOptions.map((option) => (
+                  {basedOnIdOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
@@ -352,7 +343,7 @@ const OfficeSearchPage = (): ReactElement => {
         </FiltersSection>
         <BaseSection>
           {/* Households */}
-          {appliedFilter.whereToSearch === 'HH' &&
+          {appliedFilter.searchFor === 'HH' &&
             (isLoadingHouseholds ? (
               <div>{t('Loading households...')}</div>
             ) : errorHouseholds ? (
@@ -363,7 +354,7 @@ const OfficeSearchPage = (): ReactElement => {
               NoResultsMessage
             ))}
           {/* Individuals */}
-          {appliedFilter.whereToSearch === 'IND' &&
+          {appliedFilter.searchFor === 'IND' &&
             (isLoadingIndividuals ? (
               <div>{t('Loading individuals...')}</div>
             ) : errorIndividuals ? (
@@ -374,7 +365,7 @@ const OfficeSearchPage = (): ReactElement => {
               NoResultsMessage
             ))}
           {/* Grievances */}
-          {appliedFilter.whereToSearch === 'GRV' &&
+          {appliedFilter.searchFor === 'GRV' &&
             (isLoadingGrievances ? (
               <div>{t('Loading grievances...')}</div>
             ) : errorGrievances ? (
@@ -385,7 +376,7 @@ const OfficeSearchPage = (): ReactElement => {
               NoResultsMessage
             ))}
           {/* Payment Plans */}
-          {appliedFilter.whereToSearch === 'PP' &&
+          {appliedFilter.searchFor === 'PP' &&
             (isLoadingPaymentPlans ? (
               <div>{t('Loading payment plans...')}</div>
             ) : errorPaymentPlans ? (
@@ -396,7 +387,7 @@ const OfficeSearchPage = (): ReactElement => {
               NoResultsMessage
             ))}
           {/* Payments */}
-          {appliedFilter.whereToSearch === 'RCPT' &&
+          {appliedFilter.searchFor === 'RCPT' &&
             (isLoadingPayments ? (
               <div>{t('Loading payments...')}</div>
             ) : errorPayments ? (
