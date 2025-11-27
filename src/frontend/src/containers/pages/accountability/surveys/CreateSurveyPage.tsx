@@ -452,7 +452,7 @@ const CreateSurveyPage = (): ReactElement => {
           }
         }}
       >
-        {({ submitForm, setValues, values, setFieldValue, errors }) => (
+        {({ submitForm, setValues, values, errors }) => (
           <>
             <PageHeader
               title={`${'New Survey'} > ${matchCategory(category)}`}
