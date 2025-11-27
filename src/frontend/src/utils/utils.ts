@@ -1,3 +1,28 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import localForage from 'localforage';
+import _, { camelCase, startCase } from 'lodash';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { theme as themeObj } from '../theme';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
+
+// Formats a string or array value to Normal Case using lodash's startCase
+export function formatNormalCaseValue(value: string | string[]): string {
+  if (typeof value === 'string') {
+    return startCase(value);
+  }
+  return String(value);
+}
 export function safeStringify(value) {
   if (typeof value === 'object' && value !== null) {
     try {
@@ -34,24 +59,6 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
-import _ from 'lodash';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
