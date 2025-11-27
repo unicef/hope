@@ -11,7 +11,6 @@ from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -1588,7 +1587,7 @@ class TargetPopulationViewSet(
         detail=True,
         methods=["get"],
         url_path="pending-payments",
-        filter_backends=(DjangoFilterBackend,),
+        filter_backends=[],
     )
     @transaction.atomic
     def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1610,9 +1609,13 @@ class TargetPopulationViewSet(
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
         },
-        filters=True,
     )
-    @action(detail=True, methods=["get"], url_path="pending-payments/count")
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="pending-payments/count",
+        filter_backends=[],
+    )
     def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
