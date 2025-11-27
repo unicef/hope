@@ -37,6 +37,7 @@ export type MenuItem = {
   external?: boolean;
   scopes: string[];
   isSocialWorker?: boolean;
+  dataPerm?: string;
 };
 export const SCOPE_PROGRAM = 'SCOPE_PROGRAM';
 export const SCOPE_ALL_PROGRAMS = 'SCOPE_ALL_PROGRAMS';
@@ -49,6 +50,7 @@ export const menuItems: MenuItem[] = [
     icon: <DashboardIcon />,
     permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
     scopes: [SCOPE_ALL_PROGRAMS, SCOPE_PROGRAM],
+    dataPerm: PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
   },
   {
     name: 'Registration Data Import',
@@ -57,6 +59,7 @@ export const menuItems: MenuItem[] = [
     icon: <AutorenewIcon />,
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
     scopes: [SCOPE_PROGRAM],
+    dataPerm: PERMISSIONS.RDI_VIEW_LIST,
   },
   {
     name: 'Programme Population',
@@ -75,6 +78,7 @@ export const menuItems: MenuItem[] = [
         icon: <PeopleAltRoundedIcon />,
         permissionModule: 'HOUSEHOLDS',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
       },
       {
         name: 'Household Members',
@@ -83,6 +87,7 @@ export const menuItems: MenuItem[] = [
         icon: <FaceIcon />,
         permissionModule: 'INDIVIDUALS',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
       },
     ],
   },
@@ -94,6 +99,7 @@ export const menuItems: MenuItem[] = [
     permissionModule: 'POPULATION',
     scopes: [SCOPE_PROGRAM],
     isSocialWorker: true,
+    dataPerm: PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
   },
   {
     name: 'Programmes',
@@ -106,6 +112,7 @@ export const menuItems: MenuItem[] = [
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
+    dataPerm: PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
   },
   {
     name: 'Managerial Console',
@@ -114,6 +121,7 @@ export const menuItems: MenuItem[] = [
     icon: <ManageAccounts />,
     scopes: [SCOPE_ALL_PROGRAMS],
     permissions: [PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL],
+    dataPerm: PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL,
   },
   {
     name: 'Programme Details',
@@ -125,6 +133,7 @@ export const menuItems: MenuItem[] = [
       PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
+    dataPerm: PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
   },
   {
     name: 'Targeting',
@@ -136,6 +145,7 @@ export const menuItems: MenuItem[] = [
       PERMISSIONS.TARGETING_VIEW_LIST,
       PERMISSIONS.TARGETING_VIEW_DETAILS,
     ],
+    dataPerm: PERMISSIONS.TARGETING_VIEW_LIST,
   },
   {
     name: 'Payment Module',
@@ -157,6 +167,7 @@ export const menuItems: MenuItem[] = [
         ],
         permissionModule: 'PM',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
       },
       {
         name: 'Payment Plans',
@@ -166,6 +177,7 @@ export const menuItems: MenuItem[] = [
         permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
         permissionModule: 'PM',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.PM_VIEW_LIST,
       },
     ],
   },
@@ -180,6 +192,7 @@ export const menuItems: MenuItem[] = [
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
     ],
+    dataPerm: PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
   },
   {
     name: 'Grievance',
@@ -197,6 +210,7 @@ export const menuItems: MenuItem[] = [
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
+        dataPerm: PERMISSIONS.GRIEVANCES_VIEW_LIST,
       },
       {
         name: 'Grievance Dashboard',
@@ -205,6 +219,7 @@ export const menuItems: MenuItem[] = [
         icon: <Assessment />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
+        dataPerm: PERMISSIONS.GRIEVANCES_VIEW_LIST,
       },
       {
         name: 'Feedback',
@@ -213,6 +228,7 @@ export const menuItems: MenuItem[] = [
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
+        dataPerm: PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
       },
     ],
   },
@@ -233,6 +249,7 @@ export const menuItems: MenuItem[] = [
         icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
       },
       {
         name: 'Surveys',
@@ -241,6 +258,7 @@ export const menuItems: MenuItem[] = [
         icon: <BallotIcon />,
         permissionModule: 'SURVEY',
         scopes: [SCOPE_PROGRAM],
+        dataPerm: PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
       },
     ],
   },
@@ -251,6 +269,7 @@ export const menuItems: MenuItem[] = [
     icon: <SupervisedUserCircle />,
     permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
     scopes: [SCOPE_PROGRAM],
+    dataPerm: PERMISSIONS.USER_MANAGEMENT_VIEW_LIST,
   },
   {
     name: 'Activity Log',
@@ -259,6 +278,7 @@ export const menuItems: MenuItem[] = [
     icon: <TrackChangesIcon />,
     permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
     scopes: [SCOPE_ALL_PROGRAMS],
+    dataPerm: PERMISSIONS.ACTIVITY_LOG_VIEW,
   },
   {
     name: 'Programme Log',
@@ -267,11 +287,12 @@ export const menuItems: MenuItem[] = [
     icon: <TrackChangesIcon />,
     permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
     scopes: [SCOPE_PROGRAM],
+    dataPerm: PERMISSIONS.ACTIVITY_LOG_VIEW,
   },
 ];
 
 export const resourcesItems = [
-    {
+  {
     name: 'Reporting',
     href: 'https://reporting.hope.unicef.org/',
     icon: <TrendingUpRoundedIcon />,
