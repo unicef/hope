@@ -19,7 +19,6 @@ export function NewAccountFieldArray({
 }: NewAccountFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  console.log('values in NewAccountFieldArray', values);
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>

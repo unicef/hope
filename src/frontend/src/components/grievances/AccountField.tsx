@@ -56,7 +56,6 @@ export function AccountField({
     accountFinancialInstitutionChoices.find(
       (c: any) => c.value === account?.financialInstitution,
     )?.name || account?.financialInstitution;
-  console.log('account', account);
   return (
     <>
       <Grid size={{ xs: 11 }} />
@@ -136,14 +135,17 @@ export function AccountField({
                     label={t('Field Name')}
                     variant="outlined"
                     fullWidth
-                    disabled={Boolean(account)}
+                    disabled={
+                      Boolean(account) &&
+                      account.dataFields.find((df) => field.key === df.key)
+                    }
                     required
                   />
                 </Grid>
                 {renderCurrentValue(
                   account,
                   (acc) =>
-                    acc.dataFields.find((df) => field.key === df.key).value,
+                    acc.dataFields.find((df) => field.key === df.key)?.value,
                 )}
                 <Grid size={{ xs: newValueFieldWidth - 1 }}>
                   <Field
