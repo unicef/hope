@@ -574,7 +574,6 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
-    program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
@@ -618,7 +617,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "background_action_status_display",
             "start_date",
             "end_date",
-            "program",
             "program_cycle",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
@@ -971,11 +969,13 @@ class PaymentChoicesSerializer(serializers.Serializer):
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     parent_id = serializers.UUIDField(read_only=True)
+    parent_unicef_id = serializers.CharField(source="parent.unicef_id")
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
     household_status = serializers.SerializerMethodField()
+    hoh_unicef_id = serializers.SerializerMethodField()
     hoh_full_name = serializers.SerializerMethodField()
     hoh_phone_no = serializers.SerializerMethodField()
     hoh_phone_no_alternative = serializers.SerializerMethodField()
@@ -1003,6 +1003,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "parent_id",
+            "parent_unicef_id",
             "household_id",
             "household_unicef_id",
             "household_size",
@@ -1022,6 +1023,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "status_display",
             "currency",
             "fsp_auth_code",
+            "hoh_unicef_id",
             "hoh_full_name",
             "collector_id",
             "collector_phone_no",
@@ -1098,6 +1100,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
                 return default
             cur = getattr(cur, attr, None)
         return cur
+
+    def get_hoh_unicef_id(self, obj):
+        return self._safe_get(obj, "head_of_household.unicef_id")
 
     def get_hoh_full_name(self, obj):
         return self._safe_get(obj, "head_of_household.full_name")
