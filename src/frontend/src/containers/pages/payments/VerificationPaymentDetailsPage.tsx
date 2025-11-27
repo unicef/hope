@@ -63,8 +63,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
-            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
+            title: `${t('Payment Plan')} ${payment.parent?.unicefId}`,
+            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent?.id}`,
           },
         ]
       : []),
@@ -82,9 +82,9 @@ function VerificationPaymentDetailsPage(): ReactElement {
         <VerifyManual
           paymentVerificationId={payment.verification?.id}
           status={payment.verification?.status}
-          enabled={payment.verification.isManuallyEditable}
-          receivedAmount={payment.verification.receivedAmount}
-          paymentId={payment.id}
+          enabled={payment.verification?.isManuallyEditable}
+          receivedAmount={payment.verification?.receivedAmount}
+          paymentId={payment?.id}
           paymentPlanId={paymentPlanId}
           verificationPlanId={paymentPlanId}
         />
