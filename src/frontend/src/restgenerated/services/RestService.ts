@@ -4952,6 +4952,7 @@ export class RestService {
     public static restBusinessAreasPaymentsList({
         businessAreaSlug,
         limit,
+        officeSearch,
         offset,
         ordering,
     }: {
@@ -4960,6 +4961,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4977,6 +4979,7 @@ export class RestService {
             },
             query: {
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'ordering': ordering,
             },
@@ -5007,9 +5010,11 @@ export class RestService {
      */
     public static restBusinessAreasPaymentsCountRetrieve({
         businessAreaSlug,
+        officeSearch,
         ordering,
     }: {
         businessAreaSlug: string,
+        officeSearch?: string,
         /**
          * Which field to use when ordering the results.
          */
@@ -5022,6 +5027,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'office_search': officeSearch,
                 'ordering': ordering,
             },
         });
