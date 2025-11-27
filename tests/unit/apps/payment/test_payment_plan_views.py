@@ -1990,6 +1990,30 @@ class TestPendingPaymentsAction:
 
         assert response.status_code == expected_status
 
+    def test_pending_payments_count(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.TARGETING_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        url = reverse(
+            "api:payments:target-populations-pending-payments-count",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+                "pk": str(self.target_population.id),
+            },
+        )
+
+        response = self.api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["count"] == 3
+
     @pytest.mark.parametrize(
         ("ordering_param", "db_field"),
         [
