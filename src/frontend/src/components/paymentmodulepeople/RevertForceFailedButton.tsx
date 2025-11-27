@@ -17,6 +17,7 @@ import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
 
 export interface RevertForceFailedButtonProps {
@@ -97,6 +98,7 @@ export function RevertForceFailedButton({
           variant="contained"
           onClick={() => setOpenModal(true)}
           data-cy="button-revert-mark-as-failed"
+          data-perm={PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED}
           disabled={disabled}
         >
           {t('Revert mark as failed')}
