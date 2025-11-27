@@ -4,6 +4,7 @@ from itertools import groupby
 import logging
 from typing import IO, TYPE_CHECKING, Callable, Union
 
+from celery import chain
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.paginator import Paginator
@@ -638,22 +639,22 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self.payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-            if not (fsp_id and delivery_mechanism_code):
-                self.payment_plan.delivery_mechanism = None
-                self.payment_plan.financial_service_provider = None
-                should_rebuild_list = True
+        if self.payment_plan.is_population_open:
+            current_fsp = self.payment_plan.financial_service_provider
+            current_dm = self.payment_plan.delivery_mechanism
+            has_current_values = current_fsp is not None or current_dm is not None
 
+            if not (fsp_id and delivery_mechanism_code) and has_current_values:
+                self.payment_plan.financial_service_provider = None
+                self.payment_plan.delivery_mechanism = None
+                should_rebuild_list = True
             if fsp_id and delivery_mechanism_code:
                 fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                if (
-                    self.payment_plan.financial_service_provider != fsp
-                    or self.payment_plan.delivery_mechanism != delivery_mechanism
-                ):
-                    should_rebuild_list = True
+                if current_fsp != fsp or current_dm != delivery_mechanism:
                     self.payment_plan.financial_service_provider = fsp
                     self.payment_plan.delivery_mechanism = delivery_mechanism
+                    should_rebuild_list = True
 
         self.payment_plan.save()
 
@@ -900,18 +901,35 @@ class PaymentPlanService:
         vulnerability_filter: bool,
         payment_plan: PaymentPlan,
     ) -> None:
+        from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
+
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
+
         payment_plan.build_status_pending()
         payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
 
         if rebuild_full_list:
-            payment_plan_full_rebuild.delay(str(payment_plan.id))
+            if vulnerability_filter and payment_plan.steficon_rule_targeting:
+                # in case of full rebuild and vulnerability filter, need to run steficon after rebuild
+                chain(
+                    payment_plan_full_rebuild.si(str(payment_plan.id)),
+                    payment_plan_apply_steficon_hh_selection.si(
+                        str(payment_plan.id), str(payment_plan.steficon_rule_targeting.rule_id)
+                    ),
+                ).apply_async()
+            elif should_update_money_stats:
+                chain(
+                    payment_plan_full_rebuild.si(str(payment_plan.id)),
+                    payment_plan_rebuild_stats.si(str(payment_plan.id)),
+                ).apply_async()
+            else:
+                payment_plan_full_rebuild.delay(str(payment_plan.id))
+            return
 
         if should_update_money_stats:
             payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
         if vulnerability_filter:
-            # just remove all with vulnerability_score filter
             params = {}
             if payment_plan.vulnerability_score_max is not None:
                 params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
