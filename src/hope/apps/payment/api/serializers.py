@@ -359,6 +359,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
+    program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
 
     class Meta:
         model = PaymentPlan
@@ -381,6 +382,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "created_by",
             "created_at",
             "updated_at",
+            "program",
         )
 
     @staticmethod
