@@ -25,7 +25,6 @@ export function AccountField({
   id,
   baseName,
   onDelete,
-  isEdited,
   account,
   values,
   accountTypeChoices,
@@ -34,7 +33,7 @@ export function AccountField({
   const { t } = useTranslation();
   const accountIndex = getIndexForId(values[baseName], id);
   const accountFieldName = `${baseName}.${accountIndex}`;
-
+  console.log('values[baseName]', values[baseName]);
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dynamicFieldsName = `${accountFieldName}.dataFields`;
@@ -135,10 +134,7 @@ export function AccountField({
                     label={t('Field Name')}
                     variant="outlined"
                     fullWidth
-                    disabled={
-                      Boolean(account) &&
-                      account.dataFields.find((df) => field.key === df.key)
-                    }
+                    disabled={Boolean(account) && !field.isNew}
                     required
                   />
                 </Grid>
@@ -158,9 +154,11 @@ export function AccountField({
                   />
                 </Grid>
                 <Grid size={{ xs: 1 }}>
-                  <IconButton onClick={() => remove(idx)}>
-                    <Delete />
-                  </IconButton>
+                  {field.isNew && (
+                    <IconButton onClick={() => remove(idx)}>
+                      <Delete />
+                    </IconButton>
+                  )}
                 </Grid>
               </Fragment>
             ))}
@@ -168,7 +166,7 @@ export function AccountField({
               <Button
                 variant="outlined"
                 startIcon={<Add />}
-                onClick={() => push({ key: '', value: '' })}
+                onClick={() => push({ key: '', value: '', isNew: true })}
               >
                 {t('Add Field')}
               </Button>
