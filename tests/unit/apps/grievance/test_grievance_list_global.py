@@ -19,7 +19,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import GrievanceTicket, TicketDeleteIndividualDetails, TicketNeedsAdjudicationDetails
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
@@ -903,7 +903,6 @@ class TestGrievanceTicketOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
-
 
     def test_search_by_individual_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
