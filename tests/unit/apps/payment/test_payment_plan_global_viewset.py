@@ -1,8 +1,8 @@
 from typing import Any
 
+from django.urls import reverse
 import pytest
 from rest_framework import status
-from django.urls import reverse
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
@@ -242,9 +242,7 @@ class TestPaymentPlanGlobalViewSet:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 2
 
-    def test_payment_plan_global_list_ukraine(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
+    def test_payment_plan_global_list_ukraine(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.PM_VIEW_LIST],
