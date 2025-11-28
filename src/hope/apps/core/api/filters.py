@@ -45,18 +45,3 @@ class OfficeSearchFilterMixin(FilterSet):
             return self.filter_by_grievance_for_office_search(queryset, value)
 
         return queryset
-
-    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset
-
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset
-
-    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset
-
-    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset
-
-    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset
