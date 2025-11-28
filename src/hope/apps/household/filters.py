@@ -16,9 +16,10 @@ from django_filters import (
     rest_framework as filters,
 )
 
-from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.apps.core.api.filters import OfficeSearchFilterMixin, UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.models import (
     DUPLICATE,
@@ -36,6 +37,7 @@ from hope.apps.household.models import (
     Household,
     Individual,
 )
+from hope.apps.payment.models import Payment
 from hope.apps.program.models import Program
 from hope.apps.utils.models import MergeStatusModel
 
@@ -557,3 +559,129 @@ class MergedIndividualFilter(FilterSet):
                 Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
             )
         return queryset
+
+
+class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
+    class Meta(HouseholdFilter.Meta):
+        pass
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(individuals__unicef_id=unicef_id)
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(
+            pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("household_id", flat=True)
+        )
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(
+            pk__in=Payment.objects.filter(unicef_id=unicef_id).values_list("household_id", flat=True)
+        )
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        try:
+            ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
+        except GrievanceTicket.DoesNotExist:
+            return queryset.none()
+
+        household_ids = set()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if hasattr(ticket, ticket_type) and (details := getattr(ticket, ticket_type)) and "household" in lookups:
+                household_path = lookups["household"]
+                obj = details
+                for field in household_path.split("__"):
+                    obj = getattr(obj, field, None)
+                    if obj is None:
+                        break
+                if obj and hasattr(obj, "id"):
+                    household_ids.add(obj.id)
+
+        if hasattr(ticket, "delete_household_ticket_details") and ticket.delete_household_ticket_details:
+            if ticket.delete_household_ticket_details.household:
+                household_ids.add(ticket.delete_household_ticket_details.household.id)
+
+            if ticket.delete_household_ticket_details.reason_household:
+                household_ids.add(ticket.delete_household_ticket_details.reason_household.id)
+
+        if household_ids:
+            return queryset.filter(id__in=household_ids)
+
+        return queryset.none()
+
+
+class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
+    class Meta(IndividualFilter.Meta):
+        pass
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(household__unicef_id=unicef_id)
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(
+            pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("head_of_household_id", flat=True)
+        )
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(
+            pk__in=Payment.objects.filter(unicef_id=unicef_id).values_list("head_of_household_id", flat=True)
+        )
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        try:
+            ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
+        except GrievanceTicket.DoesNotExist:
+            return queryset.none()
+
+        individual_ids = set()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if hasattr(ticket, ticket_type) and (details := getattr(ticket, ticket_type)):
+                if "individual" in lookups:
+                    individual_field = lookups["individual"]
+                    obj = details
+                    for field in individual_field.split("__"):
+                        obj = getattr(obj, field, None)
+                        if obj is None:
+                            break
+                    if obj and hasattr(obj, "id"):
+                        individual_ids.add(obj.id)
+
+                if "golden_records_individual" in lookups:
+                    individual_field = lookups["golden_records_individual"]
+                    obj = details
+                    for field in individual_field.split("__"):
+                        obj = getattr(obj, field, None)
+                        if obj is None:
+                            break
+                    if obj and hasattr(obj, "id"):
+                        individual_ids.add(obj.id)
+
+        if hasattr(ticket, "needs_adjudication_ticket_details") and ticket.needs_adjudication_ticket_details:
+            individual_ids.update(
+                ticket.needs_adjudication_ticket_details.possible_duplicates.values_list("id", flat=True)
+            )
+            individual_ids.update(
+                ticket.needs_adjudication_ticket_details.selected_individuals.values_list("id", flat=True)
+            )
+            individual_ids.update(
+                ticket.needs_adjudication_ticket_details.selected_distinct.values_list("id", flat=True)
+            )
+
+        if (
+            hasattr(ticket, "delete_individual_ticket_details")
+            and ticket.delete_individual_ticket_details
+            and ticket.delete_individual_ticket_details.individual
+        ):
+            individual_ids.add(ticket.delete_individual_ticket_details.individual.id)
+
+        if individual_ids:
+            return queryset.filter(id__in=individual_ids)
+
+        return queryset.none()

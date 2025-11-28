@@ -6,9 +6,15 @@ from rest_framework import status
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+)
+from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.program.models import Program
 
@@ -214,3 +220,202 @@ class TestPaymentGlobalViewSet:
         assert str(self.payment.id) in payment_ids
         for p in payments:
             assert str(p.id) in payment_ids
+
+
+class TestPaymentOfficeSearch:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.global_url_name = "api:payments:payments-global-list"
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program.cycles.first()
+
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        # Create first payment plan with household and individuals
+        self.payment_plan1 = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+
+        self.household1, self.individuals1 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.household1_2, self.individuals1_2 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        self.payment_plan2 = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        self.household2, self.individuals2 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.payment_plan3 = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        self.household3, self.individuals3 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.payment1 = PaymentFactory(
+            parent=self.payment_plan1,
+            household=self.household1,
+            head_of_household=self.individuals1[0],
+            program=self.program,
+            status=Payment.STATUS_SUCCESS,
+        )
+        self.payment1_second = PaymentFactory(
+            parent=self.payment_plan1,
+            household=self.household1_2,
+            head_of_household=self.individuals1_2[0],
+            program=self.program,
+            status=Payment.STATUS_SUCCESS,
+        )
+        self.payment2 = PaymentFactory(
+            parent=self.payment_plan2,
+            household=self.household2,
+            head_of_household=self.individuals2[0],
+            program=self.program,
+            status=Payment.STATUS_PENDING,
+        )
+        self.payment3 = PaymentFactory(
+            parent=self.payment_plan3,
+            household=self.household3,
+            head_of_household=self.individuals3[0],
+            program=self.program,
+            status=Payment.STATUS_SUCCESS,
+        )
+
+    def test_search_by_payment_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment1.id)
+
+    def test_search_by_household_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household2.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment2.id)
+
+    def test_search_by_individual_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals3[0].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment3.id)
+
+    def test_search_by_payment_plan_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.payment_plan1.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment_plan1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.payment1.id) in result_ids
+        assert str(self.payment1_second.id) in result_ids
+
+    def test_search_by_grievance_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        )
+
+        SensitiveGrievanceTicketWithoutExtrasFactory(
+            ticket=ticket,
+            payment=self.payment2,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment2.id)

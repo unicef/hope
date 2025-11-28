@@ -24,7 +24,6 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
-import { PERMISSIONS } from 'src/config/permissions';
 
 export interface MarkAsReleasedPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;

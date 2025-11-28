@@ -18,7 +18,6 @@ import { NewDocumentFieldArray } from '@components/grievances/EditIndividualData
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingAccountsFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
-import { G } from 'msw/lib/core/HttpResponse-BbwAqLE_';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid #d8d8d8;

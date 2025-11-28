@@ -14,7 +14,6 @@ import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { RestService } from '@restgenerated/index';
 import { showApiErrorMessages } from '@utils/utils';
-import { has } from 'lodash';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;

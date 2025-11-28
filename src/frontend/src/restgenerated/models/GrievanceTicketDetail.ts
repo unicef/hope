@@ -18,6 +18,7 @@ export type GrievanceTicketDetail = {
     status?: GrievanceTicketStatusEnum;
     readonly programs: Record<string, any>;
     household: HouseholdForTicket | null;
+    individual: IndividualSimple | null;
     admin?: string;
     admin2: AreaList;
     assignedTo: User;
@@ -45,7 +46,6 @@ export type GrievanceTicketDetail = {
     description?: string;
     language?: string;
     area?: string;
-    individual: IndividualSimple | null;
     readonly paymentRecord: Record<string, any> | null;
     readonly linkedTickets: Record<string, any>;
     readonly existingTickets: Record<string, any>;

@@ -5,6 +5,7 @@ import { ProgramRoutes } from './ProgramRoutes';
 import { ManagerialConsolePage } from '@containers/pages/managerialConsole/ManagerialConsolePage';
 import { ReactElement } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
+import OfficeSearchPage from '@containers/pages/officeSearch/OfficeSearchPage';
 
 export const AllProgramsRoutesSwitch = (): ReactElement => {
   const allProgramsRoutes = [
@@ -17,6 +18,10 @@ export const AllProgramsRoutesSwitch = (): ReactElement => {
       element: <ActivityLogPage />,
     },
     { path: 'managerial-console', element: <ManagerialConsolePage /> },
+    {
+      path: 'office-search',
+      element: <OfficeSearchPage />,
+    },
   ];
 
   const routes = useRoutes(allProgramsRoutes);
