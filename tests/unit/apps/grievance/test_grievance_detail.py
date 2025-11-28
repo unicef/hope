@@ -921,7 +921,10 @@ class TestGrievanceTicketDetail:
         assert data["payment_record"] == {
             "id": str(payment.id),
             "unicef_id": payment.unicef_id,
-            "parent_id": payment_plan.id,
+            "parent": {
+                "id": payment_plan.id,
+                "unicef_id": payment_plan.unicef_id,
+            },
             "delivered_quantity": f"{payment.delivered_quantity:.2f}",
             "entitlement_quantity": f"{payment.entitlement_quantity:.2f}",
             "verification": payment_verification.id,
