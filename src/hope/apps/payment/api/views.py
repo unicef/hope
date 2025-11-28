@@ -636,7 +636,11 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        .select_related("program_cycle__program")
+        .order_by("-created_at")
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
