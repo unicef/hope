@@ -136,11 +136,11 @@ class Sampling:
         )
 
     def generate_sampling(self) -> tuple[int, int, int]:
+        full_size_recipients_count = self.households.filter(head_of_household__phone_no_valid=True).count()
         sampling = self._get_sampling()
         sampling.sampling(self.households)
-        recipients_count = sampling.households.count()
 
-        return recipients_count, sampling.sample_size, sampling.excluded_recipients_count
+        return full_size_recipients_count, sampling.sample_size, sampling.excluded_recipients_count
 
     def _get_sampling(self) -> BaseSampling:
         if self.input_data["sampling_type"] == Message.SamplingChoices.FULL_LIST:
