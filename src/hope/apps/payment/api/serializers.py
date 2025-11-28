@@ -977,6 +977,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
     household_status = serializers.SerializerMethodField()
+    hoh_id = serializers.SerializerMethodField()
     hoh_unicef_id = serializers.SerializerMethodField()
     hoh_full_name = serializers.SerializerMethodField()
     hoh_phone_no = serializers.SerializerMethodField()
@@ -993,6 +994,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
+    program_slug = serializers.CharField(source="parent.program.slug")
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1025,6 +1027,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "status_display",
             "currency",
             "fsp_auth_code",
+            "hoh_id",
             "hoh_unicef_id",
             "hoh_full_name",
             "collector_id",
@@ -1037,6 +1040,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "payment_plan_soft_conflicted_data",
             "people_individual",
             "program_name",
+            "program_slug",
         )
 
     @classmethod
@@ -1102,6 +1106,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
                 return default
             cur = getattr(cur, attr, None)
         return cur
+
+    def get_hoh_id(self, obj):
+        return self._safe_get(obj, "head_of_household.id")
 
     def get_hoh_unicef_id(self, obj):
         return self._safe_get(obj, "head_of_household.unicef_id")
