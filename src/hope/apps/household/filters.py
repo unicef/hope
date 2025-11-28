@@ -565,23 +565,23 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
     class Meta(HouseholdFilter.Meta):
         pass
 
-    def filter_by_household(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_individual(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(individuals__unicef_id=unicef_id)
 
-    def filter_by_payment_plan(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("household_id", flat=True)
         )
 
-    def filter_by_payment(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(unicef_id=unicef_id).values_list("household_id", flat=True)
         )
 
-    def filter_by_grievance(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         try:
             ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
         except GrievanceTicket.DoesNotExist:
@@ -617,23 +617,23 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
     class Meta(IndividualFilter.Meta):
         pass
 
-    def filter_by_household(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(household__unicef_id=unicef_id)
 
-    def filter_by_individual(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_payment_plan(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("head_of_household_id", flat=True)
         )
 
-    def filter_by_payment(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(unicef_id=unicef_id).values_list("head_of_household_id", flat=True)
         )
 
-    def filter_by_grievance(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         try:
             ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
         except GrievanceTicket.DoesNotExist:
