@@ -14,6 +14,7 @@ from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
+    TicketDeleteIndividualDetailsFactory,
 )
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
@@ -827,6 +828,16 @@ class TestGrievanceTicketOfficeSearch:
         )
         self.needs_adjudication_details.possible_duplicates.add(self.individuals2[1])
 
+        self.delete_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        )
+        self.delete_ticket_details = TicketDeleteIndividualDetailsFactory(
+            ticket=self.delete_ticket,
+            individual=self.individuals3[1],
+        )
+
     def test_search_by_grievance_ticket_unicef_id(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -903,6 +914,25 @@ class TestGrievanceTicketOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
+
+    def test_search_by_delete_individual_ticket_details(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals3[1].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.elete_ticket.id)
 
     def test_search_by_individual_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
