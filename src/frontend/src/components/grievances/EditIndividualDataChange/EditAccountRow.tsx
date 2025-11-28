@@ -86,6 +86,7 @@ export function EditAccountRow({
           </Grid>
         );
       })}
+      <Grid size={11}></Grid>
       <Grid size={1}>
         <Box display="flex" alignItems="center">
           <IconButton
