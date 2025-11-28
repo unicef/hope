@@ -4,6 +4,7 @@ from enum import Enum
 import logging
 from typing import Any
 
+from django.db import transaction
 from django.db.models import QuerySet
 from django.utils.timezone import now
 from rest_framework import serializers
@@ -24,6 +25,7 @@ from hope.apps.payment.models.payment import (
     FinancialInstitution,
     FinancialInstitutionMapping,
 )
+from hope.apps.payment.signals import payment_reconciled_signal
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -603,6 +605,8 @@ class PaymentGatewayService:
             )
 
         payment.save(update_fields=update_fields)
+        if delivered_quantity:
+            payment_reconciled_signal.send(sender=payment.__class__, instance=payment)
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.filter(
@@ -616,24 +620,25 @@ class PaymentGatewayService:
             exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
-                payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
-                for instruction in payment_instructions:
-                    pending_payments = (
-                        instruction.split_payment_items.eligible()
-                        .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
-                        .order_by("unicef_id")
-                    )
-                    if pending_payments.exists():
-                        pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
-                        for payment in pending_payments:
-                            self.update_payment(
-                                payment,
-                                pg_payment_records,
-                                instruction,
-                                payment_plan,
-                                exchange_rate,
-                            )
-                        payment_plan.update_money_fields()
+                with transaction.atomic():
+                    payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
+                    for instruction in payment_instructions:
+                        pending_payments = (
+                            instruction.split_payment_items.eligible()
+                            .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
+                            .order_by("unicef_id")
+                        )
+                        if pending_payments.exists():
+                            pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+                            for payment in pending_payments:
+                                self.update_payment(
+                                    payment,
+                                    pg_payment_records,
+                                    instruction,
+                                    payment_plan,
+                                    exchange_rate,
+                                )
+                            payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
                     payment_plan.status_finished()
@@ -675,16 +680,17 @@ class PaymentGatewayService:
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
         for instruction in payment_instructions:
-            payments = instruction.split_payment_items.eligible().all().order_by("unicef_id")
-            pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
-            for payment in payments:
-                self.update_payment(
-                    payment,
-                    pg_payment_records,
-                    instruction,
-                    payment_plan,
-                    exchange_rate,
-                )
+            with transaction.atomic():
+                payments = instruction.split_payment_items.eligible().all().order_by("unicef_id")
+                pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+                for payment in payments:
+                    self.update_payment(
+                        payment,
+                        pg_payment_records,
+                        instruction,
+                        payment_plan,
+                        exchange_rate,
+                    )
 
         if payment_plan.is_reconciled:
             payment_plan.status_finished()
