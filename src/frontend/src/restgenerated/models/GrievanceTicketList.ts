@@ -6,7 +6,7 @@ import type { AreaList } from './AreaList';
 import type { CategoryB41Enum } from './CategoryB41Enum';
 import type { GrievanceTicketStatusEnum } from './GrievanceTicketStatusEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
-import type { IndividualSimple } from './IndividualSimple';
+import type { IndividualSmall } from './IndividualSmall';
 import type { PriorityEnum } from './PriorityEnum';
 import type { UrgencyEnum } from './UrgencyEnum';
 import type { User } from './User';
@@ -16,7 +16,7 @@ export type GrievanceTicketList = {
     status?: GrievanceTicketStatusEnum;
     readonly programs: Record<string, any>;
     household: HouseholdSimple | null;
-    individual: IndividualSimple | null;
+    individual: IndividualSmall | null;
     admin?: string;
     admin2: AreaList;
     assignedTo: User;
