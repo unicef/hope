@@ -26,20 +26,15 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>{t('Payment Plan')}</TableCell>
-            <TableCell>{t('Household ID')}</TableCell>
-            <TableCell>{t('Individual ID')}</TableCell>
+            <TableCell>{t('Payment Plan ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
-            <TableCell>{t('Individual Full Name')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {ppData.results && ppData.results.length > 0 ? (
             ppData.results.map((plan: PaymentPlanList) => {
               const paymentPlanDetailsPath = `/${baseUrl}/payment-module/payment-plans/${plan.id}`;
-              // const householdDetailsPath = `/${baseUrl}/population/households/${plan.householdId}`;
-              // const individualDetailsPath = `/${baseUrl}/population/individuals/${plan.individualId}`;
-              // const programDetailsPath = `/${baseUrl}/programs/all/details/${plan.programSlug}`;
+              const programDetailsPath = `/${baseUrl}/programs/all/details/${plan.program.slug}`;
 
               return (
                 <TableRow key={plan.id} hover>
@@ -48,26 +43,11 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
                       {plan.unicefId}
                     </BlackLink>
                   </TableCell>
-                  {/* <TableCell>
-                    <BlackLink to={householdDetailsPath}>
-                      {plan.householdUnicefId}
-                    </BlackLink>
-                  </TableCell>
-                  <TableCell>
-                    <BlackLink to={individualDetailsPath}>
-                      {individualUnicefId}
-                    </BlackLink>
-                  </TableCell>
                   <TableCell>
                     <BlackLink to={programDetailsPath}>
-                      {plan.programName}
+                      {plan.program.name}
                     </BlackLink>
                   </TableCell>
-                  <TableCell>
-                    <BlackLink to={individualDetailsPath}>
-                      {plan.individualFullName}
-                    </BlackLink>
-                  </TableCell> */}
                 </TableRow>
               );
             })
