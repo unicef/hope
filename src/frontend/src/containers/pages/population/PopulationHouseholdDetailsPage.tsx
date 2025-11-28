@@ -90,7 +90,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
             programSlug: programId,
           },
         );
-      return { allHouseholdsFlexFieldsAttributes: data.results };
+      return { allHouseholdsFlexFieldsAttributes: data };
     },
   });
 
