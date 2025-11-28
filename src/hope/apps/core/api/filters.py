@@ -44,4 +44,4 @@ class OfficeSearchFilterMixin(FilterSet):
         if value.startswith("GRV-"):
             return self.filter_by_grievance_for_office_search(queryset, value)
 
-        return queryset
+        return queryset.none()
