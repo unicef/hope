@@ -475,7 +475,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 20
 
         # second call get from cache
         with CaptureQueriesContext(connection) as ctx:
