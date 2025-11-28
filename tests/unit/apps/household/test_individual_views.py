@@ -2001,7 +2001,7 @@ class TestIndividualOfficeSearch:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.individuals2[0].id)
 
-    def test_search_by_needs_adjudication_multile_individuals(self, create_user_role_with_permissions: Any) -> None:
+    def test_search_by_needs_adjudication_multiple_individuals(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
             permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
@@ -2022,3 +2022,21 @@ class TestIndividualOfficeSearch:
         result_ids = [result["id"] for result in response.data["results"]]
         assert str(self.individuals3[0].id) in result_ids
         assert str(self.individuals3[1].id) in result_ids
+
+    def test_search_by_grievance_unicef_id_not_found(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "GRV-DOESNOTEXIST"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
