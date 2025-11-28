@@ -18,6 +18,7 @@ from hope.apps.household.api.serializers.household import HouseholdForTicketSeri
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
+    IndividualSmallSerializer,
 )
 from hope.apps.household.models import (
     ROLE_CHOICE,
@@ -111,7 +112,7 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
     programs = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer(source="ticket_details.household", allow_null=True)
-    individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
+    individual = IndividualSmallSerializer(source="ticket_details.individual", allow_null=True)
     admin = serializers.CharField(source="admin2.name", default="")
     admin2 = AreaListSerializer()
     assigned_to = UserSerializer()
@@ -157,6 +158,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
     partner = PartnerSerializer()
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
+    individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     payment_record = serializers.SerializerMethodField()
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
