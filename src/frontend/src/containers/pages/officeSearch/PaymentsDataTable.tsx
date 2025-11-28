@@ -20,7 +20,7 @@ interface PaymentsDataTableProps {
 const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
   paymentsData,
 }) => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -38,11 +38,11 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
         <TableBody>
           {paymentsData.results && paymentsData.results.length > 0 ? (
             paymentsData.results.map((payment) => {
-              const paymentDetailsPath = `/${baseUrl}/payment/payments/${payment.id}`;
+              const paymentDetailsPath = `/${businessArea}/programs/${payment.programSlug}/payment-module/payments/${payment.id}`;
               const programDetailsPath = `/${baseUrl}/details/${payment.programSlug}`;
-              const paymentPlanDetailsPath = `/${baseUrl}/payment/payment-plans/${payment.parentId}`;
-              const householdDetailsPath = `/${baseUrl}/population/households/${payment.householdId}`;
-              const individualDetailsPath = `/${baseUrl}/population/individuals/${payment.hohId}`;
+              const paymentPlanDetailsPath = `/${businessArea}/programs/${payment.programSlug}/payment-module/payment-plans/${payment.parentId}`;
+              const householdDetailsPath = `/${businessArea}/programs/${payment.programSlug}/population/household/${payment.householdId}`;
+              const individualDetailsPath = `/${businessArea}/programs/${payment.programSlug}/population/individuals/${payment.hohId}`;
 
               return (
                 <TableRow key={payment.id} hover>

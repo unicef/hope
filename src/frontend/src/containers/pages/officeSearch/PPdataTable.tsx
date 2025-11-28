@@ -19,7 +19,7 @@ interface PPDataTableProps {
 }
 
 const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -33,8 +33,8 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
         <TableBody>
           {ppData.results && ppData.results.length > 0 ? (
             ppData.results.map((plan: PaymentPlanList) => {
-              const paymentPlanDetailsPath = `/${baseUrl}/payment-module/payment-plans/${plan.id}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${plan.program.slug}`;
+              const paymentPlanDetailsPath = `/${businessArea}/programs/${plan.program.slug}/payment-module/payment-plans/${plan.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${plan.program.slug}`;
 
               return (
                 <TableRow key={plan.id} hover>

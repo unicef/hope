@@ -144,7 +144,7 @@ const OfficeSearchPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasHouseholdsList(
         createApiParams({ businessAreaSlug: businessArea }, hhQueryVariables, {
-          withPagination: true,
+          withPagination: false,
         }),
       ),
     enabled: appliedFilter.searchFor === 'HH' && !!appliedFilter.officeSearch,
@@ -165,7 +165,7 @@ const OfficeSearchPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasIndividualsList(
         createApiParams({ businessAreaSlug: businessArea }, indQueryVariables, {
-          withPagination: true,
+          withPagination: false,
         }),
       ),
     enabled: appliedFilter.searchFor === 'IND' && !!appliedFilter.officeSearch,
@@ -187,7 +187,7 @@ const OfficeSearchPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsList(
         createApiParams({ businessAreaSlug: businessArea }, grvQueryVariables, {
-          withPagination: true,
+          withPagination: false,
         }),
       ),
     enabled: appliedFilter.searchFor === 'GRV' && !!appliedFilter.officeSearch,
@@ -209,7 +209,7 @@ const OfficeSearchPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasPaymentPlansList(
         createApiParams({ businessAreaSlug: businessArea }, ppQueryVariables, {
-          withPagination: true,
+          withPagination: false,
         }),
       ),
     enabled: appliedFilter.searchFor === 'PP' && !!appliedFilter.officeSearch,
@@ -234,7 +234,7 @@ const OfficeSearchPage = (): ReactElement => {
           { businessAreaSlug: businessArea },
           paymentsQueryVariables,
           {
-            withPagination: true,
+            withPagination: false,
           },
         ),
       ),
@@ -248,19 +248,33 @@ const OfficeSearchPage = (): ReactElement => {
   console.log('ppData', ppData);
   console.log('paymentsData', paymentsData);
 
-  const basedOnIdOptions = [
-    canViewHouseholds && {
-      value: 'HH',
-      label: `${beneficiaryGroup?.groupLabel || 'Household'}`,
-    },
-    canViewIndividuals && {
-      value: 'IND',
-      label: `${beneficiaryGroup?.memberLabel || 'Individual'}`,
-    },
-    canViewGrievances && { value: 'GRV', label: 'Grievance' },
-    canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
-    canViewPayments && { value: 'RCPT', label: 'Payment' },
-  ].filter(Boolean);
+  // Filter basedOnId options based on searchFor selection
+  const getBasedOnIdOptions = () => {
+    const allOptions = [
+      canViewHouseholds && {
+        value: 'HH',
+        label: `${beneficiaryGroup?.groupLabel || 'Household'}`,
+      },
+      canViewIndividuals && {
+        value: 'IND',
+        label: `${beneficiaryGroup?.memberLabel || 'Individual'}`,
+      },
+      canViewGrievances && { value: 'GRV', label: 'Grievance' },
+      canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
+      canViewPayments && { value: 'RCPT', label: 'Payment' },
+    ].filter(Boolean);
+
+    // Filter out incompatible combinations
+    if (filter.searchFor === 'GRV') {
+      return allOptions.filter((option) => option.value !== 'PP');
+    }
+    if (filter.searchFor === 'PP') {
+      return allOptions.filter((option) => option.value !== 'GRV');
+    }
+    return allOptions;
+  };
+
+  const basedOnIdOptions = getBasedOnIdOptions();
 
   const searchForOptions = [
     canViewHouseholds && {
