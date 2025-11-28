@@ -12,7 +12,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import Error
-from django.db.models import JSONField, QuerySet
+from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
@@ -30,7 +30,7 @@ from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account import models as account_models
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hope.apps.account.models import Partner, User
+from hope.apps.account.models import Partner, RoleAssignment, User
 from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import build_arg_dict_from_dict
 
@@ -304,6 +304,11 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
+    def get_inlines(self, request: HttpRequest, obj: Any | None = None) -> list:
+        if request.user.has_perm("account.can_edit_user_roles"):
+            return [RoleAssignmentInline]
+        return []
+
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
@@ -360,11 +365,18 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
         ba_roles = defaultdict(list)
+
         for role in user.role_assignments.all():
             ba_roles[role.business_area.slug].append(role.role)
+        for role in user.partner.role_assignments.all():
+            ba_roles[role.business_area.slug].append(role.role)
 
-        for role in user.role_assignments.values_list("business_area__slug", flat=True).distinct("business_area"):
-            ba_perms[role].extend(user.permissions_in_business_area(role))
+        for business_area in (
+            RoleAssignment.objects.filter(Q(user=user) | Q(partner=user.partner))
+            .values_list("business_area__slug", flat=True)
+            .distinct("business_area")
+        ):
+            ba_perms[business_area].extend(user.permissions_in_business_area(business_area))
 
         context["business_ares_permissions"] = dict(ba_perms)
         context["business_ares_roles"] = dict(ba_roles)
