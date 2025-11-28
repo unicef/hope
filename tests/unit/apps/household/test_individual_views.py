@@ -2059,4 +2059,3 @@ class TestIndividualOfficeSearch:
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 0
-
