@@ -932,7 +932,7 @@ class TestGrievanceTicketOfficeSearch:
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
-        assert response.data["results"][0]["id"] == str(self.elete_ticket.id)
+        assert response.data["results"][0]["id"] == str(self.delete_ticket.id)
 
     def test_search_by_individual_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
