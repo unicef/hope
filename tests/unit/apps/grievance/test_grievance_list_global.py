@@ -19,7 +19,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hope.apps.grievance.models import GrievanceTicket, TicketDeleteIndividualDetails, TicketNeedsAdjudicationDetails
 from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db()
@@ -820,7 +820,6 @@ class TestGrievanceTicketOfficeSearch:
             business_area=self.afghanistan,
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         )
-        from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
 
         self.needs_adjudication_details = TicketNeedsAdjudicationDetails.objects.create(
             ticket=self.needs_adjudication_ticket,
@@ -905,6 +904,7 @@ class TestGrievanceTicketOfficeSearch:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
 
+
     def test_search_by_individual_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -944,3 +944,23 @@ class TestGrievanceTicketOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.needs_adjudication_ticket.id)
+
+    def test_search_by_payment_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.complaint_ticket3.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.complaint_ticket3.id)
