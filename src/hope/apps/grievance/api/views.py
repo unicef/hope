@@ -494,6 +494,8 @@ class GrievanceTicketGlobalViewSet(
             to_prefetch.append(key)
             if "household" in value:
                 to_prefetch.append(f"{key}__{value['household']}")
+            if "individual" in value:
+                to_prefetch.append(f"{key}__{value['individual']}")
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
         return (
