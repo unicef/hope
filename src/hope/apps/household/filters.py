@@ -663,13 +663,6 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
                     if obj and hasattr(obj, "id"):
                         individual_ids.add(obj.id)
 
-        if (
-            hasattr(ticket, "system_flagging_ticket_details")
-            and ticket.system_flagging_ticket_details
-            and ticket.system_flagging_ticket_details.sanction_list_individual
-        ):
-            individual_ids.add(ticket.system_flagging_ticket_details.sanction_list_individual.id)
-
         if hasattr(ticket, "needs_adjudication_ticket_details") and ticket.needs_adjudication_ticket_details:
             individual_ids.update(
                 ticket.needs_adjudication_ticket_details.possible_duplicates.values_list("id", flat=True)
