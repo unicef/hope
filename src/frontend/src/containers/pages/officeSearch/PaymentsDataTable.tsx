@@ -39,13 +39,11 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
           {paymentsData.results && paymentsData.results.length > 0 ? (
             paymentsData.results.map((payment) => {
               const paymentDetailsPath = `/${baseUrl}/payment/payments/${payment.id}`;
-              const programDetailsPath = `/${baseUrl}/programs/all/details/${payment.programName || ''}`;
+              const programDetailsPath = `/${baseUrl}/details/${payment.programSlug}`;
               const paymentPlanDetailsPath = `/${baseUrl}/payment/payment-plans/${payment.parentId}`;
               const householdDetailsPath = `/${baseUrl}/population/households/${payment.householdId}`;
-              const individualId = payment.peopleIndividual?.id;
-              const individualDetailsPath = individualId
-                ? `/${baseUrl}/population/individuals/${individualId}`
-                : '#';
+              const individualDetailsPath = `/${baseUrl}/population/individuals/${payment.hohId}`;
+
               return (
                 <TableRow key={payment.id} hover>
                   <TableCell>
@@ -60,22 +58,22 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
                   </TableCell>
                   <TableCell>
                     <BlackLink to={paymentPlanDetailsPath}>
-                      {payment.parentId}
+                      {payment.parentUnicefId}
                     </BlackLink>
                   </TableCell>
                   <TableCell>
                     <BlackLink to={householdDetailsPath}>
-                      {payment.householdUnicefId || payment.householdId}
+                      {payment.householdUnicefId}
                     </BlackLink>
                   </TableCell>
                   <TableCell>
-                    {individualId ? (
+                    {payment.hohId ? (
                       <BlackLink to={individualDetailsPath}>
-                        {individualId}
+                        {payment.hohUnicefId}
                       </BlackLink>
                     ) : null}
                   </TableCell>
-                  <TableCell>{payment.individual?.fullName}</TableCell>
+                  <TableCell>{payment.hohFullName}</TableCell>
                 </TableRow>
               );
             })
