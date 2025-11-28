@@ -1170,8 +1170,18 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         return PaymentListSerializer.get_collector_field(obj, "account_data")
 
 
+class PaymentPlanSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+        )
+
+
 class PaymentSmallSerializer(serializers.ModelSerializer):
     verification = serializers.SerializerMethodField()
+    parent = PaymentPlanSmallSerializer(read_only=True)
 
     class Meta:
         model = Payment
@@ -1180,7 +1190,7 @@ class PaymentSmallSerializer(serializers.ModelSerializer):
             "unicef_id",
             "entitlement_quantity",
             "delivered_quantity",
-            "parent_id",
+            "parent",
             "verification",
         )
 
