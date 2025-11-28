@@ -257,7 +257,6 @@ class TestPaymentOfficeSearch:
             individuals_data=[{}],
         )
 
-        # Create second payment plan with household and individuals
         self.payment_plan2 = PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.cycle,
@@ -271,7 +270,6 @@ class TestPaymentOfficeSearch:
             individuals_data=[{}, {}],
         )
 
-        # Create third payment plan with household and individuals
         self.payment_plan3 = PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.cycle,
@@ -285,7 +283,6 @@ class TestPaymentOfficeSearch:
             individuals_data=[{}, {}],
         )
 
-        # Create payments for each payment plan
         self.payment1 = PaymentFactory(
             parent=self.payment_plan1,
             household=self.household1,
