@@ -1444,6 +1444,24 @@ class TestHouseholdOfficeSearch:
         assert str(self.household1.id) in result_ids
         assert str(self.household4.id) in result_ids
 
+    def test_search_by_grievance_unicef_id_not_found(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "GRV-DOESNOTEXIST"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
 
 class TestHouseHoldChoices:
     @pytest.fixture(autouse=True)
