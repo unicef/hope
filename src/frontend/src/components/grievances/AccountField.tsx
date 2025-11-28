@@ -33,7 +33,6 @@ export function AccountField({
   const { t } = useTranslation();
   const accountIndex = getIndexForId(values[baseName], id);
   const accountFieldName = `${baseName}.${accountIndex}`;
-  console.log('values[baseName]', values[baseName]);
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dynamicFieldsName = `${accountFieldName}.dataFields`;
