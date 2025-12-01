@@ -210,7 +210,7 @@ export const menuItems: MenuItem[] = [
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: PERMISSIONS.GRIEVANCES_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
       {
         name: 'Grievance Dashboard',
@@ -228,7 +228,7 @@ export const menuItems: MenuItem[] = [
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
     ],
   },
@@ -249,7 +249,7 @@ export const menuItems: MenuItem[] = [
         icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
         scopes: [SCOPE_PROGRAM],
-        dataPerm: PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}, ${PERMISSIONS.TARGETING_VIEW_LIST}, ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}`,
       },
       {
         name: 'Surveys',

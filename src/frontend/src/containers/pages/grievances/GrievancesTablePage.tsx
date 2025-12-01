@@ -151,7 +151,8 @@ export const GrievancesTablePage = (): ReactElement => {
               'Programme has to be active to create a new Grievance Ticket',
             )}
             to={`/${baseUrl}/grievance/new-ticket`}
-            data-cy="button-new-ticket"
+            dataCy="button-new-ticket"
+            dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
             disabled={!isActiveProgram}
           >
             {t('NEW TICKET')}

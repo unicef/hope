@@ -50,8 +50,13 @@ function GrievancesDashboardPage(): ReactElement {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  const hasGrievancesViewPermission = permissions.some(
+    (perm) =>
+      perm.includes('GRIEVANCES_VIEW_LIST') ||
+      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  );
+
+  if (!hasGrievancesViewPermission) return <PermissionDenied />;
 
   const {
     ticketsByCategory,

@@ -59,7 +59,8 @@ function FeedbackPage(): ReactElement {
           color="primary"
           component={Link}
           to={`/${baseUrl}/grievance/feedback/create`}
-          data-cy="button-submit-new-feedback"
+          dataCy="button-submit-new-feedback"
+          dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
           title={t('Programme has to be active to create a new Feedback')}
           disabled={!isActiveProgram}
         >

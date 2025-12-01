@@ -58,6 +58,7 @@ export const CommunicationPage = (): ReactElement => {
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
           data-cy="button-communication-create-new"
+          dataPerm={`${PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST}, ${PERMISSIONS.TARGETING_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`}
           title={t('Programme has to be active to create new Message')}
           disabled={!isActiveProgram}
         >
