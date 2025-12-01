@@ -67,7 +67,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
     queryKey: ['fieldsAttributes', businessArea, programId],
-    queryFn: async() => {
+    queryFn: async () => {
       const data =
         await RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList(
           {
@@ -75,7 +75,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
             programSlug: programId,
           },
         );
-      return { allIndividualsFlexFieldsAttributes: data.results };
+      return { allIndividualsFlexFieldsAttributes: data };
     },
   });
 
@@ -172,10 +172,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualAccounts
-          individual={individual}
-          choicesData={choicesData}
-        />
+        <IndividualAccounts individual={individual} choicesData={choicesData} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}

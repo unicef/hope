@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -87,6 +87,7 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -1359,6 +1360,12 @@ class PaymentPlanViewSet(
         qs = FinancialServiceProviderXlsxTemplate.objects.filter(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
         ).order_by("name")
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = FSPXlsxTemplateSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         return Response(
             data=FSPXlsxTemplateSerializer(qs, many=True).data,
             status=status.HTTP_200_OK,
@@ -1989,25 +1996,31 @@ class PaymentGlobalViewSet(
 def available_fsps_for_delivery_mechanisms(
     request: Request, business_area_slug: str, *args: Any, **kwargs: Any
 ) -> Response:
-    delivery_mechanisms = DeliveryMechanism.get_choices()
+    delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
-    def get_fsps(mechanism_name: str) -> list[dict[str, Any]]:
-        fsps_qs = FinancialServiceProvider.objects.filter(
-            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
-            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-            delivery_mechanisms__name=mechanism_name,
-            allowed_business_areas__slug=business_area_slug,
-        ).distinct()
+    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
+        has_config_q = DeliveryMechanismConfig.objects.filter(
+            fsp=OuterRef("pk"),
+            delivery_mechanism__name=dm.name,
+        )
 
-        return list(fsps_qs.values("id", "name"))
+        fsps_qs = (
+            FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+                delivery_mechanisms__name=dm.name,
+                allowed_business_areas__slug=business_area_slug,
+            )
+            .annotate(has_config=Exists(has_config_q))
+            .distinct()
+        )
+
+        return list(fsps_qs.values("id", "name", "has_config"))
 
     list_resp = [
         {
-            "delivery_mechanism": {
-                "code": delivery_mechanism[0],
-                "name": delivery_mechanism[1],
-            },
-            "fsps": get_fsps(delivery_mechanism[1]),
+            "delivery_mechanism": delivery_mechanism,
+            "fsps": get_fsps(delivery_mechanism),
         }
         for delivery_mechanism in delivery_mechanisms
     ]

@@ -438,6 +438,7 @@ FLAGS = {
     "FRONT_DOOR_BYPASS": [],
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
+    "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {
@@ -458,6 +459,13 @@ MARKDOWNIFY = {
         ]
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "https://*.unitst.org",
+    "https://hope.unicef.org",
+]
 
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")

@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 
 {% block extrahead %}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('header');
     if (!header) return;
 
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     header.style.backgroundColor = color;
-});
-</script>
-{% include 'matomo.html' %}
+    });
+  </script>
+  {% include 'matomo.html' %}
 {% endblock extrahead %}

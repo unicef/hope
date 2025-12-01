@@ -144,12 +144,13 @@ function Entitlement({
 
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: ['engineRules'],
+      queryKey: ['engineRules', businessArea],
       queryFn: () =>
         RestService.restEngineRulesList({
           type: 'PAYMENT_PLAN',
           deprecated: false,
           enabled: true,
+          businessArea: businessArea,
         }),
     });
 
@@ -266,6 +267,9 @@ function Entitlement({
                   !isActiveProgram
                 }
                 data-cy="button-apply-steficon"
+                data-perm={
+                  PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS
+                }
                 onClick={async () => {
                   try {
                     await setSteficonRule({

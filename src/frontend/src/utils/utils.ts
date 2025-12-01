@@ -1,3 +1,28 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import localForage from 'localforage';
+import _, { camelCase, startCase } from 'lodash';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { theme as themeObj } from '../theme';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
+
+// Formats a string or array value to Normal Case using lodash's startCase
+export function formatNormalCaseValue(value: string | string[]): string {
+  if (typeof value === 'string') {
+    return startCase(value);
+  }
+  return String(value);
+}
 export function safeStringify(value) {
   if (typeof value === 'object' && value !== null) {
     try {
@@ -34,24 +59,6 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
-import _ from 'lodash';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -107,11 +114,27 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
       label: partner.name,
       disabled: selectedPartners.some((p) => p.id === partner.value),
     }));
@@ -293,7 +316,7 @@ export function registrationDataImportStatusToColor(
 ): string {
   switch (status) {
     case 'Merged':
-      return theme.hctPalette.gray;
+      return theme.hctPalette.green;
     case 'In Progress':
       return theme.hctPalette.orange;
     case 'Import Error':
@@ -333,23 +356,24 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
-    [PaymentPlanStatus.DRAFT]: theme.hctPalette.green,
-    [PaymentPlanStatus.FINISHED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.lighterGray,
+    [PaymentPlanStatus.FINISHED]: theme.hctPalette.green,
     [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
     [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
-    [PaymentPlanStatus.LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.red,
-    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
     [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
-    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -1270,7 +1294,8 @@ export const filterEmptyParams = (params) => {
 };
 
 export function deepCamelize(data) {
-  const notCalizedKeys = ['form_errors', 'household_data'];
+  const notCamelizedKeys = ['form_errors', 'household_data'];
+
   if (_.isArray(data)) {
     return data.map(deepCamelize);
   } else if (_.isObject(data)) {
@@ -1278,11 +1303,17 @@ export function deepCamelize(data) {
       data,
       (result, value, key) => {
         const camelKey = _.camelCase(key);
-        if (notCalizedKeys.includes(key)) {
+
+        if (notCamelizedKeys.includes(key)) {
           // Special handling for error_info to keep it as is
           result[camelKey] = value;
           return result;
         }
+        if (key.endsWith('_i_f') || key.endsWith('_h_f')) {
+          result[key] = deepCamelize(value);
+          return result;
+        }
+
         result[camelKey] = deepCamelize(value);
         return result;
       },
@@ -1293,6 +1324,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
+  const notUnderscoreKeys = ['dataFields'];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1300,7 +1332,9 @@ export function deepUnderscore(data) {
       data,
       (result, value, key) => {
         // Special handling for keys that follow the pattern of letters followed by numbers
-        if (/^[a-zA-Z]+\d+$/.test(key)) {
+        if (notUnderscoreKeys.includes(key)) {
+          result[_.snakeCase(key)] = value;
+        } else if (/^[a-zA-Z]+\d+$/.test(key)) {
           // Keep original key for letter+number pattern fields
           result[key] = deepUnderscore(value);
         } else {

@@ -83,11 +83,6 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
-        if payment_plan.status not in [
-            PaymentPlan.Status.OPEN,
-            PaymentPlan.Status.LOCKED,
-        ]:
-            raise serializers.ValidationError("Payment plan must be within status OPEN or LOCKED.")
 
         if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
@@ -1393,22 +1388,15 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 class FspChoiceSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    has_config = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = FinancialServiceProvider
-        fields = (
-            "id",
-            "name",
-        )
-
-
-class DeliveryMechanismChoiceSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    code = serializers.CharField()
+        fields = ("id", "name", "has_config")
 
 
 class FspChoicesSerializer(serializers.Serializer):
-    delivery_mechanism = DeliveryMechanismChoiceSerializer()
+    delivery_mechanism = DeliveryMechanismSerializer()
     fsps = FspChoiceSerializer(many=True)
 
 

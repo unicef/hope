@@ -464,6 +464,33 @@ export function prepareVariables(businessArea, values) {
   return prepareFunction(requiredVariables, values);
 }
 
+export function prepareExistingAccountValues(
+  individualDataUpdateAccountsToEdit: any,
+) {
+  if (!individualDataUpdateAccountsToEdit) {
+    return [];
+  }
+  function popKey(obj: any, key: string) {
+    const value = obj[key];
+    delete obj[key];
+    return value;
+  }
+  return individualDataUpdateAccountsToEdit.map((item) => {
+    const dataFieldsArray = popKey(item, 'dataFields') || [];
+
+    const dataFields = {};
+    for (const field of dataFieldsArray) {
+      dataFields[field.key] = field.value;
+    }
+    return {
+      number: popKey(item, 'number'),
+      financialInstitution: popKey(item, 'financialInstitution'),
+      id: popKey(item, 'id'),
+      dataFields: { ...item, ...dataFields },
+    };
+  });
+}
+
 export function prepareRestVariables(values: any): CreateGrievanceTicket {
   const extras: any = {};
   const category = parseInt(values.category, 10);
@@ -582,7 +609,7 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
       const flexFields = values.individualDataUpdateFields
         .filter((item) => item.fieldName && item.isFlexField)
         .reduce((prev, current) => {
-          prev[camelCase(current.fieldName)] = current.fieldValue;
+          prev[current.fieldName] = current.fieldValue;
           return prev;
         }, {});
       individualData.flexFields = flexFields;
@@ -608,7 +635,9 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
             identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
             identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
             accounts: individualDataUpdateFieldsAccountsWithoutIds,
-            accounts_to_edit: values.individualDataUpdateAccountsToEdit,
+            accounts_to_edit: prepareExistingAccountValues(
+              values.individualDataUpdateAccountsToEdit,
+            ),
           },
         },
       };
