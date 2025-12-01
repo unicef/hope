@@ -1,21 +1,18 @@
-import { ReactElement, useState, useRef } from 'react';
-import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
-import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
+import FeedbackFilters from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import FeedbackFilters from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { useProgramContext } from '../../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import FeedbackTable from '@containers/tables/Feedback/FeedbackTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useProgramContext } from '../../../../programContext';
 
 function FeedbackPage(): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -47,14 +44,9 @@ function FeedbackPage(): ReactElement {
   );
 
   if (permissions === null) return null;
-  if (
-    !hasPermissionInModule(
-      PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST, permissions))
     return <PermissionDenied />;
-  const canViewDetails = hasPermissionInModule(
+  const canViewDetails = hasPermissions(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     permissions,
   );

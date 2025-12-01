@@ -10,10 +10,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import {
-  hasPermissionInModule,
-  PERMISSIONS,
-} from '../../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 function SurveysPage(): ReactElement {
   const permissions = usePermissions();
@@ -42,15 +39,10 @@ function SurveysPage(): ReactElement {
   );
 
   if (permissions === null) return null;
-  if (
-    !hasPermissionInModule(
-      PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
-  const canViewDetails = hasPermissionInModule(
+  const canViewDetails = hasPermissions(
     PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
     permissions,
   );
