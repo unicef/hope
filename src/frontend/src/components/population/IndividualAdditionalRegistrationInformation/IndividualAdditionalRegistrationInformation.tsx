@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
+import { renderNestedObject } from '@utils/utils';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -45,13 +46,16 @@ export const IndividualAdditionalRegistrationInformation = ({
   }
 
   const fields = Object.entries(individual?.flexFields || {}).map(
-    ([key, value]: [string, string | string[]]) => {
+    ([key, value]: [string, any]) => {
+      // Generate label: remove _i_f, replace underscores, add spaces before uppercase
+      const label = key
+        .replaceAll('_i_f', '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2');
+
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          >
+          <LabelizedField key={key} label={label}>
             <IndividualFlexFieldPhotoModal field={flexAttributesDict[key]} />
           </LabelizedField>
         );
@@ -73,21 +77,35 @@ export const IndividualAdditionalRegistrationInformation = ({
             )
             .join(', ');
         }
+        return <LabelizedField key={key} label={label} value={newValue} />;
+      }
+
+      // Handle nested objects generically
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const formattedValue = renderNestedObject(value);
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={newValue}
-          />
+          <LabelizedField key={key} label={label}>
+            <div
+              style={{
+                whiteSpace: 'pre-line',
+                fontFamily: 'monospace',
+                fontSize: '0.9em',
+              }}
+            >
+              {formattedValue}
+            </div>
+          </LabelizedField>
         );
       }
-      return (
-        <LabelizedField
-          key={key}
-          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          value={value}
-        />
-      );
+
+      // Handle arrays
+      if (Array.isArray(value)) {
+        return (
+          <LabelizedField key={key} label={label} value={value.join(', ')} />
+        );
+      }
+
+      return <LabelizedField key={key} label={label} value={value} />;
     },
   );
   return (

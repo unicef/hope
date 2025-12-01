@@ -47,14 +47,46 @@ export const HouseholdAdditionalRegistrationInformation = ({
     );
   }
 
+  const renderNestedObject = (obj: Record<string, any>): string => {
+    return Object.entries(obj)
+      .map(([k, v]) => {
+        if (v && typeof v === 'object' && !Array.isArray(v)) {
+          // Handle nested objects - render all properties generically
+          const parts = Object.entries(v)
+            .map(([key, val]) => {
+              let valStr: string;
+              if (val === null || val === undefined) {
+                valStr = '-';
+              } else if (typeof val === 'boolean') {
+                valStr = val ? '✓' : '✗';
+              } else if (typeof val === 'number') {
+                valStr = val.toString();
+              } else if (typeof val === 'object') {
+                valStr = JSON.stringify(val);
+              } else {
+                valStr = val as string;
+              }
+              return `${key}: ${valStr}`;
+            })
+            .join(', ');
+          return `${k}: ${parts}`;
+        }
+        return `${k}: ${String(v)}`;
+      })
+      .join('\n');
+  };
+
   const fields = Object.entries(household?.flexFields || {}).map(
-    ([key, value]: [string, string | string[]]) => {
+    ([key, value]: [string, any]) => {
+      // Generate label: remove _i_f, replace underscores, add spaces before uppercase
+      const label = key
+        .replaceAll('_i_f', '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2');
+
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          >
+          <LabelizedField key={key} label={label}>
             <HouseholdFlexFieldPhotoModal field={flexAttributesDict[key]} />
           </LabelizedField>
         );
@@ -66,7 +98,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
         let newValue =
           flexAttributesDict[key].choices.find((item) => item.value === value)
             ?.labelEn || '-';
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
           newValue = value
             .map(
               (choice) =>
@@ -76,21 +108,35 @@ export const HouseholdAdditionalRegistrationInformation = ({
             )
             .join(', ');
         }
+        return <LabelizedField key={key} label={label} value={newValue} />;
+      }
+
+      // Handle nested objects generically
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const formattedValue = renderNestedObject(value);
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={newValue}
-          />
+          <LabelizedField key={key} label={label}>
+            <div
+              style={{
+                whiteSpace: 'pre-line',
+                fontFamily: 'monospace',
+                fontSize: '0.9em',
+              }}
+            >
+              {formattedValue}
+            </div>
+          </LabelizedField>
         );
       }
-      return (
-        <LabelizedField
-          key={key}
-          label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
-          value={value}
-        />
-      );
+
+      // Handle arrays
+      if (Array.isArray(value)) {
+        return (
+          <LabelizedField key={key} label={label} value={value.join(', ')} />
+        );
+      }
+
+      return <LabelizedField key={key} label={label} value={value} />;
     },
   );
 
