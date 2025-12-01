@@ -146,6 +146,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         iban_format = re.compile(r"^[A-Z]{2}\d{2}[A-Z0-9]+$")
 
+        if not isinstance(number, str):
+            number = str(number)
+
         number = number.replace(" ", "").upper()
         if not iban_format.match(number):
             return False

@@ -714,7 +714,7 @@ class PaymentPlan(
     ) -> QuerySet:
         from hope.models.payment_verification_plan import PaymentVerificationPlan
 
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
