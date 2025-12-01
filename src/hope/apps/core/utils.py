@@ -24,6 +24,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import F, Func, Q, Value
 from django.template.loader import render_to_string
@@ -593,6 +594,9 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
                     flex_fields_with_str_choices[flex_field_name].pop(round_number)
             if not flex_fields_with_str_choices[flex_field_name]:
                 flex_fields_with_str_choices.pop(flex_field_name)
+
+        if flex_field == FlexibleAttribute.IMAGE:
+            flex_fields_with_str_choices[flex_field_name] = default_storage.url(value) if value else ""
 
     return flex_fields_with_str_choices
 

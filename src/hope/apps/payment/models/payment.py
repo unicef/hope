@@ -793,7 +793,7 @@ class PaymentPlan(
     ) -> QuerySet:
         from hope.apps.payment.models import PaymentVerificationPlan
 
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -2348,6 +2348,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         }
 
         iban_format = re.compile(r"^[A-Z]{2}\d{2}[A-Z0-9]+$")
+
+        if not isinstance(number, str):
+            number = str(number)
 
         number = number.replace(" ", "").upper()
         if not iban_format.match(number):

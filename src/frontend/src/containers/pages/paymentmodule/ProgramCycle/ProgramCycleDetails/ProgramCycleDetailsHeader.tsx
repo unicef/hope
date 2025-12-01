@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { RestService } from '@restgenerated/index';
 import { showApiErrorMessages } from '@utils/utils';
+import { has } from 'lodash';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;
@@ -144,32 +145,43 @@ export const ProgramCycleDetailsHeader = ({
               </Button>
             </Box>
           )}
-        {programCycle.status === 'Active' && (
-          <Box ml={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={finishAction}
-              disabled={isPendingFinishing}
-              data-cy="button-finish-programme-cycle"
-            >
-              {t('Finish Cycle')}
-            </Button>
-          </Box>
-        )}
-        {programCycle.status === 'Finished' && (
-          <Box ml={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={reactivateAction}
-              disabled={isPendingReactivation}
-              data-cy="button-reactivate-programme-cycle"
-            >
-              {t('Reactivate Cycle')}
-            </Button>
-          </Box>
-        )}
+
+        {programCycle.status === 'Active' &&
+          hasPermissions(
+            PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
+            permissions,
+          ) && (
+            <Box ml={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={finishAction}
+                disabled={isPendingFinishing}
+                data-cy="button-finish-programme-cycle"
+                data-perm={PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE}
+              >
+                {t('Finish Cycle')}
+              </Button>
+            </Box>
+          )}
+        {programCycle.status === 'Finished' &&
+          hasPermissions(
+            PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
+            permissions,
+          ) && (
+            <Box ml={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={reactivateAction}
+                disabled={isPendingReactivation}
+                data-cy="button-reactivate-programme-cycle"
+                data-perm={PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE}
+              >
+                {t('Reactivate Cycle')}
+              </Button>
+            </Box>
+          )}
       </Box>
     </>
   );
