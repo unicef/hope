@@ -1,8 +1,8 @@
 import abc
 from typing import TYPE_CHECKING, Any
 
-from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.filters import filter_age
 from hope.apps.payment.utils import get_number_of_samples

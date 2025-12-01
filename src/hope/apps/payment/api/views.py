@@ -1997,19 +1997,19 @@ class PaymentGlobalViewSet(
 def available_fsps_for_delivery_mechanisms(
     request: Request, business_area_slug: str, *args: Any, **kwargs: Any
 ) -> Response:
-    delivery_mechanisms = DeliveryMechanism.get_choices()
+    delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
-    def get_fsps(mechanism_name: str) -> list[dict[str, Any]]:
+    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
         has_config_q = DeliveryMechanismConfig.objects.filter(
             fsp=OuterRef("pk"),
-            delivery_mechanism__name=mechanism_name,
+            delivery_mechanism__name=dm.name,
         )
 
         fsps_qs = (
             FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__name=mechanism_name,
+                delivery_mechanisms__name=dm.name,
                 allowed_business_areas__slug=business_area_slug,
             )
             .annotate(has_config=Exists(has_config_q))
@@ -2020,11 +2020,8 @@ def available_fsps_for_delivery_mechanisms(
 
     list_resp = [
         {
-            "delivery_mechanism": {
-                "code": delivery_mechanism[0],
-                "name": delivery_mechanism[1],
-            },
-            "fsps": get_fsps(delivery_mechanism[1]),
+            "delivery_mechanism": delivery_mechanism,
+            "fsps": get_fsps(delivery_mechanism),
         }
         for delivery_mechanism in delivery_mechanisms
     ]

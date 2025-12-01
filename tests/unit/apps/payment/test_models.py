@@ -1193,6 +1193,7 @@ class TestAccountModel(TestCase):
             ("", False),
             (" ", False),
             ("1", False),
+            (123333, False),
             ("PL", False),  # too short
             ("PL00", False),  # too short
             ("PL00ABC", False),  # too short
