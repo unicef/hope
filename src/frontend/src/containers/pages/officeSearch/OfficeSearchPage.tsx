@@ -241,13 +241,6 @@ const OfficeSearchPage = (): ReactElement => {
     enabled: appliedFilter.searchFor === 'RCPT' && !!appliedFilter.officeSearch,
   });
 
-  // Debug logs
-  console.log('hhData', hhData);
-  console.log('indData', indData);
-  console.log('grvData', grvData);
-  console.log('ppData', ppData);
-  console.log('paymentsData', paymentsData);
-
   // Filter basedOnId options based on searchFor selection
   const getBasedOnIdOptions = () => {
     const allOptions = [
