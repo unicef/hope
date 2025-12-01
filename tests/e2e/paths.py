@@ -1,13 +1,17 @@
 from pathlib import Path
 
-from environ import Env
-
-env = Env()
 HERE = Path(__file__).resolve().parent
+E2E_ROOT = HERE.parent
 
-# Base dir for all e2e artefacts; relative to tests dir by default
-OUTPUT_DATA_ROOT = Path(env("OUTPUT_DATA_ROOT", default=str(HERE / "output_data"))).resolve()
+# Local build directory in the project root
+OUTPUT_DATA_ROOT = E2E_ROOT / "output_data"
+OUTPUT_DATA_ROOT.mkdir(exist_ok=True)
 
 REPORT_DIRECTORY = OUTPUT_DATA_ROOT / "report"
+REPORT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
 DOWNLOAD_DIRECTORY = REPORT_DIRECTORY / "downloads"
+DOWNLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
 SCREENSHOT_DIRECTORY = REPORT_DIRECTORY / "screenshot"
+SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
