@@ -17,7 +17,7 @@ else
       python manage.py runserver 0.0.0.0:8000
       ;;
     "celery-beat")
-      celery -A hope.apps.core.celery beat -l INFO --scheduler hope.models.custom_model_entry:CustomDatabaseScheduler
+      celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler
       ;;
     "celery-worker")
       watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hope.apps.core.celery worker -E -l info --max-tasks-per-child=4 --concurrency=4
