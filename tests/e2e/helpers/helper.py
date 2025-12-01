@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from time import sleep
-from typing import Callable, Literal, Optional, Tuple, Union
+from typing import Callable, Literal, Tuple, Union
 
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
@@ -13,8 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
-
-from e2e.paths import SCREENSHOT_DIRECTORY
 
 logger = logging.getLogger(__name__)
 
@@ -260,13 +258,12 @@ class Common:
 
     def screenshot(
         self,
+        file_path: str,
         file_name: str = "test",
         file_type: str = "png",
-        file_path: Optional[str] = None,
         delay_sec: float = 1,
     ) -> None:
-        if file_path is None:
-            file_path = str(SCREENSHOT_DIRECTORY)
+        os.makedirs(file_path, exist_ok=True)
         sleep(delay_sec)
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
         self.driver.get_screenshot_as_file(full_filename)

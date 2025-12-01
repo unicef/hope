@@ -17,7 +17,6 @@ from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from e2e.paths import DOWNLOAD_DIRECTORY
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.household import (
     HouseholdFactory,
@@ -50,7 +49,7 @@ pytestmark = pytest.mark.django_db()
 
 def find_file(
     file_name: str,
-    search_in_dir: str = str(DOWNLOAD_DIRECTORY),
+    search_in_dir: str = "",
     number_of_ties: int = 1,
 ) -> str:
     for _ in range(number_of_ties):

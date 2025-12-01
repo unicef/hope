@@ -2,6 +2,7 @@ from contextlib import suppress
 from datetime import datetime
 import logging
 import os
+from pathlib import Path
 import re
 from typing import Any
 
@@ -72,10 +73,6 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from e2e.paths import (
-    DOWNLOAD_DIRECTORY,
-    SCREENSHOT_DIRECTORY,
-)
 from extras.test_utils.factories.account import RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.factories.household import DocumentTypeFactory
@@ -86,6 +83,22 @@ from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.geo.models import Country
 from hope.apps.household.models import DocumentType
 from hope.config.env import env
+
+HERE = Path(__file__).resolve().parent
+E2E_ROOT = HERE.parent
+
+# Local build directory in the project root
+BUILD_ROOT = E2E_ROOT / "build"
+BUILD_ROOT.mkdir(exist_ok=True)
+
+REPORT_DIRECTORY = BUILD_ROOT / "report"
+REPORT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+DOWNLOAD_DIRECTORY = BUILD_ROOT / "downloads"
+DOWNLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+SCREENSHOT_DIRECTORY = BUILD_ROOT / "screenshot"
+SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -155,6 +168,16 @@ def download_path(worker_id: str) -> str:
         path = DOWNLOAD_DIRECTORY / worker_id
     except (AssertionError, TimeoutException):
         path = DOWNLOAD_DIRECTORY
+    return str(path)
+
+
+@pytest.fixture(scope="session")
+def screenshot_path(worker_id: str) -> str:
+    try:
+        assert worker_id is not None
+        path = SCREENSHOT_DIRECTORY / worker_id
+    except (AssertionError, TimeoutException):
+        path = SCREENSHOT_DIRECTORY
     return str(path)
 
 
