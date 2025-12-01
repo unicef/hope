@@ -8,7 +8,6 @@ from typing import Any
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-from conftest import COMMON_SETTINGS, LOGGERS
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
 from flags.models import FlagState
@@ -129,10 +128,7 @@ def pytest_configure(config) -> None:  # type: ignore
 
     from django.conf import settings  # noqa
 
-    for setting_name, value in COMMON_SETTINGS.items():
-        setattr(settings, setting_name, value)
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
-    settings.LOGGING["loggers"].update(LOGGERS)
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
 

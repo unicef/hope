@@ -8,7 +8,6 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from conftest import COMMON_SETTINGS, LOGGERS
 from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
@@ -69,9 +68,6 @@ def pytest_configure(config: Config) -> None:
     sys._called_from_pytest = True
     from django.conf import settings  # noqa
 
-    for setting_name, value in COMMON_SETTINGS.items():
-        setattr(settings, setting_name, value)
-
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.DATABASES["default"]["CONN_MAX_AGE"] = 0
     settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
@@ -81,7 +77,6 @@ def pytest_configure(config: Config) -> None:
             "TIMEOUT": 1800,
         }
     }
-    settings.LOGGING["loggers"].update(LOGGERS)
     logging.disable(logging.CRITICAL)
 
 

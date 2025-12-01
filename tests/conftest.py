@@ -1,5 +1,7 @@
 import os
 
+from _pytest.config import Config
+
 COMMON_SETTINGS = {
     "DEBUG": True,
     "ALLOWED_HOSTS": [
@@ -27,36 +29,45 @@ COMMON_SETTINGS = {
     "TESTS_ROOT": os.getenv("TESTS_ROOT"),
 }
 
-LOGGERS = {
-    "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-    "registration_datahub.tasks.deduplicate": {
-        "handlers": ["default"],
-        "level": "INFO",
-        "propagate": True,
-    },
-    "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-        "handlers": ["default"],
-        "level": "INFO",
-        "propagate": True,
-    },
-    "elasticsearch": {
-        "handlers": ["default"],
-        "level": "CRITICAL",
-        "propagate": True,
-    },
-    "elasticsearch-dsl-django": {
-        "handlers": ["default"],
-        "level": "CRITICAL",
-        "propagate": True,
-    },
-    "hope.apps.registration_datahub.tasks.deduplicate": {
-        "handlers": ["default"],
-        "level": "CRITICAL",
-        "propagate": True,
-    },
-    "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-        "handlers": ["default"],
-        "level": "CRITICAL",
-        "propagate": True,
-    },
-}
+
+def pytest_configure(config: Config) -> None:
+    from django.conf import settings  # noqa
+
+    for setting_name, value in COMMON_SETTINGS.items():
+        setattr(settings, setting_name, value)
+
+    settings.LOGGING["loggers"].update(
+        {
+            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+            "registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "elasticsearch": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "elasticsearch-dsl-django": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hope.apps.registration_datahub.tasks.deduplicate": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+        }
+    )
