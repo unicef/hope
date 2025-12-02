@@ -15,7 +15,7 @@ from unit.api.factories import APITokenFactory
 
 
 class GenericImportAPITestCase(APITestCase):
-    """Base class dla testów Generic Import API."""
+    """Base test case for Generic Import API."""
 
     databases = {"default"}
 
@@ -23,26 +23,19 @@ class GenericImportAPITestCase(APITestCase):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        # User
         cls.user = UserFactory()
-
-        # Business Area
         cls.business_area = BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
-
-        # Program
         cls.program = ProgramFactory(
             business_area=cls.business_area,
             status=Program.ACTIVE,
         )
 
-        # API Token z grantem
         cls.token = APITokenFactory(
             user=cls.user,
             grants=[Grant.API_GENERIC_IMPORT.name],
         )
         cls.token.valid_for.set([cls.business_area])
 
-        # Role dla usera
         cls.role = RoleFactory(
             subsystem="API",
             name="GenericImportRole",
@@ -54,17 +47,14 @@ class GenericImportAPITestCase(APITestCase):
         )
 
     def setUp(self):
-        # Ustaw token w header dla każdego testu
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
-
-        # URL endpointu
         self.url = reverse(
             "api:generic-import:generic-import-upload-upload",
             args=[self.business_area.slug, self.program.slug],
         )
 
     def create_xlsx_file(self, filename="test.xlsx", content=b"test xlsx"):
-        """Helper do tworzenia test XLSX file."""
+        """Create test XLSX file."""
         return SimpleUploadedFile(
             filename,
             content,
@@ -72,7 +62,7 @@ class GenericImportAPITestCase(APITestCase):
         )
 
     def create_xls_file(self, filename="test.xls", content=b"test xls"):
-        """Helper do tworzenia test XLS file."""
+        """Create test XLS file."""
         return SimpleUploadedFile(
             filename,
             content,

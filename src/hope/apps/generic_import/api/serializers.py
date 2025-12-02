@@ -2,17 +2,15 @@ from rest_framework import serializers
 
 
 class GenericImportUploadSerializer(serializers.Serializer):
-    """Walidacja pliku Excel dla generic import."""
+    """Serializer for Excel file upload validation."""
 
     file = serializers.FileField(required=True)
 
     def validate_file(self, value):
-        """Walidacja typu i rozmiaru pliku."""
-        # Sprawdź rozszerzenie
+        """Validate file type and size."""
         if not value.name.endswith((".xlsx", ".xls")):
             raise serializers.ValidationError("Only Excel files (.xlsx, .xls) are allowed.")
 
-        # Sprawdź rozmiar (max 50MB)
         max_size = 50 * 1024 * 1024
         if value.size > max_size:
             raise serializers.ValidationError(
@@ -23,7 +21,7 @@ class GenericImportUploadSerializer(serializers.Serializer):
 
 
 class GenericImportResponseSerializer(serializers.Serializer):
-    """Response z informacjami o ImportData i RDI."""
+    """Response serializer for ImportData and RDI information."""
 
     import_data_id = serializers.UUIDField(source="import_data.id")
     import_data_status = serializers.CharField(source="import_data.status")
