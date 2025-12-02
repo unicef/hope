@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 
 
 def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
-    qs = queryset.iterator(chunk_size=1)
-    doc().update(qs, parallel=parallel, chunk_size=1)
+    qs = queryset.iterator()
+    doc().update(qs, parallel=parallel)
 
 
 def _create(models: list[Model] | None) -> None:
