@@ -1568,3 +1568,32 @@ export function splitCamelCase(str: string): string {
     .replace(/^./, (s) => s.toUpperCase());
   return withSpaces.trim();
 }
+
+export const renderNestedObject = (obj: Record<string, any>): string => {
+  return Object.entries(obj)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Handle nested objects - render all properties generically
+        const parts = Object.entries(v)
+          .map(([key, val]) => {
+            let valStr: string;
+            if (val === null || val === undefined) {
+              valStr = '-';
+            } else if (typeof val === 'boolean') {
+              valStr = val ? 'true' : 'false';
+            } else if (typeof val === 'number') {
+              valStr = val.toString();
+            } else if (typeof val === 'object') {
+              valStr = JSON.stringify(val);
+            } else {
+              valStr = val as string;
+            }
+            return `${key}: ${valStr}`;
+          })
+          .join(', ');
+        return `${k}: ${parts}`;
+      }
+      return `${k}: ${String(v)}`;
+    })
+    .join('\n');
+};

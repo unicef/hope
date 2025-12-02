@@ -8,7 +8,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
-import { formatNormalCaseValue } from '@utils/utils';
+import { formatNormalCaseValue, renderNestedObject } from '@utils/utils';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -49,13 +49,15 @@ export const HouseholdAdditionalRegistrationInformation = ({
   }
 
   const fields = Object.entries(household?.flexFields || {}).map(
-    ([key, value]: [string, string | string[]]) => {
+    ([key, value]: [string, any]) => {
+      // Generate label: remove _h_f, replace underscores, add spaces before uppercase
+      const label = key
+        .replaceAll('_h_f', '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2');
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          >
+          <LabelizedField key={key} label={label}>
             <HouseholdFlexFieldPhotoModal field={flexAttributesDict[key]} />
           </LabelizedField>
         );
@@ -67,7 +69,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
         let newValue =
           flexAttributesDict[key].choices.find((item) => item.value === value)
             ?.labelEn || '-';
-        if (value instanceof Array) {
+        if (Array.isArray(value)) {
           newValue = value
             .map(
               (choice) =>
@@ -77,27 +79,41 @@ export const HouseholdAdditionalRegistrationInformation = ({
             )
             .join(', ');
         }
+        return <LabelizedField key={key} label={label} value={newValue} />;
+      }
+
+      // Handle nested objects generically
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const formattedValue = renderNestedObject(value);
         return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={formatNormalCaseValue(newValue)}
-          />
+          <LabelizedField key={key} label={label}>
+            <div
+              style={{
+                whiteSpace: 'pre-line',
+                fontFamily: 'monospace',
+                fontSize: '0.9em',
+              }}
+            >
+              {formattedValue}
+            </div>
+          </LabelizedField>
         );
       }
 
-      // Fallback: if value is array, join and format each
-      let displayValue: string;
+      // Handle arrays
       if (Array.isArray(value)) {
-        displayValue = value.map((v) => formatNormalCaseValue(v)).join(', ');
-      } else {
-        displayValue = formatNormalCaseValue(value);
+        const displayValue = value
+          .map((v) => formatNormalCaseValue(v))
+          .join(', ');
+        return <LabelizedField key={key} label={label} value={displayValue} />;
       }
+
+      // Handle simple values
       return (
         <LabelizedField
           key={key}
-          label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
-          value={displayValue}
+          label={label}
+          value={formatNormalCaseValue(value)}
         />
       );
     },
