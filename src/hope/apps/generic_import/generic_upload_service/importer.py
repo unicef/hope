@@ -388,8 +388,8 @@ class Importer:
             "removed_date",
         ]
 
-        Form = modelform_factory(model_cls, exclude=list(set(exclude + common_exclude)))
-        form = Form(data=data, files=files)
+        form_class = modelform_factory(model_cls, exclude=list(set(exclude + common_exclude)))
+        form = form_class(data=data, files=files)
         try:
             if not form.is_valid():
                 return None, form.errors

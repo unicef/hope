@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
-from django.db import transaction
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -127,7 +127,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
                 f"Import '{import_name}' is being processed in the background.",
             )
 
-        except Exception as e:
+        except (DatabaseError, ValidationError, ValueError) as e:
             messages.error(
                 self.request,
                 f"Failed to upload file: {str(e)}",

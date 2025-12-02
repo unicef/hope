@@ -46,8 +46,7 @@ def format_validation_errors(errors: list) -> str:
         # Format field errors
         for field_name, error_messages in field_errors.items():
             if isinstance(error_messages, list):
-                for msg in error_messages:
-                    formatted_lines.append(f"   • {field_name}: {msg}")
+                formatted_lines.extend([f"   • {field_name}: {msg}" for msg in error_messages])
             else:
                 formatted_lines.append(f"   • {field_name}: {error_messages}")
 
@@ -65,6 +64,7 @@ def process_generic_import_task(
     """Process generic import file asynchronously.
 
     Args:
+        self: Celery task instance (bound task)
         registration_data_import_id: UUID of RegistrationDataImport instance
         import_data_id: UUID of ImportData instance
 
