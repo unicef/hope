@@ -54,6 +54,8 @@ class GenericImportForm(forms.Form):
 
         Args:
             user: Django user instance to filter accessible BAs and Programs
+            *args: Variable positional arguments passed to parent
+            **kwargs: Variable keyword arguments passed to parent
 
         """
         super().__init__(*args, **kwargs)

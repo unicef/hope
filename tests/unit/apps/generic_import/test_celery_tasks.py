@@ -204,14 +204,14 @@ class TestProcessGenericImportTask:
         import_data, rdi = self._create_import_objects()
 
         # Mock parser to raise exception
-        mock_parser_class.side_effect = Exception("Parser error")
+        mock_parser_class.side_effect = RuntimeError("Parser error")
 
         # Create a mock for the task's retry method
         mock_task = Mock()
-        mock_task.retry.side_effect = Exception("Retry called")
+        mock_task.retry.side_effect = RuntimeError("Retry called")
 
         # Execute task and expect retry
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             process_generic_import_task.apply(
                 args=[str(rdi.id), str(import_data.id)],
             ).get()

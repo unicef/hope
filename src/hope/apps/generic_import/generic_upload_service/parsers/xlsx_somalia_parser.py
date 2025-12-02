@@ -50,9 +50,7 @@ class XlsxSomaliaParser(BaseParser):
         try:
             wb = openpyxl.load_workbook(file_path, data_only=True)
             sheet = wb.active
-            headers = []
-            for cell in sheet[1]:
-                headers.append(cell.value)
+            headers = [cell.value for cell in sheet[1]]
 
             if not self._validate_headers(headers):
                 return
@@ -129,7 +127,7 @@ class XlsxSomaliaParser(BaseParser):
             sex = "MALE"  # Default
         dob = row.get("IndividualDateOfBirth")
         if isinstance(dob, str):
-            dob = dob
+            pass
         elif dob:
             dob = dob.strftime("%Y-%m-%d") if hasattr(dob, "strftime") else str(dob)
 
