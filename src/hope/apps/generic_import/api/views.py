@@ -20,15 +20,10 @@ class GenericImportUploadViewSet(
     SerializerActionMixin,
     BaseViewSet,
 ):
-    """ViewSet dla uploadu plików Excel - generic import.
-
-    Endpoint program-specific dla upload i asynchronicznego przetwarzania.
-    Reużywa istniejącej infrastruktury generic_import.
-    """
+    """ViewSet for Excel file upload and asynchronous processing via generic import."""
 
     queryset = ImportData.objects.none()
 
-    # Autoryzacja przez ApiToken
     authentication_classes = [HOPEAuthentication]
     permission_classes = [HOPEPermission]
     permission = Grant.API_GENERIC_IMPORT
@@ -58,13 +53,11 @@ class GenericImportUploadViewSet(
         """Upload Excel file for generic import."""
         from hope.apps.generic_import.celery_tasks import process_generic_import_task
 
-        # Walidacja
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         file = serializer.validated_data["file"]
 
-        # Utwórz ImportData
         import_data = ImportData.objects.create(
             status=ImportData.STATUS_PENDING,
             business_area_slug=self.business_area.slug,
@@ -73,7 +66,6 @@ class GenericImportUploadViewSet(
             created_by_id=request.user.id,
         )
 
-        # Utwórz RegistrationDataImport
         import_name = (
             f"Generic Import API {self.business_area.slug} - "
             f"{self.program.name} - "
@@ -92,7 +84,6 @@ class GenericImportUploadViewSet(
             number_of_households=0,
         )
 
-        # Zaplanuj Celery task po commit transakcji
         transaction.on_commit(
             lambda: process_generic_import_task.delay(
                 registration_data_import_id=str(rdi.id),
@@ -100,7 +91,6 @@ class GenericImportUploadViewSet(
             )
         )
 
-        # Zwróć response z ID obu obiektów
         return Response(
             GenericImportResponseSerializer(rdi).data,
             status=status.HTTP_201_CREATED,
