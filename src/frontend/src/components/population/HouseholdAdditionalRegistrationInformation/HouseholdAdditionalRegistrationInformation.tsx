@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
+import { formatNormalCaseValue } from '@utils/utils';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -115,28 +116,28 @@ export const HouseholdAdditionalRegistrationInformation = ({
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         const formattedValue = renderNestedObject(value);
         return (
-          <LabelizedField key={key} label={label}>
-            <div
-              style={{
-                whiteSpace: 'pre-line',
-                fontFamily: 'monospace',
-                fontSize: '0.9em',
-              }}
-            >
-              {formattedValue}
-            </div>
-          </LabelizedField>
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={formatNormalCaseValue(newValue)}
+          />
         );
       }
 
-      // Handle arrays
+      // Fallback: if value is array, join and format each
+      let displayValue: string;
       if (Array.isArray(value)) {
-        return (
-          <LabelizedField key={key} label={label} value={value.join(', ')} />
-        );
+        displayValue = value.map((v) => formatNormalCaseValue(v)).join(', ');
+      } else {
+        displayValue = formatNormalCaseValue(value);
       }
-
-      return <LabelizedField key={key} label={label} value={value} />;
+      return (
+        <LabelizedField
+          key={key}
+          label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
+          value={displayValue}
+        />
+      );
     },
   );
 

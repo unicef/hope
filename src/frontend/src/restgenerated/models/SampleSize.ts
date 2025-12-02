@@ -5,5 +5,6 @@
 export type SampleSize = {
     numberOfRecipients: number;
     sampleSize: number;
+    excludedRecipientsCount: number;
 };
 
