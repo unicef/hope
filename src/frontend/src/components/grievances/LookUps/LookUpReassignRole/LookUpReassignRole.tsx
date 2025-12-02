@@ -51,6 +51,7 @@ export function LookUpReassignRole({
           programSlug: programId,
           id: selectedIndividualId,
         }),
+      enabled: !!selectedIndividualId,
     });
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] =
@@ -111,6 +112,7 @@ export function LookUpReassignRole({
         break;
     }
     const role = roleReassignData?.[individualRole.id];
+
     if (role) {
       setReAssigneeRole(role);
     }

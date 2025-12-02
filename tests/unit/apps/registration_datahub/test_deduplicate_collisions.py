@@ -30,7 +30,6 @@ def program(poland: Country) -> Program:
         status=Program.ACTIVE,
         business_area=business_area,
     )
-    program.collision_detection_enabled = True
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()
     return program

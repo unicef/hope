@@ -120,20 +120,6 @@ export function customSnakeCase(str: string): string {
   );
 }
 
-function isAccountDataField(key: string): boolean {
-  if (!key) {
-    return false;
-  }
-  if (typeof key !== 'string') {
-    return false;
-  }
-  return (
-    key.startsWith(
-      'extras.issue_type.individual_data_update_issue_type_extras.individual_data.accounts_to_edit',
-    ) && key.endsWith('.data_fields')
-  );
-}
-
 export function processFormData(
   obj: any,
   form?: FormData,
@@ -163,9 +149,6 @@ export function processFormData(
     if (Array.isArray(obj)) {
       // Array: use bracket notation for index
       formKey = parentKey ? `${parentKey}[${key}]` : key;
-    } else if (isAccountDataField(parentKey)) {
-      // Object: use dot notation for nesting
-      formKey = parentKey ? `${parentKey}.${key}` : snakeKey;
     } else {
       // Object: use dot notation for nesting
       formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
