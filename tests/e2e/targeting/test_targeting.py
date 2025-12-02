@@ -1084,6 +1084,7 @@ class TestTargeting:
         filters: Filters,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
+        screenshot_path: str,
     ) -> None:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
@@ -1093,9 +1094,9 @@ class TestTargeting:
         page_targeting_details.get_lock_button().click()
         page_targeting_details.get_lock_popup_button().click()
         page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.screenshot("targeting_locked.png")
+        page_targeting_details.screenshot(screenshot_path, "targeting_locked.png")
         page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.screenshot("targeting_lockedgetButtonMarkReady.png")
+        page_targeting_details.screenshot(screenshot_path, "targeting_lockedgetButtonMarkReady.png")
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
