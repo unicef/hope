@@ -145,7 +145,9 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     unicef_id = serializers.CharField()
 
     def get_photo(self, obj: Any) -> str | None:
-        individual = Individual.all_objects.filter(id=obj.get("id")).first()
+        if not (ind_id := obj.get("id")):
+            return ""
+        individual = Individual.all_objects.filter(id=ind_id).first()
         return individual.photo.url if individual and individual.photo else None
 
 
