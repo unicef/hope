@@ -86,6 +86,23 @@ export const HouseholdTable = ({
     page,
   ]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [
+    businessArea,
+    programId,
+    filter,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin1,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+  ]);
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
