@@ -811,7 +811,7 @@ class TestIndividualDetail:
             "id": str(self.registration_data_import.id),
             "name": self.registration_data_import.name,
             "status": self.registration_data_import.status,
-            "import_date": f"{self.registration_data_import.import_date:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "import_date": f"{self.registration_data_import.import_date:%Y-%m-%dT%H:%M:%SZ}",
             "number_of_individuals": self.registration_data_import.number_of_individuals,
             "number_of_households": self.registration_data_import.number_of_households,
             "imported_by": {
