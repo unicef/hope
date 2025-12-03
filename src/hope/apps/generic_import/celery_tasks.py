@@ -101,7 +101,7 @@ def process_generic_import_task(
             rdi.save(update_fields=["status"])
 
             # Parse file
-            parser = XlsxSomaliaParser()
+            parser = XlsxSomaliaParser(business_area=rdi.business_area)
             parser.parse(import_data.file.path)
 
             # Run importer

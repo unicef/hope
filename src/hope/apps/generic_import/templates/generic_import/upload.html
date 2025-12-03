@@ -205,7 +205,7 @@
     </div>
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" id="upload-form">
+    <form method="post" enctype="multipart/form-data" id="generic-import-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -295,7 +295,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('{{ form.file.id_for_label }}');
     const fileNameDisplay = document.getElementById('file-name-display');
-    const uploadForm = document.getElementById('upload-form');
+    const uploadForm = document.getElementById('generic-import-form');
     const submitButton = uploadForm.querySelector('.submit-button');
     const businessAreaSelect = document.getElementById('{{ form.business_area.id_for_label }}');
     const programSelect = document.getElementById('{{ form.program.id_for_label }}');
@@ -358,6 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         const option = document.createElement('option');
                         option.value = program.id;
                         option.textContent = program.name;
+                        // Add slug as data attribute for API call
+                        if (program.slug) {
+                            option.setAttribute('data-slug', program.slug);
+                        }
                         programSelect.appendChild(option);
                     });
                     programSelect.disabled = false;
@@ -397,10 +401,73 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 
-    // Disable submit button during upload
-    uploadForm.addEventListener('submit', function() {
+    // Intercept form submission for API call
+    uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();  // Prevent traditional form submission
+
+        const formData = new FormData(uploadForm);
+
+        // Get business area slug from selected option
+        const selectedBAOption = businessAreaSelect.options[businessAreaSelect.selectedIndex];
+        const businessAreaSlug = selectedBAOption.getAttribute('data-slug');
+
+        // Get program slug from selected option
+        const selectedProgramOption = programSelect.options[programSelect.selectedIndex];
+        const programSlug = selectedProgramOption.getAttribute('data-slug');
+
+        const file = formData.get('file');
+
+        // Validate
+        if (!businessAreaSlug || !programSlug || !file) {
+            alert('{% translate "Please fill all required fields" %}');
+            return;
+        }
+
+        // Show loading indicator
         submitButton.disabled = true;
         submitButton.textContent = '{% translate "Uploading..." %}';
+
+        try {
+            // Create API form data (only file)
+            const apiFormData = new FormData();
+            apiFormData.append('file', file);
+
+            // Call API endpoint
+            const response = await fetch(
+                `/api/rest/business-areas/${businessAreaSlug}/programs/${programSlug}/generic-import-upload/upload/`,
+                {
+                    method: 'POST',
+                    body: apiFormData,
+                    credentials: 'same-origin',  // Include cookies for session auth
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || errorData.file || 'Upload failed');
+            }
+
+            const data = await response.json();
+
+            // Show success message
+            alert('{% translate "File uploaded successfully!" %}\n' +
+                  '{% translate "Import:" %} ' + data.rdi_name + '\n' +
+                  '{% translate "Status:" %} ' + data.rdi_status_display);
+
+            // Reload page to reset form
+            window.location.reload();
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('{% translate "Upload failed:" %} ' + error.message);
+
+            // Re-enable submit button
+            submitButton.disabled = false;
+            submitButton.textContent = '{% translate "Upload and Process" %}';
+        }
     });
 
     // Drag and drop support
