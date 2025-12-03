@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.api.models import Grant
-from hope.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin
+from hope.apps.account.permissions import Permissions
+from hope.apps.core.api.mixins import BaseViewSet, PermissionsMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.generic_import.api.serializers import (
     GenericImportResponseSerializer,
@@ -16,17 +16,21 @@ from hope.apps.registration_data.models import ImportData, RegistrationDataImpor
 
 
 class GenericImportUploadViewSet(
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
     BaseViewSet,
 ):
-    """ViewSet for Excel file upload and asynchronous processing via generic import."""
+    """ViewSet for Excel file upload and asynchronous processing via generic import.
+
+    Supports both session-based (cookie) and token-based authentication.
+    """
 
     queryset = ImportData.objects.none()
 
-    authentication_classes = [HOPEAuthentication]
-    permission_classes = [HOPEPermission]
     permission = Grant.API_GENERIC_IMPORT
+    token_permission = Grant.API_GENERIC_IMPORT
+    PERMISSIONS = [Permissions.GENERIC_IMPORT_DATA]
 
     serializer_classes_by_action = {
         "upload": GenericImportUploadSerializer,

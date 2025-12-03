@@ -5,8 +5,10 @@ import uuid
 
 import openpyxl
 
+from hope.apps.core.models import BusinessArea
 from hope.apps.generic_import.generic_upload_service.parsers.base_parser import BaseParser
 from hope.apps.geo.models import Area, Country
+from hope.apps.payment.models.payment import FinancialInstitution
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,8 @@ class XlsxSomaliaParser(BaseParser):
         "HouseholdSize",
     ]
 
-    def __init__(self):
+    def __init__(self, business_area: BusinessArea | None = None):
+        self._business_area = business_area
         self._households = {}
         self._individuals = []
         self._accounts = []
@@ -41,6 +44,25 @@ class XlsxSomaliaParser(BaseParser):
             self._somalia_country_id = Country.objects.get(iso_code3="SOM").id
         except Country.DoesNotExist:
             self._somalia_country_id = None
+
+        # Cache financial institution on initialization to avoid repeated queries
+        self._financial_institution = self._get_financial_institution_for_account()
+
+    def _get_financial_institution_for_account(self) -> FinancialInstitution | None:
+        """Get Financial Institution based on BusinessArea countries.
+
+        Returns first FI that matches any of the BusinessArea's countries.
+        """
+        if not self._business_area:
+            return None
+
+        # Get countries from BusinessArea
+        ba_countries = self._business_area.countries.all()
+        if not ba_countries.exists():
+            return None
+
+        # Query FinancialInstitution by country
+        return FinancialInstitution.objects.filter(country__in=ba_countries).first()
 
     def parse(self, file_path: str) -> None:
         """Parse the Excel file and extract all data."""
@@ -148,10 +170,12 @@ class XlsxSomaliaParser(BaseParser):
         self._process_documents(row, individual_id)
         wallet_phone = row.get("WalletPhoneNumber")
         if wallet_phone:
+            # Use cached financial institution instead of querying every time
             account_data = {
                 "individual_id": individual_id,
                 "account_type": "mobile",
                 "number": self._format_phone(wallet_phone),
+                "financial_institution_id": self._financial_institution.id if self._financial_institution else None,
                 "data": {
                     "provider": row.get("MPSP") or "",
                 },
