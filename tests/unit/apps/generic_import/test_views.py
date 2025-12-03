@@ -2,6 +2,7 @@ from io import BytesIO
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import DatabaseError
 from django.test import TransactionTestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -433,7 +434,7 @@ class TestGenericImportUploadView(TransactionTestCase):
         self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
 
         # Simulate database error
-        mock_create.side_effect = Exception("Database error")
+        mock_create.side_effect = DatabaseError("Database error")
 
         uploaded_file = self._create_upload_file()
 

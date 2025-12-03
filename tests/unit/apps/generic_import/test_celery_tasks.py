@@ -86,8 +86,8 @@ class TestProcessGenericImportTask:
         assert rdi.status == RegistrationDataImport.IN_REVIEW
 
         # Verify parser was called
-        mock_parser_class.assert_called_once_with(import_data.file.path)
-        mock_parser.parse.assert_called_once()
+        mock_parser_class.assert_called_once_with()
+        mock_parser.parse.assert_called_once_with(import_data.file.path)
 
         # Verify importer was created and called
         assert mock_importer_class.called
