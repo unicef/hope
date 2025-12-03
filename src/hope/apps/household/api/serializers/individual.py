@@ -226,7 +226,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
 
     def get_photo(self, obj: dict) -> str:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
-        return individual.photo.url if individual and individual.photo else ""
+        return individual.photo.url if individual and individual.photo else None
 
 
 class IndividualListSerializer(serializers.ModelSerializer):
