@@ -28,6 +28,25 @@ class BusinessAreaSelectWidget(Select):
         return option
 
 
+class ProgramSelectWidget(Select):
+    """Custom select widget that adds slug as data attribute."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        """Override to add data-slug attribute to options."""
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value:
+            # Extract actual value from ModelChoiceIteratorValue if needed
+            actual_value = value.value if hasattr(value, "value") else value
+            if actual_value:
+                # Get the Program object to extract slug
+                try:
+                    program = Program.objects.get(pk=actual_value)
+                    option["attrs"]["data-slug"] = program.slug
+                except (Program.DoesNotExist, ValueError, TypeError):
+                    pass
+        return option
+
+
 class GenericImportForm(forms.Form):
     """Form for uploading generic import files with BA and Program selection."""
 
@@ -67,24 +86,27 @@ class GenericImportForm(forms.Form):
         # Set business area queryset
         self.fields["business_area"].queryset = business_areas
 
-        # If user has access to only one BA, pre-select and disable it
+        # If user has access to only one BA, pre-select it
         if business_areas.count() == 1:
             ba = business_areas.first()
             self.fields["business_area"].initial = ba
-            self.fields["business_area"].widget.attrs["disabled"] = True
 
             # Get programs for the single BA
             programs = self._get_program_queryset(ba)
 
-            # Set program choices
+            # Set program field with ModelChoiceField and custom widget
             if programs.exists():
-                program_choices = [("", "Select Program")] + [(p.id, p.name) for p in programs]
-                self.fields["program"].widget = forms.Select(choices=program_choices)
+                self.fields["program"] = forms.ModelChoiceField(
+                    queryset=programs,
+                    widget=ProgramSelectWidget(),
+                    required=True,
+                    label="Program",
+                    empty_label="Select Program",
+                )
 
-                # If only one program, pre-select and disable it
+                # If only one program, pre-select it
                 if programs.count() == 1:
-                    self.fields["program"].initial = programs.first().id
-                    self.fields["program"].widget.attrs["disabled"] = True
+                    self.fields["program"].initial = programs.first()
         # Programs will be filtered dynamically based on BA selection via JavaScript
 
     def _get_business_area_queryset(self) -> QuerySet[BusinessArea]:
@@ -129,16 +151,20 @@ class GenericImportForm(forms.Form):
     def clean_program(self):
         """Validate program field and convert to Program object.
 
-        Since we're using CharField instead of ModelChoiceField to avoid
-        queryset validation issues with dynamically loaded programs.
+        Handles both CharField (dynamically loaded) and ModelChoiceField (pre-loaded) cases.
         """
-        program_id = self.cleaned_data.get("program")
+        program = self.cleaned_data.get("program")
 
-        if not program_id:
+        if not program:
             raise ValidationError("Program is required.")
 
+        # If already a Program object (from ModelChoiceField), return it
+        if isinstance(program, Program):
+            return program
+
+        # Otherwise it's a string ID (from CharField), convert to Program
         try:
-            program = Program.objects.get(pk=program_id)
+            program = Program.objects.get(pk=program)
         except (Program.DoesNotExist, ValueError):
             raise ValidationError("Selected program does not exist.")
 
