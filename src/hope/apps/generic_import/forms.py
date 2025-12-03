@@ -64,25 +64,28 @@ class GenericImportForm(forms.Form):
         # Get accessible business areas for user
         business_areas = self._get_business_area_queryset()
 
-        # If user has access to only one BA, hide the field and set default
+        # Set business area queryset
+        self.fields["business_area"].queryset = business_areas
+
+        # If user has access to only one BA, pre-select and disable it
         if business_areas.count() == 1:
-            self.fields["business_area"].widget = forms.HiddenInput()
-            self.fields["business_area"].initial = business_areas.first()
-            self.fields["business_area"].queryset = business_areas
+            ba = business_areas.first()
+            self.fields["business_area"].initial = ba
+            self.fields["business_area"].widget.attrs["disabled"] = True
 
             # Get programs for the single BA
-            programs = self._get_program_queryset(business_areas.first())
+            programs = self._get_program_queryset(ba)
 
-            # If user has access to only one program, hide that field too
-            if programs.count() == 1:
-                self.fields["program"].widget = forms.HiddenInput()
-                self.fields["program"].initial = programs.first()
-                self.fields["program"].queryset = programs
-            else:
-                self.fields["program"].queryset = programs
-        else:
-            self.fields["business_area"].queryset = business_areas
-            # Programs will be filtered dynamically based on BA selection
+            # Set program choices
+            if programs.exists():
+                program_choices = [("", "Select Program")] + [(p.id, p.name) for p in programs]
+                self.fields["program"].widget = forms.Select(choices=program_choices)
+
+                # If only one program, pre-select and disable it
+                if programs.count() == 1:
+                    self.fields["program"].initial = programs.first().id
+                    self.fields["program"].widget.attrs["disabled"] = True
+        # Programs will be filtered dynamically based on BA selection via JavaScript
 
     def _get_business_area_queryset(self) -> QuerySet[BusinessArea]:
         """Get business areas accessible to the user.
@@ -90,6 +93,10 @@ class GenericImportForm(forms.Form):
         Matches User.business_areas logic: includes partner assignments,
         excludes expired role assignments and inactive business areas.
         """
+        # Superusers have access to all business areas
+        if self.user.is_superuser:
+            return BusinessArea.objects.exclude(active=False).distinct()
+
         # Match User.business_areas logic: include partner assignments, exclude expired/inactive
         partner_filter = Q(partner__user=self.user) if self.user.partner_id else Q(pk=None)
 
