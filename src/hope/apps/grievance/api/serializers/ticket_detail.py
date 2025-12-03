@@ -148,7 +148,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
         if not (ind_id := obj.get("id")):
             return ""
         individual = Individual.all_objects.filter(id=ind_id).first()
-        return individual.photo.url if individual and individual.photo else None
+        return individual.photo.url if individual and individual.photo else ""
 
 
 class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
