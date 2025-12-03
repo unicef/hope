@@ -1,8 +1,15 @@
+from sentry_sdk import capture_exception
+
 from hope.apps.core.celery import app
+from hope.apps.generic_import.generic_upload_service.importer import Importer
+from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
+    XlsxSomaliaParser,
+)
+from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import locked_cache
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
-from hope.apps.utils.sentry import sentry_tags
+from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 SOFT_TIME_LIMIT = 30 * 60
 HARD_TIME_LIMIT = 35 * 60
@@ -70,13 +77,6 @@ def process_generic_import_task(
 
     """
     import logging
-
-    from hope.apps.generic_import.generic_upload_service.importer import Importer
-    from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
-        XlsxSomaliaParser,
-    )
-    from hope.apps.registration_data.models import ImportData, RegistrationDataImport
-    from hope.apps.utils.sentry import set_sentry_business_area_tag
 
     logger = logging.getLogger(__name__)
 
@@ -162,8 +162,6 @@ def process_generic_import_task(
 
         # Update error status
         try:
-            from sentry_sdk import capture_exception
-
             sentry_id = capture_exception(e)
         except Exception as exc:
             logger.exception(exc)
