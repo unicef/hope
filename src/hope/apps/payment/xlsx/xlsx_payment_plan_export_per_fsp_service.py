@@ -139,7 +139,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             account_data = collector_data.get("account_data", {})
             if account_data:
-                return list(account_data.keys())
+                return list(account_data.keys()) + ["financial_institution", "number"]
         return []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
