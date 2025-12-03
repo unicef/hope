@@ -560,7 +560,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 individual=payment.collector,
                 data={
                     "name": "Union Bank",
-                    "number": str(payment.id),
                     "uba_code": "123456",
                     "holder_name": f"Admin {payment.collector.given_name}",
                 },
@@ -584,6 +583,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             assert payment_row[-3] == "123456"
             assert payment_row[-2] == f"Admin {payment.collector.given_name}"
             assert payment_row[-1] == ""
+
+        # test without number/financial_institution snapshot
+        for payment in self.payment_plan.eligible_payments:
+            payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop("number")
+            payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop("financial_institution")
+            payment.household_snapshot.save()
+        headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
+        assert headers[-5:] == required_fields_for_account
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()

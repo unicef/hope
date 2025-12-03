@@ -139,7 +139,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             account_data = collector_data.get("account_data", {})
             if account_data:
-                return list(account_data.keys()) + ["financial_institution", "number"]
+                headers = list(account_data.keys())
+                if "financial_institution" not in headers:
+                    headers.append("financial_institution")
+                if "number" not in headers:
+                    headers.append("number")
+                return headers
         return []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
