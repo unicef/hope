@@ -40,6 +40,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         if self.payment_plan.is_social_worker_program:
             self.headers.remove("household_size")
             self.headers.remove("household_id")
+            self.headers.remove("collector_id")
+        else:
+            self.headers.remove("individual_id")
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -154,7 +157,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
+                    exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 return Payment(
