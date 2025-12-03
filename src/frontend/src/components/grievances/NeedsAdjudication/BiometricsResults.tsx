@@ -158,29 +158,6 @@ export const BiometricsResults = ({
                   </Typography>
                 </Box>
               )}
-
-              {individual2?.unicefId && (
-                <Box display="flex" flexDirection="column">
-                  {individual2?.photo ? (
-                    <img
-                      src={individual2?.photo}
-                      alt="Image 2"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        objectFit: 'cover',
-                      }}
-                      data-cy="image2"
-                    />
-                  ) : (
-                    <Placeholder />
-                  )}
-                  <Typography variant="subtitle2">
-                    {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
-                    {individual2?.fullName}
-                  </Typography>
-                </Box>
-              )}
             </Box>
             <Box p={5} data-cy="results-info">
               <div>
