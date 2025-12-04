@@ -25,157 +25,98 @@ export function AccountField({
   id,
   baseName,
   onDelete,
-  isEdited,
   account,
   values,
   accountTypeChoices,
   accountFinancialInstitutionChoices,
 }: AccountProps): ReactElement {
   const { t } = useTranslation();
-
-  const accountIndex = getIndexForId(
-    values[baseName],
-    id,
-  );
+  const accountIndex = getIndexForId(values[baseName], id);
   const accountFieldName = `${baseName}.${accountIndex}`;
-
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const dataFields = account?.dataFields || {};
   const dynamicFieldsName = `${accountFieldName}.dataFields`;
-  const accountType = account?.name || values?.[baseName]?.[accountIndex]?.name;
-  const isBank = accountType === 'bank';
-
+  const renderCurrentValue = (
+    account: Account,
+    getValue: (account: Account) => string,
+  ) => {
+    if (!account) {
+      return null;
+    }
+    return (
+      <Grid size={{ xs: 3 }}>
+        <LabelizedField label={t('Current Value')} value={getValue(account)} />
+      </Grid>
+    );
+  };
+  const newValueFieldWidth = account ? 5 : 8;
+  const financialInstitutionName =
+    accountFinancialInstitutionChoices.find(
+      (c: any) => c.value === account?.financialInstitution,
+    )?.name || account?.financialInstitution;
   return (
     <>
       <Grid size={{ xs: 11 }} />
-      {!isEdited ? (
-        <Grid size={{ xs: 1 }}>
-          <IconButton disabled={isEditTicket} onClick={onDelete}>
-            <Delete />
-          </IconButton>
-        </Grid>
-      ) : null}
+      <Grid size={{ xs: 1 }}>
+        <IconButton disabled={isEditTicket} onClick={onDelete}>
+          <Delete />
+        </IconButton>
+      </Grid>
 
       <Fragment key="type">
         <Grid size={{ xs: 4 }}>
-          <LabelizedField label={t('Account Item')} value="type" />
+          <LabelizedField label={t('Account Item')} value="Account Type" />
         </Grid>
-
-        {account ? (
-          <>
-            <Grid size={{ xs: 4 }}>
-              <LabelizedField
-                label={t('Current Value')}
-                value={account?.accountType || ''}
-              />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('New Value')}
-                value={account?.accountType || ''}
-              />
-            </Grid>
-          </>
-        ) : (
-          <Grid size={{ xs: 8 }}>
-            <Field
-              name={`${accountFieldName}.accountType`}
-              variant="outlined"
-              label={t('New Value')}
-              component={FormikSelectField}
-              choices={accountTypeChoices}
-              required
-            />
-          </Grid>
-        )}
+        <Grid size={{ xs: 8 }}>
+          <Field
+            name={`${accountFieldName}.accountType`}
+            variant="outlined"
+            label={t('New Value')}
+            component={FormikSelectField}
+            choices={accountTypeChoices}
+            disabled={Boolean(account)}
+            required
+          />
+        </Grid>
       </Fragment>
 
-      {!account ? (
-        <>
-          <Fragment key="number">
-            <Grid size={{ xs: 4 }}>
-              <LabelizedField label={t('Account Item')} value="number" />
-            </Grid>
-            <Grid size={{ xs: 8 }}>
-              <Field
-                fullWidth
-                name={`${accountFieldName}.number`}
-                variant="outlined"
-                label={t('New Value')}
-                component={FormikTextField}
-                required
-              />
-            </Grid>
-          </Fragment>
-          <Fragment key="financial_institution">
-            <Grid size={{ xs: 4 }}>
-              <LabelizedField
-                label={t('Account Item')}
-                value="financial institution"
-              />
-            </Grid>
-            <Grid size={{ xs: 8 }}>
-              <Field
-                name={`${accountFieldName}.financialInstitution`}
-                variant="outlined"
-                label={t('New Value')}
-                component={FormikSelectField}
-                choices={accountFinancialInstitutionChoices}
-                required
-              />
-            </Grid>
-          </Fragment>
-        </>
-      ) : (
-        <>
-          {Object.entries(dataFields).map(([key, value]) => {
-              let displayValue = String(value);
-              const isFinancialInstitutionField = key === 'financial_institution';
-              if (
-                isFinancialInstitutionField &&
-                Array.isArray(accountFinancialInstitutionChoices)
-              ) {
-                const choice = accountFinancialInstitutionChoices.find(
-                  (c: any) => c.value === value,
-                );
-                displayValue = choice ? choice.name : String(value);
-              }
-              const fieldProps = {
-                component: isFinancialInstitutionField ? FormikSelectField : FormikTextField,
-                ...(isFinancialInstitutionField ? { choices: accountFinancialInstitutionChoices, required: true } : {}),
-              };
+      <Fragment key="number">
+        <Grid size={{ xs: 4 }}>
+          <LabelizedField label={t('Account Item')} value="Number" />
+        </Grid>
+        {renderCurrentValue(account, (acc) => acc.number)}
+        <Grid size={{ xs: newValueFieldWidth }}>
+          <Field
+            fullWidth
+            name={`${accountFieldName}.number`}
+            variant="outlined"
+            label={t('New Value')}
+            component={FormikTextField}
+            required
+          />
+        </Grid>
+      </Fragment>
+      <Fragment key="financialInstitution">
+        <Grid size={{ xs: 4 }}>
+          <LabelizedField
+            label={t('Account Item')}
+            value="Financial Institution"
+          />
+        </Grid>
 
-            return (
-              <Fragment key={key}>
-                <Grid size={{ xs: 4 }}>
-                  <LabelizedField
-                    label={t('Account Item')}
-                    value={String(key)}
-                  />
-                </Grid>
-                <Grid size={{ xs: 4 }}>
-                  <LabelizedField
-                    label={t('Current Value')}
-                    value={displayValue}
-                  />
-                </Grid>
-                <Grid size={{ xs: 3 }}>
-                  <Field
-                    name={`${accountFieldName}.${key}`}
-                    fullWidth
-                    variant="outlined"
-                    label={t('New Value')}
-                    required={!isEditTicket}
-                    disabled={isEditTicket}
-                    {...fieldProps}
-                  />
-                </Grid>
-              </Fragment>
-            );
-          })}
-        </>
-      )}
+        {renderCurrentValue(account, () => financialInstitutionName)}
+        <Grid size={{ xs: newValueFieldWidth }}>
+          <Field
+            name={`${accountFieldName}.financialInstitution`}
+            variant="outlined"
+            label={t('New Value')}
+            component={FormikSelectField}
+            choices={accountFinancialInstitutionChoices}
+            required
+          />
+        </Grid>
+      </Fragment>
+
       {/* --- Dynamic Fields Section --- */}
       <FieldArray name={dynamicFieldsName}>
         {/* eslint-disable-next-line @typescript-eslint/unbound-method*/}
@@ -192,10 +133,16 @@ export function AccountField({
                     label={t('Field Name')}
                     variant="outlined"
                     fullWidth
+                    disabled={Boolean(account) && !field.isNew}
                     required
                   />
                 </Grid>
-                <Grid size={{ xs: 7 }}>
+                {renderCurrentValue(
+                  account,
+                  (acc) =>
+                    acc.dataFields.find((df) => field.key === df.key)?.value,
+                )}
+                <Grid size={{ xs: newValueFieldWidth - 1 }}>
                   <Field
                     name={`${dynamicFieldsName}.${idx}.value`}
                     component={FormikTextField}
@@ -206,9 +153,11 @@ export function AccountField({
                   />
                 </Grid>
                 <Grid size={{ xs: 1 }}>
-                  <IconButton onClick={() => remove(idx)}>
-                    <Delete />
-                  </IconButton>
+                  {field.isNew && (
+                    <IconButton onClick={() => remove(idx)}>
+                      <Delete />
+                    </IconButton>
+                  )}
                 </Grid>
               </Fragment>
             ))}
@@ -216,7 +165,7 @@ export function AccountField({
               <Button
                 variant="outlined"
                 startIcon={<Add />}
-                onClick={() => push({ key: '', value: '' })}
+                onClick={() => push({ key: '', value: '', isNew: true })}
               >
                 {t('Add Field')}
               </Button>

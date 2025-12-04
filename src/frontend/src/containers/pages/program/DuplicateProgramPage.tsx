@@ -34,7 +34,7 @@ import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -382,8 +382,8 @@ const DuplicateProgramPage = (): ReactElement => {
             <PageHeader
               title={`${t('Copy of Programme')}: (${name})`}
               breadCrumbs={
-                hasPermissionInModule(
-                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                hasPermissions(
+                  PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
                   permissions,
                 )
                   ? breadCrumbsItems
