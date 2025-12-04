@@ -127,6 +127,18 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
             verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
 
+    def test_verify_flex_fields_with_int(self) -> None:
+        test_int_i_f = Core_FlexibleAttribute(
+            type=Core_FlexibleAttribute.INTEGER,
+            name="test_int_i_f",
+            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "int123"},
+        )
+        test_int_i_f.save()
+
+        verify_flex_fields({"test_int_i_f": "1233"}, "individuals")
+        verify_flex_fields({"test_int_i_f": 1233}, "individuals")
+
     def test_handle_role(self) -> None:
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")

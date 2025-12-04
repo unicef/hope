@@ -97,7 +97,12 @@ def verify_flex_fields(flex_fields_to_verify: dict, associated_with: str) -> Non
             # convert string value to datetime
             value = datetime.strptime(value, "%Y-%m-%d")
 
-        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
+        expected_type = FIELD_TYPES_TO_INTERNAL_TYPE[field_type]
+        # handle integers passed as strings
+        if expected_type is int and isinstance(value, str) and value.isdigit():
+            value = int(value)
+
+        if not isinstance(value, expected_type) or value is None:
             raise ValueError(f"invalid value type for a field {name}")
 
         if field_type == TYPE_SELECT_ONE and value not in field_choices:
@@ -281,11 +286,11 @@ def prepare_edit_accounts_save(accounts: list[dict]) -> list[dict]:
             "number_previous_value": account_object.number,
             "data_fields": [
                 {
-                    "name": field,
-                    "value": value,
-                    "previous_value": account_object.data.get(field),
+                    "name": item["key"],
+                    "value": item["value"],
+                    "previous_value": account_object.data.get(item["key"]),
                 }
-                for field, value in data_fields.items()
+                for item in data_fields
             ],
         }
         items.append(data)

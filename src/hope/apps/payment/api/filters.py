@@ -2,7 +2,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 import django_filters
-from django_filters import FilterSet
+from django_filters import FilterSet, OrderingFilter
 
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.models import GrievanceTicket
@@ -87,6 +87,22 @@ class TargetPopulationFilter(PaymentPlanFilter):
         ]
         value_list = is_assigned if value == "ASSIGNED" else [value]
         return queryset.filter(status__in=value_list)
+
+
+class PendingPaymentFilter(FilterSet):
+    ordering = OrderingFilter(
+        fields=(
+            ("household__unicef_id", "household_unicef_id"),
+            ("household__size", "household_size"),
+            ("household__admin2__name", "household_admin2"),
+            ("head_of_household__full_name", "head_of_household"),
+            ("vulnerability_score", "vulnerability_score"),
+        )
+    )
+
+    class Meta:
+        model = Payment
+        fields = []
 
 
 class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):

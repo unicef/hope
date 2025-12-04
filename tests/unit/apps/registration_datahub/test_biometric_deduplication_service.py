@@ -33,7 +33,7 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hope.models import RegistrationDataImport
+from hope.models import DeduplicationEngineSimilarityPair, RegistrationDataImport
 from hope.models.utils import MergeStatusModel
 
 
@@ -794,6 +794,22 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
+        assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
+        assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
+
+        # test only one individual in dedup engine results
+        similarity_pairs = [
+            SimilarityPair(score=0.0, first=ind1.id, second=None, status_code="412"),  # no face detected
+        ]
+        DeduplicationEngineSimilarityPair.objects.all().delete()
+        service.store_similarity_pairs(self.program, similarity_pairs)
+        service.update_rdis_deduplication_statistics(self.program, exclude_rdi=rdi2)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 5
+        assert rdi1.dedup_engine_golden_record_duplicates == 1
+        ind1.refresh_from_db()
+        assert ind1.biometric_deduplication_golden_record_results == []
         assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
         assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
