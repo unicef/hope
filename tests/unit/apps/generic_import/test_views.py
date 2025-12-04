@@ -10,6 +10,7 @@ from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.account.models import RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import BusinessArea
 from hope.apps.program.models import Program
@@ -451,4 +452,108 @@ class TestGenericImportUploadView(TransactionTestCase):
         assert response.status_code == 200
 
         # Task should NOT be called due to exception
+        mock_delay.assert_not_called()
+
+    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+    def test_upload_to_ba_without_import_permission_for_that_ba(self, mock_delay):
+        """Test that upload fails when user has BA access but not GENERIC_IMPORT_DATA for selected BA."""
+        from hope.apps.account.models import Role
+
+        # Create second business area
+        other_ba = BusinessArea.objects.create(
+            name="Other Country",
+            slug="other-country",
+            code="OTH",
+            active=True,
+        )
+        other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
+
+        # Give user GENERIC_IMPORT_DATA for other_ba, but only basic access to afghanistan
+        role_import = Role.objects.create(
+            name="TestImportRole",
+            permissions=[Permissions.GENERIC_IMPORT_DATA.value],
+        )
+
+        role_basic = Role.objects.create(
+            name="TestBasicRole",
+            permissions=[Permissions.RDI_VIEW_LIST.value],  # Some basic permission
+        )
+
+        # User has GENERIC_IMPORT_DATA only for other_ba
+        RoleAssignment.objects.create(
+            user=self.user,
+            role=role_import,
+            business_area=other_ba,
+            program=other_program,
+        )
+        # User has basic access to afghanistan (can see it) but no GENERIC_IMPORT_DATA
+        RoleAssignment.objects.create(
+            user=self.user,
+            role=role_basic,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
+
+        uploaded_file = self._create_upload_file()
+
+        # Try to upload to afghanistan (user has access but not GENERIC_IMPORT_DATA permission)
+        response = self.client.post(
+            self.url,
+            data={
+                "business_area": self.afghanistan.id,
+                "program": self.program.id,
+                "file": uploaded_file,
+            },
+        )
+
+        # Should fail - form_invalid called with error message
+        assert response.status_code == 200  # Returns form with errors
+        mock_delay.assert_not_called()
+        # Check for permission error message in messages
+        messages_list = list(response.context["messages"])
+        assert any("permission" in str(m).lower() for m in messages_list)
+
+    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+    def test_form_invalid_shows_non_field_errors(self, mock_delay):
+        """Test that non-field errors (__all__) are displayed correctly."""
+        # Setup user with access to both BAs
+        other_ba = BusinessArea.objects.create(
+            name="Other Country",
+            slug="other-country",
+            code="OTH",
+            active=True,
+        )
+        other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
+
+        self._create_user_role_with_permissions(
+            self.user,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+            program=self.program,
+        )
+        self._create_user_role_with_permissions(
+            self.user,
+            [Permissions.GENERIC_IMPORT_DATA],
+            other_ba,
+            program=other_program,
+        )
+
+        self.client.force_login(self.user, "django.contrib.auth.backends.ModelBackend")
+
+        uploaded_file = self._create_upload_file()
+
+        # Submit form with program from different BA - this triggers __all__ error
+        response = self.client.post(
+            self.url,
+            data={
+                "business_area": self.afghanistan.id,
+                "program": other_program.id,  # Program from other_ba
+                "file": uploaded_file,
+            },
+        )
+
+        # Should return form with errors
+        assert response.status_code == 200
         mock_delay.assert_not_called()

@@ -347,3 +347,235 @@ class TestXlsxSomaliaParser:
         individuals = parser.individuals_data
         assert len(individuals) > 0
         assert individuals[0]["sex"] == expected
+
+    def test_format_phone_empty_value(self):
+        """Test that empty phone value returns empty string."""
+        parser = XlsxSomaliaParser()
+        assert parser._format_phone("") == ""
+        assert parser._format_phone(None) == ""
+        assert parser._format_phone("   ") == ""
+
+    def test_format_phone_already_has_plus(self):
+        """Test that phone number with + prefix is preserved."""
+        parser = XlsxSomaliaParser()
+        result = parser._format_phone("+252612345678")
+        assert result == "+252612345678"
+
+    def test_format_phone_with_decimal(self):
+        """Test that decimal point from Excel float is removed."""
+        parser = XlsxSomaliaParser()
+        # Excel might return phone numbers as floats like 252612345678.0
+        result = parser._format_phone("252612345678.0")
+        assert result == "+252612345678"
+        assert ".0" not in result
+
+    def test_format_phone_non_numeric(self):
+        """Test that non-numeric phone strings are returned unchanged."""
+        parser = XlsxSomaliaParser()
+        # Non-numeric strings should not get + prefix
+        result = parser._format_phone("N/A")
+        assert result == "N/A"
+
+        result = parser._format_phone("invalid-phone")
+        assert result == "invalid-phone"
+
+    def test_parse_int_edge_cases(self):
+        """Test _parse_int with various edge cases."""
+        parser = XlsxSomaliaParser()
+
+        # None and empty string
+        assert parser._parse_int(None) == 0
+        assert parser._parse_int("") == 0
+
+        # Float values
+        assert parser._parse_int(3.7) == 3
+        assert parser._parse_int("5.9") == 5
+
+        # Invalid values
+        assert parser._parse_int("invalid") == 0
+        assert parser._parse_int("abc123") == 0
+
+    def test_parse_float_edge_cases(self):
+        """Test _parse_float with various edge cases."""
+        parser = XlsxSomaliaParser()
+
+        # None and empty string
+        assert parser._parse_float(None) == 0.0
+        assert parser._parse_float("") == 0.0
+
+        # Valid floats
+        assert parser._parse_float(3.5) == 3.5
+        assert parser._parse_float("5.9") == 5.9
+
+        # Invalid values
+        assert parser._parse_float("invalid") == 0.0
+        assert parser._parse_float("abc123") == 0.0
+
+    def test_validate_file_structure_not_parsed(self):
+        """Test validate_file_structure returns False before parsing."""
+        parser = XlsxSomaliaParser()
+        assert parser.validate_file_structure() is False
+
+    def test_validate_file_structure_with_errors(self, tmp_path):
+        """Test validate_file_structure returns False when there are errors."""
+        # Create file with missing columns to trigger errors
+        excel_file = tmp_path / "invalid.xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["HouseholdCSSPID"])  # Missing required columns
+        wb.save(str(excel_file))
+
+        parser = XlsxSomaliaParser()
+        parser.parse(str(excel_file))
+
+        assert parser.validate_file_structure() is False
+        assert len(parser.errors) > 0
+
+    def test_validate_file_structure_success(self, somalia_excel_file):
+        """Test validate_file_structure returns True after successful parse."""
+        parser = XlsxSomaliaParser()
+        parser.parse(somalia_excel_file)
+
+        assert parser.validate_file_structure() is True
+        assert len(parser.errors) == 0
+
+    def test_supported_file_types_property(self):
+        """Test supported_file_types returns correct extensions."""
+        parser = XlsxSomaliaParser()
+        supported = parser.supported_file_types
+
+        assert ".xlsx" in supported
+        assert ".xls" in supported
+        assert len(supported) == 2
+
+    def test_individual_roles_in_households_data_property(self):
+        """Test individual_roles_in_households_data property returns empty list."""
+        parser = XlsxSomaliaParser()
+        assert parser.individual_roles_in_households_data == []
+
+    def test_get_financial_institution_no_business_area(self):
+        """Test _get_financial_institution_for_account returns None without business area."""
+        parser = XlsxSomaliaParser(business_area=None)
+        assert parser._financial_institution is None
+
+    def test_parse_exception_handling(self, tmp_path):
+        """Test that parse() handles exceptions gracefully."""
+        # Create a corrupted/invalid file
+        invalid_file = tmp_path / "corrupted.xlsx"
+        invalid_file.write_bytes(b"not a valid xlsx file")
+
+        parser = XlsxSomaliaParser()
+        parser.parse(str(invalid_file))
+
+        # Should have errors and not crash
+        assert len(parser.errors) > 0
+        assert "Error parsing file" in parser.errors[0]
+        assert parser._parsed is False
+
+    def test_date_as_string(self, tmp_path):
+        """Test that date of birth as string is handled correctly."""
+        excel_file = tmp_path / "string_date.xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        headers = [
+            "HouseholdCSSPID",
+            "IndividualID",
+            "IndividualName",
+            "Sex",
+            "IndividualDateOfBirth",
+            "District",
+            "Village",
+            "HouseholdSize",
+        ]
+        ws.append(headers)
+        # Use string date instead of datetime object
+        ws.append(["TEST001", 123456, "TEST NAME", "Male", "1990-01-15", "TEST", "TEST", 1])
+        wb.save(str(excel_file))
+
+        parser = XlsxSomaliaParser()
+        parser.parse(str(excel_file))
+
+        individuals = parser.individuals_data
+        assert len(individuals) == 1
+        # String date should be kept as-is
+        assert individuals[0]["birth_date"] == "1990-01-15"
+
+    def test_process_documents_none_values(self, tmp_path):
+        """Test that documents with 'None' string values are skipped."""
+        excel_file = tmp_path / "none_doc.xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        headers = [
+            "HouseholdCSSPID",
+            "IndividualID",
+            "IndividualName",
+            "Sex",
+            "IndividualDateOfBirth",
+            "District",
+            "Village",
+            "HouseholdSize",
+            "IndividualIDDocument",
+            "IndividualIDNumber",
+        ]
+        ws.append(headers)
+        # Add row with "None" as document number
+        ws.append(["TEST001", 123456, "TEST NAME", "Male", date(1990, 1, 1), "TEST", "TEST", 1, "passport", "None"])
+        wb.save(str(excel_file))
+
+        parser = XlsxSomaliaParser()
+        parser.parse(str(excel_file))
+
+        # Document should be skipped when doc_number is "None"
+        assert len(parser.documents_data) == 0
+
+    def test_ba_without_countries(self):
+        """Test that parser handles BA without countries (financial institution is None)."""
+        from extras.test_utils.factories.core import create_afghanistan
+
+        create_afghanistan()
+        from hope.apps.core.models import BusinessArea
+
+        ba = BusinessArea.objects.get(slug="afghanistan")
+        # Clear any countries from the BA
+        ba.countries.clear()
+
+        parser = XlsxSomaliaParser(business_area=ba)
+
+        # Financial institution should be None since BA has no countries
+        assert parser._financial_institution is None
+
+    def test_parse_with_empty_rows(self, tmp_path):
+        """Test that empty rows in Excel are skipped during parsing."""
+        excel_file = tmp_path / "empty_rows.xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        headers = [
+            "HouseholdCSSPID",
+            "IndividualID",
+            "IndividualName",
+            "Sex",
+            "IndividualDateOfBirth",
+            "District",
+            "Village",
+            "HouseholdSize",
+        ]
+        ws.append(headers)
+        # Add valid row
+        ws.append(["HH001", 123456, "Person One", "Male", date(1990, 1, 1), "District1", "Village1", 2])
+        # Add empty row (all None values)
+        ws.append([None, None, None, None, None, None, None, None])
+        # Add another empty row with just whitespace
+        ws.append(["", "", "", "", "", "", "", ""])
+        # Add another valid row
+        ws.append(["HH001", 123457, "Person Two", "Female", date(1992, 5, 15), "District1", "Village1", 2])
+        wb.save(str(excel_file))
+
+        parser = XlsxSomaliaParser()
+        parser.parse(str(excel_file))
+
+        # Should have 1 household and 2 individuals (empty rows skipped)
+        assert len(parser.households_data) == 1
+        assert len(parser.individuals_data) == 2
