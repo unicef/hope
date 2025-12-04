@@ -14,6 +14,7 @@ from django_filters import (
 )
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
 from hope.apps.household.const import HEAD
@@ -274,6 +275,57 @@ class GrievanceTicketFilter(FilterSet):
         return qs.filter(
             Q(complaint_ticket_details__payment_id__in=value) | Q(sensitive_ticket_details__payment_id__in=value)
         )
+
+
+class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicketFilter):
+    class Meta(GrievanceTicketFilter.Meta):
+        pass
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        q_filters = Q()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "household" in lookups:
+                household_path = lookups["household"]
+                q_filters |= Q(**{f"{ticket_type}__{household_path}__unicef_id": unicef_id})
+
+        q_filters |= Q(delete_household_ticket_details__household__unicef_id=unicef_id)
+        q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
+
+        return queryset.filter(q_filters).distinct()
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        q_filters = Q()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "individual" in lookups:
+                individual_path = lookups["individual"]
+                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+
+            if "golden_records_individual" in lookups:
+                individual_path = lookups["golden_records_individual"]
+                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+
+        q_filters |= Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=unicef_id)
+        q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
+        q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
+
+        q_filters |= Q(delete_individual_ticket_details__individual__unicef_id=unicef_id)
+
+        return queryset.filter(q_filters).distinct()
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        q_filters = Q()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "payment_record" in lookups:
+                payment_path = lookups["payment_record"]
+                q_filters |= Q(**{f"{ticket_type}__{payment_path}__unicef_id": unicef_id})
+
+        return queryset.filter(q_filters).distinct()
 
 
 class TicketNoteFilter(FilterSet):

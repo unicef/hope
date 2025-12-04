@@ -4,8 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, QuerySet
-from django.db.models.expressions import RawSQL
+from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -134,7 +133,15 @@ class ProgramViewSet(
         user = self.request.user
 
         allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
-        status_rank_raw_sql = RawSQL('"program_program"."status_rank"', [])
+
+        status_rank_expr = Case(
+            When(status="DRAFT", then=Value(1)),
+            When(status="ACTIVE", then=Value(2)),
+            When(status="FINISHED", then=Value(3)),
+            default=Value(99),
+            output_field=IntegerField(),
+        )
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
@@ -148,7 +155,8 @@ class ProgramViewSet(
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
-            .order_by(status_rank_raw_sql, "start_date")
+            .annotate(status_rank=status_rank_expr)
+            .order_by("status_rank", "start_date")
         )
 
     @etag_decorator(ProgramListKeyConstructor)

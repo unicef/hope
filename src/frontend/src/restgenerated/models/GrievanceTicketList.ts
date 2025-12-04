@@ -3,9 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AreaList } from './AreaList';
-import type { CategoryB41Enum } from './CategoryB41Enum';
+import type { CategoryD86Enum } from './CategoryD86Enum';
 import type { GrievanceTicketStatusEnum } from './GrievanceTicketStatusEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
+import type { IndividualSmall } from './IndividualSmall';
 import type { PriorityEnum } from './PriorityEnum';
 import type { UrgencyEnum } from './UrgencyEnum';
 import type { User } from './User';
@@ -15,6 +16,7 @@ export type GrievanceTicketList = {
     status?: GrievanceTicketStatusEnum;
     readonly programs: Record<string, any>;
     household: HouseholdSimple | null;
+    individual: IndividualSmall | null;
     admin?: string;
     admin2: AreaList;
     assignedTo: User;
@@ -23,7 +25,7 @@ export type GrievanceTicketList = {
      * Date this ticket was most recently changed.
      */
     userModified?: string | null;
-    category: CategoryB41Enum;
+    category: CategoryD86Enum;
     issueType?: number | null;
     priority?: PriorityEnum;
     urgency?: UrgencyEnum;

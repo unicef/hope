@@ -10,7 +10,6 @@ import pytest
 from pytz import utc
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
 
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
@@ -52,7 +51,7 @@ pytestmark = pytest.mark.django_db()
 
 def find_file(
     file_name: str,
-    search_in_dir: str = settings.DOWNLOAD_DIRECTORY,
+    search_in_dir: str = "",
     number_of_ties: int = 1,
 ) -> str:
     for _ in range(number_of_ties):

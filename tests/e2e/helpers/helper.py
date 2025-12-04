@@ -3,9 +3,8 @@ import logging
 import os
 import time
 from time import sleep
-from typing import Callable, Literal, Optional, Tuple, Union
+from typing import Callable, Literal, Tuple, Union
 
-from django.conf import settings
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver import Chrome, Keys
@@ -259,13 +258,12 @@ class Common:
 
     def screenshot(
         self,
+        file_path: str,
         file_name: str = "test",
         file_type: str = "png",
-        file_path: Optional[str] = None,
         delay_sec: float = 1,
     ) -> None:
-        if file_path is None:
-            file_path = settings.SCREENSHOT_DIRECTORY
+        os.makedirs(file_path, exist_ok=True)
         sleep(delay_sec)
         full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
         self.driver.get_screenshot_as_file(full_filename)

@@ -71,6 +71,25 @@ export function IndividualsListTable({
       page,
     ],
   );
+  useEffect(() => {
+    setPage(0);
+  }, [
+    filter,
+    filter.ageMin,
+    filter.ageMax,
+    filter.sex,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin2,
+    filter.flags,
+    filter.status,
+    filter.lastRegistrationDateMin,
+    filter.lastRegistrationDateMax,
+    filter.orderBy,
+    programId,
+    businessArea,
+  ]);
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,

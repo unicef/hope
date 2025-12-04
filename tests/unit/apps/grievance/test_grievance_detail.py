@@ -891,6 +891,7 @@ class TestGrievanceTicketDetail:
             payment_verification=payment_verification,
         )
         self._assign_ticket_data(grievance_ticket)
+        payment_plan.refresh_from_db()
 
         create_user_role_with_permissions(
             user=self.user,
@@ -922,7 +923,10 @@ class TestGrievanceTicketDetail:
         assert data["payment_record"] == {
             "id": str(payment.id),
             "unicef_id": payment.unicef_id,
-            "parent_id": payment_plan.id,
+            "parent": {
+                "id": str(payment_plan.id),
+                "unicef_id": payment_plan.unicef_id,
+            },
             "delivered_quantity": f"{payment.delivered_quantity:.2f}",
             "entitlement_quantity": f"{payment.entitlement_quantity:.2f}",
             "verification": payment_verification.id,

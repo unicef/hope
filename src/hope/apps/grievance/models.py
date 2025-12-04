@@ -244,12 +244,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         "complaint_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "sensitive_ticket_details": {
             "individual": "individual",
             "household": "household",
-            "payment_record": "payment_record",
+            "payment_record": "payment",
         },
         "positive_feedback_ticket_details": {
             "individual": "individual",
