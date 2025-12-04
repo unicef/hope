@@ -1324,7 +1324,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
-  const notUnderscoreKeys = ['dataFields'];
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
