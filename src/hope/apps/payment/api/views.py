@@ -10,7 +10,7 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
-from django_filters import  rest_framework as filters
+from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status
