@@ -24,23 +24,23 @@ import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
+import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   decodeIdString,
+  deepUnderscore,
   isPartnerVisible,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
   mapPartnerChoicesFromProgramWithoutUnicef,
   showApiErrorMessages,
-  deepUnderscore,
-  mapPartnerChoicesFromChoicesWithoutUnicef,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { UserChoices } from '@restgenerated/models/UserChoices';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -374,7 +374,10 @@ const EditProgramPage = (): ReactElement => {
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
-          hasPermissionInModule('PROGRAMME_VIEW_LIST_AND_DETAILS', permissions)
+          hasPermissions(
+            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            permissions,
+          )
             ? breadCrumbsItems
             : null
         }

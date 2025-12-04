@@ -1,6 +1,5 @@
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -16,35 +15,32 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  Stepper,
+  Button,
+  FormHelperText,
   Step,
   StepLabel,
-  FormHelperText,
+  Stepper,
   Typography,
-  Button,
 } from '@mui/material';
-import { Grid, Box } from '@mui/system';
+import { Box, Grid } from '@mui/system';
 import { RestService } from '@restgenerated/index';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
-import { Formik, Field } from 'formik';
-import { ReactElement, useState, ReactNode } from 'react';
+import { Field, Formik } from 'formik';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, Link } from 'react-router-dom';
-import {
-  hasPermissions,
-  PERMISSIONS,
-  hasPermissionInModule,
-} from 'src/config/permissions';
+import { Link, useNavigate } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
@@ -300,8 +296,8 @@ function CreateFeedbackPage(): ReactElement {
             <PageHeader
               title="New Feedback"
               breadCrumbs={
-                hasPermissionInModule(
-                  'GRIEVANCES_FEEDBACK_VIEW_LIST',
+                hasPermissions(
+                  PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
                   permissions,
                 )
                   ? breadCrumbsItems

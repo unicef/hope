@@ -9,6 +9,7 @@ export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
     readonly parentId: string;
+    parentUnicefId: string;
     readonly householdId: string;
     householdUnicefId: string;
     householdSize: number;
@@ -31,6 +32,8 @@ export type PaymentList = {
     readonly statusDisplay: string;
     currency?: string | null;
     readonly fspAuthCode: string;
+    readonly hohId: string;
+    readonly hohUnicefId: string;
     readonly hohFullName: string;
     readonly collectorId: string;
     readonly collectorPhoneNo: string;
@@ -42,5 +45,6 @@ export type PaymentList = {
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
     programName: string;
+    programSlug: string;
 };
 
