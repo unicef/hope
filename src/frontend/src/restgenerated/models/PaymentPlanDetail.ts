@@ -253,6 +253,7 @@ export type PaymentPlanDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    readonly program: ProgramSmall;
     /**
      * record revision number
      */
@@ -282,7 +283,6 @@ export type PaymentPlanDetail = {
      * Payment Plan end date
      */
     endDate?: string | null;
-    readonly program: ProgramSmall;
     programCycle: ProgramCycleSmall;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;

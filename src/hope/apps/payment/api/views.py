@@ -11,6 +11,7 @@ from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -42,7 +43,13 @@ from hope.apps.payment.api.caches import (
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
-from hope.apps.payment.api.filters import PaymentPlanFilter, PendingPaymentFilter, TargetPopulationFilter
+from hope.apps.payment.api.filters import (
+    PaymentOfficeSearchFilter,
+    PaymentPlanFilter,
+    PaymentPlanOfficeSearchFilter,
+    PendingPaymentFilter,
+    TargetPopulationFilter,
+)
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
@@ -629,7 +636,11 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        .select_related("program_cycle__program")
+        .order_by("-created_at")
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
@@ -1454,6 +1465,23 @@ class PaymentPlanViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan reactivate abort"})
 
 
+class PaymentPlanGlobalViewSet(
+    BusinessAreaProgramsAccessMixin,
+    SerializerActionMixin,
+    CountActionMixin,
+    PaymentPlanMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+    }
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    program_model_field = "program_cycle__program"
+    filterset_class = PaymentPlanOfficeSearchFilter
+
+
 class TargetPopulationViewSet(
     CountActionMixin,
     ProgramMixin,
@@ -1997,7 +2025,8 @@ class PaymentGlobalViewSet(
         "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
-    filter_backends = (OrderingFilter,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = PaymentOfficeSearchFilter
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:

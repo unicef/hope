@@ -20,6 +20,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { PERMISSIONS } from '../../../config/permissions';
 import React from 'react';
@@ -210,7 +211,7 @@ export const menuItems: MenuItem[] = [
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: PERMISSIONS.GRIEVANCES_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
       {
         name: 'Grievance Dashboard',
@@ -228,7 +229,7 @@ export const menuItems: MenuItem[] = [
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
     ],
   },
@@ -249,7 +250,7 @@ export const menuItems: MenuItem[] = [
         icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
         scopes: [SCOPE_PROGRAM],
-        dataPerm: PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+        dataPerm: `${PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}, ${PERMISSIONS.TARGETING_VIEW_LIST}, ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}`,
       },
       {
         name: 'Surveys',
@@ -288,6 +289,14 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
     scopes: [SCOPE_PROGRAM],
     dataPerm: PERMISSIONS.ACTIVITY_LOG_VIEW,
+  },
+  {
+    name: 'Office Search',
+    href: '/office-search',
+    selectedRegexp: /^\/office-search.*$/,
+    icon: <BusinessCenterIcon />,
+    permissions: [PERMISSIONS.SEARCH_BUSINESS_AREAS],
+    scopes: [SCOPE_ALL_PROGRAMS],
   },
 ];
 
