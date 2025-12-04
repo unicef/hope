@@ -260,7 +260,8 @@ def login_limited_user(browser, user_without_import_permission: User):
     browser.find_element(By.ID, "id_password").send_keys("testtest2")
     browser.find_element(By.XPATH, login_button).click()
 
-    sleep(0.3)
+    # Wait for login to complete (URL change or page element)
+    WebDriverWait(browser, 10).until(lambda d: "login" not in d.current_url or d.current_url != browser.current_url)
     return browser
 
 
@@ -301,8 +302,7 @@ class TestGenericImportFormValidation:
         page_generic_import.upload_file(test_xlsx_file_path)
 
         # Verify file name is displayed
-        sleep(1)  # Wait for JS to update display
-        assert page_generic_import.is_file_name_displayed()
+        assert page_generic_import.wait_for_file_displayed()
         assert "e2e_generic_import_somalia.xlsx" in page_generic_import.get_file_name_display_text()
 
         # Submit form
@@ -473,7 +473,7 @@ class TestGenericImportUIBehavior:
         page_generic_import.select_business_area_by_name("Somalia")
 
         # Wait for new programs to load
-        sleep(2)  # Allow time for AJAX request
+        page_generic_import.wait_for_programs_to_load()
 
         # Program selection should be reset
         program_text = page_generic_import.get_program_select_text()
@@ -497,8 +497,7 @@ class TestGenericImportUIBehavior:
         page_generic_import.drag_and_drop_file(test_xlsx_file_path)
 
         # Verify file is selected
-        sleep(1)
-        assert page_generic_import.is_file_name_displayed()
+        assert page_generic_import.wait_for_file_displayed()
         assert "e2e_generic_import_somalia.xlsx" in page_generic_import.get_file_name_display_text()
 
     def test_autoselect_single_business_area(
@@ -563,8 +562,8 @@ class TestGenericImportPermissions:
         # Navigate to Generic Import page as limited user
         page_generic_import.navigate_to_generic_import()
 
-        # Should see 403 error page or permission denied message
-        sleep(1)
+        # Wait for page to load and check for 403 error
+        page_generic_import.wait_for_text("403", "body", timeout=5)
         page_source = page_generic_import.driver.page_source
 
         # Check for 403 Forbidden or permission denied message
@@ -598,7 +597,7 @@ class TestGenericImportPermissionsAndErrors:
 
         # Upload file with missing columns
         page_generic_import.upload_file(invalid_xlsx_file_path)
-        sleep(1)
+        assert page_generic_import.wait_for_file_displayed()
 
         # Submit form - upload will succeed but validation happens in background task
         page_generic_import.click_submit()
@@ -609,9 +608,6 @@ class TestGenericImportPermissionsAndErrors:
 
         # Extract RDI name from alert
         assert "Generic Import" in alert_text
-
-        # Wait for Celery task to process (runs in EAGER mode during tests)
-        sleep(2)
 
         # Check RDI status in database - validation errors should cause IMPORT_ERROR
         rdi = (
@@ -643,10 +639,9 @@ class TestGenericImportPermissionsAndErrors:
         page_generic_import.upload_file(test_xlsx_file_path)
 
         # Wait for display to update
-        sleep(1)
+        assert page_generic_import.wait_for_file_displayed()
 
         # Verify file info is displayed with size
-        assert page_generic_import.is_file_name_displayed()
         file_info = page_generic_import.get_file_name_display_text()
         # Should contain file name and size (e.g., "KB" or "MB")
         assert "e2e_generic_import_somalia.xlsx" in file_info
@@ -719,9 +714,6 @@ class TestGenericImportDataVerification:
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
 
-        # Wait for Celery task to complete
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -731,7 +723,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
@@ -764,9 +756,6 @@ class TestGenericImportDataVerification:
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
 
-        # Wait for Celery task to complete
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -776,7 +765,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
@@ -807,9 +796,6 @@ class TestGenericImportDataVerification:
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
 
-        # Wait for Celery task to complete
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -819,7 +805,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
@@ -860,9 +846,6 @@ class TestGenericImportDataVerification:
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
 
-        # Wait for Celery task to complete
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -872,7 +855,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
@@ -916,9 +899,6 @@ class TestGenericImportDataVerification:
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
 
-        # Wait for Celery task to complete
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -928,7 +908,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
@@ -977,8 +957,7 @@ class TestGenericImportDataVerification:
 
         # Step 4: Upload file
         page_generic_import.upload_file(test_xlsx_file_path)
-        sleep(1)
-        assert page_generic_import.is_file_name_displayed()
+        assert page_generic_import.wait_for_file_displayed()
 
         # Step 5: Submit and verify success
         page_generic_import.click_submit()
@@ -987,8 +966,6 @@ class TestGenericImportDataVerification:
         assert "Generic Import" in alert_text or "successfully" in alert_text.lower()
 
         # Step 6-10: Verify data via database instead of UI navigation
-        sleep(2)
-
         # Get the most recent RDI
         rdi = (
             RegistrationDataImport.objects.filter(program=active_program_somalia, name__contains="Generic Import")
@@ -998,7 +975,7 @@ class TestGenericImportDataVerification:
 
         assert rdi is not None, "RDI should exist"
 
-        # Wait for RDI to complete processing
+        # Wait for RDI to complete processing (Celery task)
         for _ in range(30):
             rdi.refresh_from_db()
             if rdi.status in ["IN_REVIEW", "IMPORT_ERROR"]:
