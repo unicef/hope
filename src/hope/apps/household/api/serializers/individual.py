@@ -105,24 +105,26 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
         fields = ("id", "country", "number", "partner")
 
 
+class AccountDataFieldSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField()
+
+
 class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    account_type_key = serializers.CharField(source="account_type.key")
     data_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
-        fields = (
-            "id",
-            "name",
-            "data_fields",
-            "account_type",
-        )
+        fields = ("id", "name", "data_fields", "account_type", "number", "financial_institution", "account_type_key")
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_data_fields(self, obj: Account) -> dict:
-        return dict(sorted(obj.account_data.items()))
+    @extend_schema_field(AccountDataFieldSerializer(many=True))
+    def get_data_fields(self, obj: Account) -> list:
+        return [{"key": key, "value": value} for key, value in sorted(obj.data.items())]
 
 
 class IndividualSimpleSerializer(serializers.ModelSerializer):

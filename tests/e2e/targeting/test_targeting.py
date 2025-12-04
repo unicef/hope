@@ -511,7 +511,7 @@ class TestSmokeTargeting:
         assert "11" in page_targeting_details.get_label_targeted_individuals().text
         assert "Items Groups" in page_targeting_details.get_table_title().text
         expected_menu_items = [
-            "ID",
+            "Items Group ID",
             "Head of Items Group",
             "Items Group Size",
             "Administrative Level 2",
