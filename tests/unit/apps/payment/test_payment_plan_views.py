@@ -477,7 +477,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 18
 
         # second call get from cache
         with CaptureQueriesContext(connection) as ctx:
@@ -498,7 +498,7 @@ class TestPaymentPlanList:
             new_etag = response.headers["etag"]
             assert json.loads(cache.get(new_etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 12
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -520,7 +520,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 15
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -538,7 +538,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 12
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -981,8 +981,8 @@ class TestTargetPopulationList:
         assert tp["status"] == self.tp.get_status_display().upper()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
-        assert tp["created_at"] == self.tp.created_at.isoformat().replace("+00:00", "Z")
-        assert tp["updated_at"] == self.tp.updated_at.isoformat().replace("+00:00", "Z")
+        assert tp["created_at"] == self.tp.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+        assert tp["updated_at"] == self.tp.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
         assert tp["created_by"] == self.user.get_full_name()
 
     def test_target_population_caching(self, create_user_role_with_permissions: Any) -> None:

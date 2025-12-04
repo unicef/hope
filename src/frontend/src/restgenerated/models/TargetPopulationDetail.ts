@@ -252,6 +252,7 @@ export type TargetPopulationDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    readonly program: ProgramSmall;
     backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
     /**
      * Payment Plan start date
@@ -261,7 +262,6 @@ export type TargetPopulationDetail = {
      * Payment Plan end date
      */
     endDate?: string | null;
-    readonly program: ProgramSmall;
     programCycle: ProgramCycleSmall;
     /**
      * Exclusion reason (Targeting level)
