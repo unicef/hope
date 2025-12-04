@@ -130,6 +130,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
+            .order_by("unicef_id")
         )
         for payment in qs:
             snapshot = getattr(payment, "household_snapshot", None)

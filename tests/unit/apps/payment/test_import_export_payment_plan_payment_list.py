@@ -134,7 +134,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             )
 
         cls.user = UserFactory()
-        cls.payment_plan = PaymentPlan.objects.all()[0]
 
         # set Lock status
         cls.payment_plan.status_lock()
@@ -533,11 +532,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
         required_fields_for_account = [
             "name",
+            "number",
             "uba_code",
             "holder_name",
             "financial_institution_pk",
             "financial_institution_name",
-            "number",
         ]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
@@ -598,7 +597,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             payment.household_snapshot.save()
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-6:] == required_fields_for_account
+        assert headers[-6:] == [
+            "name",
+            "uba_code",
+            "holder_name",
+            "financial_institution_pk",
+            "financial_institution_name",
+            "number",
+        ]
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
