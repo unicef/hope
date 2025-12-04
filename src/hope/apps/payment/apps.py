@@ -6,5 +6,3 @@ class PaymentConfig(AppConfig):
 
     def ready(self) -> None:
         import hope.apps.payment.signals  # noqa
-
-        import hope.models  # noqa
