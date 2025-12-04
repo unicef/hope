@@ -41,8 +41,8 @@ class TestGenericImportForm:
         self.user_single_ba = UserFactory(partner=None)
         self.user_multi_ba = UserFactory(partner=None)
 
-    def test_form_with_single_business_area_hides_field(self, create_user_role_with_permissions):
-        """Test that BA field is hidden when user has access to only one BA."""
+    def test_form_with_single_business_area_preselects_field(self, create_user_role_with_permissions):
+        """Test that BA field is pre-selected when user has access to only one BA."""
         from hope.apps.account.permissions import Permissions
 
         # Create user with access to single BA
@@ -54,9 +54,10 @@ class TestGenericImportForm:
 
         form = GenericImportForm(user=self.user_single_ba)
 
-        # BA field should be hidden
-        assert form.fields["business_area"].widget.__class__.__name__ == "HiddenInput"
+        # BA field should be pre-selected (autoselect behavior)
         assert form.fields["business_area"].initial == self.afghanistan
+        # Queryset should contain only one BA
+        assert form.fields["business_area"].queryset.count() == 1
 
     def test_form_with_multiple_business_areas_shows_field(self, create_user_role_with_permissions):
         """Test that BA field is visible when user has access to multiple BAs."""
@@ -79,8 +80,8 @@ class TestGenericImportForm:
         # BA field should be visible (not hidden)
         assert form.fields["business_area"].widget.__class__.__name__ != "HiddenInput"
 
-    def test_form_with_single_program_hides_field(self, create_user_role_with_permissions):
-        """Test that Program field is hidden when user has access to only one program."""
+    def test_form_with_single_program_preselects_field(self, create_user_role_with_permissions):
+        """Test that Program field is pre-selected when user has access to only one program."""
         from hope.apps.account.permissions import Permissions
 
         # Create user with access to single BA and single program
@@ -93,9 +94,9 @@ class TestGenericImportForm:
 
         form = GenericImportForm(user=self.user_single_ba)
 
-        # Both BA and Program fields should be hidden
-        assert form.fields["business_area"].widget.__class__.__name__ == "HiddenInput"
-        assert form.fields["program"].widget.__class__.__name__ == "HiddenInput"
+        # BA field should be pre-selected (autoselect behavior)
+        assert form.fields["business_area"].initial == self.afghanistan
+        # Program field should be pre-selected (autoselect behavior)
         assert form.fields["program"].initial == self.program_afg
 
     def test_valid_file_upload(self, create_user_role_with_permissions):
