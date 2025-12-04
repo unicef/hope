@@ -108,6 +108,8 @@ class PendingPaymentFilter(FilterSet):
     class Meta:
         model = Payment
         fields = []
+
+
 class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
     class Meta(PaymentPlanFilter.Meta):
         pass
