@@ -23,6 +23,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.payment.services.verification_plan_crud_services import does_payment_record_have_right_hoh_phone_number
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -303,3 +304,21 @@ class TestPhoneNumberVerification(TestCase):
         with pytest.raises(ValidationError) as e:
             service.export_xlsx(str(self.user.pk))
         assert "Not possible to export with no records" in str(e.value)
+
+    def test_does_payment_record_have_right_hoh_phone_number(self) -> None:
+        payment_without_hoh = PaymentFactory(
+            parent=self.payment_plan,
+            head_of_household=None,
+        )
+
+        result = does_payment_record_have_right_hoh_phone_number(payment_without_hoh)
+        assert result is False
+
+        hoh = self.individuals[0]
+        assert hoh.phone_no_valid is True
+        payment_with_hoh_phone_no_valid = PaymentFactory(
+            parent=self.payment_plan,
+            head_of_household=hoh,
+        )
+        result = does_payment_record_have_right_hoh_phone_number(payment_with_hoh_phone_no_valid)
+        assert result is True

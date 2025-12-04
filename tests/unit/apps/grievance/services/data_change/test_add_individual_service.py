@@ -19,9 +19,10 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
+from hope.apps.grievance.services.data_change.utils import handle_add_identity
 from hope.apps.household.const import SINGLE
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import Document, Individual
+from hope.models import Document, Individual, IndividualIdentity
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -128,3 +129,18 @@ class TestAddIndividualService(TestCase):
             self.fail("ValidationError should not be raised")
         assert Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count() == 0
         assert Document.objects.filter(document_number="123456").count() == 2
+
+    def test_handle_add_identity(self) -> None:
+        poland = CountryFactory(iso_code3="PLN")
+        individual = IndividualFactory(program=self.program, household=self.household)
+        identity_data = {
+            "partner": "UNICEF",
+            "country": "PLN",
+            "number": "A123456A",
+        }
+        identity_obj = handle_add_identity(identity_data, individual)
+
+        assert isinstance(identity_obj, IndividualIdentity) is True
+        assert identity_obj.partner.name == "UNICEF"
+        assert identity_obj.number == "A123456A"
+        assert identity_obj.country == poland
