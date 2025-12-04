@@ -537,7 +537,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             "holder_name",
             "financial_institution_pk",
             "financial_institution_name",
-            "number"
+            "number",
         ]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
