@@ -596,6 +596,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 "financial_institution_name"
             )
             payment.household_snapshot.save()
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
         assert headers[-6:] == required_fields_for_account
 
