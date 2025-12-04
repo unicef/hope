@@ -11,7 +11,7 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportFactory,
 )
 from hope.apps.core.models import BusinessArea
-from hope.apps.generic_import.celery_tasks import process_generic_import_task
+from hope.apps.generic_import.celery_tasks import format_validation_errors, process_generic_import_task
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -395,3 +395,137 @@ class TestProcessGenericImportTask:
         # Verify cache key format
         assert len(cache_keys) == 1
         assert cache_keys[0] == f"process_generic_import_task-{rdi.id}"
+
+
+class TestFormatValidationErrors:
+    """Tests for format_validation_errors() function."""
+
+    def test_empty_errors_list(self):
+        """Test that empty errors list returns 'No errors'."""
+        result = format_validation_errors([])
+        assert result == "No errors"
+
+    def test_non_dict_error_item(self):
+        """Test handling of non-dict error items (e.g., string errors)."""
+        errors = ["Simple error message", "Another error"]
+        result = format_validation_errors(errors)
+        assert "1. Simple error message" in result
+        assert "2. Another error" in result
+
+    def test_household_error_type(self):
+        """Test formatting of household error type."""
+        errors = [
+            {
+                "type": "household",
+                "data": {"id": "abc12345-full-uuid-here"},
+                "errors": {"size": ["Must be positive"]},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "Household (ID: abc12345...)" in result
+        assert "size: Must be positive" in result
+
+    def test_individual_error_type(self):
+        """Test formatting of individual error type."""
+        errors = [
+            {
+                "type": "individual",
+                "data": {"full_name": "John Doe", "given_name": "John"},
+                "errors": {"birth_date": ["Invalid date format"]},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "Individual (John Doe)" in result
+        assert "birth_date: Invalid date format" in result
+
+    def test_individual_error_type_fallback_to_given_name(self):
+        """Test individual error falls back to given_name when full_name is missing."""
+        errors = [
+            {
+                "type": "individual",
+                "data": {"given_name": "Jane"},
+                "errors": {"sex": ["Required field"]},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "Individual (Jane)" in result
+
+    def test_account_error_type(self):
+        """Test formatting of account error type."""
+        errors = [
+            {
+                "type": "account",
+                "data": {"number": "+252612345678"},
+                "errors": {"account_type": ["Unknown type"]},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "Account (+252612345678)" in result
+        assert "account_type: Unknown type" in result
+
+    def test_unknown_error_type(self):
+        """Test formatting of unknown/other error type."""
+        errors = [
+            {
+                "type": "document",
+                "data": {},
+                "errors": {"type": ["Required"]},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "Document" in result
+        assert "type: Required" in result
+
+    def test_field_errors_as_string(self):
+        """Test handling of field errors as string instead of list."""
+        errors = [
+            {
+                "type": "household",
+                "data": {"id": "12345678"},
+                "errors": {"village": "This field is required"},
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "village: This field is required" in result
+
+    def test_multiple_field_errors(self):
+        """Test formatting of multiple field errors."""
+        errors = [
+            {
+                "type": "individual",
+                "data": {"full_name": "Test Person"},
+                "errors": {
+                    "birth_date": ["Invalid format", "Cannot be in future"],
+                    "sex": ["Required field"],
+                },
+            }
+        ]
+        result = format_validation_errors(errors)
+        assert "birth_date: Invalid format" in result
+        assert "birth_date: Cannot be in future" in result
+        assert "sex: Required field" in result
+
+    def test_missing_data_fields(self):
+        """Test handling when data fields are missing."""
+        errors = [
+            {
+                "type": "household",
+                "data": {},  # No id field
+                "errors": {"size": ["Required"]},
+            },
+            {
+                "type": "individual",
+                "data": {},  # No full_name or given_name
+                "errors": {"name": ["Required"]},
+            },
+            {
+                "type": "account",
+                "data": {},  # No number field
+                "errors": {"number": ["Required"]},
+            },
+        ]
+        result = format_validation_errors(errors)
+        # Should use "Unknown" for missing identifiers
+        assert "Household (ID: Unknown...)" in result
+        assert "Individual (Unknown)" in result
+        assert "Account (Unknown)" in result

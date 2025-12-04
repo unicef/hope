@@ -571,3 +571,366 @@ class TestImporter:
         assert individual.rdi_merge_status == Individual.PENDING
         assert document.rdi_merge_status == Document.PENDING
         assert identity.rdi_merge_status == IndividualIdentity.PENDING
+
+    def test_import_individual_with_missing_household(self):
+        """Test that individual with non-existent household_id produces error."""
+        import uuid
+
+        individual_temp_id = uuid.uuid4().hex
+        non_existent_household_id = uuid.uuid4().hex
+
+        individuals_data = [
+            {
+                "id": individual_temp_id,
+                "household_id": non_existent_household_id,  # This household doesn't exist
+                "given_name": "Orphan",
+                "family_name": "Individual",
+                "full_name": "Orphan Individual",
+                "sex": "MALE",
+                "birth_date": "1990-01-01",
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],  # No households
+            individuals_data=individuals_data,
+            documents_data=[],
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_households()
+        importer._import_individuals()
+
+        # Assert error was recorded
+        assert len(importer.errors) == 1
+        assert importer.errors[0]["type"] == "individual"
+        assert "household_id" in importer.errors[0]["errors"]
+        assert non_existent_household_id in str(importer.errors[0]["errors"]["household_id"])
+
+    def test_import_document_with_unknown_country_code(self):
+        """Test that document with unknown country code produces error."""
+        import uuid
+
+        individual_temp_id = uuid.uuid4().hex
+
+        # First create individual
+        individuals_data = [
+            {
+                "id": individual_temp_id,
+                "given_name": "Test",
+                "family_name": "Person",
+                "full_name": "Test Person",
+                "sex": "MALE",
+                "birth_date": "1990-01-01",
+            }
+        ]
+
+        documents_data = [
+            {
+                "individual_id": individual_temp_id,
+                "type_key": "national_id",
+                "document_number": "DOC123",
+                "country": "XXX",  # Invalid country code
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=individuals_data,
+            documents_data=documents_data,
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_individuals()
+        importer._import_documents()
+
+        # Assert error was recorded for unknown country
+        doc_errors = [e for e in importer.errors if e["type"] == "document"]
+        assert len(doc_errors) == 1
+        assert "country" in doc_errors[0]["errors"]
+        assert "Unknown country code: XXX" in str(doc_errors[0]["errors"]["country"])
+
+    def test_import_document_with_missing_individual(self):
+        """Test that document with non-existent individual_id produces error."""
+        import uuid
+
+        non_existent_individual_id = uuid.uuid4().hex
+
+        documents_data = [
+            {
+                "individual_id": non_existent_individual_id,
+                "type": self.document_type.id,
+                "document_number": "DOC123",
+                "country": self.country.id,
+                "program": self.program.id,
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=[],  # No individuals
+            documents_data=documents_data,
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_documents()
+
+        # Assert error was recorded
+        assert len(importer.errors) == 1
+        assert importer.errors[0]["type"] == "document"
+        assert "individual_id" in importer.errors[0]["errors"]
+        assert non_existent_individual_id in str(importer.errors[0]["errors"]["individual_id"])
+
+    def test_import_account_with_missing_individual(self):
+        """Test that account with non-existent individual_id produces error."""
+        import uuid
+
+        non_existent_individual_id = uuid.uuid4().hex
+
+        accounts_data = [
+            {
+                "individual_id": non_existent_individual_id,
+                "account_type": self.account_type.id,
+                "number": "+252612345678",
+                "data": {"provider": "Test"},
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=[],  # No individuals
+            documents_data=[],
+            accounts_data=accounts_data,
+            identities_data=[],
+        )
+
+        importer._import_accounts()
+
+        # Assert error was recorded
+        assert len(importer.errors) == 1
+        assert importer.errors[0]["type"] == "account"
+        assert "individual_id" in importer.errors[0]["errors"]
+        assert non_existent_individual_id in str(importer.errors[0]["errors"]["individual_id"])
+
+    def test_import_identity_with_missing_individual(self):
+        """Test that identity with non-existent individual_id produces error."""
+        import uuid
+
+        non_existent_individual_id = uuid.uuid4().hex
+
+        identities_data = [
+            {
+                "individual_id": non_existent_individual_id,
+                "number": "WFP123456",
+                "country": self.country.id,
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=[],  # No individuals
+            documents_data=[],
+            accounts_data=[],
+            identities_data=identities_data,
+        )
+
+        importer._import_identities()
+
+        # Assert error was recorded
+        assert len(importer.errors) == 1
+        assert importer.errors[0]["type"] == "identity"
+        assert "individual_id" in importer.errors[0]["errors"]
+        assert non_existent_individual_id in str(importer.errors[0]["errors"]["individual_id"])
+
+    def test_import_account_with_unknown_type_key(self):
+        """Test that account with unknown account_type key produces error."""
+        import uuid
+
+        individual_temp_id = uuid.uuid4().hex
+
+        # First create individual
+        individuals_data = [
+            {
+                "id": individual_temp_id,
+                "given_name": "Test",
+                "family_name": "Person",
+                "full_name": "Test Person",
+                "sex": "MALE",
+                "birth_date": "1990-01-01",
+            }
+        ]
+
+        accounts_data = [
+            {
+                "individual_id": individual_temp_id,
+                "account_type": "unknown_type_key",  # String key that doesn't exist
+                "number": "+252612345678",
+                "data": {"provider": "Test"},
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=individuals_data,
+            documents_data=[],
+            accounts_data=accounts_data,
+            identities_data=[],
+        )
+
+        importer._import_individuals()
+        importer._import_accounts()
+
+        # Assert error was recorded for unknown account type
+        account_errors = [e for e in importer.errors if e["type"] == "account"]
+        assert len(account_errors) == 1
+        assert "account_type" in account_errors[0]["errors"]
+        assert "Unknown account type: unknown_type_key" in str(account_errors[0]["errors"]["account_type"])
+
+    def test_import_document_with_unknown_type_key(self):
+        """Test that document with unknown type_key produces error."""
+        import uuid
+
+        individual_temp_id = uuid.uuid4().hex
+
+        # First create individual
+        individuals_data = [
+            {
+                "id": individual_temp_id,
+                "given_name": "Test",
+                "family_name": "Person",
+                "full_name": "Test Person",
+                "sex": "MALE",
+                "birth_date": "1990-01-01",
+            }
+        ]
+
+        documents_data = [
+            {
+                "individual_id": individual_temp_id,
+                "type_key": "unknown_document_type",  # Type key that doesn't exist
+                "document_number": "DOC123",
+                "country": "SOM",
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=individuals_data,
+            documents_data=documents_data,
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_individuals()
+        importer._import_documents()
+
+        # Assert error was recorded for unknown document type
+        doc_errors = [e for e in importer.errors if e["type"] == "document"]
+        assert len(doc_errors) == 1
+        assert "type_key" in doc_errors[0]["errors"]
+        assert "Unknown document type: unknown_document_type" in str(doc_errors[0]["errors"]["type_key"])
+
+    def test_import_household_with_validation_errors(self):
+        """Test that household with invalid data produces validation error."""
+        import uuid
+
+        household_temp_id = uuid.uuid4().hex
+
+        # Household with invalid data (size is required and must be positive)
+        households_data = [
+            {
+                "id": household_temp_id,
+                "size": "invalid_size",  # Invalid - should be integer
+                "village": "Test Village",
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=households_data,
+            individuals_data=[],
+            documents_data=[],
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_households()
+
+        # Assert error was recorded
+        household_errors = [e for e in importer.errors if e["type"] == "household"]
+        assert len(household_errors) == 1
+        assert "size" in household_errors[0]["errors"]
+
+    def test_import_individual_with_validation_errors_no_fk(self):
+        """Test that individual with invalid field data produces validation error."""
+        import uuid
+
+        individual_temp_id = uuid.uuid4().hex
+
+        # Individual with invalid sex value
+        individuals_data = [
+            {
+                "id": individual_temp_id,
+                "given_name": "Test",
+                "family_name": "Person",
+                "full_name": "Test Person",
+                "sex": "INVALID_SEX",  # Invalid - not in choices
+                "birth_date": "not-a-date",  # Invalid date format
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=[],
+            individuals_data=individuals_data,
+            documents_data=[],
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        importer._import_individuals()
+
+        # Assert error was recorded
+        individual_errors = [e for e in importer.errors if e["type"] == "individual"]
+        assert len(individual_errors) >= 1
+
+    def test_save_empty_individuals_list(self):
+        """Test that _save_individuals handles empty list correctly."""
+        import uuid
+
+        household_temp_id = uuid.uuid4().hex
+
+        # Only household, no individuals
+        households_data = [
+            {
+                "id": household_temp_id,
+                "size": 0,
+                "village": "Test Village",
+            }
+        ]
+
+        importer = Importer(
+            registration_data_import=self.registration_data_import,
+            households_data=households_data,
+            individuals_data=[],  # Empty
+            documents_data=[],
+            accounts_data=[],
+            identities_data=[],
+        )
+
+        # This should not raise any exceptions
+        errors = importer.import_data()
+
+        # No errors expected for empty individuals list
+        individual_errors = [e for e in errors if e.get("type") == "individual"]
+        assert len(individual_errors) == 0

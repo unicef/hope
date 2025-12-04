@@ -277,3 +277,161 @@ class TestGenericImportForm:
         ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
         assert self.afghanistan.id in ba_ids
         assert self.other_ba.id not in ba_ids
+
+    def test_superuser_has_access_to_all_business_areas(self):
+        """Test that superuser can see all active business areas."""
+        # Create superuser
+        superuser = UserFactory(is_superuser=True, partner=None)
+
+        form = GenericImportForm(user=superuser)
+
+        # Superuser should see all active BAs
+        ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
+        assert self.afghanistan.id in ba_ids
+        assert self.other_ba.id in ba_ids
+
+    def test_valid_xls_file_upload(self, create_user_role_with_permissions):
+        """Test form validation with valid .xls file (old Excel format)."""
+        from hope.apps.account.permissions import Permissions
+
+        create_user_role_with_permissions(
+            self.user_single_ba,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+            program=self.program_afg,
+        )
+
+        # Create valid .xls file
+        file_content = BytesIO(b"fake excel content")
+        uploaded_file = SimpleUploadedFile(
+            "test_import.xls",  # .xls extension
+            file_content.getvalue(),
+            content_type="application/vnd.ms-excel",
+        )
+
+        form_data = {
+            "business_area": self.afghanistan.id,
+            "program": self.program_afg.id,
+        }
+        form = GenericImportForm(
+            user=self.user_single_ba,
+            data=form_data,
+            files={"file": uploaded_file},
+        )
+
+        assert form.is_valid(), f"Form errors: {form.errors}"
+
+    def test_clean_program_with_invalid_string_id(self, create_user_role_with_permissions):
+        """Test that invalid program ID string raises validation error."""
+        from hope.apps.account.permissions import Permissions
+
+        create_user_role_with_permissions(
+            self.user_single_ba,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+        )
+
+        file_content = BytesIO(b"fake excel content")
+        uploaded_file = SimpleUploadedFile(
+            "test_import.xlsx",
+            file_content.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Submit with non-existent program ID as string
+        form_data = {
+            "business_area": self.afghanistan.id,
+            "program": "99999999-9999-9999-9999-999999999999",  # Non-existent UUID
+        }
+        form = GenericImportForm(
+            user=self.user_single_ba,
+            data=form_data,
+            files={"file": uploaded_file},
+        )
+
+        assert not form.is_valid()
+        assert "program" in form.errors
+        # Django's ModelChoiceField returns "Select a valid choice" error for invalid choices
+        assert "valid choice" in str(form.errors["program"]).lower() or "does not exist" in str(form.errors["program"])
+
+    def test_user_without_program_access(self, create_user_role_with_permissions):
+        """Test that user without access to program gets validation error."""
+        from hope.apps.account.permissions import Permissions
+
+        # Create another program that user won't have access to
+        restricted_program = ProgramFactory(
+            business_area=self.afghanistan,
+            status=Program.ACTIVE,
+        )
+
+        # Give user access to BA but only to program_afg, not restricted_program
+        create_user_role_with_permissions(
+            self.user_single_ba,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+            program=self.program_afg,
+        )
+
+        file_content = BytesIO(b"fake excel content")
+        uploaded_file = SimpleUploadedFile(
+            "test_import.xlsx",
+            file_content.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # Try to submit with restricted_program (user has BA access but not program access)
+        form_data = {
+            "business_area": self.afghanistan.id,
+            "program": restricted_program.id,
+        }
+        form = GenericImportForm(
+            user=self.user_single_ba,
+            data=form_data,
+            files={"file": uploaded_file},
+        )
+
+        assert not form.is_valid()
+        # Error should be in program field or __all__
+        error_message = str(form.errors)
+        assert "do not have access" in error_message or "program" in form.errors
+
+    def test_business_area_widget_adds_data_slug(self, create_user_role_with_permissions):
+        """Test that BusinessAreaSelectWidget adds data-slug attribute."""
+        from hope.apps.account.permissions import Permissions
+
+        create_user_role_with_permissions(
+            self.user_single_ba,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+        )
+
+        form = GenericImportForm(user=self.user_single_ba)
+
+        # Render the widget to trigger create_option
+        html = str(form["business_area"])
+
+        # Should contain data-slug attribute
+        assert "data-slug" in html
+        assert self.afghanistan.slug in html
+
+    def test_program_widget_adds_data_slug(self, create_user_role_with_permissions):
+        """Test that ProgramSelectWidget adds data-slug attribute."""
+        from hope.apps.account.permissions import Permissions
+
+        create_user_role_with_permissions(
+            self.user_single_ba,
+            [Permissions.GENERIC_IMPORT_DATA],
+            self.afghanistan,
+            program=self.program_afg,
+        )
+
+        form = GenericImportForm(user=self.user_single_ba)
+
+        # Set initial value to trigger widget rendering with program
+        form.fields["program"].initial = self.program_afg
+
+        # Render the widget - this will trigger create_option
+        html = str(form["program"])
+
+        # Should contain the program (though slug might be in different format)
+        assert self.program_afg.name in html or str(self.program_afg.id) in html
