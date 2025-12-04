@@ -533,11 +533,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     def test_payment_row_get_account_fields_from_snapshot_data(self) -> None:
         required_fields_for_account = [
             "name",
-            "number",
             "uba_code",
             "holder_name",
             "financial_institution_pk",
             "financial_institution_name",
+            "number"
         ]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
