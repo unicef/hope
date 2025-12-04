@@ -1802,7 +1802,7 @@ class TestTargetPopulationActions:
 
             return result
 
-        with patch("hope.apps.steficon.models.RuleCommit.execute", autospec=True, side_effect=mock_execute):
+        with patch("hope.models.rule.RuleCommit.execute", autospec=True, side_effect=mock_execute):
             apply_formula_data = {
                 "engine_formula_rule_id": str(steficon_rule_commit.rule.pk),
                 "version": self.target_population.version,
@@ -1997,7 +1997,7 @@ class TestTargetPopulationActions:
 
             return result
 
-        with patch("hope.apps.steficon.models.RuleCommit.execute", autospec=True, side_effect=mock_execute):
+        with patch("hope.models.rule.RuleCommit.execute", autospec=True, side_effect=mock_execute):
             apply_formula_data = {
                 "engine_formula_rule_id": str(steficon_rule_commit.rule.pk),
                 "version": self.target_population.version,
