@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type DeliveryMechanismChoice = {
-    name: string;
-    code: string;
+export type AccountDataField = {
+    key: string;
+    value: string;
 };
 

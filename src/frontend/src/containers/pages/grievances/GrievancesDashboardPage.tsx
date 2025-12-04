@@ -9,7 +9,6 @@ import { GrievanceDashboardCard } from '@components/grievances/GrievancesDashboa
 import { TicketsByCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
 import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
-import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
@@ -50,8 +49,13 @@ function GrievancesDashboardPage(): ReactElement {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  const hasGrievancesViewPermission = permissions.some(
+    (perm) =>
+      perm.includes('GRIEVANCES_VIEW_LIST') ||
+      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  );
+
+  if (!hasGrievancesViewPermission) return <PermissionDenied />;
 
   const {
     ticketsByCategory,
