@@ -37,18 +37,18 @@ class BaseSampling(abc.ABC):
 
 class FullListSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]) -> None:
-        original_count = households.count()
-
-        self.households = households.filter(
-            Q(head_of_household__phone_no_valid=True)
-            & ~Q(admin1__id__in=self.excluded_admin_areas)
-            & ~Q(admin2__id__in=self.excluded_admin_areas)
-            & ~Q(admin3__id__in=self.excluded_admin_areas)
-            & ~Q(admin4__id__in=self.excluded_admin_areas)
+        self.households = households.exclude(
+            Q(admin1__id__in=self.excluded_admin_areas)
+            | Q(admin2__id__in=self.excluded_admin_areas)
+            | Q(admin3__id__in=self.excluded_admin_areas)
+            | Q(admin4__id__in=self.excluded_admin_areas)
         )
 
+        count_without_phone_filter = self.households.count()
+        self.households = self.households.filter(head_of_household__phone_no_valid=True)
+        self.excluded_recipients_count = count_without_phone_filter - self.households.count()
+
         self.sample_size = self.households.count()
-        self.excluded_recipients_count = original_count - self.sample_size
 
     def get_full_list_arguments(self) -> dict:
         return {
@@ -61,8 +61,6 @@ class FullListSampling(BaseSampling):
 
 class RandomSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]) -> None:
-        original_count = households.count()
-
         if self.sex and isinstance(self.sex, str):
             households = households.filter(head_of_household__sex=self.sex)
 
@@ -74,16 +72,16 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
 
-        self.households = households.filter(
-            Q(head_of_household__phone_no_valid=True)
-            & ~Q(admin1__id__in=self.excluded_admin_areas)
-            & ~Q(admin2__id__in=self.excluded_admin_areas)
-            & ~Q(admin3__id__in=self.excluded_admin_areas)
-            & ~Q(admin4__id__in=self.excluded_admin_areas)
+        self.households = households.exclude(
+            Q(admin1__id__in=self.excluded_admin_areas)
+            | Q(admin2__id__in=self.excluded_admin_areas)
+            | Q(admin3__id__in=self.excluded_admin_areas)
+            | Q(admin4__id__in=self.excluded_admin_areas)
         )
 
-        self.excluded_recipients_count = original_count - self.households.count()
-
+        count_without_phone_filter = self.households.count()
+        self.households = self.households.filter(head_of_household__phone_no_valid=True)
+        self.excluded_recipients_count = count_without_phone_filter - self.households.count()
         self.sample_size = get_number_of_samples(
             self.households.count(), self.confidence_interval, self.margin_of_error
         )
@@ -138,11 +136,11 @@ class Sampling:
         )
 
     def generate_sampling(self) -> tuple[int, int, int]:
+        full_size_recipients_count = self.households.filter(head_of_household__phone_no_valid=True).count()
         sampling = self._get_sampling()
         sampling.sampling(self.households)
-        recipients_count = sampling.households.count()
 
-        return recipients_count, sampling.sample_size, sampling.excluded_recipients_count
+        return full_size_recipients_count, sampling.sample_size, sampling.excluded_recipients_count
 
     def _get_sampling(self) -> BaseSampling:
         if self.input_data["sampling_type"] == Message.SamplingChoices.FULL_LIST:

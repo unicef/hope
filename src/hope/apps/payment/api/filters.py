@@ -4,6 +4,8 @@ from django.db.models import Q, QuerySet
 import django_filters
 from django_filters import FilterSet, OrderingFilter
 
+from hope.apps.core.api.filters import OfficeSearchFilterMixin
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.models import (
     DeliveryMechanism,
     Payment,
@@ -106,3 +108,64 @@ class PendingPaymentFilter(FilterSet):
     class Meta:
         model = Payment
         fields = []
+class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
+    class Meta(PaymentPlanFilter.Meta):
+        pass
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(payment_items__household__unicef_id=unicef_id).distinct()
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(payment_items__head_of_household__unicef_id=unicef_id).distinct()
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(payment_items__unicef_id=unicef_id).distinct()
+
+
+class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
+    class Meta:
+        model = Payment
+        fields = []
+
+    def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(unicef_id=unicef_id)
+
+    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(household__unicef_id=unicef_id)
+
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(head_of_household__unicef_id=unicef_id)
+
+    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        return queryset.filter(parent__unicef_id=unicef_id)
+
+    def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+        try:
+            ticket = GrievanceTicket.objects.get(unicef_id=unicef_id)
+        except GrievanceTicket.DoesNotExist:
+            return queryset.none()
+
+        payment_ids = set()
+
+        for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if (
+                "payment_record" in lookups
+                and hasattr(ticket, ticket_type)
+                and (details := getattr(ticket, ticket_type))
+            ):
+                payment_field = lookups["payment_record"]
+                obj = details
+                for field in payment_field.split("__"):
+                    obj = getattr(obj, field, None)
+                    if obj is None:
+                        break
+                if obj and hasattr(obj, "id"):
+                    payment_ids.add(obj.id)
+
+        if payment_ids:
+            return queryset.filter(id__in=payment_ids)
+
+        return queryset.none()

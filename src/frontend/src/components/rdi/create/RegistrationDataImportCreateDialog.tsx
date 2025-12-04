@@ -1,4 +1,3 @@
- 
 import {
   Box,
   Button,
@@ -23,6 +22,7 @@ import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 import { CreateImportFromProgramPopulationForm } from './programPopulation/CreateImportFromProgramPopulation';
+import { PERMISSIONS } from 'src/config/permissions';
 
 const ComboBox = styled(Select)`
   & {
@@ -67,7 +67,8 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
       color="primary"
       startIcon={<ExitToAppRoundedIcon />}
       onClick={() => setOpen(true)}
-      data-cy="button-import"
+      dataCy="button-import"
+      dataPerm={PERMISSIONS.RDI_IMPORT_DATA}
       title={t(
         'Program has to be active to create a new RegistrationDataImport',
       )}
