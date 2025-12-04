@@ -178,21 +178,24 @@ class GenericImport(BaseComponents):
 
     def wait_for_file_displayed(self, timeout: int = 10) -> bool:
         """Wait for file name to be displayed after upload using WebDriverWait."""
+        from selenium.common.exceptions import TimeoutException
+
         try:
             self._wait(timeout).until(lambda d: self.is_file_name_displayed())
             return True
-        except Exception:
+        except TimeoutException:
             return False
 
     def wait_for_success_alert(self, timeout: int = 30) -> bool:
         """Wait for success alert dialog."""
-        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.common.exceptions import TimeoutException
+        from selenium.webdriver.support import expected_conditions
         from selenium.webdriver.support.ui import WebDriverWait
 
         try:
-            WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
+            WebDriverWait(self.driver, timeout).until(expected_conditions.alert_is_present())
             return True
-        except Exception:
+        except TimeoutException:
             return False
 
     def accept_alert(self) -> str:
