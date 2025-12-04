@@ -1,15 +1,18 @@
+import datetime
 from decimal import Decimal
 from io import BytesIO
 import logging.config
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
-from django.core.files.base import File
+from django.core.files.base import ContentFile, File
 from django.test import TestCase
+from django.utils import timezone
 from flags.models import FlagState
 import pytest
 
@@ -20,6 +23,8 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
@@ -35,6 +40,8 @@ from hope.apps.payment.celery_tasks import (
     periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
+    remove_old_cash_plan_payment_verification_xlsx,
+    remove_old_payment_plan_payment_list_xlsx,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
@@ -522,6 +529,56 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan.refresh_from_db(fields=["background_action_status"])
         assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
+
+    def test_remove_old_cash_plan_payment_verification_xlsx(self) -> None:
+        filename = "Test_File_ABC.xlsx"
+        file_content = b"Test abc"
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
+        pp = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            business_area=self.ba,
+            created_by=self.user,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=pp)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=pp)
+        creation_time = timezone.now() - datetime.timedelta(days=99)
+        FileTemp.objects.create(
+            object_id=payment_verification_plan.pk,
+            content_type=get_content_type_for_model(payment_verification_plan),
+            created=creation_time,
+            file=ContentFile(file_content, filename),
+        )
+        assert FileTemp.objects.all().count() == 1
+
+        remove_old_cash_plan_payment_verification_xlsx(5)
+
+        assert FileTemp.objects.all().count() == 0
+
+    def test_remove_old_payment_plan_payment_list_xlsx(self) -> None:
+        filename = "Test_File_ABC1.xlsx"
+        file_content = b"Test abc1"
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            business_area=self.ba,
+            created_by=self.user,
+        )
+        creation_time = timezone.now() - datetime.timedelta(days=99)
+        FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created=creation_time,
+            file=ContentFile(file_content, filename),
+        )
+        assert FileTemp.objects.all().count() == 1
+
+        remove_old_payment_plan_payment_list_xlsx(5)
+
+        assert FileTemp.objects.all().count() == 0
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

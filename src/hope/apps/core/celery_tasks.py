@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
-    from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
+    from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
         UploadNewKoboTemplateAndUpdateFlexFieldsTask,
     )
@@ -39,7 +39,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
-    from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
+    from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
     )
 

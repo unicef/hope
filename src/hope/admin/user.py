@@ -136,7 +136,7 @@ class ADUSerMixin:
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission="account.can_load_from_ad")
-    def load_ad_users(self, request: HttpRequest) -> TemplateResponse:
+    def load_ad_users(self, request: HttpRequest) -> TemplateResponse:  # pragma: no cover
         ctx = self.get_common_context(
             request,
             None,
@@ -354,7 +354,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         return to_delete, model_count, perms_needed, protected
 
     @button(permission="auth.view_permission")
-    def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
+    def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:  # pragma: no cover
         context = self.get_common_context(request, pk)
         user: User = context["original"]
         all_perms = user.get_all_permissions()

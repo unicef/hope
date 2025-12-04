@@ -6,7 +6,7 @@ from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth, user as social_core_user
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User
+from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 

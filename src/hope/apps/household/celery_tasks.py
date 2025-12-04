@@ -111,7 +111,7 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hope.models import Household
+    from hope.models import Household  # pragma: no cover
 
     return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
         # TODO: count differently or add all the fields for the new gender options

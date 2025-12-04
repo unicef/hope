@@ -83,7 +83,7 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
+def remove_old_cash_plan_payment_verification_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files."""
     from django.contrib.contenttypes.models import ContentType
 
@@ -435,9 +435,9 @@ def update_exchange_rate_on_release_payments(self: Any, payment_plan_id: str) ->
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files."""
-    try:
-        from hope.models import FileTemp, PaymentPlan
+    from hope.models import FileTemp, PaymentPlan
 
+    try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
         if file_qs:

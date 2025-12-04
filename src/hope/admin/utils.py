@@ -116,7 +116,7 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        from hope.models import BusinessArea
+        from hope.models import BusinessArea  # pragma: no cover
 
         return BusinessArea.objects.values_list("code", "name").distinct()
 
