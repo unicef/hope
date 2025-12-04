@@ -27,6 +27,7 @@ from e2e.page_object.accountability.surveys_details import AccountabilitySurveys
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.filters import Filters
+from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.feedback import Feedback
@@ -515,6 +516,11 @@ def page_program_log(request: FixtureRequest, browser: Chrome) -> ProgramLog:
 @pytest.fixture
 def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
     return CountryDashboard(browser)
+
+
+@pytest.fixture
+def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImport:
+    return GenericImport(browser)
 
 
 @pytest.fixture
