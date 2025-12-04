@@ -29,11 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import {
-  PERMISSIONS,
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { showApiErrorMessages } from '@utils/utils';
 
 export const validationSchema = Yup.object().shape({
@@ -203,8 +199,8 @@ const EditFeedbackPage = (): ReactElement => {
           <PageHeader
             title={`Edit Feedback #${feedback.unicefId}`}
             breadCrumbs={
-              hasPermissionInModule(
-                'GRIEVANCES_FEEDBACK_VIEW_LIST',
+              hasPermissions(
+                PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
                 permissions,
               )
                 ? breadCrumbsItems

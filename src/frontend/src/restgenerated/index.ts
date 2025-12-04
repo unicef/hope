@@ -147,6 +147,7 @@ export type { IndividualList as IndividualListCamelCase } from './models/Individ
 export type { IndividualListHousehold as IndividualListHouseholdCamelCase } from './models/IndividualListHousehold';
 export type { IndividualPhotoDetail as IndividualPhotoDetailCamelCase } from './models/IndividualPhotoDetail';
 export type { IndividualSimple as IndividualSimpleCamelCase } from './models/IndividualSimple';
+export type { IndividualSmall as IndividualSmallCamelCase } from './models/IndividualSmall';
 export type { IndividualUpdateData as IndividualUpdateDataCamelCase } from './models/IndividualUpdateData';
 export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
 export type { IssueTypeExtras as IssueTypeExtrasCamelCase } from './models/IssueTypeExtras';
