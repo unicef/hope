@@ -536,7 +536,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             "number",
             "uba_code",
             "holder_name",
-            "financial_institution",
+            "financial_institution_pk",
+            "financial_institution_name",
         ]
         # remove all old Roles
         IndividualRoleInHousehold.all_objects.all().delete()
@@ -573,24 +574,27 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=[], flex_fields=[])
 
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-5:] == required_fields_for_account
+        assert headers[-6:] == required_fields_for_account
 
         for payment in self.payment_plan.eligible_payments:
             # check payment row
             payment_row = export_service.get_payment_row(payment)
-            assert payment_row[-5] == "Union Bank"
-            assert payment_row[-4] == str(payment.id)
-            assert payment_row[-3] == "123456"
-            assert payment_row[-2] == f"Admin {payment.collector.given_name}"
+            assert payment_row[-6] == "Union Bank"
+            assert payment_row[-5] == str(payment.id)
+            assert payment_row[-4] == "123456"
+            assert payment_row[-3] == f"Admin {payment.collector.given_name}"
+            assert payment_row[-2] == ""
             assert payment_row[-1] == ""
 
         # test without number/financial_institution snapshot
         for payment in self.payment_plan.eligible_payments:
             payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop("number")
-            payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop("financial_institution")
+            payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop(
+                "financial_institution_pk"
+            )
             payment.household_snapshot.save()
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
-        assert headers[-5:] == required_fields_for_account
+        assert headers[-6:] == required_fields_for_account
 
         # test without snapshot
         PaymentHouseholdSnapshot.objects.all().delete()

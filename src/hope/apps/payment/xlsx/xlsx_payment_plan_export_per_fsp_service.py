@@ -140,8 +140,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             account_data = collector_data.get("account_data", {})
             if account_data:
                 headers = list(account_data.keys())
-                if "financial_institution" not in headers:
-                    headers.append("financial_institution")
+                if "financial_institution_pk" not in headers:
+                    headers.append("financial_institution_pk")
+                if "financial_institution_name" not in headers:
+                    headers.append("financial_institution_name")
                 if "number" not in headers:
                     headers.append("number")
                 return headers
