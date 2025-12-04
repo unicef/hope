@@ -592,6 +592,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop(
                 "financial_institution_pk"
             )
+            payment.household_snapshot.snapshot_data["primary_collector"]["account_data"].pop(
+                "financial_institution_name"
+            )
             payment.household_snapshot.save()
         headers = export_service.prepare_headers(fsp_xlsx_template=fsp_xlsx_template)
         assert headers[-6:] == required_fields_for_account
