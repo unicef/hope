@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CountryEnum } from './CountryEnum';
-import type { Type69cEnum } from './Type69cEnum';
+import type { TypeA8fEnum } from './TypeA8fEnum';
 export type DocumentSerializerLax = {
-    type: Type69cEnum;
+    type: TypeA8fEnum;
     country: CountryEnum;
     image?: string;
     documentNumber: string;

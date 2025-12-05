@@ -326,3 +326,4 @@ class TestRegistrationDataImportViews:
         assert response_json["erased"] is False
         assert response_json["import_date"] == "2022-01-01T00:00:00Z"
         assert response_json["total_households_count_with_valid_phone_no"] == 1
+        assert response_json["number_of_registered_individuals"] == 1
