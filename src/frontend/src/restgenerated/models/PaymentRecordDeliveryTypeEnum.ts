@@ -4,22 +4,25 @@
 /* eslint-disable */
 /**
  * * `atm_card` - ATM Card
+ * * `9c60824b-0642-4cd7-83fe-15fda38ae53e` - Attack need inside quite.
  * * `cardless_cash_withdrawal` - Cardless cash withdrawal
  * * `cash` - Cash
  * * `cash_by_fsp` - Cash by FSP
  * * `cash_over_the_counter` - Cash over the counter
  * * `cheque` - Cheque
+ * * `02e506aa-78cc-42dd-b2a6-74021cec2458` - Decision police public sound floor.
  * * `deposit_to_card` - Deposit to Card
- * * `mobile_money` - Mobile Money
  * * `pre-paid_card` - Pre-paid card
  * * `referral` - Referral
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
  * * `voucher` - Voucher
+ * * `387342a8-a39f-4638-b469-326dcf85edc0` - War simply.
  */
 export enum PaymentRecordDeliveryTypeEnum {
     ATM_CARD = 'atm_card',
+    _9C60824B_0642_4CD7_83FE_15FDA38AE53E = '9c60824b-0642-4cd7-83fe-15fda38ae53e',
     CARDLESS_CASH_WITHDRAWAL = 'cardless_cash_withdrawal',
     CASH = 'cash',
     CASH_BY_FSP = 'cash_by_fsp',
