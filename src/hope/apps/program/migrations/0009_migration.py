@@ -21,10 +21,12 @@ class Migration(migrations.Migration):
               END
             ) STORED;
             CREATE INDEX prog_status_rank_id_idx ON program_program (status_rank, id);
-            """,
+            """
+        ),
+        migrations.RunSQL(
             """
             DROP INDEX IF EXISTS prog_status_rank_id_idx;
             ALTER TABLE program_program DROP COLUMN IF EXISTS status_rank;
             """,
-        )
+        ),
     ]

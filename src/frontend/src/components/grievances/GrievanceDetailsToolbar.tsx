@@ -426,6 +426,7 @@ export const GrievanceDetailsToolbar = ({
               }}
               data-cy="button-set-to-in-progress"
               disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS}
             >
               {t('Set to in progress')}
             </LoadingButton>
@@ -441,6 +442,7 @@ export const GrievanceDetailsToolbar = ({
                   variant="outlined"
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
                   data-cy="button-set-on-hold"
+                  data-perm={PERMISSIONS.GRIEVANCES_SET_ON_HOLD}
                   disabled={!isActiveProgram}
                 >
                   {t('Set On Hold')}
@@ -457,6 +459,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                   data-cy="button-send-for-approval"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL}
                   disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
@@ -496,6 +499,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
@@ -512,6 +516,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
@@ -529,6 +534,9 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={
+                    PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK
+                  }
                   onClick={() =>
                     confirm({
                       content: closingConfirmationText,
@@ -553,6 +561,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
+                  data-perm={PERMISSIONS.GRIEVANCES_SEND_BACK}
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
