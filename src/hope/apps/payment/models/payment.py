@@ -2364,7 +2364,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def account_data(self) -> dict:
         data = self.data.copy()
         data["number"] = self.number or data.get("number", "")
-        data["financial_institution"] = str(self.financial_institution.id) if self.financial_institution else ""
+        data["financial_institution_name"] = str(self.financial_institution.name) if self.financial_institution else ""
+        data["financial_institution_pk"] = str(self.financial_institution.pk) if self.financial_institution else ""
         return data
 
     @account_data.setter
@@ -2476,10 +2477,9 @@ class PaymentDataCollector(Account):
                 delivery_data[field] = getattr(associated_object, internal_field, None)
 
         if account:
-            if account.number:
-                delivery_data["number"] = account.number
-            if account.financial_institution:
-                delivery_data["financial_institution"] = str(account.financial_institution.id)
+            delivery_data.setdefault("number", account.number)
+            delivery_data.setdefault("financial_institution_name", getattr(account.financial_institution, "name", ""))
+            delivery_data.setdefault("financial_institution_pk", str(getattr(account.financial_institution, "pk", "")))
 
         return delivery_data
 
