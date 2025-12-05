@@ -9,7 +9,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models import User
 
 
 class BaseTest(WebTest):

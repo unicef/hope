@@ -7,8 +7,8 @@ from extras.test_utils.factories.household import (
     create_household_for_fixtures,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.household.models import Document, Household, Individual
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.models import Document, Household, Individual
 
 
 class TestHouseholdWithdraw(TestCase):

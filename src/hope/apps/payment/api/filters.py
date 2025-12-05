@@ -6,12 +6,7 @@ from django_filters import FilterSet, OrderingFilter
 
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    Payment,
-    PaymentPlan,
-    PaymentVerificationSummary,
-)
+from hope.models import DeliveryMechanism, Payment, PaymentPlan, PaymentVerificationSummary
 
 
 class PaymentPlanFilter(FilterSet):

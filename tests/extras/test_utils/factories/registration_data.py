@@ -8,14 +8,14 @@ from pytz import utc
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from hope.models import (
+    BusinessArea,
     ImportData,
     KoboImportData,
+    Program,
     RegistrationDataImport,
     RegistrationDataImportDatahub,
+    User,
 )
 
 faker = Faker()

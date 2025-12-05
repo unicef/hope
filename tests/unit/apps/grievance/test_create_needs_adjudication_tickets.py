@@ -12,15 +12,13 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
     create_needs_adjudication_tickets_for_biometrics,
 )
-from hope.apps.household.models import Individual
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, Individual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

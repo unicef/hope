@@ -1,15 +1,18 @@
+import datetime
 from decimal import Decimal
 from io import BytesIO
 import logging.config
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
-from django.core.files.base import File
+from django.core.files.base import ContentFile, File
 from django.test import TestCase
+from django.utils import timezone
 from flags.models import FlagState
 import pytest
 
@@ -20,11 +23,12 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_from_xlsx,
@@ -36,20 +40,23 @@ from hope.apps.payment.celery_tasks import (
     periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
+    remove_old_cash_plan_payment_verification_xlsx,
+    remove_old_payment_plan_payment_list_xlsx,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_payment_plan_reconciliation_overdue_email,
     send_qcf_report_email_notifications,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
+from hope.apps.payment.utils import generate_cache_key
+from hope.models import (
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
     PaymentPlan,
+    Rule,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
-from hope.apps.payment.utils import generate_cache_key
-from hope.apps.steficon.models import Rule
 
 
 class TestPaymentCeleryTask(TestCase):
@@ -171,7 +178,7 @@ class TestPaymentCeleryTask(TestCase):
         payment.refresh_from_db(fields=["vulnerability_score"])
         assert payment.vulnerability_score == Decimal("500.333")
 
-    @patch("hope.apps.steficon.models.RuleCommit.execute")
+    @patch("hope.models.rule.RuleCommit.execute")
     @patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection.retry")
     def test_payment_plan_apply_steficon_hh_selection_exception_handling(
         self, mock_retry: Mock, mock_rule_execute: Mock
@@ -197,7 +204,7 @@ class TestPaymentCeleryTask(TestCase):
         assert payment_plan.status == PaymentPlan.Status.TP_STEFICON_ERROR
 
     @patch(
-        "hope.apps.payment.models.PaymentPlan.get_exchange_rate",
+        "hope.models.payment_plan.PaymentPlan.get_exchange_rate",
         return_value=2.0,
     )
     def test_payment_plan_rebuild_stats(self, get_exchange_rate_mock: Mock) -> None:
@@ -212,7 +219,7 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan_rebuild_stats(pp_id_str)
 
-    @patch("hope.apps.payment.models.PaymentPlan.update_population_count_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.update_population_count_fields")
     @patch("hope.apps.payment.celery_tasks.payment_plan_rebuild_stats.retry")
     def test_payment_plan_rebuild_stats_exception_handling(
         self, mock_retry: Mock, mock_update_population_count_fields: Mock
@@ -330,19 +337,19 @@ class TestPaymentCeleryTask(TestCase):
             assert mock_mailjet_send.call_count == 3
 
     @patch("hope.apps.payment.celery_tasks.logger")
-    @patch("hope.apps.payment.celery_tasks.get_user_model")
+    @patch("hope.models.User")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
         self, mock_get_user_model: Mock, mock_logger: Mock
     ) -> None:
         mock_get_user_model.objects.get.side_effect = Exception("User not found")
-        with pytest.raises(Exception, match="“pp_id_123” is not a valid UUID."):
+        with pytest.raises(Exception, match="User not found"):
             send_payment_plan_payment_list_xlsx_per_fsp_password("pp_id_123", "invalid-user-id-123")
 
         mock_logger.exception.assert_called_once_with("Send Payment Plan List XLSX Per FSP Password Error")
 
     @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
-    @patch("hope.apps.payment.models.PaymentPlan.update_money_fields")
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate")
+    @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
     def test_update_exchange_rate_on_release_payments_success(
         self,
         mock_get_exchange_rate: Mock,
@@ -522,6 +529,56 @@ class TestPaymentCeleryTask(TestCase):
 
         payment_plan.refresh_from_db(fields=["background_action_status"])
         assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR
+
+    def test_remove_old_cash_plan_payment_verification_xlsx(self) -> None:
+        filename = "Test_File_ABC.xlsx"
+        file_content = b"Test abc"
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
+        pp = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            business_area=self.ba,
+            created_by=self.user,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=pp)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=pp)
+        creation_time = timezone.now() - datetime.timedelta(days=99)
+        FileTemp.objects.create(
+            object_id=payment_verification_plan.pk,
+            content_type=get_content_type_for_model(payment_verification_plan),
+            created=creation_time,
+            file=ContentFile(file_content, filename),
+        )
+        assert FileTemp.objects.all().count() == 1
+
+        remove_old_cash_plan_payment_verification_xlsx(5)
+
+        assert FileTemp.objects.all().count() == 0
+
+    def test_remove_old_payment_plan_payment_list_xlsx(self) -> None:
+        filename = "Test_File_ABC1.xlsx"
+        file_content = b"Test abc1"
+        with NamedTemporaryFile(delete=False) as file_temp:
+            file_temp.write(file_content)
+            file_temp.flush()
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            business_area=self.ba,
+            created_by=self.user,
+        )
+        creation_time = timezone.now() - datetime.timedelta(days=99)
+        FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created=creation_time,
+            file=ContentFile(file_content, filename),
+        )
+        assert FileTemp.objects.all().count() == 1
+
+        remove_old_payment_plan_payment_list_xlsx(5)
+
+        assert FileTemp.objects.all().count() == 0
 
 
 class PeriodicSyncPaymentPlanInvoicesWesternUnionFTPTests(TestCase):

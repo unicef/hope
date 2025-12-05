@@ -11,8 +11,8 @@ from extras.test_utils.factories.account import (
     RoleFactory,
     UserFactory,
 )
-from hope.api.models import APIToken, Grant
-from hope.apps.core.models import BusinessArea
+from hope.models import APIToken, BusinessArea
+from hope.models.utils import Grant
 from unit.api.factories import APITokenFactory
 
 

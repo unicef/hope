@@ -5,24 +5,24 @@ from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
-from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import (
-    FinancialInstitutionMapping,
-    FinancialServiceProvider,
-    PendingAccount,
-)
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
     mergedicts,
+)
+from hope.models import (
+    Country,
+    DocumentType,
+    FinancialInstitutionMapping,
+    FinancialServiceProvider,
+    PendingAccount,
+    PendingDocument,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
 )
 
 logger = logging.getLogger(__name__)

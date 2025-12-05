@@ -5,10 +5,10 @@
 import type { CountryEnum } from './CountryEnum';
 import type { DocumentSerializerUploadStatusEnum } from './DocumentSerializerUploadStatusEnum';
 import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
-import type { Type69cEnum } from './Type69cEnum';
+import type { TypeA8fEnum } from './TypeA8fEnum';
 export type DocumentSerializerUpload = {
     readonly id: string;
-    type: Type69cEnum;
+    type: TypeA8fEnum;
     country: CountryEnum;
     image?: string;
     documentNumber: string;

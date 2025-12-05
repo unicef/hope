@@ -1,17 +1,14 @@
 from typing import TYPE_CHECKING
 
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
-from hope.apps.account.models import USER_STATUS_CHOICES, Partner
 from hope.apps.core.utils import CustomOrderingFilter
+from hope.models import USER_STATUS_CHOICES, Partner, User
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
-    from hope.apps.account.models import User
 
 
 class UsersFilter(FilterSet):
@@ -24,7 +21,7 @@ class UsersFilter(FilterSet):
     is_feedback_creator = BooleanFilter(method="is_feedback_creator_filter")
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = {"status": ["exact"], "partner": ["exact"]}
 
     order_by = CustomOrderingFilter(

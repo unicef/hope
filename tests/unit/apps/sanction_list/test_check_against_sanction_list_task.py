@@ -14,10 +14,10 @@ from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from hope.apps.sanction_list.models import UploadedXLSXFile
 from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
+from hope.models import UploadedXLSXFile
 
 
 class TestSanctionList(TestCase):

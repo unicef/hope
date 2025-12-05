@@ -11,7 +11,7 @@ import type { RegistrationDataImport } from './RegistrationDataImport';
 import type { RegistrationMethodEnum } from './RegistrationMethodEnum';
 export type HouseholdDetail = {
     readonly id: string;
-    unicefId: string | null;
+    unicefId?: string | null;
     headOfHousehold: HeadOfHousehold;
     admin1: AreaSimple;
     admin2: AreaSimple;

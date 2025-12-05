@@ -19,15 +19,13 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models import PaymentPlan, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

@@ -20,15 +20,15 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    Program,
     build_summary,
 )
-from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 

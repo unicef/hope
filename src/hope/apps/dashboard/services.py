@@ -17,10 +17,8 @@ from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 import sentry_sdk
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
-from hope.apps.household.models import Household
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.models import BusinessArea, Household, Payment, PaymentPlan
 
 logger = logging.getLogger(__name__)
 

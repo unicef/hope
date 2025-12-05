@@ -6,7 +6,6 @@ from django.forms.models import modelform_factory
 import openpyxl
 from xlwt import Row
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.field_attributes.core_fields_attributes import (
     _HOUSEHOLD,
@@ -14,8 +13,8 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.household.models import Individual
 from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models import Individual, log_create
 
 
 class InvalidColumnsError(Exception):

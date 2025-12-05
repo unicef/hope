@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, override_settings
@@ -16,16 +17,17 @@ import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
-from hope.apps.account.models import User
-from hope.apps.geo.models import Area, AreaType, Country
-
-pytestmark = pytest.mark.django_db
+from hope.models import Area, AreaType, Country, User
 
 
 @pytest.fixture
 def superuser() -> User:
     user = UserFactory(is_superuser=True, is_staff=True, is_active=True, email="test123@mail.com")
-    perm = Permission.objects.get(codename="import_areas", content_type__app_label="geo")
+    content_type, _ = ContentType.objects.get_or_create(
+        app_label="geo",
+        model="area",
+    )
+    perm, _ = Permission.objects.get_or_create(codename="import_areas", content_type=content_type)
     user.user_permissions.add(perm)
     return user
 

@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { Status753Enum } from '@restgenerated/models/Status753Enum';
+import { StatusF63Enum } from '@restgenerated/models/StatusF63Enum';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation } from '@tanstack/react-query';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -118,7 +118,7 @@ export function CreateImportFromKoboForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (koboImportData?.status === Status753Enum.FINISHED) {
+    if (koboImportData?.status === StatusF63Enum.FINISHED) {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);

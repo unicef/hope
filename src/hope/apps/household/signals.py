@@ -45,7 +45,7 @@ def increment_individual_list_cache_version_from_bulk(sender, instances, **kwarg
 
 # Register signals - use lazy import to avoid circular dependency
 def register_bulk_signals():
-    from hope.apps.household.models import Household, Individual
+    from hope.models import Household, Individual
 
     post_bulk_update.connect(increment_household_list_cache_version_from_bulk, sender=Household)
     post_bulk_create.connect(increment_household_list_cache_version_from_bulk, sender=Household)

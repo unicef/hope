@@ -20,8 +20,7 @@ from hope.apps.core.api.filters import OfficeSearchFilterMixin, UpdatedAtFilter
 from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -33,13 +32,10 @@ from hope.apps.household.models import (
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
     STATUS_WITHDRAWN,
-    DocumentType,
-    Household,
-    Individual,
 )
-from hope.apps.payment.models import Payment
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.models import DocumentType, Household, Individual, Payment, Program
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 

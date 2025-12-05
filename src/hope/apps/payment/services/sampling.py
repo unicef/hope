@@ -5,14 +5,11 @@ from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.filters import filter_age
-from hope.apps.payment.models import PaymentVerificationPlan
 from hope.apps.payment.utils import get_number_of_samples
+from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.apps.payment.models import (
-        Payment,  # pragma: no cover
-        PaymentPlan,
-    )
+    from hope.models import Payment, PaymentPlan  # pragma: no cover
 
 
 class Sampling:

@@ -16,15 +16,11 @@ from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
-    Individual,
-    IndividualRoleInHousehold,
 )
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
@@ -40,35 +36,37 @@ from hope.apps.payment.celery_tasks import (
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 from hope.apps.payment.utils import get_link
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingIndividualRuleFilterBlock,
-)
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    BusinessArea,
+    DeliveryMechanism,
+    FileTemp,
+    FinancialServiceProvider,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentDataCollector,
+    PaymentPlan,
+    PaymentPlanSplit,
+    Program,
+    ProgramCycle,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+    User,
+)
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser
+    from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 
 class PaymentPlanService:

@@ -4,7 +4,7 @@ import pytest
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType
 
 
 class TestDCTValidation(TestCase):

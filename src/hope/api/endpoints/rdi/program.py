@@ -11,9 +11,9 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
-from hope.api.models import Grant
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.program.models import Program
+from hope.models import Program
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

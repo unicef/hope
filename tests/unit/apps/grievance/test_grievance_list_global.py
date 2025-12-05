@@ -21,7 +21,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.program.models import Program
+from hope.models import Program
 
 pytestmark = pytest.mark.django_db()
 

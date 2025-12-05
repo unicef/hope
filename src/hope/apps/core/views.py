@@ -10,8 +10,8 @@ from django.urls import reverse
 from django.views.generic import View
 
 from hope.apps.core.forms import StorageFileForm
-from hope.apps.core.models import StorageFile
 from hope.apps.core.permissions_views_mixins import UploadFilePermissionMixin
+from hope.models import StorageFile
 
 logger = logging.getLogger(__name__)
 

@@ -8,12 +8,8 @@ from rest_framework.validators import UniqueValidator
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
-from hope.apps.registration_data.models import (
-    ImportData,
-    KoboImportData,
-    RegistrationDataImport,
-)
 from hope.apps.registration_datahub.utils import get_rdi_program_population
+from hope.models import ImportData, KoboImportData, RegistrationDataImport
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):

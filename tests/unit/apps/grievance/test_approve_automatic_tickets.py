@@ -19,10 +19,8 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.sanction_list.models import SanctionListIndividual
+from hope.models import BusinessArea, SanctionListIndividual, country as geo_models
 
 pytestmark = pytest.mark.django_db()
 
@@ -94,9 +92,7 @@ class TestGrievanceApproveAutomaticTickets:
         household_one.save()
         self.household_one = household_one
 
-        # from test_utils.factories.sanction_list import SanctionListFactory
-
-        from test_utils.factories.sanction_list import SanctionListFactory
+        from extras.test_utils.factories.sanction_list import SanctionListFactory
 
         sanction_list_individual_data = {
             "sanction_list": SanctionListFactory(),

@@ -4,8 +4,7 @@ from extras.test_utils.factories.account import PartnerFactory, RoleFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import AdminAreaLimitedTo, RoleAssignment
-from hope.apps.program.models import Program
+from hope.models import AdminAreaLimitedTo, Program, RoleAssignment
 
 
 class TestPartnerAccessChangeSignal(TestCase):

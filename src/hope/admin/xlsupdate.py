@@ -11,12 +11,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
-from hope.apps.household.models import XlsxUpdateFile
 from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
+from hope.models import XlsxUpdateFile
 
 if TYPE_CHECKING:
     from django import forms
@@ -45,6 +44,8 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         return super().get_queryset(request).select_related("business_area", "rdi", "program", "uploaded_by")
 
     def xlsx_update_stage2(self, request: HttpRequest, old_form: Form) -> TemplateResponse:
+        from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form  # pragma: no cover
+
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
@@ -99,6 +100,8 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         return self.xlsx_update(request)
 
     def xlsx_update(self, request: HttpRequest) -> Any:
+        from hope.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form  # pragma: no cover
+
         form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()

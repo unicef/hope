@@ -14,11 +14,10 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
+from hope.models import BusinessArea, PaymentPlan
 
 
 def file_without_delivery_dates() -> BytesIO:
@@ -99,7 +98,7 @@ class TestDeliveryDate(BaseTestCase):
             currency="PLN",
         )
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch(
         "hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
         return_value=datetime(2023, 10, 23).replace(tzinfo=utc),
@@ -129,7 +128,7 @@ class TestDeliveryDate(BaseTestCase):
         assert self.payment_2.delivery_date == old_delivery_date2
         assert self.payment_3.delivery_date == old_delivery_date3
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
         self.payment_2.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
@@ -153,7 +152,7 @@ class TestDeliveryDate(BaseTestCase):
             "There aren't any updates in imported file, please add changes and try again",
         ]
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
         self, mock_exchange_rate: Any
     ) -> None:
@@ -179,7 +178,7 @@ class TestDeliveryDate(BaseTestCase):
         assert self.payment_2.delivery_date == datetime(2023, 12, 24).replace(tzinfo=utc)
         assert self.payment_3.delivery_date == datetime(2023, 12, 24).replace(tzinfo=utc)
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),
@@ -210,7 +209,7 @@ class TestDeliveryDate(BaseTestCase):
         assert payment_1.transaction_reference_id == "ref1"
         assert payment_2.transaction_reference_id == "ref2"
 
-    @patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
+    @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
     def test_upload_transaction_status_blockchain_link(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),

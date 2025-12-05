@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import RegistrationDataImport
 
 
 class RegistrationDataImportFilter(UpdatedAtFilter):

@@ -8,7 +8,7 @@ import django.core.validators
 from django.db import migrations, models
 import model_utils.fields
 
-import hope.apps.utils.models
+from hope.models.utils import AdminUrlMixin
 
 
 class Migration(migrations.Migration):
@@ -170,7 +170,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Grievance Ticket",
                 "ordering": ("status", "created_at"),
             },
-            bases=(hope.apps.utils.models.AdminUrlMixin, models.Model),
+            bases=(AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
             name="GrievanceTicketThrough",
