@@ -21,6 +21,7 @@ class Grant(Enum):
     API_RDI_CREATE = auto()
 
     API_PROGRAM_CREATE = auto()
+    API_GENERIC_IMPORT = auto()
 
     @classmethod
     def choices(cls) -> tuple[tuple[Any, Any], ...]:
