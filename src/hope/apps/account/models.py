@@ -388,6 +388,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_change_allowed_partners", "Can change allowed partners"),
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
+            ("can_edit_user_roles", "Can edit user role assignments"),
         )
         indexes = [
             # Optimize JOIN queries between User and Partner in permissions methods
