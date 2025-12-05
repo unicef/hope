@@ -28,6 +28,8 @@ export LIBRARY_PATHS=true
 export ELASTICSEARCH_SYNONYMS_FILE=$PWD/src/data/synonyms.txt
 export DATA_VOLUME=$PWD/data
 export PYTHONPATH=$PWD/src:$PYTHONPATH
+export DEDUPLICATION_ENGINE_API_KEY='test'
+export DEDUPLICATION_ENGINE_API_URL=''
 # export GEOS_LIBRARY_PATH='/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
 # export GDAL_LIBRARY_PATH='/opt/homebrew/opt/gdal/lib/libgdal.dylib'
 if [ ! -d ".venv" ]; then
