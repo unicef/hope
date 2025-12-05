@@ -120,6 +120,7 @@ class TestKoboTemplateUpload(BaseTestCase):
     )
     def test_upload_valid_template(self) -> None:
         response = self.upload_file("kobo-template-valid.xlsx")
+        # assert not response.context["form"].errors
         messages = [m.message for m in get_messages(response.wsgi_request)]
 
         assert response.status_code == 302 or response.redirect_chain
