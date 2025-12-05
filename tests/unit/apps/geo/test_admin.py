@@ -121,7 +121,7 @@ def test_upload(
 
     stored_messages = [str(m) for m in list(messages)]
     assert len(stored_messages) == 1
-    assert stored_messages[0] == "Found 3 new areas to create. The import is running in the background."
+    assert stored_messages[0] == "Found 4 new areas to create. The import is running in the background."
 
     mock_task_delay.assert_called_once_with(csv_content.decode("utf-8-sig"))
 

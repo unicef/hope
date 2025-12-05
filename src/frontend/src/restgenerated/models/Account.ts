@@ -2,10 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AccountDataField } from './AccountDataField';
 export type Account = {
     readonly id: string;
     readonly name: string;
-    readonly dataFields: Record<string, any>;
+    readonly dataFields: Array<AccountDataField>;
     accountType: number;
+    number?: string | null;
+    financialInstitution?: number | null;
+    accountTypeKey: string;
 };
 

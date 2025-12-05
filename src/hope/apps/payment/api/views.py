@@ -11,8 +11,9 @@ from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -42,7 +43,13 @@ from hope.apps.payment.api.caches import (
     PaymentPlanListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
-from hope.apps.payment.api.filters import PaymentPlanFilter, TargetPopulationFilter
+from hope.apps.payment.api.filters import (
+    PaymentOfficeSearchFilter,
+    PaymentPlanFilter,
+    PaymentPlanOfficeSearchFilter,
+    PendingPaymentFilter,
+    TargetPopulationFilter,
+)
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
@@ -630,7 +637,11 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        .select_related("program_cycle__program")
+        .order_by("-created_at")
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
@@ -1455,6 +1466,23 @@ class PaymentPlanViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan reactivate abort"})
 
 
+class PaymentPlanGlobalViewSet(
+    BusinessAreaProgramsAccessMixin,
+    SerializerActionMixin,
+    CountActionMixin,
+    PaymentPlanMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+    }
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    program_model_field = "program_cycle__program"
+    filterset_class = PaymentPlanOfficeSearchFilter
+
+
 class TargetPopulationViewSet(
     CountActionMixin,
     ProgramMixin,
@@ -1488,6 +1516,7 @@ class TargetPopulationViewSet(
         "copy": [Permissions.TARGETING_DUPLICATE],
         "apply_engine_formula": [Permissions.TARGETING_UPDATE],
         "pending_payments": [Permissions.TARGETING_VIEW_DETAILS],
+        "pending_payments_count": [Permissions.TARGETING_VIEW_DETAILS],
         "lock": [Permissions.TARGETING_LOCK],
         "unlock": [Permissions.TARGETING_UNLOCK],
         "rebuild": [Permissions.TARGETING_LOCK],
@@ -1574,19 +1603,51 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population rebuilding"})
 
-    @extend_schema(responses={200: PendingPaymentSerializer(many=True)})
+    @extend_schema(
+        responses={200: PendingPaymentSerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="ordering",
+            ),
+        ],
+    )
     @action(
         detail=True,
         methods=["get"],
         url_path="pending-payments",
-        filter_backends=(),
+        filter_backends=[],
     )
     @transaction.atomic
     def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
-        queryset = tp.payment_items.all()
-        data = PendingPaymentSerializer(self.paginate_queryset(queryset), many=True).data
-        return self.get_paginated_response(data)
+        queryset = tp.payment_items.select_related("household", "head_of_household", "household__admin2").all()
+
+        filterset = PendingPaymentFilter(request.GET, queryset=queryset)
+        queryset = filterset.qs
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
+        },
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="pending-payments/count",
+        filter_backends=[],
+    )
+    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        pending_payments_count = tp.payment_items.count()
+        return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
@@ -1965,7 +2026,8 @@ class PaymentGlobalViewSet(
         "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
-    filter_backends = (OrderingFilter,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = PaymentOfficeSearchFilter
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
