@@ -117,7 +117,10 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     extra_data = serializers.SerializerMethodField()
 
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
-        if financial_institution_pk := account_data.get("financial_institution"):
+        financial_institution_pk = account_data.get("financial_institution_pk") or account_data.get(
+            "financial_institution"
+        )  # TODO remove account_data.get("financial_institution") later
+        if financial_institution_pk:
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
             if financial_institution.is_generic:
                 return account_data
