@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING
 
-from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(AdminFiltersMixin, SoftDeletableAdminMixin):
     list_display = ("name", "type", "required", "program", "pdu_data", "group")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
