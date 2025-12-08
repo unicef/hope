@@ -57,7 +57,6 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
