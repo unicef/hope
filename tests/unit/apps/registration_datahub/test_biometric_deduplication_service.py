@@ -75,7 +75,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         )
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
-                reference_pk=str(self.program.id),
+                reference_pk=str(self.program.slug),
                 notification_url=notification_url,
             )
         )
@@ -823,4 +823,13 @@ class BiometricDeduplicationServiceTest(TestCase):
         mock_report_false_positive_duplicate.assert_called_once_with(
             IgnoredFilenamesPair(first="123", second="456"),
             str(self.program.deduplication_set_id),
+        )
+
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_refused_individuals")
+    def test_report_withdrawn(self, mock_report_withdrawn: mock.Mock) -> None:
+        service = BiometricDeduplicationService()
+        service.report_refused_individuals(str(self.program.deduplication_set_id), ["abc"])
+        mock_report_withdrawn.assert_called_once_with(
+            str(self.program.deduplication_set_id),
+            ["abc"],
         )

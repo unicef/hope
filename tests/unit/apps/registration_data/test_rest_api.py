@@ -1,6 +1,7 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Any, Callable, Generator
 from unittest.mock import Mock, patch
+import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -20,6 +21,7 @@ from extras.test_utils.factories.registration_data import (
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
+from hope.apps.household.documents import IndividualDocumentAfghanistan
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import (
@@ -58,6 +60,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             name="Test Program",
             status=Program.ACTIVE,
             biometric_deduplication_enabled=True,
+            deduplication_set_id=uuid.uuid4(),
         )
         cls.client = APIClient()
 
@@ -308,7 +311,23 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert not rdi.erased
 
-    def test_refuse_rdi(self) -> None:
+    @patch.dict(
+        "os.environ",
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
+    )
+    @patch(
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_refused_individuals"
+    )
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_refuse_rdi(
+        self, remove_elasticsearch_documents_by_matching_ids_moc: Any, report_refused_individuals_mock: Any
+    ) -> None:
         self.client.force_authenticate(user=self.user)
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,
@@ -328,6 +347,9 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
                 {"program": self.program, "registration_data_import": rdi},
             ],
         )
+        individuals_ids_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
 
         assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
         assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
@@ -346,6 +368,14 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.status == RegistrationDataImport.REFUSED_IMPORT
         assert rdi.refuse_reason == "Testing refuse endpoint"
+
+        report_refused_individuals_mock.assert_called_once_with(
+            str(rdi.program.deduplication_set_id),
+            individuals_ids_to_remove,
+        )
+        remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
+            individuals_ids_to_remove, IndividualDocumentAfghanistan
+        )
 
     def test_refuse_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -987,7 +1017,16 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         response = self.client.post(url, {}, format="json")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_permission_checks_refuse(self) -> None:
+    @patch(
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_refused_individuals"
+    )
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_permission_checks_refuse(
+        self, remove_elasticsearch_documents_by_matching_ids_moc: Any, report_refused_individuals_mock: Any
+    ) -> None:
         self.client.force_authenticate(user=self.user)
 
         rdi_to_refuse = RegistrationDataImportFactory(
