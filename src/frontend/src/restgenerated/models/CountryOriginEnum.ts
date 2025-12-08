@@ -19,7 +19,7 @@
  * * `AU` - Australia
  * * `AT` - Austria
  * * `AZ` - Azerbaijan
- * * `BS` - Bahamas (The)
+ * * `BS` - Bahamas
  * * `BH` - Bahrain
  * * `BD` - Bangladesh
  * * `BB` - Barbados
@@ -54,6 +54,7 @@
  * * `CO` - Colombia
  * * `KM` - Comoros
  * * `CG` - Congo
+ * * `CD` - Congo (the Democratic Republic of the)
  * * `CK` - Cook Islands
  * * `CR` - Costa Rica
  * * `CI` - Côte d'Ivoire
@@ -62,7 +63,6 @@
  * * `CW` - Curaçao
  * * `CY` - Cyprus
  * * `CZ` - Czechia
- * * `CD` - Democratic Republic of the Congo
  * * `DK` - Denmark
  * * `DJ` - Djibouti
  * * `DM` - Dominica
@@ -101,6 +101,7 @@
  * * `GY` - Guyana
  * * `HT` - Haiti
  * * `HM` - Heard Island and McDonald Islands
+ * * `VA` - Holy See
  * * `HN` - Honduras
  * * `HK` - Hong Kong
  * * `HU` - Hungary
@@ -171,7 +172,7 @@
  * * `OM` - Oman
  * * `PK` - Pakistan
  * * `PW` - Palau
- * * `PS` - Palestine
+ * * `PS` - Palestine, State of
  * * `PA` - Panama
  * * `PG` - Papua New Guinea
  * * `PY` - Paraguay
@@ -187,7 +188,7 @@
  * * `RU` - Russia
  * * `RW` - Rwanda
  * * `BL` - Saint Barthélemy
- * * `SH` - Saint Helena
+ * * `SH` - Saint Helena, Ascension and Tristan da Cunha
  * * `KN` - Saint Kitts and Nevis
  * * `LC` - Saint Lucia
  * * `MF` - Saint Martin (French part)
@@ -208,7 +209,7 @@
  * * `SB` - Solomon Islands
  * * `SO` - Somalia
  * * `ZA` - South Africa
- * * `GS` - South Georgia
+ * * `GS` - South Georgia and the South Sandwich Islands
  * * `KR` - South Korea
  * * `SS` - South Sudan
  * * `ES` - Spain
@@ -243,7 +244,6 @@
  * * `UY` - Uruguay
  * * `UZ` - Uzbekistan
  * * `VU` - Vanuatu
- * * `VA` - Vatican City
  * * `VE` - Venezuela
  * * `VN` - Vietnam
  * * `VG` - Virgin Islands (British)
@@ -306,6 +306,7 @@ export enum CountryOriginEnum {
     CO = 'CO',
     KM = 'KM',
     CG = 'CG',
+    CD = 'CD',
     CK = 'CK',
     CR = 'CR',
     CI = 'CI',
@@ -314,7 +315,6 @@ export enum CountryOriginEnum {
     CW = 'CW',
     CY = 'CY',
     CZ = 'CZ',
-    CD = 'CD',
     DK = 'DK',
     DJ = 'DJ',
     DM = 'DM',
@@ -353,6 +353,7 @@ export enum CountryOriginEnum {
     GY = 'GY',
     HT = 'HT',
     HM = 'HM',
+    VA = 'VA',
     HN = 'HN',
     HK = 'HK',
     HU = 'HU',
@@ -495,7 +496,6 @@ export enum CountryOriginEnum {
     UY = 'UY',
     UZ = 'UZ',
     VU = 'VU',
-    VA = 'VA',
     VE = 'VE',
     VN = 'VN',
     VG = 'VG',

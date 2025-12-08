@@ -10,15 +10,15 @@
  * * `cash_over_the_counter` - Cash over the counter
  * * `cheque` - Cheque
  * * `deposit_to_card` - Deposit to Card
- * * `2739171f-b945-4706-85e2-d53d6e663632` - Dog actually claim.
- * * `3317d5dc-dcee-4cca-a56d-f0123f3097db` - Drop close.
- * * `b00a94c0-3d93-47a5-916f-003fdc93519b` - Knowledge cause everyone can.
+ * * `8306ec17-8e3b-4f78-b254-38236a23766b` - Information rest tend.
+ * * `2aeaa22a-0c68-4f31-a24d-de00e7b86db0` - Item voice process.
+ * * `af1a22a3-d701-4695-825e-85207847789b` - Lead provide effort.
  * * `mobile_money` - Mobile Money
- * * `1531ea0f-a571-4060-80a9-d0bf185c5c52` - Once fund west.
- * * `3cf0e801-e2c7-4b2b-b41e-982258649f9a` - Position modern.
+ * * `d442e8b4-f749-4fa1-b930-2016893c5492` - Need subject factor rule.
+ * * `d3a5c361-d6cb-44a0-a5ac-9362a739596d` - Policy plan federal population.
+ * * `97b3e593-eb9f-4234-878a-4154a3ad5ea6` - Poor guy involve discussion.
  * * `pre-paid_card` - Pre-paid card
  * * `referral` - Referral
- * * `b8f0d7a9-f2e7-41aa-8e68-fc6644c0444d` - Step not.
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
@@ -32,15 +32,15 @@ export enum PaymentRecordDeliveryTypeEnum {
     CASH_OVER_THE_COUNTER = 'cash_over_the_counter',
     CHEQUE = 'cheque',
     DEPOSIT_TO_CARD = 'deposit_to_card',
-    _2739171F_B945_4706_85E2_D53D6E663632 = '2739171f-b945-4706-85e2-d53d6e663632',
-    _3317D5DC_DCEE_4CCA_A56D_F0123F3097DB = '3317d5dc-dcee-4cca-a56d-f0123f3097db',
-    B00A94C0_3D93_47A5_916F_003FDC93519B = 'b00a94c0-3d93-47a5-916f-003fdc93519b',
+    _8306EC17_8E3B_4F78_B254_38236A23766B = '8306ec17-8e3b-4f78-b254-38236a23766b',
+    _2AEAA22A_0C68_4F31_A24D_DE00E7B86DB0 = '2aeaa22a-0c68-4f31-a24d-de00e7b86db0',
+    AF1A22A3_D701_4695_825E_85207847789B = 'af1a22a3-d701-4695-825e-85207847789b',
     MOBILE_MONEY = 'mobile_money',
-    _1531EA0F_A571_4060_80A9_D0BF185C5C52 = '1531ea0f-a571-4060-80a9-d0bf185c5c52',
-    _3CF0E801_E2C7_4B2B_B41E_982258649F9A = '3cf0e801-e2c7-4b2b-b41e-982258649f9a',
+    D442E8B4_F749_4FA1_B930_2016893C5492 = 'd442e8b4-f749-4fa1-b930-2016893c5492',
+    D3A5C361_D6CB_44A0_A5AC_9362A739596D = 'd3a5c361-d6cb-44a0-a5ac-9362a739596d',
+    _97B3E593_EB9F_4234_878A_4154A3AD5EA6 = '97b3e593-eb9f-4234-878a-4154a3ad5ea6',
     PRE_PAID_CARD = 'pre-paid_card',
     REFERRAL = 'referral',
-    B8F0D7A9_F2E7_41AA_8E68_FC6644C0444D = 'b8f0d7a9-f2e7-41aa-8e68-fc6644c0444d',
     TRANSFER = 'transfer',
     TRANSFER_TO_ACCOUNT = 'transfer_to_account',
     TRANSFER_TO_DIGITAL_WALLET = 'transfer_to_digital_wallet',
