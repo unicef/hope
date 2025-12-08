@@ -82,13 +82,13 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       <Box display="flex" alignItems="center">
-        {deduplicationFlags.canRunDeduplication && (
+        {deduplicationFlags?.canRunDeduplication && (
           <Box mr={3}>
             <ButtonTooltip
               variant="contained"
               color="primary"
               onClick={runDeduplication}
-              disabled={deduplicationFlags.isDeduplicationDisabled}
+              disabled={deduplicationFlags?.isDeduplicationDisabled}
               title={t('Deduplication engine already in progress')}
             >
               {t('START DEDUPLICATION ENGINE')}
