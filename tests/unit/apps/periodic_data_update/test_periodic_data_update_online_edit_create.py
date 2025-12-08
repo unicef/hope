@@ -103,14 +103,12 @@ class TestPDUOnlineEditCreate:
         self.base_data = {
             "rounds_data": [
                 {
-                    "field": "vaccination_records_update",
+                    "field": self.pdu_field_vaccination.name,
                     "round": 2,
-                    "round_name": "February vaccination",
                 },
                 {
-                    "field": "health_records_update",
+                    "field": self.pdu_field_health.name,
                     "round": 4,
-                    "round_name": "April",
                 },
             ],
             "filters": {
@@ -176,8 +174,8 @@ class TestPDUOnlineEditCreate:
                 "first_name": self.household2.individuals.first().given_name,
                 "last_name": self.household2.individuals.first().family_name,
                 "pdu_fields": {
-                    "vaccination_records_update": {
-                        "field_name": "vaccination_records_update",
+                    self.pdu_field_vaccination.name: {
+                        "field_name": self.pdu_field_vaccination.name,
                         "label": "Vaccination Records Update",
                         "round_number": 2,
                         "round_name": "February vaccination",
@@ -186,8 +184,8 @@ class TestPDUOnlineEditCreate:
                         "subtype": PeriodicFieldData.DECIMAL,
                         "is_editable": True,
                     },
-                    "health_records_update": {
-                        "field_name": "health_records_update",
+                    self.pdu_field_health.name: {
+                        "field_name": self.pdu_field_health.name,
                         "label": "Health Records Update",
                         "round_number": 4,
                         "round_name": "April",
@@ -223,7 +221,7 @@ class TestPDUOnlineEditCreate:
         assert response_json_detail["name"] is None
         assert response_json_detail["number_of_records"] == 1
         assert response_json_detail["created_by"] == self.user.get_full_name()
-        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%SZ}"
         assert response_json_detail["status"] == PDUOnlineEdit.Status.NEW
         assert response_json_detail["status_display"] == PDUOnlineEdit.Status.NEW.label
         assert response_json_detail["is_authorized"] is False

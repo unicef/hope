@@ -49,9 +49,6 @@ class FeedbackDetailsPage(BaseComponents):
     def get_household_id(self) -> WebElement:
         return self.wait_for(self.label_household_id)
 
-    def get_individual_id(self) -> WebElement:
-        return self.wait_for(self.label_individual_id)
-
     def get_programme(self) -> WebElement:
         return self.wait_for(self.label_programme)
 

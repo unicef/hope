@@ -22,7 +22,7 @@ from hope.apps.household.models import (
     NOT_PROCESSED,
     UNIQUE,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair, RegistrationDataImport
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
@@ -68,10 +68,15 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         self.program.refresh_from_db()
         assert str(self.program.deduplication_set_id) == new_uuid
+        notification_url = (
+            f"https://{settings.DOMAIN_NAME}/api/rest/business-areas/"
+            f"{self.program.business_area.slug}/programs/{self.program.slug}/"
+            f"registration-data-imports/webhookdeduplication/"
+        )
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
                 reference_pk=str(self.program.id),
-                notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
+                notification_url=notification_url,
             )
         )
 
@@ -789,6 +794,22 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
+        assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
+        assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
+
+        # test only one individual in dedup engine results
+        similarity_pairs = [
+            SimilarityPair(score=0.0, first=ind1.id, second=None, status_code="412"),  # no face detected
+        ]
+        DeduplicationEngineSimilarityPair.objects.all().delete()
+        service.store_similarity_pairs(self.program, similarity_pairs)
+        service.update_rdis_deduplication_statistics(self.program, exclude_rdi=rdi2)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 5
+        assert rdi1.dedup_engine_golden_record_duplicates == 1
+        ind1.refresh_from_db()
+        assert ind1.biometric_deduplication_golden_record_results == []
         assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
         assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 

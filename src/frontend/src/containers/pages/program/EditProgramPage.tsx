@@ -29,17 +29,18 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   decodeIdString,
-  isPartnerVisible,
-  mapPartnerChoicesWithoutUnicef,
-  showApiErrorMessages,
   deepUnderscore,
+  isPartnerVisible,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
+  mapPartnerChoicesFromProgramWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -52,14 +53,13 @@ const EditProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: treeData } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
@@ -70,15 +70,6 @@ const EditProgramPage = (): ReactElement => {
       }),
   });
 
-  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
-
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
       queryKey: ['programChoices', businessArea],
@@ -88,6 +79,15 @@ const EditProgramPage = (): ReactElement => {
         }),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
+    });
+
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
     });
 
   const queryClient = useQueryClient();
@@ -136,15 +136,10 @@ const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (
-    loadingProgram ||
-    userPartnerChoicesLoading ||
-    choicesLoading
-  )
+  if (loadingProgram || choicesLoading || userPartnerChoicesLoading)
     return <LoadingComponent />;
 
-  if (!program || !userPartnerChoicesData || !choicesData)
-    return null;
+  if (!program || !choicesData || !userPartnerChoicesData) return null;
 
   const {
     name,
@@ -249,8 +244,10 @@ const EditProgramPage = (): ReactElement => {
         version,
         status: '', // readonly field, will be ignored by API
         partnerAccess: '', // readonly field, will be ignored by API
-        reconciliationWindowInDays: requestValuesDetails.reconciliationWindowInDays,
-        sendReconciliationWindowExpiryNotifications: requestValuesDetails.sendReconciliationWindowExpiryNotifications,
+        reconciliationWindowInDays:
+          requestValuesDetails.reconciliationWindowInDays,
+        sendReconciliationWindowExpiryNotifications:
+          requestValuesDetails.sendReconciliationWindowExpiryNotifications,
       };
 
       const response = await updateProgramDetails(programData);
@@ -303,7 +300,8 @@ const EditProgramPage = (): ReactElement => {
     frequencyOfPayments: frequencyOfPayments,
     pduFields: pduFields,
     reconciliationWindowInDays: reconciliationWindowInDays,
-    sendReconciliationWindowExpiryNotifications: sendReconciliationWindowExpiryNotifications,
+    sendReconciliationWindowExpiryNotifications:
+      sendReconciliationWindowExpiryNotifications,
   };
 
   initialValuesProgramDetails.budget =
@@ -348,8 +346,6 @@ const EditProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
-
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Programme'),
@@ -378,7 +374,10 @@ const EditProgramPage = (): ReactElement => {
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
-          hasPermissionInModule('PROGRAMME_VIEW_LIST_AND_DETAILS', permissions)
+          hasPermissions(
+            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            permissions,
+          )
             ? breadCrumbsItems
             : null
         }
@@ -477,10 +476,28 @@ const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
-              userPartnerChoices,
-              values.partners,
-            );
+            const mappedPartnerChoicesFromProgram =
+              mapPartnerChoicesFromProgramWithoutUnicef(
+                program.partners,
+                values.partners,
+              );
+
+            const mappedPartnerChoicesFromChoices =
+              mapPartnerChoicesFromChoicesWithoutUnicef(
+                userPartnerChoicesData.partnerChoices,
+                values.partners,
+              );
+
+            const seen = new Set();
+            const mappedPartnerChoices = [
+              ...mappedPartnerChoicesFromProgram,
+              ...mappedPartnerChoicesFromChoices,
+            ].filter((item) => {
+              const key = `${item.value}|${item.label}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
 
             return (
               <BaseSection title={t('Programme Partners')}>

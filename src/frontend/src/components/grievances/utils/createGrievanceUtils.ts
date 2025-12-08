@@ -470,18 +470,11 @@ export function prepareExistingAccountValues(
   if (!individualDataUpdateAccountsToEdit) {
     return [];
   }
-  function popKey(obj: any, key: string) {
-    const value = obj[key];
-    delete obj[key];
-    return value;
-  }
   return individualDataUpdateAccountsToEdit.map((item) => {
-    return {
-      number: popKey(item, 'number'),
-      financialInstitution: popKey(item, 'financialInstitution'),
-      id: popKey(item, 'id'),
-      dataFields: { ...item },
-    };
+    const preparedItem = { ...item };
+    delete preparedItem.accountType;
+    delete preparedItem.isNew;
+    return preparedItem;
   });
 }
 

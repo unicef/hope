@@ -119,6 +119,7 @@ export function customSnakeCase(str: string): string {
       .toLowerCase()
   );
 }
+
 export function processFormData(
   obj: any,
   form?: FormData,
@@ -306,20 +307,26 @@ export const sendRequest = async (
   }
 
   onCancel(() => controller.abort());
-  let  response = await fetch(url, request);
+  let response = await fetch(url, request);
   const content = await response.json();
   try {
-    if (response?.status == 403&&content?.detail!=="Authentication credentials were not provided.") {
+    if (
+      response?.status == 403 &&
+      content?.detail !== 'Authentication credentials were not provided.'
+    ) {
       window.location.href = '/access-denied/';
-    }else if(response?.status == 403&&content?.detail==="Authentication credentials were not provided."){
+    } else if (
+      response?.status == 403 &&
+      content?.detail === 'Authentication credentials were not provided.'
+    ) {
       const pathWithQuery = window.location.pathname + window.location.search;
       let next = '';
-      if (pathWithQuery){
+      if (pathWithQuery) {
         next = `?next=${encodeURIComponent(pathWithQuery)}`;
       }
       window.location.href = `/login/${next}`;
     }
-  }catch (error) {
+  } catch (error) {
     console.error(error);
   }
   response.json = async () => {

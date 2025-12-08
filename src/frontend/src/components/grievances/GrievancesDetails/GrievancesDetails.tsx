@@ -44,7 +44,7 @@ function GrievancesDetails({
   canViewIndividualDetails,
 }: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const statusChoices: {
@@ -93,7 +93,7 @@ function GrievancesDetails({
     if (paymentRecord) {
       return (
         <ContentLink
-          href={`/${baseUrl}/payment-module/payments/${paymentRecord.id}`}
+          href={`/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-module/payments/${paymentRecord.id}`}
         >
           {paymentRecord.unicefId}
         </ContentLink>
@@ -104,10 +104,11 @@ function GrievancesDetails({
 
   const renderPaymentPlanUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
+
     if (parent) {
       return (
         <ContentLink
-          href={`/${baseUrl}/payment-module/payment-plans/${parent.id}`}
+          href={`/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-module/payment-plans/${parent.id}`}
         >
           {parent.unicefId}
         </ContentLink>
@@ -118,8 +119,9 @@ function GrievancesDetails({
 
   const renderPaymentPlanVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
+
     if (parent) {
-      const url = `/${baseUrl}/payment-verification/payment-plan/${parent.id}`;
+      const url = `/${businessArea}/programs/${ticket.programs?.[0]?.slug}/payment-verification/payment-plan/${parent.id}`;
       return <ContentLink href={url}>{parent.unicefId}</ContentLink>;
     }
     return <>-</>;
@@ -213,7 +215,7 @@ function GrievancesDetails({
                 ),
                 size: 3,
               },
-              !isAllPrograms && {
+              !isSocialDctType && {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
@@ -334,7 +336,9 @@ function GrievancesDetails({
               },
             ]
               .filter((el) =>
-                isSocialDctType ? el.label !== 'Household ID' : el,
+                isSocialDctType
+                  ? el.label !== `${beneficiaryGroup?.groupLabel} ID`
+                  : el,
               )
               .map(
                 (el) =>

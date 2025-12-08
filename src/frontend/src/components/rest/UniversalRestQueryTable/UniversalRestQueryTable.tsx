@@ -28,12 +28,13 @@ interface UniversalRestQueryTableProps<T = any, K = any> {
   query: (variables: K) => Promise<any>;
   page?: number;
   setPage?: (page: number) => void;
+  customEnabled?: boolean;
 }
 
 export const UniversalRestQueryTable = <T, K>(
   props: UniversalRestQueryTableProps,
 ): ReactElement => {
-  const { query, page, setPage, ...propsToPass } = props;
+  const { query, page, setPage, customEnabled = true, ...propsToPass } = props;
   const { businessArea, programSlug } = useBaseUrl();
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
@@ -45,7 +46,7 @@ export const UniversalRestQueryTable = <T, K>(
         programSlug,
         ...cleanedQueryVariables,
       }),
-    enabled: !!businessArea && !!programSlug,
+    enabled: customEnabled && !!businessArea && !!programSlug,
   });
   return (
     <UniversalRestTable<T, K>

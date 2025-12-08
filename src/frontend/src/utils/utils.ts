@@ -1,3 +1,28 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import localForage from 'localforage';
+import _, { camelCase, startCase } from 'lodash';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { theme as themeObj } from '../theme';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
+
+// Formats a string or array value to Normal Case using lodash's startCase
+export function formatNormalCaseValue(value: string | string[]): string {
+  if (typeof value === 'string') {
+    return startCase(value);
+  }
+  return String(value);
+}
 export function safeStringify(value) {
   if (typeof value === 'object' && value !== null) {
     try {
@@ -34,24 +59,6 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
-import _ from 'lodash';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -107,11 +114,27 @@ export const isPartnerVisible = (partnerName: string): boolean => {
   );
 };
 
-export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+export function mapPartnerChoicesFromChoicesWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
   return choices
     .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
+export function mapPartnerChoicesFromProgramWithoutUnicef(
+  choices,
+  selectedPartners,
+) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.id,
       label: partner.name,
       disabled: selectedPartners.some((p) => p.id === partner.value),
     }));
@@ -1301,6 +1324,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1308,7 +1332,9 @@ export function deepUnderscore(data) {
       data,
       (result, value, key) => {
         // Special handling for keys that follow the pattern of letters followed by numbers
-        if (/^[a-zA-Z]+\d+$/.test(key)) {
+        if (notUnderscoreKeys.includes(key)) {
+          result[_.snakeCase(key)] = value;
+        } else if (/^[a-zA-Z]+\d+$/.test(key)) {
           // Keep original key for letter+number pattern fields
           result[key] = deepUnderscore(value);
         } else {
@@ -1542,3 +1568,32 @@ export function splitCamelCase(str: string): string {
     .replace(/^./, (s) => s.toUpperCase());
   return withSpaces.trim();
 }
+
+export const renderNestedObject = (obj: Record<string, any>): string => {
+  return Object.entries(obj)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Handle nested objects - render all properties generically
+        const parts = Object.entries(v)
+          .map(([key, val]) => {
+            let valStr: string;
+            if (val === null || val === undefined) {
+              valStr = '-';
+            } else if (typeof val === 'boolean') {
+              valStr = val ? 'true' : 'false';
+            } else if (typeof val === 'number') {
+              valStr = val.toString();
+            } else if (typeof val === 'object') {
+              valStr = JSON.stringify(val);
+            } else {
+              valStr = val as string;
+            }
+            return `${key}: ${valStr}`;
+          })
+          .join(', ');
+        return `${k}: ${parts}`;
+      }
+      return `${k}: ${String(v)}`;
+    })
+    .join('\n');
+};

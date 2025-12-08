@@ -47,7 +47,6 @@ export function LookUpSelectionSurveys({
 
   const { t } = useTranslation();
 
-
   const handleChange = (type: number, value: string): void => {
     setValues({
       ...values,
@@ -57,7 +56,6 @@ export function LookUpSelectionSurveys({
           : '',
     });
   };
-
 
   return (
     <Box>
