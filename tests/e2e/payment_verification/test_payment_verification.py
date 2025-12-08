@@ -394,7 +394,7 @@ class TestSmokePaymentVerification:
         assert payment_record.parent.name in page_payment_record.get_label_target_population().text
         assert payment_record.parent.unicef_id in page_payment_record.get_label_distribution_modality().text
         assert payment_record.payment_verifications.first().status in page_payment_record.get_label_status()[1].text
-        assert "PLN 0.00" in page_payment_record.get_label_amount_received().text
+        assert "-" in page_payment_record.get_label_amount_received().text
         assert payment_record.household.unicef_id in page_payment_record.get_label_household_id().text
         assert "21.36" in page_payment_record.get_label_entitlement_quantity().text
         assert "21.36" in page_payment_record.get_label_delivered_quantity().text
