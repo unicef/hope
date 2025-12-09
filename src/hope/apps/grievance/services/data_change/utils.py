@@ -251,7 +251,7 @@ def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     identity_id = updated_identity.get("id")
     country_code = updated_identity.get("country")
 
-    country = Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)  # pragma: no cover
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 

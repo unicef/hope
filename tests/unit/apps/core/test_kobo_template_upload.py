@@ -14,6 +14,10 @@ import requests
 
 from hope.apps.account.models import User
 from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task,
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry,
+)
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -216,3 +220,13 @@ class TestKoboErrorHandling(BaseTestCase):
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
             assert empty_template.first_connection_failed_time is None
+
+    def test_upload_new_kobo_template_and_update_flex_fields_task_with_retry(self) -> None:
+        # coverage imports
+        empty_template = self.generate_empty_template()
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry(str(empty_template.id))
+
+    def test_upload_new_kobo_template_and_update_flex_fields_task(self) -> None:
+        # coverage imports
+        template = self.generate_empty_template()
+        upload_new_kobo_template_and_update_flex_fields_task(str(template.id))

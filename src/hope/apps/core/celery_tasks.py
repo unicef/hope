@@ -41,13 +41,10 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
 def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
     from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (  # pragma: no cover
         KoboRetriableError,
+        UploadNewKoboTemplateAndUpdateFlexFieldsTask,
     )
 
     try:
-        from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
-            UploadNewKoboTemplateAndUpdateFlexFieldsTask,
-        )
-
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError:
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)

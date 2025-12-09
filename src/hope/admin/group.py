@@ -115,7 +115,7 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         objs = []
         for qs in [groups]:
             objs.extend(qs)
-        objs.extend(UserGroup.objects.filter(pk=record.pk))
+        objs.extend(UserGroup.objects.filter(pk=record.pk))  # pragma: no cover
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(

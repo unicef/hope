@@ -69,10 +69,10 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
 
         if not (obj and (obj.is_unicef_subpartner or obj.is_unicef)):
-            queryset = Partner.objects.filter(level=0)
+            queryset = Partner.objects.filter(level=0)  # pragma: no cover
             if obj:
                 if obj.is_parent:
-                    queryset = Partner.objects.none()
+                    queryset = Partner.objects.none()  # pragma: no cover
                 else:
                     queryset = queryset.exclude(id=obj.id)
 

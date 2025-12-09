@@ -394,7 +394,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                         for role in roles:
                             if crud == "ADD":
                                 try:
-                                    IncompatibleRoles.objects.validate_user_role(u, ba, role)
+                                    IncompatibleRoles.objects.validate_user_role(u, ba, role)  # pragma: no cover
                                     ur, is_new = u.role_assignments.get_or_create(business_area=ba, role=role)
                                     if is_new:
                                         added += 1

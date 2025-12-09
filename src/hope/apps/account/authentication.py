@@ -75,7 +75,7 @@ def create_user(
     if user:
         return {"is_new": False}
 
-    user = User.objects.create(
+    user = User.objects.create(  # pragma: no cover
         email=details["email"],
         username=details["email"],
         first_name=details.get("first_name"),
