@@ -2,14 +2,11 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DatabaseError, transaction
-from django.db.models import Q
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.generic.edit import FormView
 
-from hope.apps.account.models import RoleAssignment
-from hope.apps.account.permissions import Permissions, check_permissions
+from hope.apps.account.permissions import Permissions
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.forms import GenericImportForm
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -29,33 +26,23 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
-        """Check GENERIC_IMPORT_DATA permission before processing request."""
+        """Check GENERIC_IMPORT_DATA permission before processing request.
+
+        Note: This check is intentionally separate from form_valid() check.
+        dispatch() verifies user can access ANY business area (view access gate),
+        while form_valid() verifies permission for the SPECIFIC selected BA.
+        """
         # Only check permissions if user is authenticated
         # LoginRequiredMixin will handle redirect for unauthenticated users
         if request.user.is_authenticated:
-            # Get business areas from role assignments (including partner assignments)
-            from hope.apps.core.models import BusinessArea
-
-            # Match User.business_areas logic: include partner assignments, exclude expired/inactive
-            role_assignments = RoleAssignment.objects.filter(
-                Q(user=request.user) | Q(partner__user=request.user)
-            ).exclude(expiry_date__lt=timezone.now())
-
-            business_areas = (
-                BusinessArea.objects.filter(role_assignments__in=role_assignments).exclude(active=False).distinct()
-            )
+            business_areas = request.user.business_areas
 
             if not business_areas.exists():
                 raise PermissionDenied("You do not have access to any business area.")
 
             # Check GENERIC_IMPORT_DATA permission for at least one business area
             has_permission = any(
-                check_permissions(
-                    request.user,
-                    [Permissions.GENERIC_IMPORT_DATA],
-                    business_area=ba,
-                )
-                for ba in business_areas
+                request.user.has_perm(Permissions.GENERIC_IMPORT_DATA.name, ba) for ba in business_areas
             )
 
             if not has_permission:
@@ -72,11 +59,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
         uploaded_file = form.cleaned_data["file"]
 
         # Verify user has permission for selected BA
-        if not check_permissions(
-            self.request.user,
-            [Permissions.GENERIC_IMPORT_DATA],
-            business_area=business_area,
-        ):
+        if not self.request.user.has_perm(Permissions.GENERIC_IMPORT_DATA.name, business_area):
             messages.error(
                 self.request,
                 f"You do not have permission to import data for {business_area.name}.",
@@ -150,18 +133,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         """Add extra context to template."""
-        from hope.apps.core.models import BusinessArea
-
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Generic Import"
-
-        # Get business areas from role assignments (including partner assignments)
-        # Match User.business_areas logic: include partner assignments, exclude expired/inactive
-        role_assignments = RoleAssignment.objects.filter(
-            Q(user=self.request.user) | Q(partner__user=self.request.user)
-        ).exclude(expiry_date__lt=timezone.now())
-
-        context["business_areas"] = (
-            BusinessArea.objects.filter(role_assignments__in=role_assignments).exclude(active=False).distinct()
-        )
+        context["business_areas"] = self.request.user.business_areas
         return context

@@ -72,6 +72,15 @@ def mobile_account_type(db):
 
 
 @pytest.fixture
+def generic_financial_institutions(db):
+    """Create generic financial institutions for accounts without FI."""
+    from hope.apps.payment.models import FinancialInstitution
+
+    FinancialInstitution.objects.create(name="Generic Bank")
+    FinancialInstitution.objects.create(name="Generic Telco Company")
+
+
+@pytest.fixture
 def document_type_other_id(db):
     """Create other_id document type."""
     from hope.apps.household.models import DocumentType
@@ -188,6 +197,7 @@ class TestSomaliaImportIntegration:
         mobile_account_type,
         document_type_other_id,
         somalia_country,
+        generic_financial_institutions,
     ):
         """Test complete flow: parse → import → database verification."""
         # Step 1: Parse Excel file
@@ -364,6 +374,7 @@ class TestSomaliaImportIntegration:
         tmp_path,
         registration_data_import,
         mobile_account_type,
+        generic_financial_institutions,
     ):
         """Test importing multiple households."""
         # Create file with multiple households
