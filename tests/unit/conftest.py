@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 import re
 import sys
@@ -81,7 +80,6 @@ def pytest_configure(config: Config) -> None:
 
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.DATABASES["default"]["CONN_MAX_AGE"] = 0
-    settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",

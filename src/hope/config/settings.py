@@ -159,10 +159,8 @@ TEMPLATES: list[dict[str, Any]] = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.static",
-                # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
-                # Matomo
                 "hope.apps.core.context_processors.matomo",
             ],
             "debug": DEBUG,

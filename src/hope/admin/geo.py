@@ -9,7 +9,7 @@ from typing import (
 )
 
 from admin_extra_buttons.decorators import button
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
@@ -79,7 +79,7 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)
@@ -112,7 +112,7 @@ class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdmi
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAdminBase):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -156,7 +156,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",

@@ -1425,6 +1425,7 @@ class TestIndividualChoices:
         }
 
 
+@pytest.mark.elasticsearch
 class TestIndividualFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:

@@ -8,7 +8,7 @@ from uuid import UUID
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.admin import SyncModelAdmin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import messages
@@ -75,7 +75,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "created_by",

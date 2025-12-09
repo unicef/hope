@@ -277,7 +277,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 
             RegistrationDataImport.objects.filter(
                 id=registration_data_import_id,
-            ).update(status=RegistrationDataImport.MERGE_ERROR)
+            ).update(status=RegistrationDataImport.MERGE_ERROR, error_message=str(e))
             raise self.retry(exc=e)
 
     logger.info(

@@ -1,8 +1,6 @@
- 
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { ImportData } from '@restgenerated/models/ImportData';
-import { StatusF63Enum } from '@restgenerated/models/StatusF63Enum';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -24,7 +22,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
 
   // Mutation for uploading XLSX file
   const uploadMutation = useMutation({
-    mutationFn: async(variables: SaveXlsxVariables) => {
+    mutationFn: async (variables: SaveXlsxVariables) => {
       const formData = {
         file: variables.file,
       } as any;
@@ -44,7 +42,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
   // Query for polling import data status
   const { data: xlsxImportData } = useQuery({
     queryKey: ['importData', importDataId, businessAreaSlug],
-    queryFn: async() => {
+    queryFn: async () => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasImportDataRetrieve({
         businessAreaSlug: businessAreaSlug,
@@ -56,11 +54,9 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
       // Stop polling if status is final
       if (
         data &&
-        [
-          StatusF63Enum.ERROR,
-          StatusF63Enum.VALIDATION_ERROR,
-          StatusF63Enum.FINISHED,
-        ].includes(data?.state?.data?.status)
+        ['ERROR', 'VALIDATION_ERROR', 'FINISHED'].includes(
+          data?.state?.data?.status,
+        )
       ) {
         return false;
       }
@@ -68,7 +64,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     },
   });
 
-  const saveAndStartPolling = async(
+  const saveAndStartPolling = async (
     variables: SaveXlsxVariables,
   ): Promise<void> => {
     await uploadMutation.mutateAsync(variables);
@@ -78,9 +74,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     saveAndStartPolling,
     loading:
       uploadMutation.isPending ||
-      [StatusF63Enum.PENDING, StatusF63Enum.RUNNING].includes(
-        xlsxImportData?.status,
-      ),
+      ['PENDING', 'RUNNING'].includes(xlsxImportData?.status),
     xlsxImportData: xlsxImportData || null,
   };
 }

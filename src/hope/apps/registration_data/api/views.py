@@ -50,8 +50,6 @@ from hope.apps.utils.elasticsearch_utils import (
 )
 from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
-# Import moved inline to avoid circular dependency issues
-
 logger = logging.getLogger(__name__)
 
 

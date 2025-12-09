@@ -2,7 +2,7 @@ import contextlib
 import json
 from typing import Any
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -50,6 +50,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
     golden_record_duplicates_count_and_percentage = serializers.SerializerMethodField()
     golden_record_possible_duplicates_count_and_percentage = serializers.SerializerMethodField()
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
+    number_of_registered_individuals = serializers.SerializerMethodField()
 
     class Meta:
         model = RegistrationDataImport
@@ -65,6 +66,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "import_date",
             "number_of_households",
             "number_of_individuals",
+            "number_of_registered_individuals",
             "biometric_deduplicated",
             "error_message",
             "can_merge",
@@ -134,6 +136,11 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             .distinct()
             .count()
         )
+
+    def get_number_of_registered_individuals(self, obj: RegistrationDataImport) -> int:
+        return obj.households.aggregate(total_registered_individuals=Count("individuals", distinct=True))[
+            "total_registered_individuals"
+        ]
 
 
 class RefuseRdiSerializer(serializers.Serializer):
