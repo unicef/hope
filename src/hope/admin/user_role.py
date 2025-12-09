@@ -51,8 +51,6 @@ class RoleAssignmentInline(admin.TabularInline):
 
     def has_add_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
-            if obj.is_parent or obj.is_unicef_subpartner:
-                return False  # Disable adding if Partner is a parent or is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
