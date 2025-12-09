@@ -197,14 +197,6 @@ class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
     autocomplete_fields = ("fsp",)
 
 
-class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
-    form = FspXlsxTemplatePerDeliveryMechanismForm
-    model = FspXlsxTemplatePerDeliveryMechanism
-    extra = 0
-    readonly_fields = ("created_by",)
-    raw_id_fields = ("financial_service_provider",)
-
-
 class FSPXlsxTemplateInline(admin.TabularInline):
     model = FinancialServiceProvider.xlsx_templates.through
     extra = 1
