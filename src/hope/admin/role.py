@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.collector import ForeignKeysCollector
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.base import BaseSyncMixin
 from admin_sync.protocol import LoadDumpProtocol
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -42,7 +42,7 @@ class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
