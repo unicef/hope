@@ -1,30 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import get from 'lodash/get';
-import { Autocomplete, TextField, Paper } from '@mui/material';
+import { forwardRef, ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import get from 'lodash/get';
+import { Autocomplete, Paper, TextField } from '@mui/material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
 `;
+interface Option {
+  labelEn: string;
+}
 
-export function CriteriaAutocomplete({
-  field,
-  choices,
-  ...otherProps
-}): React.ReactElement {
+function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
   const [open, setOpen] = useState(false);
-  const [newValue, setNewValue] = useState<any>(null);
+  const [newValue, setNewValue] = useState(null);
+  const [choicesWithoutDuplicates, setChoicesWithoutDuplicates] = useState();
+
   useEffect(() => {
     const optionValue =
-      choices.find((choice: any) => choice.name === field.value) || null;
+      otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
-  }, [field.value, choices]);
-
+  }, [field.value, otherProps.choices]);
+  useEffect(() => {
+    const uniqueChoices = otherProps.choices.filter(
+      (choice, index, self) =>
+        index === self.findIndex((t) => t.name === choice.name),
+    );
+    setChoicesWithoutDuplicates(uniqueChoices);
+  }, [otherProps.choices]);
   const isInvalid =
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
   return (
-    <StyledAutocomplete<any>
+    // @ts-ignore
+    <StyledAutocomplete<Option>
       {...field}
       {...otherProps}
       open={open}
@@ -34,48 +43,51 @@ export function CriteriaAutocomplete({
       onClose={() => {
         setOpen(false);
       }}
-      options={choices}
+      options={choicesWithoutDuplicates || []}
       value={newValue}
-      getOptionLabel={(option: any) => {
-        if (option) {
-          return option.labelEn || '';
-        }
+      getOptionLabel={(option) => {
+        if (!option) return '';
+        if (typeof option.labelEn === 'string') return option.labelEn;
+        if (option.labelEn?.englishEn) return String(option.labelEn.englishEn);
+        if (option.label?.englishEn) return String(option.label.englishEn);
         return '';
       }}
       renderInput={(params) => (
         <TextField
           {...params}
           {...otherProps}
+          size="small"
           variant="outlined"
-          margin="dense"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
           InputProps={{
             ...params.InputProps,
           }}
-          slotProps={{
-            htmlInput: {
-              ...params.inputProps,
-              'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
-            },
+          // https://github.com/mui-org/material-ui/issues/12805
+
+          inputProps={{
+            ...params.inputProps,
+            'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
           }}
         />
       )}
       data-cy="autocomplete-target-criteria"
-      PaperComponent={CriteriaAutocompletePaper}
+      component={forwardRef(
+        function CriteriaAutocompletePaperComponent(props, ref) {
+          return (
+            <Paper
+              {...{
+                ...props,
+                ref,
+              }}
+              data-cy="autocomplete-target-criteria-options"
+            />
+          );
+        },
+      )}
     />
   );
 }
 
-const CriteriaAutocompletePaper = React.forwardRef<HTMLDivElement, any>(
-  (props, ref) => (
-    <Paper
-      {...props}
-      ref={ref}
-      data-cy="autocomplete-target-criteria-options"
-    />
-  ),
-);
-
-CriteriaAutocompletePaper.displayName = 'CriteriaAutocompletePaper';
+export default withErrorBoundary(CriteriaAutocomplete, 'CriteriaAutocomplete');

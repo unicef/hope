@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { Button } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 
 const PlainComponentWrapper = styled.div`
   display: flex;
@@ -33,19 +33,21 @@ export const UniversalCriteriaPlainComponent = (
   return (
     <PlainComponentWrapper>
       {props.isEdit && (
-        <>
-          {!!props.rules.length && (
-            <ButtonWrapper>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setOpen(true)}
-              >
-                {t('Add')} &apos;Or&apos; {t('Filter')}
-              </Button>
-            </ButtonWrapper>
-          )}
-        </>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 6 }}>
+            {!!props.rules.length && (
+              <ButtonWrapper>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setOpen(true)}
+                >
+                  {t('Create New')}
+                </Button>
+              </ButtonWrapper>
+            )}
+          </Grid>
+        </Grid>
       )}
       <UniversalCriteriaComponent
         {...props}

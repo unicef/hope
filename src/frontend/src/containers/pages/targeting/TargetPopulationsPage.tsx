@@ -87,9 +87,7 @@ const TargetPopulationsPage = (): ReactElement => {
         }}
       />
       <Box p={5}>
-        <BaseSection title={t('Programme Eligibility Criteria')}>
-          <ProgramEligibilityCriteria />
-        </BaseSection>
+        <ProgramEligibilityCriteria />
       </Box>
       <Box ref={tableRef}>
         <Table

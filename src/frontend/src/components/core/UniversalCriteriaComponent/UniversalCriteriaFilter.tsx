@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
 import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
+import { Box } from '@mui/system';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -48,7 +49,7 @@ export function UniversalCriteriaFilter({
   const { t } = useTranslation();
   const shouldShowDivider = index + 1 < values.filters.length;
   return (
-    <div>
+    <Box mt={2}>
       <FieldChooser
         index={index}
         choices={fieldsChoices}
@@ -59,15 +60,21 @@ export function UniversalCriteriaFilter({
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy="autocomplete-universal-criteria-values">
-          <SubField field={each} index={index} baseName={`filters[${index}]`} />
-        </div>
+        <Box mt={2}>
+          <div data-cy="autocomplete-universal-criteria-values">
+            <SubField
+              field={each}
+              index={index}
+              baseName={`filters[${index}]`}
+            />
+          </div>
+        </Box>
       )}
       {shouldShowDivider && (
         <Divider>
           <DividerLabel>{t('And')}</DividerLabel>
         </Divider>
       )}
-    </div>
+    </Box>
   );
 }

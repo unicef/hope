@@ -39,29 +39,35 @@ export function Example(): React.ReactElement {
     staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     enabled: !!selectedProgram?.id && !isAllPrograms,
   });
+
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
-      allFieldsAttributes: allCoreFieldsAttributesData?.results
+      allFieldsAttributes: allCoreFieldsAttributesData
+        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     };
     setIndividualData(filteredIndividualData);
 
     const filteredHouseholdData = {
-      allFieldsAttributes: allCoreFieldsAttributesData?.results?.filter(
-        associatedWith('Household'),
-      ),
+      allFieldsAttributes: allCoreFieldsAttributesData
+        //@ts-ignore
+        ?.filter(associatedWith('Household')),
     };
     setHouseholdData(filteredHouseholdData);
   }, [allCoreFieldsAttributesData, loading]);
 
   if (!individualData || !householdData) return <div>Loading</div>;
 
+  console.log('individualData', individualData);
+  console.log('householdData', householdData);
+
   const initialValues = {
     name: '',
     someWeirdNameForCriteria: [],
   };
+
   return (
     <div>
       <PaperContainer>

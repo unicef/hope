@@ -23,6 +23,7 @@ import {
   DialogContent,
   Button,
   DialogActions,
+  Grid,
 } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useRef } from 'react';
@@ -32,6 +33,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useProgramContext } from 'src/programContext';
 import { FspChoices } from '@restgenerated/models/FspChoices';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -124,7 +126,8 @@ export function UniversalCriteriaForm({
 }: UniversalCriteriaFormProps): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea, isAllPrograms } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
@@ -248,126 +251,149 @@ export function UniversalCriteriaForm({
             fullWidth
             maxWidth="md"
           >
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle>
                 <Typography variant="h6">{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {
-                // @ts-ignore
-                errors.nonFieldErrors && (
-                  <DialogError>
-                    <ul>
-                      {
-                        // @ts-ignore
-                        errors.nonFieldErrors.map((message, index) => (
-                          <li key={index}>{message}</li>
-                        ))
-                      }
-                    </ul>
-                  </DialogError>
-                )
-              }
-              <DialogDescription>
-                All rules defined below have to be true for the entire
-                household.
-              </DialogDescription>
-              <FieldArray
-                name="filters"
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={filtersArrayWrapperRef}
-                  >
-                    {values.filters.map((each, index) => {
-                      return (
-                        <UniversalCriteriaFilter
-                          key={index}
-                          index={index}
-                          fieldsChoices={householdFieldsChoices}
-                          each={each}
-                          onChange={(e, object) => {
-                            if (object) {
-                              return chooseFieldType(
-                                object,
-                                arrayHelpers,
-                                index,
-                              );
-                            }
-                            return clearField(arrayHelpers, index);
-                          }}
-                          values={values}
-                          onClick={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
-                  </ArrayFieldWrapper>
-                )}
-              />
-              <Box display="flex" flexDirection="column">
-                <ButtonBox>
-                  <Button
-                    onClick={() =>
-                      filtersArrayWrapperRef.current
-                        .getArrayHelpers()
-                        .push({ fieldName: '' })
-                    }
-                    color="primary"
-                    startIcon={<AddCircleOutline />}
-                  >
-                    ADD HOUSEHOLD RULE
-                  </Button>
-                </ButtonBox>
-              </Box>
-              <AndDivider>
-                <AndDividerLabel>And</AndDividerLabel>
-              </AndDivider>
-              {values.individualsFiltersBlocks.length &&
-              shouldShowWarningForIndividualFilter ? (
-                <DialogDescription>
-                  In your programme, individual rules can only be applied to
-                  head of households.
-                </DialogDescription>
-              ) : null}
-              <FieldArray
-                name="individualsFiltersBlocks"
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={individualsFiltersBlocksWrapperRef}
-                  >
-                    {values.individualsFiltersBlocks.map((each, index) => {
-                      return (
-                        <UniversalCriteriaFilterBlocks
-                          key={index}
-                          blockIndex={index}
-                          fieldsChoices={individualFieldsChoices}
-                          values={values}
-                          onDelete={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
-                  </ArrayFieldWrapper>
-                )}
-              />
-              <Box display="flex" flexDirection="column">
-                <ButtonBox>
-                  <Button
-                    onClick={() =>
-                      individualsFiltersBlocksWrapperRef.current
-                        .getArrayHelpers()
-                        .push({
-                          individualBlockFilters: [{ fieldName: '' }],
-                        })
-                    }
-                    color="primary"
-                  >
-                    <AddCircleOutline />
-                    ADD INDIVIDUAL RULE GROUP
-                  </Button>
-                </ButtonBox>
-              </Box>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12 }}>
+                  {/* Error messages */}
+                  {
+                    // @ts-ignore
+                    errors.nonFieldErrors && (
+                      <DialogError>
+                        <ul>
+                          {
+                            // @ts-ignore
+                            errors.nonFieldErrors.map((message, index) => (
+                              <li key={index}>{message}</li>
+                            ))
+                          }
+                        </ul>
+                      </DialogError>
+                    )
+                  }
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <DialogDescription>
+                    {isSocialDctType
+                      ? ''
+                      : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabel}.`}{' '}
+                  </DialogDescription>
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <FieldArray
+                    name="filters"
+                    render={(arrayHelpers) => (
+                      <ArrayFieldWrapper
+                        arrayHelpers={arrayHelpers}
+                        ref={filtersArrayWrapperRef}
+                      >
+                        {values.filters?.map((each, index) => {
+                          return (
+                            <UniversalCriteriaFilter
+                              key={index}
+                              index={index}
+                              fieldsChoices={householdFieldsChoices}
+                              each={each}
+                              onChange={(e, object) => {
+                                if (object) {
+                                  return chooseFieldType(
+                                    object,
+                                    arrayHelpers,
+                                    index,
+                                  );
+                                }
+                                return clearField(arrayHelpers, index);
+                              }}
+                              values={values}
+                              onClick={() => arrayHelpers.remove(index)}
+                            />
+                          );
+                        })}
+                      </ArrayFieldWrapper>
+                    )}
+                  />
+                  <Box display="flex" flexDirection="column">
+                    <ButtonBox>
+                      <Button
+                        onClick={() =>
+                          filtersArrayWrapperRef.current
+                            .getArrayHelpers()
+                            .push({ fieldName: '' })
+                        }
+                        color="primary"
+                        startIcon={<AddCircleOutline />}
+                      >
+                        ADD{' '}
+                        {isSocialDctType
+                          ? 'PEOPLE'
+                          : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
+                        RULE
+                      </Button>
+                    </ButtonBox>
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <AndDivider>
+                    <AndDividerLabel>And</AndDividerLabel>
+                  </AndDivider>
+                </Grid>
+                {values.individualsFiltersBlocks.length &&
+                shouldShowWarningForIndividualFilter ? (
+                  <Grid size={{ xs: 12 }}>
+                    <DialogDescription>
+                      In your programme, individual rules can only be applied to
+                      head of households.
+                    </DialogDescription>
+                  </Grid>
+                ) : null}
+                <Grid size={{ xs: 12 }}>
+                  <FieldArray
+                    name="individualsFiltersBlocks"
+                    render={(arrayHelpers) => (
+                      <ArrayFieldWrapper
+                        arrayHelpers={arrayHelpers}
+                        ref={individualsFiltersBlocksWrapperRef}
+                      >
+                        {values.individualsFiltersBlocks.map((each, index) => {
+                          return (
+                            <UniversalCriteriaFilterBlocks
+                              key={index}
+                              blockIndex={index}
+                              fieldsChoices={individualFieldsChoices}
+                              values={values}
+                              onDelete={() => arrayHelpers.remove(index)}
+                            />
+                          );
+                        })}
+                      </ArrayFieldWrapper>
+                    )}
+                  />
+                  <Box display="flex" flexDirection="column">
+                    <ButtonBox>
+                      <Button
+                        data-cy="button-individual-rule"
+                        onClick={() =>
+                          individualsFiltersBlocksWrapperRef.current
+                            .getArrayHelpers()
+                            .push({
+                              individualBlockFilters: [{ fieldName: '' }],
+                            })
+                        }
+                        color="primary"
+                        startIcon={<AddCircleOutline />}
+                      >
+                        {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
+                              RULE GROUP`}
+                      </Button>
+                    </ButtonBox>
+                  </Box>
+                </Grid>
+              </Grid>
             </DialogContent>
             <DialogFooter>
               <DialogActions>

@@ -5,6 +5,7 @@ import { UniversalCriteria } from './UniversalCriteria';
 import { UniversalCriteriaForm } from './UniversalCriteriaForm';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
+import { Button } from '@mui/material';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -38,23 +39,6 @@ const DividerLabel = styled.div`
   border: 1px solid #b1b1b5;
   border-radius: 50%;
   background-color: #fff;
-`;
-
-const AddCriteria = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #003c8f;
-  border: 2px solid #033f91;
-  border-radius: 3px;
-  font-size: 16px;
-  padding: ${({ theme }) => theme.spacing(6)}px
-    ${({ theme }) => theme.spacing(28)}px;
-  cursor: pointer;
-  p {
-    font-weight: 500;
-    margin: 0 0 0 ${({ theme }) => theme.spacing(2)}px;
-  }
 `;
 
 interface UniversalCriteriaProps {
@@ -158,13 +142,14 @@ export const UniversalCriteriaComponent = ({
             );
           })
         ) : (
-          <AddCriteria
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => setOpen(true)}
             data-cy="button-universal-add-criteria"
           >
-            <AddCircleOutline />
-            <p>{t('Add Filter')}</p>
-          </AddCriteria>
+            <p>{t('Create New')}</p>
+          </Button>
         )}
       </ContentWrapper>
     </>

@@ -2,9 +2,9 @@ import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CriteriaAutocomplete } from './CriteriaAutocomplete';
 import { Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import CriteriaAutocomplete from '@components/core/UniversalCriteriaComponent/CriteriaAutocomplete';
 
 const FlexWrapper = styled.div`
   display: flex;
