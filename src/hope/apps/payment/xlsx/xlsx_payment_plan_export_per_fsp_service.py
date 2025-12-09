@@ -129,6 +129,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
+            .order_by("unicef_id")
         )
         for payment in qs:
             snapshot = getattr(payment, "household_snapshot", None)
@@ -138,7 +139,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             account_data = collector_data.get("account_data", {})
             if account_data:
-                return list(account_data.keys())
+                headers = list(account_data.keys())
+                if "financial_institution_pk" not in headers:
+                    headers.append("financial_institution_pk")
+                if "financial_institution_name" not in headers:
+                    headers.append("financial_institution_name")
+                if "number" not in headers:
+                    headers.append("number")
+                return headers
         return []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:

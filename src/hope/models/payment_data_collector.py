@@ -60,10 +60,9 @@ class PaymentDataCollector(Account):
                 delivery_data[field] = getattr(associated_object, internal_field, None)
 
         if account:
-            if account.number:
-                delivery_data["number"] = account.number
-            if account.financial_institution:
-                delivery_data["financial_institution"] = str(account.financial_institution.id)
+            delivery_data.setdefault("number", account.number)
+            delivery_data.setdefault("financial_institution_name", getattr(account.financial_institution, "name", ""))
+            delivery_data.setdefault("financial_institution_pk", str(getattr(account.financial_institution, "pk", "")))
 
         return delivery_data
 

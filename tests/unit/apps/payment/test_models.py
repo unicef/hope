@@ -1083,7 +1083,8 @@ class TestAccountModel(TestCase):
             "custom_ind_name": f"{dmd.individual.full_name} Custom",
             "custom_hh_address": f"{self.hh.address} Custom",
             "address": self.hh.address,
-            "financial_institution": str(self.financial_institution.id),
+            "financial_institution_name": str(self.financial_institution.name),
+            "financial_institution_pk": str(self.financial_institution.id),
         }
 
     def test_delivery_data_setter(self) -> None:
@@ -1112,7 +1113,8 @@ class TestAccountModel(TestCase):
         assert account.account_data == {
             "number": "456",
             "expiry_date": "12.12.2025",
-            "financial_institution": str(financial_institution2.id),
+            "financial_institution_pk": str(financial_institution2.id),
+            "financial_institution_name": str(financial_institution2.name),
             "new_field": "new_value",
             "name_of_cardholder": "Marek",
         }

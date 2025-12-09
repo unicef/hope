@@ -109,6 +109,8 @@ class TestBuildSnapshot(TestCase):
             "expiry_date": "2022-01-01",
             "number": "123",
             "name_of_cardholder": "Marek",
+            "financial_institution_name": "",
+            "financial_institution_pk": "",
         }
 
     def test_batching(self) -> None:
