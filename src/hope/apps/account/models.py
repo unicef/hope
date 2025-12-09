@@ -537,6 +537,24 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{role_holder} {self.role} in {self.business_area}"
 
 
+class UserRoleAssignment(RoleAssignment):
+    """Proxy model for RoleAssignments that are assigned to Users."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Role Assignment (User)"
+        verbose_name_plural = "Role Assignments (User)"
+
+
+class PartnerRoleAssignment(RoleAssignment):
+    """Proxy model for RoleAssignments that are assigned to Partners."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Role Assignment (Partner)"
+        verbose_name_plural = "Role Assignments (Partner)"
+
+
 class AdminAreaLimitedTo(TimeStampedUUIDModel):
     """Model to limit the admin area access for a partner.
 

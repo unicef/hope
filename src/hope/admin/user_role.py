@@ -65,23 +65,8 @@ class RoleAssignmentInline(admin.TabularInline):
         return True
 
 
-@admin.register(account_models.RoleAssignment)
-class RoleAssignmentAdmin(HOPEModelAdminBase):
-    list_display = ("user", "partner", "role", "business_area", "program")
+class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
     form = RoleAssignmentAdminForm
-    autocomplete_fields = ("user", "partner", "business_area", "role", "program", "group")
-    search_fields = (
-        "user__username",
-        "user__first_name",
-        "user__last_name",
-    )
-    list_filter = (
-        ("business_area", AutoCompleteFilter),
-        ("program", AutoCompleteFilter),
-        ("role", AutoCompleteFilter),
-        ("role__subsystem", AllValuesComboFilter),
-        ("partner", AutoCompleteFilter),
-    )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -111,3 +96,70 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
 
     def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
+
+
+@admin.register(account_models.UserRoleAssignment)
+class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
+    list_display = ("user", "role", "business_area", "program")
+    autocomplete_fields = ("user", "business_area", "role", "program", "group")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__email",
+    )
+    list_filter = (
+        ("user", AutoCompleteFilter),
+        ("business_area", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
+        ("role", AutoCompleteFilter),
+        ("role__subsystem", AllValuesComboFilter),
+    )
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = super().get_queryset(request)
+        return qs.filter(user__isnull=False)
+
+    def has_module_permission(self, request: HttpRequest) -> bool:
+        return request.user.has_perm("account.can_edit_user_roles")
+
+    def has_view_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return request.user.has_perm("account.can_edit_user_roles")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.has_perm("account.can_edit_user_roles")
+
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return request.user.has_perm("account.can_edit_user_roles")
+
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return request.user.has_perm("account.can_edit_user_roles")
+
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+        return ["user", "business_area", "program", "role", "expiry_date", "group"]
+
+
+@admin.register(account_models.PartnerRoleAssignment)
+class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
+    list_display = ("partner", "role", "business_area", "program")
+    autocomplete_fields = ("partner", "business_area", "role", "program", "group")
+    search_fields = ("partner__name",)
+    list_filter = (
+        ("partner", AutoCompleteFilter),
+        ("business_area", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
+        ("role", AutoCompleteFilter),
+        ("role__subsystem", AllValuesComboFilter),
+    )
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = super().get_queryset(request)
+        return qs.filter(partner__isnull=False)
+
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+        return ["partner", "business_area", "program", "role", "expiry_date", "group"]
+
+    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+        if db_field.name == "role":
+            kwargs["queryset"] = Role.objects.filter(is_available_for_partner=True).order_by("name")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
