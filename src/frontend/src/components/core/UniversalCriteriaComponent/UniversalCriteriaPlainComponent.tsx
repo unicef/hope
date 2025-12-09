@@ -42,7 +42,7 @@ export const UniversalCriteriaPlainComponent = (
                   color="primary"
                   onClick={() => setOpen(true)}
                 >
-                  {t('Create New')}
+                  {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
               </ButtonWrapper>
             )}

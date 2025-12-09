@@ -72,33 +72,40 @@ export const ProgramEligibilityCriteria: React.FC = () => {
     <ContentWrapper>
       <Formik
         initialValues={initialValues}
-        onSubmit={() => {
-          console.log('XD');
+        onSubmit={(values) => {
+          console.log('Form submitted with values:', values);
+          console.log(
+            'someWeirdNameForCriteria content:',
+            values.someWeirdNameForCriteria,
+          );
         }}
       >
         {({ values }) => {
-          console.log('values', values);
+          console.log('ProgramEligibilityCriteria render - values:', values);
+          console.log(
+            'someWeirdNameForCriteria length:',
+            values.someWeirdNameForCriteria?.length,
+          );
+          console.log(
+            'someWeirdNameForCriteria content:',
+            values.someWeirdNameForCriteria,
+          );
           return (
             <Form style={{ width: '100%' }}>
               <FieldArray
                 name="someWeirdNameForCriteria"
                 render={(arrayHelpers) => (
-                  <BaseSection
-                    title={t('Programme Eligibility Criteria')}
-                    buttons={
-                      <UniversalCriteriaPlainComponent
-                        isEdit
-                        arrayHelpers={arrayHelpers}
-                        rules={values.someWeirdNameForCriteria}
-                        householdFieldsChoices={
-                          householdData.allFieldsAttributes
-                        }
-                        individualFieldsChoices={
-                          individualData.allFieldsAttributes
-                        }
-                      />
-                    }
-                  ></BaseSection>
+                  <BaseSection title={t('Programme Eligibility Criteria')}>
+                    <UniversalCriteriaPlainComponent
+                      isEdit
+                      arrayHelpers={arrayHelpers}
+                      rules={values.someWeirdNameForCriteria}
+                      householdFieldsChoices={householdData.allFieldsAttributes}
+                      individualFieldsChoices={
+                        individualData.allFieldsAttributes
+                      }
+                    />
+                  </BaseSection>
                 )}
               />
             </Form>

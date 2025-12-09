@@ -5,7 +5,6 @@ import { UniversalCriteria } from './UniversalCriteria';
 import { UniversalCriteriaForm } from './UniversalCriteriaForm';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
-import { Button } from '@mui/material';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -39,6 +38,23 @@ const DividerLabel = styled.div`
   border: 1px solid #b1b1b5;
   border-radius: 50%;
   background-color: #fff;
+`;
+
+const AddCriteria = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #003c8f;
+  border: 2px solid #033f91;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: ${({ theme }) => theme.spacing(6)}px
+    ${({ theme }) => theme.spacing(28)}px;
+  cursor: pointer;
+  p {
+    font-weight: 500;
+    margin: 0 0 0 ${({ theme }) => theme.spacing(2)}px;
+  }
 `;
 
 interface UniversalCriteriaProps {
@@ -94,13 +110,17 @@ export const UniversalCriteriaComponent = ({
   };
 
   const addCriteria = (values): void => {
+    console.log('addCriteria called with values:', values);
     const criteria = {
-      filters: [...values.filters],
-      individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+      filters: [...(values.filters || [])],
+      individualsFiltersBlocks: [...(values.individualsFiltersBlocks || [])],
     };
+    console.log('Created criteria object:', criteria);
     if (criteriaIndex !== null) {
+      console.log('Replacing criteria at index:', criteriaIndex);
       arrayHelpers.replace(criteriaIndex, criteria);
     } else {
+      console.log('Pushing new criteria');
       arrayHelpers.push(criteria);
     }
     return closeModal();
@@ -142,14 +162,13 @@ export const UniversalCriteriaComponent = ({
             );
           })
         ) : (
-          <Button
-            variant="contained"
-            color="primary"
+          <AddCriteria
             onClick={() => setOpen(true)}
             data-cy="button-universal-add-criteria"
           >
-            <p>{t('Create New')}</p>
-          </Button>
+            <AddCircleOutline />
+            <p>{t('Add Filter')}</p>
+          </AddCriteria>
         )}
       </ContentWrapper>
     </>

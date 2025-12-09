@@ -224,11 +224,27 @@ export function UniversalCriteriaForm({
   };
 
   const handleSubmit = (values, bag): void => {
+    console.log(
+      'UniversalCriteriaForm handleSubmit called with values:',
+      values,
+    );
+    console.log('Raw filters:', values.filters);
+    console.log(
+      'Raw individualsFiltersBlocks:',
+      values.individualsFiltersBlocks,
+    );
     const filters = formatCriteriaFilters(values.filters);
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
-    addCriteria({ filters, individualsFiltersBlocks });
+    console.log('Formatted filters:', filters);
+    console.log(
+      'Formatted individualsFiltersBlocks:',
+      individualsFiltersBlocks,
+    );
+    const criteriaToAdd = { filters, individualsFiltersBlocks };
+    console.log('Calling addCriteria with:', criteriaToAdd);
+    addCriteria(criteriaToAdd);
     return bag.resetForm();
   };
   if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
