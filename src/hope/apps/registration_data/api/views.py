@@ -98,6 +98,7 @@ class RegistrationDataImportViewSet(
         ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
+        "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -117,7 +118,6 @@ class RegistrationDataImportViewSet(
         methods=["GET"],
         url_path="webhookdeduplication",
         url_name="webhook-deduplication",
-        permission_classes=[AllowAny],
     )
     def webhook_deduplication(
         self,
