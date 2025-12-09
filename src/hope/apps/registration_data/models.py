@@ -435,17 +435,38 @@ class DeduplicationEngineSimilarityPair(models.Model):
     @classmethod
     def bulk_add_pairs(cls, program: "Program", duplicates_data: list[SimilarityPair]) -> None:
         duplicates = []
+
+        all_unique_ind_ids: set = set()
         for pair in duplicates_data:
+            if pair.first:
+                all_unique_ind_ids.add(pair.first)
+            if pair.second:
+                all_unique_ind_ids.add(pair.second)
+
+        existing_ind_ids = set(Individual.all_objects.filter(id__in=all_unique_ind_ids).values_list("id", flat=True))
+
+        for pair in duplicates_data:
+            if not (pair.first or pair.second):
+                logger.warning("Dedup Engine Findings, both Individuals empty")
+                continue
+
+            # Skip if either individual does NOT exist in DB
+            if (pair.first and pair.first not in existing_ind_ids) or (
+                pair.second and pair.second not in existing_ind_ids
+            ):
+                logger.warning(
+                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist",
+                )
+                continue
+
             if pair.first and pair.second:
                 # Ensure consistent ordering of individual1 and individual2
                 individual1, individual2 = sorted([pair.first, pair.second])
-            elif not (pair.first or pair.second):
-                continue
             else:
                 individual1, individual2 = pair.first, pair.second
 
             if individual1 == individual2:
-                logger.warning(f"Skipping duplicate pair ({individual1}, {individual2})")
+                logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
                 continue
 
             duplicates.append(
