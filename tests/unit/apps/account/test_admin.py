@@ -19,8 +19,8 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.partner import PartnerAdmin
-from hope.admin.user_role import RoleAssignmentAdmin, RoleAssignmentInline
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
+from hope.admin.user_role import UserRoleAssignmentAdmin, RoleAssignmentInline
+from hope.apps.account.models import Partner, Role, RoleAssignment, User, UserRoleAssignment
 
 pytestmark = pytest.mark.django_db()
 
@@ -137,7 +137,7 @@ class RoleAssignmentAdminTest(TestCase):
     def setUp(self) -> None:
         self.request = RequestFactory()
         self.site = AdminSite()
-        self.admin = RoleAssignmentAdmin(model=RoleAssignment, admin_site=self.site)
+        self.admin = UserRoleAssignmentAdmin(model=UserRoleAssignment, admin_site=self.site)
 
         self.user = UserFactory(username="testuser", is_staff=True)
         self.business_area = create_afghanistan()

@@ -53,7 +53,7 @@ class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
 
     @button(permission="account.view_role")
     def members(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:account_roleassignment_changelist")
+        url = reverse("admin:account_userroleassignment_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
     @button(permission="account.view_role")

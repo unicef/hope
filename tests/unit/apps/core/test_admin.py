@@ -214,6 +214,6 @@ def test_role_admin_members_button(client, superuser) -> None:
     with patch.object(type(superuser), "has_perm", return_value=True):
         response = client.get(url)
 
-    expected_url = reverse("admin:account_roleassignment_changelist") + f"?role__id__exact={role.pk}"
+    expected_url = reverse("admin:account_userroleassignment_changelist") + f"?role__id__exact={role.pk}"
     assert response.status_code == 302
     assert response.url == expected_url
