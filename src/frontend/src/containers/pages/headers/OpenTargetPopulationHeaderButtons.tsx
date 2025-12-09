@@ -83,6 +83,7 @@ export function OpenTargetPopulationHeaderButtons({
           onClick={() => setOpenDuplicate(true)}
           data-cy="button-target-population-duplicate"
           disabled={!isActiveProgram}
+          data-perm={PERMISSIONS.TARGETING_DUPLICATE}
         >
           <FileCopy />
         </IconButton>
@@ -92,6 +93,7 @@ export function OpenTargetPopulationHeaderButtons({
           data-cy="button-delete"
           onClick={() => setOpenDelete(true)}
           disabled={!isActiveProgram}
+          data-perm={PERMISSIONS.TARGETING_REMOVE}
         >
           <Delete />
         </IconButton>

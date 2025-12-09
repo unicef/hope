@@ -1,3 +1,28 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import localForage from 'localforage';
+import _, { camelCase, startCase } from 'lodash';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { theme as themeObj } from '../theme';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
+
+// Formats a string or array value to Normal Case using lodash's startCase
+export function formatNormalCaseValue(value: string | string[]): string {
+  if (typeof value === 'string') {
+    return startCase(value);
+  }
+  return String(value);
+}
 export function safeStringify(value) {
   if (typeof value === 'object' && value !== null) {
     try {
@@ -34,24 +59,6 @@ export function periodicDataUpdatesOnlineEditsStatusToColor(
       return theme.hctPalette.gray;
   }
 }
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
-import _ from 'lodash';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -1317,7 +1324,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
-  const notUnderscoreKeys = ['dataFields'];
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1561,3 +1568,32 @@ export function splitCamelCase(str: string): string {
     .replace(/^./, (s) => s.toUpperCase());
   return withSpaces.trim();
 }
+
+export const renderNestedObject = (obj: Record<string, any>): string => {
+  return Object.entries(obj)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Handle nested objects - render all properties generically
+        const parts = Object.entries(v)
+          .map(([key, val]) => {
+            let valStr: string;
+            if (val === null || val === undefined) {
+              valStr = '-';
+            } else if (typeof val === 'boolean') {
+              valStr = val ? 'true' : 'false';
+            } else if (typeof val === 'number') {
+              valStr = val.toString();
+            } else if (typeof val === 'object') {
+              valStr = JSON.stringify(val);
+            } else {
+              valStr = val as string;
+            }
+            return `${key}: ${valStr}`;
+          })
+          .join(', ');
+        return `${k}: ${parts}`;
+      }
+      return `${k}: ${String(v)}`;
+    })
+    .join('\n');
+};
