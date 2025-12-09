@@ -24,6 +24,7 @@ class RoleAssignmentInline(admin.TabularInline):
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
+    ordering = ["business_area__name"]
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
@@ -57,15 +58,11 @@ class RoleAssignmentInline(admin.TabularInline):
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
-            if obj.is_unicef_subpartner:
-                return False  # Disable editing if Partner is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
-            if obj.is_unicef_subpartner:
-                return False  # Disable deleting if Partner is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
@@ -85,6 +82,7 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
         ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
         ("role__subsystem", AllValuesComboFilter),
+        ("partner", AutoCompleteFilter),
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
