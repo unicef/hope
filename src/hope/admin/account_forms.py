@@ -54,10 +54,40 @@ class RoleAssignmentAdminForm(forms.ModelForm):
         if not self.is_valid():
             return
         role = self.cleaned_data["role"]
-        user = self.cleaned_data["user"]
+        user = self.cleaned_data.get("user")
+        partner = self.cleaned_data.get("partner")
         business_area = self.cleaned_data["business_area"]
 
-        account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
+        if user or partner:
+            incompatible_roles = list(
+                account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+            ) + list(
+                account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
+            )
+
+            incompatible_assignments = account_models.RoleAssignment.objects.filter(
+                business_area=business_area,
+                role__id__in=incompatible_roles,
+            )
+
+            if user:
+                incompatible_assignments = incompatible_assignments.filter(user=user)
+                if self.instance and self.instance.pk:
+                    incompatible_assignments = incompatible_assignments.exclude(pk=self.instance.pk)
+            elif partner:
+                incompatible_assignments = incompatible_assignments.filter(partner=partner)
+                if self.instance and self.instance.pk:
+                    incompatible_assignments = incompatible_assignments.exclude(pk=self.instance.pk)
+
+            if incompatible_assignments.exists():
+                incompatible_role_names = [assignment.role.name for assignment in incompatible_assignments]
+                raise ValidationError(
+                    {
+                        "role": _(
+                            f"This role is incompatible with {', '.join(incompatible_role_names)}"
+                        )
+                    }
+                )
 
 
 class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
