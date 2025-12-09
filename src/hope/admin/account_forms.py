@@ -61,9 +61,7 @@ class RoleAssignmentAdminForm(forms.ModelForm):
         if user or partner:
             incompatible_roles = list(
                 account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-            ) + list(
-                account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
-            )
+            ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
 
             incompatible_assignments = account_models.RoleAssignment.objects.filter(
                 business_area=business_area,
@@ -82,11 +80,7 @@ class RoleAssignmentAdminForm(forms.ModelForm):
             if incompatible_assignments.exists():
                 incompatible_role_names = [assignment.role.name for assignment in incompatible_assignments]
                 raise ValidationError(
-                    {
-                        "role": _(
-                            f"This role is incompatible with {', '.join(incompatible_role_names)}"
-                        )
-                    }
+                    {"role": _(f"This role is incompatible with {', '.join(incompatible_role_names)}")}
                 )
 
 
