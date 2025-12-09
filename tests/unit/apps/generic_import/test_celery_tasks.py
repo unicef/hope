@@ -11,7 +11,8 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportFactory,
 )
 from hope.apps.core.models import BusinessArea
-from hope.apps.generic_import.celery_tasks import format_validation_errors, process_generic_import_task
+from hope.apps.generic_import.celery_tasks import process_generic_import_task
+from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
 from hope.apps.household.models import Household, Individual
 from hope.apps.program.models import Program
 from hope.apps.registration_data.models import ImportData, RegistrationDataImport

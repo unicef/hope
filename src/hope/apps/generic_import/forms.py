@@ -1,3 +1,4 @@
+from constance import config
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
@@ -181,10 +182,13 @@ class GenericImportForm(forms.Form):
         if not file.name.endswith((".xlsx", ".xls")):
             raise ValidationError("Only Excel files (.xlsx, .xls) are allowed.")
 
-        # Check file size (limit to 50MB)
-        max_size = 50 * 1024 * 1024  # 50 MB
+        # Check file size
+        max_size_mb = config.GENERIC_IMPORT_MAX_FILE_SIZE_MB
+        max_size = max_size_mb * 1024 * 1024
         if file.size > max_size:
-            raise ValidationError(f"File size must not exceed 50 MB. Current size: {file.size / (1024 * 1024):.2f} MB")
+            raise ValidationError(
+                f"File size must not exceed {max_size_mb} MB. Current size: {file.size / (1024 * 1024):.2f} MB"
+            )
 
         return file
 

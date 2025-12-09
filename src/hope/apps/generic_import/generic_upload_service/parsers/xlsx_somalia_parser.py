@@ -236,28 +236,28 @@ class XlsxSomaliaParser(BaseParser):
         return [".xlsx", ".xls"]
 
     @property
-    def households_data(self) -> list[dict]:
+    def households_data(self) -> list[dict[str, Any]]:
         return list(self._households.values())
 
     @property
-    def individuals_data(self) -> list[dict]:
+    def individuals_data(self) -> list[dict[str, Any]]:
         return self._individuals
 
     @property
-    def individual_roles_in_households_data(self) -> list[dict]:
+    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
         return self._individual_roles
 
     @property
-    def accounts_data(self) -> list[dict]:
+    def accounts_data(self) -> list[dict[str, Any]]:
         """Return list of account dictionaries."""
         return self._accounts
 
     @property
-    def documents_data(self) -> list[dict]:
+    def documents_data(self) -> list[dict[str, Any]]:
         """Return list of document dictionaries."""
         return self._documents
 
     @property
-    def identities_data(self) -> list[dict]:
+    def identities_data(self) -> list[dict[str, Any]]:
         """Return list of identity dictionaries."""
         return self._identities

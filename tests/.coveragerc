@@ -27,7 +27,7 @@ exclude_lines =
     if self\.debug
     # Don't complain if tests don't hit defensive assertion code:
     raise AssertionError
-    raise NotImplementedError
+    raise NotImplementedError.*
     except ImportError
     # Don't complain if non-runnable code isn't run:
     if 0:
@@ -35,7 +35,6 @@ exclude_lines =
     if TYPE_CHECKING
     ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
     logger.exception(e)
-    raise NotImplementedError()
 
 fail_under = 15
 
