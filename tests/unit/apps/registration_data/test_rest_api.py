@@ -42,6 +42,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             Permissions.RDI_REFUSE_IMPORT,
             Permissions.RDI_RERUN_DEDUPE,
             Permissions.RDI_IMPORT_DATA,
+            Permissions.RDI_WEBHOOK_DEDUPLICATION,
         ]
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
