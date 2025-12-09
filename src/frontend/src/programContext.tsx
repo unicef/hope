@@ -18,6 +18,7 @@ type ProgramContent = {
   isSocialDctType: boolean;
   isStandardDctType: boolean;
   programHasPdu: boolean;
+  screenBeneficiary: boolean;
 };
 
 export const ProgramContext = createContext(null);
@@ -39,6 +40,8 @@ export function ProgramProvider({
 
   const programHasPdu =
     selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;
+
+  const screenBeneficiary = selectedProgram?.screenBeneficiary ?? false;
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {
     isActiveProgram = true;
@@ -52,6 +55,7 @@ export function ProgramProvider({
         isSocialDctType,
         isStandardDctType,
         programHasPdu,
+        screenBeneficiary,
       }}
     >
       {children}
