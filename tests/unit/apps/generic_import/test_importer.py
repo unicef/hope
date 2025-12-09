@@ -6,7 +6,7 @@ from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     IndividualFactory,
 )
-from extras.test_utils.factories.payment import AccountTypeFactory
+from extras.test_utils.factories.payment import AccountTypeFactory, FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.models import BusinessArea
@@ -30,6 +30,10 @@ class TestImporter:
         self.country = CountryFactory(name="Somalia", short_name="SOM", iso_code2="SO", iso_code3="SOM")
         self.document_type = DocumentTypeFactory(key="national_id", label="National ID")
         self.account_type = AccountTypeFactory(key="mobile_money", label="Mobile Money")
+
+        # Create generic financial institutions for accounts without FI
+        FinancialInstitutionFactory(name="Generic Bank")
+        FinancialInstitutionFactory(name="Generic Telco Company")
 
         # Create test individual
         self.individual = IndividualFactory(
