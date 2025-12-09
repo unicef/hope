@@ -167,7 +167,8 @@ class TestNigeriaPeopleRegistrationService(TestCase):
             "name": "United Bank for Africa",
             "code": "000004",
             "holder_name": "xxxx",
-            "financial_institution": str(self.fi.id),
+            "financial_institution_pk": str(self.fi.id),
+            "financial_institution_name": str(self.fi.name),
         }
         assert account.account_type.key == "bank"
         assert account.financial_institution == self.fi
