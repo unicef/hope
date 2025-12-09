@@ -1,8 +1,8 @@
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { CalendarTodayRounded as CalendarTodayRoundedIcon } from '@mui/icons-material';
 import { FormikAutocomplete } from '../../../shared/Formik/FormikAutocomplete';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';
@@ -27,7 +27,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikDecimalField}
             />
@@ -36,7 +36,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikDecimalField}
             />
@@ -52,7 +52,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               label={`${field.fieldAttribute.labelEn} from`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             />
           </InlineField>
           <InlineField>
@@ -61,7 +61,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               label={`${field.fieldAttribute.labelEn} to`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             />
           </InlineField>
         </FlexWrapper>
@@ -73,9 +73,9 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
-              type='number'
+              type="number"
               integer
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikTextField}
             />
@@ -84,9 +84,9 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
-              type='number'
+              type="number"
               integer
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikTextField}
             />
@@ -128,7 +128,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
       );

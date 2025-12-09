@@ -1,13 +1,13 @@
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
 import React from 'react';
-import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
-import { Button } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
+import { Button } from '@mui/material';
 
 const PlainComponentWrapper = styled.div`
-display: flex;
-flex-direction: column;
+  display: flex;
+  flex-direction: column;
   width: 100%;
 `;
 const ButtonWrapper = styled.div`
@@ -21,8 +21,8 @@ interface UniversalCriteriaPlainComponentProps {
   arrayHelpers?;
   individualDataNeeded?: boolean;
   isEdit?: boolean;
-  individualFieldsChoices: FieldAttributeNode[];
-  householdFieldsChoices: FieldAttributeNode[];
+  individualFieldsChoices: FieldAttribute[];
+  householdFieldsChoices: FieldAttribute[];
 }
 
 export const UniversalCriteriaPlainComponent = (
@@ -35,14 +35,14 @@ export const UniversalCriteriaPlainComponent = (
       {props.isEdit && (
         <>
           {!!props.rules.length && (
-              <ButtonWrapper>
-            <Button
-              variant='outlined'
-              color='primary'
-              onClick={() => setOpen(true)}
-            >
-              {t('Add')} &apos;Or&apos; {t('Filter')}
-            </Button>
+            <ButtonWrapper>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setOpen(true)}
+              >
+                {t('Add')} &apos;Or&apos; {t('Filter')}
+              </Button>
             </ButtonWrapper>
           )}
         </>

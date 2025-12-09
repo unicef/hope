@@ -1,10 +1,10 @@
-import { IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { CriteriaAutocomplete } from './CriteriaAutocomplete';
+import { Delete } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 const FlexWrapper = styled.div`
   display: flex;

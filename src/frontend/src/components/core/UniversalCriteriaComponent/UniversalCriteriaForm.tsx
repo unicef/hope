@@ -6,7 +6,6 @@ import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   chooseFieldType,
   clearField,
@@ -28,6 +27,11 @@ import {
 import { Box } from '@mui/system';
 import React, { useRef } from 'react';
 import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useProgramContext } from 'src/programContext';
+import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -85,6 +89,7 @@ const validationSchema = Yup.object().shape({
 });
 interface ArrayFieldWrapperProps {
   arrayHelpers;
+  children?: React.ReactNode;
 }
 class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
@@ -118,9 +123,40 @@ export function UniversalCriteriaForm({
   householdFieldsChoices,
 }: UniversalCriteriaFormProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-  const { data, loading } =
-    useCachedImportedIndividualFieldsQuery(businessArea);
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey: [
+      'businessAreasAllFieldsAttributesList',
+      businessArea,
+      selectedProgram?.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!businessArea && !!selectedProgram?.id && !isAllPrograms,
+  });
+
+  // data is available for future use if needed for filtering field attributes
+  // Currently using field choices passed as props
+  void data;
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -136,8 +172,8 @@ export function UniversalCriteriaForm({
         filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
-      filter.value?.hasOwnProperty('from') &&
-      filter.value?.hasOwnProperty('to') &&
+      'from' in (filter.value || {}) &&
+      'to' in (filter.value || {}) &&
       !filter.value.from &&
       !filter.value.to;
 
@@ -192,7 +228,7 @@ export function UniversalCriteriaForm({
     addCriteria({ filters, individualsFiltersBlocks });
     return bag.resetForm();
   };
-  if (loading || !open) return null;
+  if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
 
   return (
     <DialogContainer>
@@ -213,7 +249,7 @@ export function UniversalCriteriaForm({
             maxWidth="md"
           >
             <DialogTitleWrapper>
-              <DialogTitle disableTypography>
+              <DialogTitle>
                 <Typography variant="h6">{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
@@ -225,8 +261,8 @@ export function UniversalCriteriaForm({
                     <ul>
                       {
                         // @ts-ignore
-                        errors.nonFieldErrors.map((message) => (
-                          <li>{message}</li>
+                        errors.nonFieldErrors.map((message, index) => (
+                          <li key={index}>{message}</li>
                         ))
                       }
                     </ul>

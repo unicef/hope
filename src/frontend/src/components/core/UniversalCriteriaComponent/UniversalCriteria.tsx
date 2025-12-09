@@ -1,13 +1,18 @@
-import { IconButton } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import { Fragment } from 'react/jsx-runtime';
+import { fieldNameToLabel } from '@utils/utils';
+import { Edit, Delete } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
-const CriteriaElement = styled.div`
+interface CriteriaElementProps {
+  alternative?: boolean;
+}
+
+const CriteriaElement = styled.div<CriteriaElementProps>`
   width: auto;
   max-width: 380px;
   position: relative;
@@ -16,13 +21,13 @@ const CriteriaElement = styled.div`
   font-size: 16px;
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
-  padding: ${({ theme }) => theme.spacing(1)}px
+  padding: ${({ theme }) => theme.spacing(1)}
     ${({ theme, alternative }) =>
-      alternative ? theme.spacing(1) : theme.spacing(17)}px
-    ${({ theme }) => theme.spacing(1)}px ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(2)}px 0;
+      alternative ? theme.spacing(1) : theme.spacing(17)}
+    ${({ theme }) => theme.spacing(1)} ${({ theme }) => theme.spacing(4)};
+  margin: ${({ theme }) => theme.spacing(2)} 0;
   p {
-    margin: ${({ theme }) => theme.spacing(2)}px 0;
+    margin: ${({ theme }) => theme.spacing(2)} 0;
     span {
       color: ${(props) => (props.alternative ? '#000' : '#003c8f')};
       font-weight: bold;
@@ -53,28 +58,57 @@ const MathSign = styled.img`
 const CriteriaSetBox = styled.div`
   border: 1px solid #607cab;
   border-radius: 3px;
-  padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  margin: ${({ theme }) => theme.spacing(2)}px 0;
+  padding: 0 ${({ theme }) => theme.spacing(2)};
+  margin: ${({ theme }) => theme.spacing(2)} 0;
 `;
 
-const CriteriaField = ({ field }): React.ReactElement => {
+function getFieldLabel(field) {
+  if (field.fieldAttribute?.labelEn) {
+    if (typeof field.fieldAttribute.labelEn === 'string')
+      return field.fieldAttribute.labelEn;
+    if (
+      field.fieldAttribute.labelEn &&
+      typeof field.fieldAttribute.labelEn.englishEn === 'string'
+    )
+      return field.fieldAttribute.labelEn.englishEn;
+  }
+  const labelEn = field.labelEn;
+  if (typeof labelEn === 'string') return labelEn;
+  if (labelEn && typeof labelEn.englishEn === 'string')
+    return labelEn.englishEn;
+  return fieldNameToLabel(field.fieldName);
+}
+
+const CriteriaField = ({ field }): ReactElement => {
   const { t } = useTranslation();
+
+  const extractChoiceLabel = (choiceField, argument) => {
+    const choices =
+      choiceField?.choices || choiceField?.fieldAttribute?.choices;
+    return choices?.length
+      ? choices.find((each) => each.value === argument)?.labelEn
+      : argument;
+  };
+
+  const displayValueOrEmpty = (value) => (value ? value : 'Empty');
+
   let fieldElement;
   switch (field.comparisonMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{field.arguments[0]}</span>
+          {getFieldLabel(field)}:{' '}
+          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {getFieldLabel(field)}:{' '}
           <span>
-            {field.arguments[0]} - {field.arguments[1]}
+            {displayValueOrEmpty(field.arguments?.[0])} -{' '}
+            {displayValueOrEmpty(field.arguments?.[1])}
           </span>
         </p>
       );
@@ -82,70 +116,69 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          {field.fieldAttribute.type === 'BOOL' ? (
-            <span>{field.arguments[0] === 'True' ? t('Yes') : t('No')}</span>
+          {getFieldLabel(field)}:{' '}
+          {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
+            <span>{t('Empty')}</span>
+          ) : typeof field.arguments?.[0] === 'boolean' ? (
+            field.arguments[0] ? (
+              <span>{t('Yes')}</span>
+            ) : (
+              <span>{t('No')}</span>
+            )
           ) : (
-            <span>
-              {field.fieldAttribute.choices?.length
-                ? field.fieldAttribute.choices.find(
-                    (each) => each.value === field.arguments[0],
-                  )?.labelEn
-                : field.arguments[0]}
-            </span>
+            <>
+              {field.arguments?.[0] != null ? (
+                field.arguments[0] === 'Yes' ? (
+                  <span>{t('Yes')}</span>
+                ) : field.arguments[0] === 'No' ? (
+                  <span>{t('No')}</span>
+                ) : (
+                  <span>{extractChoiceLabel(field, field.arguments[0])}</span>
+                )
+              ) : (
+                <span>{t('Empty')}</span>
+              )}
+            </>
           )}
         </p>
       );
       break;
     case 'LESS_THAN':
+    case 'GREATER_THAN': {
+      const isLessThan = field?.comparisonMethod === 'LESS_THAN';
+      const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
+      const altText = isLessThan ? 'less_than' : 'greater_than';
+      const displayValue = field.arguments?.[0];
+
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={LessThanEqual} alt='less_than' />
-          <span>{field.arguments[0]}</span>
+          {getFieldLabel(field)}:{' '}
+          {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
+          <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
       );
       break;
-    case 'GREATER_THAN':
-      fieldElement = (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={GreaterThanEqual} alt='greater_than' />
-          <span>{field.arguments[0]}</span>
-        </p>
-      );
-      break;
+    }
     case 'CONTAINS':
-      fieldElement =
-        field.arguments.length > 1 ? (
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            {field.arguments.map((argument, index) => {
-              return (
-                <>
-                  <span>
-                    {field.fieldAttribute.choices.length
-                      ? field.fieldAttribute.choices.find(
-                          (each) => each.value === argument,
-                        )?.labelEn
-                      : field.arguments[0]}
-                  </span>
-                  {index !== field.arguments.length - 1 && ', '}
-                </>
-              );
-            })}
-          </p>
-        ) : (
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            <span>{field.arguments[0]}</span>
-          </p>
-        );
+      fieldElement = (
+        <p>
+          {getFieldLabel(field)}:{' '}
+          {field.arguments?.map((argument, index) => (
+            <Fragment key={index}>
+              <span>
+                {displayValueOrEmpty(extractChoiceLabel(field, argument))}
+              </span>
+              {index !== field.arguments.length - 1 && ', '}
+            </Fragment>
+          ))}
+        </p>
+      );
       break;
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}: <span>{field.arguments[0]}</span>
+          {getFieldLabel(field)}:{' '}
+          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
@@ -154,7 +187,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
 };
 
 interface CriteriaProps {
-  rules: [TargetingCriteriaRuleObjectType];
+  rules: [any];
   individualsFiltersBlocks;
   removeFunction?;
   editFunction?;
@@ -171,22 +204,22 @@ export function UniversalCriteria({
   canRemove,
   alternative = null,
   individualsFiltersBlocks,
-}: CriteriaProps): React.ReactElement {
+}: CriteriaProps): ReactElement {
   return (
-    <CriteriaElement alternative={alternative} data-cy='criteria-container'>
-      {rules.map((each, index) => {
-         
-        return <CriteriaField key={index} field={each} />;
-      })}
-      {individualsFiltersBlocks.map((item) => {
-        return (
-          <CriteriaSetBox>
-            {item.individualBlockFilters.map((filter) => {
-              return <CriteriaField field={filter} />;
-            })}
-          </CriteriaSetBox>
-        );
-      })}
+    <CriteriaElement alternative={alternative} data-cy="criteria-container">
+      {(rules || []).map((each, index) => (
+        <CriteriaField key={index} field={each} />
+      ))}
+      {individualsFiltersBlocks.map(
+        (item, index) =>
+          item.individualBlockFilters.length > 0 && (
+            <CriteriaSetBox key={index}>
+              {item.individualBlockFilters.map((filter, filterIndex) => (
+                <CriteriaField key={filterIndex} field={filter} />
+              ))}
+            </CriteriaSetBox>
+          ),
+      )}
       {isEdit && (
         <ButtonsContainer>
           <IconButton onClick={editFunction}>

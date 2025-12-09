@@ -1,30 +1,16 @@
-import { Button, Paper, Typography } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { UniversalCriteria } from './UniversalCriteria';
 import { UniversalCriteriaForm } from './UniversalCriteriaForm';
+import { AddCircleOutline } from '@mui/icons-material';
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
 
 export const ContentWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   padding: ${({ theme }) => theme.spacing(4)}px
     ${({ theme }) => theme.spacing(4)}px;
-`;
-
-const PaperContainer = styled(Paper)`
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
-
-const Title = styled.div`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 `;
 
 const Divider = styled.div`
@@ -76,8 +62,8 @@ interface UniversalCriteriaProps {
   arrayHelpers?;
   individualDataNeeded?: boolean;
   isEdit?: boolean;
-  individualFieldsChoices: FieldAttributeNode[];
-  householdFieldsChoices: FieldAttributeNode[];
+  individualFieldsChoices: FieldAttribute[];
+  householdFieldsChoices: FieldAttribute[];
   isAddDialogOpen?: boolean;
   onAddDialogClose?: () => void;
 }
@@ -150,7 +136,6 @@ export const UniversalCriteriaComponent = ({
         {rules.length ? (
           rules.map((criteria, index) => {
             return (
-               
               <Fragment key={criteria.id || index}>
                 <UniversalCriteria
                   isEdit={isEdit}
@@ -175,7 +160,7 @@ export const UniversalCriteriaComponent = ({
         ) : (
           <AddCriteria
             onClick={() => setOpen(true)}
-            data-cy='button-universal-add-criteria'
+            data-cy="button-universal-add-criteria"
           >
             <AddCircleOutline />
             <p>{t('Add Filter')}</p>

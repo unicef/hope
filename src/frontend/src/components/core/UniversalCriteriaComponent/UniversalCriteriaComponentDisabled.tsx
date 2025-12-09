@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
+import { Paper, Typography } from '@mui/material';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -52,12 +52,14 @@ export function UniversalCriteriaComponentDisabled(): React.ReactElement {
     <div>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{t('Targeting UniversalCriteria')}</Typography>
+          <Typography variant="h6">
+            {t('Targeting UniversalCriteria')}
+          </Typography>
         </Title>
         <ContentWrapper>
           <AddCriteria
             onClick={() => null}
-            data-cy='button-target-population-disabled-add-criteria'
+            data-cy="button-target-population-disabled-add-criteria"
           >
             <IconWrapper>
               <AddCircleOutline />

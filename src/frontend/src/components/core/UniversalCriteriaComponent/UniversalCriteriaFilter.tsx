@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FieldAttributeNode, ImportedIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -39,7 +39,7 @@ export function UniversalCriteriaFilter({
   onClick,
 }: {
   index: number;
-  fieldsChoices: FieldAttributeNode[];
+  fieldsChoices: FieldAttribute[];
   each;
   onChange: (e, object) => void;
   values;
@@ -59,7 +59,7 @@ export function UniversalCriteriaFilter({
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-universal-criteria-values'>
+        <div data-cy="autocomplete-universal-criteria-values">
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
         </div>
       )}

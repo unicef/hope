@@ -1,12 +1,13 @@
-import { Box, Button } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '../../../utils/targetingUtils';
-import { FieldAttributeNode, ImportedIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { UniversalTargetingCriteriaBlockFilter } from './UniversalTargetingCriteriaBlockFilter';
+import { AddCircleOutline } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { Box } from '@mui/system';
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -75,7 +76,7 @@ export function UniversalCriteriaFilterBlocks({
   onDelete,
 }: {
   blockIndex: number;
-  fieldsChoices: FieldAttributeNode[];
+  fieldsChoices: FieldAttribute[];
   values;
   onDelete: () => void;
 }): React.ReactElement {
@@ -131,10 +132,10 @@ export function UniversalCriteriaFilterBlocks({
                   </Fragment>
                 );
               })}
-              <Box display='flex' justifyContent='center'>
+              <Box display="flex" justifyContent="center">
                 <Button
-                  color='primary'
-                  variant='outlined'
+                  color="primary"
+                  variant="outlined"
                   startIcon={<AddCircleOutline />}
                   onClick={() =>
                     arrayHelpers.push({
