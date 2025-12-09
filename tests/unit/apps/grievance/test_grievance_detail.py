@@ -890,6 +890,7 @@ class TestGrievanceTicketDetail:
             payment_verification=payment_verification,
         )
         self._assign_ticket_data(grievance_ticket)
+        payment_plan.refresh_from_db()
 
         create_user_role_with_permissions(
             user=self.user,
@@ -921,7 +922,10 @@ class TestGrievanceTicketDetail:
         assert data["payment_record"] == {
             "id": str(payment.id),
             "unicef_id": payment.unicef_id,
-            "parent_id": payment_plan.id,
+            "parent": {
+                "id": str(payment_plan.id),
+                "unicef_id": payment_plan.unicef_id,
+            },
             "delivered_quantity": f"{payment.delivered_quantity:.2f}",
             "entitlement_quantity": f"{payment.entitlement_quantity:.2f}",
             "verification": payment_verification.id,
@@ -1352,13 +1356,52 @@ class TestGrievanceTicketDetail:
                 "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["id"],
                 "unicef_id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["unicef_id"],
                 "full_name": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["full_name"],
-                "photo": None,
+                "photo": "",
             },
             "individual2": {
                 "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["id"],
                 "unicef_id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["unicef_id"],
                 "full_name": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["full_name"],
-                "photo": None,
+                "photo": "",
+            },
+        }
+
+        # test only one individual in dedup engine results
+        dedup_engine_similarity_pair.individual2 = None
+        dedup_engine_similarity_pair.save()
+        ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"] = {
+            "id": "",
+            "unicef_id": "",
+            "full_name": "",
+            "photo_name": "",
+        }
+        ticket_details.save()
+
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data["ticket_details"]["extra_data"]["dedup_engine_similarity_pair"] == {
+            "similarity_score": f"{ticket_details.extra_data['dedup_engine_similarity_pair']['similarity_score']:.1f}",
+            "status_code": ticket_details.extra_data["dedup_engine_similarity_pair"]["status_code"],
+            "individual1": {
+                "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["id"],
+                "unicef_id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["unicef_id"],
+                "full_name": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["full_name"],
+                "photo": "",
+            },
+            "individual2": {
+                "id": "",
+                "unicef_id": "",
+                "full_name": "",
+                "photo": "",
             },
         }
 

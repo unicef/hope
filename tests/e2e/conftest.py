@@ -2,6 +2,7 @@ from contextlib import suppress
 from datetime import datetime
 import logging
 import os
+from pathlib import Path
 import re
 from typing import Any
 
@@ -10,7 +11,6 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
-from environ import Env
 from flags.models import FlagState
 import pytest
 from pytest_html_reporter import attach
@@ -85,6 +85,22 @@ from hope.apps.geo.models import Country
 from hope.apps.household.models import DocumentType
 from hope.config.env import env
 
+HERE = Path(__file__).resolve().parent
+E2E_ROOT = HERE.parent
+
+# Local build directory in the project root
+BUILD_ROOT = E2E_ROOT / "build"
+BUILD_ROOT.mkdir(exist_ok=True)
+
+REPORT_DIRECTORY = BUILD_ROOT / "report"
+REPORT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+DOWNLOAD_DIRECTORY = BUILD_ROOT / "downloads"
+DOWNLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+SCREENSHOT_DIRECTORY = BUILD_ROOT / "screenshot"
+SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
 
 def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
@@ -118,81 +134,15 @@ def pytest_configure(config) -> None:  # type: ignore
         "markers",
         "night: This marker is intended for e2e tests conducted during the night on CI",
     )
-    # delete all old screenshots
 
-    env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/e2e/output_data")
-    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
-    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
-    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    for file in SCREENSHOT_DIRECTORY.iterdir():
+        if file.is_file():
+            file.unlink()
 
-    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
-        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
+    from django.conf import settings  # noqa
 
-    settings.DEBUG = True
-    settings.ALLOWED_HOSTS = [
-        "localhost",
-        "127.0.0.1",
-        "10.0.2.2",
-        os.getenv("DOMAIN", ""),
-    ]
-    settings.CELERY_TASK_ALWAYS_EAGER = True
-
-    settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
-    settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-    settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
-    settings.USE_DUMMY_EXCHANGE_RATES = True
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
-    settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-    settings.CSRF_COOKIE_SECURE = False
-    settings.CSRF_COOKIE_HTTPONLY = False
-    settings.SESSION_COOKIE_SECURE = False
-    settings.SESSION_COOKIE_HTTPONLY = True
-    settings.SECURE_HSTS_SECONDS = False
-    settings.SECURE_CONTENT_TYPE_NOSNIFF = True
-    settings.SECURE_REFERRER_POLICY = "same-origin"
-    settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
-
-    settings.LOGGING["loggers"].update(
-        {
-            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "sanction_list.tasks.check_against_sanction_list_pre_merge": {
-                "handlers": ["default"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "elasticsearch": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "elasticsearch-dsl-django": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.registration_datahub.tasks.deduplicate": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-            "hope.apps.core.tasks.upload_new_template_and_update_flex_fields": {
-                "handlers": ["default"],
-                "level": "CRITICAL",
-                "propagate": True,
-            },
-        }
-    )
-
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
 
@@ -216,9 +166,20 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 def download_path(worker_id: str) -> str:
     try:
         assert worker_id is not None
-        yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
+        path = DOWNLOAD_DIRECTORY / worker_id
     except (AssertionError, TimeoutException):
-        yield settings.DOWNLOAD_DIRECTORY
+        path = DOWNLOAD_DIRECTORY
+    return str(path)
+
+
+@pytest.fixture(scope="session")
+def screenshot_path(worker_id: str) -> str:
+    try:
+        assert worker_id is not None
+        path = SCREENSHOT_DIRECTORY / worker_id
+    except (AssertionError, TimeoutException):
+        path = SCREENSHOT_DIRECTORY
+    return str(path)
 
 
 @pytest.fixture
@@ -719,13 +680,12 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
-        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
-    file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
-    driver.get_screenshot_as_file(file_path)
+    file_path = SCREENSHOT_DIRECTORY / file_name
+    driver.get_screenshot_as_file(str(file_path))
     attach(data=driver.get_screenshot_as_png())
 
 
