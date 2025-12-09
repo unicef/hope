@@ -175,7 +175,7 @@ export function UniversalCriteria({
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {
-        //eslint-disable-next-line
+         
         return <CriteriaField key={index} field={each} />;
       })}
       {individualsFiltersBlocks.map((item) => {

@@ -17,6 +17,8 @@ import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPo
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { BaseSection } from '@components/core/BaseSection';
+import ProgramEligibilityCriteria from '@components/targeting/ProgramEligibilityCriteria';
 
 const initialFilter = {
   name: '',
@@ -84,6 +86,11 @@ const TargetPopulationsPage = (): ReactElement => {
           setShouldScroll(true);
         }}
       />
+      <Box p={5}>
+        <BaseSection title={t('Programme Eligibility Criteria')}>
+          <ProgramEligibilityCriteria />
+        </BaseSection>
+      </Box>
       <Box ref={tableRef}>
         <Table
           filter={appliedFilter}

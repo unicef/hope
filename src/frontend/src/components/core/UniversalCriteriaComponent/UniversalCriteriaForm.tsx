@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -18,7 +7,6 @@ import { DialogDescription } from '../../../containers/dialogs/DialogDescription
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,
@@ -28,7 +16,18 @@ import {
 } from '../../../utils/targetingUtils';
 import { UniversalCriteriaFilter } from './UniversalCriteriaFilter';
 import { UniversalCriteriaFilterBlocks } from './UniversalCriteriaFilterBlocks';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
+import { AddCircleOutline } from '@mui/icons-material';
+import {
+  Dialog,
+  DialogTitle,
+  Typography,
+  DialogContent,
+  Button,
+  DialogActions,
+} from '@mui/material';
+import { Box } from '@mui/system';
+import React, { useRef } from 'react';
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -105,8 +104,8 @@ interface UniversalCriteriaFormProps {
   open: boolean;
   onClose: () => void;
   shouldShowWarningForIndividualFilter?: boolean;
-  individualFieldsChoices: FieldAttributeNode[];
-  householdFieldsChoices: FieldAttributeNode[];
+  individualFieldsChoices: FieldAttribute[];
+  householdFieldsChoices: FieldAttribute[];
 }
 
 export function UniversalCriteriaForm({
@@ -120,9 +119,8 @@ export function UniversalCriteriaForm({
 }: UniversalCriteriaFormProps): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { data, loading } =
+    useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -159,9 +157,8 @@ export function UniversalCriteriaForm({
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
-        const hasFromToError = block.individualBlockFilters.some(
-          filterEmptyFromTo,
-        );
+        const hasFromToError =
+          block.individualBlockFilters.some(filterEmptyFromTo);
 
         return hasNulls || hasFromToError;
       },
@@ -210,36 +207,38 @@ export function UniversalCriteriaForm({
           <Dialog
             open={open}
             onClose={onClose}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
             fullWidth
-            maxWidth='md'
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle disableTypography>
-                <Typography variant='h6'>{t('Add Filter')}</Typography>
+                <Typography variant="h6">{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-              // @ts-ignore
-              errors.nonFieldErrors && (
-                <DialogError>
-                  <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                    // @ts-ignore
-                    errors.nonFieldErrors.map((message) => (
-                      <li>{message}</li>
-                    ))}
-                  </ul>
-                </DialogError>
-              )}
+              {
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {
+                        // @ts-ignore
+                        errors.nonFieldErrors.map((message) => (
+                          <li>{message}</li>
+                        ))
+                      }
+                    </ul>
+                  </DialogError>
+                )
+              }
               <DialogDescription>
                 All rules defined below have to be true for the entire
                 household.
               </DialogDescription>
               <FieldArray
-                name='filters'
+                name="filters"
                 render={(arrayHelpers) => (
                   <ArrayFieldWrapper
                     arrayHelpers={arrayHelpers}
@@ -248,7 +247,6 @@ export function UniversalCriteriaForm({
                     {values.filters.map((each, index) => {
                       return (
                         <UniversalCriteriaFilter
-                          //eslint-disable-next-line
                           key={index}
                           index={index}
                           fieldsChoices={householdFieldsChoices}
@@ -271,7 +269,7 @@ export function UniversalCriteriaForm({
                   </ArrayFieldWrapper>
                 )}
               />
-              <Box display='flex' flexDirection='column'>
+              <Box display="flex" flexDirection="column">
                 <ButtonBox>
                   <Button
                     onClick={() =>
@@ -279,7 +277,7 @@ export function UniversalCriteriaForm({
                         .getArrayHelpers()
                         .push({ fieldName: '' })
                     }
-                    color='primary'
+                    color="primary"
                     startIcon={<AddCircleOutline />}
                   >
                     ADD HOUSEHOLD RULE
@@ -297,7 +295,7 @@ export function UniversalCriteriaForm({
                 </DialogDescription>
               ) : null}
               <FieldArray
-                name='individualsFiltersBlocks'
+                name="individualsFiltersBlocks"
                 render={(arrayHelpers) => (
                   <ArrayFieldWrapper
                     arrayHelpers={arrayHelpers}
@@ -306,7 +304,6 @@ export function UniversalCriteriaForm({
                     {values.individualsFiltersBlocks.map((each, index) => {
                       return (
                         <UniversalCriteriaFilterBlocks
-                          //eslint-disable-next-line
                           key={index}
                           blockIndex={index}
                           fieldsChoices={individualFieldsChoices}
@@ -318,7 +315,7 @@ export function UniversalCriteriaForm({
                   </ArrayFieldWrapper>
                 )}
               />
-              <Box display='flex' flexDirection='column'>
+              <Box display="flex" flexDirection="column">
                 <ButtonBox>
                   <Button
                     onClick={() =>
@@ -328,7 +325,7 @@ export function UniversalCriteriaForm({
                           individualBlockFilters: [{ fieldName: '' }],
                         })
                     }
-                    color='primary'
+                    color="primary"
                   >
                     <AddCircleOutline />
                     ADD INDIVIDUAL RULE GROUP
@@ -338,7 +335,7 @@ export function UniversalCriteriaForm({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <StyledBox display='flex' justifyContent='flex-end'>
+                <StyledBox display="flex" justifyContent="flex-end">
                   <div>
                     <Button
                       onClick={() => {
@@ -350,10 +347,10 @@ export function UniversalCriteriaForm({
                     </Button>
                     <Button
                       onClick={submitForm}
-                      type='submit'
-                      color='primary'
-                      variant='contained'
-                      data-cy='button-target-population-add-criteria'
+                      type="submit"
+                      color="primary"
+                      variant="contained"
+                      data-cy="button-target-population-add-criteria"
                     >
                       Save
                     </Button>

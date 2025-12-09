@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { FieldArray, Form, Formik } from 'formik';
-import { Paper } from '@material-ui/core';
 import styled from 'styled-components';
 import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
 import { UniversalCriteriaPaperComponent } from './UniversalCriteriaPaperComponent';
+import { Paper } from '@mui/material';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
+import { RestService } from '@restgenerated/index';
+import { useQuery } from '@tanstack/react-query';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -25,27 +26,38 @@ const isNot = (type) => (item) => item.type !== type;
 export function Example(): React.ReactElement {
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
-  const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+
+  const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
+    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryFn: () =>
+      RestService.restBusinessAreasAllFieldsAttributesList({
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+    enabled: !!selectedProgram?.id && !isAllPrograms,
+  });
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
-      allFieldsAttributes: data?.allFieldsAttributes
+      allFieldsAttributes: allCoreFieldsAttributesData?.results
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     };
     setIndividualData(filteredIndividualData);
 
     const filteredHouseholdData = {
-      allFieldsAttributes: data?.allFieldsAttributes?.filter(
+      allFieldsAttributes: allCoreFieldsAttributesData?.results?.filter(
         associatedWith('Household'),
       ),
     };
     setHouseholdData(filteredHouseholdData);
-  }, [data, loading]);
+  }, [allCoreFieldsAttributesData, loading]);
+
   if (!individualData || !householdData) return <div>Loading</div>;
+
   const initialValues = {
     name: '',
     someWeirdNameForCriteria: [],
@@ -66,7 +78,7 @@ export function Example(): React.ReactElement {
               return (
                 <Form style={{ width: '100%' }}>
                   <FieldArray
-                    name='someWeirdNameForCriteria'
+                    name="someWeirdNameForCriteria"
                     render={(arrayHelpers) => (
                       <UniversalCriteriaPlainComponent
                         isEdit
@@ -99,10 +111,10 @@ export function Example(): React.ReactElement {
           return (
             <Form style={{ width: '100%' }}>
               <FieldArray
-                name='someWeirdNameForCriteria'
+                name="someWeirdNameForCriteria"
                 render={(arrayHelpers) => (
                   <UniversalCriteriaPaperComponent
-                    title='Example Paper Criteria'
+                    title="Example Paper Criteria"
                     isEdit
                     arrayHelpers={arrayHelpers}
                     rules={values.someWeirdNameForCriteria}

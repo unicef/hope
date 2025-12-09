@@ -1,12 +1,9 @@
-import { Button, Paper, Typography } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
-import React, { Fragment, useState } from 'react';
+import { Button, Paper, Typography } from '@mui/material';
+import { FieldAttribute } from '@restgenerated/models/FieldAttribute';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
-import { UniversalCriteria } from './UniversalCriteria';
-import { UniversalCriteriaForm } from './UniversalCriteriaForm';
-import {UniversalCriteriaComponent} from "./UniversalCriteriaComponent";
+import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -77,12 +74,14 @@ interface UniversalCriteriaPaperComponent {
   arrayHelpers?;
   individualDataNeeded?: boolean;
   isEdit?: boolean;
-  individualFieldsChoices: FieldAttributeNode[];
-  householdFieldsChoices: FieldAttributeNode[];
+  individualFieldsChoices: FieldAttribute[];
+  householdFieldsChoices: FieldAttribute[];
   title: string;
 }
 
-export const UniversalCriteriaPaperComponent = (props: UniversalCriteriaPaperComponent): React.ReactElement => {
+export const UniversalCriteriaPaperComponent = (
+  props: UniversalCriteriaPaperComponent,
+): React.ReactElement => {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
 
@@ -90,13 +89,13 @@ export const UniversalCriteriaPaperComponent = (props: UniversalCriteriaPaperCom
     <div>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{props.title}</Typography>
+          <Typography variant="h6">{props.title}</Typography>
           {props.isEdit && (
             <>
               {!!props.rules.length && (
                 <Button
-                  variant='outlined'
-                  color='primary'
+                  variant="outlined"
+                  color="primary"
                   onClick={() => setOpen(true)}
                 >
                   {t('Add')} &apos;Or&apos; {t('Filter')}
@@ -104,9 +103,8 @@ export const UniversalCriteriaPaperComponent = (props: UniversalCriteriaPaperCom
               )}
             </>
           )}
-
         </Title>
-        <UniversalCriteriaComponent {...props}/>
+        <UniversalCriteriaComponent {...props} />
       </PaperContainer>
     </div>
   );

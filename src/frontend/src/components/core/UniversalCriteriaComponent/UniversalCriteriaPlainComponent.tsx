@@ -9,12 +9,12 @@ const PlainComponentWrapper = styled.div`
 display: flex;
 flex-direction: column;
   width: 100%;
-`
+`;
 const ButtonWrapper = styled.div`
   display: flex;
   align-items: end;
   justify-content: end;
-`
+`;
 
 interface UniversalCriteriaPlainComponentProps {
   rules?;

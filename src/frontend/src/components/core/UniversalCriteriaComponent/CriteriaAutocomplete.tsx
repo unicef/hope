@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField, Paper } from '@material-ui/core';
-import styled from 'styled-components';
 import get from 'lodash/get';
+import { Autocomplete, TextField, Paper } from '@mui/material';
+import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
 `;
-interface Option {
-  labelEn: string;
-}
 
 export function CriteriaAutocomplete({
   field,
@@ -17,10 +13,10 @@ export function CriteriaAutocomplete({
   ...otherProps
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const [newValue, setNewValue] = useState(null);
+  const [newValue, setNewValue] = useState<any>(null);
   useEffect(() => {
     const optionValue =
-      choices.find((choice) => choice.name === field.value) || null;
+      choices.find((choice: any) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, choices]);
 
@@ -28,7 +24,7 @@ export function CriteriaAutocomplete({
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
   return (
-    <StyledAutocomplete<Option>
+    <StyledAutocomplete<any>
       {...field}
       {...otherProps}
       open={open}
@@ -40,9 +36,9 @@ export function CriteriaAutocomplete({
       }}
       options={choices}
       value={newValue}
-      getOptionLabel={(option) => {
+      getOptionLabel={(option: any) => {
         if (option) {
-          return option.labelEn;
+          return option.labelEn || '';
         }
         return '';
       }}
@@ -50,32 +46,36 @@ export function CriteriaAutocomplete({
         <TextField
           {...params}
           {...otherProps}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
           InputProps={{
             ...params.InputProps,
           }}
-          // https://github.com/mui-org/material-ui/issues/12805
-          // eslint-disable-next-line react/jsx-no-duplicate-props
-          inputProps={{
-            ...params.inputProps,
-            'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
+          slotProps={{
+            htmlInput: {
+              ...params.inputProps,
+              'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
+            },
           }}
         />
       )}
-      data-cy='autocomplete-target-criteria'
-      PaperComponent={React.forwardRef((props, ref) => (
-        <Paper
-          {...{
-            ...props,
-            ref,
-          }}
-          data-cy='autocomplete-target-criteria-options'
-        />
-      ))}
+      data-cy="autocomplete-target-criteria"
+      PaperComponent={CriteriaAutocompletePaper}
     />
   );
 }
+
+const CriteriaAutocompletePaper = React.forwardRef<HTMLDivElement, any>(
+  (props, ref) => (
+    <Paper
+      {...props}
+      ref={ref}
+      data-cy="autocomplete-target-criteria-options"
+    />
+  ),
+);
+
+CriteriaAutocompletePaper.displayName = 'CriteriaAutocompletePaper';

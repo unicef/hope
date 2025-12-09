@@ -105,7 +105,7 @@ export const UniversalCriteriaComponent = ({
 
   useEffect(() => {
     if (onAddDialogClose && !isOpen && isAddDialogOpen) {
-      onAddDialogClose()
+      onAddDialogClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -150,7 +150,7 @@ export const UniversalCriteriaComponent = ({
         {rules.length ? (
           rules.map((criteria, index) => {
             return (
-              //eslint-disable-next-line
+               
               <Fragment key={criteria.id || index}>
                 <UniversalCriteria
                   isEdit={isEdit}
