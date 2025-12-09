@@ -33,6 +33,7 @@ import PaymentsDataTable from '@containers/pages/officeSearch/PaymentsDataTable'
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 
 const OfficeSearchPage = (): ReactElement => {
   const NoResultsMessage = (
@@ -282,6 +283,10 @@ const OfficeSearchPage = (): ReactElement => {
     canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
     canViewPayments && { value: 'RCPT', label: 'Payment' },
   ].filter(Boolean);
+
+  if (!hasPermissions(PERMISSIONS.SEARCH_BUSINESS_AREAS, permissions)) {
+    return <PermissionDenied />;
+  }
 
   return (
     <>
