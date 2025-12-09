@@ -1,9 +1,60 @@
+from enum import StrEnum
+
 from django.forms import modelform_factory
 
 from hope.apps.geo.models import Country
 from hope.apps.household.models import Document, DocumentType, Household, Individual, IndividualIdentity
-from hope.apps.payment.models import Account, AccountType
+from hope.apps.payment.models import Account, AccountType, FinancialInstitution
 from hope.apps.registration_data.models import RegistrationDataImport
+
+
+class RecordType(StrEnum):
+    HOUSEHOLD = "household"
+    INDIVIDUAL = "individual"
+    ACCOUNT = "account"
+    DOCUMENT = "document"
+    IDENTITY = "identity"
+
+
+def format_validation_errors(errors: list) -> str:
+    """Format validation errors in a human-readable way."""
+    if not errors:
+        return "No errors"
+
+    formatted_lines = []
+
+    for idx, error_item in enumerate(errors, 1):
+        if not isinstance(error_item, dict):
+            formatted_lines.append(f"{idx}. {str(error_item)}")
+            continue
+
+        error_type = error_item.get("type", "Unknown")
+        data = error_item.get("data", {})
+        field_errors = error_item.get("errors", {})
+
+        # Get identifier for the record
+        if error_type == RecordType.HOUSEHOLD:
+            identifier = data.get("id", "Unknown")[:8]
+            header = f"{idx}. Household (ID: {identifier}...)"
+        elif error_type == RecordType.INDIVIDUAL:
+            full_name = data.get("full_name", data.get("given_name", "Unknown"))
+            header = f"{idx}. Individual ({full_name})"
+        elif error_type == RecordType.ACCOUNT:
+            number = data.get("number", "Unknown")
+            header = f"{idx}. Account ({number})"
+        else:
+            header = f"{idx}. {error_type.title()}"
+
+        formatted_lines.append(header)
+
+        # Format field errors
+        for field_name, error_messages in field_errors.items():
+            if isinstance(error_messages, list):
+                formatted_lines.extend([f"   • {field_name}: {msg}" for msg in error_messages])
+            else:
+                formatted_lines.append(f"   • {field_name}: {error_messages}")
+
+    return "\n".join(formatted_lines)
 
 
 class Importer:
@@ -95,7 +146,7 @@ class Importer:
             model_cls=Individual, data=individual_data, exclude=exclude
         )
         if errors:
-            self.errors.append({"type": "individual", "data": individual_data, "errors": errors})
+            self.errors.append({"type": RecordType.INDIVIDUAL, "data": individual_data, "errors": errors})
         else:
             # Use UUID from parser as real DB ID
             if "id" in individual_data:
@@ -103,19 +154,16 @@ class Importer:
                 # Store in dictionary for account/document/identity FK linking
                 self._individual_instances[individual_data["id"]] = individual_instance
             # Link individual to household via object reference (not UUID)
-            if "household_id" in individual_data:
-                household_obj = self._household_instances.get(individual_data["household_id"])
-                if household_obj:
+            if household_id := individual_data.get("household_id"):
+                if household_obj := self._household_instances.get(household_id):
                     individual_instance.household = household_obj
                 else:
                     # Household not found - add error
                     self.errors.append(
                         {
-                            "type": "individual",
+                            "type": RecordType.INDIVIDUAL,
                             "data": individual_data,
-                            "errors": {
-                                "household_id": [f"Household with id {individual_data['household_id']} not found"]
-                            },
+                            "errors": {"household_id": [f"Household with id {household_id} not found"]},
                         }
                     )
                     return
@@ -140,7 +188,7 @@ class Importer:
             model_cls=Household, data=household_data, exclude=exclude
         )
         if errors:
-            self.errors.append({"type": "household", "data": household_data, "errors": errors})
+            self.errors.append({"type": RecordType.HOUSEHOLD, "data": household_data, "errors": errors})
         else:
             # Use UUID from parser as real DB ID
             if "id" in household_data:
@@ -153,10 +201,8 @@ class Importer:
         exclude = ["individual"]
 
         # Resolve type_key string to DocumentType ID if needed
-        if "type_key" in document_data and isinstance(document_data["type_key"], str):
-            type_key = document_data["type_key"]
-            document_type_id = self._document_types.get(type_key)
-            if document_type_id:
+        if (type_key := document_data.get("type_key")) and isinstance(type_key, str):
+            if document_type_id := self._document_types.get(type_key):
                 # Create a copy with resolved ID and remove type_key
                 document_data = {**document_data, "type": document_type_id}
                 document_data.pop("type_key", None)
@@ -164,7 +210,7 @@ class Importer:
                 # Invalid document type key
                 self.errors.append(
                     {
-                        "type": "document",
+                        "type": RecordType.DOCUMENT,
                         "data": document_data,
                         "errors": {"type_key": [f"Unknown document type: {type_key}"]},
                     }
@@ -172,17 +218,15 @@ class Importer:
                 return
 
         # Resolve country ISO code to Country ID if needed
-        if "country" in document_data and isinstance(document_data["country"], str):
-            country_code = document_data["country"]
-            country_id = self._countries.get(country_code)
-            if country_id:
+        if (country_code := document_data.get("country")) and isinstance(country_code, str):
+            if country_id := self._countries.get(country_code):
                 # Create a copy with resolved ID
                 document_data = {**document_data, "country": country_id}
             else:
                 # Invalid country code - set to None or add error
                 self.errors.append(
                     {
-                        "type": "document",
+                        "type": RecordType.DOCUMENT,
                         "data": document_data,
                         "errors": {"country": [f"Unknown country code: {country_code}"]},
                     }
@@ -193,41 +237,38 @@ class Importer:
             model_cls=Document, data=document_data, exclude=exclude
         )
         if errors:
-            self.errors.append({"type": "document", "data": document_data, "errors": errors})
+            self.errors.append({"type": RecordType.DOCUMENT, "data": document_data, "errors": errors})
         else:
             # Link document to individual via object reference (not UUID)
-            if "individual_id" in document_data:
-                individual_obj = self._individual_instances.get(document_data["individual_id"])
-                if individual_obj:
+            if individual_id := document_data.get("individual_id"):
+                if individual_obj := self._individual_instances.get(individual_id):
                     document_instance.individual = individual_obj
                 else:
                     self.errors.append(
                         {
-                            "type": "document",
+                            "type": RecordType.DOCUMENT,
                             "data": document_data,
-                            "errors": {
-                                "individual_id": [f"Individual with id {document_data['individual_id']} not found"]
-                            },
+                            "errors": {"individual_id": [f"Individual with id {individual_id} not found"]},
                         }
                     )
                     return
             self.documents_to_create.append(document_instance)
 
     def _import_account(self, account_data):
-        exclude = ["individual"]
+        exclude = ["individual", "financial_institution"]
+        account_type_key = None
 
         # Resolve account_type string key to database ID if needed
-        if "account_type" in account_data and isinstance(account_data["account_type"], str):
-            account_type_key = account_data["account_type"]
-            account_type_id = self._account_types.get(account_type_key)
-            if account_type_id:
+        if (account_type_val := account_data.get("account_type")) and isinstance(account_type_val, str):
+            account_type_key = account_type_val
+            if account_type_id := self._account_types.get(account_type_key):
                 # Create a copy with resolved ID
                 account_data = {**account_data, "account_type": account_type_id}
             else:
                 # Invalid account_type key
                 self.errors.append(
                     {
-                        "type": "account",
+                        "type": RecordType.ACCOUNT,
                         "data": account_data,
                         "errors": {"account_type": [f"Unknown account type: {account_type_key}"]},
                     }
@@ -236,24 +277,32 @@ class Importer:
 
         account_instance, errors = self._build_unsaved_instance(model_cls=Account, data=account_data, exclude=exclude)
         if errors:
-            self.errors.append({"type": "account", "data": account_data, "errors": errors})
+            self.errors.append({"type": RecordType.ACCOUNT, "data": account_data, "errors": errors})
         else:
             # Link account to individual via object reference (not UUID)
-            if "individual_id" in account_data:
-                individual_obj = self._individual_instances.get(account_data["individual_id"])
-                if individual_obj:
+            if individual_id := account_data.get("individual_id"):
+                if individual_obj := self._individual_instances.get(individual_id):
                     account_instance.individual = individual_obj
                 else:
                     self.errors.append(
                         {
-                            "type": "account",
+                            "type": RecordType.ACCOUNT,
                             "data": account_data,
-                            "errors": {
-                                "individual_id": [f"Individual with id {account_data['individual_id']} not found"]
-                            },
+                            "errors": {"individual_id": [f"Individual with id {individual_id} not found"]},
                         }
                     )
                     return
+
+            # Assign generic Financial Institution if not provided
+            if not account_data.get("financial_institution"):
+                if account_type_key is None:
+                    # account_type was passed as ID, get the key from AccountType
+                    account_type_obj = AccountType.objects.filter(id=account_data.get("account_type")).first()
+                    account_type_key = account_type_obj.key if account_type_obj else "mobile"
+                account_instance.financial_institution = FinancialInstitution.get_generic_one(
+                    account_type_key, is_valid_iban=False
+                )
+
             self.accounts_to_create.append(account_instance)
 
     def _import_identity(self, identity_data):
@@ -263,21 +312,18 @@ class Importer:
             model_cls=IndividualIdentity, data=identity_data, exclude=exclude
         )
         if errors:
-            self.errors.append({"type": "identity", "data": identity_data, "errors": errors})
+            self.errors.append({"type": RecordType.IDENTITY, "data": identity_data, "errors": errors})
         else:
             # Link identity to individual via object reference (not UUID)
-            if "individual_id" in identity_data:
-                individual_obj = self._individual_instances.get(identity_data["individual_id"])
-                if individual_obj:
+            if individual_id := identity_data.get("individual_id"):
+                if individual_obj := self._individual_instances.get(individual_id):
                     identity_instance.individual = individual_obj
                 else:
                     self.errors.append(
                         {
-                            "type": "identity",
+                            "type": RecordType.IDENTITY,
                             "data": identity_data,
-                            "errors": {
-                                "individual_id": [f"Individual with id {identity_data['individual_id']} not found"]
-                            },
+                            "errors": {"individual_id": [f"Individual with id {individual_id} not found"]},
                         }
                     )
                     return
@@ -304,9 +350,9 @@ class Importer:
             household.registration_data_import = self.registration_data_import
             household.rdi_merge_status = Household.PENDING
             household.is_removed = False
-            if not hasattr(household, "first_registration_date") or not household.first_registration_date:
+            if not getattr(household, "first_registration_date", None):
                 household.first_registration_date = timezone.now()
-            if not hasattr(household, "last_registration_date") or not household.last_registration_date:
+            if not getattr(household, "last_registration_date", None):
                 household.last_registration_date = timezone.now()
 
         # Bulk create - UUID from parser will be used as DB ID
@@ -324,9 +370,9 @@ class Importer:
             individual.registration_data_import = self.registration_data_import
             individual.rdi_merge_status = Individual.PENDING
             individual.is_removed = False
-            if not hasattr(individual, "first_registration_date") or not individual.first_registration_date:
+            if not getattr(individual, "first_registration_date", None):
                 individual.first_registration_date = timezone.now()
-            if not hasattr(individual, "last_registration_date") or not individual.last_registration_date:
+            if not getattr(individual, "last_registration_date", None):
                 individual.last_registration_date = timezone.now()
         Individual.objects.bulk_create(self.individuals_to_create)
 

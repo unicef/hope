@@ -1,7 +1,7 @@
 from sentry_sdk import capture_exception
 
 from hope.apps.core.celery import app
-from hope.apps.generic_import.generic_upload_service.importer import Importer
+from hope.apps.generic_import.generic_upload_service.importer import Importer, format_validation_errors
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
@@ -10,54 +10,6 @@ from hope.apps.registration_datahub.celery_tasks import locked_cache
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-
-SOFT_TIME_LIMIT = 30 * 60
-HARD_TIME_LIMIT = 35 * 60
-
-RESULT_LOCKED = "locked"
-RESULT_SUCCESS = "success"
-RESULT_FAILED = "failed"
-
-
-def format_validation_errors(errors: list) -> str:
-    """Format validation errors in a human-readable way."""
-    if not errors:
-        return "No errors"
-
-    formatted_lines = []
-
-    for idx, error_item in enumerate(errors, 1):
-        if not isinstance(error_item, dict):
-            formatted_lines.append(f"{idx}. {str(error_item)}")
-            continue
-
-        error_type = error_item.get("type", "Unknown")
-        data = error_item.get("data", {})
-        field_errors = error_item.get("errors", {})
-
-        # Get identifier for the record
-        if error_type == "household":
-            identifier = data.get("id", "Unknown")[:8]
-            header = f"{idx}. Household (ID: {identifier}...)"
-        elif error_type == "individual":
-            full_name = data.get("full_name", data.get("given_name", "Unknown"))
-            header = f"{idx}. Individual ({full_name})"
-        elif error_type == "account":
-            number = data.get("number", "Unknown")
-            header = f"{idx}. Account ({number})"
-        else:
-            header = f"{idx}. {error_type.title()}"
-
-        formatted_lines.append(header)
-
-        # Format field errors
-        for field_name, error_messages in field_errors.items():
-            if isinstance(error_messages, list):
-                formatted_lines.extend([f"   • {field_name}: {msg}" for msg in error_messages])
-            else:
-                formatted_lines.append(f"   • {field_name}: {error_messages}")
-
-    return "\n".join(formatted_lines)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -153,18 +105,18 @@ def process_generic_import_task(
                     f"{households_count} households, {individuals_count} individuals"
                 )
 
-    except AlreadyRunningError as e:
-        logger.error(str(e))
+    except AlreadyRunningError:
+        logger.exception("Task already running")
         raise  # Raise without retry - task will fail
 
     except Exception as e:
-        logger.exception(f"Error processing generic import {registration_data_import_id}: {e}")
+        logger.exception(f"Error processing generic import {registration_data_import_id}")
 
         # Update error status
         try:
             sentry_id = capture_exception(e)
-        except Exception as exc:
-            logger.exception(exc)
+        except Exception:
+            logger.exception("Failed to capture Sentry exception")
             sentry_id = "N/A"
 
         # Update ImportData status
@@ -173,8 +125,8 @@ def process_generic_import_task(
             import_data.status = ImportData.STATUS_ERROR
             import_data.error = str(e)
             import_data.save(update_fields=["status", "error"])
-        except Exception as exc:
-            logger.exception(f"Failed to update ImportData status: {exc}")
+        except Exception:
+            logger.exception("Failed to update ImportData status")
 
         # Update RegistrationDataImport status
         try:
@@ -183,7 +135,7 @@ def process_generic_import_task(
             rdi.error_message = str(e)
             rdi.sentry_id = sentry_id
             rdi.save(update_fields=["status", "error_message", "sentry_id"])
-        except Exception as exc:
-            logger.exception(f"Failed to update RegistrationDataImport status: {exc}")
+        except Exception:
+            logger.exception("Failed to update RegistrationDataImport status")
 
         raise self.retry(exc=e)

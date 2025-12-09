@@ -5,8 +5,6 @@ from hope.apps.program.api.urls import program_base_router
 
 app_name = "generic_import"
 
-# Rejestracja w program-nested router
-# URL: /api/business-areas/<slug>/programs/<slug>/generic-import-upload/upload/
 program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
     "generic-import-upload",

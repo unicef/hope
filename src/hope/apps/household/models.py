@@ -999,7 +999,9 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, blank=True)
     photo = models.ImageField(blank=True)
-    cleared = models.BooleanField(default=False, blank=True)
+    cleared = models.BooleanField(
+        default=False, blank=True, help_text="Cleared used to confirm FOSTER_CHILD relationship"
+    )
     cleared_date = models.DateTimeField(default=timezone.now, blank=True)
     cleared_by = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
