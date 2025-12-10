@@ -23,15 +23,13 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import ROLE_PRIMARY
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import prepare_payment_plan_task
-from hope.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, DeliveryMechanism, Payment, PaymentPlan, Program
 
 
 class TestPaymentSignature(BaseTestCase):
@@ -112,7 +110,7 @@ class TestPaymentSignature(BaseTestCase):
         assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hope.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,

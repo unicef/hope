@@ -2,7 +2,7 @@ import uuid
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 
 
 def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:

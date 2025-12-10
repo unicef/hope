@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentVerificationDetailsStatusEnum } from './PaymentVerificationDetailsStatusEnum';
+import type { PaymentVerificationStatusEnum } from './PaymentVerificationStatusEnum';
 export type PaymentVerificationDetails = {
     readonly id: string;
     receivedAmount?: string | null;
-    status?: PaymentVerificationDetailsStatusEnum;
+    status?: PaymentVerificationStatusEnum;
     paymentVerificationPlanUnicefId: string;
     verificationChannel: string;
     readonly adminUrl: string | null;

@@ -6,9 +6,8 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from hope.api.models import Grant
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Program
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

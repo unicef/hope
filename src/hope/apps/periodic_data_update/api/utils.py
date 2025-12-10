@@ -2,8 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.program.models import Program
+from hope.models import FlexibleAttribute, Program
 
 
 def add_round_names_to_rounds_data(rounds_data: list[dict[str, Any]], program: Program) -> None:
