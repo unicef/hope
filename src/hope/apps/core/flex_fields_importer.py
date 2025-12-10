@@ -420,7 +420,7 @@ class FlexibleAttributeImporter:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = load_workbook(filename=xls_file, data_only=True)
-        else:
+        else:  # noqa
             xls_file.seek(0)
             wb = load_workbook(filename=BytesIO(xls_file.read()), data_only=True)
         sheets = {

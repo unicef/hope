@@ -129,6 +129,19 @@ class TestKoboTemplateUpload(BaseTestCase):
             "Import status will change after task completion"
         ) in messages
 
+    def test_upload_template_with_validation_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid.xlsx")
+        assert "Field: residence_status_h_c" in response.text
+        assert "Choice: RETURNEE is not present" in response.text
+        assert "Field: size_h_c - Field must be required" in response.text
+        assert "Field: tax_id_no_i_c - Field is missing" in response.text
+        assert "Upload XLS" in response.text
+
+    def test_upload_template_with_missing_sheet_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid-missing-sheet.xlsx")
+        form = response.context["form"]
+        assert "Missing sheet: 'Worksheet survey does not exist.'" in form.errors["xls_file"]
+
 
 class TestKoboErrorHandling(BaseTestCase):
     def generate_empty_template(self) -> XLSXKoboTemplate:
