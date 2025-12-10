@@ -5,11 +5,12 @@ from hope.apps.generic_import.generic_upload_service.importer import Importer, f
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import locked_cache
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hope.models.import_data import ImportData
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -85,7 +86,8 @@ def process_generic_import_task(
                 logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
             else:
                 # Update stats
-                from hope.apps.household.models import Household, Individual
+                from hope.models.household import Household
+                from hope.models.individual import Individual
 
                 households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
                 individuals_count = Individual.pending_objects.filter(registration_data_import=rdi).count()
