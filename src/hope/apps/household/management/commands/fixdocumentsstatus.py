@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.management import BaseCommand
 
-from hope.apps.household.models import Document
+from hope.models import Document
 
 
 def fix_documents_statuses() -> int:

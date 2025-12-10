@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
 from hope.apps.grievance.models import GrievanceTicket
@@ -13,15 +12,13 @@ from hope.apps.grievance.utils import (
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
 )
 from hope.apps.utils.exceptions import log_and_raise
+from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
 class GrievancePermissionsMixin:

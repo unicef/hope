@@ -10,10 +10,9 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import LogEntry
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.program.models import Program
+from hope.models import LogEntry, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -129,6 +128,7 @@ class TestLogEntryView:
             },
         )
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -173,6 +173,7 @@ class TestLogEntryView:
             assert response_results[2]["program_slug"] == self.program_2.slug
             assert response_results[3]["program_slug"] == self.program_1.slug
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -200,6 +201,7 @@ class TestLogEntryView:
             assert resp_data["count"] == 4
 
     # per Program
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -238,6 +240,7 @@ class TestLogEntryView:
                     expected_is_user_generated = None
                 assert log_result["is_user_generated"] == expected_is_user_generated
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -263,6 +266,7 @@ class TestLogEntryView:
             resp_data = response.json()
             assert resp_data["count"] == 2
 
+    @pytest.mark.enable_activity_log
     def test_activity_logs_filters(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_2)
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)

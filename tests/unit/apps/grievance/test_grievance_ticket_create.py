@@ -15,9 +15,7 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -27,7 +25,7 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -37,12 +35,17 @@ from hope.apps.household.models import (
     SINGLE,
     UNHCR,
     WIDOWED,
+)
+from hope.models import (
+    Account,
+    AccountType,
+    BusinessArea,
     DocumentType,
     IndividualRoleInHousehold,
+    Program,
+    country as geo_models,
 )
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.program.models import Program
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
