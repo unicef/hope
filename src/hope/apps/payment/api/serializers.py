@@ -10,7 +10,6 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.currencies import CURRENCY_CHOICES
@@ -25,27 +24,9 @@ from hope.apps.household.api.serializers.individual import (
     IndividualListSerializer,
     IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
-    Household,
-    Individual,
-)
-from hope.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
-from hope.apps.payment.models.payment import (
-    DeliveryMechanism,
-    FinancialServiceProviderXlsxTemplate,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -53,11 +34,28 @@ from hope.apps.program.api.serializers import (
     ProgramCycleSmallSerializer,
     ProgramSmallSerializer,
 )
-from hope.apps.program.models import Program
 from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Household,
+    Individual,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
+    Program,
+    log_create,
+)
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -1412,11 +1410,10 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 class FspChoiceSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    has_config = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = FinancialServiceProvider
-        fields = ("id", "name", "has_config")
+        fields = ("id", "name")
 
 
 class FspChoicesSerializer(serializers.Serializer):

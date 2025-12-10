@@ -13,10 +13,10 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.payment.models import AccountType, PaymentPlan
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
+from hope.models import AccountType, PaymentPlan
 
 
 class TestXlsxExportTargetingService(BaseTestCase):
@@ -140,7 +140,9 @@ class TestXlsxExportTargetingService(BaseTestCase):
 
         assert (
             service._accounts_info(individual) == "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
-            " 'name_of_cardholder': 'Marek', 'number': '123', 'financial_institution': ''}, "
+            " 'name_of_cardholder': 'Marek', 'number': '123',"
+            " 'financial_institution_name': '', 'financial_institution_pk': ''}, "
             "{'provider': 'Provider', 'delivery_phone_number': '123456789', "
-            "'service_provider_code': 'ABC', 'number': '321', 'financial_institution': ''}"
+            "'service_provider_code': 'ABC', 'number': '321',"
+            " 'financial_institution_name': '', 'financial_institution_pk': ''}"
         )

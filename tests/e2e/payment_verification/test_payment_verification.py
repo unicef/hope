@@ -32,17 +32,20 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
-from hope.apps.payment.models import (
+from hope.models import (
+    Area,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
     DeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
+    Program,
+    ProgramCycle,
+    User,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()
 
@@ -391,7 +394,7 @@ class TestSmokePaymentVerification:
         assert payment_record.parent.name in page_payment_record.get_label_target_population().text
         assert payment_record.parent.unicef_id in page_payment_record.get_label_distribution_modality().text
         assert payment_record.payment_verifications.first().status in page_payment_record.get_label_status()[1].text
-        assert "PLN 0.00" in page_payment_record.get_label_amount_received().text
+        assert "-" in page_payment_record.get_label_amount_received().text
         assert payment_record.household.unicef_id in page_payment_record.get_label_household_id().text
         assert "21.36" in page_payment_record.get_label_entitlement_quantity().text
         assert "21.36" in page_payment_record.get_label_delivered_quantity().text

@@ -17,28 +17,27 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pyzipper
 
-from hope.apps.account.models import User
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hope.apps.core.models import FileTemp, FlexibleAttribute
-from hope.apps.payment.models import (
+from hope.apps.payment.validators import generate_numeric_token
+from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hope.apps.utils.exceptions import log_and_raise
+from hope.models import (
     DeliveryMechanism,
-    FinancialServiceProvider,
+    FileTemp,
     FinancialServiceProviderXlsxTemplate,
+    FlexibleAttribute,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    Program,
 )
-from hope.apps.payment.validators import generate_numeric_token
-from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.program.models import Program
-from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models import FinancialServiceProvider, User
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +129,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
+            .order_by("unicef_id")
         )
         for payment in qs:
             snapshot = getattr(payment, "household_snapshot", None)
@@ -139,7 +139,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             account_data = collector_data.get("account_data", {})
             if account_data:
-                return list(account_data.keys())
+                headers = list(account_data.keys())
+                if "financial_institution_pk" not in headers:
+                    headers.append("financial_institution_pk")
+                if "financial_institution_name" not in headers:
+                    headers.append("financial_institution_name")
+                if "number" not in headers:
+                    headers.append("number")
+                return headers
         return []
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
@@ -333,7 +340,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
+        fsp: "FinancialServiceProvider" = self.payment_plan.financial_service_provider
         delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()

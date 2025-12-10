@@ -6,13 +6,13 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from xlwt import Row, Worksheet
 
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
+from hope.models import PaymentVerification, PaymentVerificationPlan
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):

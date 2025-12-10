@@ -26,6 +26,7 @@ import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { AdminButton } from '@components/core/AdminButton';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 
 const Container = styled.div`
   padding: 20px;
@@ -109,6 +110,14 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!individual && error?.message === 'Not Found') {
+    return (
+      <SomethingWentWrong
+        specificError={`${beneficiaryGroup?.memberLabel} has been removed or does not exist`}
+        goBackAddress={`/${baseUrl}/population/individuals`}
+      />
+    );
+  }
 
   if (
     !individual ||

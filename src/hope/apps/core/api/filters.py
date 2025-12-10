@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 from django_filters import CharFilter, DateFromToRangeFilter, FilterSet
 
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea
 
 
 class UpdatedAtFilter(FilterSet):

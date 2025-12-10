@@ -34,15 +34,17 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import DataCollectingType
-from hope.apps.payment.models import (
+from hope.models import (
+    BeneficiaryGroup,
+    DataCollectingType,
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
+    Program,
+    ProgramCycle,
+    Rule,
+    User,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 

@@ -2,7 +2,7 @@ from typing import Any, Sequence
 import uuid
 from uuid import UUID
 
-from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.buttons import ButtonWidget
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -22,11 +22,10 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.celery import app as celery_app
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
 from hope.apps.utils.celery_utils import get_task_in_queue_or_running
 from hope.apps.utils.security import is_root
+from hope.models import BusinessArea, PaymentPlan
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
@@ -117,7 +116,7 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        from hope.apps.core.models import BusinessArea
+        from hope.models import BusinessArea  # pragma: no cover
 
         return BusinessArea.objects.values_list("code", "name").distinct()
 
@@ -150,39 +149,39 @@ class BusinessAreaForIndividualCollectionListFilter(BusinessAreaForCollectionsLi
     model_filter_field = "individuals__business_area__id"
 
 
-def is_enabled(btn: Button) -> bool:
+def is_enabled(btn: ButtonWidget) -> bool:
     return btn.request.user.is_superuser
 
 
-def is_payment_plan_in_status(btn: Button, status: str) -> bool:
+def is_payment_plan_in_status(btn: ButtonWidget, status: str) -> bool:
     return btn.original.status == status
 
 
-def is_background_action_in_status(btn: Button, background_status: str) -> bool:
+def is_background_action_in_status(btn: ButtonWidget, background_status: str) -> bool:
     return btn.original.background_action_status == background_status
 
 
-def is_preparing_payment_plan(btn: Button) -> bool:
+def is_preparing_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.OPEN)
 
 
-def is_locked_payment_plan(btn: Button) -> bool:
+def is_locked_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.LOCKED)
 
 
-def is_accepted_payment_plan(btn: Button) -> bool:
+def is_accepted_payment_plan(btn: ButtonWidget) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.ACCEPTED)
 
 
-def is_importing_entitlements_xlsx_file(btn: Button) -> bool:
+def is_importing_entitlements_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
 
 
-def is_importing_reconciliation_xlsx_file(btn: Button) -> bool:
+def is_importing_reconciliation_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION)
 
 
-def is_exporting_xlsx_file(btn: Button) -> bool:
+def is_exporting_xlsx_file(btn: ButtonWidget) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
 
 
@@ -233,7 +232,7 @@ class PaymentPlanCeleryTasksMixin:
             return redirect(reverse(self.url, args=[pk]))
 
         if request.method == "POST":
-            prepare_payment_plan_task.delay(payment_plan.id)
+            prepare_payment_plan_task.delay(str(payment_plan.id))
             messages.add_message(
                 request,
                 messages.SUCCESS,

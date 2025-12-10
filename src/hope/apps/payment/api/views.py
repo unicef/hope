@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -25,7 +25,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -35,9 +34,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
-from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -92,18 +89,6 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -125,10 +110,25 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hope.apps.program.models import ProgramCycle
-from hope.apps.steficon.models import Rule
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import (
+    BusinessArea,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    ProgramCycle,
+    Rule,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -2061,23 +2061,14 @@ def available_fsps_for_delivery_mechanisms(
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
     def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
-        has_config_q = DeliveryMechanismConfig.objects.filter(
-            fsp=OuterRef("pk"),
-            delivery_mechanism__name=dm.name,
-        )
+        fsps_qs = FinancialServiceProvider.objects.filter(
+            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
+            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+            delivery_mechanisms__name=dm.name,
+            allowed_business_areas__slug=business_area_slug,
+        ).distinct()
 
-        fsps_qs = (
-            FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
-                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__name=dm.name,
-                allowed_business_areas__slug=business_area_slug,
-            )
-            .annotate(has_config=Exists(has_config_q))
-            .distinct()
-        )
-
-        return list(fsps_qs.values("id", "name", "has_config"))
+        return list(fsps_qs.values("id", "name"))
 
     list_resp = [
         {

@@ -19,16 +19,17 @@ from openpyxl.styles import Font
 
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FileTemp
 from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.payment.models.payment import (
+from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.utils import get_link
+from hope.models import (
+    FileTemp,
+    Payment,
+    PaymentPlan,
     WesternUnionInvoice,
     WesternUnionInvoicePayment,
     WesternUnionPaymentPlanReport,
 )
-from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
-from hope.apps.payment.utils import get_link
 
 logger = logging.getLogger(__name__)
 
