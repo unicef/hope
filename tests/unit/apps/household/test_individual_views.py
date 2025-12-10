@@ -1028,20 +1028,16 @@ class TestIndividualDetail:
         assert len(data["accounts"]) == 2
         account_1 = data["accounts"][0]
         account_2 = data["accounts"][1]
-        assert account_1["data_fields"] == {
-            "card_expiry_date__bank": "2022-01-01",
-            "card_number__bank": "123",
-            "name_of_cardholder__bank": "Marek",
-            "financial_institution": "",
-            "number": "",
-        }
-        assert account_2["data_fields"] == {
-            "service_provider_code__mobile": "ABC",
-            "delivery_phone_number__mobile": "123456789",
-            "provider__mobile": "Provider",
-            "financial_institution": "",
-            "number": "",
-        }
+        assert account_1["data_fields"] == [
+            {"key": "card_expiry_date__bank", "value": "2022-01-01"},
+            {"key": "card_number__bank", "value": "123"},
+            {"key": "name_of_cardholder__bank", "value": "Marek"},
+        ]
+        assert account_2["data_fields"] == [
+            {"key": "delivery_phone_number__mobile", "value": "123456789"},
+            {"key": "provider__mobile", "value": "Provider"},
+            {"key": "service_provider_code__mobile", "value": "ABC"},
+        ]
 
         assert data["linked_grievances"] == [
             {
@@ -1425,6 +1421,7 @@ class TestIndividualChoices:
         }
 
 
+@pytest.mark.elasticsearch
 class TestIndividualFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:

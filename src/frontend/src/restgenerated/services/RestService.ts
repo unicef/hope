@@ -1169,7 +1169,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -1219,7 +1219,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -13293,6 +13293,7 @@ export class RestService {
         programSlug,
         limit,
         offset,
+        ordering,
     }: {
         businessAreaSlug: string,
         /**
@@ -13308,6 +13309,7 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        ordering?: string,
     }): CancelablePromise<PaginatedPendingPaymentList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -13320,6 +13322,33 @@ export class RestService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/pending-payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
             },
         });
     }

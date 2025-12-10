@@ -118,12 +118,7 @@ class ProgramAdmin(
         "is_visible",
     )
     search_fields = ("name", "programme_code")
-    raw_id_fields = (
-        "business_area",
-        "data_collecting_type",
-        "beneficiary_group",
-    )
-    filter_horizontal = ("admin_areas",)
+    autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)

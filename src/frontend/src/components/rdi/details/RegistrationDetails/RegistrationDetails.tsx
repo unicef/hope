@@ -125,6 +125,22 @@ function RegistrationDetails({
             </BigValueContainer>
           </Grid>
         </Grid>
+        <Grid container>
+          <Grid size={{ xs: 6 }}>
+            <Box mt={2}>
+              <BigValueContainer>
+                <LabelizedField
+                  label={`${beneficiaryGroup?.memberLabelPlural} with records at HOPE`}
+                  dataCy="registered-individuals"
+                >
+                  <BigValue>
+                    {registration?.numberOfRegisteredIndividuals}
+                  </BigValue>
+                </LabelizedField>
+              </BigValueContainer>
+            </Box>
+          </Grid>
+        </Grid>
       </Grid>
     );
   }

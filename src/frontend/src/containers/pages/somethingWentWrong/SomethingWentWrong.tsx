@@ -51,18 +51,24 @@ interface SomethingWentWrongProps {
   pathname?: string;
   errorMessage?: string;
   component?: string;
+  goBackAddress?: string;
+  specificError?: string;
 }
 
 export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
   pathname,
   errorMessage: propsErrorMessage,
   component,
+  goBackAddress,
+  specificError,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleGoBackAndClearCache =  () => {
-    if (location.state?.lastSuccessfulPage) {
+  const handleGoBackAndClearCache = () => {
+    if (goBackAddress) {
+      navigate(goBackAddress);
+    } else if (location.state?.lastSuccessfulPage) {
       navigate(location.state.lastSuccessfulPage);
     } else {
       window.history.back();
@@ -92,7 +98,9 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
       </SquareLogo>
       <TextContainer>
         <Title>Oops! Something went wrong</Title>
-        {errorMessage && isEnvWhereShowErrors ? (
+        {specificError ? (
+          <Paragraph>Error: {specificError}</Paragraph>
+        ) : isEnvWhereShowErrors && errorMessage ? (
           <Box display="flex" flexDirection="column">
             {pathname && (
               <Paragraph style={{ wordWrap: 'break-word' }}>

@@ -1023,6 +1023,7 @@ class TestRegistrationImportCeleryTasks(BaseTestCase):
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
         assert self.registration_data_import.status == RegistrationDataImport.MERGE_ERROR
+        assert self.registration_data_import.error_message == "Test Exception"
 
     @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(

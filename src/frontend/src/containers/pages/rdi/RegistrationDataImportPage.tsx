@@ -101,7 +101,7 @@ function RegistrationDataImportPage(): ReactElement {
             </ButtonTooltip>
           </Box>
         )}
-        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && !businessAreaData.rdiImportXlsxDisabled && (
+        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && !businessAreaData?.rdiImportXlsxDisabled && (
           <Box>
             <RegistrationDataImportCreateDialog />
           </Box>

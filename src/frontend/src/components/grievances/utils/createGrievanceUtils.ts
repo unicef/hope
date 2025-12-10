@@ -7,7 +7,6 @@ import {
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import camelCase from 'lodash/camelCase';
 import { removeIdPropertyFromObjects } from './helpers';
-import { CategoryB41Enum } from '@restgenerated/models/CategoryB41Enum';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -21,7 +20,7 @@ export const replaceLabels = (text, _beneficiaryGroup) => {
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
 
-export function isShowIssueType(category: string | CategoryB41Enum): boolean {
+export function isShowIssueType(category: any): boolean {
   const cat = category?.toString();
   return (
     cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -470,24 +469,11 @@ export function prepareExistingAccountValues(
   if (!individualDataUpdateAccountsToEdit) {
     return [];
   }
-  function popKey(obj: any, key: string) {
-    const value = obj[key];
-    delete obj[key];
-    return value;
-  }
   return individualDataUpdateAccountsToEdit.map((item) => {
-    const dataFieldsArray = popKey(item, 'dataFields') || [];
-
-    const dataFields = {};
-    for (const field of dataFieldsArray) {
-      dataFields[field.key] = field.value;
-    }
-    return {
-      number: popKey(item, 'number'),
-      financialInstitution: popKey(item, 'financialInstitution'),
-      id: popKey(item, 'id'),
-      dataFields: { ...item, ...dataFields },
-    };
+    const preparedItem = { ...item };
+    delete preparedItem.accountType;
+    delete preparedItem.isNew;
+    return preparedItem;
   });
 }
 
