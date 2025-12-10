@@ -1,6 +1,5 @@
 import logging
 
-from admin_sync.mixin import GetManyFromRemoteMixin
 from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
 from jsoneditor.forms import JSONEditor
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
+class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
