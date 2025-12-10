@@ -7,15 +7,11 @@ import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.geo.models import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import Document, DocumentType, Household, Individual
-from hope.apps.payment.models import Account, AccountType
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
-from hope.apps.universal_update_script.models import UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_account_fields,
     get_document_fields,
@@ -28,6 +24,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
     get_generator_handler,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import Account, AccountType, Country, Document, DocumentType, Household, Individual, UniversalUpdate
 
 logger = logging.getLogger(__name__)
 

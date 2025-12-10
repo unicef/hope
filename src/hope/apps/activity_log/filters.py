@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 from django.db.models import Q
 from django_filters import CharFilter, FilterSet
 
-from hope.apps.activity_log.models import LogEntry
+from hope.models import LogEntry
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
+    from django.db.models import QuerySet
 
 
 class LogEntryFilter(FilterSet):

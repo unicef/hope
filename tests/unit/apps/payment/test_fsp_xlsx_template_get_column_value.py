@@ -15,15 +15,16 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hope.apps.payment.models import (
+from hope.apps.household.const import ROLE_PRIMARY
+from hope.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    IndividualRoleInHousehold,
     PaymentPlan,
-)
-from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
 )
 
 
