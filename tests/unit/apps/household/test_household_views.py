@@ -18,20 +18,32 @@ from extras.test_utils.factories.accountability import (
 )
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import GrievanceComplaintTicketWithoutExtrasFactory, GrievanceTicketFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
+    TicketPaymentVerificationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
+)
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
-from hope.apps.grievance.models import GrievanceTicket, TicketDeleteHouseholdDetails
+from hope.apps.grievance.models import GrievanceTicket, TicketDeleteHouseholdDetails, TicketNeedsAdjudicationDetails
 from hope.apps.household.models import (
     DUPLICATE,
     HOST,
@@ -1320,6 +1332,73 @@ class TestHouseholdOfficeSearch:
             reason_household=self.household4,
         )
 
+        self.household5, self.individuals5 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        self.needs_adjudication_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
+        self.needs_adjudication_ticket.programs.add(self.program)
+        self.needs_adjudication_details = TicketNeedsAdjudicationDetails.objects.create(
+            ticket=self.needs_adjudication_ticket,
+            golden_records_individual=self.individuals5[0],
+        )
+
+        self.household6, self.individuals6 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        self.sanction_list_individual = SanctionListIndividualFactory()
+        self.system_flagging_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        )
+        self.system_flagging_ticket.programs.add(self.program)
+        self.system_flagging_details = TicketSystemFlaggingDetailsFactory(
+            ticket=self.system_flagging_ticket,
+            golden_records_individual=self.individuals6[0],
+            sanction_list_individual=self.sanction_list_individual,
+        )
+
+        self.household7, self.individuals7 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        self.payment3 = PaymentFactory(
+            parent=self.payment_plan,
+            household=self.household7,
+            head_of_household=self.individuals7[0],
+            program=self.program,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=self.payment_plan)
+        self.payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=self.payment_plan,
+        )
+        self.payment_verification = PaymentVerificationFactory(
+            payment=self.payment3,
+            payment_verification_plan=self.payment_verification_plan,
+        )
+        self.payment_verification_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        )
+        self.payment_verification_ticket.programs.add(self.program)
+        self.payment_verification_details = TicketPaymentVerificationDetailsFactory(
+            ticket=self.payment_verification_ticket,
+            payment_verification=self.payment_verification,
+        )
+
     def test_search_by_household_unicef_id(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -1394,10 +1473,11 @@ class TestHouseholdOfficeSearch:
             {"office_search": self.payment_plan.unicef_id},
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 2
+        assert len(response.data["results"]) == 3
         result_ids = [result["id"] for result in response.data["results"]]
         assert str(self.household1.id) in result_ids
         assert str(self.household2.id) in result_ids
+        assert str(self.household7.id) in result_ids
         assert str(self.household3.id) not in result_ids
 
     def test_search_by_grievance_unicef_id(self, create_user_role_with_permissions: Any) -> None:
@@ -1461,6 +1541,66 @@ class TestHouseholdOfficeSearch:
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 0
+
+    def test_search_by_needs_adjudication_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.needs_adjudication_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.needs_adjudication_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.household5.id)
+
+    def test_search_by_system_flagging_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.system_flagging_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.system_flagging_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.household6.id)
+
+    def test_search_by_payment_verification_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.payment_verification_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment_verification_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.household7.id)
 
 
 class TestHouseHoldChoices:
