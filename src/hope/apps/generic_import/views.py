@@ -9,7 +9,8 @@ from django.views.generic.edit import FormView
 from hope.apps.account.permissions import Permissions
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.forms import GenericImportForm
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.models.import_data import ImportData
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 class GenericImportUploadView(LoginRequiredMixin, FormView):

@@ -10,11 +10,12 @@ from django.utils import timezone
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.models.business_area import BusinessArea
+from hope.models.import_data import ImportData
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.role_assignment import RoleAssignment
 
 
 class TestGenericImportUploadView(TransactionTestCase):
@@ -40,7 +41,8 @@ class TestGenericImportUploadView(TransactionTestCase):
 
     def _create_user_role_with_permissions(self, user, permissions, business_area, program=None):
         """Helper to create user role with permissions."""
-        from hope.apps.account.models import Role, RoleAssignment
+        from hope.models.role import Role
+        from hope.models.role_assignment import RoleAssignment
 
         permission_list = [perm.value for perm in permissions]
         role, _ = Role.objects.update_or_create(
@@ -300,7 +302,8 @@ class TestGenericImportUploadView(TransactionTestCase):
         """Test that expired role assignments don't grant access."""
         from datetime import timedelta
 
-        from hope.apps.account.models import Role, RoleAssignment
+        from hope.models.role import Role
+        from hope.models.role_assignment import RoleAssignment
 
         role = Role.objects.create(
             name="Expired Role",
@@ -344,7 +347,9 @@ class TestGenericImportUploadView(TransactionTestCase):
     @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
     def test_user_with_partner_permissions(self, mock_delay):
         """Test that users inherit permissions from their partner."""
-        from hope.apps.account.models import Partner, Role, RoleAssignment
+        from hope.models.partner import Partner
+        from hope.models.role import Role
+        from hope.models.role_assignment import RoleAssignment
 
         # Create partner with allowed business areas
         partner = Partner.objects.create(name="Test Partner")
@@ -387,7 +392,8 @@ class TestGenericImportUploadView(TransactionTestCase):
     @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
     def test_ba_level_permission_grants_all_programs(self, mock_delay):
         """Test that BA-level role assignment grants access to all programs."""
-        from hope.apps.account.models import Role, RoleAssignment
+        from hope.models.role import Role
+        from hope.models.role_assignment import RoleAssignment
 
         program1 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
         program2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
@@ -457,7 +463,7 @@ class TestGenericImportUploadView(TransactionTestCase):
     @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
     def test_upload_to_ba_without_import_permission_for_that_ba(self, mock_delay):
         """Test that upload fails when user has BA access but not GENERIC_IMPORT_DATA for selected BA."""
-        from hope.apps.account.models import Role
+        from hope.models.role import Role
 
         # Create second business area
         other_ba = BusinessArea.objects.create(

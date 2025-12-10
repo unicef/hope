@@ -9,10 +9,11 @@ from rest_framework.test import APITestCase
 
 from extras.test_utils.factories.account import BusinessAreaFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.api.models import Grant
 from hope.apps.account.permissions import Permissions
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.models.import_data import ImportData
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.factories import APITokenFactory
 
 
