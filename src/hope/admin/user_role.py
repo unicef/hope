@@ -51,6 +51,8 @@ class RoleAssignmentInline(admin.TabularInline):
 
     def has_add_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
+            if obj.is_parent:
+                return False
             return request.user.can_add_business_area_to_partner()
         return True
 

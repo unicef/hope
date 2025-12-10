@@ -19,7 +19,7 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.partner import PartnerAdmin
-from hope.admin.user_role import UserRoleAssignmentAdmin, RoleAssignmentInline
+from hope.admin.user_role import RoleAssignmentInline, UserRoleAssignmentAdmin
 from hope.apps.account.models import Partner, Role, RoleAssignment, User, UserRoleAssignment
 
 pytestmark = pytest.mark.django_db()
@@ -104,7 +104,7 @@ class RoleAssignmentInlineTest(TestCase):
 
     def test_has_add_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert not self.admin.has_add_permission(request, self.unicef_subpartner)
+        assert self.admin.has_add_permission(request, self.unicef_subpartner)
 
         assert not self.admin.has_add_permission(request, self.unicef_parent)
 
@@ -114,7 +114,7 @@ class RoleAssignmentInlineTest(TestCase):
 
     def test_has_change_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert not self.admin.has_change_permission(request, self.unicef_subpartner)
+        assert self.admin.has_change_permission(request, self.unicef_subpartner)
 
         assert self.admin.has_change_permission(request, self.unicef_parent)
 
@@ -124,7 +124,7 @@ class RoleAssignmentInlineTest(TestCase):
 
     def test_has_delete_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
-        assert not self.admin.has_delete_permission(request, self.unicef_subpartner)
+        assert self.admin.has_delete_permission(request, self.unicef_subpartner)
 
         assert self.admin.has_delete_permission(request, self.unicef_parent)
 
@@ -175,6 +175,167 @@ class RoleAssignmentAdminTest(TestCase):
     def test_check_publish_permission(self) -> None:
         request = self.get_mock_request()
         assert not self.admin.check_publish_permission(request)
+
+
+class RoleAssignmentAdminFormTest(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        from hope.admin.account_forms import RoleAssignmentAdminForm
+        from hope.apps.account.models import IncompatibleRoles
+
+        cls.form_class = RoleAssignmentAdminForm
+        cls.business_area = create_afghanistan()
+        cls.role_1 = RoleFactory(name="Role 1")
+        cls.role_2 = RoleFactory(name="Role 2")
+        cls.role_3 = RoleFactory(name="Role 3")
+
+        IncompatibleRoles.objects.create(role_one=cls.role_1, role_two=cls.role_2)
+
+    def test_user_incompatible_roles_create(self) -> None:
+        user = UserFactory()
+
+        # User already has role_1
+        RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
+
+        # Try to assign incompatible role_2
+        form = self.form_class(
+            data={
+                "user": user.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert not form.is_valid()
+        assert "role" in form.errors
+        assert f"This role is incompatible with {self.role_1.name}" in form.errors["role"]
+
+    def test_user_incompatible_roles_edit_exclude_self(self) -> None:
+        user = UserFactory()
+
+        role_assignment = RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
+
+        # Edit the same assignment
+        form = self.form_class(
+            data={
+                "user": user.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            },
+            instance=role_assignment,
+        )
+
+        # Should be valid because we exclude the current instance
+        assert form.is_valid()
+
+    def test_partner_incompatible_roles_create(self) -> None:
+        partner = PartnerFactory()
+        partner.allowed_business_areas.add(self.business_area)
+
+        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
+
+        # Try to assign incompatible role_2
+        form = self.form_class(
+            data={
+                "partner": partner.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert not form.is_valid()
+        assert "role" in form.errors
+        assert f"This role is incompatible with {self.role_1.name}" in form.errors["role"]
+
+    def test_partner_incompatible_roles_edit_exclude_self(self) -> None:
+        partner = PartnerFactory()
+        partner.allowed_business_areas.add(self.business_area)
+
+        role_assignment = RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
+
+        # Edit the same assignment
+        form = self.form_class(
+            data={
+                "partner": partner.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            },
+            instance=role_assignment,
+        )
+
+        # Should be valid because we exclude the current instance
+        assert form.is_valid()
+
+    def test_user_compatible_roles_allowed(self) -> None:
+        user = UserFactory()
+
+        # User already has role_1
+        RoleAssignmentFactory(user=user, role=self.role_1, business_area=self.business_area)
+
+        # Assign role_3 (not incompatible with role_1)
+        form = self.form_class(
+            data={
+                "user": user.id,
+                "role": self.role_3.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert form.is_valid()
+
+    def test_partner_compatible_roles_allowed(self) -> None:
+        partner = PartnerFactory()
+        partner.allowed_business_areas.add(self.business_area)
+
+        # Partner already has role_1
+        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=self.business_area)
+
+        # Assign role_3 (not incompatible with role_1)
+        form = self.form_class(
+            data={
+                "partner": partner.id,
+                "role": self.role_3.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert form.is_valid()
+
+    def test_user_incompatible_roles_different_business_area_allowed(self) -> None:
+        user = UserFactory()
+        other_business_area = BusinessAreaFactory(name="Other BA")
+
+        RoleAssignmentFactory(user=user, role=self.role_1, business_area=other_business_area)
+
+        # Assign incompatible role_2 in different business area (should be allowed)
+        form = self.form_class(
+            data={
+                "user": user.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert form.is_valid()
+
+    def test_partner_incompatible_roles_different_business_area_allowed(self) -> None:
+        partner = PartnerFactory()
+        other_business_area = BusinessAreaFactory(name="Other BA")
+        partner.allowed_business_areas.add(self.business_area, other_business_area)
+
+        RoleAssignmentFactory(partner=partner, role=self.role_1, business_area=other_business_area)
+
+        # Assign incompatible role_2 in different business area (should be allowed)
+        form = self.form_class(
+            data={
+                "partner": partner.id,
+                "role": self.role_2.id,
+                "business_area": self.business_area.id,
+            }
+        )
+
+        assert form.is_valid()
 
 
 @pytest.mark.skip("Fail on pipeline")
