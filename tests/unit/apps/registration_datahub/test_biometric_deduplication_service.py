@@ -316,6 +316,17 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind1, individual2=None, similarity_score=0.00
         ).exists()
 
+    def test_store_results_not_existing_individual(self) -> None:
+        ind1 = IndividualFactory.create_batch(1)[0]
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=70.0, first=ind1.id, second=str(uuid.uuid4()), status_code="429"),
+        ]
+
+        service.store_similarity_pairs(self.program, similarity_pairs)
+
+        assert self.program.deduplication_engine_similarity_pairs.count() == 0
+
     def test_mark_rdis_as(self) -> None:
         service = BiometricDeduplicationService()
         rdi = RegistrationDataImportFactory(
