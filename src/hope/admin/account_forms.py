@@ -10,8 +10,8 @@ from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
-from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
+from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 

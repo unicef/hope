@@ -200,9 +200,7 @@ class ADUSerMixin:
                     except Http404:
                         results.missing.append(email)
                 User.objects.bulk_create(users_to_bulk_create)
-                RoleAssignment.objects.bulk_create(
-                    users_role_to_bulk_create, ignore_conflicts=True
-                )
+                RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                 ctx["results"] = results
                 return TemplateResponse(request, "admin/load_users.html", ctx)
             except (HTTPError, Http404) as e:
