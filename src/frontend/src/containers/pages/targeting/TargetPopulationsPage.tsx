@@ -150,7 +150,7 @@ const TargetPopulationsPage = (): ReactElement => {
                     justifyContent="space-between"
                     p={2}
                   >
-                    <Typography variant="h6" p={4}>
+                    <Typography variant="h6" p={0}>
                       {t('Programme Eligibility Criteria')}
                     </Typography>
                     <Button
