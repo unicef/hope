@@ -315,13 +315,15 @@ class DashboardCacheBase(Protocol):
 
             for hh in households_qs:
                 size_value = hh.get("size")
+                dct_type = hh.get("program__data_collecting_type__type")
+                is_sw_program = dct_type == "SOCIAL"
                 household_map[hh["id"]] = {
-                    "size": 1 if size_value is None else size_value,
-                    "children_count": hh.get("children_count"),  # Return the raw value or None
+                    "size": 1 if is_sw_program or size_value is None else size_value,
+                    "children_count": hh.get("children_count"),
                     "pwd_count": hh.get("pwd_count_calc") or 0,
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
                     "country": hh.get("country_name_hh", "Unknown Country"),
-                    "dct_type": hh.get("program__data_collecting_type__type"),
+                    "dct_type": dct_type,
                 }
         return household_map
 
@@ -521,7 +523,9 @@ class DashboardDataCache(DashboardCacheBase):
                 children_count = h_data.get("children_count")
                 is_sw_program = h_data.get("dct_type") == "SOCIAL"
 
-                if is_sw_program or children_count is None:
+                if is_sw_program:
+                    pass
+                elif children_count is None:
                     payment_year = payment.get("year")
                     country_name = h_data.get("country", "Unknown Country")
                     if payment_year:
@@ -720,7 +724,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     children_count = h_data.get("children_count")
                     is_sw_program = h_data.get("dct_type") == "SOCIAL"
 
-                    if is_sw_program or children_count is None:
+                    if is_sw_program:
+                        pass
+                    elif children_count is None:
                         payment_year = payment.get("year")
                         country_name = h_data.get("country", "Unknown Country")
                         if payment_year:
