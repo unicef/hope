@@ -12,15 +12,13 @@ from hope.admin.account_forms import (
     RoleAssignmentInlineFormSet,
 )
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account import models as account_models
-from hope.apps.account.models import Partner, Role
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, Partner, Role, RoleAssignment
 
 logger = logging.getLogger(__name__)
 
 
 class RoleAssignmentInline(admin.TabularInline):
-    model = account_models.RoleAssignment
+    model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
@@ -70,7 +68,7 @@ class RoleAssignmentInline(admin.TabularInline):
         return True
 
 
-@admin.register(account_models.RoleAssignment)
+@admin.register(RoleAssignment)
 class RoleAssignmentAdmin(HOPEModelAdminBase):
     list_display = ("user", "partner", "role", "business_area", "program")
     form = RoleAssignmentAdminForm

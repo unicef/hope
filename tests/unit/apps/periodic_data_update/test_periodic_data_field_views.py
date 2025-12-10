@@ -20,7 +20,7 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
+from hope.models import PeriodicFieldData
 
 pytestmark = pytest.mark.django_db()
 

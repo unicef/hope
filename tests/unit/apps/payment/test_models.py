@@ -43,31 +43,33 @@ from extras.test_utils.factories.registration_data import RegistrationDataImport
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     LOT_DIFFICULTY,
     ROLE_PRIMARY,
-    IndividualRoleInHousehold,
 )
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    Approval,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialInstitution,
-    FinancialServiceProviderXlsxTemplate,
-    FspNameMapping,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.program.models import ProgramCycle
-from hope.apps.steficon.models import Rule
+from hope.models import (
+    Account,
+    AccountType,
+    Approval,
+    BusinessArea,
+    DataCollectingType,
+    DeliveryMechanism,
+    DeliveryMechanismConfig,
+    FileTemp,
+    FinancialInstitution,
+    FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentDataCollector,
+    PaymentPlan,
+    ProgramCycle,
+    Rule,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -1081,7 +1083,8 @@ class TestAccountModel(TestCase):
             "custom_ind_name": f"{dmd.individual.full_name} Custom",
             "custom_hh_address": f"{self.hh.address} Custom",
             "address": self.hh.address,
-            "financial_institution": str(self.financial_institution.id),
+            "financial_institution_name": str(self.financial_institution.name),
+            "financial_institution_pk": str(self.financial_institution.id),
         }
 
     def test_delivery_data_setter(self) -> None:
@@ -1110,7 +1113,8 @@ class TestAccountModel(TestCase):
         assert account.account_data == {
             "number": "456",
             "expiry_date": "12.12.2025",
-            "financial_institution": str(financial_institution2.id),
+            "financial_institution_pk": str(financial_institution2.id),
+            "financial_institution_name": str(financial_institution2.name),
             "new_field": "new_value",
             "name_of_cardholder": "Marek",
         }

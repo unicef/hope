@@ -8,10 +8,8 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
-from hope.api.models import Grant
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.payment.models import FinancialInstitution
-from hope.apps.program.models import Program
+from hope.models import Area, AreaType, Country, FinancialInstitution, Program
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

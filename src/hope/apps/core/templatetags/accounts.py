@@ -6,13 +6,12 @@ from django.urls import reverse
 
 from hope.apps.utils.security import is_root
 
-register = template.Library()
-
-
 if TYPE_CHECKING:
     from django.http import HttpRequest
 
-    from hope.apps.account.models import User
+    from hope.models import User
+
+register = template.Library()
 
 
 @register.simple_tag()

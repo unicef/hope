@@ -8,7 +8,6 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from parameterized import parameterized
-import pytest
 from rest_framework import status
 
 from extras.test_utils.factories.account import UserFactory
@@ -16,9 +15,8 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.admin.utils import PaymentPlanCeleryTasksMixin
-from hope.apps.core.models import FileTemp
-from hope.apps.payment.models import PaymentPlan
 from hope.apps.payment.utils import generate_cache_key
+from hope.models import FileTemp, PaymentPlan
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):
@@ -95,7 +93,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         response = self.client.post(
             reverse(
                 "admin:payment_paymentplan_restart_preparing_payment_plan",
-                args=[payment_plan.id],
+                args=[str(payment_plan.id)],
             ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
@@ -161,7 +159,6 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             == f"Task is already running for Payment Plan {payment_plan.unicef_id}."
         )
 
-    @pytest.mark.xfail(reason="Failing after last merge develop")
     @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_importing_reconciliation_xlsx_file(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
@@ -192,7 +189,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         payment_plan.save()
         payment_plan.refresh_from_db()
 
-        with mock.patch("hope.apps.utils.celery_utils.get_task_in_queue_or_running", return_value=None):
+        with mock.patch("hope.admin.utils.get_task_in_queue_or_running", return_value=None):
             response = self.client.post(
                 reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
                 HTTP_X_ROOT_TOKEN="test-token123",

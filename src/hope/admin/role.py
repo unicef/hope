@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.collector import ForeignKeysCollector
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixins.base import BaseSyncMixin
 from admin_sync.protocol import LoadDumpProtocol
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -16,8 +16,8 @@ from import_export.admin import ImportExportModelAdmin
 from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.account import models as account_models
 from hope.apps.account.permissions import Permissions
+from hope.models import IncompatibleRoles, Role
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class RoleResource(resources.ModelResource):
     class Meta:
-        model = account_models.Role
+        model = Role
         fields = ("name", "subsystem", "permissions")
         import_id_fields = ("name", "subsystem")
 
@@ -41,8 +41,8 @@ class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
     collector_class = UnrelatedForeignKeysCollector
 
 
-@admin.register(account_models.Role)
-class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
+@admin.register(Role)
+class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
@@ -62,7 +62,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted(str(x.value) for x in Permissions)
-        roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
+        roles = Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
@@ -113,7 +113,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         return change_message
 
 
-@admin.register(account_models.IncompatibleRoles)
+@admin.register(IncompatibleRoles)
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)

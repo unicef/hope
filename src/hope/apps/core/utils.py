@@ -41,8 +41,7 @@ if TYPE_CHECKING:
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
-    from hope.apps.account.models import User
-
+    from hope.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +178,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             },
         }
     """
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").all()
 
@@ -574,7 +573,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
 
 
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
-    from hope.apps.core.models import FlexibleAttribute
+    from hope.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices: dict = {**parent.flex_fields}
@@ -656,13 +655,13 @@ def fix_flex_type_fields(items: Any, flex_fields: dict) -> list[dict]:
 
 
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
-    excluded_ids_array = excluded_ids_string.split(",")
+    excluded_ids_array = excluded_ids_string.split(",") if excluded_ids_string else []
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
-    from hope.apps.household.models import Household
+    from hope.models import Household
 
     excluded_household_ids_from_individuals_array = Household.objects.filter(
         individuals__unicef_id__in=excluded_individuals_ids_array
@@ -832,7 +831,7 @@ class JSONBSet(Func):
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     from hope.apps.core.kobo.api import KoboAPI
     from hope.apps.core.kobo.common import reduce_assets_list
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
     try:
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
@@ -856,8 +855,7 @@ def get_fields_attr_generators(
 ) -> Generator:
     from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
     from hope.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-    from hope.apps.core.models import FlexibleAttribute
-    from hope.apps.program.models import Program
+    from hope.models import FlexibleAttribute, Program
 
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(

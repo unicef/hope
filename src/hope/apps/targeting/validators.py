@@ -4,12 +4,16 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.core.models import DataCollectingType, FlexibleAttribute
 from hope.apps.core.utils import get_attr_value
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
 from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import TargetingCriteriaRuleFilter
+from hope.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    Program,
+    TargetingCriteriaRuleFilter,
+)
 
 logger = logging.getLogger(__name__)
 
