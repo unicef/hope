@@ -9,8 +9,8 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import AccountTypeFactory, FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import BusinessArea
 from hope.apps.generic_import.generic_upload_service.importer import Importer
+from hope.models.business_area import BusinessArea
 
 
 @pytest.mark.django_db
@@ -340,7 +340,9 @@ class TestImporter:
         """Test complete import_data() flow with households, individuals, and documents."""
         import uuid
 
-        from hope.apps.household.models import Document, Household, Individual
+        from hope.models.document import Document
+        from hope.models.household import Household
+        from hope.models.individual import Individual
 
         # Create temporary UUIDs (simulating parser output)
         household_temp_id = uuid.uuid4().hex
@@ -414,7 +416,8 @@ class TestImporter:
         """Test that Individual.household FK correctly points to created Household."""
         import uuid
 
-        from hope.apps.household.models import Household, Individual
+        from hope.models.household import Household
+        from hope.models.individual import Individual
 
         household_temp_id = uuid.uuid4().hex
         individual_temp_id = uuid.uuid4().hex
@@ -467,7 +470,8 @@ class TestImporter:
         """Test that Document.individual FK correctly points to created Individual."""
         import uuid
 
-        from hope.apps.household.models import Document, Individual
+        from hope.models.document import Document
+        from hope.models.individual import Individual
 
         individual_temp_id = uuid.uuid4().hex
 
@@ -520,7 +524,10 @@ class TestImporter:
         """Test that all created objects have rdi_merge_status = PENDING."""
         import uuid
 
-        from hope.apps.household.models import Document, Household, Individual, IndividualIdentity
+        from hope.models.document import Document
+        from hope.models.household import Household
+        from hope.models.individual import Individual
+        from hope.models.individual_identity import IndividualIdentity
 
         household_temp_id = uuid.uuid4().hex
         individual_temp_id = uuid.uuid4().hex

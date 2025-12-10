@@ -6,9 +6,9 @@ import pytest
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea
 from hope.apps.generic_import.forms import GenericImportForm
-from hope.apps.program.models import Program
+from hope.models.business_area import BusinessArea
+from hope.models.program import Program
 
 
 @pytest.mark.django_db

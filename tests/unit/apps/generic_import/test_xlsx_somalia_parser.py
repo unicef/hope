@@ -535,7 +535,7 @@ class TestXlsxSomaliaParser:
         from extras.test_utils.factories.core import create_afghanistan
 
         create_afghanistan()
-        from hope.apps.core.models import BusinessArea
+        from hope.models.business_area import BusinessArea
 
         ba = BusinessArea.objects.get(slug="afghanistan")
         # Clear any countries from the BA

@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from hope.api.models import Grant
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import BaseViewSet, PermissionsMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
@@ -12,7 +11,9 @@ from hope.apps.generic_import.api.serializers import (
     GenericImportResponseSerializer,
     GenericImportUploadSerializer,
 )
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
+from hope.models.import_data import ImportData
+from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.utils import Grant
 
 
 class GenericImportUploadViewSet(
