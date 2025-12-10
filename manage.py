@@ -25,11 +25,11 @@ def runserver_with_frontend(runserver_args: list[str]) -> None:
         # frontend: yarn build-and-watch
         processes.append(start(f"{node} {yarn_js} build-and-watch", cwd="src/frontend"))
 
-        # backend: call manage.py runserver with --clasic to avoid recursion
+        # backend: call manage.py runserver with --classic to avoid recursion
         backend_cmd = f"{sys.executable} {Path(sys.argv[0])} runserver"
         if runserver_args:
             backend_cmd += " " + " ".join(runserver_args)
-        backend_cmd += " --clasic"
+        backend_cmd += " --classic"
 
         processes.append(start(backend_cmd))
 
