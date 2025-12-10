@@ -2,11 +2,7 @@ from typing import Iterable
 
 from django.utils import timezone
 
-from hope.apps.payment.models import (
-    Payment,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+from hope.models import Payment, PaymentVerification, PaymentVerificationPlan
 
 
 class CreatePaymentVerifications:

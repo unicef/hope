@@ -9,8 +9,8 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import Household
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
+from hope.models import Household
 
 
 class TestTargetingCriteriaFlags(BaseTestCase):

@@ -8,10 +8,8 @@ from django.utils import timezone
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Program, Role, RoleAssignment
 
 
 class AllPermissionsInBusinessAreasTest(TransactionTestCase):
@@ -295,7 +293,7 @@ class AllPermissionsInBusinessAreasTest(TransactionTestCase):
         afg_permissions = permissions1[str(self.business_area_afg.id)]
         assert Permissions.RDI_VIEW_LIST.value in afg_permissions
 
-    @patch("hope.apps.account.models.timezone.now")
+    @patch("hope.models.user.timezone.now")
     def test_expiry_date_edge_case(self, mock_now) -> None:
         """Test expiry date filtering on exact boundary."""
         # Set current time - beginning of next day so that today's date is < timezone.now()
