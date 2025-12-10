@@ -21,36 +21,29 @@ tests/
 ### Using tox (Recommended)
 
 ```bash
-tox -e pytest
-```
+# Run all unit tests
+tox -e unit
 
-This runs all unit tests with the correct environment configuration.
-
-### Running Specific Tests
-
-Use the tox-created pytest binary directly:
-
-```bash
-# Run a specific test file
-.tox/pytest/bin/pytest tests/unit/apps/household/test_models.py -v
+# Run specific test file or directory
+tox -e pytest -- tests/unit/apps/household/test_models.py -v
 
 # Run a specific test class
-.tox/pytest/bin/pytest tests/unit/apps/household/test_models.py::TestHousehold -v
+tox -e pytest -- tests/unit/apps/household/test_models.py::TestHousehold -v
 
 # Run a specific test method
-.tox/pytest/bin/pytest tests/unit/apps/household/test_models.py::TestHousehold::test_create -v
+tox -e pytest -- tests/unit/apps/household/test_models.py::TestHousehold::test_create -v
 
 # Run tests matching a pattern
-.tox/pytest/bin/pytest tests/unit -k "test_create" -v
+tox -e pytest -- tests/unit -k "test_create" -v
 ```
 
-### Using direnv with pytest
+### Summary
 
-With direnv active, you can also run:
-
-```bash
-direnv exec . .tox/pytest/bin/pytest tests/unit/path/to/test.py -v
-```
+| Command | Use case |
+|---------|----------|
+| `tox -e unit` | Run all unit tests |
+| `tox -e pytest -- <path>` | Run specific test file/class/method |
+| `tox -e selenium` | Run selenium/e2e tests |
 
 ### Common pytest Options
 
@@ -86,19 +79,14 @@ Selenium tests run on the host machine due to ARM64 architecture limitations in 
 1. Services running (PostgreSQL, Redis, Elasticsearch)
 2. Chrome/Chromium browser installed
 
-### Setup
+### Running E2E Tests
 
 ```bash
-# macOS - install system requirements
-brew install wkhtmltopdf pango postgis gdal
-
-# Create and activate virtual environment
-uv venv .venv --python 3.13
-source .venv/bin/activate
-uv sync
+# Run all selenium tests
+tox -e selenium
 ```
 
-### Running E2E Tests
+Or manually:
 
 ```bash
 # Start services
