@@ -10,13 +10,15 @@ from extras.test_utils.factories.registration_data import (
     ImportDataFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.core.models import BusinessArea
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
+from hope.models.business_area import BusinessArea
+from hope.models.household import Household
+from hope.models.import_data import ImportData
+from hope.models.individual import Individual
+from hope.models.program import Program
+from hope.models.registration_data_import import RegistrationDataImport
 
 
 @pytest.mark.django_db
@@ -396,6 +398,81 @@ class TestProcessGenericImportTask:
         # Verify cache key format
         assert len(cache_keys) == 1
         assert cache_keys[0] == f"process_generic_import_task-{rdi.id}"
+
+    @patch("hope.apps.generic_import.celery_tasks.XlsxSomaliaParser")
+    def test_task_handles_sentry_capture_exception_failure(self, mock_parser_class):
+        """Test that task continues when Sentry capture_exception itself fails."""
+        import_data, rdi = self._create_import_objects()
+        mock_parser_class.side_effect = RuntimeError("Test error")
+
+        with patch("hope.apps.generic_import.celery_tasks.capture_exception") as mock_sentry:
+            mock_sentry.side_effect = Exception("Sentry failed")
+
+            with contextlib.suppress(Exception):
+                process_generic_import_task.apply(
+                    args=[str(rdi.id), str(import_data.id)],
+                ).get()
+
+        rdi.refresh_from_db()
+        assert rdi.sentry_id == "N/A"
+
+    @patch("hope.apps.generic_import.celery_tasks.XlsxSomaliaParser")
+    def test_task_handles_import_data_update_failure_in_error_handler(self, mock_parser_class):
+        """Test that task continues when ImportData status update fails in error handler."""
+        import_data, rdi = self._create_import_objects()
+        mock_parser_class.side_effect = RuntimeError("Test error")
+
+        original_get = ImportData.objects.get
+
+        call_count = [0]
+
+        def mock_get(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] <= 2:  # First two calls succeed (main try block)
+                return original_get(*args, **kwargs)
+            raise Exception("DB error in error handler")
+
+        with (
+            patch("hope.apps.generic_import.celery_tasks.capture_exception", return_value="sentry-123"),
+            patch.object(ImportData.objects, "get", side_effect=mock_get),
+        ):
+            with contextlib.suppress(Exception):
+                process_generic_import_task.apply(
+                    args=[str(rdi.id), str(import_data.id)],
+                ).get()
+
+        # RDI should still be updated even if ImportData update failed
+        rdi.refresh_from_db()
+        assert rdi.status == RegistrationDataImport.IMPORT_ERROR
+
+    @patch("hope.apps.generic_import.celery_tasks.XlsxSomaliaParser")
+    def test_task_handles_rdi_update_failure_in_error_handler(self, mock_parser_class):
+        """Test that task continues when RDI status update fails in error handler."""
+        import_data, rdi = self._create_import_objects()
+        mock_parser_class.side_effect = RuntimeError("Test error")
+
+        original_get = RegistrationDataImport.objects.get
+
+        call_count = [0]
+
+        def mock_get(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] <= 2:  # First two calls succeed (main try block)
+                return original_get(*args, **kwargs)
+            raise Exception("DB error in error handler")
+
+        with (
+            patch("hope.apps.generic_import.celery_tasks.capture_exception", return_value="sentry-123"),
+            patch.object(RegistrationDataImport.objects, "get", side_effect=mock_get),
+        ):
+            with contextlib.suppress(Exception):
+                process_generic_import_task.apply(
+                    args=[str(rdi.id), str(import_data.id)],
+                ).get()
+
+        # ImportData should still be updated even if RDI update failed
+        import_data.refresh_from_db()
+        assert import_data.status == ImportData.STATUS_ERROR
 
 
 class TestFormatValidationErrors:

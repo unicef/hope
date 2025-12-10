@@ -5,10 +5,11 @@ import uuid
 
 import openpyxl
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.generic_import.generic_upload_service.parsers.base_parser import BaseParser
-from hope.apps.geo.models import Area, Country
-from hope.apps.payment.models.payment import FinancialInstitution
+from hope.models.area import Area
+from hope.models.business_area import BusinessArea
+from hope.models.country import Country
+from hope.models.financial_institution import FinancialInstitution
 
 logger = logging.getLogger(__name__)
 
