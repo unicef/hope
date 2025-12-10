@@ -1,0 +1,44 @@
+[run]
+branch = True
+source = hope
+concurrency=multiprocessing,thread
+
+omit =
+        */selenium_tests/**
+        */tests/**
+        */migrations/*
+        */apps.py
+        */admin/*.py
+        */admin.py
+        */**/fixtures.py
+        */**/migrations/*.py
+        hope/one_time_scripts/*
+        hope/config/settings.py
+        hope/apps/core/management/commands/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+    pragma: no-cover
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError.*
+    except ImportError
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+    if TYPE_CHECKING
+    ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
+    logger.exception(e)
+
+fail_under = 15
+
+ignore_errors = False
+
+[html]
+directory = ~build/coverage
