@@ -56,7 +56,6 @@ class RoleAssignmentAdminForm(forms.ModelForm):
         partner = self.cleaned_data.get("partner")
         business_area = self.cleaned_data["business_area"]
 
-        IncompatibleRoles.objects.validate_user_role(user, business_area, role)
         if user or partner:
             incompatible_roles = list(
                 IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)

@@ -19,10 +19,11 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
+from hope.admin.account_forms import RoleAssignmentAdminForm
 from hope.admin.partner import PartnerAdmin
 from hope.admin.user import UserAdmin
 from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
-from hope.models import Partner, Role, RoleAssignment, User
+from hope.models import IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -308,9 +309,6 @@ class RoleAssignmentAdminFormTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        from hope.admin.account_forms import RoleAssignmentAdminForm
-        from hope.apps.account.models import IncompatibleRoles
-
         cls.form_class = RoleAssignmentAdminForm
         cls.business_area = create_afghanistan()
         cls.role_1 = RoleFactory(name="Role 1")
