@@ -21,6 +21,7 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
+    TicketDeleteIndividualDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
@@ -1368,6 +1369,24 @@ class TestHouseholdOfficeSearch:
             sanction_list_individual=self.sanction_list_individual,
         )
 
+        self.household8, self.individuals8 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        self.delete_individual_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        )
+        self.delete_individual_ticket.programs.add(self.program)
+        self.delete_individual_details = TicketDeleteIndividualDetailsFactory(
+            ticket=self.delete_individual_ticket,
+            individual=self.individuals8[0],
+        )
+
         self.household7, self.individuals7 = create_household_and_individuals(
             household_data={
                 "program": self.program,
@@ -1581,6 +1600,26 @@ class TestHouseholdOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.household6.id)
+
+    def test_search_by_delete_individual_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.delete_individual_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.delete_individual_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.household8.id)
 
     def test_search_by_payment_verification_household(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
