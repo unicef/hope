@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from urllib.parse import unquote
 
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Permission
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
@@ -19,6 +20,7 @@ from extras.test_utils.factories.account import (
 )
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.partner import PartnerAdmin
+from hope.admin.user import UserAdmin
 from hope.admin.user_role import RoleAssignmentInline, UserRoleAssignmentAdmin
 from hope.apps.account.models import Partner, Role, RoleAssignment, User, UserRoleAssignment
 
@@ -336,6 +338,102 @@ class RoleAssignmentAdminFormTest(TestCase):
         )
 
         assert form.is_valid()
+
+
+class UserAdminTest(TestCase):
+    def setUp(self) -> None:
+        request = RequestFactory()
+        self.site = AdminSite()
+        self.admin = UserAdmin(model=User, admin_site=self.site)
+        self.request = request.get("/")
+
+        self.business_area = create_afghanistan()
+        self.user = UserFactory(username="normaluser", is_staff=True)
+        self.role = RoleFactory(name="Test Role")
+
+        # Create user with permission
+        self.user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
+        permission = Permission.objects.get(
+            codename="can_edit_user_roles",
+        )
+        self.user_with_perm.user_permissions.add(permission)
+
+        # Create user without permission
+        self.user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
+
+    def test_get_inlines_with_permission(self) -> None:
+        self.request.user = self.user_with_perm
+
+        inlines = self.admin.get_inlines(self.request, self.user)
+
+        assert len(inlines) == 1
+        assert inlines[0] == RoleAssignmentInline
+
+    def test_get_inlines_without_permission(self) -> None:
+        self.request.user = self.user_without_perm
+
+        inlines = self.admin.get_inlines(self.request, self.user)
+
+        assert len(inlines) == 0
+        assert inlines == []
+
+
+def test_user_privileges_action(django_app: DjangoTestApp, superuser: User) -> None:
+    business_area = create_afghanistan()
+    user = UserFactory(username="normaluser", is_staff=True)
+    role = RoleFactory(name="Test Role")
+
+    RoleAssignmentFactory(
+        user=user,
+        role=role,
+        business_area=business_area,
+    )
+
+    url = reverse("admin:account_user_privileges", args=[user.pk])
+    res = django_app.get(url, user=superuser)
+
+    assert res.status_code == 200
+    assert "permissions" in res.context
+    assert "business_ares_permissions" in res.context
+    assert res.context["original"] == user
+
+
+def test_user_privileges_action_shows_user_and_partner_roles(django_app: DjangoTestApp, superuser: User) -> None:
+    business_area = create_afghanistan()
+    user = UserFactory(username="normaluser", is_staff=True)
+
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area)
+    user.partner = partner
+    user.save()
+
+    # Create user role
+    user_role = RoleFactory(name="User Role", permissions=["PROGRAM_VIEW_LIST_AND_DETAILS"])
+    RoleAssignmentFactory(
+        user=user,
+        role=user_role,
+        business_area=business_area,
+    )
+
+    # Create partner role
+    partner_role = RoleFactory(name="Partner Role", permissions=["GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE"])
+    RoleAssignmentFactory(
+        partner=partner,
+        role=partner_role,
+        business_area=business_area,
+    )
+
+    url = reverse("admin:account_user_privileges", args=[user.pk])
+    res = django_app.get(url, user=superuser)
+
+    assert res.status_code == 200
+    assert "business_ares_permissions" in res.context
+    assert business_area.slug in res.context["business_ares_permissions"]
+
+    # Check that permissions from both user and partner roles are present
+    ba_permissions = res.context["business_ares_permissions"][business_area.slug]
+    assert "PROGRAM_VIEW_LIST_AND_DETAILS" in ba_permissions
+    assert "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE" in ba_permissions
 
 
 @pytest.mark.skip("Fail on pipeline")
