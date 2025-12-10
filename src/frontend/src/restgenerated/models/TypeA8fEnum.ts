@@ -15,7 +15,7 @@
  * * `foster_child` - Foster Child
  * * `other_id` - Other
  */
-export enum Type69cEnum {
+export enum TypeA8fEnum {
     BIRTH_CERTIFICATE = 'birth_certificate',
     DRIVERS_LICENSE = 'drivers_license',
     ELECTORAL_CARD = 'electoral_card',

@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type FspChoice = {
-    readonly id: string;
-    name: string;
+export type AccountDataField = {
+    key: string;
+    value: string;
 };
 

@@ -845,6 +845,18 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
                 payment.vulnerability_score = normalize_score(result.value)
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["vulnerability_score"])
+
+        if payment_plan.vulnerability_score_min is not None or payment_plan.vulnerability_score_max is not None:
+            params = {}
+            if payment_plan.vulnerability_score_max is not None:
+                params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
+            if payment_plan.vulnerability_score_min is not None:
+                params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
+            payment_plan.payment_items(manager="all_objects").filter(**params).update(is_removed=False)
+            payment_plan.payment_items(manager="all_objects").exclude(**params).update(is_removed=True)
+            payment_plan.update_population_count_fields()
+            payment_plan.update_money_fields()
+
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
         payment_plan.steficon_targeting_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
