@@ -290,7 +290,7 @@ const OfficeSearchPage = (): ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('Office Search')} />
+      <PageHeader title={t('Country Search')} />
       <Box
         display="flex"
         flexDirection="column"
