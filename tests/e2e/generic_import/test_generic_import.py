@@ -185,6 +185,16 @@ def financial_institution(somalia_business_area: BusinessArea) -> None:
         },
     )
 
+    # Create generic financial institutions for accounts without specific FI
+    FinancialInstitution.objects.get_or_create(
+        name="Generic Bank",
+        defaults={"type": FinancialInstitution.FinancialInstitutionType.BANK},
+    )
+    FinancialInstitution.objects.get_or_create(
+        name="Generic Telco Company",
+        defaults={"type": FinancialInstitution.FinancialInstitutionType.TELCO},
+    )
+
     # Create DocumentType for passport (parser uses lowercase key from Excel)
     DocumentType.objects.get_or_create(
         key="passport",
