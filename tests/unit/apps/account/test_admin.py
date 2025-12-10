@@ -21,7 +21,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.partner import PartnerAdmin
 from hope.admin.user import UserAdmin
-from hope.admin.user_role import RoleAssignmentInline, UserRoleAssignmentAdmin
+from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
 from hope.apps.account.models import Partner, Role, RoleAssignment, User, UserRoleAssignment
 
 pytestmark = pytest.mark.django_db()
@@ -135,7 +135,7 @@ class RoleAssignmentInlineTest(TestCase):
         assert self.admin.has_delete_permission(request, self.user)
 
 
-class RoleAssignmentAdminTest(TestCase):
+class UserRoleAssignmentAdminTest(TestCase):
     def setUp(self) -> None:
         self.request = RequestFactory()
         self.site = AdminSite()
@@ -177,6 +177,131 @@ class RoleAssignmentAdminTest(TestCase):
     def test_check_publish_permission(self) -> None:
         request = self.get_mock_request()
         assert not self.admin.check_publish_permission(request)
+
+    def test_get_queryset_filters_user_only(self) -> None:
+        partner = PartnerFactory()
+        partner.allowed_business_areas.add(self.business_area)
+        partner_role_assignment = RoleAssignmentFactory(
+            partner=partner,
+            role=self.role,
+            business_area=self.business_area,
+        )
+
+        request = self.get_mock_request()
+        queryset = self.admin.get_queryset(request)
+
+        # Should only include user role assignments
+        assert self.role_assignment in queryset
+        assert partner_role_assignment not in queryset
+
+    def test_get_fields(self) -> None:
+        request = self.get_mock_request()
+        fields = self.admin.get_fields(request)
+
+        assert "user" in fields
+        assert "partner" not in fields
+        assert "business_area" in fields
+        assert "program" in fields
+        assert "role" in fields
+        assert "expiry_date" in fields
+        assert "group" in fields
+
+    def test_has_permissions_require_can_edit_user_roles(self) -> None:
+        user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
+        permission = Permission.objects.get(codename="can_edit_user_roles")
+        user_with_perm.user_permissions.add(permission)
+
+        user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
+
+        request_with_perm = self.get_mock_request(user=user_with_perm)
+        request_without_perm = self.get_mock_request(user=user_without_perm)
+
+        # With permission
+        assert self.admin.has_module_permission(request_with_perm)
+        assert self.admin.has_view_permission(request_with_perm)
+        assert self.admin.has_add_permission(request_with_perm)
+        assert self.admin.has_change_permission(request_with_perm)
+        assert self.admin.has_delete_permission(request_with_perm)
+
+        # Without permission
+        assert not self.admin.has_module_permission(request_without_perm)
+        assert not self.admin.has_view_permission(request_without_perm)
+        assert not self.admin.has_add_permission(request_without_perm)
+        assert not self.admin.has_change_permission(request_without_perm)
+        assert not self.admin.has_delete_permission(request_without_perm)
+
+
+class PartnerRoleAssignmentAdminTest(TestCase):
+    def setUp(self) -> None:
+        self.request = RequestFactory()
+        self.site = AdminSite()
+        self.admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=self.site)
+
+        self.partner = PartnerFactory()
+        self.business_area = create_afghanistan()
+        self.partner.allowed_business_areas.add(self.business_area)
+
+        self.role_available = RoleFactory(name="Role Available", is_available_for_partner=True)
+        self.role_not_available = RoleFactory(name="Role Not Available", is_available_for_partner=False)
+
+        self.partner_role_assignment = RoleAssignmentFactory(
+            partner=self.partner,
+            role=self.role_available,
+            business_area=self.business_area,
+        )
+
+    def get_mock_request(self, user: Optional[User] = None) -> Union[WSGIRequest, WSGIRequest]:
+        """Helper to create a mock request"""
+        request = self.request.get("/")
+        request.user = user if user else UserFactory(is_staff=True)
+        return request
+
+    def test_get_queryset_filters_partner_only(self) -> None:
+        user = UserFactory()
+        user_role_assignment = RoleAssignmentFactory(
+            user=user,
+            role=self.role_available,
+            business_area=self.business_area,
+        )
+
+        request = self.get_mock_request()
+        queryset = self.admin.get_queryset(request)
+
+        # Should only include partner role assignments
+        assert self.partner_role_assignment in queryset
+        assert user_role_assignment not in queryset
+
+    def test_get_fields(self) -> None:
+        request = self.get_mock_request()
+        fields = self.admin.get_fields(request)
+
+        assert "partner" in fields
+        assert "user" not in fields
+        assert "business_area" in fields
+        assert "program" in fields
+        assert "role" in fields
+        assert "expiry_date" in fields
+        assert "group" in fields
+
+    def test_formfield_for_foreignkey_role_filters_partner_available(self) -> None:
+        request = self.get_mock_request()
+
+        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
+
+        # Should only show roles available for partners
+        assert self.role_available in field.queryset
+        assert self.role_not_available not in field.queryset
+
+    def test_formfield_for_foreignkey_business_area_filters_split(self) -> None:
+        business_area_split = BusinessAreaFactory(name="Split BA", is_split=True)
+
+        request = self.get_mock_request()
+
+        field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
+
+        # Should exclude split business areas
+        assert self.business_area in field.queryset
+        assert business_area_split not in field.queryset
 
 
 class RoleAssignmentAdminFormTest(TestCase):

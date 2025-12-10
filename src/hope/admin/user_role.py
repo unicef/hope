@@ -162,6 +162,7 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         return ["partner", "business_area", "program", "role", "expiry_date", "group"]
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            kwargs["queryset"] = Role.objects.filter(is_available_for_partner=True).order_by("name")
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+            field.queryset = Role.objects.filter(is_available_for_partner=True).order_by("name")
+        return field
