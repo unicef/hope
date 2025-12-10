@@ -6,11 +6,8 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.household import HouseholdFactory, create_household
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import Partner, User
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.household.models import Household
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, DataCollectingType, Household, Partner, Program, User
 
 
 class TestHouseholdRegistrationIdTrigger(BaseTestCase):

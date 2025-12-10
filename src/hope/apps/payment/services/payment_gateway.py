@@ -10,24 +10,22 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
-from hope.apps.payment.models import (
+from hope.apps.payment.utils import (
+    get_payment_delivered_quantity_status_and_value,
+    get_quantity_in_usd,
+    to_decimal,
+)
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
-)
-from hope.apps.payment.models.payment import (
-    FinancialInstitution,
-    FinancialInstitutionMapping,
-)
-from hope.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd,
-    to_decimal,
 )
 
 logger = logging.getLogger(__name__)

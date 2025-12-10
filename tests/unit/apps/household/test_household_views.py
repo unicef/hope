@@ -42,23 +42,19 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
 from hope.apps.grievance.models import GrievanceTicket, TicketDeleteHouseholdDetails, TicketNeedsAdjudicationDetails
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     HOST,
     REFUGEE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    Household,
 )
-from hope.apps.payment.models import Payment
-from hope.apps.program.models import Program
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import DocumentType, FlexibleAttribute, Household, Payment, Program
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

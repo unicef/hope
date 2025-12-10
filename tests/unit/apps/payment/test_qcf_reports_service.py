@@ -11,19 +11,21 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import (
+from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
+from hope.apps.payment.utils import get_link
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.models import (
     PaymentPlan,
+    Program,
+    Role,
+    RoleAssignment,
+    User,
     WesternUnionInvoice,
     WesternUnionInvoicePayment,
     WesternUnionPaymentPlanReport,
 )
-from hope.apps.payment.services.qcf_reports_service import QCFReportsService
-from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
-from hope.apps.payment.utils import get_link
-from hope.apps.program.models import Program
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 
 class WUClientMock(WesternUnionFTPClient):

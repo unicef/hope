@@ -15,34 +15,39 @@ import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.account.models import Partner
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea, FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
-from hope.apps.geo.models import Area
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PDUXlsxImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
 from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
 from hope.apps.utils.phone import is_valid_phone_number
+from hope.models import (
+    Account,
+    Area,
+    BusinessArea,
+    DocumentType,
+    FlexibleAttribute,
+    ImportData,
+    Partner,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
+    PeriodicFieldData,
+    RegistrationDataImport,
+    log_create,
+)
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -349,7 +354,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self.collectors[hh_id].append(PendingIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_documents(self) -> None:
-        from hope.apps.geo.models import Country as GeoCountry
+        from hope.models import Country as GeoCountry
 
         docs_to_create = []
         for document_data in self.documents.values():
@@ -371,7 +376,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         PendingDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
-        from hope.apps.geo.models import Country as GeoCountry
+        from hope.models import Country as GeoCountry
 
         identities_to_create = [
             PendingIndividualIdentity(
@@ -602,7 +607,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.flex_fields["enumerator_id"] = cell.value
 
                             if header in ("country_h_c", "country_origin_h_c"):
-                                from hope.apps.geo.models import Country as GeoCountry
+                                from hope.models import Country as GeoCountry
 
                                 setattr(
                                     obj_to_create,
