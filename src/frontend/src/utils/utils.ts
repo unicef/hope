@@ -692,9 +692,13 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number | string,
+  amount: number | string | null | undefined,
   currency = 'USD',
 ): string {
+  // If amount is null or undefined just show '-'
+  if (amount === null || amount === undefined) {
+    return '-';
+  }
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
@@ -1324,7 +1328,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
-  const notUnderscoreKeys = ['dataFields'];
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {

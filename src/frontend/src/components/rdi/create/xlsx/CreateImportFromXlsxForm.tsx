@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { Status753Enum } from '@restgenerated/models/Status753Enum';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation } from '@tanstack/react-query';
 import { Box, CircularProgress } from '@mui/material';
@@ -111,7 +110,7 @@ export function CreateImportFromXlsxForm({
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
   useEffect(() => {
-    if (xlsxImportData?.status === Status753Enum.FINISHED) {
+    if (xlsxImportData?.status === 'FINISHED') {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);

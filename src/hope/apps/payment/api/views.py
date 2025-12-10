@@ -7,13 +7,13 @@ from zipfile import BadZipFile
 
 from constance import config
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -47,6 +47,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PendingPaymentFilter,
     TargetPopulationFilter,
 )
 from hope.apps.payment.api.serializers import (
@@ -93,7 +94,6 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismConfig,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -1515,6 +1515,7 @@ class TargetPopulationViewSet(
         "copy": [Permissions.TARGETING_DUPLICATE],
         "apply_engine_formula": [Permissions.TARGETING_UPDATE],
         "pending_payments": [Permissions.TARGETING_VIEW_DETAILS],
+        "pending_payments_count": [Permissions.TARGETING_VIEW_DETAILS],
         "lock": [Permissions.TARGETING_LOCK],
         "unlock": [Permissions.TARGETING_UNLOCK],
         "rebuild": [Permissions.TARGETING_LOCK],
@@ -1601,19 +1602,51 @@ class TargetPopulationViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Target Population rebuilding"})
 
-    @extend_schema(responses={200: PendingPaymentSerializer(many=True)})
+    @extend_schema(
+        responses={200: PendingPaymentSerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="ordering",
+            ),
+        ],
+    )
     @action(
         detail=True,
         methods=["get"],
         url_path="pending-payments",
-        filter_backends=(),
+        filter_backends=[],
     )
     @transaction.atomic
     def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
-        queryset = tp.payment_items.all()
-        data = PendingPaymentSerializer(self.paginate_queryset(queryset), many=True).data
-        return self.get_paginated_response(data)
+        queryset = tp.payment_items.select_related("household", "head_of_household", "household__admin2").all()
+
+        filterset = PendingPaymentFilter(request.GET, queryset=queryset)
+        queryset = filterset.qs
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
+        },
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="pending-payments/count",
+        filter_backends=[],
+    )
+    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        pending_payments_count = tp.payment_items.count()
+        return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
@@ -2027,23 +2060,14 @@ def available_fsps_for_delivery_mechanisms(
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
     def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
-        has_config_q = DeliveryMechanismConfig.objects.filter(
-            fsp=OuterRef("pk"),
-            delivery_mechanism__name=dm.name,
-        )
+        fsps_qs = FinancialServiceProvider.objects.filter(
+            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
+            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+            delivery_mechanisms__name=dm.name,
+            allowed_business_areas__slug=business_area_slug,
+        ).distinct()
 
-        fsps_qs = (
-            FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
-                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__name=dm.name,
-                allowed_business_areas__slug=business_area_slug,
-            )
-            .annotate(has_config=Exists(has_config_q))
-            .distinct()
-        )
-
-        return list(fsps_qs.values("id", "name", "has_config"))
+        return list(fsps_qs.values("id", "name"))
 
     list_resp = [
         {
