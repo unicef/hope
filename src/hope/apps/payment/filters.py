@@ -21,7 +21,7 @@ from django_filters import (
 from hope.apps.activity_log.filters import LogEntryFilter
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.apps.payment.models import (
+from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,

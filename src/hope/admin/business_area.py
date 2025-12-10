@@ -22,21 +22,17 @@ from jsoneditor.forms import JSONEditor
 import requests
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
-from hope.apps.account.models import Partner, RoleAssignment
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.apps.household.models import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.apps.payment.models import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
+from hope.models import AcceptanceProcessThreshold, BusinessArea, DocumentType, Partner, RoleAssignment
 
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.contrib.admin import ModelAdmin
-    from django.db.models.query import QuerySet
-
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

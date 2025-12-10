@@ -7,8 +7,8 @@ from django.shortcuts import get_object_or_404, redirect
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 from hope.apps.utils.exceptions import log_and_raise
+from hope.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.http import (

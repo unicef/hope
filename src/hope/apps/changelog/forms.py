@@ -1,11 +1,11 @@
 from django import forms
 
-from hope.apps.changelog import models
+from hope.models import Changelog
 
 
 class ChangelogForm(forms.ModelForm):
     class Meta:
-        model = models.Changelog
+        model = Changelog
         fields = [
             "description",
             "version",

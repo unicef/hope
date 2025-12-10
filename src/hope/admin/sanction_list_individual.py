@@ -3,10 +3,7 @@ from django.contrib import admin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.sanction_list.models import (
-    SanctionListIndividual,
-    SanctionListIndividualDateOfBirth,
-)
+from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirth
 
 
 class SanctionListIndividualDateOfBirthInline(admin.StackedInline):

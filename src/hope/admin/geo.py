@@ -23,14 +23,10 @@ from smart_admin.mixins import FieldsetMixin
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models import Area, AreaType, Country
 
 if TYPE_CHECKING:
-    from django.http import (
-        HttpRequest,
-        HttpResponsePermanentRedirect,
-        HttpResponseRedirect,
-    )
+    from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 

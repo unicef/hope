@@ -7,7 +7,6 @@ from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models import QuerySet
@@ -21,7 +20,7 @@ from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hope.admin.utils import HOPEModelAdminBase, HopeModelAdminMixin
-from hope.apps.account import models as account_models
+from hope.models import User, UserGroup
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,6 @@ class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _G
 
     @button(permission="auth.view_group")
     def users(self, request: HttpRequest, pk: str) -> HttpResponse:
-        User = get_user_model()  # noqa
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
         users = User.objects.filter(groups=group).distinct()
@@ -83,7 +81,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncModelAdmin, HopeModelAdminMixin, _G
         return change_message
 
 
-@admin.register(account_models.UserGroup)
+@admin.register(UserGroup)
 class UserGroupAdmin(HOPEModelAdminBase):
     list_display = ("user", "group", "business_area")
     autocomplete_fields = ("group",)
@@ -117,7 +115,7 @@ class UserGroupAdmin(HOPEModelAdminBase):
         objs = []
         for qs in [groups]:
             objs.extend(qs)
-        objs.extend(account_models.UserGroup.objects.filter(pk=record.pk))
+        objs.extend(UserGroup.objects.filter(pk=record.pk))  # pragma: no cover
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
