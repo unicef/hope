@@ -114,6 +114,7 @@ class ProgramAdmin(
         "cash_plus",
         "is_visible",
     )
+    filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "programme_code")
     autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
