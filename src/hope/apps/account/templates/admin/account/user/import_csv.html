@@ -8,7 +8,7 @@
         &rsaquo; <a
             href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
         &rsaquo; <a
-            href="{% url opts|admin_urlname:'import_csv' %}">Import CSV</a>
+            href="{% url opts|admin_urlname:'import_csv' pk %}">Import CSV</a>
     </div>
 {% endblock breadcrumbs %}
 
