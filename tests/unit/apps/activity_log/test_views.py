@@ -45,7 +45,7 @@ class TestLogEntryView:
         )
 
         self.l1 = LogEntry.objects.create(
-            action=LogEntry.CREATE,
+            action=LogEntry.UPDATE,
             content_object=self.program_1,
             user=self.user,
             business_area=self.afghanistan,
@@ -346,3 +346,23 @@ class TestLogEntryView:
         choice = resp_data[0]
         assert "name" in choice
         assert "value" in choice
+
+    @pytest.mark.enable_activity_log
+    def test_activity_logs_list_search(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)
+        response = self.client.get(self.url_list + "?limit=20&offset=0&search=upda")
+        # search self.l1 > by Action "UPDATE"
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()["results"]
+        assert len(response_results) == 1
+        log_result = response_results[0]
+        assert log_result["object_id"] == str(self.l1.object_id)
+        assert log_result["action"] == self.l1.get_action_display()
+        assert log_result["changes"] == self.l1.changes
+        assert log_result["user"] == (f"{self.l1.user.first_name} {self.l1.user.last_name}" if self.l1.user else "-")
+        assert log_result["object_repr"] == self.l1.object_repr
+        assert log_result["content_type"] == self.l1.content_type.name
+        assert log_result["timestamp"] == f"{self.l1.timestamp:%Y-%m-%dT%H:%M:%SZ}"
