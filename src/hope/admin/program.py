@@ -64,7 +64,6 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
         ("created_by", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
     )
-    filter_horizontal = ("sanction_lists",)
     search_fields = ("title", "program__name")
     raw_id_fields = ("program", "created_by")
     exclude = ("unicef_id",)
@@ -149,6 +148,7 @@ class ProgramAdmin(
         "cash_plus",
         "is_visible",
     )
+    filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "programme_code")
     autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
