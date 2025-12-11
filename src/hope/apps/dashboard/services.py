@@ -17,9 +17,8 @@ from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 import sentry_sdk
 
-from hope.apps.core.models import BusinessArea, DataCollectingType
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
-from hope.models import BusinessArea, Household, Payment, PaymentPlan
+from hope.models import BusinessArea, DataCollectingType, Household, Payment, PaymentPlan
 
 logger = logging.getLogger(__name__)
 
@@ -718,7 +717,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     h_data = household_map.get(household_id, {})
                     current_summary["individuals"] += int(h_data.get("size", 0))
 
-                    # --- Start of modified children_count logic ---
                     children_count = h_data.get("children_count")
                     is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
 
@@ -731,7 +729,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                                 current_summary["children_counts"] += fertility_rate
                         else:
                             current_summary["children_counts"] += children_count
-                    # --- End of modified children_count logic ---
 
                     current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                     current_summary["_seen_households"].add(household_id)
