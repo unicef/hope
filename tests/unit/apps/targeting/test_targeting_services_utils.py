@@ -5,16 +5,17 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.household.models import Household, Individual
-from hope.apps.targeting.models import (
+from hope.apps.targeting.services.utils import (
+    from_input_to_targeting_criteria,
+    get_existing_unicef_ids,
+)
+from hope.models import (
+    Household,
+    Individual,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-)
-from hope.apps.targeting.services.utils import (
-    from_input_to_targeting_criteria,
-    get_existing_unicef_ids,
 )
 
 

@@ -27,12 +27,7 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -86,7 +81,10 @@ class TestProgramUpdate:
             "send_reconciliation_window_expiry_notifications": False,
         }
         self.program = ProgramFactory(**self.initial_program_data, business_area=self.afghanistan)
-        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        role_with_all_permissions = RoleFactory(name="Role with all permissions", is_available_for_partner=True)
+        # TODO: FIX it ???
+        role_with_all_permissions.is_available_for_partner = True
+        role_with_all_permissions.save()
         RoleAssignmentFactory(
             partner=self.partner,
             business_area=self.afghanistan,

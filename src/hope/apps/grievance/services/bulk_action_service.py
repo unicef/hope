@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import User
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.documents import (
@@ -16,6 +15,7 @@ from hope.apps.grievance.documents import (
     bulk_update_urgency,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.models import User
 
 
 class BulkActionService:
