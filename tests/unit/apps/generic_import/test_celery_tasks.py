@@ -13,12 +13,7 @@ from extras.test_utils.factories.registration_data import (
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
-from hope.models.business_area import BusinessArea
-from hope.models.household import Household
-from hope.models.import_data import ImportData
-from hope.models.individual import Individual
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport
 
 
 @pytest.mark.django_db

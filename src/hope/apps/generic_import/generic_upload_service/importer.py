@@ -2,16 +2,18 @@ from enum import StrEnum
 
 from django.forms import modelform_factory
 
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.country import Country
-from hope.models.document import Document
-from hope.models.document_type import DocumentType
-from hope.models.financial_institution import FinancialInstitution
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.individual_identity import IndividualIdentity
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import (
+    Account,
+    AccountType,
+    Country,
+    Document,
+    DocumentType,
+    FinancialInstitution,
+    Household,
+    Individual,
+    IndividualIdentity,
+    RegistrationDataImport,
+)
 
 
 class RecordType(StrEnum):
