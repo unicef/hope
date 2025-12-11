@@ -21,7 +21,7 @@ from extras.test_utils.factories.geo import (
     generate_area_types,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()
 

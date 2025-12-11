@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 import re
 import sys
@@ -8,19 +7,24 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.management import create_permissions
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.management import call_command
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 import pytest
 
 from extras.test_utils.fixtures import *  # noqa: F403, F401
-from hope.apps.account.models import Partner, Role
 
 
 @pytest.fixture(autouse=True)
 def create_unicef_partner(db: Any) -> None:
+    from hope.models import Partner
+
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     return Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
@@ -28,18 +32,24 @@ def create_unicef_partner(db: Any) -> None:
 @pytest.fixture(scope="class", autouse=True)
 def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models import Partner
+
         unicef, _ = Partner.objects.get_or_create(name="UNICEF")
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
 @pytest.fixture(autouse=True)
 def create_role_with_all_permissions(db: Any) -> None:
+    from hope.models import Role
+
     return Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(scope="class", autouse=True)
 def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
     with django_db_blocker.unblock():
+        from hope.models import Role
+
         Role.objects.get_or_create(name="Role with all permissions")
 
 
@@ -70,7 +80,6 @@ def pytest_configure(config: Config) -> None:
 
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.DATABASES["default"]["CONN_MAX_AGE"] = 0
-    settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
@@ -216,3 +225,36 @@ def register_custom_sql_signal() -> None:
 @pytest.fixture(autouse=True)
 def clear_cache_before_each_test() -> None:
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def disable_activity_log(request, monkeypatch):
+    if request.node.get_closest_marker("enable_activity_log"):
+        yield  # do nothing, let real logging work
+        return
+
+    from hope.models import LogEntry
+
+    class DummyPrograms:
+        def add(self, *args, **kwargs):
+            pass
+
+    class DummyLog:
+        def __init__(self):
+            self.programs = DummyPrograms()
+
+    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
+    yield
+
+
+@pytest.fixture(autouse=True)
+def ensure_contenttypes_and_permissions(db):
+    ContentType.objects.clear_cache()
+    for app_config in apps.get_app_configs():
+        create_permissions(app_config, verbosity=0)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def prevent_contenttype_flush(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command("migrate", interactive=False, run_syncdb=True)

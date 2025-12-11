@@ -15,14 +15,9 @@ from django.urls import reverse
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.forms import TemplateSelectForm
-from hope.apps.payment.models import (
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSupportingDocument,
-)
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
 
 if TYPE_CHECKING:
     from uuid import UUID

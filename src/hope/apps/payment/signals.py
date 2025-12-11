@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from hope.api.caches import get_or_create_cache_key
-from hope.apps.payment.models import PaymentPlan
+from hope.models import PaymentPlan
 
 
 @receiver(post_save, sender=PaymentPlan)
