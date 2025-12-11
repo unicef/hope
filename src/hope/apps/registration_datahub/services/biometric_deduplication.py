@@ -49,7 +49,7 @@ class BiometricDeduplicationService:
             args=[program.business_area.slug, program.slug],
         )
         deduplication_set = DeduplicationSet(
-            reference_pk=str(program.id),
+            reference_pk=str(program.slug),
             notification_url=f"https://{settings.DOMAIN_NAME}{notification_url}",
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
@@ -405,3 +405,6 @@ class BiometricDeduplicationService:
     ) -> None:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
         self.api.report_false_positive_duplicate(false_positive_pair, deduplication_set_id)
+
+    def report_refused_individuals(self, deduplication_set_id: str, individual_ids: list[str]) -> None:
+        self.api.report_refused_individuals(deduplication_set_id, individual_ids)

@@ -68,6 +68,7 @@ class DeduplicationEngineAPI(BaseAPI):
         GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
         IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored/reference_pks/"  # POST/GET
         IGNORED_FILENAMES = "deduplication_sets/{deduplication_set_pk}/ignored/filenames/"  # POST/GET
+        REFUSED_INDIVIDUALS_KEYS = "deduplication_sets/{deduplication_set_pk}/refused/reference_pks/"  # POST/GET
 
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
@@ -127,4 +128,10 @@ class DeduplicationEngineAPI(BaseAPI):
         self._post(
             self.Endpoints.IGNORED_FILENAMES.format(deduplication_set_pk=deduplication_set_id),
             dataclasses.asdict(false_positive_pair),
+        )
+
+    def report_refused_individuals(self, deduplication_set_id: str, individual_ids: list[str]) -> None:
+        self._post(
+            self.Endpoints.REFUSED_INDIVIDUALS_KEYS.format(deduplication_set_pk=deduplication_set_id),
+            individual_ids,
         )
