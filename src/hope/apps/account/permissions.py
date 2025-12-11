@@ -247,7 +247,7 @@ class Permissions(Enum):
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
-    # Office Search
+    # Country Search
     SEARCH_BUSINESS_AREAS = auto()
 
     @classmethod

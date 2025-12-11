@@ -141,7 +141,7 @@ class TestDrawer:
             "Managerial Console",
             "Grievance",
             "Activity Log",
-            "Office Search",
+            "Country Search",
         ]
         actual_menu_items = page_programme_management.get_drawer_items().text.split("\n")
         assert expected_menu_items == actual_menu_items
