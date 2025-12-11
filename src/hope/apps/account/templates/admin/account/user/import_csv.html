@@ -30,7 +30,7 @@
         {% endif %}
         <div>
         <a class="btn btn-primary" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-        <a class="btn" href="{% url opts|admin_urlname:'import_csv' %}">Kobo Import</a>
+        <a class="btn" href="{% url opts|admin_urlname:'import_csv' pk %}">Kobo Import</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>
