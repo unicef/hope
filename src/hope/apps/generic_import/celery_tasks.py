@@ -86,8 +86,7 @@ def process_generic_import_task(
                 logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
             else:
                 # Update stats
-                from hope.models.household import Household
-                from hope.models.individual import Individual
+                from hope.models import Household, Individual
 
                 households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
                 individuals_count = Individual.pending_objects.filter(registration_data_import=rdi).count()

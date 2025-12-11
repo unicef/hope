@@ -16,18 +16,20 @@ import pytest
 from e2e.page_object.generic_import.generic_import import GenericImport
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models.area import Area
-from hope.models.area_type import AreaType
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.partner import Partner
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
-from hope.models.role import Role
-from hope.models.role_assignment import RoleAssignment
-from hope.models.user import User
+from hope.models import (
+    Area,
+    AreaType,
+    BeneficiaryGroup,
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    Partner,
+    Program,
+    RegistrationDataImport,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -179,9 +181,7 @@ def invalid_xlsx_file_path() -> str:
 @pytest.fixture
 def financial_institution(somalia_business_area: BusinessArea) -> None:
     """Create financial institution and required types for Somalia (required by XlsxSomaliaParser)."""
-    from hope.models.account_type import AccountType
-    from hope.models.document_type import DocumentType
-    from hope.models.financial_institution import FinancialInstitution
+    from hope.models import AccountType, DocumentType, FinancialInstitution
 
     somalia_country = Country.objects.get(iso_code3="SOM")
     FinancialInstitution.objects.get_or_create(
@@ -726,8 +726,7 @@ class TestGenericImportDataVerification:
         financial_institution: None,
     ) -> None:
         """Test 15: Verify RDI status and counts after import via database check."""
-        from hope.models.household import Household
-        from hope.models.individual import Individual
+        from hope.models import Household, Individual
 
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
@@ -769,7 +768,7 @@ class TestGenericImportDataVerification:
         financial_institution: None,
     ) -> None:
         """Test 16: Verify Household data after import via database check."""
-        from hope.models.household import Household
+        from hope.models import Household
 
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
@@ -809,7 +808,7 @@ class TestGenericImportDataVerification:
         financial_institution: None,
     ) -> None:
         """Test 17: Verify Individual data after import via database check."""
-        from hope.models.individual import Individual
+        from hope.models import Individual
 
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
@@ -853,9 +852,7 @@ class TestGenericImportDataVerification:
 
         Expected: passport, number 123, country Somalia
         """
-        from hope.models.document import Document
-        from hope.models.document_type import DocumentType
-        from hope.models.individual import Individual
+        from hope.models import Document, DocumentType, Individual
 
         # Ensure passport document type exists (parser uses lowercase key from Excel)
         DocumentType.objects.get_or_create(
@@ -913,8 +910,7 @@ class TestGenericImportDataVerification:
 
         Expected: mobile account, number +48603603603, provider Hormuud Telecom
         """
-        from hope.models.account import Account
-        from hope.models.individual import Individual
+        from hope.models import Account, Individual
 
         # Perform import
         self._perform_import(page_generic_import, test_xlsx_file_path)
@@ -963,8 +959,7 @@ class TestGenericImportDataVerification:
         financial_institution: None,
     ) -> None:
         """Test 20: Full E2E flow - Import and verify data via database check."""
-        from hope.models.household import Household
-        from hope.models.individual import Individual
+        from hope.models import Household, Individual
 
         # Step 1: Navigate to Generic Import
         page_generic_import.navigate_to_generic_import()

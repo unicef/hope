@@ -9,16 +9,18 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import XlsxSomaliaParser
-from hope.models.account import Account
-from hope.models.account_type import AccountType
-from hope.models.beneficiary_group import BeneficiaryGroup
-from hope.models.business_area import BusinessArea
-from hope.models.data_collecting_type import DataCollectingType
-from hope.models.document import Document
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.program import Program
-from hope.models.registration_data_import import RegistrationDataImport
+from hope.models import (
+    Account,
+    AccountType,
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    Document,
+    Household,
+    Individual,
+    Program,
+    RegistrationDataImport,
+)
 
 
 @pytest.fixture
@@ -79,7 +81,7 @@ def mobile_account_type(db):
 @pytest.fixture
 def generic_financial_institutions(db):
     """Create generic financial institutions for accounts without FI."""
-    from hope.models.financial_institution import FinancialInstitution
+    from hope.models import FinancialInstitution
 
     FinancialInstitution.objects.create(name="Generic Bank")
     FinancialInstitution.objects.create(name="Generic Telco Company")
@@ -88,7 +90,7 @@ def generic_financial_institutions(db):
 @pytest.fixture
 def document_type_other_id(db):
     """Create other_id document type."""
-    from hope.models.document_type import DocumentType
+    from hope.models import DocumentType
 
     return DocumentType.objects.create(
         key="other_id",
@@ -99,7 +101,7 @@ def document_type_other_id(db):
 @pytest.fixture
 def somalia_country(db):
     """Create Somalia country."""
-    from hope.models.country import Country
+    from hope.models import Country
 
     return Country.objects.create(
         name="Somalia",

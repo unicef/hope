@@ -11,9 +11,7 @@ from hope.apps.generic_import.api.serializers import (
     GenericImportResponseSerializer,
     GenericImportUploadSerializer,
 )
-from hope.models.import_data import ImportData
-from hope.models.registration_data_import import RegistrationDataImport
-from hope.models.utils import Grant
+from hope.models import Grant, ImportData, RegistrationDataImport
 
 
 class GenericImportUploadViewSet(
