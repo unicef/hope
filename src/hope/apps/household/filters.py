@@ -596,12 +596,10 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
                 if obj and hasattr(obj, "id"):
                     household_ids.add(obj.id)
 
-        if hasattr(ticket, "delete_household_ticket_details") and ticket.delete_household_ticket_details:
-            if ticket.delete_household_ticket_details.household:
-                household_ids.add(ticket.delete_household_ticket_details.household.id)
-
-            if ticket.delete_household_ticket_details.reason_household:
-                household_ids.add(ticket.delete_household_ticket_details.reason_household.id)
+        if (
+            delete_details := getattr(ticket, "delete_household_ticket_details", None)
+        ) and delete_details.reason_household:
+            household_ids.add(delete_details.reason_household.id)
 
         if household_ids:
             return queryset.filter(id__in=household_ids)
@@ -669,13 +667,6 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             individual_ids.update(
                 ticket.needs_adjudication_ticket_details.selected_distinct.values_list("id", flat=True)
             )
-
-        if (
-            hasattr(ticket, "delete_individual_ticket_details")
-            and ticket.delete_individual_ticket_details
-            and ticket.delete_individual_ticket_details.individual
-        ):
-            individual_ids.add(ticket.delete_individual_ticket_details.individual.id)
 
         if individual_ids:
             return queryset.filter(id__in=individual_ids)
