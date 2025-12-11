@@ -46,4 +46,4 @@ tox -e selenium
 
 ## Coverage Requirements
 
-Pull requests must maintain **95% code coverage** on new code.
+Pull requests must maintain **97% code coverage** on new code.
