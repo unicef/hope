@@ -10,7 +10,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -89,6 +88,7 @@ class RegistrationDataImportViewSet(
         ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
+        "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -108,7 +108,6 @@ class RegistrationDataImportViewSet(
         methods=["GET"],
         url_path="webhookdeduplication",
         url_name="webhook-deduplication",
-        permission_classes=[AllowAny],
     )
     def webhook_deduplication(
         self,
