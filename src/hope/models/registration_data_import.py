@@ -12,11 +12,13 @@ from django.db.models import Count, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.models.business_area import BusinessArea
-from hope.models.household import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
+)
+from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.models import BusinessArea
+from hope.models.household import (
     Household,
     PendingHousehold,
 )

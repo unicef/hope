@@ -5,9 +5,7 @@ from django.db.models import Q, QuerySet
 from django.forms.widgets import Select
 from django.utils import timezone
 
-from hope.models.business_area import BusinessArea
-from hope.models.program import Program
-from hope.models.role_assignment import RoleAssignment
+from hope.models import BusinessArea, Program, RoleAssignment
 
 
 class BusinessAreaSelectWidget(Select):
