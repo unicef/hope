@@ -31,7 +31,7 @@ class UserImportCSVTest(WebTest):
 
     @responses.activate
     def test_import_csv(self) -> None:
-        url = reverse("admin:account_user_import_csv")
+        url = reverse("admin:account_user_import_csv", args=[self.superuser.pk])
         res = self.app.get(url, user=self.superuser)
         form = res.forms["load_users"]
         form["file"] = (
@@ -57,7 +57,7 @@ class UserImportCSVTest(WebTest):
             status=201,
         )
 
-        url = reverse("admin:account_user_import_csv")
+        url = reverse("admin:account_user_import_csv", args=[self.superuser.pk])
         res = self.app.get(url, user=self.superuser)
         form = res.forms["load_users"]
         form["file"] = (
@@ -79,7 +79,7 @@ class UserImportCSVTest(WebTest):
     def test_import_csv_detect_incompatible_roles(self) -> None:
         u: User = UserFactory(email="test@example.com", partner=self.partner)
         RoleAssignmentFactory(user=u, role=self.role_2, business_area=self.business_area)
-        url = reverse("admin:account_user_import_csv")
+        url = reverse("admin:account_user_import_csv", args=[self.superuser.pk])
         res = self.app.get(url, user=self.superuser)
         form = res.forms["load_users"]
         form["file"] = (
@@ -100,7 +100,7 @@ class UserImportCSVTest(WebTest):
         partner2 = PartnerFactory(name="Partner2")
         u: User = UserFactory(email="test@example.com", partner=self.partner)  # noqa: F841
 
-        url = reverse("admin:account_user_import_csv")
+        url = reverse("admin:account_user_import_csv", args=[self.superuser.pk])
         res = self.app.get(url, user=self.superuser)
         form = res.forms["load_users"]
         form["file"] = (
@@ -117,7 +117,7 @@ class UserImportCSVTest(WebTest):
 
     @responses.activate
     def test_import_csv_with_username(self) -> None:
-        url = reverse("admin:account_user_import_csv")
+        url = reverse("admin:account_user_import_csv", args=[self.superuser.pk])
         res = self.app.get(url, user=self.superuser)
         form = res.forms["load_users"]
         form["file"] = (
