@@ -6,10 +6,7 @@ import uuid
 import openpyxl
 
 from hope.apps.generic_import.generic_upload_service.parsers.base_parser import BaseParser
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
-from hope.models.country import Country
-from hope.models.financial_institution import FinancialInstitution
+from hope.models import Area, BusinessArea, Country, FinancialInstitution
 
 logger = logging.getLogger(__name__)
 
