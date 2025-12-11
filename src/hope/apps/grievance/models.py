@@ -275,9 +275,22 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         },
         "system_flagging_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
         },
         "needs_adjudication_ticket_details": {
             "golden_records_individual": "golden_records_individual",
+            "household": "golden_records_individual__household",
+        },
+        "delete_individual_ticket_details": {
+            "individual": "individual",
+            "household": "individual__household",
+        },
+        "delete_household_ticket_details": {
+            "household": "household",
+        },
+        "payment_verification_ticket_details": {
+            "individual": "payment_verification__payment__head_of_household",
+            "household": "payment_verification__payment__household",
         },
     }
 
