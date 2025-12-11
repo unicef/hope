@@ -16,13 +16,12 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NOT_PROCESSED,
     UNIQUE,
 )
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair, RegistrationDataImport
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
@@ -34,7 +33,8 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import DeduplicationEngineSimilarityPair, RegistrationDataImport
+from hope.models.utils import MergeStatusModel
 
 
 @pytest.fixture(autouse=True)
@@ -315,6 +315,17 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert self.program.deduplication_engine_similarity_pairs.filter(
             individual1=ind1, individual2=None, similarity_score=0.00
         ).exists()
+
+    def test_store_results_not_existing_individual(self) -> None:
+        ind1 = IndividualFactory.create_batch(1)[0]
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=70.0, first=ind1.id, second=str(uuid.uuid4()), status_code="429"),
+        ]
+
+        service.store_similarity_pairs(self.program, similarity_pairs)
+
+        assert self.program.deduplication_engine_similarity_pairs.count() == 0
 
     def test_mark_rdis_as(self) -> None:
         service = BiometricDeduplicationService()

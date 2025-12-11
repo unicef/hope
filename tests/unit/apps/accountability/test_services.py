@@ -4,12 +4,11 @@ from rest_framework.exceptions import ValidationError
 from extras.test_utils.factories.accountability import FeedbackFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.accountability.models import Message
 from hope.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
-from hope.apps.program.models import Program
+from hope.models import Message, Program
 
 pytestmark = pytest.mark.django_db
 
