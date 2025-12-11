@@ -71,8 +71,8 @@ class RdiMergeTask:
 
             household_ids_to_exclude = []
             for ids in chunks(household_ids, 1000):
-                households = PendingHousehold.objects.filter(id__in=ids)
-                for household in households:
+                households_chunks = PendingHousehold.objects.filter(id__in=ids)
+                for household in households_chunks:
                     collided_id = obj_hct.program.collision_detector.detect_collision(household)
                     if not collided_id:
                         continue
