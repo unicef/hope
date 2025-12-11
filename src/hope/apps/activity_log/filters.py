@@ -26,12 +26,12 @@ class LogEntryFilter(FilterSet):
         for element in values:
             if element.lower() == "system":
                 q_obj |= Q(user__isnull=True)
-            q_obj |= Q(content_type__model__startswith=element)
-            q_obj |= Q(object_id__startswith=element)
-            q_obj |= Q(action__startswith=element)
-            q_obj |= Q(object_repr__startswith=element)
-            q_obj |= Q(timestamp__startswith=element)
-        return qs.filter(q_obj)
+            q_obj |= Q(content_type__model__istartswith=element)
+            q_obj |= Q(object_id__istartswith=element)
+            q_obj |= Q(action__istartswith=element)
+            q_obj |= Q(object_repr__istartswith=element)
+            q_obj |= Q(timestamp__istartswith=element)
+        return qs.filter(q_obj).distinct()
 
     def filter_by_user_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
         return qs.filter(user_id=value)

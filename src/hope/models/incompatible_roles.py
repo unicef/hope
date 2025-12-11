@@ -23,8 +23,7 @@ class IncompatibleRolesManager(models.Manager):
             role__id__in=incompatible_roles,
             user=user,
         )
-        if user.id:
-            incompatible_userroles = incompatible_userroles.exclude(id=user.id)
+
         if incompatible_userroles.exists():
             raise ValidationError(
                 {

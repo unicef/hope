@@ -26,6 +26,7 @@ class Permissions(Enum):
     RDI_RERUN_DEDUPE = auto()
     RDI_MERGE_IMPORT = auto()
     RDI_REFUSE_IMPORT = auto()
+    RDI_WEBHOOK_DEDUPLICATION = auto()
 
     # Generic Import
     GENERIC_IMPORT_DATA = auto()
@@ -249,7 +250,7 @@ class Permissions(Enum):
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
-    # Office Search
+    # Country Search
     SEARCH_BUSINESS_AREAS = auto()
 
     @classmethod

@@ -25,14 +25,15 @@ import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import HHDataTable from '@containers/pages/officeSearch/HHdataTable';
-import INDDataTable from '@containers/pages/officeSearch/INDdataTable';
-import GRVDataTable from '@containers/pages/officeSearch/GRVdataTable';
-import PPDataTable from '@containers/pages/officeSearch/PPdataTable';
-import PaymentsDataTable from '@containers/pages/officeSearch/PaymentsDataTable';
+import HHDataTable from '@containers/pages/countrySearch/HHdataTable';
+import INDDataTable from '@containers/pages/countrySearch/INDdataTable';
+import GRVDataTable from '@containers/pages/countrySearch/GRVdataTable';
+import PPDataTable from '@containers/pages/countrySearch/PPdataTable';
+import PaymentsDataTable from '@containers/pages/countrySearch/PaymentsDataTable';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 
 const OfficeSearchPage = (): ReactElement => {
   const NoResultsMessage = (
@@ -283,9 +284,13 @@ const OfficeSearchPage = (): ReactElement => {
     canViewPayments && { value: 'RCPT', label: 'Payment' },
   ].filter(Boolean);
 
+  if (!hasPermissions(PERMISSIONS.SEARCH_BUSINESS_AREAS, permissions)) {
+    return <PermissionDenied />;
+  }
+
   return (
     <>
-      <PageHeader title={t('Office Search')} />
+      <PageHeader title={t('Country Search')} />
       <Box
         display="flex"
         flexDirection="column"

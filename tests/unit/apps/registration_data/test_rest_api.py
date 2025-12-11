@@ -44,6 +44,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             Permissions.RDI_REFUSE_IMPORT,
             Permissions.RDI_RERUN_DEDUPE,
             Permissions.RDI_IMPORT_DATA,
+            Permissions.RDI_WEBHOOK_DEDUPLICATION,
         ]
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
@@ -78,6 +79,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
     @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:registration-data:registration-data-imports-webhook-deduplication",
             args=["afghanistan", self.program.slug],
