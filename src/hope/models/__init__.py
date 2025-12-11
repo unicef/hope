@@ -8,6 +8,7 @@ from hope.models.approval import *  # noqa: F403
 from hope.models.approval_process import *  # noqa: F403
 from hope.models.area import *  # noqa: F403
 from hope.models.area_type import *  # noqa: F403
+from hope.models.async_job import *  # noqa: F403
 from hope.models.beneficiary_group import *  # noqa: F403
 from hope.models.business_area import *  # noqa: F403
 from hope.models.changelog import *  # noqa: F403
