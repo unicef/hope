@@ -1143,10 +1143,6 @@ export class RestService {
         });
     }
     /**
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     *
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-     * variable token_permission.
      * @returns AreaList
      * @throws ApiError
      */
@@ -1169,7 +1165,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -1193,10 +1189,6 @@ export class RestService {
         });
     }
     /**
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     *
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-     * variable token_permission.
      * @returns AreaTree
      * @throws ApiError
      */
@@ -1219,7 +1211,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,

@@ -32,37 +32,39 @@ from extras.test_utils.factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
-from hope.apps.account.models import User
 from hope.apps.core.currencies import CURRENCY_CHOICES
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area
-from hope.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
-from hope.apps.payment.models import (
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import to_decimal
+from hope.models import (
+    MALE,
+    ROLE_PRIMARY,
     Account,
     AccountType,
     Approval,
     ApprovalProcess,
+    Area,
+    BusinessArea,
+    DataCollectingType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
     FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
+    Household,
+    Individual,
+    MergeStatusModel,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
-)
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.payment.utils import to_decimal
-from hope.apps.program.models import Program
-from hope.apps.targeting.models import (
+    Program,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    User,
 )
-from hope.apps.utils.models import MergeStatusModel
 
 
 def update_kwargs_with_usd_currency(kwargs: Any) -> Any:

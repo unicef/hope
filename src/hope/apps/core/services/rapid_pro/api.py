@@ -12,7 +12,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import JSONDecodeError
 from urllib3.util.retry import Retry
 
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 

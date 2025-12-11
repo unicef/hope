@@ -4,10 +4,8 @@ from typing import TypedDict
 from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 
-from hope.apps.geo.models import Area
-from hope.apps.household.models import Household
-from hope.apps.payment.models import Payment, PaymentVerification
 from hope.apps.payment.utils import get_payment_items_for_dashboard
+from hope.models import Area, Household, Payment, PaymentVerification
 
 
 class PaymentVerificationChartQueryResponse(TypedDict):
