@@ -10,6 +10,5 @@ export type SanctionListIndividual = {
     referenceNumber: string;
     documents: Array<SanctionListIndividualDocument>;
     datesOfBirth: Array<SanctionListIndividualDateOfBirth>;
-    sanctionListName: string;
 };
 

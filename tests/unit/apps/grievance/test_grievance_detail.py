@@ -852,7 +852,6 @@ class TestGrievanceTicketDetail:
                     "date": f"{sanction_list_date_of_birth.date:%Y-%m-%d}",
                 }
             ],
-            "sanction_list_name": sanction_list_individual.sanction_list.name,
         }
 
     def test_grievance_detail_payment_verification(self, create_user_role_with_permissions: Any) -> None:
