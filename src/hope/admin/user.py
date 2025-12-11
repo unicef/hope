@@ -12,7 +12,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import Error
-from django.db.models import JSONField, QuerySet
+from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
@@ -31,7 +31,7 @@ from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
-from hope.models import BusinessArea, IncompatibleRoles, Partner, User
+from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -43,14 +43,14 @@ logger = logging.getLogger(__name__)
 
 class LoadUsersForm(forms.Form):
     emails = forms.CharField(widget=forms.Textarea, help_text="Emails must be space separated")
-    role = forms.ModelChoiceField(queryset=models.role.Role.objects.all())
+    role = forms.ModelChoiceField(queryset=Role.objects.all())
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all().order_by("name"),
         required=True,
         widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
-        queryset=models.partner.Partner.objects.all().order_by("name"),
+        queryset=Partner.objects.all().order_by("name"),
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
@@ -179,10 +179,10 @@ class ADUSerMixin:
                             user.set_unusable_password()
                             users_to_bulk_create.append(user)
                             global_business_area = BusinessArea.objects.filter(slug="global").first()
-                            basic_role = models.role.Role.objects.filter(name="Basic User").first()
+                            basic_role = Role.objects.filter(name="Basic User").first()
                             if global_business_area and basic_role:
                                 users_role_to_bulk_create.append(
-                                    models.role_assignment.RoleAssignment(
+                                    RoleAssignment(
                                         business_area=global_business_area,
                                         user=user,
                                         role=basic_role,
@@ -191,7 +191,7 @@ class ADUSerMixin:
                             results.created.append(user)
 
                         users_role_to_bulk_create.append(
-                            models.role_assignment.RoleAssignment(role=role, business_area=business_area, user=user)
+                            RoleAssignment(role=role, business_area=business_area, user=user)
                         )
                     except HTTPError as e:
                         if e.response.status_code != 404:
@@ -200,9 +200,7 @@ class ADUSerMixin:
                     except Http404:
                         results.missing.append(email)
                 User.objects.bulk_create(users_to_bulk_create)
-                models.role_assignment.RoleAssignment.objects.bulk_create(
-                    users_role_to_bulk_create, ignore_conflicts=True
-                )
+                RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                 ctx["results"] = results
                 return TemplateResponse(request, "admin/load_users.html", ctx)
             except (HTTPError, Http404) as e:
@@ -305,6 +303,11 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
+    def get_inlines(self, request: HttpRequest, obj: Any | None = None) -> list:
+        if request.user.has_perm("account.can_edit_user_roles"):
+            return [RoleAssignmentInline]
+        return []
+
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
@@ -354,18 +357,25 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         return to_delete, model_count, perms_needed, protected
 
     @button(permission="auth.view_permission")
-    def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:  # pragma: no cover
+    def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: User = context["original"]
         all_perms = user.get_all_permissions()
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
         ba_roles = defaultdict(list)
+
         for role in user.role_assignments.all():
             ba_roles[role.business_area.slug].append(role.role)
+        for role in user.partner.role_assignments.all():
+            ba_roles[role.business_area.slug].append(role.role)
 
-        for role in user.role_assignments.values_list("business_area__slug", flat=True).distinct("business_area"):
-            ba_perms[role].extend(user.permissions_in_business_area(role))
+        for business_area in (
+            RoleAssignment.objects.filter(Q(user=user) | Q(partner=user.partner))
+            .values_list("business_area__slug", flat=True)
+            .distinct("business_area")
+        ):
+            ba_perms[business_area].extend(user.permissions_in_business_area(business_area))
 
         context["business_ares_permissions"] = dict(ba_perms)
         context["business_ares_roles"] = dict(ba_roles)

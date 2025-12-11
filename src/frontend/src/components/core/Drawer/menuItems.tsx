@@ -291,9 +291,9 @@ export const menuItems: MenuItem[] = [
     dataPerm: PERMISSIONS.ACTIVITY_LOG_VIEW,
   },
   {
-    name: 'Office Search',
-    href: '/office-search',
-    selectedRegexp: /^\/office-search.*$/,
+    name: 'Country Search',
+    href: '/country-search',
+    selectedRegexp: /^\/country-search.*$/,
     icon: <BusinessCenterIcon />,
     permissions: [PERMISSIONS.SEARCH_BUSINESS_AREAS],
     scopes: [SCOPE_ALL_PROGRAMS],
