@@ -45,6 +45,7 @@ class Permissions(Enum):
     PROGRAMME_ACTIVATE = auto()
     PROGRAMME_FINISH = auto()
     PROGRAMME_DUPLICATE = auto()
+    PROGRAMME_BULK_UPLOAD_INDIVIDUALS_PHOTOS = auto()
 
     # Targeting
     TARGETING_VIEW_LIST = auto()
