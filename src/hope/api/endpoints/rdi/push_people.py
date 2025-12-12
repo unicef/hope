@@ -39,7 +39,6 @@ from hope.models.utils import Grant
 if TYPE_CHECKING:
     from rest_framework.request import Request
 
-
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
     (NON_BENEFICIARY, "Non Beneficiary"),
@@ -218,6 +217,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
         if serializer.is_valid():
+            self._mark_by_biometric_deduplication_enabled()
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 
             response = {
@@ -226,3 +226,8 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
             }
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _mark_by_biometric_deduplication_enabled(self):
+        if self.selected_rdi.program.biometric_deduplication_enabled:
+            self.selected_rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+            self.selected_rdi.save()
