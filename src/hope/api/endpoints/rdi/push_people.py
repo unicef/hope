@@ -162,7 +162,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo = self.get_photo(individual_data.pop("photo", None))
+        photo = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.programme_code)
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -188,7 +188,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
-            doc["photo"] = self.get_photo(doc.pop("image", None))
+            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.programme_code)
             self.save_document(ind, doc)
 
         for account in accounts:
@@ -203,7 +203,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     @cached_property
     def selected_rdi(self) -> RegistrationDataImport:
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],
