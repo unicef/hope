@@ -117,11 +117,6 @@ class UpdateByXlsxStage2Form(forms.Form):
         raise ValidationError("Unicef Id columns have to be selected")
 
 
-class UpdateIndividualsIBANFromXlsxForm(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    file = forms.FileField()
-
-
 class WithdrawForm(forms.Form):
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     tag = forms.SlugField(
