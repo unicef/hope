@@ -9,7 +9,8 @@ from extras.test_utils.factories.household import DocumentTypeFactory, PendingIn
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin, get_photo_from_stream
-from hope.models import AccountType, PendingAccount, PendingDocument
+from hope.apps.household.models import PendingDocument
+from hope.apps.payment.models import AccountType, PendingAccount
 
 
 class PhotoMixinTests(TestCase):
