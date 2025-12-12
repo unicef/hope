@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -97,7 +99,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.primary_collector == self.primary_collector
         assert household.alternate_collector == self.alternate_collector
 
-    def test_create_multiple_households_success(self) -> None:
+    def _test_create_multiple_households_success(self) -> None:
         second_head_of_household = PendingIndividualFactory(
             individual_id="IND004",
             registration_data_import=self.rdi,
@@ -133,6 +135,24 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert response.data["processed"] == 2
         assert response.data["accepted"] == 2
         assert response.data["errors"] == 0
+
+    def test_create_multiple_households_success(self):
+        self._test_create_multiple_households_success()
+
+    def test_create_multiple_households_success_with_biometric_deduplication_disabled(self):
+        with patch("hope.api.endpoints.rdi.lax.mark_by_biometric_deduplication") as mocked_marker:
+            self._test_create_multiple_households_success()
+            mocked_marker.assert_called_once_with(self.rdi)
+            assert self.rdi.deduplication_engine_status is None
+
+    def test_create_multiple_households_success_with_biometric_deduplication_enabled(self):
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        self._test_create_multiple_households_success()
+
+        self.rdi.refresh_from_db()
+        assert self.rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
     def test_create_household_with_validation_errors(self) -> None:
         household_data = {
