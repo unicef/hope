@@ -205,7 +205,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     def selected_rdi(self) -> RegistrationDataImport:
         """Get the selected RDI with proper error handling."""
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],
@@ -224,7 +224,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64)
+            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -260,7 +260,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         external_individual_id = serializer.validated_data.pop("individual_id")
 
         photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64)
+        photo_file = self.get_photo(photo_b64, self.selected_rdi.program.programme_code)
 
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
