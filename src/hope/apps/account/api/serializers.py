@@ -248,18 +248,12 @@ class UserChoicesSerializer(serializers.Serializer):
 
 
 class PermissionSerializer(serializers.ModelSerializer):
-    app_label = serializers.SerializerMethodField()
-    model = serializers.SerializerMethodField()
+    app_label = serializers.CharField(source="content_type.app_label", read_only=True)
+    model = serializers.CharField(source="content_type.model", read_only=True)
 
     class Meta:
         model = Permission
         fields = ("id", "name", "codename", "app_label", "model")
-
-    def get_app_label(self, obj: Permission) -> str:
-        return obj.content_type.app_label
-
-    def get_model(self, obj: Permission) -> str:
-        return obj.content_type.model
 
 
 class GroupListSerializer(serializers.ModelSerializer):

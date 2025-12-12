@@ -1,8 +1,8 @@
 from typing import Any
 
-import pytest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -113,21 +113,16 @@ class TestGroupsAPI:
         from rest_framework.test import APIClient
 
         unauthenticated_client = APIClient()
-        response = unauthenticated_client.get(
-            reverse(self.detail_url, kwargs={"pk": self.group_approver.id})
-        )
+        response = unauthenticated_client.get(reverse(self.detail_url, kwargs={"pk": self.group_approver.id}))
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_retrieve_group_with_authentication(self, create_user_role_with_permissions: Any) -> None:
-        # Any authenticated user can retrieve group details
         create_user_role_with_permissions(
             user=self.user,
-            permissions=[Permissions.PROGRAMME_FINISH],  # Any permission, just to be authenticated
+            permissions=[Permissions.PROGRAMME_FINISH],
             business_area=self.afghanistan,
         )
-        response = self.api_client.get(
-            reverse(self.detail_url, kwargs={"pk": self.group_approver.id})
-        )
+        response = self.api_client.get(reverse(self.detail_url, kwargs={"pk": self.group_approver.id}))
         assert response.status_code == status.HTTP_200_OK
         data = response.data
 
@@ -156,9 +151,7 @@ class TestGroupsAPI:
             permissions=[Permissions.PROGRAMME_FINISH],
             business_area=self.afghanistan,
         )
-        response = self.api_client.get(
-            reverse(self.detail_url, kwargs={"pk": 999999})
-        )
+        response = self.api_client.get(reverse(self.detail_url, kwargs={"pk": 999999}))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_groups_ordering(self, create_user_role_with_permissions: Any) -> None:
@@ -193,8 +186,6 @@ class TestGroupsAPI:
             permissions=[Permissions.PROGRAMME_FINISH],
             business_area=self.afghanistan,
         )
-        response = self.api_client.get(
-            reverse(self.count_url)
-        )
+        response = self.api_client.get(reverse(self.count_url))
         assert response.status_code == status.HTTP_200_OK
         assert response.data["count"] == 3
