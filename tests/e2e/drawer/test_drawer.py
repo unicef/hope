@@ -165,7 +165,7 @@ class TestDrawer:
         page_programme_management.select_global_program_filter(active_program_name)
         assert active_program_name in page_programme_details.get_header_title().text
         with pytest.raises(NoSuchElementException):
-            page_programme_details.get_drawer_inactive_subheader(timeout=0.05)
+            page_programme_details.get_drawer_inactive_subheader(timeout=int(0.05))
 
         # first have to search Finished program because of default filtering
         page_programme_management.select_global_program_filter(finished_program_name)

@@ -17,8 +17,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 logger = logging.getLogger(__name__)
 
 
-def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
-    def _predicate(driver):
+def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable[[Chrome], bool]:
+    def _predicate(driver: Chrome) -> bool:
         try:
             actual = driver.find_element(*locator).text.strip()
             return actual == expected
@@ -231,7 +231,7 @@ class Common:
             self.wait_for(select_option).click()
             self.wait_for_disappear(select_option)
 
-    def select_multiple_option_by_name(self, *args: [str]) -> None:
+    def select_multiple_option_by_name(self, *args: tuple[str, ...]) -> None:
         for option_name in args:
             select_option = f'li[data-cy="select-option-{option_name}"]'
             self.wait_for(select_option).click()

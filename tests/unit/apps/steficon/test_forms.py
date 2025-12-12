@@ -60,8 +60,8 @@ class TestRuleForm(BaseTestCase):
         form = RuleForm(instance=rule, initial=form_data)
 
         # mock some responses to do nothing
-        form.is_valid = lambda: True  # type: ignore
-        form.full_clean = lambda: None  # type: ignore
+        form.is_valid = lambda: True
+        form.full_clean = lambda: None
         form.is_valid()
         form.full_clean()
         form.cleaned_data = form_data

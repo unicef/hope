@@ -39,7 +39,7 @@ class FlexibleArgumentsDataclassMixin:
 
 
 class ReadOnlyModelSerializer(serializers.ModelSerializer):
-    def get_fields(self, *args: list, **kwargs: dict) -> dict:
+    def get_fields(self, *args: Any, **kwargs: Any) -> dict:
         fields = super().get_fields(*args, **kwargs)
         for field in fields:
             fields[field].read_only = True
@@ -82,7 +82,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         return payload
 
     def get_external_code(self, obj: Any) -> str:
-        return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
+        return str(f"{obj.payment_plan.unicef_id}-{obj.order}")
 
     class Meta:
         model = PaymentPlanSplit
@@ -329,8 +329,8 @@ class PaymentGatewayAPI(BaseAPI):
     class PaymentGatewayMissingAPICredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIError  # type: ignore
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsError  # type: ignore
+    API_EXCEPTION_CLASS = PaymentGatewayAPIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsError
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
@@ -369,7 +369,7 @@ class PaymentGatewayAPI(BaseAPI):
         validate_response: bool = True,
     ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,

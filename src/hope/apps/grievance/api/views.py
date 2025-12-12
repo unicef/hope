@@ -9,6 +9,8 @@ from django.db.models import (
     CharField,
     Count,
     DateField,
+    DurationField,
+    ExpressionWrapper,
     F,
     Q,
     QuerySet,
@@ -114,7 +116,7 @@ from hope.apps.utils.exceptions import log_and_raise
 from hope.models import FlexibleAttribute, Household, IndividualRoleInHousehold, log_create
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import AbstractUser
+    from hope.apps.account.models import User
 
 
 TICKET_ORDERING_KEYS = [
@@ -507,9 +509,9 @@ class GrievanceTicketGlobalViewSet(
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
-                        then=F("updated_at") - F("created_at"),
+                        then=ExpressionWrapper(F("updated_at") - F("created_at"), output_field=DurationField()),
                     ),
-                    default=timezone.now() - F("created_at"),  # type: ignore
+                    default=ExpressionWrapper(timezone.now() - F("created_at"), output_field=DurationField()),
                     output_field=DateField(),
                 )
             )
@@ -527,7 +529,7 @@ class GrievanceTicketGlobalViewSet(
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user: AbstractUser = request.user  # type: ignore
+        user: User = request.user
         input_data = serializer.validated_data
         # check if user has access to the program
         program = input_data.get("program")
@@ -596,7 +598,7 @@ class GrievanceTicketGlobalViewSet(
             self.verify_required_arguments(input_data, "issue_type", self.UPDATE_EXTRAS_OPTIONS)
 
         extras = input_data.pop("extras", {})
-        grievance_ticket = self.update_basic_data(user, input_data, grievance_ticket)  # type: ignore
+        grievance_ticket = self.update_basic_data(user, input_data, grievance_ticket)
 
         update_extra_methods = {
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_service,
@@ -696,7 +698,7 @@ class GrievanceTicketGlobalViewSet(
 
         if not grievance_ticket.can_change_status(new_status):
             log_and_raise("New status is incorrect")
-        status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
+        status_changer = TicketStatusChangerService(grievance_ticket, user)
         status_changer.change_status(new_status)
 
         grievance_ticket.refresh_from_db()
@@ -1197,7 +1199,7 @@ class GrievanceTicketGlobalViewSet(
         tickets = BulkActionService().bulk_assign(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["assigned_to"],
-            self.business_area_slug,  # type: ignore
+            self.business_area_slug,
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1216,7 +1218,7 @@ class GrievanceTicketGlobalViewSet(
         tickets = BulkActionService().bulk_set_priority(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["priority"],
-            self.business_area_slug,  # type: ignore
+            self.business_area_slug,
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1235,7 +1237,7 @@ class GrievanceTicketGlobalViewSet(
         tickets = BulkActionService().bulk_set_urgency(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["urgency"],
-            self.business_area_slug,  # type: ignore
+            self.business_area_slug,
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1252,10 +1254,10 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tickets = BulkActionService().bulk_add_note(
-            request.user,  # type: ignore
+            request.user,
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["note"],
-            self.business_area_slug,  # type: ignore
+            self.business_area_slug,
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,

@@ -319,9 +319,10 @@ class KoboAccessMixin:
                             },
                         },
                     )
-                    local.custom_fields["kobo_pk"] = entry[0]
-                    local.custom_fields["kobo_username"] = entry[1]
-                    local.save()
+                    if local:
+                        local.custom_fields["kobo_pk"] = entry[0]
+                        local.custom_fields["kobo_username"] = entry[1]
+                        local.save()
                     results.append([local, created])
             ctx["results"] = results
         else:

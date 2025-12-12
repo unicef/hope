@@ -757,7 +757,7 @@ def register_custom_sql_signal() -> None:
             return
         conn = connections[using]
         for stmt in all_sqls:
-            conn.cursor().execute(stmt)
+            conn.cursor().execute(str(stmt))
 
     pre_migrate.connect(
         pre_migration_custom_sql,

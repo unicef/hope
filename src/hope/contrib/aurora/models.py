@@ -98,7 +98,7 @@ class Record(models.Model):
             ("can_add_records", "Can add records"),
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.registration} - {self.source_id}"
 
     def mark_as_invalid(self, msg: str) -> None:

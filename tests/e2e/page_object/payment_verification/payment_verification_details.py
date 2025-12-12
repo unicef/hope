@@ -140,7 +140,7 @@ class PaymentVerificationDetails(BaseComponents):
     def get_verification_plan_name(self, name: str) -> WebElement:
         return self.wait_for(self.verification_plan.format(name))
 
-    def get_verification_plan_prefix(self) -> [WebElement]:
+    def get_verification_plan_prefix(self) -> list[WebElement]:
         return self.get_elements(self.verification_plan_prefix)
 
     def get_button_activate_plan(self) -> WebElement:
@@ -203,7 +203,7 @@ class PaymentVerificationDetails(BaseComponents):
     def get_button_finish(self) -> WebElement:
         return self.wait_for(self.button_finish)
 
-    def get_rows(self) -> [WebElement]:
+    def get_rows(self) -> list[WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)
 

@@ -146,10 +146,10 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "related_tickets",
         )
 
-    def get_programs(self, obj: GrievanceTicket) -> dict:
+    def get_programs(self, obj: GrievanceTicket) -> list[dict[Any, Any]]:
         return ProgramSmallSerializer(obj.programs, many=True).data
 
-    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
+    def get_related_tickets(self, obj: GrievanceTicket) -> list[dict]:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
@@ -240,7 +240,7 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     def get_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
 
-    def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict]:
+    def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
             {"category": key, "label": categories[key], "sub_categories": value}
