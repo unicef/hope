@@ -300,7 +300,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         assert individual.photo is not None
-        assert individual.photo.name.startswith("photo")
+        assert individual.photo.name.startswith(self.program.programme_code)
         assert individual.photo.name.endswith(".png")
 
     def test_create_individual_with_document_image(self) -> None:
@@ -334,7 +334,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         document = PendingDocument.objects.get(individual=individual)
         assert document.photo is not None
-        assert document.photo.name.startswith("photo")
+        assert document.photo.name.startswith(self.program.programme_code)
         assert document.photo.name.endswith(".png")
 
     def test_file_cleanup_on_failure(self) -> None:
