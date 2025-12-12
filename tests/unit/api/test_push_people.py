@@ -361,6 +361,51 @@ class TestPushPeople(HOPEApiTestCase):
         assert ind.household.admin3 is None
         assert ind.household.admin4 is None
 
+    def test_push_people_marks_dedup_engine_pending_when_biometric_enabled(self) -> None:
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        data = [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "full_name": "John Doe",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "type": "",
+                "program": str(self.program.id),
+            }
+        ]
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+
+        self.rdi.refresh_from_db()
+        assert self.rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+    def test_push_people_does_not_mark_dedup_engine_when_biometric_disabled(self) -> None:
+        self.program.biometric_deduplication_enabled = False
+        self.program.save()
+
+        original_status = self.rdi.deduplication_engine_status
+        data = [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "full_name": "John Doe",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "type": "",
+                "program": str(self.program.id),
+            }
+        ]
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+
+        self.rdi.refresh_from_db()
+        assert self.rdi.deduplication_engine_status == original_status
+
 
 class TestPeopleUploadMixin:
     @pytest.fixture
