@@ -30,7 +30,7 @@ coverage:
     - "pragma: no-cover"
     - "def __repr__"
     - "raise AssertionError"
-    - "raise NotImplementedError"
+    - "raise NotImplementedError.*"
     - "except ImportError"
     - "if __name__ == .__main__."
     - "if TYPE_CHECKING"

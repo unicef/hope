@@ -224,6 +224,11 @@ Clear Cache,clear-cache/
         "Default Beneficiary Group name",
         str,
     ),
+    "GENERIC_IMPORT_MAX_FILE_SIZE_MB": (
+        50,
+        "Maximum file size in MB for generic import uploads",
+        "positive_integers",
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

@@ -101,7 +101,7 @@ class MergeStatusModel(models.Model):
         (MERGED, _("Merged")),
     )
 
-    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING)
+    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, blank=True)
 
     class Meta:
         abstract = True
@@ -669,6 +669,7 @@ class Grant(Enum):
     API_RDI_CREATE = auto()
 
     API_PROGRAM_CREATE = auto()
+    API_GENERIC_IMPORT = auto()
 
     @classmethod
     def choices(cls) -> tuple[tuple[Any, Any], ...]:

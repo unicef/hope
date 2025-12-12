@@ -34,6 +34,7 @@ def create_afghanistan() -> BusinessArea:
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
             "kobo_token": "XXX",
+            "active": True,  # Set active=True for tests
         },
     )[0]
 

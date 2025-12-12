@@ -28,6 +28,9 @@ class Permissions(Enum):
     RDI_REFUSE_IMPORT = auto()
     RDI_WEBHOOK_DEDUPLICATION = auto()
 
+    # Generic Import
+    GENERIC_IMPORT_DATA = auto()
+
     # Population
     POPULATION_VIEW_HOUSEHOLDS_LIST = auto()
     POPULATION_VIEW_HOUSEHOLDS_DETAILS = auto()

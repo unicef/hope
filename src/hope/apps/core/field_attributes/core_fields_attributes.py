@@ -88,8 +88,7 @@ from hope.apps.household.const import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hope.models.area import Area
-from hope.models.country import Country
+from hope.models import Area, Country
 from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)

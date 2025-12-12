@@ -11,8 +11,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.models.business_area import BusinessArea
-from hope.models.file_temp import FileTemp
+from hope.models import BusinessArea, FileTemp
 from hope.models.payment_verification_summary import build_summary
 from hope.models.utils import (
     AdminUrlMixin,
@@ -22,7 +21,7 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.models.program import Program
+    from hope.models import Program
 
 logger = logging.getLogger(__name__)
 
