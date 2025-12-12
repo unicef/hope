@@ -16,7 +16,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+    mark_by_biometric_deduplication,
+)
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -397,6 +401,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 "individual_id_mapping": individual_id_mapping,
                 "results": results,
             }
+            mark_by_biometric_deduplication(self.selected_rdi)
 
         except Exception:
             for field_file in self.staging.saved_file_fields:
@@ -586,6 +591,7 @@ class CreateLaxHouseholds(CreateLaxBaseView):
         if roles_to_create:
             IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
 
+        mark_by_biometric_deduplication(self.selected_rdi)
         return Response(
             {
                 "id": self.selected_rdi.id,

@@ -146,7 +146,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         account = PendingAccount.objects.first()
         assert account.financial_institution.name == "Generic Bank"
 
-    def test_create_multiple_individuals_success(self) -> None:
+    def _test_create_multiple_individuals_success(self) -> None:
         individuals_data = [
             {
                 "individual_id": "IND001",
@@ -177,6 +177,24 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert response.data["accepted"] == 2
         assert response.data["errors"] == 0
         assert len(response.data["individual_id_mapping"]) == 2
+
+    def test_create_multiple_individuals_success(self):
+        self._test_create_multiple_individuals_success()
+
+    def test_create_multiple_individual_success_with_biometric_deduplication_disabled(self):
+        with patch("hope.api.endpoints.rdi.lax.mark_by_biometric_deduplication") as mocked_marker:
+            self._test_create_multiple_individuals_success()
+            mocked_marker.assert_called_once_with(self.rdi)
+            assert self.rdi.deduplication_engine_status is None
+
+    def test_create_multiple_individual_success_with_biometric_deduplication_enabled(self):
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        self._test_create_multiple_individuals_success()
+
+        self.rdi.refresh_from_db()
+        assert self.rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
     def test_create_individual_with_validation_errors(self) -> None:
         individual_data = {
