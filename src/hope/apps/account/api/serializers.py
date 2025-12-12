@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from flags.state import flag_state
@@ -244,3 +245,32 @@ class UserChoicesSerializer(serializers.Serializer):
                 .values_list("id", "name")
             )
         )
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    app_label = serializers.SerializerMethodField()
+    model = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Permission
+        fields = ("id", "name", "codename", "app_label", "model")
+
+    def get_app_label(self, obj: Permission) -> str:
+        return obj.content_type.app_label
+
+    def get_model(self, obj: Permission) -> str:
+        return obj.content_type.model
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("id", "name")
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "name", "permissions")
