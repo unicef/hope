@@ -75,21 +75,10 @@ COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
 
-# Frontend builder
-FROM node:22-bookworm-slim AS frontend-builder
-
-WORKDIR /fe-build
-COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./
-# Network timeout is needed by the cross-platform build
-RUN yarn install --frozen-lockfile --network-timeout 600000
-COPY ./src/frontend ./
-RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
-
 # Dist builder image
 FROM uv as dist-builder
 WORKDIR $APP_PATH
 COPY ./src/ ./src/
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hope/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
         --no-editable --frozen
