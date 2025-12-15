@@ -25,6 +25,7 @@ class SanctionListIndividualDateOfBirthSerializer(serializers.ModelSerializer):
 class SanctionListIndividualSerializer(serializers.ModelSerializer):
     documents = SanctionListIndividualDocumentSerializer(many=True)
     dates_of_birth = SanctionListIndividualDateOfBirthSerializer(many=True)
+    sanction_list_name = serializers.CharField(source="sanction_list.name")
 
     class Meta:
         model = SanctionListIndividual
@@ -34,6 +35,7 @@ class SanctionListIndividualSerializer(serializers.ModelSerializer):
             "reference_number",
             "documents",
             "dates_of_birth",
+            "sanction_list_name",
         )
 
 
