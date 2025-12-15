@@ -120,16 +120,6 @@ class BiometricDeduplicationService:
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
 
     def upload_and_process_deduplication_set(self, program: Program) -> None:
-        deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
-        if not deduplication_set_id:
-            with transaction.atomic():
-                try:
-                    deduplication_set_id = self.create_deduplication_set(program)
-                except DeduplicationEngineAPI.DeduplicationEngineAPIError:
-                    raise self.BiometricDeduplicationServiceError(
-                        f"Error creating deduplication set for program {program}"
-                    )
-
         pending_rdis = RegistrationDataImport.objects.filter(
             program=program,
             deduplication_engine_status__in=[
@@ -142,6 +132,15 @@ class BiometricDeduplicationService:
 
         if not pending_rdis:
             return
+
+        deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
+        if not deduplication_set_id:
+            try:
+                deduplication_set_id = self.create_deduplication_set(program)
+            except DeduplicationEngineAPI.DeduplicationEngineAPIError:
+                logging.exception(f"Error creating deduplication set {deduplication_set_id}")
+                pending_rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR)
+                return
 
         for rdi in pending_rdis:
             self.upload_individuals(deduplication_set_id, rdi)

@@ -168,6 +168,13 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
 
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        rdi.save()
+        mock_process_deduplication.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
+        service.process_deduplication_set(str(self.program.deduplication_set_id), RegistrationDataImport.objects.all())
+        rdi.refresh_from_db()
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
+
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set")
     def test_delete_deduplication_set(self, mock_delete_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
@@ -195,52 +202,42 @@ class BiometricDeduplicationServiceTest(TestCase):
         mock_process_deduplication.return_value = ({}, 200)
         service = BiometricDeduplicationService()
 
-        # Test when biometric deduplication is not enabled
-        self.program.biometric_deduplication_enabled = False
-        self.program.save()
-
-        with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceError,
-            "Biometric deduplication is not enabled for this program",
-        ):
-            service.upload_and_process_deduplication_set(self.program)
-
-        # Test RDIs in progress
-        self.program.biometric_deduplication_enabled = True
-        self.program.save()
-
         rdi_1 = RegistrationDataImportFactory(
             program=self.program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
+            status=RegistrationDataImport.IN_REVIEW,
         )
         rdi_2 = RegistrationDataImportFactory(
             program=self.program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
+            status=RegistrationDataImport.IN_REVIEW,
         )
         IndividualFactory(registration_data_import=rdi_1, photo="some_photo1.jpg")
         PendingIndividualFactory(registration_data_import=rdi_2, photo="some_photo2.jpg")
 
         service.create_deduplication_set = mock.MagicMock()
-        with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceError,
-            "Deduplication is already in progress for some RDIs",
-        ):
-            service.upload_and_process_deduplication_set(self.program)
-            service.create_deduplication_set.assert_called_once_with(self.program)
 
-        # Test when rdi images upload fails
-        rdi_2.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
-        rdi_2.save()
+        # test create deduplication set error
+        self.program.deduplication_set_id = None
+        self.program.save()
+        service.create_deduplication_set.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
+        service.upload_and_process_deduplication_set(self.program)
+        assert service.create_deduplication_set.call_count == 1
+        rdi_1.refresh_from_db()
+        rdi_2.refresh_from_db()
+        assert rdi_1.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
+        assert rdi_2.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
 
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.save()
+        # test upload images error
         mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
-        with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceError,
-            "Failed to upload images for all RDIs",
-        ):
-            service.upload_and_process_deduplication_set(self.program)
-            assert mock_bulk_upload_images.call_count == 2
-            assert rdi_1.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
-            assert rdi_2.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
+        service.upload_and_process_deduplication_set(self.program)
+        assert mock_bulk_upload_images.call_count == 2
+        rdi_1.refresh_from_db()
+        rdi_2.refresh_from_db()
+        assert rdi_1.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
+        assert rdi_2.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
 
         # Test when all rdi images are uploaded successfully
         mock_bulk_upload_images.reset_mock()

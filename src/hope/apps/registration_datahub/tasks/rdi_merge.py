@@ -161,7 +161,7 @@ class RdiMergeTask:
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
                         ).deduplicate_individuals_against_population(individuals)
-                        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
+                        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                         golden_record_duplicates = Individual.objects.filter(
                             registration_data_import=obj_hct,
                             deduplication_golden_record_status=DUPLICATE,
