@@ -230,7 +230,7 @@ class RegistrationDataImportViewSet(
                     individuals_to_remove,
                     BiometricDeduplicationService.INDIVIDUALS_REFUSED,
                 )
-            except DeduplicationEngineAPI.DeduplicationEngineAPIError:
+            except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
                 logging.exception("RDI refuse, error while sending status to Deduplication Engine")
 
         log_create(

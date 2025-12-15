@@ -227,8 +227,8 @@ class RdiMergeTask:
                                     individuals_to_merge_ids,
                                     BiometricDeduplicationService.INDIVIDUALS_MERGED,
                                 )
-                            except DeduplicationEngineAPI.DeduplicationEngineAPIError:
-                                logging.exception("RDI refuse, error while sending status to Deduplication Engine")
+                            except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
+                                logging.exception("RDI merge, error while sending status to Deduplication Engine")
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
