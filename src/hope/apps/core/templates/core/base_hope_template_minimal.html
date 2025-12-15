@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HOPE</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'base_hope_template.css' %}">
+    <style>
+        #muiProgramMenu {
+            max-height: 320px;
+            overflow-y: auto;
+            min-width: 320px;
+            z-index: 1000;
+        }
+        #muiProgramOptions {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .mui-autocomplete-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mui-autocomplete-option.selected {
+            background: #e6f7ee;
+        }
+        .mui-status-badge {
+            margin-left: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .mui-status-active {
+            background: #e6f7ee;
+            color: #2e7d32;
+        }
+        .mui-status-draft {
+            background: #eee;
+            color: #888;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+    {% block extrahead %}{% endblock extrahead %}
+</head>
+<body>
+    <div class="root">
+        <div class="drawer" id="drawer">
+            <div class="drawer-header" style="background: #A1E4B6; display: flex; align-items: center; justify-content: center; padding-left: 0; height: 64px; min-height: 64px; max-height: 64px;">
+                <img class="drawer-logo" src="{% static 'logo-transparent.png' %}" alt="HOPE Logo" id="drawerLogo" />
+            </div>
+            <div id="inactiveBar" class="inactive-bar" style="display:none;">Programme Inactive</div>
+            <nav class="drawer-nav" style="margin-top: 8px;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li>
+                        <a id="programmeManagementLink" href="#" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; padding: 12px 24px; color: #233944; text-decoration: none; font-weight: 500; border-radius: 6px; transition: background 0.2s;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px;"><rect width="24" height="24" fill="none"/><rect x="4" y="6" width="16" height="2" rx="1" fill="#233944"/><rect x="4" y="11" width="16" height="2" rx="1" fill="#233944"/><rect x="4" y="16" width="16" height="2" rx="1" fill="#233944"/></svg>
+                            Programmes
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <div class="appbar-minimal" style="height: 64px; min-height: 64px; max-height: 64px; background: #fff; border-bottom: 1px solid #e0e0e0;"></div>
+            <div class="main-content" style="background: #FFF; color: #233944; flex: 1;">
+                {% block main %}
+                {% endblock main %}
+            </div>
+        </div>
+    </div>
+    <script>
+        // Only keep drawer collapse/restore and color logic
+        function matchColorToWindowOrigin() {
+            const url = window.location.href;
+            if (window.location.hostname === 'localhost') {
+                return '#A1E4B6';
+            }
+            if (url.includes('trn')) {
+                return '#BF360C';
+            }
+            if (url.includes('stg')) {
+                return '#673AB7';
+            }
+            if (url.includes('dev')) {
+                return '#00796B';
+            }
+            if (url.includes('eph')) {
+                return '#CC00EF';
+            }
+            if (url.includes('tst')) {
+                return '#EF00A7';
+            }
+            return '#00ADEF';
+        }
+        document.documentElement.style.setProperty('--drawer-header-bg', matchColorToWindowOrigin());
+        // Logo transparency logic
+        const drawerLogo = document.getElementById('drawerLogo');
+        if (drawerLogo && matchColorToWindowOrigin() !== '#00ADEF') {
+            drawerLogo.style.opacity = '0.7';
+        }
+        // Collapse/restore logic
+        const drawer = document.getElementById('drawer');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const chevron = document.getElementById('chevron');
+        let mini = false;
+        function toggleDrawer() {
+            mini = !mini;
+            if (mini) {
+                drawer.classList.add('mini');
+                document.querySelector('.main-content').classList.add('mini');
+                document.getElementById('chevronPath').setAttribute('d', 'M11 9L16 14L11 19');
+            } else {
+                drawer.classList.remove('mini');
+                document.querySelector('.main-content').classList.remove('mini');
+                document.getElementById('chevronPath').setAttribute('d', 'M17 9L12 14L17 19');
+            }
+        }
+        if (collapseBtn) collapseBtn.addEventListener('click', toggleDrawer);
+        if (drawer.classList.contains('mini')) {
+            document.querySelector('.main-content').classList.add('mini');
+            document.getElementById('chevronPath').setAttribute('d', 'M11 9L16 14L11 19');
+            mini = true;
+        }
+        // Programme Inactive bar logic (simulate, can be dynamic)
+        const showInactiveBar = false;
+        if (showInactiveBar) {
+            document.getElementById('inactiveBar').style.display = '';
+        }
+        // Programme Management link domain logic
+        (function() {
+            const link = document.getElementById('programmeManagementLink');
+            if (!link) return;
+            const domainMap = [
+                { backend: 'localhost', frontend: 'http://localhost:3000' },
+                { backend: 'dev-hope.unitst.org', frontend: 'https://dev-hope.unitst.org' },
+                { backend: 'trn-hope.unitst.org', frontend: 'https://trn-hope.unitst.org' },
+                { backend: 'stg-hope.unitst.org', frontend: 'https://stg-hope.unitst.org' },
+                { backend: 'hope.unitst.org', frontend: 'https://hope.unitst.org' },
+            ];
+            const host = window.location.hostname;
+            let frontendUrl = 'https://hope.unitst.org'; // default
+            for (const entry of domainMap) {
+                if (host === entry.backend || host.endsWith('.' + entry.backend)) {
+                    frontendUrl = entry.frontend;
+                    break;
+                }
+            }
+            link.href = frontendUrl;
+        })();
+    </script>
+</body>
+</html>

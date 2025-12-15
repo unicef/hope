@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+{% extends "core/base_hope_template_minimal.html" %}
 {% load i18n static %}
 
 {% block extrahead %}
@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static 'generic_import/css/upload.css' %}">
 {% endblock extrahead %}
 
-{% block content %}
+{% block main %}
 <div class="generic-import-container">
     <h1 class="generic-import-title">{% translate "Generic Import - Upload File" %}</h1>
 
@@ -328,4 +328,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock content %}
+{% endblock main %}
