@@ -322,7 +322,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         "hope.apps.registration_datahub.services"
         ".biometric_deduplication"
         ".BiometricDeduplicationService"
-        ".report_refused_individuals"
+        ".report_individuals_status"
     )
     @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
     def test_refuse_rdi(
@@ -1021,7 +1021,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         "hope.apps.registration_datahub.services"
         ".biometric_deduplication"
         ".BiometricDeduplicationService"
-        ".report_refused_individuals"
+        ".report_individuals_status"
     )
     @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
     def test_permission_checks_refuse(

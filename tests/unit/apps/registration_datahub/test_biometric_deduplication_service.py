@@ -825,10 +825,10 @@ class BiometricDeduplicationServiceTest(TestCase):
             str(self.program.deduplication_set_id),
         )
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_refused_individuals")
+    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
     def test_report_withdrawn(self, mock_report_withdrawn: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-        service.report_refused_individuals(str(self.program.deduplication_set_id), ["abc"])
+        service.report_individuals_status(str(self.program.deduplication_set_id), ["abc"])
         mock_report_withdrawn.assert_called_once_with(
             str(self.program.deduplication_set_id),
             ["abc"],
