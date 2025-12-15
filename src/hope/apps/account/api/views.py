@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from constance import config
+from django.contrib.auth.models import Group
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -9,7 +10,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -17,6 +18,8 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hope.api.caches import etag_decorator
 from hope.apps.account.api.caches import UserListKeyConstructor
 from hope.apps.account.api.serializers import (
+    GroupDetailSerializer,
+    GroupListSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
     UserChoicesSerializer,
@@ -197,3 +200,19 @@ class UserViewSet(
 
         choices_data = Partner.get_partners_for_program_as_choices(business_area.id, program.id if program else None)
         return Response(to_choice_object(choices_data))
+
+
+class GroupViewSet(
+    SerializerActionMixin,
+    CountActionMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    BaseViewSet,
+):
+    permission_classes = [IsAuthenticated]
+    queryset = Group.objects.all().prefetch_related("permissions", "permissions__content_type")
+    serializer_classes_by_action = {
+        "list": GroupListSerializer,
+        "retrieve": GroupDetailSerializer,
+    }
+    filter_backends = (OrderingFilter,)
