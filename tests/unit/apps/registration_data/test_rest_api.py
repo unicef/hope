@@ -80,6 +80,20 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert resp.data == {"message": "Deduplication process started"}
         mock_deduplication_engine_process.assert_called_once_with(str(self.program.id))
 
+        RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+        resp = self.client.post(url, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json() == ["Deduplication is already in progress for some RDIs"]
+
+        self.program.biometric_deduplication_enabled = False
+        self.program.deduplication_set_id = None
+        self.program.save()
+        resp = self.client.post(url, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json() == ["Biometric deduplication is not enabled for this program"]
+
     @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
         self.client.force_authenticate(user=self.user)
