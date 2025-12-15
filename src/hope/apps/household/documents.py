@@ -4,13 +4,8 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
-from hope.apps.household.models import (
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
+from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
-from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
@@ -23,21 +22,17 @@ from jsoneditor.forms import JSONEditor
 import requests
 
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
-from hope.apps.account.models import Partner, RoleAssignment
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.apps.household.models import DocumentType
 from hope.apps.payment.forms import AcceptanceProcessThresholdForm
-from hope.apps.payment.models import AcceptanceProcessThreshold
 from hope.apps.utils.security import is_root
+from hope.models import AcceptanceProcessThreshold, BusinessArea, DocumentType, Partner, RoleAssignment
 
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.contrib.admin import ModelAdmin
-    from django.db.models.query import QuerySet
-
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +151,6 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin,
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
@@ -191,7 +185,7 @@ class BusinessAreaAdmin(
         "is_accountability_applicable",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
-    filter_horizontal = ("countries", "partners", "payment_countries")
+    filter_horizontal = ("countries", "payment_countries")
 
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))

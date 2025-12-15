@@ -19,20 +19,25 @@ from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
+)
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    Area,
+    AreaType,
+    BusinessArea,
     DocumentType,
+    ImportData,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
+    country as geo_models,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.registration_data.models import ImportData, RegistrationDataImport
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -84,11 +89,11 @@ class TestRdiKoboCreateTask(TestCase):
 
         country = geo_models.Country.objects.first()
 
-        admin1_type = geo_models.AreaType.objects.create(name="Bakool", area_level=1, country=country)
-        admin1 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
+        admin1_type = AreaType.objects.create(name="Bakool", area_level=1, country=country)
+        admin1 = Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
-        admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
-        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
+        admin2_type = AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
+        Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(

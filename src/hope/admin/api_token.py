@@ -14,14 +14,12 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
-from hope.api.models import APIToken
-from hope.apps.account.models import ChoiceArrayField
-from hope.apps.core.models import BusinessArea
+from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.utils.security import is_root
+from hope.models import APIToken, BusinessArea
 
 if TYPE_CHECKING:
     from uuid import UUID
-
 
 TOKEN_INFO_EMAIL = """
 Dear {friendly_name},

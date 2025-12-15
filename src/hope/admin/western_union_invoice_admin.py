@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 from django.utils.html import format_html
 
-from hope.apps.payment.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
+from hope.models import WesternUnionInvoice, WesternUnionPaymentPlanReport
 
 
 class WesternUnionPaymentPlanReportInline(admin.TabularInline):

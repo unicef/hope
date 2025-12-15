@@ -20,7 +20,6 @@ from extras.test_utils.factories.payment import (
     create_payment_verification_plan_with_status,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
@@ -30,9 +29,7 @@ from hope.apps.dashboard.services import (
     get_fertility_rate,
     get_pwd_count_expression,
 )
-from hope.apps.household.models import Household
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import BusinessArea, Household, Payment, PaymentPlan, Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),

@@ -1,34 +1,36 @@
 import base64
 from dataclasses import dataclass
 import logging
+import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hope.apps.geo.models import Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Country,
     DocumentType,
     Household,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
 
-def get_photo_from_stream(stream: str | None) -> SimpleUploadedFile | None:
+def get_photo_from_stream(stream: str | None, file_name_prefix: str = "") -> SimpleUploadedFile | None:
     if stream:
+        file_name = f"{file_name_prefix}{uuid.uuid4().hex}.png"
         base64_img_bytes = stream.encode("utf-8")
         decoded_image_data = base64.decodebytes(base64_img_bytes)
-        return SimpleUploadedFile("photo.png", decoded_image_data, content_type="image/png")
+        return SimpleUploadedFile(file_name, decoded_image_data, content_type="image/png")
 
     return None
 
@@ -64,13 +66,13 @@ DATA_PREFIX_SUFFIX = ";base64,"
 
 class PhotoMixin:
     @staticmethod
-    def get_photo(photo: str | None) -> SimpleUploadedFile | None:
+    def get_photo(photo: str | None, file_name_prefix: str = "") -> SimpleUploadedFile | None:
         if photo:
             if photo.startswith(DATA_PREFIX_PREFIX) and DATA_PREFIX_SUFFIX in photo:
                 data = photo[photo.index(DATA_PREFIX_SUFFIX) + len(DATA_PREFIX_SUFFIX) :]
             else:
                 data = photo
-            return get_photo_from_stream(data)
+            return get_photo_from_stream(data, file_name_prefix)
         return None
 
 

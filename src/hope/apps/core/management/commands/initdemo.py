@@ -90,8 +90,7 @@ from extras.test_utils.factories.program import (
 )
 from extras.test_utils.factories.registration_data import generate_rdi
 from extras.test_utils.factories.steficon import generate_rule_formulas
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
 

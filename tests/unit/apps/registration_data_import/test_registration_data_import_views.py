@@ -18,7 +18,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 
@@ -326,3 +326,4 @@ class TestRegistrationDataImportViews:
         assert response_json["erased"] is False
         assert response_json["import_date"] == "2022-01-01T00:00:00Z"
         assert response_json["total_households_count_with_valid_phone_no"] == 1
+        assert response_json["number_of_registered_individuals"] == 1
