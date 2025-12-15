@@ -8,7 +8,7 @@ from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.apps.program.models import Program, ProgramCycle
+from hope.models import Program, ProgramCycle
 
 
 class ProgramCycleFilter(UpdatedAtFilter):

@@ -8,12 +8,10 @@ from django.db import transaction
 
 from hope.apps.core.kobo.api import KoboAPI
 from hope.apps.core.kobo.common import count_population
-from hope.apps.core.models import BusinessArea
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import KoboImportData
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
+from hope.models import BusinessArea, KoboImportData, Program
 
 
 class PullKoboSubmissions:

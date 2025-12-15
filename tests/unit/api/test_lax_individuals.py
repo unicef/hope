@@ -17,18 +17,10 @@ from extras.test_utils.factories.payment import FinancialInstitutionFactory, gen
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
-    DISABLED,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NOT_DISABLED,
-    PendingDocument,
-    PendingIndividual,
-)
-from hope.apps.payment.models import AccountType, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
+from hope.models import AccountType, PendingAccount, PendingDocument, PendingIndividual, Program, RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 
@@ -308,7 +300,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
 
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         assert individual.photo is not None
-        assert individual.photo.name.startswith("photo")
+        assert individual.photo.name.startswith(self.program.programme_code)
         assert individual.photo.name.endswith(".png")
 
     def test_create_individual_with_document_image(self) -> None:
@@ -342,7 +334,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
         document = PendingDocument.objects.get(individual=individual)
         assert document.photo is not None
-        assert document.photo.name.startswith("photo")
+        assert document.photo.name.startswith(self.program.programme_code)
         assert document.photo.name.endswith(".png")
 
     def test_file_cleanup_on_failure(self) -> None:

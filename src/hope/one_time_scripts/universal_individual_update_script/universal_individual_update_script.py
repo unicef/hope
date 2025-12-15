@@ -1,26 +1,24 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.geo.models import Country
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import Document, DocumentType, Household, Individual
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.program.models import Program
+from hope.models import Household, Individual, Document, DocumentType, Account, AccountType, Country
 from hope.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
 
+if TYPE_CHECKING:
+    from hope.models import BusinessArea, Program
 
 class UniversalIndividualUpdateScript:
     def __init__(  # noqa
         self,
-        business_area: BusinessArea,
-        program: Program,
+        business_area: "BusinessArea",
+        program: "Program",
         file_path: str,
         household_fields: dict[str, tuple[str, Any, Any]] | None = None,
         individual_fields: dict[str, tuple[str, Any, Any]] | None = None,

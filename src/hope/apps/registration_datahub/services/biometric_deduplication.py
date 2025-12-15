@@ -6,18 +6,11 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.urls import reverse
 
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Individual,
-    PendingIndividual,
-)
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
 )
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
@@ -27,7 +20,14 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import (
+    DeduplicationEngineSimilarityPair,
+    Individual,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 

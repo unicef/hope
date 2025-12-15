@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import chunks
 from hope.apps.grievance.models import GrievanceTicket
@@ -15,24 +14,11 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.registration_data.models import (
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -46,8 +32,22 @@ from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.apps.utils.models import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models import (
+    Household,
+    HouseholdCollection,
+    Individual,
+    IndividualCollection,
+    KoboImportedSubmission,
+    PendingAccount,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
+    log_create,
+)
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +71,8 @@ class RdiMergeTask:
 
             household_ids_to_exclude = []
             for ids in chunks(household_ids, 1000):
-                households = PendingHousehold.objects.filter(id__in=ids)
-                for household in households:
+                households_chunks = PendingHousehold.objects.filter(id__in=ids)
+                for household in households_chunks:
                     collided_id = obj_hct.program.collision_detector.detect_collision(household)
                     if not collided_id:
                         continue

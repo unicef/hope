@@ -19,17 +19,18 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportFactory,
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.documents import IndividualDocumentAfghanistan
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from hope.models import (
+    Household,
     ImportData,
+    Individual,
     KoboImportData,
+    Program,
     RegistrationDataImport,
+    Role,
+    RoleAssignment,
+    SanctionList,
 )
-from hope.apps.sanction_list.models import SanctionList
 from unit.api.base import HOPEApiTestCase
 
 
@@ -44,6 +45,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             Permissions.RDI_REFUSE_IMPORT,
             Permissions.RDI_RERUN_DEDUPE,
             Permissions.RDI_IMPORT_DATA,
+            Permissions.RDI_WEBHOOK_DEDUPLICATION,
         ]
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
@@ -79,6 +81,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
     @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:registration-data:registration-data-imports-webhook-deduplication",
             args=["afghanistan", self.program.slug],

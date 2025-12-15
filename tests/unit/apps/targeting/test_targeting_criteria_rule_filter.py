@@ -23,13 +23,11 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.household.models import (
+from hope.apps.targeting.choices import FlexFieldClassification
+from hope.models import (
     Household,
     Individual,
-)
-from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import (
+    PeriodicFieldData,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,

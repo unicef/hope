@@ -32,7 +32,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
         from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             deduplicate_and_check_against_sanctions_list_task_single_individual,
         )
-        from hope.apps.household.models import Individual
+        from hope.models import Individual
 
         try:
             individual = Individual.objects.get(id=individual_id)

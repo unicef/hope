@@ -1,16 +1,16 @@
 from datetime import date
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import timezone_datetime
-from hope.apps.geo.models import Area
-from hope.apps.household.models import SEX_CHOICE
-from hope.apps.program.models import Program
+from hope.apps.household.const import SEX_CHOICE
+from hope.models import Area
 from hope.apps.utils.phone import is_valid_phone_number
 
+if TYPE_CHECKING:
+    from hope.models import Program, BusinessArea
 
 def handle_date_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: "BusinessArea", program: "Program"
 ) -> date | None:
     if value is None or value == "":
         return None
@@ -18,13 +18,13 @@ def handle_date_field(
 
 
 def handle_simple_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: "BusinessArea", program: "Program"
 ) -> Any:
     return value
 
 
 def handle_admin_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: "BusinessArea", program: "Program"
 ) -> Area | None:
     if value is None or value == "":
         return None
@@ -32,7 +32,7 @@ def handle_admin_field(
 
 
 def validate_admin(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: "BusinessArea", program: "Program"
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -46,8 +46,8 @@ def validate_string(
     value: Any,
     name: str,
     modified_object: Any,
-    business_area: BusinessArea,
-    program: Program,
+    business_area: "BusinessArea",
+    program: "Program",
 ) -> str | None:
     return None
 
@@ -56,8 +56,8 @@ def validate_date(
     value: Any,
     name: str,
     modified_object: Any,
-    business_area: BusinessArea,
-    program: Program,
+    business_area: "BusinessArea",
+    program: "Program",
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -72,8 +72,8 @@ def validate_phone_number(
     value: Any,
     name: str,
     modified_object: Any,
-    business_area: BusinessArea,
-    program: Program,
+    business_area: "BusinessArea",
+    program: "Program",
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -87,8 +87,8 @@ def validate_sex(
     value: Any,
     name: str,
     modified_object: Any,
-    business_area: BusinessArea,
-    program: Program,
+    business_area: "BusinessArea",
+    program: "Program",
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -102,7 +102,7 @@ def validate_flex_field_string(
     value: Any,
     name: str,
     modified_object: Any,
-    business_area: BusinessArea,
-    program: Program,
+    business_area: "BusinessArea",
+    program: "Program",
 ) -> str | None:
     return None

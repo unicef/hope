@@ -7,7 +7,6 @@ import {
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import camelCase from 'lodash/camelCase';
 import { removeIdPropertyFromObjects } from './helpers';
-import { CategoryB41Enum } from '@restgenerated/models/CategoryB41Enum';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -21,7 +20,7 @@ export const replaceLabels = (text, _beneficiaryGroup) => {
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
 
-export function isShowIssueType(category: string | CategoryB41Enum): boolean {
+export function isShowIssueType(category: any): boolean {
   const cat = category?.toString();
   return (
     cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
