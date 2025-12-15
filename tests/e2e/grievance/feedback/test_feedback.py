@@ -18,11 +18,17 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import HOST, Household
-from hope.apps.program.models import BeneficiaryGroup, Program
+from hope.models import (
+    HOST,
+    Area,
+    BeneficiaryGroup,
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    Household,
+    Program,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -179,7 +185,6 @@ class TestSmokeFeedback:
         assert page_feedback_details.text_category in page_feedback_details.get_category().text
         assert page_feedback_details.text_issue_type in page_feedback_details.get_issue_type().text
         page_feedback_details.get_household_id()
-        page_feedback_details.get_individual_id()
         page_feedback_details.get_created_by()
         page_feedback_details.get_date_created()
         page_feedback_details.get_last_modified_date()
@@ -241,7 +246,6 @@ class TestFeedback:
         assert page_feedback_details.text_category in page_feedback_details.get_category().text
         assert issue_type in page_feedback_details.get_issue_type().text
         assert "-" in page_feedback_details.get_household_id().text
-        assert "-" in page_feedback_details.get_individual_id().text
         assert "-" in page_feedback_details.get_programme().text
         assert "Test" in page_feedback_details.get_description().text
         page_feedback_details.get_last_modified_date()
@@ -276,7 +280,6 @@ class TestFeedback:
         assert page_feedback_details.text_category in page_feedback_details.get_category().text
         assert issue_type in page_feedback_details.get_issue_type().text
         assert "-" in page_feedback_details.get_household_id().text
-        assert "-" in page_feedback_details.get_individual_id().text
         assert "-" in page_feedback_details.get_programme().text
         assert "Test" in page_feedback_details.get_description().text
         page_feedback_details.get_last_modified_date()

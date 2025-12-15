@@ -3,7 +3,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from hope.api.models import Grant
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
@@ -94,51 +94,47 @@ class APIAreaTests(HOPEApiTestCase):
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_1_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_1_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": self.area_2_area_type_1.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_2_area_type_1.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_1_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_1_area_type_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": self.area_2_area_type_2.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_2_area_type_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_1_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_1_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": self.area_2_area_type_afg_2.updated_at.isoformat(timespec="microseconds").replace(
-                "+00:00", "Z"
-            ),
+            "updated_at": self.area_2_area_type_afg_2.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } in response_json
         assert {
             "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
             "area_type": str(self.area_type_other.id),
-            "updated_at": self.area_other.updated_at.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+            "updated_at": self.area_other.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         } not in response_json

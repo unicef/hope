@@ -23,9 +23,6 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
-from hope.apps.household.models import Individual, PendingIndividual
-from hope.apps.payment.models import Payment
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
@@ -33,6 +30,7 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.apps.utils.security import is_root
+from hope.models import Individual, Payment, PendingIndividual, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -243,13 +241,13 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 number_of_households = rdi.households.count()
                 number_of_individuals = rdi.individuals.count()
                 number_of_household_selections = Payment.objects.filter(
-                    parent__household__registration_data_import=rdi,
+                    household__registration_data_import=rdi,
                 ).count()
                 return confirm_action(
                     self,
                     request,
                     self.delete_rdi,
-                    f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    message=f"""<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                     <h3>Deleting the RDI will also result in the removal of related households,
                      individuals, and their associated grievance tickets.</h3>
                     <h3>Consequently, these households will no longer be part of any Target Population,
@@ -258,7 +256,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     <h4>This action will result in removing: {number_of_households} Households,
                     {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
                     """,
-                    "Successfully executed",
+                    success_message="Successfully executed",
                 )
         except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)

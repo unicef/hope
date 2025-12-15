@@ -11,8 +11,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory, PDUOnlineEditSentBackCommentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
-from hope.apps.program.models import Program
+from hope.models import PDUOnlineEdit, Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -132,7 +131,7 @@ class TestPDUOnlineEditDetail:
         assert result["name"] == self.pdu_edit.name
         assert result["number_of_records"] == self.pdu_edit.number_of_records
         assert result["created_by"] == self.pdu_edit.created_by.get_full_name()
-        assert result["created_at"] == f"{self.pdu_edit.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+        assert result["created_at"] == f"{self.pdu_edit.created_at:%Y-%m-%dT%H:%M:%SZ}"
         assert result["status"] == self.pdu_edit.status
         assert result["status_display"] == self.pdu_edit.get_status_display()
         assert result["is_authorized"] is False
@@ -142,7 +141,7 @@ class TestPDUOnlineEditDetail:
         assert result["sent_back_comment"] == {
             "comment": self.pdu_edit.sent_back_comment.comment,
             "created_by": self.pdu_edit.sent_back_comment.created_by.get_full_name(),
-            "created_at": f"{self.pdu_edit.sent_back_comment.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "created_at": f"{self.pdu_edit.sent_back_comment.created_at:%Y-%m-%dT%H:%M:%SZ}",
         }
         assert result["edit_data"] == self.pdu_edit.edit_data
         assert result["authorized_users"] == [

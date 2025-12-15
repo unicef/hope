@@ -5,9 +5,12 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import Signal, receiver
 
-from hope.apps.account.models import Partner, Role, RoleAssignment
 from hope.apps.account.permissions import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-from hope.apps.core.models import BusinessArea, DataCollectingType
+from hope.models.business_area import BusinessArea
+from hope.models.data_collecting_type import DataCollectingType
+from hope.models.partner import Partner
+from hope.models.role import Role
+from hope.models.role_assignment import RoleAssignment
 
 post_bulk_update = Signal()
 post_bulk_create = Signal()

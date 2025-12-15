@@ -11,20 +11,19 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     HEAD,
     MALE,
     OTHER,
     SON_DAUGHTER,
     WIFE_HUSBAND,
-    XlsxUpdateFile,
 )
 from hope.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
+from hope.models import BusinessArea, XlsxUpdateFile
 
 
 def valid_file() -> File:

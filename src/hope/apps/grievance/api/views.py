@@ -43,7 +43,6 @@ from hope.apps.account.permissions import (
     check_permissions,
     has_creator_or_owner_permission,
 )
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
@@ -55,7 +54,6 @@ from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.api.serializers import FieldAttributeSerializer
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
@@ -83,7 +81,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
-from hope.apps.grievance.filters import GrievanceTicketFilter
+from hope.apps.grievance.filters import GrievanceTicketFilter, GrievanceTicketOfficeSearchFilter
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -111,8 +109,9 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.apps.household.models import HEAD, Household, IndividualRoleInHousehold
+from hope.apps.household.const import HEAD
 from hope.apps.utils.exceptions import log_and_raise
+from hope.models import FlexibleAttribute, Household, IndividualRoleInHousehold, log_create
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
@@ -481,7 +480,7 @@ class GrievanceTicketGlobalViewSet(
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = GrievanceTicketFilter
+    filterset_class = GrievanceTicketOfficeSearchFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
     program_model_field_is_many = True
@@ -494,6 +493,8 @@ class GrievanceTicketGlobalViewSet(
             to_prefetch.append(key)
             if "household" in value:
                 to_prefetch.append(f"{key}__{value['household']}")
+            if "individual" in value:
+                to_prefetch.append(f"{key}__{value['individual']}")
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
         return (

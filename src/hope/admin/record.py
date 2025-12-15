@@ -6,8 +6,8 @@ from admin_extra_buttons.decorators import button
 from adminactions.mass_update import mass_update
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
-from adminfilters.json import JsonFieldFilter
-from adminfilters.numbers import NumberFilter
+from adminfilters.json_filter import JsonFieldFilter
+from adminfilters.num import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages
@@ -24,7 +24,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hope.contrib.aurora.models import Record, Registration
@@ -33,6 +32,7 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
+from hope.models import RegistrationDataImport
 
 
 class StatusFilter(ChoicesFieldComboFilter):

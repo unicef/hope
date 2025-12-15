@@ -26,7 +26,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deepUnderscore,
   isPartnerVisible,
-  mapPartnerChoicesWithoutUnicef,
+  mapPartnerChoicesFromChoicesWithoutUnicef,
   showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
@@ -34,7 +34,7 @@ import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -62,14 +62,13 @@ const DuplicateProgramPage = (): ReactElement => {
     },
   });
 
-  const { data: treeData, isLoading: treeLoading } =
-    useQuery<AreaTree[]>({
-      queryKey: ['allAreasTree', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: treeData, isLoading: treeLoading } = useQuery<AreaTree[]>({
+    queryKey: ['allAreasTree', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
@@ -362,7 +361,7 @@ const DuplicateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+        const mappedPartnerChoices = mapPartnerChoicesFromChoicesWithoutUnicef(
           userPartnerChoices,
           values.partners,
         );
@@ -383,8 +382,8 @@ const DuplicateProgramPage = (): ReactElement => {
             <PageHeader
               title={`${t('Copy of Programme')}: (${name})`}
               breadCrumbs={
-                hasPermissionInModule(
-                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                hasPermissions(
+                  PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
                   permissions,
                 )
                   ? breadCrumbsItems

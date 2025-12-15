@@ -30,8 +30,6 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import AdminAreaLimitedTo
-from hope.apps.core.models import BusinessArea, FlexibleAttribute as Core_FlexibleAttribute
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -49,14 +47,19 @@ from hope.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
     validate_individual_for_need_adjudication,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.models import (
+    AdminAreaLimitedTo,
+    BusinessArea,
+    DeduplicationEngineSimilarityPair,
     Document,
+    FlexibleAttribute as Core_FlexibleAttribute,
     IndividualRoleInHousehold,
 )
-from hope.apps.registration_data.models import DeduplicationEngineSimilarityPair
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 
 class FlexibleAttribute:
@@ -83,7 +86,7 @@ class TestGrievanceUtils(TestCase):
         to_phone_number_str(data, "other_field_name")
         assert data["phone_number"] == 123456789
 
-    @patch("hope.apps.core.models.FlexibleAttribute.objects.filter")
+    @patch("hope.models.flexible_attribute.FlexibleAttribute.objects.filter")
     def test_cast_flex_fields(self, mock_filter: Any) -> None:
         mock_filter.side_effect = [
             MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
@@ -123,6 +126,18 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValueError, match="time data 'invalid' does not match format '%Y-%m-%d'"):
             verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
+
+    def test_verify_flex_fields_with_int(self) -> None:
+        test_int_i_f = Core_FlexibleAttribute(
+            type=Core_FlexibleAttribute.INTEGER,
+            name="test_int_i_f",
+            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "int123"},
+        )
+        test_int_i_f.save()
+
+        verify_flex_fields({"test_int_i_f": "1233"}, "individuals")
+        verify_flex_fields({"test_int_i_f": 1233}, "individuals")
 
     def test_handle_role(self) -> None:
         create_afghanistan()

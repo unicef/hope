@@ -11,10 +11,9 @@ from rest_framework.test import APIClient, APIRequestFactory
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
-from hope.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
+from hope.models import PaymentPlan, PaymentPlanSupportingDocument, Role, RoleAssignment
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):
@@ -62,16 +61,6 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         assert not serializer.is_valid()
         assert "file" in serializer.errors
         assert serializer.errors["file"][0] == "Unsupported file type."
-
-    def test_validate_payment_plan_status_failure(self) -> None:
-        self.payment_plan.status = PaymentPlan.Status.FINISHED
-        self.payment_plan.save(update_fields=["status"])
-        serializer = PaymentPlanSupportingDocumentSerializer(
-            data={"file": self.file, "title": "test"}, context=self.context
-        )
-        assert not serializer.is_valid()
-        assert "non_field_errors" in serializer.errors
-        assert serializer.errors["non_field_errors"][0] == "Payment plan must be within status OPEN or LOCKED."
 
     def test_validate_file_limit_failure(self) -> None:
         # create 10 documents

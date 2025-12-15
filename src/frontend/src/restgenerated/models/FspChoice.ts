@@ -5,6 +5,5 @@
 export type FspChoice = {
     readonly id: string;
     name: string;
-    readonly hasConfig: boolean;
 };
 

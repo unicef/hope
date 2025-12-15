@@ -4,7 +4,9 @@ import uuid
 
 from django.core.cache import cache
 from django.test import TestCase
+import pytest
 import requests
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -21,11 +23,11 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.geo.models import Area
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hope.apps.payment.services.verification_plan_crud_services import does_payment_record_have_right_hoh_phone_number
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hope.models import Area, PaymentVerification, PaymentVerificationPlan
 
 
 class TestPhoneNumberVerification(TestCase):
@@ -34,15 +36,15 @@ class TestPhoneNumberVerification(TestCase):
         super().setUpTestData()
         cls.afghanistan = create_afghanistan()
         cls.payment_record_amount = 110
-        user = UserFactory()
+        cls.user = UserFactory()
 
-        program = ProgramFactory(business_area=cls.afghanistan)
-        program.admin_areas.set(Area.objects.order_by("?")[:3])
+        cls.program = ProgramFactory(business_area=cls.afghanistan)
+        cls.program.admin_areas.set(Area.objects.order_by("?")[:3])
 
         payment_plan = PaymentPlanFactory(
-            program_cycle=program.cycles.first(),
+            program_cycle=cls.program.cycles.first(),
             business_area=cls.afghanistan,
-            created_by=user,
+            created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -52,17 +54,17 @@ class TestPhoneNumberVerification(TestCase):
         )
         cls.individuals = []
         # set cache key
-        version_key = f":1:afghanistan:1:{program.slug}:registration_data_import_list"
+        version_key = f":1:afghanistan:1:{cls.program.slug}:registration_data_import_list"
         cache.set(version_key, 1)
         for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=cls.afghanistan, program=program
+                imported_by=cls.user, business_area=cls.afghanistan, program=cls.program
             )
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
                     "admin2": Area.objects.order_by("?").first(),
-                    "program": program,
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import,
@@ -96,7 +98,7 @@ class TestPhoneNumberVerification(TestCase):
         other_payment_plan = PaymentPlanFactory(
             program_cycle=other_program.cycles.first(),
             business_area=cls.afghanistan,
-            created_by=user,
+            created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=other_payment_plan)
         other_payment_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -107,7 +109,7 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_individuals = []
         for _ in range(cls.payment_record_amount):
             other_registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=cls.afghanistan, program=other_program
+                imported_by=cls.user, business_area=cls.afghanistan, program=other_program
             )
             other_household, other_individuals = create_household(
                 {
@@ -283,3 +285,40 @@ class TestPhoneNumberVerification(TestCase):
             ).count()
             == self.payment_record_amount
         )
+
+    def test_export_xlsx_validation_if_no_records(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.program.cycles.first(),
+            business_area=self.afghanistan,
+            created_by=self.user,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        pvp = PaymentVerificationPlanFactory(
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+            payment_plan=payment_plan,
+        )
+        assert pvp.payment_record_verifications.count() == 0
+        service = VerificationPlanStatusChangeServices(pvp)
+
+        with pytest.raises(ValidationError) as e:
+            service.export_xlsx(str(self.user.pk))
+        assert "Not possible to export with no records" in str(e.value)
+
+    def test_does_payment_record_have_right_hoh_phone_number(self) -> None:
+        payment_without_hoh = PaymentFactory(
+            parent=self.payment_plan,
+            head_of_household=None,
+        )
+
+        result = does_payment_record_have_right_hoh_phone_number(payment_without_hoh)
+        assert result is False
+
+        hoh = self.individuals[0]
+        assert hoh.phone_no_valid is True
+        payment_with_hoh_phone_no_valid = PaymentFactory(
+            parent=self.payment_plan,
+            head_of_household=hoh,
+        )
+        result = does_payment_record_have_right_hoh_phone_number(payment_with_hoh_phone_no_valid)
+        assert result is True

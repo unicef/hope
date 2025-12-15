@@ -1,4 +1,7 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
@@ -16,18 +19,18 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import (
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
     Document,
     Household,
     Individual,
+    Payment,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import Payment
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -96,6 +99,9 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
 
 @pytest.mark.elasticsearch
 class RegistrationDataImportAdminDeleteMergedTest(TestCase):
+    def setUp(self):
+        self.client.login(username=self.admin_user.username, password="password")
+
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -149,6 +155,9 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         cls.payment = PaymentFactory(household=cls.household, parent=cls.payment_plan)
         rebuild_search_index()
 
+        User = get_user_model()  # noqa
+        cls.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
+
     def test_delete_merged_rdi(self) -> None:
         assert GrievanceTicket.objects.count() == 2
         assert TicketIndividualDataUpdateDetails.objects.count() == 1
@@ -160,6 +169,13 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         assert Household.objects.count() == 1
         assert Individual.objects.count() == 2
         assert Document.objects.count() == 1
+
+        url = reverse("admin:registration_data_registrationdataimport_delete_merged_rdi", args=[self.rdi.pk])
+        response = self.client.get(url, HTTP_X_ROOT_TOKEN=settings.ROOT_TOKEN)
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
+        assert "This action will result in removing:" in content
 
         RegistrationDataImportAdmin._delete_merged_rdi(self.rdi)
 

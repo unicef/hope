@@ -1,5 +1,4 @@
 from typing import Any, List
-from unittest.mock import patch
 
 import pytest
 from rest_framework import status
@@ -15,11 +14,8 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.payment import PaymentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import PeriodicFieldData
-from hope.apps.payment.models import Payment
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program
+from hope.models import Payment, PDUOnlineEdit, PeriodicFieldData, Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -121,7 +117,6 @@ class TestPDUOnlineEditCreate:
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
         )
 
-    @patch("hope.apps.periodic_data_update.models.PDUOnlineEdit.queue")
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -131,7 +126,6 @@ class TestPDUOnlineEditCreate:
     )
     def test_create_pdu_online_edit_permissions(
         self,
-        task_mock: Any,
         permissions: List,
         expected_status: int,
         create_user_role_with_permissions: Any,
@@ -221,7 +215,7 @@ class TestPDUOnlineEditCreate:
         assert response_json_detail["name"] is None
         assert response_json_detail["number_of_records"] == 1
         assert response_json_detail["created_by"] == self.user.get_full_name()
-        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+        assert response_json_detail["created_at"] == f"{pdu_online_edit.created_at:%Y-%m-%dT%H:%M:%SZ}"
         assert response_json_detail["status"] == PDUOnlineEdit.Status.NEW
         assert response_json_detail["status_display"] == PDUOnlineEdit.Status.NEW.label
         assert response_json_detail["is_authorized"] is False

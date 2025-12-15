@@ -1,6 +1,5 @@
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import * as Yup from 'yup';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -16,35 +15,32 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  Stepper,
+  Button,
+  FormHelperText,
   Step,
   StepLabel,
-  FormHelperText,
+  Stepper,
   Typography,
-  Button,
 } from '@mui/material';
-import { Grid, Box } from '@mui/system';
+import { Box, Grid } from '@mui/system';
 import { RestService } from '@restgenerated/index';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
-import { Formik, Field } from 'formik';
-import { ReactElement, useState, ReactNode } from 'react';
+import { Field, Formik } from 'formik';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, Link } from 'react-router-dom';
-import {
-  hasPermissions,
-  PERMISSIONS,
-  hasPermissionInModule,
-} from 'src/config/permissions';
+import { Link, useNavigate } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
 
@@ -150,7 +146,7 @@ function CreateFeedbackPage(): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const steps = [
@@ -300,8 +296,8 @@ function CreateFeedbackPage(): ReactElement {
             <PageHeader
               title="New Feedback"
               breadCrumbs={
-                hasPermissionInModule(
-                  'GRIEVANCES_FEEDBACK_VIEW_LIST',
+                hasPermissions(
+                  PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
                   permissions,
                 )
                   ? breadCrumbsItems
@@ -370,21 +366,28 @@ function CreateFeedbackPage(): ReactElement {
                                   'Select correctly answered questions (minimum 5)',
                                 )}
                               </Typography> */}
-                              <Box py={4}>
-                                <Typography variant="subtitle2">
-                                  {t(
-                                    `${beneficiaryGroup?.groupLabel} Questionnaire`,
-                                  )}
-                                </Typography>
+                              {!isSocialDctType && (
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} programSlug={
-                                    values.selectedHousehold?.programSlug ||
-                                    values.selectedHousehold?.program?.slug ||
-                                    values.selectedIndividual?.program?.slug ||
-                                    values.selectedIndividual?.programSlug
-                                  } />
+                                  <Typography variant="subtitle2">
+                                    {t(
+                                      `${beneficiaryGroup?.groupLabel} Questionnaire`,
+                                    )}
+                                  </Typography>
+                                  <Box py={4}>
+                                    <HouseholdQuestionnaire
+                                      values={values}
+                                      programSlug={
+                                        values.selectedHousehold?.programSlug ||
+                                        values.selectedHousehold?.program
+                                          ?.slug ||
+                                        values.selectedIndividual?.program
+                                          ?.slug ||
+                                        values.selectedIndividual?.programSlug
+                                      }
+                                    />
+                                  </Box>
                                 </Box>
-                              </Box>
+                              )}
                               <Typography variant="subtitle2">
                                 {t(
                                   `${beneficiaryGroup?.memberLabel} Questionnaire`,
@@ -427,13 +430,17 @@ function CreateFeedbackPage(): ReactElement {
                                       : 'Negative Feedback'}
                                   </LabelizedField>
                                 </Grid>
-                                <Grid size={{ xs: 6 }}>
-                                  <LabelizedField
-                                    label={t(`${beneficiaryGroup?.groupLabel}`)}
-                                  >
-                                    {values.selectedHousehold?.unicefId}
-                                  </LabelizedField>
-                                </Grid>
+                                {!isSocialDctType && (
+                                  <Grid size={{ xs: 6 }}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.groupLabel}`,
+                                      )}
+                                    >
+                                      {values.selectedHousehold?.unicefId}
+                                    </LabelizedField>
+                                  </Grid>
+                                )}
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField
                                     label={t(
@@ -460,12 +467,6 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
-                              {touched.description &&
-                                typeof errors.description === 'string' && (
-                                  <FormHelperText error>
-                                    {errors.description}
-                                  </FormHelperText>
-                                )}
                             </Grid>
                             <Grid size={{ xs: 12 }}>
                               <Field

@@ -4,8 +4,7 @@ from typing import Any
 
 from constance import config
 from django.db import transaction
-from django.db.models import Prefetch, QuerySet
-from django.db.models.expressions import RawSQL
+from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -28,7 +27,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -38,9 +36,7 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
@@ -67,17 +63,25 @@ from hope.apps.program.celery_tasks import (
     copy_program_task,
     populate_pdu_new_rounds_with_null_values_task,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.program.signals import program_closed_signal, program_opened_signal
 from hope.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
+from hope.models import (
+    BeneficiaryGroup,
+    FlexibleAttribute,
+    Payment,
+    PaymentPlan,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
+    log_create,
+)
+from hope.apps.program.signals import program_closed_signal, program_opened_signal
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +134,15 @@ class ProgramViewSet(
         user = self.request.user
 
         allowed_programs = user.get_program_ids_for_business_area(self.business_area.id)
-        status_rank_raw_sql = RawSQL('"program_program"."status_rank"', [])
+
+        status_rank_expr = Case(
+            When(status="DRAFT", then=Value(1)),
+            When(status="ACTIVE", then=Value(2)),
+            When(status="FINISHED", then=Value(3)),
+            default=Value(99),
+            output_field=IntegerField(),
+        )
+
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
@@ -144,7 +156,8 @@ class ProgramViewSet(
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
-            .order_by(status_rank_raw_sql, "start_date")
+            .annotate(status_rank=status_rank_expr)
+            .order_by("status_rank", "start_date")
         )
 
     @etag_decorator(ProgramListKeyConstructor)

@@ -19,7 +19,7 @@ from extras.test_utils.factories.household import create_household_and_individua
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.program.models import Program
+from hope.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -361,7 +361,7 @@ class TestGrievanceTicketList:
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
                     "area_type": grievance_ticket.admin2.area_type.id,
-                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
                 }
                 if grievance_ticket.admin2
                 else None
@@ -387,7 +387,7 @@ class TestGrievanceTicketList:
             assert grievance_ticket_result["priority"] == grievance_ticket.priority
             assert grievance_ticket_result["urgency"] == grievance_ticket.urgency
             assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
-            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%SZ}"
 
             # total_days
             if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
@@ -593,7 +593,7 @@ class TestGrievanceTicketList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 9
-            assert len(ctx.captured_queries) == 60
+            assert len(ctx.captured_queries) == 62
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -615,7 +615,7 @@ class TestGrievanceTicketList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 55
+            assert len(ctx.captured_queries) == 57
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -626,7 +626,7 @@ class TestGrievanceTicketList:
             assert len(response.json()["results"]) == 6
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 49
+            assert len(ctx.captured_queries) == 51
 
         ticket.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -641,7 +641,7 @@ class TestGrievanceTicketList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 38
+            assert len(ctx.captured_queries) == 40
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:

@@ -15,14 +15,13 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.models import AUNT_UNCLE, BROTHER_SISTER, HEAD
-from hope.apps.program.models import Program
+from hope.apps.household.const import AUNT_UNCLE, BROTHER_SISTER, HEAD
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import Program, country as geo_models
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Individual
+    from hope.models import Individual
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 pytestmark = pytest.mark.django_db()

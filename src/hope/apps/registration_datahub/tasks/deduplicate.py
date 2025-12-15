@@ -10,12 +10,9 @@ from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import to_dict
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
@@ -23,21 +20,26 @@ from hope.apps.household.models import (
     SIMILAR_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Document,
-    Household,
-    Individual,
-    PendingIndividual,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.apps.household.documents import IndividualDocument, get_individual_doc
 from hope.apps.registration_datahub.utils import post_process_dedupe_results
 from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
     wait_until_es_healthy,
 )
-from hope.apps.utils.models import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models import (
+    BusinessArea,
+    Document,
+    Household,
+    Individual,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+    log_create,
+)
+from hope.models.utils import MergeStatusModel
 
 log = logging.getLogger(__name__)
 
@@ -195,8 +197,6 @@ class DeduplicateTask:
         registration_data_import: RegistrationDataImport,
     ) -> list[str]:
         program = registration_data_import.program
-        if not program.collision_detection_enabled or not program.collision_detector:
-            return []
         households = Household.all_objects.filter(registration_data_import=registration_data_import).iterator(1000)
         households_to_exclude = [
             household.id for household in households if program.collision_detector.detect_collision(household)

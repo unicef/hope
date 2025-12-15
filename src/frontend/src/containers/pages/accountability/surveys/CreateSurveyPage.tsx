@@ -141,22 +141,25 @@ const CreateSurveyPage = (): ReactElement => {
   };
 
   const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
-  const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.WHOLE_PROGRAM_POPULATION);
+  const [selectedTab, setSelectedTab] = useState(
+    SurveyTabsValues.WHOLE_PROGRAM_POPULATION,
+  );
   const [selectedSampleSizeType, setSelectedSampleSizeType] = useState(0);
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const { data: adminAreasData, isLoading: adminAreasLoading } =
-    useQuery<AreaList[]>({
-      queryKey: ['adminAreas', businessArea, { level: 2 }],
-      queryFn: async () => {
-        return RestService.restBusinessAreasGeoAreasList({
-          businessAreaSlug: businessArea,
-          level: 2,
-        });
-      },
-      enabled: !!businessArea,
-    });
+  const { data: adminAreasData, isLoading: adminAreasLoading } = useQuery<
+    AreaList[]
+  >({
+    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryFn: async () => {
+      return RestService.restBusinessAreasGeoAreasList({
+        businessAreaSlug: businessArea,
+        level: 2,
+      });
+    },
+    enabled: !!businessArea,
+  });
 
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
   const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
@@ -449,7 +452,7 @@ const CreateSurveyPage = (): ReactElement => {
           }
         }}
       >
-        {({ submitForm, setValues, values, setFieldValue, errors }) => (
+        {({ submitForm, setValues, values, errors }) => (
           <>
             <PageHeader
               title={`${'New Survey'} > ${matchCategory(category)}`}
@@ -486,9 +489,7 @@ const CreateSurveyPage = (): ReactElement => {
                 {activeStep === SurveySteps.LookUp && (
                   <Box display="flex" flexDirection="column">
                     <LookUpSelectionSurveys
-                      businessArea={businessArea}
                       values={values}
-                      onValueChange={setFieldValue}
                       setValues={setValues}
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}
@@ -757,14 +758,22 @@ const CreateSurveyPage = (): ReactElement => {
                           0
                         )}
                       </Box>
-                      {!sampleSizeLoading && (sampleSizesData?.excluded_recipients_count || sampleSizesData?.excludedRecipientsCount) &&
-                        (sampleSizesData.excluded_recipients_count > 0 || sampleSizesData.excludedRecipientsCount > 0) && (
-                        <Box mt={1} color="text.secondary">
-                          <Typography variant="body2">
-                            {t('Excluded due to missing/invalid phone number')}: {sampleSizesData.excluded_recipients_count || sampleSizesData.excludedRecipientsCount}
-                          </Typography>
-                        </Box>
-                      )}
+                      {!sampleSizeLoading &&
+                        (sampleSizesData?.excluded_recipients_count ||
+                          sampleSizesData?.excludedRecipientsCount) &&
+                        (sampleSizesData.excluded_recipients_count > 0 ||
+                          sampleSizesData.excludedRecipientsCount > 0) && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">
+                              {t(
+                                'Excluded due to missing/invalid phone number',
+                              )}
+                              :{' '}
+                              {sampleSizesData.excluded_recipients_count ||
+                                sampleSizesData.excludedRecipientsCount}
+                            </Typography>
+                          </Box>
+                        )}
                     </Grid>
                   </>
                 )}

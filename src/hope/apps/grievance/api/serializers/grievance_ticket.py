@@ -3,12 +3,9 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
-from hope.apps.account.models import Partner, User
-from hope.apps.accountability.models import Feedback
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaListSerializer
-from hope.apps.geo.models import Area
 from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
@@ -18,19 +15,24 @@ from hope.apps.household.api.serializers.household import HouseholdForTicketSeri
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
+    IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
-    ROLE_CHOICE,
+from hope.apps.household.const import ROLE_CHOICE
+from hope.apps.payment.api.serializers import PaymentSmallSerializer
+from hope.apps.program.api.serializers import ProgramSmallSerializer
+from hope.models import (
+    Area,
     Document,
     DocumentType,
+    Feedback,
     Household,
     Individual,
     IndividualIdentity,
+    Partner,
+    Payment,
+    Program,
+    User,
 )
-from hope.apps.payment.api.serializers import PaymentSmallSerializer
-from hope.apps.payment.models import Payment
-from hope.apps.program.api.serializers import ProgramSmallSerializer
-from hope.apps.program.models import Program
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -111,6 +113,7 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
     programs = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer(source="ticket_details.household", allow_null=True)
+    individual = IndividualSmallSerializer(source="ticket_details.individual", allow_null=True)
     admin = serializers.CharField(source="admin2.name", default="")
     admin2 = AreaListSerializer()
     assigned_to = UserSerializer()
@@ -126,6 +129,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "status",
             "programs",
             "household",
+            "individual",
             "admin",
             "admin2",
             "assigned_to",
@@ -173,7 +177,6 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "description",
             "language",
             "area",
-            "individual",
             "payment_record",
             "linked_tickets",
             "existing_tickets",

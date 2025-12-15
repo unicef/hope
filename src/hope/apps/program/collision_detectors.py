@@ -5,18 +5,17 @@ from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
-from hope.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hope.models.household import Household
+from hope.models.individual import Individual
+from hope.models.individual_role_in_household import IndividualRoleInHousehold
 
-# only for typing purposes
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import Program
 
 
 class AbstractCollisionDetector:
     def __init__(self, context: "Program"):
         self.program = context
-        if not self.program.collision_detection_enabled:
-            raise ValueError("Collision detection is not enabled for this program")  # pragma: no cover
 
     def detect_collision(self, household: Household) -> str | None:
         raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
@@ -187,6 +186,15 @@ class AbstractCollisionDetector:
         destination.__class__.objects.filter(pk=destination.id).update(**data)
 
 
+class NoopCollisionDetector(AbstractCollisionDetector):
+    def detect_collision(self, household: Household) -> str | None:
+        pass
+
+    @atomic
+    def update_household(self, household_to_merge: Household) -> None:
+        pass
+
+
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def __init__(self, context: "Program"):
         super().__init__(context)
@@ -326,3 +334,4 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
 collision_detectors_registry.append(IdentificationKeyCollisionDetector)
+collision_detectors_registry.append(NoopCollisionDetector)

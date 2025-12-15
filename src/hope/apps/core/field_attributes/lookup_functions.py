@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_ELECTORAL_CARD,
@@ -13,7 +13,7 @@ from hope.apps.household.models import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.household.models import Individual
+    from hope.models import Individual
 
 
 def get_birth_certificate_no(individual: "Individual") -> str:

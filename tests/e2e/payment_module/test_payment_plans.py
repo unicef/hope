@@ -10,7 +10,6 @@ import pytest
 from pytz import utc
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
 
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
@@ -35,22 +34,24 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import DataCollectingType
-from hope.apps.payment.models import (
+from hope.models import (
+    BeneficiaryGroup,
+    DataCollectingType,
     DeliveryMechanism,
     FinancialServiceProvider,
     PaymentPlan,
+    Program,
+    ProgramCycle,
+    Rule,
+    User,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db()
 
 
 def find_file(
     file_name: str,
-    search_in_dir: str = settings.DOWNLOAD_DIRECTORY,
+    search_in_dir: str = "",
     number_of_ties: int = 1,
 ) -> str:
     for _ in range(number_of_ties):

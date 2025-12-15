@@ -7,20 +7,19 @@ from django.utils import timezone
 import openpyxl
 from openpyxl.cell import Cell
 
-from hope.apps.core.models import FileTemp
-from hope.apps.payment.models import Payment, PaymentPlan
 from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
+from hope.models import FileTemp, Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.apps.account.models import User
+    from hope.models import User
 
 Row = tuple[Cell]
 
@@ -157,7 +156,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=converted_entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
+                    exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 return Payment(

@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import (
     TicketAddIndividualDetails,
     TicketDeleteHouseholdDetails,
@@ -21,10 +20,9 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
 )
-from hope.apps.household.models import Individual
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
-from hope.apps.program.models import Program
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
+from hope.models import BusinessArea, Individual, Program
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -145,8 +143,10 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     unicef_id = serializers.CharField()
 
     def get_photo(self, obj: Any) -> str | None:
-        individual = Individual.all_objects.filter(id=obj.get("id")).first()
-        return individual.photo.url if individual and individual.photo else None
+        if not (ind_id := obj.get("id")):
+            return ""
+        individual = Individual.all_objects.filter(id=ind_id).first()
+        return individual.photo.url if individual and individual.photo else ""
 
 
 class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):

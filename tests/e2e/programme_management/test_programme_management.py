@@ -21,9 +21,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import Partner
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.program.models import BeneficiaryGroup, Program
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -106,6 +104,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        screenshot_path: str,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -134,7 +133,7 @@ class TestProgrammeManagement:
         # 3rd step (Partners)
         page_programme_management.get_button_save().click()
         # Check Details page
-        page_programme_management.screenshot("test_create_programme", file_path="./")
+        page_programme_management.screenshot(screenshot_path, "test_create_programme")
         page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
         assert "DRAFT" in page_programme_details.get_program_status().text
         assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
@@ -170,6 +169,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        screenshot_path: str,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -203,7 +203,7 @@ class TestProgrammeManagement:
         page_programme_management.get_button_save().click()
         # Check Details page
         page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        page_programme_details.screenshot("0", file_path="./")
+        page_programme_details.screenshot(screenshot_path, "0")
         assert "DRAFT" in page_programme_details.get_program_status().text
         assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
         assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
@@ -758,6 +758,7 @@ class TestManualCalendar:
         create_programs: None,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        screenshot_path: str,
     ) -> None:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
@@ -841,7 +842,7 @@ class TestManualCalendar:
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"
         )
         assert len(partner_name_elements_new) == 3
-        page_programme_details.screenshot("partner_name_elements_new.png")
+        page_programme_details.screenshot(screenshot_path, "partner_name_elements_new.png")
         assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)

@@ -7,14 +7,13 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.household.models import Individual
 from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from hope.apps.utils.exceptions import log_and_raise
+from hope.models import Individual, PaymentVerification, PaymentVerificationPlan
 
 
 class VerificationPlanStatusChangeServices:
@@ -197,6 +196,8 @@ class VerificationPlanStatusChangeServices:
             raise ValidationError("Exporting xlsx file is already started. Please wait")
         if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
             raise ValidationError("Xlsx file is already created")
+        if self.payment_verification_plan.payment_record_verifications.count() == 0:
+            raise ValidationError("Not possible to export with no records")
 
         self.payment_verification_plan.xlsx_file_exporting = True
         self.payment_verification_plan.save()

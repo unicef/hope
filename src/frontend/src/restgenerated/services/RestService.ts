@@ -176,7 +176,7 @@ export class RestService {
         lang,
     }: {
         format?: 'json' | 'yaml',
-        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
+        lang?: 'af' | 'ar' | 'ar-dz' | 'ast' | 'az' | 'be' | 'bg' | 'bn' | 'br' | 'bs' | 'ca' | 'ckb' | 'cs' | 'cy' | 'da' | 'de' | 'dsb' | 'el' | 'en' | 'en-au' | 'en-gb' | 'eo' | 'es' | 'es-ar' | 'es-co' | 'es-mx' | 'es-ni' | 'es-ve' | 'et' | 'eu' | 'fa' | 'fi' | 'fr' | 'fy' | 'ga' | 'gd' | 'gl' | 'he' | 'hi' | 'hr' | 'hsb' | 'hu' | 'hy' | 'ia' | 'id' | 'ig' | 'io' | 'is' | 'it' | 'ja' | 'ka' | 'kab' | 'kk' | 'km' | 'kn' | 'ko' | 'ky' | 'lb' | 'lt' | 'lv' | 'mk' | 'ml' | 'mn' | 'mr' | 'ms' | 'my' | 'nb' | 'ne' | 'nl' | 'nn' | 'os' | 'pa' | 'pl' | 'pt' | 'pt-br' | 'ro' | 'ru' | 'sk' | 'sl' | 'sq' | 'sr' | 'sr-latn' | 'sv' | 'sw' | 'ta' | 'te' | 'tg' | 'th' | 'tk' | 'tr' | 'tt' | 'udm' | 'ug' | 'uk' | 'ur' | 'uz' | 'vi' | 'zh-hans' | 'zh-hant',
     }): CancelablePromise<Record<string, any>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1143,10 +1143,6 @@ export class RestService {
         });
     }
     /**
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     *
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-     * variable token_permission.
      * @returns AreaList
      * @throws ApiError
      */
@@ -1169,7 +1165,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -1193,10 +1189,6 @@ export class RestService {
         });
     }
     /**
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     *
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to
-     * variable token_permission.
      * @returns AreaTree
      * @throws ApiError
      */
@@ -1219,7 +1211,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -1273,6 +1265,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -1353,6 +1346,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -1457,6 +1451,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -1505,6 +1500,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -1586,6 +1582,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -1690,6 +1687,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -2044,6 +2042,7 @@ export class RestService {
         isActiveProgram,
         isCrossArea,
         issueType,
+        officeSearch,
         orderBy,
         ordering,
         paymentRecordIds,
@@ -2119,6 +2118,7 @@ export class RestService {
          * * `25` - Biometrics Similarity
          */
         issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        officeSearch?: string,
         /**
          * Ordering
          *
@@ -2218,6 +2218,7 @@ export class RestService {
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
+                'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_record_ids': paymentRecordIds,
@@ -2264,6 +2265,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -2344,6 +2346,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -2448,6 +2451,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -2495,6 +2499,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -2575,6 +2580,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -2679,6 +2685,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -2727,6 +2734,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -2808,6 +2816,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -2912,6 +2921,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -2962,6 +2972,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -3043,6 +3054,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -3147,6 +3159,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -3197,6 +3210,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -3278,6 +3292,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -3382,6 +3397,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -3432,6 +3448,7 @@ export class RestService {
         isCrossArea,
         issueType,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -3513,6 +3530,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -3617,6 +3635,7 @@ export class RestService {
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -3683,6 +3702,7 @@ export class RestService {
         isActiveProgram,
         isCrossArea,
         issueType,
+        officeSearch,
         orderBy,
         ordering,
         paymentRecordIds,
@@ -3758,6 +3778,7 @@ export class RestService {
          * * `25` - Biometrics Similarity
          */
         issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        officeSearch?: string,
         /**
          * Ordering
          *
@@ -3857,6 +3878,7 @@ export class RestService {
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
+                'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'payment_record_ids': paymentRecordIds,
@@ -3911,6 +3933,7 @@ export class RestService {
         lastRegistrationDateBefore,
         limit,
         messageId,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -3952,6 +3975,7 @@ export class RestService {
          */
         limit?: number,
         messageId?: string,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4056,6 +4080,7 @@ export class RestService {
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
                 'message_id': messageId,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -4117,6 +4142,7 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         messageId,
+        officeSearch,
         orderBy,
         ordering,
         phoneNo,
@@ -4153,6 +4179,7 @@ export class RestService {
         lastRegistrationDateAfter?: string,
         lastRegistrationDateBefore?: string,
         messageId?: string,
+        officeSearch?: string,
         /**
          * Ordering
          *
@@ -4252,6 +4279,7 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'message_id': messageId,
+                'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'phone_no': phoneNo,
@@ -4322,6 +4350,7 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        officeSearch,
         offset,
         orderBy,
         ordering,
@@ -4360,6 +4389,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4445,6 +4475,7 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -4497,6 +4528,7 @@ export class RestService {
         isActiveProgram,
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
+        officeSearch,
         orderBy,
         ordering,
         program,
@@ -4530,6 +4562,7 @@ export class RestService {
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
         lastRegistrationDateBefore?: string,
+        officeSearch?: string,
         /**
          * Ordering
          *
@@ -4610,6 +4643,7 @@ export class RestService {
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
+                'office_search': officeSearch,
                 'order_by': orderBy,
                 'ordering': ordering,
                 'program': program,
@@ -4652,12 +4686,265 @@ export class RestService {
     }
     /**
      * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
+     * @returns PaginatedPaymentPlanListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlansList({
+        businessAreaSlug,
+        deliveryMechanism,
+        endDate,
+        fsp,
+        isFollowUp,
+        limit,
+        name,
+        officeSearch,
+        offset,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        startDate,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
+        updatedAtGte,
+        updatedAtLte,
+    }: {
+        businessAreaSlug: string,
+        deliveryMechanism?: Array<string>,
+        endDate?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        officeSearch?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        startDate?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
+         * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
+         */
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
+    }): CancelablePromise<PaginatedPaymentPlanListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plans/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'end_date': endDate,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'limit': limit,
+                'name': name,
+                'office_search': officeSearch,
+                'offset': offset,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'start_date': startDate,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasPaymentPlansCountRetrieve({
+        businessAreaSlug,
+        deliveryMechanism,
+        endDate,
+        fsp,
+        isFollowUp,
+        name,
+        officeSearch,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        startDate,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        totalEntitledQuantityUsdFrom,
+        totalEntitledQuantityUsdTo,
+        updatedAtGte,
+        updatedAtLte,
+    }: {
+        businessAreaSlug: string,
+        deliveryMechanism?: Array<string>,
+        endDate?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        name?: string,
+        officeSearch?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        startDate?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `ABORTED` - Aborted
+         * * `FINISHED` - Finished
+         * * `CLOSED` - Closed
+         */
+        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        totalEntitledQuantityUsdFrom?: number,
+        totalEntitledQuantityUsdTo?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/payment-plans/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'end_date': endDate,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'name': name,
+                'office_search': officeSearch,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'start_date': startDate,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
+                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
     public static restBusinessAreasPaymentsList({
         businessAreaSlug,
         limit,
+        officeSearch,
         offset,
         ordering,
     }: {
@@ -4666,6 +4953,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        officeSearch?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4683,6 +4971,7 @@ export class RestService {
             },
             query: {
                 'limit': limit,
+                'office_search': officeSearch,
                 'offset': offset,
                 'ordering': ordering,
             },
@@ -4713,9 +5002,11 @@ export class RestService {
      */
     public static restBusinessAreasPaymentsCountRetrieve({
         businessAreaSlug,
+        officeSearch,
         ordering,
     }: {
         businessAreaSlug: string,
+        officeSearch?: string,
         /**
          * Which field to use when ordering the results.
          */
@@ -4728,6 +5019,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'office_search': officeSearch,
                 'ordering': ordering,
             },
         });
@@ -12993,6 +13285,7 @@ export class RestService {
         programSlug,
         limit,
         offset,
+        ordering,
     }: {
         businessAreaSlug: string,
         /**
@@ -13008,6 +13301,7 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        ordering?: string,
     }): CancelablePromise<PaginatedPendingPaymentList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -13020,6 +13314,33 @@ export class RestService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/pending-payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
             },
         });
     }

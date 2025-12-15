@@ -1,8 +1,7 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.steficon.models import Rule, RuleCommit
+from hope.models import BusinessArea, Rule, RuleCommit
 
 
 class RuleFactory(DjangoModelFactory):

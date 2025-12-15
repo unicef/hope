@@ -4,19 +4,13 @@ import uuid
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from django.urls import reverse
 
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    Individual,
-    PendingIndividual,
-)
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
 )
 from hope.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
@@ -26,7 +20,14 @@ from hope.apps.registration_datahub.apis.deduplication_engine import (
     IgnoredFilenamesPair,
     SimilarityPair,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import (
+    DeduplicationEngineSimilarityPair,
+    Individual,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +44,13 @@ class BiometricDeduplicationService:
         self.api = DeduplicationEngineAPI()
 
     def create_deduplication_set(self, program: Program) -> str:
+        notification_url = reverse(
+            "api:registration-data:registration-data-imports-webhook-deduplication",
+            args=[program.business_area.slug, program.slug],
+        )
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.id),
-            notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
+            notification_url=f"https://{settings.DOMAIN_NAME}{notification_url}",
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
         deduplication_set_id = uuid.UUID(response_data["id"])

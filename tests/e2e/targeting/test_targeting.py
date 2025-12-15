@@ -35,34 +35,34 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.account.models import User
-from hope.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEARING,
     HOST,
     REFUGEE,
     ROLE_PRIMARY,
     SEEING,
-    Household,
-    Individual,
-)
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hope.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hope.apps.steficon.models import Rule
+from hope.models import (
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    PaymentPlan,
+    PeriodicFieldData,
+    Program,
+    ProgramCycle,
+    Rule,
+    User,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -511,7 +511,7 @@ class TestSmokeTargeting:
         assert "11" in page_targeting_details.get_label_targeted_individuals().text
         assert "Items Groups" in page_targeting_details.get_table_title().text
         expected_menu_items = [
-            "ID",
+            "Items Group ID",
             "Head of Items Group",
             "Items Group Size",
             "Administrative Level 2",
@@ -1084,6 +1084,7 @@ class TestTargeting:
         filters: Filters,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
+        screenshot_path: str,
     ) -> None:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
@@ -1093,9 +1094,9 @@ class TestTargeting:
         page_targeting_details.get_lock_button().click()
         page_targeting_details.get_lock_popup_button().click()
         page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.screenshot("targeting_locked.png")
+        page_targeting_details.screenshot(screenshot_path, "targeting_locked.png")
         page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.screenshot("targeting_lockedgetButtonMarkReady.png")
+        page_targeting_details.screenshot(screenshot_path, "targeting_lockedgetButtonMarkReady.png")
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 

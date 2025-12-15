@@ -17,10 +17,8 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import Partner
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import Partner, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 

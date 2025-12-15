@@ -19,19 +19,22 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.models import DataCollectingType, PeriodicFieldData
-from hope.apps.geo.models import Country as GeoCountry
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    Country as GeoCountry,
+    DataCollectingType,
+    ImportData,
+    PendingAccount,
     PendingHousehold,
     PendingIndividual,
+    PeriodicFieldData,
+    Program,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import ImportData
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
