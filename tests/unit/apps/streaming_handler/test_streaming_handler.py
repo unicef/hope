@@ -12,11 +12,11 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.geo.models import Country
 from hope.apps.payment.signals import payment_plan_approved_signal, payment_reconciled_signal
 from hope.apps.program.signals import program_closed_signal, program_opened_signal
 from hope.apps.registration_datahub.signals import rdi_merged
 from hope.apps.streaming_handler.hope_live import HopeLiveService
+from hope.models import Country
 
 pytestmark = pytest.mark.django_db
 
