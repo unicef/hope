@@ -71,6 +71,42 @@ class CreateRDITests(HOPEApiTestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
         assert "User with this email does not exist." in str(response.json())
 
+    def test_create_rdi_with_biometric_deduplication_enabled(self) -> None:
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_with_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_with_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+    def test_create_rdi_with_biometric_deduplication_disabled(self) -> None:
+        self.program.biometric_deduplication_enabled = False
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_without_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_without_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status is None
+
 
 class PushToRDITests(HOPEApiTestCase):
     databases = {"default"}
