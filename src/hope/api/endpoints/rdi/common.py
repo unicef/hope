@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hope.models import NOT_DISABLED, RegistrationDataImport
+from hope.models import NOT_DISABLED
 
 
 class NullableChoiceField(serializers.ChoiceField):
@@ -15,9 +15,3 @@ class DisabilityChoiceField(serializers.ChoiceField):
         if data == "":
             return NOT_DISABLED
         return super().to_internal_value(data)
-
-
-def mark_by_biometric_deduplication(rdi: RegistrationDataImport):
-    if rdi.program.biometric_deduplication_enabled:
-        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
-        rdi.save()
