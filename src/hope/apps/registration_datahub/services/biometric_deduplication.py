@@ -36,6 +36,8 @@ class BiometricDeduplicationService:
     GET_DUPLICATES_BATCH_SIZE = 100
     DEDUP_STATE_READY = "Ready"
     DEDUP_STATE_FAILED = "Failed"
+    INDIVIDUALS_REFUSED = "rejected"
+    INDIVIDUALS_MERGED = "merged"
 
     class BiometricDeduplicationServiceError(Exception):
         pass
@@ -104,33 +106,29 @@ class BiometricDeduplicationService:
         rdi.save(update_fields=["deduplication_engine_status"])
 
     def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
-        response_data, status = self.api.process_deduplication(deduplication_set_id)
-        if status == 409:
-            raise self.BiometricDeduplicationServiceError(
-                f"Deduplication is already in progress for deduplication set {deduplication_set_id}"
-            )
-        if status == 200:
-            rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
-
-        else:
-            logging.error(
-                f"Failed to process deduplication set {deduplication_set_id}. Response[{status}]: {response_data}"
-            )
+        try:
+            response_data, status = self.api.process_deduplication(deduplication_set_id)
+            if status in [409, 200]:  # 409 - deduplication already in progress
+                rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
+            else:
+                logging.error(
+                    f"Failed to process deduplication set {deduplication_set_id}. Response[{status}]: {response_data}"
+                )
+                rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+        except DeduplicationEngineAPI.DeduplicationEngineAPIError:
+            logging.exception(f"Failed to process deduplication set {deduplication_set_id}")
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
 
     def upload_and_process_deduplication_set(self, program: Program) -> None:
-        if not program.biometric_deduplication_enabled:
-            raise self.BiometricDeduplicationServiceError("Biometric deduplication is not enabled for this program")
-
         deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
         if not deduplication_set_id:
             with transaction.atomic():
-                deduplication_set_id = self.create_deduplication_set(program)
-
-        if RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
-        ).exists():
-            raise self.BiometricDeduplicationServiceError("Deduplication is already in progress for some RDIs")
+                try:
+                    deduplication_set_id = self.create_deduplication_set(program)
+                except DeduplicationEngineAPI.DeduplicationEngineAPIError:
+                    raise self.BiometricDeduplicationServiceError(
+                        f"Error creating deduplication set for program {program}"
+                    )
 
         pending_rdis = RegistrationDataImport.objects.filter(
             program=program,
@@ -139,26 +137,23 @@ class BiometricDeduplicationService:
                 RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
                 RegistrationDataImport.DEDUP_ENGINE_ERROR,
             ],
+            status=RegistrationDataImport.IN_REVIEW,
+        )
+
+        if not pending_rdis:
+            return
+
+        for rdi in pending_rdis:
+            self.upload_individuals(deduplication_set_id, rdi)
+
+        uploaded_rdis = RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
         ).exclude(
             status__in=[
                 RegistrationDataImport.REFUSED_IMPORT,
             ]
         )
-        for rdi in pending_rdis:
-            self.upload_individuals(deduplication_set_id, rdi)
-
-        all_uploaded = not pending_rdis.all().exists()  # refetch qs
-        if all_uploaded:
-            uploaded_rdis = RegistrationDataImport.objects.filter(
-                deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
-            ).exclude(
-                status__in=[
-                    RegistrationDataImport.REFUSED_IMPORT,
-                ]
-            )
-            self.process_deduplication_set(deduplication_set_id, uploaded_rdis)
-        else:
-            raise self.BiometricDeduplicationServiceError("Failed to upload images for all RDIs")
+        self.process_deduplication_set(deduplication_set_id, uploaded_rdis)
 
     def delete_deduplication_set(self, program: Program) -> None:
         if program.deduplication_set_id:
@@ -406,5 +401,8 @@ class BiometricDeduplicationService:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
         self.api.report_false_positive_duplicate(false_positive_pair, deduplication_set_id)
 
-    def report_refused_individuals(self, deduplication_set_id: str, individual_ids: list[str]) -> None:
-        self.api.report_refused_individuals(deduplication_set_id, individual_ids)
+    def report_individuals_status(self, deduplication_set_id: str, individual_ids: list[str], action: str) -> None:
+        self.api.report_individuals_status(
+            deduplication_set_id,
+            {"action": action, "targets": individual_ids},
+        )

@@ -110,6 +110,14 @@ class RegistrationDataImportViewSet(
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
     def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if not self.program.biometric_deduplication_enabled:
+            raise ValidationError("Biometric deduplication is not enabled for this program")
+
+        if RegistrationDataImport.objects.filter(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists():
+            raise ValidationError("Deduplication is already in progress for some RDIs")
+
         deduplication_engine_process.delay(str(self.program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
@@ -223,9 +231,10 @@ class RegistrationDataImportViewSet(
         )
 
         if rdi.program.biometric_deduplication_enabled and rdi.program.deduplication_set_id:
-            BiometricDeduplicationService().report_refused_individuals(
+            BiometricDeduplicationService().report_individuals_status(
                 str(rdi.program.deduplication_set_id),
                 individuals_to_remove,
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )
 
         log_create(

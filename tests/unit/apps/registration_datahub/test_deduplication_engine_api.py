@@ -179,7 +179,7 @@ class DeduplicationEngineApiTest(TestCase):
         deduplication_set_id = str(uuid.uuid4())
         post_mock.return_value = {}, 200
 
-        api.report_refused_individuals(
+        api.report_individuals_status(
             deduplication_set_id,
             ["abc", "def", "ghi"],
         )
