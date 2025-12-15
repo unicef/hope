@@ -14,7 +14,6 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
-    mark_by_biometric_deduplication,
 )
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
@@ -221,7 +220,6 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(data=request.data, many=True)
         if serializer.is_valid():
-            mark_by_biometric_deduplication(self.selected_rdi)
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 
             response = {
