@@ -315,11 +315,10 @@ class ProgramAdmin(
                     )
                     job = AsyncJob.objects.create(
                         program=program,
-                        file=file_temp,
                         owner=request.user,
                         type=AsyncJobModel.JobType.JOB_TASK,
                         action="hope.admin.program.bulk_upload_individuals_photos_action",
-                        config={},
+                        config={"file_id": str(file_temp.pk)},
                         description=f"Bulk upload individuals photos for program {program.pk}",
                     )
                     job.queue()
@@ -347,12 +346,14 @@ def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
     """
     job.errors = {}
 
-    if not job.file:
+    file_id = job.config.get("file_id")
+    file = FileTemp.objects.filter(pk=file_id).first()
+    if not file:
         job.errors = {"file": "This job requires the file."}
         job.save(update_fields=["errors"])
         raise ValueError("BulkUploadIndividualsPhotosJob requires a file.")
 
-    file_field = job.file.file
+    file_field = file.file
     invalid_filenames: list[str] = []
     missing_individuals: list[str] = []
     updated_count = 0
