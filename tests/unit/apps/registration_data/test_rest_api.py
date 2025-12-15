@@ -20,6 +20,7 @@ from extras.test_utils.factories.registration_data import (
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.household.documents import IndividualDocumentAfghanistan
 from hope.models import (
     Household,
     ImportData,
