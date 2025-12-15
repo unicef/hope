@@ -114,16 +114,6 @@ class Migration(migrations.Migration):
                 ("sentry_id", models.CharField(blank=True, max_length=255, null=True)),
                 ("errors", models.JSONField(blank=True, default=dict)),
                 (
-                    "file",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="async_jobs",
-                        to="core.filetemp",
-                    ),
-                ),
-                (
                     "owner",
                     models.ForeignKey(
                         blank=True,
