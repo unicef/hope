@@ -63,6 +63,7 @@ from hope.apps.program.celery_tasks import (
     copy_program_task,
     populate_pdu_new_rounds_with_null_values_task,
 )
+from hope.apps.program.signals import program_closed_signal, program_opened_signal
 from hope.apps.program.utils import (
     copy_program_object,
     create_program_partner_access,
@@ -81,7 +82,6 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
-from hope.apps.program.signals import program_closed_signal, program_opened_signal
 
 logger = logging.getLogger(__name__)
 

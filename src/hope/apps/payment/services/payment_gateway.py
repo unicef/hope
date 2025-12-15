@@ -11,6 +11,7 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
+from hope.apps.payment.signals import payment_reconciled_signal
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -28,11 +29,9 @@ from hope.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hope.apps.payment.signals import payment_reconciled_signal
 
 logger = logging.getLogger(__name__)
 
-from hope.apps.payment.signals import payment_reconciled_signal
 
 class FlexibleArgumentsDataclassMixin:
     @classmethod

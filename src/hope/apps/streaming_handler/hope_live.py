@@ -4,9 +4,7 @@ from flags.state import flag_state
 from streaming.manager import manager
 from streaming.utils import make_event
 
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Payment, PaymentPlan, Program, RegistrationDataImport
 
 
 class HopeLiveService:

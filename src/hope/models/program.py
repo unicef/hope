@@ -11,7 +11,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
