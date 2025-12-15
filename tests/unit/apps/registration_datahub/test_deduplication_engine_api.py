@@ -181,9 +181,16 @@ class DeduplicationEngineApiTest(TestCase):
 
         api.report_individuals_status(
             deduplication_set_id,
-            ["abc", "def", "ghi"],
+            {
+                "action": "approved",
+                "targets": ["abc", "def", "ghi"],
+            },
         )
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/refused/reference_pks/", ["abc", "def", "ghi"]
+            f"deduplication_sets/{deduplication_set_id}/approve_or_reject/",
+            {
+                "action": "approved",
+                "targets": ["abc", "def", "ghi"],
+            },
         )
