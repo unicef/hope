@@ -314,7 +314,7 @@ class DashboardCacheBase(Protocol):
             for hh in households_qs:
                 size_value = hh.get("size")
                 dct_type = hh.get("program__data_collecting_type__type")
-                is_sw_program = dct_type == "SOCIAL"
+                is_sw_program = dct_type == DataCollectingType.Type.SOCIAL
                 household_map[hh["id"]] = {
                     "size": 1 if is_sw_program or size_value is None else size_value,
                     "children_count": hh.get("children_count"),
