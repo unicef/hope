@@ -374,8 +374,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert rdi.refuse_reason == "Testing refuse endpoint"
 
         report_refused_individuals_mock.assert_called_once_with(
-            str(rdi.program.deduplication_set_id),
-            individuals_ids_to_remove,
+            str(rdi.program.deduplication_set_id), individuals_ids_to_remove, "rejected"
         )
         remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
             individuals_ids_to_remove, IndividualDocumentAfghanistan
