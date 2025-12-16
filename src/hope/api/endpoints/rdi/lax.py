@@ -16,7 +16,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
