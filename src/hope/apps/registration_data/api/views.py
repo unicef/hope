@@ -36,7 +36,6 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
@@ -224,14 +223,11 @@ class RegistrationDataImportViewSet(
         )
 
         if rdi.program.biometric_deduplication_enabled and rdi.program.deduplication_set_id:
-            try:
-                BiometricDeduplicationService().report_individuals_status(
-                    str(rdi.program.deduplication_set_id),
-                    individuals_to_remove,
-                    BiometricDeduplicationService.INDIVIDUALS_REFUSED,
-                )
-            except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
-                logging.exception("RDI refuse, error while sending status to Deduplication Engine")
+            BiometricDeduplicationService().report_individuals_status(
+                str(rdi.program.deduplication_set_id),
+                individuals_to_remove,
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,

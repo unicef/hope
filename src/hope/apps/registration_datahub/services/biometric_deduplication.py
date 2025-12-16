@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.urls import reverse
+from flags.state import flag_state
 
 from hope.apps.household.const import (
     DUPLICATE,
@@ -401,7 +402,13 @@ class BiometricDeduplicationService:
         self.api.report_false_positive_duplicate(false_positive_pair, deduplication_set_id)
 
     def report_individuals_status(self, deduplication_set_id: str, individual_ids: list[str], action: str) -> None:
-        self.api.report_individuals_status(
-            deduplication_set_id,
-            {"action": action, "targets": individual_ids},
-        )
+        if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
+            return
+
+        try:
+            self.api.report_individuals_status(
+                deduplication_set_id,
+                {"action": action, "targets": individual_ids},
+            )
+        except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
+            logging.exception(f"RDI {action}, error while sending Individuals status to Deduplication Engine")

@@ -8,6 +8,7 @@ from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
+from flags.models import FlagState
 from freezegun import freeze_time
 from parameterized import parameterized
 import pytest
@@ -531,6 +532,13 @@ class TestRdiMergeTask(TestCase):
         create_grievance_tickets_for_duplicates_mock: mock.Mock,
         report_individuals_status_mock: mock.Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
         program.deduplication_set_id = uuid.uuid4()

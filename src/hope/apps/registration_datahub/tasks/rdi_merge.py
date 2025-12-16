@@ -19,7 +19,6 @@ from hope.apps.household.const import (
     NEEDS_ADJUDICATION,
 )
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -221,14 +220,11 @@ class RdiMergeTask:
                         dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
 
                         if obj_hct.program.deduplication_set_id:
-                            try:
-                                dedupe_service.report_individuals_status(
-                                    str(obj_hct.program.deduplication_set_id),
-                                    individuals_to_merge_ids,
-                                    BiometricDeduplicationService.INDIVIDUALS_MERGED,
-                                )
-                            except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
-                                logging.exception("RDI merge, error while sending status to Deduplication Engine")
+                            dedupe_service.report_individuals_status(
+                                str(obj_hct.program.deduplication_set_id),
+                                individuals_to_merge_ids,
+                                BiometricDeduplicationService.INDIVIDUALS_MERGED,
+                            )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
