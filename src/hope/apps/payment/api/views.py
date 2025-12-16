@@ -47,6 +47,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PaymentVerificationRecordFilter,
     PendingPaymentFilter,
     TargetPopulationFilter,
 )
@@ -515,13 +516,9 @@ class PaymentVerificationViewSet(
         )
 
 
-class PaymentVerificationRecordViewSet(
-    CountActionMixin, ProgramMixin, SerializerActionMixin, PaymentPlanMixin, BaseViewSet
-):
+class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, SerializerActionMixin, BaseViewSet):
+    queryset = Payment.objects.all()
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.filter(
-        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -533,12 +530,18 @@ class PaymentVerificationRecordViewSet(
         "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
         "partial_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentVerificationRecordFilter
 
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
     def get_verification_record(self) -> PaymentVerificationPlan:
         return get_object_or_404(Payment, id=self.kwargs.get("pk"))
+
+    def get_queryset(self):
+        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
+        return payment_plan.eligible_payments.all()
 
     @extend_schema(
         responses={
@@ -547,14 +550,13 @@ class PaymentVerificationRecordViewSet(
     )
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Return list of verification records."""
-        payment_plan = self.get_object()
-        payments = payment_plan.eligible_payments.all()
-        page = self.paginate_queryset(payments)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(payments, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
