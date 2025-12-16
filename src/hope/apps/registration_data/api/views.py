@@ -129,7 +129,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
-        fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
+        fetch_biometric_deduplication_results_and_process.delay(program.slug)
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
