@@ -6,6 +6,7 @@ import uuid
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
+from flags.models import FlagState
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -346,6 +347,13 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
     def test_refuse_rdi(
         self, remove_elasticsearch_documents_by_matching_ids_moc: Any, report_refused_individuals_mock: Any
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         self.client.force_authenticate(user=self.user)
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,

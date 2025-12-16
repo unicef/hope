@@ -6,6 +6,7 @@ import uuid
 
 from django.conf import settings
 from django.test import TestCase
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -56,6 +57,12 @@ class BiometricDeduplicationServiceTest(TestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.program = ProgramFactory.create(biometric_deduplication_enabled=True, deduplication_set_id=uuid.uuid4())
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set")
     def test_create_deduplication_set(self, mock_create_deduplication_set: mock.Mock) -> None:
