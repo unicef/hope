@@ -104,7 +104,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        mock_fetch_dedup_results.assert_called_once_with(self.program.deduplication_set_id)
+        mock_fetch_dedup_results.assert_called_once_with(self.program.slug)
 
     def test_list_registrations(self) -> None:
         self.client.force_authenticate(user=self.user)

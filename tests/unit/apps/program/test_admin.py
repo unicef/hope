@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+from django.contrib.admin import AdminSite
+from django.test import RequestFactory
 from django.urls import reverse
 from django_webtest import WebTest
 import pytest
@@ -10,7 +14,10 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models import AdminAreaLimitedTo, Area, Partner, RoleAssignment
+from hope.models import AdminAreaLimitedTo, Area, Partner, Program, RoleAssignment
+
+from hope.admin.program import ProgramAdmin
+
 
 pytestmark = pytest.mark.django_db()
 
@@ -123,3 +130,74 @@ class ProgramAdminTest(WebTest):
             },
         )
         assert not AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
+
+    def test_save_model_existing_program_enable_biometric_deduplication_calls_service(self) -> None:
+        """
+        If obj.pk exists and biometric_deduplication_enabled changes False -> True,
+        admin should create the deduplication set and mark RDIs as pending.
+        """
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
+        obj = Program.objects.get(pk=program.pk)  # original in DB: False
+        obj.biometric_deduplication_enabled = True  # changed in memory: True
+
+        url = reverse(
+            "admin:program_program_change",
+            args=[program.pk],
+        )
+        request = RequestFactory().post(url)
+        request.user = self.user
+
+        admin_instance = ProgramAdmin(Program, AdminSite())
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            admin_instance.save_model(request, obj, None, True)
+            service = service_cls.return_value
+            service.mark_rdis_as_pending.assert_called_once_with(program)
+            service.delete_deduplication_set.assert_not_called()
+
+    def test_save_model_existing_program_disable_biometric_deduplication_calls_service(self) -> None:
+        """
+        If obj.pk exists and biometric_deduplication_enabled changes True -> False,
+        admin should delete the deduplication set.
+        """
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=True)
+        obj = Program.objects.get(pk=program.pk)
+        obj.biometric_deduplication_enabled = False
+
+        url = reverse(
+            "admin:program_program_change",
+            args=[program.pk],
+        )
+        request = RequestFactory().post(url)
+        request.user = self.user
+
+        admin_instance = ProgramAdmin(Program, AdminSite())
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            admin_instance.save_model(request, obj, None, True)
+
+            service = service_cls.return_value
+            service.delete_deduplication_set.assert_called_once_with(obj)
+            service.create_deduplication_set.assert_not_called()
+            service.mark_rdis_as_pending.assert_not_called()
+
+    def test_save_model_new_program_does_not_call_deduplication_service(self) -> None:
+        """
+        When creating a new program (no pk yet), deduplication hooks should not run.
+        """
+        obj = ProgramFactory.build(
+            business_area=self.business_area,
+            biometric_deduplication_enabled=True,
+        )
+        obj.pk = None  # emulate new unsaved instance
+
+        request = RequestFactory().post(reverse("admin:program_program_add"))
+        request.user = self.user
+        admin_instance = ProgramAdmin(Program, AdminSite())
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            admin_instance.save_model(request, obj, None, False)
+
+        service_cls.assert_not_called()
+        assert obj.pk is not None
+        assert Program.objects.filter(pk=obj.pk).exists()

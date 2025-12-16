@@ -34,12 +34,11 @@ class DeduplicationEngineApiTest(TestCase):
     def test_delete_deduplication_set(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
-        deduplication_set_id = str(uuid.uuid4())
         mock_delete.return_value = {}, 200
 
-        api.delete_deduplication_set(deduplication_set_id)
+        api.delete_deduplication_set("slug")
 
-        mock_delete.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
+        mock_delete.assert_called_once_with("deduplication_sets/slug/")
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_create_deduplication_set(self, mock_post: mock.Mock) -> None:
@@ -57,18 +56,16 @@ class DeduplicationEngineApiTest(TestCase):
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_deduplication_set(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         get_mock.return_value = {}, 200
 
-        api.get_deduplication_set(deduplication_set_id)
+        api.get_deduplication_set("slug")
 
-        get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
+        get_mock.assert_called_once_with("deduplication_sets/slug/")
 
     @override_config(DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE=1)
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         images = [
             DeduplicationImage(
                 reference_pk=str(uuid.uuid4()),
@@ -80,12 +77,12 @@ class DeduplicationEngineApiTest(TestCase):
 
         mock_post.side_effect = zip(batches, repeat(200))
 
-        assert api.bulk_upload_images(deduplication_set_id, images) == images
+        assert api.bulk_upload_images("slug", images) == images
 
         mock_post.assert_has_calls(
             [
                 call(
-                    f"deduplication_sets/{deduplication_set_id}/images_bulk/",
+                    "deduplication_sets/slug/images_bulk/",
                     [dataclasses.asdict(image) for image in batch],
                 )
                 for batch in batches
@@ -95,7 +92,6 @@ class DeduplicationEngineApiTest(TestCase):
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images_json_parsing_error(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         images = [
             DeduplicationImage(
                 reference_pk=str(uuid.uuid4()),
@@ -103,70 +99,65 @@ class DeduplicationEngineApiTest(TestCase):
             )
         ]
         mock_post.return_value = {}, 200
-        assert api.bulk_upload_images(deduplication_set_id, images) == []
+        assert api.bulk_upload_images("slug", images) == []
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
     def test_bulk_delete_images(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         mock_delete.return_value = {}, 200
 
-        api.bulk_delete_images(deduplication_set_id)
+        api.bulk_delete_images("slug")
 
-        mock_delete.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/images_bulk/")
+        mock_delete.assert_called_once_with("deduplication_sets/slug/images_bulk/")
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_duplicates(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         get_mock.return_value = {"results": []}, 200
 
-        api.get_duplicates(deduplication_set_id, [])
-        get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/", {"reference_pk": ""})
+        api.get_duplicates("slug", [])
+        get_mock.assert_called_once_with("deduplication_sets/slug/duplicates/", {"reference_pk": ""})
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_duplicates_paginated(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
 
         page1 = ({"next": "deduplication_sets/x/duplicates/?page=2", "results": [{"id": 1}, {"id": 2}]}, 200)
         page2 = ({"next": None, "results": [{"id": 3}, {"id": 4}]}, 200)
 
         get_mock.side_effect = [page1, page2]
 
-        results = api.get_duplicates(deduplication_set_id, ["1,2,3,4"])
+        results = api.get_duplicates("slug", ["1,2,3,4"])
         assert results == [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
 
-        get_mock.assert_any_call(f"deduplication_sets/{deduplication_set_id}/duplicates/", {"reference_pk": "1,2,3,4"})
+        get_mock.assert_any_call("deduplication_sets/slug/duplicates/", {"reference_pk": "1,2,3,4"})
         get_mock.assert_any_call("deduplication_sets/x/duplicates/?page=2", None)
         assert get_mock.call_count == 2
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_process_deduplication(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         post_mock.return_value = {}, 200
 
-        api.process_deduplication(deduplication_set_id)
+        api.process_deduplication("slug")
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/process/",
+            "deduplication_sets/slug/process/",
             validate_response=False,
         )
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_report_false_positive_duplicate(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         post_mock.return_value = {}, 200
 
         api.report_false_positive_duplicate(
             IgnoredFilenamesPair(first="123", second="456"),
-            deduplication_set_id,
+            "slug",
         )
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/ignored/filenames/",
+            "deduplication_sets/slug/ignored/filenames/",
             {
                 "first": "123",
                 "second": "456",

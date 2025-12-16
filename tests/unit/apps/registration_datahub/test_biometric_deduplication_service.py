@@ -56,7 +56,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
-        cls.program = ProgramFactory.create(biometric_deduplication_enabled=True, deduplication_set_id=uuid.uuid4())
+        cls.program = ProgramFactory.create(biometric_deduplication_enabled=True)
         FlagState.objects.get_or_create(
             name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
             condition="boolean",
@@ -68,13 +68,9 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_create_deduplication_set(self, mock_create_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
-        new_uuid = str(uuid.uuid4())
-        mock_create_deduplication_set.return_value = {"id": new_uuid}
-
         service.create_deduplication_set(self.program)
 
         self.program.refresh_from_db()
-        assert str(self.program.deduplication_set_id) == new_uuid
         notification_url = (
             f"https://{settings.DOMAIN_NAME}/api/rest/business-areas/"
             f"{self.program.business_area.slug}/programs/{self.program.slug}/"
@@ -90,8 +86,8 @@ class BiometricDeduplicationServiceTest(TestCase):
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
     def test_get_deduplication_set_results(self, mock_get_duplicates: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-        service.get_deduplication_set_results(self.program.deduplication_set_id, ["1", "2"])
-        mock_get_duplicates.assert_called_once_with(self.program.deduplication_set_id, ["1", "2"])
+        service.get_deduplication_set_results(self.program.slug, ["1", "2"])
+        mock_get_duplicates.assert_called_once_with(self.program.slug, ["1", "2"])
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
     def test_get_deduplication_set(self, mock_get_deduplication_set: mock.Mock) -> None:
@@ -99,10 +95,10 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         mock_get_deduplication_set.return_value = {"state": "Ready"}
 
-        data = service.get_deduplication_set(self.program.deduplication_set_id)
+        data = service.get_deduplication_set(self.program.slug)
         assert data == DeduplicationSetData(state="Ready", error="")
 
-        mock_get_deduplication_set.assert_called_once_with(self.program.deduplication_set_id)
+        mock_get_deduplication_set.assert_called_once_with(self.program.slug)
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_success(self, mock_bulk_upload_images: mock.Mock) -> None:
@@ -113,9 +109,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         individual = IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg")
 
         service = BiometricDeduplicationService()
-        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+        service.upload_individuals(str(self.program.slug), rdi)
         mock_bulk_upload_images.assert_called_once_with(
-            str(self.program.deduplication_set_id),
+            str(self.program.slug),
             [DeduplicationImage(reference_pk=str(individual.id), filename="some_photo.jpg")],
         )
 
@@ -124,7 +120,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_ERROR
         rdi.save()
-        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+        service.upload_individuals(str(self.program.slug), rdi)
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
 
@@ -138,7 +134,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg")
 
         service = BiometricDeduplicationService()
-        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+        service.upload_individuals(str(self.program.slug), rdi)
 
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
@@ -151,7 +147,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg", withdrawn=True)
 
         service = BiometricDeduplicationService()
-        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+        service.upload_individuals(str(self.program.slug), rdi)
 
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED
@@ -165,40 +161,28 @@ class BiometricDeduplicationServiceTest(TestCase):
         service = BiometricDeduplicationService()
 
         mock_process_deduplication.return_value = ({}, 200)
-        service.process_deduplication_set(str(self.program.deduplication_set_id), RegistrationDataImport.objects.all())
-        mock_process_deduplication.assert_called_once_with(str(self.program.deduplication_set_id))
+        service.process_deduplication_set(str(self.program.slug), RegistrationDataImport.objects.all())
+        mock_process_deduplication.assert_called_once_with(str(self.program.slug))
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
         mock_process_deduplication.return_value = ({}, 400)
-        service.process_deduplication_set(str(self.program.deduplication_set_id), RegistrationDataImport.objects.all())
+        service.process_deduplication_set(str(self.program.slug), RegistrationDataImport.objects.all())
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
 
         rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         rdi.save()
         mock_process_deduplication.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
-        service.process_deduplication_set(str(self.program.deduplication_set_id), RegistrationDataImport.objects.all())
+        service.process_deduplication_set(str(self.program.slug), RegistrationDataImport.objects.all())
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set")
     def test_delete_deduplication_set(self, mock_delete_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-
-        self.program.deduplication_set_id = None
-        self.program.save()
-
         service.delete_deduplication_set(self.program)
-        mock_delete_deduplication_set.assert_not_called()
-
-        deduplication_set_id = uuid.uuid4()
-        self.program.deduplication_set_id = deduplication_set_id
-        self.program.save()
-        service.delete_deduplication_set(self.program)
-        mock_delete_deduplication_set.assert_called_once_with(str(deduplication_set_id))
-        self.program.refresh_from_db()
-        assert self.program.deduplication_set_id is None
+        mock_delete_deduplication_set.assert_called_once_with(self.program.slug)
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
@@ -208,6 +192,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         mock_bulk_upload_images.return_value = ({}, 200)
         mock_process_deduplication.return_value = ({}, 200)
         service = BiometricDeduplicationService()
+
+        # No pending rdis
+        service.upload_and_process_deduplication_set(self.program)
 
         rdi_1 = RegistrationDataImportFactory(
             program=self.program,
@@ -296,7 +283,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.0, status_code="404"),
         ]
 
-        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
+        service.store_similarity_pairs(self.program.slug, similarity_pairs)
         assert self.program.deduplication_engine_similarity_pairs.count() == 0
 
     def test_store_results_1_individual(self) -> None:
@@ -581,8 +568,8 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.fetch_biometric_deduplication_results_and_process(self.program)
 
-        service.get_deduplication_set.assert_called_once_with(self.program.deduplication_set_id)
-        service.get_deduplication_set_results.assert_called_once_with(self.program.deduplication_set_id, [])
+        service.get_deduplication_set.assert_called_once_with(self.program.slug)
+        service.get_deduplication_set_results.assert_called_once_with(self.program.slug, [])
         service.store_similarity_pairs.assert_called_once_with(
             self.program,
             [
@@ -605,7 +592,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.fetch_biometric_deduplication_results_and_process(self.program)
 
-        service.get_deduplication_set.assert_called_once_with(self.program.deduplication_set_id)
+        service.get_deduplication_set.assert_called_once_with(self.program.slug)
         service.mark_rdis_as_error.assert_called_once_with(self.program)
 
     def test_fetch_biometric_deduplication_results_and_process_dedup_engine_error(self) -> None:
@@ -618,7 +605,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.fetch_biometric_deduplication_results_and_process(self.program)
 
-        service.get_deduplication_set.assert_called_once_with(self.program.deduplication_set_id)
+        service.get_deduplication_set.assert_called_once_with(self.program.slug)
         service.mark_rdis_as_error.assert_called_once_with(self.program)
 
     def test_store_rdis_deduplication_statistics(self) -> None:
@@ -827,17 +814,17 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_report_false_positive_duplicate(self, mock_report_false_positive_duplicate: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
-        service.report_false_positive_duplicate("123", "456", str(self.program.deduplication_set_id))
+        service.report_false_positive_duplicate("123", "456", self.program.slug)
         mock_report_false_positive_duplicate.assert_called_once_with(
             IgnoredFilenamesPair(first="123", second="456"),
-            str(self.program.deduplication_set_id),
+            self.program.slug,
         )
 
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
     def test_report_withdrawn(self, mock_report_withdrawn: mock.Mock) -> None:
         service = BiometricDeduplicationService()
-        service.report_individuals_status(str(self.program.deduplication_set_id), ["abc"], "refused")
+        service.report_individuals_status(str(self.program.slug), ["abc"], "refused")
         mock_report_withdrawn.assert_called_once_with(
-            str(self.program.deduplication_set_id),
+            str(self.program.slug),
             {"action": "refused", "targets": ["abc"]},
         )
