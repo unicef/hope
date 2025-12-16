@@ -118,6 +118,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
 
@@ -261,9 +262,13 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         external_individual_id = serializer.validated_data.pop("individual_id")
 
-        photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64, self.selected_rdi.program.programme_code)
-
+        photo_file = self.get_photo(
+            serializer.validated_data.pop("photo", None), self.selected_rdi.program.programme_code
+        )
+        disability_certificate_picture_file = self.get_photo(
+            serializer.validated_data.pop("disability_certificate_picture", None),
+            self.selected_rdi.program.programme_code,
+        )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
             self.selected_rdi.program, validated_data.get("flex_fields")
@@ -276,9 +281,17 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             business_area=self.selected_rdi.business_area,
             **validated_data,
         )
+
         if photo_file:
             ind.photo.save(photo_file.name, File(photo_file), save=False)
             self.staging.saved_file_fields.append(ind.photo)
+
+        if disability_certificate_picture_file:
+            ind.disability_certificate_picture.save(
+                disability_certificate_picture_file.name,
+                File(photo_file),
+                save=False,
+            )
 
         calculate_phone_numbers_validity(ind)
 
@@ -418,6 +431,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    consent_sign = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     head_of_household = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
@@ -477,7 +491,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxHouseholds(CreateLaxBaseView):
+class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     """API to import households with selected RDI."""
 
     @extend_schema(request=HouseholdSerializer(many=True))
@@ -504,7 +518,10 @@ class CreateLaxHouseholds(CreateLaxBaseView):
                 members: list[str] = data.pop("members", [])
                 primary_collector = data.pop("primary_collector")
                 alternate_collector = data.pop("alternate_collector", None)
-
+                consent_sign_file = self.get_photo(
+                    data.pop("consent_sign", None),
+                    self.selected_rdi.program.programme_code,
+                )
                 country_code = data.pop("country", None)
                 if country_code:
                     country_codes.add(country_code)
@@ -520,6 +537,13 @@ class CreateLaxHouseholds(CreateLaxBaseView):
                     business_area=self.selected_business_area,
                     **data,
                 )
+                if consent_sign_file:
+                    household_instance.consent_sign.save(
+                        consent_sign_file.name,
+                        File(consent_sign_file),
+                        save=False,
+                    )
+                # TODO: Collect all files as in individuals to remove them if transaction is not successful
 
                 valid_payloads.append(
                     {
