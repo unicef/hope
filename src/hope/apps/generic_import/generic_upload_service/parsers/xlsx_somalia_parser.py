@@ -25,7 +25,7 @@ class XlsxSomaliaParser(BaseParser):
         "HouseholdSize",
     ]
 
-    def __init__(self, business_area: BusinessArea | None = None):
+    def __init__(self, business_area: BusinessArea):
         self._business_area = business_area
         self._households = {}
         self._individuals = []
