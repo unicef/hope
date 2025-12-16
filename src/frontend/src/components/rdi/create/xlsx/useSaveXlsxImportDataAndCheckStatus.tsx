@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { ImportData } from '@restgenerated/models/ImportData';
-import { Status753Enum } from '@restgenerated/models/Status753Enum';
+import { StatusF63Enum } from '@restgenerated/models/StatusF63Enum';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -57,9 +57,9 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
       if (
         data &&
         [
-          Status753Enum.ERROR,
-          Status753Enum.VALIDATION_ERROR,
-          Status753Enum.FINISHED,
+          StatusF63Enum.ERROR,
+          StatusF63Enum.VALIDATION_ERROR,
+          StatusF63Enum.FINISHED,
         ].includes(data?.state?.data?.status)
       ) {
         return false;
@@ -78,7 +78,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     saveAndStartPolling,
     loading:
       uploadMutation.isPending ||
-      [Status753Enum.PENDING, Status753Enum.RUNNING].includes(
+      [StatusF63Enum.PENDING, StatusF63Enum.RUNNING].includes(
         xlsxImportData?.status,
       ),
     xlsxImportData: xlsxImportData || null,
