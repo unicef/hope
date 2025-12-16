@@ -68,26 +68,37 @@ title: Stack
 ```
 hope/
 ├── src/
-│   ├── hope/              # Django project
-│   │   ├── apps/          # Django applications
-│   │   │   ├── core/      # Core functionality, Celery
-│   │   │   ├── web/       # Web app, static files
+│   ├── hope/                    # Django project
+│   │   ├── config/              # Django settings (settings.py, env.py)
+│   │   ├── models/              # All models (yes, ALL of them here)*
+│   │   ├── admin/               # All admin classes (here too)*
+│   │   ├── api/                 # REST API endpoints
+│   │   ├── apps/                # Django apps (without models/admin)
+│   │   │   ├── core/            # Core functionality, Celery
+│   │   │   ├── web/             # Web app serving frontend
+│   │   │   │   └── static/web/  # Frontend build output**
 │   │   │   └── ...
-│   │   └── config/        # Django settings
-│   └── frontend/          # React application
-│       ├── src/           # React source code
-│       └── build/         # Production build output
+│   │   └── ...
+│   └── frontend/                # React application (Vite)
+│       ├── src/                 # React source code
+│       └── build/               # Local build output
 ├── tests/
-│   ├── unit/              # Unit tests
-│   └── e2e/               # End-to-end tests
-├── docker/                # Docker configuration
-├── development_tools/     # Docker Compose for local dev
-├── docs/                  # Documentation
-├── manage.py              # Django management script
-├── pyproject.toml         # Python project configuration
-├── tox.ini                # Test configuration
-└── uv.lock                # Python dependency lock file
+│   ├── unit/                    # Unit tests
+│   └── e2e/                     # End-to-end tests
+├── docker/                      # Docker configuration
+├── development_tools/           # Docker Compose for local dev
+├── docs/                        # Documentation
+├── manage.py                    # Django management script
+├── pyproject.toml               # Python project configuration
+├── tox.ini                      # Test configuration
+└── uv.lock                      # Python dependency lock file
 ```
+
+### Architectural Curiosities
+
+**\* Centralized models and admin:** Unlike typical Django projects where each app has its own `models.py` and `admin.py`, HOPE keeps all models in `src/hope/models/` and all admin classes in `src/hope/admin/` as separate files per entity.
+
+**\*\* Committed build artifacts:** The frontend build output (`src/hope/apps/web/static/web/`) is committed to the repository. This is unconventional - most projects gitignore build artifacts. Here, it ensures Django can serve the frontend without requiring a Node.js build step in production. The `manage.py runserver` command automatically rebuilds and watches for changes during development.
 
 ## Dependencies
 
