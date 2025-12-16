@@ -138,7 +138,7 @@ class BiometricDeduplicationService:
             try:
                 deduplication_set_id = self.create_deduplication_set(program)
             except DeduplicationEngineAPI.DeduplicationEngineAPIError:
-                logging.exception(f"Error creating deduplication set {deduplication_set_id}")
+                logging.exception(f"Error creating deduplication set for program {program}")
                 pending_rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR)
                 return
 
