@@ -1169,7 +1169,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -1219,7 +1219,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        parentId?: string | null,
+        parentId?: string,
         parentPCode?: string,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
@@ -10424,97 +10424,65 @@ export class RestService {
         businessAreaSlug,
         paymentVerificationPk,
         programSlug,
-        deliveryMechanism,
-        endDate,
-        fsp,
-        isFollowUp,
         limit,
-        name,
         offset,
         ordering,
-        paymentVerificationSummaryStatus,
-        program,
-        programCycle,
-        programCycleEndDate,
-        programCycleStartDate,
         search,
-        startDate,
-        status,
-        totalEntitledQuantityGte,
-        totalEntitledQuantityLte,
-        totalEntitledQuantityUsdFrom,
-        totalEntitledQuantityUsdTo,
-        updatedAtGte,
-        updatedAtLte,
+        verificationChannel,
+        verificationPlanId,
+        verificationStatus,
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
         programSlug: string,
-        deliveryMechanism?: Array<string>,
-        endDate?: string,
-        fsp?: string,
-        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
         limit?: number,
-        name?: string,
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
         /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        /**
-         * * `ACTIVE` - Active
-         * * `FINISHED` - Finished
-         * * `PENDING` - Pending
-         */
-        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
-        /**
-         * Filter by program slug
-         */
-        program?: string,
-        programCycle?: string,
-        programCycleEndDate?: string,
-        programCycleStartDate?: string,
-        /**
-         * A search term.
-         */
-        search?: string,
-        startDate?: string,
-        /**
-         * Status [sys]
+         * Ordering
          *
-         * * `TP_OPEN` - Open
-         * * `TP_LOCKED` - Locked
-         * * `PROCESSING` - Processing
-         * * `STEFICON_WAIT` - Steficon Wait
-         * * `STEFICON_RUN` - Steficon Run
-         * * `STEFICON_COMPLETED` - Steficon Completed
-         * * `STEFICON_ERROR` - Steficon Error
-         * * `DRAFT` - Draft
-         * * `PREPARING` - Preparing
-         * * `OPEN` - Open
-         * * `LOCKED` - Locked
-         * * `LOCKED_FSP` - Locked FSP
-         * * `IN_APPROVAL` - In Approval
-         * * `IN_AUTHORIZATION` - In Authorization
-         * * `IN_REVIEW` - In Review
-         * * `ACCEPTED` - Accepted
-         * * `ABORTED` - Aborted
-         * * `FINISHED` - Finished
-         * * `CLOSED` - Closed
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `verification_channel` - Verification channel
+         * * `-verification_channel` - Verification channel (descending)
+         * * `verification_plan_id` - Verification plan id
+         * * `-verification_plan_id` - Verification plan id (descending)
+         * * `verification_status` - Verification status
+         * * `-verification_status` - Verification status (descending)
+         * * `head_of_household` - Head of household
+         * * `-head_of_household` - Head of household (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `delivered_quantity` - Delivered quantity
+         * * `-delivered_quantity` - Delivered quantity (descending)
+         * * `received_amount` - Received amount
+         * * `-received_amount` - Received amount (descending)
+         * * `phone_no` - Phone no
+         * * `-phone_no` - Phone no (descending)
+         * * `phone_no_alternative` - Phone no alternative
+         * * `-phone_no_alternative` - Phone no alternative (descending)
          */
-        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
-        totalEntitledQuantityGte?: number,
-        totalEntitledQuantityLte?: number,
-        totalEntitledQuantityUsdFrom?: number,
-        totalEntitledQuantityUsdTo?: number,
-        updatedAtGte?: string,
-        updatedAtLte?: string,
+        ordering?: Array<'-delivered_quantity' | '-head_of_household' | '-household_unicef_id' | '-phone_no' | '-phone_no_alternative' | '-received_amount' | '-unicef_id' | '-verification_channel' | '-verification_plan_id' | '-verification_status' | 'delivered_quantity' | 'head_of_household' | 'household_unicef_id' | 'phone_no' | 'phone_no_alternative' | 'received_amount' | 'unicef_id' | 'verification_channel' | 'verification_plan_id' | 'verification_status'>,
+        search?: string,
+        /**
+         * * `MANUAL` - MANUAL
+         * * `RAPIDPRO` - RAPIDPRO
+         * * `XLSX` - XLSX
+         */
+        verificationChannel?: Array<'MANUAL' | 'RAPIDPRO' | 'XLSX'>,
+        verificationPlanId?: string,
+        /**
+         * * `NOT_RECEIVED` - NOT RECEIVED
+         * * `PENDING` - PENDING
+         * * `RECEIVED` - RECEIVED
+         * * `RECEIVED_WITH_ISSUES` - RECEIVED WITH ISSUES
+         */
+        verificationStatus?: Array<'NOT_RECEIVED' | 'PENDING' | 'RECEIVED' | 'RECEIVED_WITH_ISSUES'>,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10525,28 +10493,13 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'delivery_mechanism': deliveryMechanism,
-                'end_date': endDate,
-                'fsp': fsp,
-                'is_follow_up': isFollowUp,
                 'limit': limit,
-                'name': name,
                 'offset': offset,
                 'ordering': ordering,
-                'payment_verification_summary_status': paymentVerificationSummaryStatus,
-                'program': program,
-                'program_cycle': programCycle,
-                'program_cycle_end_date': programCycleEndDate,
-                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
-                'start_date': startDate,
-                'status': status,
-                'total_entitled_quantity__gte': totalEntitledQuantityGte,
-                'total_entitled_quantity__lte': totalEntitledQuantityLte,
-                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
-                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
-                'updated_at__gte': updatedAtGte,
-                'updated_at__lte': updatedAtLte,
+                'verification_channel': verificationChannel,
+                'verification_plan_id': verificationPlanId,
+                'verification_status': verificationStatus,
             },
         });
     }
@@ -10562,7 +10515,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A UUID string identifying this Payment Plan.
+         * A UUID string identifying this payment.
          */
         id: string,
         paymentVerificationPk: string,
@@ -10593,7 +10546,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A UUID string identifying this Payment Plan.
+         * A UUID string identifying this payment.
          */
         id: string,
         paymentVerificationPk: string,
@@ -10621,87 +10574,55 @@ export class RestService {
         businessAreaSlug,
         paymentVerificationPk,
         programSlug,
-        deliveryMechanism,
-        endDate,
-        fsp,
-        isFollowUp,
-        name,
         ordering,
-        paymentVerificationSummaryStatus,
-        program,
-        programCycle,
-        programCycleEndDate,
-        programCycleStartDate,
         search,
-        startDate,
-        status,
-        totalEntitledQuantityGte,
-        totalEntitledQuantityLte,
-        totalEntitledQuantityUsdFrom,
-        totalEntitledQuantityUsdTo,
-        updatedAtGte,
-        updatedAtLte,
+        verificationChannel,
+        verificationPlanId,
+        verificationStatus,
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
         programSlug: string,
-        deliveryMechanism?: Array<string>,
-        endDate?: string,
-        fsp?: string,
-        isFollowUp?: boolean,
-        name?: string,
         /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        /**
-         * * `ACTIVE` - Active
-         * * `FINISHED` - Finished
-         * * `PENDING` - Pending
-         */
-        paymentVerificationSummaryStatus?: Array<'ACTIVE' | 'FINISHED' | 'PENDING'>,
-        /**
-         * Filter by program slug
-         */
-        program?: string,
-        programCycle?: string,
-        programCycleEndDate?: string,
-        programCycleStartDate?: string,
-        /**
-         * A search term.
-         */
-        search?: string,
-        startDate?: string,
-        /**
-         * Status [sys]
+         * Ordering
          *
-         * * `TP_OPEN` - Open
-         * * `TP_LOCKED` - Locked
-         * * `PROCESSING` - Processing
-         * * `STEFICON_WAIT` - Steficon Wait
-         * * `STEFICON_RUN` - Steficon Run
-         * * `STEFICON_COMPLETED` - Steficon Completed
-         * * `STEFICON_ERROR` - Steficon Error
-         * * `DRAFT` - Draft
-         * * `PREPARING` - Preparing
-         * * `OPEN` - Open
-         * * `LOCKED` - Locked
-         * * `LOCKED_FSP` - Locked FSP
-         * * `IN_APPROVAL` - In Approval
-         * * `IN_AUTHORIZATION` - In Authorization
-         * * `IN_REVIEW` - In Review
-         * * `ACCEPTED` - Accepted
-         * * `ABORTED` - Aborted
-         * * `FINISHED` - Finished
-         * * `CLOSED` - Closed
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `verification_channel` - Verification channel
+         * * `-verification_channel` - Verification channel (descending)
+         * * `verification_plan_id` - Verification plan id
+         * * `-verification_plan_id` - Verification plan id (descending)
+         * * `verification_status` - Verification status
+         * * `-verification_status` - Verification status (descending)
+         * * `head_of_household` - Head of household
+         * * `-head_of_household` - Head of household (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `delivered_quantity` - Delivered quantity
+         * * `-delivered_quantity` - Delivered quantity (descending)
+         * * `received_amount` - Received amount
+         * * `-received_amount` - Received amount (descending)
+         * * `phone_no` - Phone no
+         * * `-phone_no` - Phone no (descending)
+         * * `phone_no_alternative` - Phone no alternative
+         * * `-phone_no_alternative` - Phone no alternative (descending)
          */
-        status?: 'ABORTED' | 'ACCEPTED' | 'CLOSED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
-        totalEntitledQuantityGte?: number,
-        totalEntitledQuantityLte?: number,
-        totalEntitledQuantityUsdFrom?: number,
-        totalEntitledQuantityUsdTo?: number,
-        updatedAtGte?: string,
-        updatedAtLte?: string,
+        ordering?: Array<'-delivered_quantity' | '-head_of_household' | '-household_unicef_id' | '-phone_no' | '-phone_no_alternative' | '-received_amount' | '-unicef_id' | '-verification_channel' | '-verification_plan_id' | '-verification_status' | 'delivered_quantity' | 'head_of_household' | 'household_unicef_id' | 'phone_no' | 'phone_no_alternative' | 'received_amount' | 'unicef_id' | 'verification_channel' | 'verification_plan_id' | 'verification_status'>,
+        search?: string,
+        /**
+         * * `MANUAL` - MANUAL
+         * * `RAPIDPRO` - RAPIDPRO
+         * * `XLSX` - XLSX
+         */
+        verificationChannel?: Array<'MANUAL' | 'RAPIDPRO' | 'XLSX'>,
+        verificationPlanId?: string,
+        /**
+         * * `NOT_RECEIVED` - NOT RECEIVED
+         * * `PENDING` - PENDING
+         * * `RECEIVED` - RECEIVED
+         * * `RECEIVED_WITH_ISSUES` - RECEIVED WITH ISSUES
+         */
+        verificationStatus?: Array<'NOT_RECEIVED' | 'PENDING' | 'RECEIVED' | 'RECEIVED_WITH_ISSUES'>,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10712,26 +10633,11 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'delivery_mechanism': deliveryMechanism,
-                'end_date': endDate,
-                'fsp': fsp,
-                'is_follow_up': isFollowUp,
-                'name': name,
                 'ordering': ordering,
-                'payment_verification_summary_status': paymentVerificationSummaryStatus,
-                'program': program,
-                'program_cycle': programCycle,
-                'program_cycle_end_date': programCycleEndDate,
-                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
-                'start_date': startDate,
-                'status': status,
-                'total_entitled_quantity__gte': totalEntitledQuantityGte,
-                'total_entitled_quantity__lte': totalEntitledQuantityLte,
-                'total_entitled_quantity_usd_from': totalEntitledQuantityUsdFrom,
-                'total_entitled_quantity_usd_to': totalEntitledQuantityUsdTo,
-                'updated_at__gte': updatedAtGte,
-                'updated_at__lte': updatedAtLte,
+                'verification_channel': verificationChannel,
+                'verification_plan_id': verificationPlanId,
+                'verification_status': verificationStatus,
             },
         });
     }
@@ -14628,6 +14534,19 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/payment-verification-plan-status/',
+        });
+    }
+    /**
+     * Return choices used in the system like statuses, currencies.
+     *
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentVerificationStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-verification-status/',
         });
     }
     /**

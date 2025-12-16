@@ -9,7 +9,7 @@
  * * `ERROR` - Error
  * * `VALIDATION_ERROR` - Validation Error
  */
-export enum Status753Enum {
+export enum StatusF63Enum {
     PENDING = 'PENDING',
     RUNNING = 'RUNNING',
     FINISHED = 'FINISHED',
