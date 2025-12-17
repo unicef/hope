@@ -35,6 +35,8 @@ class RDISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
+        if validated_data.get("program").biometric_deduplication_enabled:
+            validated_data["deduplication_engine_status"] = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return super().create(validated_data)
 
 

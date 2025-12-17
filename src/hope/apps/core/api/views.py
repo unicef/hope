@@ -41,6 +41,7 @@ from hope.models import (
     DeliveryMechanism,
     Feedback,
     PaymentPlan,
+    PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     RoleAssignment,
@@ -164,6 +165,12 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-verification-plan-status")
     def payment_verification_plan_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.STATUS_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-status")
+    def payment_verification_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerification.STATUS_CHOICES), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

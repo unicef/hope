@@ -38,6 +38,16 @@ CACHE_CONFIG = [
 CURRENT_YEAR = timezone.now().year
 TEST_COUNTRY_SLUG = "afghanistan"
 TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=dt_timezone.utc)
+CHILDREN_COUNT_SCENARIOS = [
+    ("social_program_with_value", "SOCIAL", 10, 0, 0),
+    ("social_program_none", "SOCIAL", None, 0, 0),
+    ("standard_program_none", "STANDARD", None, 3.8, 4),
+    ("standard_program_with_value", "STANDARD", 7, 0, 7),
+]
+INDIVIDUALS_COUNT_SCENARIOS = [
+    ("social_program_size", "SOCIAL", 5, 1),
+    ("standard_program_size", "STANDARD", 5, 5),
+]
 
 
 def _create_test_payment_for_queryset(
@@ -948,11 +958,59 @@ def test_get_base_payment_queryset_with_without_ba() -> None:
     assert qs_all.filter(pk=payment2.pk).exists()
 
 
-CHILDREN_COUNT_SCENARIOS = [
-    ("social_program", "SOCIAL", 10, 2.6, 3),
-    ("children_count_none", "STANDARD", None, 3.8, 4),
-    ("children_count_value", "STANDARD", 7, 1.1, 7),
-]
+@pytest.mark.parametrize(
+    ("test_id", "dct_type", "household_size", "expected_individuals"),
+    INDIVIDUALS_COUNT_SCENARIOS,
+)
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_individuals_count_calculation_scenarios(
+    test_id: str,
+    dct_type: str,
+    household_size: int,
+    expected_individuals: int,
+    afghanistan: BusinessArea,
+) -> None:
+    """Test various scenarios for individuals count calculation in dashboard data."""
+    cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
+    cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
+
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct, sector=f"Sector-{test_id}")
+    household, _ = create_household(
+        household_args={
+            "program": program,
+            "business_area": afghanistan,
+            "size": household_size,
+        }
+    )
+
+    status_map = {
+        "social_program_size": Payment.STATUS_SUCCESS,
+        "standard_program_size": Payment.STATUS_DISTRIBUTION_SUCCESS,
+    }
+    status = status_map[test_id]
+
+    PaymentFactory.create(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        delivery_date=TEST_DATE,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        status=status,
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert len(result) == 1
+    assert result[0]["individuals"] == expected_individuals, "Country dashboard individuals count mismatch"
+
+    global_result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
+    global_agg_group = [
+        item
+        for item in global_result
+        if item["country"] == afghanistan.name and item["sector"] == f"Sector-{test_id}" and item["status"] == status
+    ]
+    assert len(global_agg_group) == 1
+    assert global_agg_group[0]["individuals"] == expected_individuals, "Global dashboard individuals count mismatch"
 
 
 @pytest.mark.parametrize(
@@ -984,9 +1042,10 @@ def test_children_count_calculation_scenarios(
         }
     )
     status_map = {
-        "social_program": Payment.STATUS_SUCCESS,
-        "children_count_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
-        "children_count_value": Payment.STATUS_PENDING,
+        "social_program_with_value": Payment.STATUS_SUCCESS,
+        "social_program_none": Payment.STATUS_SENT_TO_FSP,
+        "standard_program_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
+        "standard_program_with_value": Payment.STATUS_PENDING,
     }
     status = status_map[test_id]
 
