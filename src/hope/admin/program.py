@@ -26,7 +26,6 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.account.permissions import Permissions
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.registration_datahub.services.biometric_deduplication import (
@@ -295,7 +294,7 @@ class ProgramAdmin(
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))
 
-    @button(label="Bulk Upload Individuals Photos", permission=Permissions.PROGRAMME_BULK_UPLOAD_INDIVIDUALS_PHOTOS)
+    @button(label="Bulk Upload Individual Photos", permission="program.can_bulk_upload_individual_photos")
     def bulk_upload_individuals_photos(self, request: HttpRequest, pk: int) -> TemplateResponse:
         program = Program.objects.get(pk=pk)
         context: dict = self.get_common_context(request, processed=False)

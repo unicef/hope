@@ -317,7 +317,10 @@ class Program(
                 name="unique_for_business_area_and_slug_if_not_removed",
             ),
         ]
-        permissions = [("enroll_beneficiaries", "Can enroll beneficiaries")]
+        permissions = [
+            ("enroll_beneficiaries", "Can enroll beneficiaries"),
+            ("can_bulk_upload_individual_photos", "Can bulk upload Individual photos"),
+        ]
         verbose_name = "Programme"
 
     def __str__(self) -> str:
