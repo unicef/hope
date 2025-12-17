@@ -13,6 +13,7 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
@@ -100,8 +101,6 @@ function AddIndividualGrievanceDetails({
   delete individualData.identities;
   const flexFields = individualData?.flexFields;
   delete individualData?.flexFields;
-  delete individualData.documents;
-  delete individualData.identities;
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
@@ -116,6 +115,16 @@ function AddIndividualGrievanceDetails({
       }
       if (Array.isArray(value)) {
         textValue = value.map((el) => capitalize(el)).join(', ');
+      }
+      if (fieldAttribute?.type === 'IMAGE' || key === 'photo') {
+        return (
+          <Grid key={key} size={{ xs: 6 }}>
+            <LabelizedField
+              label={camelToUnderscore(key).replace(/_/g, ' ')}
+              value={value ? <PhotoModal src={value as string} /> : '-'}
+            />
+          </Grid>
+        );
       }
       return (
         <Grid key={key} size={{ xs: 6 }}>

@@ -590,7 +590,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "photo_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE, Scope.INDIVIDUAL_UPDATE],
     },
     {
         "id": "35ede8c4-877e-40dc-a93a-0a9a3bc511dc",
