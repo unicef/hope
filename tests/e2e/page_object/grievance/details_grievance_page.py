@@ -178,6 +178,8 @@ class GrievanceDetailsPage(BaseComponents):
     button_rotate_image = 'button[data-cy="button-rotate-image"]'
     button_cancel = 'button[data-cy="button-cancel"]'
     link_show_photo = 'a[data-cy="link-show-photo"]'
+    current_value_cell = 'td[data-cy="current-value"]'
+    new_value_cell = 'td[data-cy="new-value"]'
     label_status = 'div[data-cy="label-Status"]'
     status_container = 'div[data-cy="status-container"]'
     label_priority = 'div[data-cy="label-Priority"]'
@@ -709,3 +711,25 @@ class GrievanceDetailsPage(BaseComponents):
 
     def get_label_urgency(self) -> WebElement:
         return self.wait_for(self.label_urgency)
+
+    def get_current_value_cell(self) -> WebElement:
+        return self.wait_for(self.current_value_cell)
+
+    def get_new_value_cell(self) -> WebElement:
+        return self.wait_for(self.new_value_cell)
+
+    def get_current_value_cells(self) -> [WebElement]:
+        self.wait_for(self.current_value_cell)
+        return self.get_elements(self.current_value_cell)
+
+    def get_new_value_cells(self) -> [WebElement]:
+        self.wait_for(self.new_value_cell)
+        return self.get_elements(self.new_value_cell)
+
+    def get_photo_in_current_value(self) -> WebElement:
+        current_value = self.get_current_value_cell()
+        return current_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')
+
+    def get_photo_in_new_value(self) -> WebElement:
+        new_value = self.get_new_value_cell()
+        return new_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')

@@ -1,22 +1,36 @@
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: {
     name?: string;
     type?: string;
+    isFlexField?: boolean;
     choices?: Array<{
       value: any;
       labelEn?: string;
     }>;
   };
   value;
+  individualId?: string;
+  fieldName?: string;
 }
 
 export function CurrentValue({
   field,
   value,
+  individualId,
+  fieldName,
 }: CurrentValueProps): ReactElement {
+  // Handle core photo field - check both field.name and passed fieldName as fallback
+  const isPhotoField = field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
+
+  if (isPhotoField && (field?.type === 'IMAGE' || !field)) {
+    return <>{individualId ? <GrievanceIndividualPhotoModal isCurrent individualId={individualId} /> : '-'}</>;
+  }
+
   let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
@@ -41,9 +55,17 @@ export function CurrentValue({
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
     case 'IMAGE':
-      displayValue = (
-        <GrievanceFlexFieldPhotoModal field={field} isCurrent isIndividual />
-      );
+      if (field?.isFlexField) {
+        displayValue = (
+          <GrievanceFlexFieldPhotoModal field={field} isCurrent isIndividual />
+        );
+      } else if (field?.name === 'photo') {
+        displayValue = (
+          <GrievanceIndividualPhotoModal isCurrent individualId={individualId} />
+        );
+      } else {
+        displayValue = value ? <PhotoModal src={value} /> : '-';
+      }
       break;
     default:
       displayValue =
