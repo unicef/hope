@@ -8,7 +8,7 @@
         &rsaquo; <a
             href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
         &rsaquo; <a
-            href="{% url opts|admin_urlname:'import_csv' pk %}">Import CSV</a>
+            href="{% url opts|admin_urlname:'import_csv' %}">Import CSV</a>
     </div>
 {% endblock breadcrumbs %}
 
@@ -30,7 +30,7 @@
         {% endif %}
         <div>
         <a class="btn btn-primary" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-        <a class="btn" href="{% url opts|admin_urlname:'import_csv' pk %}">Kobo Import</a>
+        <a class="btn" href="{% url opts|admin_urlname:'import_csv' %}">Kobo Import</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>

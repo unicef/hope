@@ -435,11 +435,10 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
-    def import_csv(self, request: HttpRequest, pk: int) -> TemplateResponse:
+    def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
 
         context: dict = self.get_common_context(request, processed=False)
-        context["pk"] = pk
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": models.partner.Partner.objects.first()})
             context["form"] = form
