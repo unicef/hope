@@ -172,7 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     programs.forEach(program => {
                         const option = document.createElement('option');
                         option.value = program.id;
-                        option.textContent = program.name;
+                        // Sanitize program.name for extra safety
+                        option.textContent = sanitizeText(program.name);
                         // Add slug as data attribute for API call
                         if (program.slug) {
                             option.setAttribute('data-slug', program.slug);
@@ -325,6 +326,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const event = new Event('change', { bubbles: true });
             fileInput.dispatchEvent(event);
         }
+    }
+
+    // Helper function to sanitize text
+    function sanitizeText(str) {
+        // Remove control characters and only allow printable unicode
+        return String(str).replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
     }
 });
 </script>
