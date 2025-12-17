@@ -60,14 +60,15 @@ class DeduplicationEngineAPI(BaseAPI):
         CREATE_DEDUPLICATION_SET = "deduplication_sets/"  # POST - Create view
         DELETE_DEDUPLICATION_SET = "deduplication_sets/{pk}/"  # DELETE - Delete view
         PROCESS_DEDUPLICATION = "deduplication_sets/{pk}/process/"  # POST - Start processing a deduplication set
+        INDIVIDUALS_STATUS = "deduplication_sets/{pk}/approve_or_reject/"  # POST
 
-        BULK_UPLOAD_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/"  # POST - Create view
+        BULK_UPLOAD_IMAGES = "deduplication_sets/{pk}/images_bulk/"  # POST - Create view
         # DELETE - Delete all images for a deduplication set
-        BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"
+        BULK_DELETE_IMAGES = "deduplication_sets/{pk}/images_bulk/clear/"
 
-        GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
-        IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored/reference_pks/"  # POST/GET
-        IGNORED_FILENAMES = "deduplication_sets/{deduplication_set_pk}/ignored/filenames/"  # POST/GET
+        GET_DUPLICATES = "deduplication_sets/{pk}/duplicates/"  # GET - List view
+        IGNORED_KEYS = "deduplication_sets/{pk}/ignored/reference_pks/"  # POST/GET
+        IGNORED_FILENAMES = "deduplication_sets/{pk}/ignored/filenames/"  # POST/GET
 
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
@@ -86,7 +87,7 @@ class DeduplicationEngineAPI(BaseAPI):
 
     def _bulk_upload_image_batch(self, deduplication_set_id: str, images: tuple[DeduplicationImage, ...]) -> list:
         response_data, _ = self._post(
-            self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id),
+            self.Endpoints.BULK_UPLOAD_IMAGES.format(pk=deduplication_set_id),
             [dataclasses.asdict(image) for image in images],
         )
         # API returns a list of objects
@@ -103,14 +104,12 @@ class DeduplicationEngineAPI(BaseAPI):
         return reduce(add, response_data, [])
 
     def bulk_delete_images(self, deduplication_set_id: str) -> dict:
-        response_data, _ = self._delete(
-            self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id)
-        )
+        response_data, _ = self._delete(self.Endpoints.BULK_UPLOAD_IMAGES.format(pk=deduplication_set_id))
         return response_data
 
     def get_duplicates(self, deduplication_set_id: str, individual_ids: list[str]) -> list[dict]:
         return self._get_paginated(
-            self.Endpoints.GET_DUPLICATES.format(deduplication_set_pk=deduplication_set_id),
+            self.Endpoints.GET_DUPLICATES.format(pk=deduplication_set_id),
             params={"reference_pk": ",".join(individual_ids)},
         )
 
@@ -125,6 +124,12 @@ class DeduplicationEngineAPI(BaseAPI):
         self, false_positive_pair: IgnoredFilenamesPair, deduplication_set_id: str
     ) -> None:
         self._post(
-            self.Endpoints.IGNORED_FILENAMES.format(deduplication_set_pk=deduplication_set_id),
+            self.Endpoints.IGNORED_FILENAMES.format(pk=deduplication_set_id),
             dataclasses.asdict(false_positive_pair),
+        )
+
+    def report_individuals_status(self, deduplication_set_id: str, data: dict) -> None:
+        self._post(
+            self.Endpoints.INDIVIDUALS_STATUS.format(pk=deduplication_set_id),
+            data,
         )

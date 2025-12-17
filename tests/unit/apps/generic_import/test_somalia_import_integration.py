@@ -199,6 +199,7 @@ class TestSomaliaImportIntegration:
 
     def test_full_import_flow(
         self,
+        business_area,
         somalia_excel_file_exact,
         registration_data_import,
         mobile_account_type,
@@ -208,7 +209,7 @@ class TestSomaliaImportIntegration:
     ):
         """Test complete flow: parse → import → database verification."""
         # Step 1: Parse Excel file
-        parser = XlsxSomaliaParser()
+        parser = XlsxSomaliaParser(business_area)
         parser.parse(somalia_excel_file_exact)
 
         # Verify parsing succeeded
@@ -352,12 +353,13 @@ class TestSomaliaImportIntegration:
 
     def test_import_with_missing_account_type(
         self,
+        business_area,
         somalia_excel_file_exact,
         registration_data_import,
     ):
         """Test import fails gracefully when account_type doesn't exist."""
         # Parse without creating AccountType
-        parser = XlsxSomaliaParser()
+        parser = XlsxSomaliaParser(business_area)
         parser.parse(somalia_excel_file_exact)
 
         importer = Importer(
@@ -378,6 +380,7 @@ class TestSomaliaImportIntegration:
 
     def test_import_multiple_households(
         self,
+        business_area,
         tmp_path,
         registration_data_import,
         mobile_account_type,
@@ -439,7 +442,7 @@ class TestSomaliaImportIntegration:
         wb.save(str(excel_file))
 
         # Parse and import
-        parser = XlsxSomaliaParser()
+        parser = XlsxSomaliaParser(business_area)
         parser.parse(str(excel_file))
 
         importer = Importer(
