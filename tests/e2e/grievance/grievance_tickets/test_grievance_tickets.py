@@ -1444,7 +1444,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Individual Data Update with Photo - TEST")
         page_grievance_new_ticket.get_button_add_new_field().click()
         page_grievance_new_ticket.get_individual_field_name(0).click()
-        page_grievance_new_ticket.get_listbox_element("s photo").click()
+        page_grievance_new_ticket.get_listbox_element("Individual's photo").click()
         page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
 
         page_grievance_new_ticket.get_button_next().click()

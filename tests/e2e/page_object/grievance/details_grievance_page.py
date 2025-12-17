@@ -726,10 +726,20 @@ class GrievanceDetailsPage(BaseComponents):
         self.wait_for(self.new_value_cell)
         return self.get_elements(self.new_value_cell)
 
+    def get_photo_row(self) -> WebElement:
+        """Find the row containing 'photo' in the field name."""
+        rows = self.driver.find_elements(By.CSS_SELECTOR, "tr")
+        for row in rows:
+            if "photo" in row.text.lower():
+                return row
+        raise AssertionError("Photo row not found in table")
+
     def get_photo_in_current_value(self) -> WebElement:
-        current_value = self.get_current_value_cell()
+        photo_row = self.get_photo_row()
+        current_value = photo_row.find_element(By.CSS_SELECTOR, '[data-cy="current-value"]')
         return current_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')
 
     def get_photo_in_new_value(self) -> WebElement:
-        new_value = self.get_new_value_cell()
+        photo_row = self.get_photo_row()
+        new_value = photo_row.find_element(By.CSS_SELECTOR, '[data-cy="new-value"]')
         return new_value.find_element(By.CSS_SELECTOR, '[data-cy="mini-image"]')

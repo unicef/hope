@@ -21,7 +21,10 @@ export function FormikFileField({ field, form, label }: FormikFileFieldProps): R
           accept="image/*"
           data-cy={`input-${field.name}`}
           onChange={(event) => {
-            form.setFieldValue(field.name, event.currentTarget.files[0]);
+            const file = event.currentTarget.files?.[0];
+            if (file) {
+              form.setFieldValue(field.name, file);
+            }
           }}
         />
       </Box>

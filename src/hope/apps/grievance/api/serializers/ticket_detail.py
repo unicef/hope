@@ -52,12 +52,12 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         if not data:
             return data
         data = deepcopy(data)
-        if "photo" in data and data["photo"].get("value"):
-            photo_path = data["photo"]["value"]
-            data["photo"]["value"] = default_storage.url(photo_path)
-        if "photo" in data and data["photo"].get("previous_value"):
-            photo_path = data["photo"]["previous_value"]
-            data["photo"]["previous_value"] = default_storage.url(photo_path)
+        photo_data = data.get("photo")
+        if isinstance(photo_data, dict):
+            if photo_data.get("value"):
+                photo_data["value"] = default_storage.url(photo_data["value"])
+            if photo_data.get("previous_value"):
+                photo_data["previous_value"] = default_storage.url(photo_data["previous_value"])
         return data
 
 

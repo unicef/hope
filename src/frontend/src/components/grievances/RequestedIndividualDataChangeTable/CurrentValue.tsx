@@ -2,6 +2,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface CurrentValueProps {
   field: {
@@ -24,6 +25,7 @@ export function CurrentValue({
   individualId,
   fieldName,
 }: CurrentValueProps): ReactElement {
+  const { t } = useTranslation();
   // Handle core photo field - check both field.name and passed fieldName as fallback
   const isPhotoField = field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
 
@@ -51,8 +53,7 @@ export function CurrentValue({
       }
       break;
     case 'BOOL':
-       
-      displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+      displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     case 'IMAGE':
       if (field?.isFlexField) {
