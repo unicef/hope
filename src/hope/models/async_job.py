@@ -1,8 +1,6 @@
 from django.db import models
 from django_celery_boost.models import AsyncJobModel
 
-from hope.models.program import Program
-
 
 class AsyncJob(AsyncJobModel):
     """Define the base async job used by all job types.
@@ -14,7 +12,7 @@ class AsyncJob(AsyncJobModel):
     celery_task_name = "hope.apps.core.celery_tasks.async_job_task"
 
     program = models.ForeignKey(
-        Program,
+        "program.Program",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
