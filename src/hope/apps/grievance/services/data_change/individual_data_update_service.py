@@ -89,7 +89,8 @@ class IndividualDataUpdateService(DataChangeService):
                 individual_data["photo"] = ""
             else:
                 saved_photo = handle_photo(photo, None)
-                individual_data["photo"] = saved_photo
+                if saved_photo:  # Only set if handle_photo returned a valid path
+                    individual_data["photo"] = saved_photo
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
@@ -179,7 +180,8 @@ class IndividualDataUpdateService(DataChangeService):
                 new_individual_data["photo"] = ""
             else:
                 saved_photo = handle_photo(photo, None)
-                new_individual_data["photo"] = saved_photo
+                if saved_photo:  # Only set if handle_photo returned a valid path
+                    new_individual_data["photo"] = saved_photo
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
         individual_data_with_approve_status: dict[str, Any] = {

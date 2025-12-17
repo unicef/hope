@@ -101,8 +101,6 @@ function AddIndividualGrievanceDetails({
   delete individualData.identities;
   const flexFields = individualData?.flexFields;
   delete individualData?.flexFields;
-  delete individualData.documents;
-  delete individualData.identities;
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
