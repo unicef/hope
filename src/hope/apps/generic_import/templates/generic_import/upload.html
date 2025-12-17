@@ -1,0 +1,338 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'generic_import/css/upload.css' %}">
+{% endblock extrahead %}
+
+{% block content %}
+<div class="generic-import-container">
+    <h1 class="generic-import-title">{% translate "Generic Import - Upload File" %}</h1>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="generic-import-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="error-list">
+            <strong>{% translate "Errors:" %}</strong>
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% if form.business_area.field.widget.input_type != 'hidden' %}
+        <div class="form-group">
+            <label for="{{ form.business_area.id_for_label }}">
+                {{ form.business_area.label }}
+                {% if form.business_area.field.required %}<span style="color: red;">*</span>{% endif %}
+            </label>
+            {{ form.business_area }}
+            {% if form.business_area.errors %}
+            <div class="error-list">
+                {{ form.business_area.errors }}
+            </div>
+            {% endif %}
+            {% if form.business_area.help_text %}
+            <span class="helptext">{{ form.business_area.help_text }}</span>
+            {% endif %}
+        </div>
+        {% else %}
+        {{ form.business_area }}
+        {% endif %}
+
+        {% if form.program.field.widget.input_type != 'hidden' %}
+        <div class="form-group">
+            <label for="{{ form.program.id_for_label }}">
+                {{ form.program.label }}
+                {% if form.program.field.required %}<span style="color: red;">*</span>{% endif %}
+            </label>
+            {{ form.program }}
+            {% if form.program.errors %}
+            <div class="error-list">
+                {{ form.program.errors }}
+            </div>
+            {% endif %}
+            {% if form.program.help_text %}
+            <span class="helptext">{{ form.program.help_text }}</span>
+            {% endif %}
+        </div>
+        {% else %}
+        {{ form.program }}
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.file.id_for_label }}">
+                {{ form.file.label }}
+                {% if form.file.field.required %}<span style="color: red;">*</span>{% endif %}
+            </label>
+
+            <div class="file-upload-wrapper">
+                {{ form.file }}
+                <label for="{{ form.file.id_for_label }}" class="file-upload-label">
+                    <div class="file-upload-text">
+                        <div class="main-text">{% translate "Click to upload or drag and drop" %}</div>
+                        <div class="sub-text">{% translate "Excel files (.xlsx, .xls) - Max 50 MB" %}</div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="file-name-display" id="file-name-display"></div>
+
+            {% if form.file.errors %}
+            <div class="error-list">
+                {{ form.file.errors }}
+            </div>
+            {% endif %}
+            {% if form.file.help_text %}
+            <span class="helptext">{{ form.file.help_text }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="submit-button">
+                {% translate "Upload and Process" %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const uploadForm = document.getElementById('generic-import-form');
+    const submitButton = uploadForm.querySelector('.submit-button');
+    const businessAreaSelect = document.getElementById('{{ form.business_area.id_for_label }}');
+    const programSelect = document.getElementById('{{ form.program.id_for_label }}');
+
+    // Disable program select if no business area is selected initially
+    if (businessAreaSelect && programSelect) {
+        if (!businessAreaSelect.value) {
+            programSelect.disabled = true;
+            programSelect.innerHTML = '<option value="">{% translate "First select a Business Area" %}</option>';
+        }
+
+        // Handle business area selection change
+        businessAreaSelect.addEventListener('change', function() {
+            const businessAreaId = this.value;
+
+            if (!businessAreaId) {
+                // No BA selected - disable and clear program dropdown
+                programSelect.disabled = true;
+                programSelect.innerHTML = '<option value="">{% translate "First select a Business Area" %}</option>';
+                return;
+            }
+
+            // Get the selected business area's slug
+            const selectedOption = businessAreaSelect.options[businessAreaSelect.selectedIndex];
+            const businessAreaSlug = selectedOption.getAttribute('data-slug');
+
+            if (!businessAreaSlug) {
+                console.error('Business area slug not found');
+                programSelect.disabled = true;
+                programSelect.innerHTML = '<option value="">{% translate "Error: Business area slug not found" %}</option>';
+                return;
+            }
+
+            // Show loading state
+            programSelect.disabled = true;
+            programSelect.innerHTML = '<option value="">{% translate "Loading programs..." %}</option>';
+
+            // Fetch programs for selected business area
+            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch programs');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear and populate program dropdown
+                programSelect.innerHTML = '<option value="">{% translate "Select Program" %}</option>';
+
+                const programs = data.results || data;
+                if (programs && programs.length > 0) {
+                    programs.forEach(program => {
+                        const option = document.createElement('option');
+                        option.value = program.id;
+                        // Sanitize program.name for extra safety
+                        option.textContent = sanitizeText(program.name);
+                        // Add slug as data attribute for API call
+                        if (program.slug) {
+                            option.setAttribute('data-slug', program.slug);
+                        }
+                        programSelect.appendChild(option);
+                    });
+                    programSelect.disabled = false;
+                } else {
+                    programSelect.innerHTML = '<option value="">{% translate "No programs available" %}</option>';
+                    programSelect.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching programs:', error);
+                programSelect.innerHTML = '<option value="">{% translate "Error loading programs" %}</option>';
+                programSelect.disabled = true;
+
+                // Show error message to user
+                alert('{% translate "Failed to load programs. Please try again or contact support." %}');
+            });
+        });
+    }
+
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileNameDisplay.textContent = '{% translate "Selected file:" %} ' + file.name + ' (' + formatFileSize(file.size) + ')';
+            fileNameDisplay.style.display = 'block';
+        } else {
+            fileNameDisplay.style.display = 'none';
+        }
+    });
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // Intercept form submission for API call
+    uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();  // Prevent traditional form submission
+
+        const formData = new FormData(uploadForm);
+
+        // Get business area slug from data-slug attribute
+        const selectedBAOption = businessAreaSelect.options[businessAreaSelect.selectedIndex];
+        const businessAreaSlug = selectedBAOption?.getAttribute('data-slug');
+
+        // Get program slug from data-slug attribute
+        const selectedProgramOption = programSelect.options[programSelect.selectedIndex];
+        const programSlug = selectedProgramOption?.getAttribute('data-slug');
+
+        const file = formData.get('file');
+
+        // Validate
+        if (!businessAreaSlug || !programSlug || !file) {
+            alert('{% translate "Please fill all required fields" %}');
+            return;
+        }
+
+        // Show loading indicator
+        submitButton.disabled = true;
+        submitButton.textContent = '{% translate "Uploading..." %}';
+
+        try {
+            // Create API form data (only file)
+            const apiFormData = new FormData();
+            apiFormData.append('file', file);
+
+            // Call API endpoint
+            const response = await fetch(
+                `/api/rest/business-areas/${businessAreaSlug}/programs/${programSlug}/generic-import-upload/upload/`,
+                {
+                    method: 'POST',
+                    body: apiFormData,
+                    credentials: 'same-origin',  // Include cookies for session auth
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || errorData.file || 'Upload failed');
+            }
+
+            const data = await response.json();
+
+            // Show success message
+            alert('{% translate "File uploaded successfully!" %}\n' +
+                  '{% translate "Import:" %} ' + data.rdi_name + '\n' +
+                  '{% translate "Status:" %} ' + data.rdi_status_display);
+
+            // Reload page to reset form
+            window.location.reload();
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('{% translate "Upload failed:" %} ' + error.message);
+
+            // Re-enable submit button
+            submitButton.disabled = false;
+            submitButton.textContent = '{% translate "Upload and Process" %}';
+        }
+    });
+
+    // Drag and drop support
+    const fileUploadLabel = document.querySelector('.file-upload-label');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileUploadLabel.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileUploadLabel.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileUploadLabel.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        fileUploadLabel.style.backgroundColor = 'rgba(2, 62, 144, 0.15)';
+    }
+
+    function unhighlight(e) {
+        fileUploadLabel.style.backgroundColor = 'rgba(2, 62, 144, 0.05)';
+    }
+
+    fileUploadLabel.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            fileInput.files = files;
+            // Trigger change event
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+        }
+    }
+
+    // Helper function to sanitize text
+    function sanitizeText(str) {
+        // Remove control characters and only allow printable unicode
+        return String(str).replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+    }
+});
+</script>
+{% endblock content %}
