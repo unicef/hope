@@ -182,6 +182,7 @@ PROJECT_APPS = [
     "hope.apps.utils.apps.UtilsConfig",
     "hope.apps.registration_datahub.apps.Config",
     "hope.apps.registration_data.apps.RegistrationDataConfig",
+    "hope.apps.generic_import.apps.Config",
     "hope.apps.sanction_list.apps.SanctionListConfig",
     "hope.apps.steficon.apps.SteficonConfig",
     "hope.apps.activity_log.apps.ActivityLogConfig",
@@ -436,6 +437,7 @@ FLAGS = {
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
+    "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
 }
 
 MARKDOWNIFY = {

@@ -7,7 +7,7 @@ from django.utils import timezone
 from hope.models.utils import TimeStampedUUIDModel
 
 if TYPE_CHECKING:
-    from hope.models.payment_plan import PaymentPlan
+    from hope.models import PaymentPlan
 
 
 def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:
