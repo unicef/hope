@@ -6,7 +6,14 @@ from django_filters import FilterSet, OrderingFilter
 
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import DeliveryMechanism, Payment, PaymentPlan, PaymentVerificationSummary
+from hope.apps.payment.models import (
+    DeliveryMechanism,
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
+)
 
 
 class PaymentPlanFilter(FilterSet):
@@ -166,3 +173,45 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
             return queryset.filter(id__in=payment_ids)
 
         return queryset.none()
+
+
+class PaymentVerificationRecordFilter(FilterSet):
+    search = django_filters.CharFilter(method="search_filter")
+    verification_status = django_filters.MultipleChoiceFilter(
+        field_name="payment_verifications__status",
+        choices=PaymentVerification.STATUS_CHOICES,
+    )
+    verification_channel = django_filters.MultipleChoiceFilter(
+        field_name="payment_verifications__payment_verification_plan__verification_channel",
+        choices=PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
+    )
+    verification_plan_id = django_filters.UUIDFilter(
+        field_name="payment_verifications__payment_verification_plan__id",
+    )
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            (
+                "payment_verifications__payment_verification_plan__verification_channel",
+                "verification_channel",
+            ),
+            (
+                "payment_verifications__payment_verification_plan__id",
+                "verification_plan_id",
+            ),
+            ("payment_verifications__status", "verification_status"),
+            ("head_of_household__full_name", "head_of_household"),
+            ("household__unicef_id", "household_unicef_id"),
+            ("delivered_quantity", "delivered_quantity"),
+            ("payment_verifications__received_amount", "received_amount"),
+            ("head_of_household__phone_no", "phone_no"),
+            ("head_of_household__phone_no_alternative", "phone_no_alternative"),
+        )
+    )
+
+    class Meta:
+        model = Payment
+        fields = []
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
+        return qs.filter(unicef_id__istartswith=value)
