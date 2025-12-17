@@ -31,7 +31,7 @@ export function GrievanceIndividualPhotoModal({
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve({
         businessAreaSlug: businessArea,
         programSlug: selectedProgram?.slug || '',
-        id: individualId!, // Safe: enabled guard ensures individualId exists
+        id: individualId || '',
       }),
     enabled:
       !!isCurrent &&
