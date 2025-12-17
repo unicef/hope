@@ -186,6 +186,8 @@ def register_custom_sql_signal() -> None:
         using: Any,
         **kwargs: Any,
     ) -> None:
+        if not settings.TESTS_ROOT:
+            return
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
             pre_sql = file.read()
@@ -200,6 +202,8 @@ def register_custom_sql_signal() -> None:
         using: Any,
         **kwargs: Any,
     ) -> None:
+        from django.db.utils import ProgrammingError
+
         app_label = app_config.label
         if app_label not in apps:
             return
@@ -208,7 +212,13 @@ def register_custom_sql_signal() -> None:
             return
         conn = connections[using]
         for stmt in all_sqls:
-            conn.cursor().execute(stmt)
+            try:
+                conn.cursor().execute(stmt)
+            except ProgrammingError as e:
+                # Ignore "already exists" errors for indexes/tables when using existing test DB
+                if "already exists" in str(e):
+                    continue
+                raise
 
     pre_migrate.connect(
         pre_migration_custom_sql,
