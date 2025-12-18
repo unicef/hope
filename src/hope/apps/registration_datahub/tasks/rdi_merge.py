@@ -218,13 +218,11 @@ class RdiMergeTask:
                         dedupe_service = BiometricDeduplicationService()
                         dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
                         dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
-
-                        if obj_hct.program.deduplication_set_id:
-                            dedupe_service.report_individuals_status(
-                                str(obj_hct.program.deduplication_set_id),
-                                individuals_to_merge_ids,
-                                BiometricDeduplicationService.INDIVIDUALS_MERGED,
-                            )
+                        dedupe_service.report_individuals_status(
+                            str(obj_hct.program.slug),
+                            individuals_to_merge_ids,
+                            BiometricDeduplicationService.INDIVIDUALS_MERGED,
+                        )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
