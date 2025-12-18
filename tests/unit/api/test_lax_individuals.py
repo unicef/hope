@@ -303,6 +303,31 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert individual.photo.name.startswith(self.program.programme_code)
         assert individual.photo.name.endswith(".png")
 
+    def test_create_individual_with_disability_certificate_picture(self) -> None:
+        individual_data = {
+            "individual_id": "IND001",
+            "full_name": "John Doe",
+            "given_name": "John",
+            "family_name": "Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "observed_disability": "NONE",
+            "marital_status": "SINGLE",
+            "disability_certificate_picture": self.base64_encoded_data,
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+        assert individual.disability_certificate_picture is not None
+        assert individual.disability_certificate_picture.name.startswith(self.program.programme_code)
+        assert individual.disability_certificate_picture.name.endswith(".png")
+
     def test_create_individual_with_document_image(self) -> None:
         individual_data = {
             "individual_id": "IND001",

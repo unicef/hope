@@ -289,7 +289,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         if disability_certificate_picture_file:
             ind.disability_certificate_picture.save(
                 disability_certificate_picture_file.name,
-                File(photo_file),
+                File(disability_certificate_picture_file),
                 save=False,
             )
 
