@@ -1,7 +1,6 @@
 import re
 from typing import Any
 from unittest.mock import MagicMock, patch
-import uuid
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
@@ -560,8 +559,7 @@ class TestGrievanceUtils(TestCase):
     ) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
-        deduplication_set_id = uuid.uuid4()
-        program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
+        program = ProgramFactory(business_area=ba)
         rdi = RegistrationDataImportFactory(
             program=program,
         )
@@ -626,13 +624,12 @@ class TestGrievanceUtils(TestCase):
         report_false_positive_duplicate_mock.assert_called_once_with(
             str(ind_1.photo.name),
             str(ind_2.photo.name),
-            str(deduplication_set_id),
+            program.slug,
         )
 
     def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
         ba = BusinessAreaFactory(slug="afghanistan")
-        deduplication_set_id = uuid.uuid4()
-        program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
+        program = ProgramFactory(business_area=ba)
         hh1, individuals_1 = create_household(
             {"size": 2, "business_area": ba, "program": program},
             {
