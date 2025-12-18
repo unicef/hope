@@ -393,7 +393,9 @@ def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
         job.save(update_fields=["errors"])
         return 0
 
-    individuals = Individual.objects.filter(unicef_id__in=individual_unicef_ids).only("id", "unicef_id", "photo")
+    individuals = Individual.objects.filter(program=job.program, unicef_id__in=individual_unicef_ids).only(
+        "id", "unicef_id", "photo"
+    )
 
     individuals_by_unicef_id = {ind.unicef_id: ind for ind in individuals}
 

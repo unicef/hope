@@ -196,6 +196,7 @@ class TestProgramAdminBulkUploadIndividualsPhotos:
 
         job = MagicMock()
         job.config = {"file_id": str(file_temp.pk)}
+        job.program = program
         job.errors = {}
         job.save = MagicMock()
 
