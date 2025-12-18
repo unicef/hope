@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -31,6 +34,9 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         cls.admin2 = AreaFactory(parent=cls.admin1, p_code="AF0101", area_type=admin_type_2)
         cls.admin3 = AreaFactory(parent=cls.admin2, p_code="AF010101", area_type=admin_type_3)
         cls.admin4 = AreaFactory(parent=cls.admin3, p_code="AF01010101", area_type=admin_type_4)
+
+        image = Path(__file__).parent / "logo.png"
+        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
 
     def setUp(self) -> None:
         super().setUp()
@@ -229,3 +235,31 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.admin2 == self.admin2
         assert household.admin3 == self.admin3
         assert household.admin4 == self.admin4
+
+    def test_create_household_with_consent_sign(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+        assert household.consent_sign is not None
+        assert household.consent_sign.name.startswith(self.program.programme_code)
+        assert household.consent_sign.name.endswith(".png")
