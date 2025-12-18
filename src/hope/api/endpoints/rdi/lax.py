@@ -16,37 +16,39 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.api.models import Grant
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Account,
+    AccountType,
+    Area,
+    Country,
     DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
     IndividualRoleInHousehold,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
 BATCH_SIZE = 100
 

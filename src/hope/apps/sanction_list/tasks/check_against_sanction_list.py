@@ -13,8 +13,8 @@ from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 
-from hope.apps.sanction_list.models import SanctionListIndividual, UploadedXLSXFile
 from hope.apps.utils.mailjet import MailjetClient
+from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from uuid import UUID

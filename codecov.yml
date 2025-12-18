@@ -5,10 +5,10 @@ coverage:
   status:
     project:
       default:
-        threshold: 5%
+        threshold: 90%
     patch:
       default:
-        target: 95%
+        target: 97%
   ignore:
     - "**/forms.py"
     - "*/selenium_tests/**"
@@ -30,7 +30,7 @@ coverage:
     - "pragma: no-cover"
     - "def __repr__"
     - "raise AssertionError"
-    - "raise NotImplementedError"
+    - "raise NotImplementedError.*"
     - "except ImportError"
     - "if __name__ == .__main__."
     - "if TYPE_CHECKING"

@@ -17,28 +17,27 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pyzipper
 
-from hope.apps.account.models import User
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hope.apps.core.models import FileTemp, FlexibleAttribute
-from hope.apps.payment.models import (
+from hope.apps.payment.validators import generate_numeric_token
+from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hope.apps.utils.exceptions import log_and_raise
+from hope.models import (
     DeliveryMechanism,
-    FinancialServiceProvider,
+    FileTemp,
     FinancialServiceProviderXlsxTemplate,
+    FlexibleAttribute,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    Program,
 )
-from hope.apps.payment.validators import generate_numeric_token
-from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.program.models import Program
-from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from hope.apps.account.models import User
+    from hope.models import FinancialServiceProvider, User
 
 logger = logging.getLogger(__name__)
 
@@ -341,7 +340,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
+        fsp: "FinancialServiceProvider" = self.payment_plan.financial_service_provider
         delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()

@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import chunks
 from hope.apps.grievance.models import GrievanceTicket
@@ -15,24 +14,11 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
 )
-from hope.apps.payment.models import PendingAccount
-from hope.apps.registration_data.models import (
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -46,8 +32,22 @@ from hope.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.apps.utils.models import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models import (
+    Household,
+    HouseholdCollection,
+    Individual,
+    IndividualCollection,
+    KoboImportedSubmission,
+    PendingAccount,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
+    log_create,
+)
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +80,8 @@ class RdiMergeTask:
                     obj_hct.program.collision_detector.update_household(household)
                     updated_household = Household.objects.get(id=collided_id)
                     updated_household.extra_rdis.add(obj_hct)
-            household_ids = list(set(household_ids) - set(household_ids_to_exclude))
-            individual_ids = list(
+            households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
+            individuals_to_merge_ids = list(
                 Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
                 .exclude(household__in=household_ids_to_exclude)
                 .values_list("id", flat=True)
@@ -91,9 +91,12 @@ class RdiMergeTask:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
 
-                    transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
+                    transaction.on_commit(
+                        lambda: recalculate_population_fields_task(households_to_merge_ids, obj_hct.program_id)
+                    )
                     logger.info(
-                        f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)}"
+                        f"RDI:{registration_data_import_id}"
+                        f" Recalculated population fields for {len(households_to_merge_ids)}"
                         f" households"
                     )
                     kobo_submissions = []
@@ -114,28 +117,29 @@ class RdiMergeTask:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
                     logger.info(
-                        f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
+                        f"RDI:{registration_data_import_id}"
+                        f" Populated index for {len(households_to_merge_ids)} households"
                     )
 
                     dmds = PendingAccount.objects.filter(
-                        individual_id__in=individual_ids,
+                        individual_id__in=individuals_to_merge_ids,
                     )
                     PendingAccount.validate_uniqueness(dmds)
                     dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
                     PendingIndividualRoleInHousehold.objects.filter(
-                        household_id__in=household_ids, individual_id__in=individual_ids
+                        household_id__in=households_to_merge_ids, individual_id__in=individuals_to_merge_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
+                    PendingDocument.objects.filter(individual_id__in=individuals_to_merge_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
-                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individuals_to_merge_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
-                    PendingHousehold.objects.filter(id__in=household_ids).update(
+                    PendingHousehold.objects.filter(id__in=households_to_merge_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED,
                         updated_at=timezone.now(),
                     )
-                    PendingIndividual.objects.filter(id__in=individual_ids).update(
+                    PendingIndividual.objects.filter(id__in=individuals_to_merge_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED,
                         updated_at=timezone.now(),
                     )
@@ -203,9 +207,7 @@ class RdiMergeTask:
                         check_against_sanction_list_pre_merge(
                             program_id=obj_hct.program.id,
                             registration_data_import=obj_hct,
-                            individuals_ids=Individual.objects.filter(registration_data_import=obj_hct).values_list(
-                                "id", flat=True
-                            ),
+                            individuals_ids=individuals_to_merge_ids,
                         )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
@@ -217,6 +219,13 @@ class RdiMergeTask:
                         dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
                         dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
 
+                        if obj_hct.program.deduplication_set_id:
+                            dedupe_service.report_individuals_status(
+                                str(obj_hct.program.deduplication_set_id),
+                                individuals_to_merge_ids,
+                                BiometricDeduplicationService.INDIVIDUALS_MERGED,
+                            )
+
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
                     obj_hct.update_duplicates_against_population_statistics()
@@ -225,16 +234,15 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    logger.info(
-                        f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
-                    )
                     populate_index(
                         Household.objects.filter(registration_data_import=obj_hct),
                         HouseholdDocument,
                     )
-                    logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
+                    logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individuals)} individuals")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
+                    logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
+
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                         "business_area",
@@ -243,7 +251,7 @@ class RdiMergeTask:
                         old_obj_hct,
                         obj_hct,
                     )
-                    logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
+
             except Exception:
                 # remove es individuals if exists
                 remove_elasticsearch_documents_by_matching_ids(

@@ -240,7 +240,6 @@ export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCame
 export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export { PaymentStatusEnum as PaymentStatusEnumCamelCase } from './models/PaymentStatusEnum';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
-export { PaymentVerificationDetailsStatusEnum as PaymentVerificationDetailsStatusEnumCamelCase } from './models/PaymentVerificationDetailsStatusEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';

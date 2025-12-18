@@ -9,12 +9,10 @@ from django.utils import timezone
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.sanction_list.models import SanctionListIndividual
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models import Individual, Program, RegistrationDataImport, SanctionListIndividual
 
 log = logging.getLogger(__name__)
 

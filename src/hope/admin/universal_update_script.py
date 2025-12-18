@@ -1,6 +1,6 @@
 from typing import Any, Iterator
 
-from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.buttons import ButtonWidget
 from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin
@@ -11,14 +11,13 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from hope.admin.utils import HOPEModelAdminBase
-from hope.apps.payment.models import AccountType
-from hope.apps.universal_update_script.models import DocumentType, UniversalUpdate
 from hope.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_household_flex_fields,
     get_individual_flex_fields,
     household_fields,
     individual_fields,
 )
+from hope.models import AccountType, DocumentType, UniversalUpdate
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
@@ -184,7 +183,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     task_statuses.short_description = "Task Statuses"
 
     @staticmethod
-    def start_universal_update_task_visible(btn: Button) -> bool:
+    def start_universal_update_task_visible(btn: ButtonWidget) -> bool:
         universal_update = get_object_or_404(UniversalUpdate, pk=btn.request.resolver_match.kwargs["object_id"])
         return bool(universal_update.update_file)
 

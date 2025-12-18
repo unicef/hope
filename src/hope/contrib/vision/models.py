@@ -1,7 +1,6 @@
 from django.db import models
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.payment.models import PaymentPlan
+from hope.models import BusinessArea, PaymentPlan
 
 
 class FundsCommitmentGroup(models.Model):

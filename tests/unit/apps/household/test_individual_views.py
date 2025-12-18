@@ -25,6 +25,9 @@ from extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketPaymentVerificationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
 )
 from extras.test_utils.factories.household import (
     DocumentFactory,
@@ -37,15 +40,18 @@ from extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hope.apps.core.utils import to_choice_object
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -73,15 +79,20 @@ from hope.apps.household.models import (
     STATUS_ACTIVE,
     UNIQUE,
     WORK_STATUS_CHOICE,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    AccountType,
     DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
     Household,
     Individual,
+    PeriodicFieldData,
+    Program,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.program.models import Program
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -1421,6 +1432,7 @@ class TestIndividualChoices:
         }
 
 
+@pytest.mark.elasticsearch
 class TestIndividualFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -1876,6 +1888,60 @@ class TestIndividualOfficeSearch:
         )
         self.needs_adjudication_details.possible_duplicates.add(self.individuals3[1])
 
+        self.sanction_list_individual = SanctionListIndividualFactory()
+        self.system_flagging_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        )
+        self.system_flagging_ticket.programs.add(self.program)
+        self.system_flagging_details = TicketSystemFlaggingDetailsFactory(
+            ticket=self.system_flagging_ticket,
+            golden_records_individual=self.individuals4[0],
+            sanction_list_individual=self.sanction_list_individual,
+        )
+
+        self.delete_individual_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        )
+        self.delete_individual_ticket.programs.add(self.program)
+        self.delete_individual_details = TicketDeleteIndividualDetailsFactory(
+            ticket=self.delete_individual_ticket,
+            individual=self.individuals2[1],
+        )
+
+        self.household5, self.individuals5 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        self.payment3 = PaymentFactory(
+            parent=self.payment_plan,
+            household=self.household5,
+            head_of_household=self.individuals5[0],
+            program=self.program,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=self.payment_plan)
+        self.payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=self.payment_plan,
+        )
+        self.payment_verification = PaymentVerificationFactory(
+            payment=self.payment3,
+            payment_verification_plan=self.payment_verification_plan,
+        )
+        self.payment_verification_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        )
+        self.payment_verification_ticket.programs.add(self.program)
+        self.payment_verification_details = TicketPaymentVerificationDetailsFactory(
+            ticket=self.payment_verification_ticket,
+            payment_verification=self.payment_verification,
+        )
+
     def test_search_by_individual_unicef_id(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -1952,10 +2018,11 @@ class TestIndividualOfficeSearch:
             {"office_search": self.payment_plan.unicef_id},
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 2
+        assert len(response.data["results"]) == 3
         result_ids = [result["id"] for result in response.data["results"]]
         assert str(self.individuals1[0].id) in result_ids
         assert str(self.individuals2[0].id) in result_ids
+        assert str(self.individuals5[0].id) in result_ids
 
     def test_search_by_complaint_ticket_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -2055,3 +2122,63 @@ class TestIndividualOfficeSearch:
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 0
+
+    def test_search_by_system_flagging_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.system_flagging_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.system_flagging_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals4[0].id)
+
+    def test_search_by_delete_individual_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.delete_individual_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.delete_individual_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals2[1].id)
+
+    def test_search_by_payment_verification_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.payment_verification_ticket.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment_verification_ticket.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals5[0].id)

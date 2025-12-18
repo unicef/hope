@@ -21,9 +21,7 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.account.models import Partner
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.program.models import BeneficiaryGroup, Program
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, Program
 
 pytestmark = pytest.mark.django_db()
 

@@ -1,9 +1,8 @@
-from collections import Counter
 from datetime import datetime
 import logging
 import secrets
 import string
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import Any
 import urllib.parse
 
 from django.core.files.storage import default_storage
@@ -12,8 +11,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import Partner
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_DATE,
@@ -21,27 +18,28 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
 )
-from hope.apps.core.models import FlexibleAttribute
-from hope.apps.core.utils import serialize_flex_attributes
-from hope.apps.geo import models as geo_models
-from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.household.models import (
-    HEAD,
-    RELATIONSHIP_UNKNOWN,
+from hope.apps.core.utils import (
+    serialize_flex_attributes,
+)
+from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+)
+from hope.apps.household.documents import HouseholdDocument, get_individual_doc
+from hope.models import (
+    Account,
+    AccountType,
+    Country,
     Document,
     DocumentType,
+    FlexibleAttribute,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Partner,
 )
-from hope.apps.payment.models import Account, AccountType
-from hope.apps.utils.models import MergeStatusModel
-
-if TYPE_CHECKING:
-    from uuid import UUID
+from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +157,7 @@ def handle_add_document(document_data: dict, individual: Individual) -> Document
     ):
         raise ValidationError(f"Document of type {document_type} already exists for this individual")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
 
     return Document(
         document_number=number,
@@ -213,7 +211,7 @@ def handle_edit_document(document_data: dict) -> Document:
 
     document.document_number = number
     document.type = document_type
-    document.country = geo_models.Country.objects.get(iso_code3=country_code)
+    document.country = Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
     return document
@@ -222,7 +220,7 @@ def handle_edit_document(document_data: dict) -> Document:
 def handle_add_identity(identity: dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -246,7 +244,7 @@ def handle_edit_identity(identity_data: dict) -> IndividualIdentity:
     identity_id = updated_identity.get("id")
     country_code = updated_identity.get("country")
 
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    country = Country.objects.get(iso_code3=country_code)  # pragma: no cover
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -446,42 +444,6 @@ def handle_documents(documents: list[dict]) -> list[dict]:
     return [handle_document(document) for document in documents]
 
 
-def verify_required_arguments(input_data: dict, field_name: str, options: dict) -> None:
-    from hope.apps.core.utils import nested_dict_get
-
-    for key, value in options.items():
-        if key != input_data.get(field_name):
-            continue
-        for required in value.get("required"):
-            if nested_dict_get(input_data, required) is None:
-                raise ValidationError(f"You have to provide {required} in {key}")
-        for not_allowed in value.get("not_allowed"):
-            if nested_dict_get(input_data, not_allowed) is not None:
-                raise ValidationError(f"You can't provide {not_allowed} in {key}")
-
-
-def remove_parsed_data_fields(data_dict: dict, fields_list: Iterable[str]) -> None:
-    for field in fields_list:
-        data_dict.pop(field, None)
-
-
-def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_remove: Individual, info: Any) -> None:
-    old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(
-        individual_to_remove,
-        ticket_details.role_reassign_data,
-        ticket_details.programs.all(),
-        info,
-    )
-    withdraw_individual(
-        individual_to_remove,
-        info,
-        old_individual,
-        household,
-        ticket_details.ticket.programs.all(),
-    )
-
-
 def get_data_from_role_data(
     role_data: dict,
 ) -> tuple[Any | None, Individual, Individual, Household]:
@@ -495,216 +457,6 @@ def get_data_from_role_data(
 
     household = get_object_or_404(Household, id=household_id)
     return role_name, old_individual, new_individual, household
-
-
-def get_data_from_role_data_new_ticket(
-    role_data: dict,
-) -> tuple[Any | None, Individual, Individual, Household]:
-    role_name, old_individual, _, household = get_data_from_role_data(role_data)
-    new_individual_id = role_data.get("new_individual")
-    new_individual = get_object_or_404(Individual, id=new_individual_id)
-
-    return role_name, old_individual, new_individual, household
-
-
-def reassign_roles_on_disable_individual(
-    individual_to_remove: Individual,
-    role_reassign_data: dict,
-    program_id: Optional["UUID"],
-    info: Any | None = None,
-    is_new_ticket: bool = False,
-) -> Household | None:
-    roles_to_bulk_update = []
-    roles_to_delete = []
-    for role_data in role_reassign_data.values():
-        if is_new_ticket:
-            (
-                role_name,
-                old_new_individual,
-                new_individual,
-                household,
-            ) = get_data_from_role_data_new_ticket(role_data)
-        else:
-            (
-                role_name,
-                old_new_individual,
-                new_individual,
-                household,
-            ) = get_data_from_role_data(role_data)
-
-        if role_name == HEAD:
-            if household.head_of_household.pk != new_individual.pk:
-                household.head_of_household = new_individual
-
-                # can be directly saved, because there is always only one head of household to update
-                household.save()
-                household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
-            new_individual.relationship = HEAD
-            new_individual.save()
-            if info:
-                log_create(
-                    Individual.ACTIVITY_LOG_MAPPING,
-                    "business_area",
-                    info.context.user,
-                    program_id,
-                    old_new_individual,
-                    new_individual,
-                )
-
-        if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
-            household=household, individual=new_individual
-        ).first():
-            if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
-                raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            if (
-                role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
-            ):  # remove alternate role if the new individual is being assigned as primary
-                roles_to_delete.append(new_individual_current_role)
-
-        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
-            role = get_object_or_404(
-                IndividualRoleInHousehold,
-                role=role_name,
-                household=household,
-                individual=individual_to_remove,
-            )
-            role.individual = new_individual
-            roles_to_bulk_update.append(role)
-
-    primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
-
-    household_to_remove = individual_to_remove.household
-    is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
-
-    if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
-        raise ValidationError("Ticket cannot be closed, not all roles have been reassigned")
-
-    if all(HEAD not in key for key in role_reassign_data) and individual_to_remove.is_head() and not is_one_individual:
-        raise ValidationError("Ticket cannot be closed, head of household has not been reassigned")
-
-    for role_to_delete in roles_to_delete:
-        role_to_delete.delete(soft=False)
-    if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
-
-    return household_to_remove
-
-
-def reassign_roles_on_update(
-    individual: Individual,
-    role_reassign_data: dict,
-    program_id: "UUID",
-    info: Any | None = None,
-) -> None:
-    roles_to_bulk_update = []
-    roles_to_delete = []
-    for role_data in role_reassign_data.values():
-        (
-            role_name,
-            old_new_individual,
-            new_individual,
-            household,
-        ) = get_data_from_role_data(role_data)
-
-        if role_name == HEAD:
-            household.head_of_household = new_individual
-            household.save()
-            new_individual.relationship = HEAD
-            new_individual.save()
-            if info:
-                log_create(
-                    Individual.ACTIVITY_LOG_MAPPING,
-                    "business_area",
-                    info.context.user,
-                    program_id,
-                    old_new_individual,
-                    new_individual,
-                )
-
-        if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
-            household=household, individual=new_individual
-        ).first():
-            if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
-                raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-            if (
-                role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
-            ):  # remove alternate role if the new individual is being assigned as primary
-                roles_to_delete.append(new_individual_current_role)
-
-        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
-            role = get_object_or_404(
-                IndividualRoleInHousehold,
-                role=role_name,
-                household=household,
-                individual=individual,
-            )
-            role.individual = new_individual
-            roles_to_bulk_update.append(role)
-
-    for role_to_delete in roles_to_delete:
-        role_to_delete.delete(soft=False)
-    if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
-
-
-def withdraw_individual(
-    individual_to_remove: Individual,
-    info: Any,
-    old_individual_to_remove: Individual,
-    removed_individual_household: Household | None,
-    program_id: Optional["UUID"],
-) -> None:
-    individual_to_remove.withdraw()
-
-    Document.objects.filter(status=Document.STATUS_VALID, individual=individual_to_remove).update(
-        status=Document.STATUS_NEED_INVESTIGATION
-    )
-    log_and_withdraw_household_if_needed(
-        individual_to_remove,
-        info,
-        old_individual_to_remove,
-        removed_individual_household,
-        program_id,
-    )
-
-
-def mark_as_duplicate_individual(
-    individual_to_remove: Individual,
-    info: Any,
-    old_individual_to_remove: Individual,
-    removed_individual_household: Household | None,
-    unique_individual: Individual,
-    program_id: Optional["UUID"],
-) -> None:
-    individual_to_remove.mark_as_duplicate(unique_individual)
-    log_and_withdraw_household_if_needed(
-        individual_to_remove,
-        info,
-        old_individual_to_remove,
-        removed_individual_household,
-        program_id,
-    )
-
-
-def log_and_withdraw_household_if_needed(
-    individual_to_remove: Individual,
-    info: Any,
-    old_individual_to_remove: Individual,
-    removed_individual_household: Household | None,
-    program_id: Optional["UUID"],
-) -> None:
-    log_create(
-        Individual.ACTIVITY_LOG_MAPPING,
-        "business_area",
-        info.context.user,
-        program_id,
-        old_individual_to_remove,
-        individual_to_remove,
-    )
-    if removed_individual_household:
-        removed_individual_household.refresh_from_db()
-        if removed_individual_household.active_individuals.count() == 0:
-            removed_individual_household.withdraw()
 
 
 def save_images(flex_fields: dict, associated_with: str) -> None:

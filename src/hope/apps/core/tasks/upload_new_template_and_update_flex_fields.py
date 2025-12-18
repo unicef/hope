@@ -6,7 +6,7 @@ import requests
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hope.apps.core.kobo.api import KoboAPI
-from hope.apps.core.models import XLSXKoboTemplate
+from hope.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 
