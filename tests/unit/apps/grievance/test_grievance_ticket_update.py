@@ -1001,6 +1001,7 @@ class TestGrievanceTicketApprove:
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=self.area_1,
             business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_NEW,
         )
         self.individual_data_change_grv.programs.set([self.program])
         TicketIndividualDataUpdateDetailsFactory(
