@@ -222,9 +222,9 @@ class RegistrationDataImportViewSet(
             get_individual_doc(rdi.business_area.slug),
         )
 
-        if rdi.program.biometric_deduplication_enabled and rdi.program.deduplication_set_id:
+        if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
-                str(rdi.program.deduplication_set_id),
+                str(rdi.program.slug),
                 individuals_to_remove,
                 BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )

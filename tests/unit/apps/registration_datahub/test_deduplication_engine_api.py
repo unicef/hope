@@ -167,11 +167,10 @@ class DeduplicationEngineApiTest(TestCase):
     @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_report_refused_individuals(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
-        deduplication_set_id = str(uuid.uuid4())
         post_mock.return_value = {}, 200
 
         api.report_individuals_status(
-            deduplication_set_id,
+            "slug",
             {
                 "action": "approved",
                 "targets": ["abc", "def", "ghi"],
@@ -179,7 +178,7 @@ class DeduplicationEngineApiTest(TestCase):
         )
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/approve_or_reject/",
+            "deduplication_sets/slug/approve_or_reject/",
             {
                 "action": "approved",
                 "targets": ["abc", "def", "ghi"],
