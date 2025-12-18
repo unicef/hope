@@ -145,6 +145,7 @@ export function processFormData(
     if (obj[key] === undefined || obj[key] === null) continue;
     const value = obj[key];
     const snakeKey = customSnakeCase(key);
+
     let formKey;
     if (Array.isArray(obj)) {
       // Array: use bracket notation for index
@@ -153,6 +154,10 @@ export function processFormData(
       // Object: use dot notation for nesting
       formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
     }
+
+    //Handle Flex Fields in form data
+    // Replace all _if with _i_f and all _hf with _h_f in formKey
+    formKey = formKey.replace(/_if/g, '_i_f').replace(/_hf/g, '_h_f');
 
     if (value instanceof File) {
       formData.append(formKey, value);
