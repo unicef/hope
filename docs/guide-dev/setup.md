@@ -173,6 +173,43 @@ cd src/frontend
 yarn install
 ```
 
+## Pre-commit Hooks
+
+Pre-commit automatically checks and formats code before each commit. When frontend files change, it automatically rebuilds the frontend.
+
+### Installation
+
+```bash
+# Install pre-commit (if not already installed)
+uv tool install pre-commit
+
+# Activate hooks in the repository
+pre-commit install
+```
+
+### Hooks Used
+
+| Hook | Description |
+|------|-------------|
+| `ruff` | Python linting with auto-fix |
+| `ruff-format` | Python code formatting |
+| `djade` | Django template formatting |
+| `pyproject-fmt` | pyproject.toml formatting |
+| `tox-ini-fmt` | tox.ini formatting |
+| `trailing-whitespace` | Remove trailing whitespace |
+| `end-of-file-fixer` | Ensure files end with newline |
+| `frontend-build-check` | When `src/frontend/` changes, runs `yarn build-for-backend` and requires staging generated files |
+
+### Manual Execution
+
+```bash
+# Run on all files
+pre-commit run --all-files
+
+# Or via tox
+direnv exec . tox -e lint
+```
+
 ## Next Steps
 
 Your environment is now ready! Continue to [Running](running.md) to start the application.
