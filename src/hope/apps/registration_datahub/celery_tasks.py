@@ -475,16 +475,12 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: str | None) -> None:
+def fetch_biometric_deduplication_results_and_process(self: Any, program_slug: str) -> None:
     from hope.apps.registration_datahub.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
 
-    if not deduplication_set_id:
-        logger.warning("Program.deduplication_set_id is None")
-        return
-
-    program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+    program = Program.objects.get(slug=program_slug)
     set_sentry_business_area_tag(program.business_area.name)
 
     try:
