@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
-import uuid
 
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -541,7 +540,6 @@ class TestRdiMergeTask(TestCase):
 
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
-        program.deduplication_set_id = uuid.uuid4()
         program.save()
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -555,7 +553,7 @@ class TestRdiMergeTask(TestCase):
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
 
         args, _ = report_individuals_status_mock.call_args
-        assert args[0] == str(program.deduplication_set_id)
+        assert args[0] == str(program.slug)
         assert set(args[1]) == set(
             Individual.objects.filter(registration_data_import=self.rdi).values_list("id", flat=True)
         )
