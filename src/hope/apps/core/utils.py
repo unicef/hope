@@ -491,13 +491,12 @@ def update_labels_mapping(csv_file: str) -> None:
         print(new_content, file=f, end="")
 
 
-def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
-    import xlrd
+def rows_iterator(sheet: "Worksheet") -> Generator:
+    """Iterate over non-empty rows of an openpyxl Worksheet, skipping the header row."""
+    for row_number in range(2, sheet.max_row + 1):  # skip header row (row 1)
+        row = sheet[row_number]
 
-    for row_number in range(1, sheet.nrows):
-        row = sheet.row(row_number)
-
-        if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
+        if all(cell.value is None for cell in row):
             continue
 
         yield row
