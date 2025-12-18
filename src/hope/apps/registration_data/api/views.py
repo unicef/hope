@@ -129,7 +129,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
-        fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
+        fetch_biometric_deduplication_results_and_process.delay(program.slug)
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -222,9 +222,9 @@ class RegistrationDataImportViewSet(
             get_individual_doc(rdi.business_area.slug),
         )
 
-        if rdi.program.biometric_deduplication_enabled and rdi.program.deduplication_set_id:
+        if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
-                str(rdi.program.deduplication_set_id),
+                str(rdi.program.slug),
                 individuals_to_remove,
                 BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )
