@@ -200,8 +200,6 @@ class Program(
     household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
     individual_count = models.PositiveIntegerField(default=0, help_text="Program individual count [sys]")
 
-    deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
-
     sanction_lists = models.ManyToManyField(
         SanctionList,
         blank=True,
