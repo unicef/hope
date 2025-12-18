@@ -97,7 +97,22 @@ RUN uv sync --python=/usr/local/bin/python \
 
 ## Dist (backend only) image
 FROM base AS dist
-ENV PATH="$APP_PATH/.venv/bin:$PATH"
+ARG BUILD_DATE
+ARG SOURCE_COMMIT
+ARG BRANCH
+ARG VERSION
+ENV VERSION=$VERSION
+ENV PATH="$APP_PATH/.venv/bin:$PATH" \
+    BUILD_DATE=$BUILD_DATE \
+    SOURCE_COMMIT=$SOURCE_COMMIT \
+    VERSION=$VERSION
+
+RUN <<EOF cat> /RELEASE
+{"version": "$VERSION",
+ "commit": "$SOURCE_COMMIT",
+ "date": "$BUILD_DATE",
+}
+EOF
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
 COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv
