@@ -36,18 +36,18 @@ class TestSettingTypesForCalculateFields(TestCase):
             (
                 "invalid_file",
                 "flex_init_not_existing_calculate_type.xlsx",
-                "Survey Sheet: Row 8: Invalid type: not_existing_type for calculate field, "
+                "Survey Sheet: Row 7: Invalid type: not_existing_type for calculate field, "
                 "valid choices are text, integer, decimal, date",
             ),
             (
                 "invalid_file",
                 "flex_init_empty_calculate_type.xlsx",
-                "Survey Sheet: Row 9: Calculated result field type must be provided for calculate type fields",
+                "Survey Sheet: Row 8: Calculated result field type must be provided for calculate type fields",
             ),
             (
                 "invalid_file",
                 "flex_init_space_as_calculate_type.xlsx",
-                "Survey Sheet: Row 8: Invalid type:  for calculate field, "
+                "Survey Sheet: Row 7: Invalid type:  for calculate field, "
                 "valid choices are text, integer, decimal, date",
             ),
         ]
