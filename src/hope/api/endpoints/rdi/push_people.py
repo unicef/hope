@@ -63,6 +63,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     accounts = AccountSerializerUpload(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     photo = serializers.CharField(allow_blank=True, required=False)
+    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
@@ -166,7 +167,13 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.programme_code)
+        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.programme_code)
+
+        disability_certificate_picture_file = self.get_photo(
+            individual_data.pop("disability_certificate_picture", None),
+            self.selected_rdi.program.programme_code,
+        )
+
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -180,7 +187,8 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             registration_data_import=rdi,
             program_id=rdi.program_id,
             relationship=relationship,
-            photo=photo,
+            photo=photo_file,
+            disability_certificate_picture=disability_certificate_picture_file,
             **individual_data,
         )
         ind.validate_phone_numbers()
