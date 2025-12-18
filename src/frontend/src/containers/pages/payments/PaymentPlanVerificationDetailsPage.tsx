@@ -55,9 +55,9 @@ const BottomTitle = styled.div`
 `;
 
 const initialFilter = {
-  search: '',
+  search: undefined,
   status: '',
-  verificationChannel: '',
+  verificationChannel: undefined,
   paymentVerificationPlan: '',
 };
 
