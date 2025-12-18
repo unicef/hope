@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
 from flags.models import FlagState
 import pytest
-from pytest_html_reporter import attach
+from pytest_html import extras
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -27,6 +27,7 @@ from e2e.page_object.accountability.surveys_details import AccountabilitySurveys
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.filters import Filters
+from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.feedback import Feedback
@@ -77,12 +78,9 @@ from extras.test_utils.factories.account import RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import BeneficiaryGroupFactory
-from hope.apps.account.models import Partner, Role, RoleAssignment, User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea, DataCollectingType
-from hope.apps.geo.models import Country
-from hope.apps.household.models import DocumentType
 from hope.config.env import env
+from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User
 
 HERE = Path(__file__).resolve().parent
 E2E_ROOT = HERE.parent
@@ -479,6 +477,11 @@ def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryD
 
 
 @pytest.fixture
+def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImport:
+    return GenericImport(browser)
+
+
+@pytest.fixture
 def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
@@ -659,8 +662,13 @@ def create_super_user(business_area: BusinessArea) -> User:
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
     outcome = yield
-    rep = outcome.get_result()
-    setattr(item, "rep_" + rep.when, rep)
+    report = outcome.get_result()
+    setattr(item, "rep_" + report.when, report)
+
+    if report.when == "call" and report.failed:
+        extra = getattr(report, "extra", [])
+        item._html_extra_list = extra
+        report.extra = extra
 
 
 @pytest.fixture(autouse=True)
@@ -670,6 +678,21 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
         pass
     elif request.node.rep_setup.passed and request.node.rep_call.failed:
         screenshot(browser, request.node.nodeid)
+
+
+def attach(data=None, path=None, name="attachment", mime_type=None):
+    """Drop-in replacement for pytest_html_reporter's attach()"""
+    item = pytest._current_item
+    if not hasattr(item, "_html_extra_list"):
+        return
+
+    extra_list = item._html_extra_list
+    if path:
+        extra_list.append(extras.file(path, name=name, mime_type=mime_type))
+    elif isinstance(data, bytes):
+        extra_list.append(extras.image(data, name=name))
+    else:
+        extra_list.append(extras.text(str(data), name=name))
 
 
 # make a screenshot with a name of the test, date and time

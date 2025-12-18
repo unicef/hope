@@ -159,10 +159,8 @@ TEMPLATES: list[dict[str, Any]] = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.static",
-                # Social auth context_processors
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
-                # Matomo
                 "hope.apps.core.context_processors.matomo",
             ],
             "debug": DEBUG,
@@ -184,9 +182,9 @@ PROJECT_APPS = [
     "hope.apps.utils.apps.UtilsConfig",
     "hope.apps.registration_datahub.apps.Config",
     "hope.apps.registration_data.apps.RegistrationDataConfig",
+    "hope.apps.generic_import.apps.Config",
     "hope.apps.sanction_list.apps.SanctionListConfig",
     "hope.apps.steficon.apps.SteficonConfig",
-    "hope.apps.reporting.apps.ReportingConfig",
     "hope.apps.activity_log.apps.ActivityLogConfig",
     "hope.apps.dashboard.apps.DashboardConfig",
     "hope.apps.accountability.apps.AccountabilityConfig",
@@ -438,6 +436,7 @@ FLAGS = {
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
+    "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
 }
 
 MARKDOWNIFY = {

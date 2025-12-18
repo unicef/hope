@@ -10,13 +10,13 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.api.models import Grant
 from hope.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,
     RegistrationListVersionsKeyBit,
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

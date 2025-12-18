@@ -33,10 +33,8 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -45,16 +43,6 @@ from hope.apps.household.models import (
     MALE,
     NOT_DISABLED,
     SON_DAUGHTER,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-)
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
-    ImportData,
-    KoboImportData,
-    RegistrationDataImport,
 )
 from hope.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
@@ -71,7 +59,6 @@ from hope.apps.registration_datahub.celery_tasks import (
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
-from hope.apps.utils.models import MergeStatusModel
 from hope.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
@@ -90,6 +77,19 @@ from hope.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
+from hope.models import (
+    BusinessArea,
+    DocumentType,
+    ImportData,
+    KoboImportData,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+    country as geo_models,
+)
+from hope.models.utils import MergeStatusModel
 
 SRI_LANKA_FIELDS: Dict = {
     "caretaker-info": [
@@ -1023,6 +1023,7 @@ class TestRegistrationImportCeleryTasks(BaseTestCase):
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
         assert self.registration_data_import.status == RegistrationDataImport.MERGE_ERROR
+        assert self.registration_data_import.error_message == "Test Exception"
 
     @patch("hope.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(

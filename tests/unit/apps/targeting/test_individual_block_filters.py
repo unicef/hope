@@ -14,18 +14,16 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.models import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     MALE,
-    Household,
 )
 from hope.apps.targeting.choices import FlexFieldClassification
-from hope.apps.targeting.models import (
+from hope.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    Household,
+    PeriodicFieldData,
     TargetingCriteriaRule,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,

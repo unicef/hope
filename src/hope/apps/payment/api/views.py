@@ -25,7 +25,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -35,9 +34,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
-from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -93,17 +90,6 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -125,10 +111,25 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hope.apps.program.models import ProgramCycle
-from hope.apps.steficon.models import Rule
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import (
+    BusinessArea,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    ProgramCycle,
+    Rule,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 

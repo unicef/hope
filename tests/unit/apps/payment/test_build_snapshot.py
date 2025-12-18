@@ -13,17 +13,13 @@ from extras.test_utils.factories.payment import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hope.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hope.apps.payment.models import (
-    AccountType,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-)
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import AccountType, DeliveryMechanism, FinancialServiceProvider, IndividualRoleInHousehold
+from hope.models.utils import MergeStatusModel
 
 
 class TestBuildSnapshot(TestCase):

@@ -25,10 +25,8 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.accountability.models import Survey
 from hope.apps.core.services.rapid_pro.api import TokenNotProvidedError
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import PaymentPlan, Program, Survey
 
 pytestmark = pytest.mark.django_db
 

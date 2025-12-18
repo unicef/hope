@@ -11,16 +11,18 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
     AccountSerializerUpload,
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.api.models import Grant
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -29,11 +31,13 @@ from hope.apps.household.models import (
     NOT_DISABLED,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+    Area,
+    Country,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

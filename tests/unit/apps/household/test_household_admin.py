@@ -17,8 +17,8 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.household.models import Document
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
+from hope.models import Document
 
 
 class TestHouseholdWithdrawFromListMixin(TestCase):

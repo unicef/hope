@@ -1,8 +1,6 @@
- 
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { KoboImportData } from '@restgenerated/models/KoboImportData';
-import { StatusF63Enum } from '@restgenerated/models/StatusF63Enum';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -26,7 +24,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
 
   // Mutation for saving Kobo import data
   const saveMutation = useMutation({
-    mutationFn: async(variables: SaveKoboVariables) => {
+    mutationFn: async (variables: SaveKoboVariables) => {
       return RestService.restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate(
         {
           businessAreaSlug: variables.businessAreaSlug,
@@ -47,7 +45,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   // Query for polling kobo import data status
   const { data: koboImportData } = useQuery({
     queryKey: ['koboImportData', importDataId, businessAreaSlug],
-    queryFn: async() => {
+    queryFn: async () => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasKoboImportDataRetrieve({
         businessAreaSlug: businessAreaSlug,
@@ -59,11 +57,9 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
       // Stop polling if status is final
       if (
         data &&
-        [
-          StatusF63Enum.ERROR,
-          StatusF63Enum.VALIDATION_ERROR,
-          StatusF63Enum.FINISHED,
-        ].includes(data?.state?.data?.status)
+        ['ERROR', 'VALIDATION_ERROR', 'FINISHED'].includes(
+          data?.state?.data?.status,
+        )
       ) {
         return false;
       }
@@ -79,9 +75,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     saveAndStartPolling,
     loading:
       saveMutation.isPending ||
-      [StatusF63Enum.PENDING, StatusF63Enum.RUNNING].includes(
-        koboImportData?.status,
-      ),
+      ['PENDING', 'RUNNING'].includes(koboImportData?.status),
     koboImportData: koboImportData || null,
   };
 }

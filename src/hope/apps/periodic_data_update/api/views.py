@@ -21,12 +21,10 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
-from hope.apps.account.models import RoleAssignment, User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import BusinessArea, FlexibleAttribute
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter, UserAvailableFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
@@ -50,14 +48,18 @@ from hope.apps.periodic_data_update.api.serializers import (
 )
 from hope.apps.periodic_data_update.api.utils import add_round_names_to_rounds_data
 from hope.apps.periodic_data_update.celery_tasks import send_pdu_online_edit_notification_emails
-from hope.apps.periodic_data_update.models import (
+from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
+from hope.models import (
+    BusinessArea,
+    FlexibleAttribute,
     PDUOnlineEdit,
     PDUOnlineEditSentBackComment,
     PDUXlsxTemplate,
     PDUXlsxUpload,
+    Program,
+    RoleAssignment,
+    User,
 )
-from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
-from hope.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 

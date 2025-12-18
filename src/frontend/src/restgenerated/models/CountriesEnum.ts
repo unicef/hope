@@ -18,7 +18,7 @@
  * * `AUS` - Australia
  * * `AUT` - Austria
  * * `AZE` - Azerbaijan
- * * `BHS` - Bahamas
+ * * `BHS` - Bahamas (The)
  * * `BHR` - Bahrain
  * * `BGD` - Bangladesh
  * * `BRB` - Barbados
@@ -53,7 +53,6 @@
  * * `COL` - Colombia
  * * `COM` - Comoros
  * * `COG` - Congo
- * * `COD` - Congo (the Democratic Republic of the)
  * * `COK` - Cook Islands
  * * `CRI` - Costa Rica
  * * `HRV` - Croatia
@@ -62,6 +61,7 @@
  * * `CYP` - Cyprus
  * * `CZE` - Czechia
  * * `CIV` - Côte d'Ivoire
+ * * `COD` - Democratic Republic of the Congo
  * * `DNK` - Denmark
  * * `DJI` - Djibouti
  * * `DMA` - Dominica
@@ -100,7 +100,6 @@
  * * `GUY` - Guyana
  * * `HTI` - Haiti
  * * `HMD` - Heard Island and McDonald Islands
- * * `VAT` - Holy See
  * * `HND` - Honduras
  * * `HKG` - Hong Kong
  * * `HUN` - Hungary
@@ -171,7 +170,7 @@
  * * `OMN` - Oman
  * * `PAK` - Pakistan
  * * `PLW` - Palau
- * * `PSE` - Palestine, State of
+ * * `PSE` - Palestine
  * * `PAN` - Panama
  * * `PNG` - Papua New Guinea
  * * `PRY` - Paraguay
@@ -187,7 +186,7 @@
  * * `RWA` - Rwanda
  * * `REU` - Réunion
  * * `BLM` - Saint Barthélemy
- * * `SHN` - Saint Helena, Ascension and Tristan da Cunha
+ * * `SHN` - Saint Helena
  * * `KNA` - Saint Kitts and Nevis
  * * `LCA` - Saint Lucia
  * * `MAF` - Saint Martin (French part)
@@ -208,7 +207,7 @@
  * * `SLB` - Solomon Islands
  * * `SOM` - Somalia
  * * `ZAF` - South Africa
- * * `SGS` - South Georgia and the South Sandwich Islands
+ * * `SGS` - South Georgia
  * * `KOR` - South Korea
  * * `SSD` - South Sudan
  * * `ESP` - Spain
@@ -243,6 +242,7 @@
  * * `URY` - Uruguay
  * * `UZB` - Uzbekistan
  * * `VUT` - Vanuatu
+ * * `VAT` - Vatican City
  * * `VEN` - Venezuela
  * * `VNM` - Vietnam
  * * `VGB` - Virgin Islands (British)
@@ -305,7 +305,6 @@ export enum CountriesEnum {
     COL = 'COL',
     COM = 'COM',
     COG = 'COG',
-    COD = 'COD',
     COK = 'COK',
     CRI = 'CRI',
     HRV = 'HRV',
@@ -314,6 +313,7 @@ export enum CountriesEnum {
     CYP = 'CYP',
     CZE = 'CZE',
     CIV = 'CIV',
+    COD = 'COD',
     DNK = 'DNK',
     DJI = 'DJI',
     DMA = 'DMA',
@@ -352,7 +352,6 @@ export enum CountriesEnum {
     GUY = 'GUY',
     HTI = 'HTI',
     HMD = 'HMD',
-    VAT = 'VAT',
     HND = 'HND',
     HKG = 'HKG',
     HUN = 'HUN',
@@ -495,6 +494,7 @@ export enum CountriesEnum {
     URY = 'URY',
     UZB = 'UZB',
     VUT = 'VUT',
+    VAT = 'VAT',
     VEN = 'VEN',
     VNM = 'VNM',
     VGB = 'VGB',
