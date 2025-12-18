@@ -1094,7 +1094,7 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        cls.program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True)
+        cls.program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, slug="slug")
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area,
             program=cls.program,
@@ -1116,7 +1116,6 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         self,
         mock_upload_and_process: Mock,
     ) -> None:
-        assert self.program.deduplication_set_id is None
         deduplication_engine_process(str(self.program.id))
 
         mock_upload_and_process.assert_called_once_with(self.program)
@@ -1136,13 +1135,5 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         self,
         mock_fetch_biometric_deduplication_results_and_process: Mock,
     ) -> None:
-        fetch_biometric_deduplication_results_and_process(None)
-        mock_fetch_biometric_deduplication_results_and_process.assert_not_called()
-
-        deduplication_set_id = str(uuid.uuid4())
-        self.program.deduplication_set_id = deduplication_set_id
-        self.program.save()
-
-        fetch_biometric_deduplication_results_and_process(deduplication_set_id)
-
+        fetch_biometric_deduplication_results_and_process(self.program.slug)
         mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(self.program)
