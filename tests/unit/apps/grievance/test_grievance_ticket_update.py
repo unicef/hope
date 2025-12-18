@@ -2,6 +2,7 @@ from datetime import date
 from typing import Any
 
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 import pytest
 from rest_framework import status
@@ -2024,3 +2025,71 @@ class TestGrievanceTicketApprove:
         assert len(resp_data) == 2
         assert resp_data[0]["ticket_notes"][0]["description"] == "New Note bulk create"
         assert resp_data[1]["ticket_notes"][0]["description"] == "New Note bulk create"
+
+    def test_update_grievance_ticket_individual_data_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras.individual_data_update_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"]
+
+    def test_update_grievance_ticket_add_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.add_individual_grv.pk),
+            },
+        )
+        data = {
+            "extras.add_individual_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.add_individual_grv.refresh_from_db()
+        ticket_details = self.add_individual_grv.add_individual_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]
