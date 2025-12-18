@@ -117,7 +117,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
-    photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    photo = serializers.CharField(allow_blank=True, required=False)
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
@@ -431,7 +431,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    consent_sign = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    consent_sign = serializers.CharField(allow_null=True, required=False)
     head_of_household = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
