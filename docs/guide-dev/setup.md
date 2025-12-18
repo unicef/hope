@@ -13,7 +13,7 @@ This guide will help you set up your local development environment for HOPE.
 Install system dependencies using Homebrew:
 
 ```bash
-brew install wkhtmltopdf pango postgis gdal
+brew install wkhtmltopdf pango gdal
 ```
 
 ### Required Tools
