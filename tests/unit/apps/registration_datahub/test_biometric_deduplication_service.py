@@ -211,19 +211,6 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.create_deduplication_set = mock.MagicMock()
 
-        # test create deduplication set error
-        self.program.deduplication_set_id = None
-        self.program.save()
-        service.create_deduplication_set.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
-        service.upload_and_process_deduplication_set(self.program)
-        assert service.create_deduplication_set.call_count == 1
-        rdi_1.refresh_from_db()
-        rdi_2.refresh_from_db()
-        assert rdi_1.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
-        assert rdi_2.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
-
-        self.program.deduplication_set_id = uuid.uuid4()
-        self.program.save()
         # test upload images error
         mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError
         service.upload_and_process_deduplication_set(self.program)

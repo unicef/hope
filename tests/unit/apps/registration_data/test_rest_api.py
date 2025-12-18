@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from typing import Any, Callable, Generator
 from unittest.mock import Mock, patch
-import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -64,7 +63,6 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             name="Test Program",
             status=Program.ACTIVE,
             biometric_deduplication_enabled=True,
-            deduplication_set_id=uuid.uuid4(),
         )
         cls.client = APIClient()
 
@@ -89,7 +87,6 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert resp.json() == ["Deduplication is already in progress for some RDIs"]
 
         self.program.biometric_deduplication_enabled = False
-        self.program.deduplication_set_id = None
         self.program.save()
         resp = self.client.post(url, {}, format="json")
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -396,7 +393,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert rdi.refuse_reason == "Testing refuse endpoint"
 
         report_refused_individuals_mock.assert_called_once_with(
-            str(rdi.program.deduplication_set_id), individuals_ids_to_remove, "rejected"
+            str(rdi.program.slug), individuals_ids_to_remove, "rejected"
         )
         remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
             individuals_ids_to_remove, IndividualDocumentAfghanistan
