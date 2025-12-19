@@ -179,9 +179,6 @@ function RegistrationDetails({
                         }
                       />
                     </LabelizedField>
-                    {registration?.errorMessage && (
-                      <Error>{registration.errorMessage}</Error>
-                    )}
                   </Box>
                 </Grid>
               )}
