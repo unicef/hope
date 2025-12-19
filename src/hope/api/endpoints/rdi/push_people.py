@@ -27,8 +27,10 @@ from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     HEAD,
+    MARITAL_STATUS_CHOICE,
     NON_BENEFICIARY,
     NOT_DISABLED,
+    OBSERVED_DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
     Area,
@@ -57,8 +59,12 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
 class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    observed_disability = serializers.CharField(allow_blank=True, required=False)
-    marital_status = serializers.CharField(allow_blank=True, required=False)
+    observed_disability = serializers.MultipleChoiceField(
+        choices=OBSERVED_DISABILITY_CHOICE,
+        allow_empty=True,
+        required=False,
+    )
+    marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
     documents = DocumentSerializerUpload(many=True, required=False)
     accounts = AccountSerializerUpload(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])

@@ -29,6 +29,8 @@ from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Account,
@@ -112,8 +114,12 @@ class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
-    observed_disability = serializers.CharField(allow_blank=True, required=False)
-    marital_status = serializers.CharField(allow_blank=True, required=False)
+    observed_disability = serializers.MultipleChoiceField(
+        choices=OBSERVED_DISABILITY_CHOICE,
+        allow_empty=True,
+        required=False,
+    )
+    marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
@@ -195,7 +201,7 @@ class HandleFlexFieldsMixin:
     def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-            model=PendingIndividual,
+            model=PendingHousehold,
             raw_data=raw_data,
             reserved_fields=reserved_fields,
         )
