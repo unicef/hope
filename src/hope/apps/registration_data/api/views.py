@@ -225,7 +225,7 @@ class RegistrationDataImportViewSet(
         if rdi.program.biometric_deduplication_enabled:
             BiometricDeduplicationService().report_individuals_status(
                 str(rdi.program.slug),
-                individuals_to_remove,
+                [str(_id) for _id in individuals_to_remove],
                 BiometricDeduplicationService.INDIVIDUALS_REFUSED,
             )
 

@@ -554,9 +554,10 @@ class TestRdiMergeTask(TestCase):
 
         args, _ = report_individuals_status_mock.call_args
         assert args[0] == str(program.slug)
-        assert set(args[1]) == set(
-            Individual.objects.filter(registration_data_import=self.rdi).values_list("id", flat=True)
-        )
+        assert set(args[1]) == {
+            str(_id)
+            for _id in Individual.objects.filter(registration_data_import=self.rdi).values_list("id", flat=True)
+        }
         assert args[2] == "merged"
 
     def test_merge_empty_rdi(self) -> None:
