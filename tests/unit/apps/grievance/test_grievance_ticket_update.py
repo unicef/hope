@@ -2094,3 +2094,37 @@ class TestGrievanceTicketApprove:
         ticket_details = self.add_individual_grv.add_individual_ticket_details
         assert "photo" in ticket_details.individual_data
         assert ticket_details.individual_data["photo"]
+
+    def test_update_grievance_ticket_individual_data_clear_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras": {
+                "individual_data_update_issue_type_extras": {
+                    "individual_data": {
+                        "photo": None,
+                    }
+                }
+            }
+        }
+        response = self.api_client.patch(url, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"] == ""
