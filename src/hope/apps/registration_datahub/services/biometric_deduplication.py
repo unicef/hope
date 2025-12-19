@@ -375,13 +375,13 @@ class BiometricDeduplicationService:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
         self.api.report_false_positive_duplicate(false_positive_pair, program_unicef_id)
 
-    def report_individuals_status(self, program_unicef_id: str, individual_ids: list[str], action: str) -> None:
+    def report_individuals_status(self, program: Program, individual_ids: list[str], action: str) -> None:
         if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
             return
 
         try:
             self.api.report_individuals_status(
-                program_unicef_id,
+                program.unicef_id,
                 {"action": action, "targets": individual_ids},
             )
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:  # pragma no cover
