@@ -3,7 +3,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Iterable
 
 from django.core.exceptions import ValidationError
-import xlrd
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import (
@@ -18,7 +17,7 @@ from hope.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
-from hope.apps.core.utils import xlrd_rows_iterator
+from hope.apps.core.utils import rows_iterator
 from hope.apps.household.const import (
     BLANK,
     NOT_PROVIDED,
@@ -68,34 +67,42 @@ class BaseValidator:
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:
     choices_mapping = defaultdict(list)
-    first_row = choices_sheet.row(0)
-    choices_headers_map = [col.value for col in first_row]
+
+    # First row = header (1-indexed in openpyxl)
+    first_row = choices_sheet[1]
+    choices_headers_map = [cell.value for cell in first_row]
+
     required_columns = {"list_name", "name"}
-    if required_columns.issubset(set(choices_headers_map)) is False:
+    if not required_columns.issubset(set(choices_headers_map)):
         missing_columns = required_columns - set(choices_headers_map)
         str_missing_columns = ", ".join(missing_columns)
         msg = f"Choices sheet does not contain all required columns, missing columns: {str_missing_columns}"
         logger.warning(msg)
         raise ValidationError(msg)
 
-    for row_number in range(1, choices_sheet.nrows):
-        row = choices_sheet.row(row_number)
+    last_list_name = None
 
-        if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
+    # Loop through all rows starting from row 2
+    for row_number in range(2, choices_sheet.max_row + 1):
+        row = choices_sheet[row_number]
+
+        if all(cell.value is None for cell in row):
             continue
 
-        last_list_name = None
         choice_value = None
         for cell, header_name in zip(row, choices_headers_map, strict=True):
             cell_value = cell.value
+
             if header_name == "list_name" and cell_value != last_list_name:
-                last_list_name = str(cell_value).strip()
+                last_list_name = str(cell_value).strip() if cell_value else None
+
             elif header_name == "name":
                 if isinstance(cell_value, float) and cell_value.is_integer():
                     cell_value = str(int(cell_value))
-
-                if isinstance(cell_value, str):
+                elif isinstance(cell_value, str):
                     cell_value = cell_value.strip().upper()
+                else:
+                    cell_value = str(cell_value).strip() if cell_value is not None else None
 
                 choice_value = cell_value
 
@@ -162,34 +169,45 @@ class KoboTemplateValidator:
         survey_sheet: "Worksheet",
         choices_mapping: dict,
         columns_names_and_numbers_mapping: dict,
-    ) -> dict:
+    ) -> dict[str, dict]:
         core_fields_in_file = {}
-        for row in xlrd_rows_iterator(survey_sheet):
-            field_name = row[columns_names_and_numbers_mapping["name"]].value
-            if field_name.endswith("_c") is False:
+
+        # Iterate over non-empty rows
+        for row in rows_iterator(survey_sheet):
+            # Safe access to name
+            cell_name = row[columns_names_and_numbers_mapping["name"]].value
+            if not cell_name or not str(cell_name).endswith("_c"):
                 continue
+            field_name = str(cell_name).strip()
 
-            field_type = row[columns_names_and_numbers_mapping["type"]].value
+            # Type
+            cell_type = row[columns_names_and_numbers_mapping["type"]].value
+            field_type = str(cell_type).strip() if cell_type else ""
 
+            # Handle select_ types
             choices_list_name = None
             if field_type.startswith("select_"):
-                field_type, choices_list_name, *_ = field_type.split(" ")
+                parts = field_type.split(" ")
+                field_type = parts[0]
+                if len(parts) > 1:
+                    choices_list_name = parts[1]
 
             if field_type not in cls.CHOICE_MAP:
                 continue
 
-            required_value = str(row[columns_names_and_numbers_mapping["required"]].value)
-            if required_value.lower() not in ("true", "false"):
-                is_field_required = False
-            else:
-                is_field_required = bool(required_value == "true")
+            # Required
+            cell_required = row[columns_names_and_numbers_mapping["required"]].value
+            required_value = str(cell_required).strip().lower() if cell_required else "false"
+            is_field_required = required_value == "true"
 
+            # Map type
             field_type = cls.CHOICE_MAP[field_type] if field_type != "calculate" else "CALCULATE"
 
+            # Build dict
             core_fields_in_file[field_name] = {
                 "type": field_type,
                 "required": is_field_required,
-                "choices": choices_mapping[choices_list_name] if choices_list_name is not None else [],
+                "choices": choices_mapping.get(choices_list_name, []) if choices_list_name else [],
             }
 
         return core_fields_in_file
@@ -259,36 +277,45 @@ class KoboTemplateValidator:
 
     @classmethod
     def validate_kobo_template(cls, survey_sheet: "Worksheet", choices_sheet: "Worksheet") -> list[dict[str, str]]:
+        # Prepare choices mapping
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
-        first_row = survey_sheet.row(0)
+        # Map column names to indices
+        first_row = survey_sheet[1]  # openpyxl first row is 1
         columns_names_and_numbers_mapping = cls._map_columns_numbers(first_row)
 
+        # Extract core fields from the survey sheet
         core_fields_in_file = cls._get_core_fields_from_file(
             survey_sheet, choices_mapping, columns_names_and_numbers_mapping
         )
         core_fields_in_db = cls._get_core_fields_from_db()
 
         validation_errors = []
+
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
             field_choices = [choice["value"] for choice in field_data["choices"]]
 
-            if not (core_field_from_file := core_fields_in_file.get(core_field)):
+            core_field_from_file = core_fields_in_file.get(core_field)
+            if not core_field_from_file:
                 validation_errors.append({"field": core_field, "message": "Field is missing"})
                 continue
 
+            # Check if the field is required
             field_required_error = cls._check_is_field_required(core_field, core_field_from_file)
             if field_required_error:
                 validation_errors.append(field_required_error)
 
+            # Boolean fields that appear as select_one are okay
             if field_type == TYPE_BOOL and core_field_from_file["type"] == TYPE_SELECT_ONE:
                 continue
 
+            # Check type consistency
             field_type_error = cls._check_field_type(core_field, core_field_from_file, field_type)
             if field_type_error:
                 validation_errors.append(field_type_error)
 
+            # Check choice values
             field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
             if field_choices_errors:
                 validation_errors.extend(field_choices_errors)
