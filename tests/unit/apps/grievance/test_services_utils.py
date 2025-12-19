@@ -624,7 +624,7 @@ class TestGrievanceUtils(TestCase):
         report_false_positive_duplicate_mock.assert_called_once_with(
             str(ind_1.photo.name),
             str(ind_2.photo.name),
-            program.slug,
+            program.unicef_id,
         )
 
     def test_create_grievance_ticket_with_details_no_possible_duplicates(self) -> None:
