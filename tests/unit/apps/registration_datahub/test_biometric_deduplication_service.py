@@ -801,7 +801,7 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_report_false_positive_duplicate(self, mock_report_false_positive_duplicate: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
-        service.report_false_positive_duplicate("123", "456", self.program.unicef_id)
+        service.report_false_positive_duplicate("123", "456", self.program)
         mock_report_false_positive_duplicate.assert_called_once_with(
             IgnoredFilenamesPair(first="123", second="456"),
             self.program.unicef_id,
