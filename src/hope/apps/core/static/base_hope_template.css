@@ -313,6 +313,10 @@ body {
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.appbar-minimal {
+  background: #233944 !important;
+  color: #fff;
+}
 .drawer.mini ~ .appbar {
   left: 55px;
   right: 0;
@@ -321,7 +325,6 @@ body {
 .main-content {
   flex-grow: 1;
   margin-left: 270px;
-  margin-top: 64px;
   padding: 32px;
   background: #fff;
   min-height: calc(100vh - 64px);

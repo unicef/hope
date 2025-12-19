@@ -16,7 +16,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -204,7 +207,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     def selected_rdi(self) -> RegistrationDataImport:
         """Get the selected RDI with proper error handling."""
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],
@@ -223,7 +226,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64)
+            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -259,7 +262,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         external_individual_id = serializer.validated_data.pop("individual_id")
 
         photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64)
+        photo_file = self.get_photo(photo_b64, self.selected_rdi.program.programme_code)
 
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(

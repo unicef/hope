@@ -200,8 +200,6 @@ class Program(
     household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
     individual_count = models.PositiveIntegerField(default=0, help_text="Program individual count [sys]")
 
-    deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
-
     sanction_lists = models.ManyToManyField(
         SanctionList,
         blank=True,
@@ -317,7 +315,10 @@ class Program(
                 name="unique_for_business_area_and_slug_if_not_removed",
             ),
         ]
-        permissions = [("enroll_beneficiaries", "Can enroll beneficiaries")]
+        permissions = [
+            ("enroll_beneficiaries", "Can enroll beneficiaries"),
+            ("can_bulk_upload_individual_photos", "Can bulk upload Individual photos"),
+        ]
         verbose_name = "Programme"
 
     def __str__(self) -> str:

@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-import xlrd
+from openpyxl import load_workbook
 from xlrd.sheet import Cell
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
@@ -14,7 +14,7 @@ class TestFlexibleHelperMethods(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.importer = FlexibleAttributeImporter()
-        cls.filename = f"{settings.TESTS_ROOT}/apps/core/test_files/flex_init.xls"
+        cls.filename = f"{settings.TESTS_ROOT}/apps/core/test_files/flex_init.xlsx"
         cls.survey_sheet_name = "survey"  # keep only the name
         cls.choices_sheet_name = "choices"  # keep only the name
         cls.importer._reset_model_fields_variables()
@@ -78,13 +78,15 @@ class TestFlexibleHelperMethods(TestCase):
         english label: Milk and dairy products: yoghurt, cheese
         required: false
         """
-        wb = xlrd.open_workbook(filename=self.filename)
-        sheet = wb.sheet_by_name(self.survey_sheet_name)
-        row = sheet.row(61)
-        type_value = row[0].value
-        name_value = row[1].value
-        required_value = row[6].value
-        label_value = row[2].value
+        wb = load_workbook(filename=self.filename, data_only=True)
+        sheet = wb[self.survey_sheet_name]
+        row_idx = 62
+        row = sheet[row_idx]
+
+        type_value = sheet.cell(row=row_idx, column=1).value
+        name_value = sheet.cell(row=row_idx, column=2).value
+        label_value = sheet.cell(row=row_idx, column=3).value
+        required_value = sheet.cell(row=row_idx, column=7).value
 
         self.importer._assign_field_values(type_value, "type", "attribute", row, 61)
         self.importer._assign_field_values(name_value, "name", "attribute", row, 61)
@@ -103,7 +105,7 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.assertRaisesMessage(
             ValidationError,
-            "Row 62: English label cannot be empty",
+            "Row 61: English label cannot be empty",
             self.importer._assign_field_values,
             "",
             "label::English(EN)",
@@ -113,7 +115,7 @@ class TestFlexibleHelperMethods(TestCase):
         )
         self.assertRaisesMessage(
             ValidationError,
-            "Row 62: Type is required",
+            "Row 61: Type is required",
             self.importer._assign_field_values,
             "",
             "type",
@@ -123,7 +125,7 @@ class TestFlexibleHelperMethods(TestCase):
         )
         self.assertRaisesMessage(
             ValidationError,
-            "Row 62: Name is required",
+            "Row 61: Name is required",
             self.importer._assign_field_values,
             "",
             "name",
@@ -138,12 +140,13 @@ class TestFlexibleHelperMethods(TestCase):
         english label: Consent
         required: false
         """
-        wb = xlrd.open_workbook(filename=self.filename)
-        sheet = wb.sheet_by_name(self.survey_sheet_name)
-        row = sheet.row(4)
-        name_value = row[1].value
-        required_value = row[6].value
-        label_value = row[2].value
+        wb = load_workbook(filename=self.filename, data_only=True)
+        sheet = wb[self.survey_sheet_name]
+        row_idx = 5
+        row = sheet[row_idx]
+        name_value = row[1].value  # Column B
+        required_value = row[6].value  # Column G
+        label_value = row[2].value  # Column C
 
         self.importer._assign_field_values(name_value, "name", "group", row, 4)
         self.importer._assign_field_values(required_value, "required", "group", row, 4)
@@ -160,7 +163,7 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.assertRaisesMessage(
             ValidationError,
-            "Row 62: Name is required",
+            "Row 61: Name is required",
             self.importer._assign_field_values,
             "",
             "name",
@@ -175,12 +178,13 @@ class TestFlexibleHelperMethods(TestCase):
         name: 1
         english label: Yes
         """
-        wb = xlrd.open_workbook(filename=self.filename)
-        sheet = wb.sheet_by_name(self.choices_sheet_name)
-        row = sheet.row(1)
-        list_name_value = row[0].value
-        name_value = row[1].value
-        label_value = row[2].value
+        wb = load_workbook(filename=self.filename, data_only=True)
+        sheet = wb[self.choices_sheet_name]
+        row_idx = 2
+        row = sheet[row_idx]
+        list_name_value = sheet.cell(row=row_idx, column=1).value
+        name_value = sheet.cell(row=row_idx, column=2).value
+        label_value = sheet.cell(row=row_idx, column=3).value
 
         self.importer._assign_field_values(list_name_value, "list_name", "choice", row, 1)
         self.importer._assign_field_values(name_value, "name", "choice", row, 1)
@@ -197,7 +201,7 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.assertRaisesMessage(
             ValidationError,
-            "Row 2: English label cannot be empty",
+            "Row 1: English label cannot be empty",
             self.importer._assign_field_values,
             "",
             "label::English(EN)",
@@ -207,7 +211,7 @@ class TestFlexibleHelperMethods(TestCase):
         )
         self.assertRaisesMessage(
             ValidationError,
-            "Row 2: List Name is required",
+            "Row 1: List Name is required",
             self.importer._assign_field_values,
             "",
             "list_name",
@@ -217,7 +221,7 @@ class TestFlexibleHelperMethods(TestCase):
         )
         self.assertRaisesMessage(
             ValidationError,
-            "Row 2: Name is required",
+            "Row 1: Name is required",
             self.importer._assign_field_values,
             "",
             "name",
@@ -356,9 +360,10 @@ class TestFlexibleHelperMethods(TestCase):
             assert case["expected"] == result
 
     def test_get_list_of_field_choices(self) -> None:
-        wb = xlrd.open_workbook(filename=self.filename)
-        sheet = wb.sheet_by_name(self.survey_sheet_name)
+        wb = load_workbook(filename=self.filename, data_only=True)
+        sheet = wb[self.survey_sheet_name]
         result = self.importer._get_list_of_field_choices(sheet)
+
         expected = {
             "sex",
             "severity_of_disability",

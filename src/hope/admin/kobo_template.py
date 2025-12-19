@@ -16,8 +16,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
-import xlrd
-from xlrd import XLRDError
+from openpyxl import load_workbook
 
 from hope.admin.utils import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hope.apps.core.celery_tasks import (
@@ -134,21 +133,29 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             xls_file = request.FILES["xls_file"]
 
             try:
-                wb = xlrd.open_workbook(file_contents=xls_file.read())
+                # Load workbook from uploaded file
+                xls_file.seek(0)
+                wb = load_workbook(filename=xls_file, data_only=True)
+
                 sheets = {
-                    "survey_sheet": wb.sheet_by_name("survey"),
-                    "choices_sheet": wb.sheet_by_name("choices"),
+                    "survey_sheet": wb["survey"],  # openpyxl sheet access
+                    "choices_sheet": wb["choices"],
                 }
+
+                # Validate Kobo template
                 validation_errors = KoboTemplateValidator.validate_kobo_template(**sheets)
+
                 if validation_errors:
                     errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
                     form.add_error(field=None, error=errors)
+
             except ValidationError as validation_error:
                 logger.warning(validation_error)
                 form.add_error("xls_file", validation_error)
-            except XLRDError as file_error:
-                logger.warning(file_error)
-                form.add_error("xls_file", file_error)
+
+            except KeyError as sheet_error:
+                logger.warning(sheet_error)
+                form.add_error("xls_file", f"Missing sheet: {sheet_error}")
 
             if form.is_valid():
                 xlsx_kobo_template_object = XLSXKoboTemplate.objects.create(

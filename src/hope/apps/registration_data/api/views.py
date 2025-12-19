@@ -45,6 +45,7 @@ from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
     registration_xlsx_import_task,
 )
+from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -89,6 +90,7 @@ class RegistrationDataImportViewSet(
         ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
+        "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -100,6 +102,14 @@ class RegistrationDataImportViewSet(
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
     def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if not self.program.biometric_deduplication_enabled:
+            raise ValidationError("Biometric deduplication is not enabled for this program")
+
+        if RegistrationDataImport.objects.filter(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists():
+            raise ValidationError("Deduplication is already in progress for some RDIs")
+
         deduplication_engine_process.delay(str(self.program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
@@ -119,7 +129,7 @@ class RegistrationDataImportViewSet(
         **kwargs: Any,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
-        fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
+        fetch_biometric_deduplication_results_and_process.delay(program.slug)
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -199,16 +209,25 @@ class RegistrationDataImportViewSet(
             logger.warning("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]
         rdi.save()
-        # TODO: Copied from mutation, but in my opinion it is wrong
-        individuals_to_remove = Individual.all_objects.filter(registration_data_import=rdi)
+
         remove_elasticsearch_documents_by_matching_ids(
-            list(individuals_to_remove.values_list("id", flat=True)),
+            individuals_to_remove,
             get_individual_doc(rdi.business_area.slug),
         )
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                str(rdi.program.slug),
+                individuals_to_remove,
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,

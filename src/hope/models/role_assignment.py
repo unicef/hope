@@ -132,3 +132,23 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
     def __str__(self) -> str:
         role_holder = self.user or self.partner
         return f"{role_holder} {self.role} in {self.business_area}"
+
+
+class UserRoleAssignment(RoleAssignment):
+    """Proxy model for RoleAssignments that are assigned to Users."""
+
+    class Meta:
+        app_label = "account"
+        proxy = True
+        verbose_name = "Role Assignment (User)"
+        verbose_name_plural = "Role Assignments (User)"
+
+
+class PartnerRoleAssignment(RoleAssignment):
+    """Proxy model for RoleAssignments that are assigned to Partners."""
+
+    class Meta:
+        app_label = "account"
+        proxy = True
+        verbose_name = "Role Assignment (Partner)"
+        verbose_name_plural = "Role Assignments (Partner)"
