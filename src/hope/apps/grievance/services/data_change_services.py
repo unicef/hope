@@ -15,11 +15,11 @@ from hope.apps.grievance.services.data_change.household_data_update_service impo
 from hope.apps.grievance.services.data_change.household_delete_service import (
     HouseholdDeleteService,
 )
-from hope.apps.grievance.services.data_change.individual_dalete_service import (
-    IndividualDeleteService,
-)
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
+)
+from hope.apps.grievance.services.data_change.individual_delete_service import (
+    IndividualDeleteService,
 )
 
 logger = logging.getLogger(__name__)

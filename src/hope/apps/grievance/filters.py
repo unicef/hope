@@ -292,7 +292,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
                 household_path = lookups["household"]
                 q_filters |= Q(**{f"{ticket_type}__{household_path}__unicef_id": unicef_id})
 
-        q_filters |= Q(delete_household_ticket_details__household__unicef_id=unicef_id)
         q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
 
         return queryset.filter(q_filters).distinct()
@@ -312,8 +311,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
         q_filters |= Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=unicef_id)
         q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
         q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
-
-        q_filters |= Q(delete_individual_ticket_details__individual__unicef_id=unicef_id)
 
         return queryset.filter(q_filters).distinct()
 

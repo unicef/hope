@@ -7,6 +7,7 @@ from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
+from flags.models import FlagState
 from freezegun import freeze_time
 from parameterized import parameterized
 import pytest
@@ -516,6 +517,9 @@ class TestRdiMergeTask(TestCase):
         },
     )
     @mock.patch(
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_individuals_status"
+    )
+    @mock.patch(
         "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
     )
     @mock.patch(
@@ -525,7 +529,15 @@ class TestRdiMergeTask(TestCase):
         self,
         update_rdis_deduplication_statistics_mock: mock.Mock,
         create_grievance_tickets_for_duplicates_mock: mock.Mock,
+        report_individuals_status_mock: mock.Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
         program.save()
@@ -539,6 +551,13 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
+
+        args, _ = report_individuals_status_mock.call_args
+        assert args[0] == str(program.slug)
+        assert set(args[1]) == set(
+            Individual.objects.filter(registration_data_import=self.rdi).values_list("id", flat=True)
+        )
+        assert args[2] == "merged"
 
     def test_merge_empty_rdi(self) -> None:
         rdi = self.rdi
