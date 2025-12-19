@@ -101,7 +101,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        mock_fetch_dedup_results.assert_called_once_with(self.program.slug)
+        mock_fetch_dedup_results.assert_called_once_with(str(self.program.id))
 
     def test_list_registrations(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -393,7 +393,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert rdi.refuse_reason == "Testing refuse endpoint"
 
         report_refused_individuals_mock.assert_called_once_with(
-            str(rdi.program.slug), [str(_id) for _id in individuals_ids_to_remove], "rejected"
+            rdi.program, [str(_id) for _id in individuals_ids_to_remove], "rejected"
         )
         remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
             individuals_ids_to_remove, IndividualDocumentAfghanistan

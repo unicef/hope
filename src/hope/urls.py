@@ -10,7 +10,6 @@ import hope.apps.account.views
 import hope.apps.accountability.views
 from hope.apps.core.rest_api import all_fields_attributes
 from hope.apps.core.views import (
-    BaseHopeTemplateView,
     UploadFile,
     homepage,
     logout_view,
@@ -93,7 +92,10 @@ api_patterns = [
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("sanction-list/", include("hope.apps.sanction_list.urls")),
-    path("generic-import/", include("hope.apps.generic_import.urls", namespace="generic_import")),
+    path(
+        "generic-import/",
+        include("hope.apps.generic_import.urls", namespace="generic_import"),
+    ),
     path("hh-status", hope.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
     path("aurora/", include("hope.contrib.aurora.urls", namespace="aurora")),
@@ -106,7 +108,6 @@ urlpatterns = (
     [
         path("_health", homepage),
         path("api/", include(api_patterns)),
-        path("base-hope-template/", BaseHopeTemplateView.as_view(), name="base-hope-template-view"),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

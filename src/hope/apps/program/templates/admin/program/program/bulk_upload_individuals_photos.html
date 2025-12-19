@@ -1,0 +1,28 @@
+{% extends "admin/change_form.html" %}
+{% load admin_modify admin_urls i18n static %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        &rsaquo; <a
+            href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a
+            href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; <a
+            href="{% url opts|admin_urlname:'bulk_upload_individuals_photos' pk %}">Bulk Upload Individuals Photos</a>
+    </div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <h1>Bulk Upload Individuals Photos</h1>
+    <div>
+    Load zip file.
+    <form method="POST" id="bulk_upload_individuals_photos" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <table>
+            {{ form }}
+        </table>
+        <div><input type="submit" value="Upload"></div>
+    </form>
+{% endblock content %}
+
+{% block submit_buttons_bottom %}{% endblock %}

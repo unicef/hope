@@ -120,6 +120,7 @@ class TestKoboTemplateUpload(BaseTestCase):
     )
     def test_upload_valid_template(self) -> None:
         response = self.upload_file("kobo-template-valid.xlsx")
+        # assert not response.context["form"].errors
         messages = [m.message for m in get_messages(response.wsgi_request)]
 
         assert response.status_code == 302 or response.redirect_chain
@@ -127,6 +128,19 @@ class TestKoboTemplateUpload(BaseTestCase):
             "Core field validation successful, running KoBo Template upload task..., "
             "Import status will change after task completion"
         ) in messages
+
+    def test_upload_template_with_validation_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid.xlsx")
+        assert "Field: residence_status_h_c" in response.text
+        assert "Choice: RETURNEE is not present" in response.text
+        assert "Field: size_h_c - Field must be required" in response.text
+        assert "Field: tax_id_no_i_c - Field is missing" in response.text
+        assert "Upload XLS" in response.text
+
+    def test_upload_template_with_missing_sheet_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid-missing-sheet.xlsx")
+        form = response.context["form"]
+        assert "Missing sheet: 'Worksheet survey does not exist.'" in form.errors["xls_file"]
 
 
 class TestKoboErrorHandling(BaseTestCase):
