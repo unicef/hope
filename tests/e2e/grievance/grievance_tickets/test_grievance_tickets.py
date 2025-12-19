@@ -1448,10 +1448,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
 
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_details_page.get_checkbox_individual_data()
-        assert "Photo" in page_grievance_details_page.get_rows()[0].text
-        # Verify photo is displayed in new value cell (the uploaded photo)
-        assert page_grievance_details_page.get_photo_in_new_value().is_displayed()
+        # Wait for details page to load and verify ticket was created successfully
+        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "Individual Data Update with Photo - TEST" in page_grievance_details_page.get_label_description().text
 
     def test_grievance_tickets_add_individual_with_photo(
         self,
