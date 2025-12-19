@@ -434,7 +434,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
-    size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_null=True, required=False)
