@@ -369,11 +369,9 @@ class BiometricDeduplicationService:
             logger.error(f"Dedupe Engine error for program {program} \n {deduplication_set_data.error}")
             self.mark_rdis_as_error(program)
 
-    def report_false_positive_duplicate(
-        self, individual1_photo: str, individual2_photo: str, program_unicef_id: str
-    ) -> None:
+    def report_false_positive_duplicate(self, individual1_photo: str, individual2_photo: str, program: Program) -> None:
         false_positive_pair = IgnoredFilenamesPair(first=individual1_photo, second=individual2_photo)
-        self.api.report_false_positive_duplicate(false_positive_pair, program_unicef_id)
+        self.api.report_false_positive_duplicate(false_positive_pair, program.unicef_id)
 
     def report_individuals_status(self, program: Program, individual_ids: list[str], action: str) -> None:
         if not bool(flag_state("BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS")):  # pragma no cover
