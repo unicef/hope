@@ -1,7 +1,12 @@
 import base64
+import os
 from pathlib import Path
+import tempfile
+from unittest.mock import patch
 
 from django.core.management import call_command
+from django.test.utils import override_settings
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -263,3 +268,41 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.consent_sign is not None
         assert household.consent_sign.name.startswith(self.program.programme_code)
         assert household.consent_sign.name.endswith(".png")
+
+    def test_consent_sign_cleanup_on_failure(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args, **kwargs):
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for consent sign cleanup test")
+
+                with patch(
+                    "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
+                    side_effect=fail_after_files_exist,
+                ):
+                    with pytest.raises(RuntimeError):
+                        self.client.post(self.url, [household_data], format="json")
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []
