@@ -16,8 +16,7 @@ from extras.test_utils.factories.core import (
 )
 from hope.admin.business_area import AcceptanceProcessThresholdFormset
 from hope.admin.data_collecting_type import DataCollectingTypeForm
-from hope.apps.account.models import Role, RoleAssignment, User
-from hope.apps.core.models import DataCollectingType
+from hope.models import DataCollectingType, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -214,6 +213,6 @@ def test_role_admin_members_button(client, superuser) -> None:
     with patch.object(type(superuser), "has_perm", return_value=True):
         response = client.get(url)
 
-    expected_url = reverse("admin:account_roleassignment_changelist") + f"?role__id__exact={role.pk}"
+    expected_url = reverse("admin:account_userroleassignment_changelist") + f"?role__id__exact={role.pk}"
     assert response.status_code == 302
     assert response.url == expected_url

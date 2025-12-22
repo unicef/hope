@@ -8,10 +8,8 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
-from hope.api.models import Grant
-from hope.apps.geo.models import Area, AreaType, Country
-from hope.apps.payment.models import FinancialInstitution
-from hope.apps.program.models import Program
+from hope.models import Area, AreaType, Country, FinancialInstitution, Program
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
@@ -65,7 +63,7 @@ class APICountriesTests(HOPEApiTestCase):
             "iso_code2": country.iso_code2,
             "iso_code3": country.iso_code3,
             "iso_num": country.iso_num,
-            "updated_at": country.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "updated_at": country.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_from": country.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_until": country.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
@@ -143,8 +141,8 @@ class AreaListTests(HOPEApiTestCase):
     def get_result(self, area: Area) -> dict:
         return {
             "id": str(area.id),
-            "created_at": area.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "updated_at": area.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "created_at": area.created_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "updated_at": area.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "original_id": area.original_id,
             "name": area.name,
             "p_code": area.p_code,
@@ -232,12 +230,12 @@ class AreaTypeListTests(HOPEApiTestCase):
     def get_result(self, area_type: AreaType) -> dict:
         return {
             "id": str(area_type.id),
-            "created_at": area_type.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "updated_at": area_type.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "created_at": area_type.created_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "updated_at": area_type.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "original_id": area_type.original_id,
             "name": area_type.name,
             "area_level": area_type.area_level,
-            "valid_from": area_type.valid_from.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "valid_from": area_type.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_until": area_type.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "extras": area_type.extras,
             "lft": area_type.lft,
@@ -324,7 +322,7 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
             "type": financial_institution.type,
             "swift_code": financial_institution.swift_code or "",
             "country_iso_code3": financial_institution.country.iso_code3 if financial_institution.country else None,
-            "updated_at": financial_institution.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            "updated_at": financial_institution.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
             if financial_institution.updated_at
             else None,
         }

@@ -10,10 +10,9 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import LogEntry
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.program.models import Program
+from hope.models import LogEntry, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -46,7 +45,7 @@ class TestLogEntryView:
         )
 
         self.l1 = LogEntry.objects.create(
-            action=LogEntry.CREATE,
+            action=LogEntry.UPDATE,
             content_object=self.program_1,
             user=self.user,
             business_area=self.afghanistan,
@@ -129,6 +128,7 @@ class TestLogEntryView:
             },
         )
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -160,7 +160,7 @@ class TestLogEntryView:
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
                 assert log_result["content_type"] == log.content_type.name
-                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%SZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
                     expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"
@@ -173,6 +173,7 @@ class TestLogEntryView:
             assert response_results[2]["program_slug"] == self.program_2.slug
             assert response_results[3]["program_slug"] == self.program_1.slug
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -200,6 +201,7 @@ class TestLogEntryView:
             assert resp_data["count"] == 4
 
     # per Program
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -230,7 +232,7 @@ class TestLogEntryView:
                 assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
                 assert log_result["object_repr"] == log.object_repr
                 assert log_result["content_type"] == log.content_type.name
-                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%SZ}"
 
                 if isinstance(log.content_object, GrievanceTicket):
                     expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"
@@ -238,6 +240,7 @@ class TestLogEntryView:
                     expected_is_user_generated = None
                 assert log_result["is_user_generated"] == expected_is_user_generated
 
+    @pytest.mark.enable_activity_log
     @pytest.mark.parametrize(
         ("permissions", "expected_status"),
         [
@@ -263,6 +266,7 @@ class TestLogEntryView:
             resp_data = response.json()
             assert resp_data["count"] == 2
 
+    @pytest.mark.enable_activity_log
     def test_activity_logs_filters(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_2)
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)
@@ -342,3 +346,23 @@ class TestLogEntryView:
         choice = resp_data[0]
         assert "name" in choice
         assert "value" in choice
+
+    @pytest.mark.enable_activity_log
+    def test_activity_logs_list_search(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)
+        response = self.client.get(self.url_list + "?limit=20&offset=0&search=upda")
+        # search self.l1 > by Action "UPDATE"
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()["results"]
+        assert len(response_results) == 1
+        log_result = response_results[0]
+        assert log_result["object_id"] == str(self.l1.object_id)
+        assert log_result["action"] == self.l1.get_action_display()
+        assert log_result["changes"] == self.l1.changes
+        assert log_result["user"] == (f"{self.l1.user.first_name} {self.l1.user.last_name}" if self.l1.user else "-")
+        assert log_result["object_repr"] == self.l1.object_repr
+        assert log_result["content_type"] == self.l1.content_type.name
+        assert log_result["timestamp"] == f"{self.l1.timestamp:%Y-%m-%dT%H:%M:%SZ}"

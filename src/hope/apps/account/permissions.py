@@ -4,14 +4,11 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
 from django.core.exceptions import PermissionDenied
 
-from hope.apps.core.models import BusinessArea
-
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
-    from hope.apps.account.models import User
-    from hope.apps.program.models import Program
+    from hope.models import BusinessArea, Program, User
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +26,10 @@ class Permissions(Enum):
     RDI_RERUN_DEDUPE = auto()
     RDI_MERGE_IMPORT = auto()
     RDI_REFUSE_IMPORT = auto()
+    RDI_WEBHOOK_DEDUPLICATION = auto()
+
+    # Generic Import
+    GENERIC_IMPORT_DATA = auto()
 
     # Population
     POPULATION_VIEW_HOUSEHOLDS_LIST = auto()
@@ -249,6 +250,9 @@ class Permissions(Enum):
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
+    # Country Search
+    SEARCH_BUSINESS_AREAS = auto()
+
     @classmethod
     def choices(cls) -> tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
@@ -305,7 +309,7 @@ DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DE
 
 
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
-    from hope.apps.program.models import Program
+    from hope.models import BusinessArea, Program
 
     if not user.is_authenticated:
         return False

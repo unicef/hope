@@ -9,8 +9,8 @@ import pytest
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.registration_data.models import RegistrationDataImport
 from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+from hope.models import RegistrationDataImport
 
 
 class TestRegistrationXlsxImportTask(TestCase):

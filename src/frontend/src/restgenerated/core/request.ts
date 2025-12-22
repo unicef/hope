@@ -120,20 +120,6 @@ export function customSnakeCase(str: string): string {
   );
 }
 
-function isAccountDataField(key: string): boolean {
-  if (!key) {
-    return false;
-  }
-  if (typeof key !== 'string') {
-    return false;
-  }
-  return (
-    key.startsWith(
-      'extras.issue_type.individual_data_update_issue_type_extras.individual_data.accounts_to_edit',
-    ) && key.endsWith('.data_fields')
-  );
-}
-
 export function processFormData(
   obj: any,
   form?: FormData,
@@ -159,17 +145,19 @@ export function processFormData(
     if (obj[key] === undefined || obj[key] === null) continue;
     const value = obj[key];
     const snakeKey = customSnakeCase(key);
+
     let formKey;
     if (Array.isArray(obj)) {
       // Array: use bracket notation for index
       formKey = parentKey ? `${parentKey}[${key}]` : key;
-    } else if (isAccountDataField(parentKey)) {
-      // Object: use dot notation for nesting
-      formKey = parentKey ? `${parentKey}.${key}` : snakeKey;
     } else {
       // Object: use dot notation for nesting
       formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
     }
+
+    //Handle Flex Fields in form data
+    // Replace all _if with _i_f and all _hf with _h_f in formKey
+    formKey = formKey.replace(/_if/g, '_i_f').replace(/_hf/g, '_h_f');
 
     if (value instanceof File) {
       formData.append(formKey, value);

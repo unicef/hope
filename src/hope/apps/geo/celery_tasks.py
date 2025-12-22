@@ -4,8 +4,8 @@ import logging
 from celery import shared_task
 from django.db import transaction
 
-from hope.apps.geo.models import Area, AreaType, Country
 from hope.apps.utils.sentry import sentry_tags
+from hope.models import Area, AreaType, Country
 
 logger = logging.getLogger(__name__)
 

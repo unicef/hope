@@ -14,11 +14,10 @@ from extras.test_utils.factories.account import (
     RoleFactory,
     UserFactory,
 )
-from hope.apps.account.models import RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.services import DashboardGlobalDataCache
 from hope.apps.dashboard.views import DashboardReportView
+from hope.models import BusinessArea, RoleAssignment
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 

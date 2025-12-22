@@ -10,7 +10,6 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
-from hope.apps.geo.models import Country
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.api.serializers.household import (
     HouseholdSimpleSerializer,
@@ -20,17 +19,20 @@ from hope.apps.household.api.serializers.household import (
 from hope.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
+)
+from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
+from hope.models import (
+    Account,
+    Country,
     Document,
     DocumentType,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hope.apps.payment.models import Account
-from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -105,24 +107,26 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
         fields = ("id", "country", "number", "partner")
 
 
+class AccountDataFieldSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField()
+
+
 class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    account_type_key = serializers.CharField(source="account_type.key")
     data_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
-        fields = (
-            "id",
-            "name",
-            "data_fields",
-            "account_type",
-        )
+        fields = ("id", "name", "data_fields", "account_type", "number", "financial_institution", "account_type_key")
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_data_fields(self, obj: Account) -> dict:
-        return dict(sorted(obj.account_data.items()))
+    @extend_schema_field(AccountDataFieldSerializer(many=True))
+    def get_data_fields(self, obj: Account) -> list:
+        return [{"key": key, "value": value} for key, value in sorted(obj.data.items())]
 
 
 class IndividualSimpleSerializer(serializers.ModelSerializer):

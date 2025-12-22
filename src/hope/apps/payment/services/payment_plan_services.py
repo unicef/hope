@@ -4,6 +4,7 @@ from itertools import groupby
 import logging
 from typing import IO, TYPE_CHECKING, Callable, Union
 
+from celery import chain
 from constance import config
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.paginator import Paginator
@@ -15,15 +16,11 @@ from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.currencies import USDC
-from hope.apps.core.models import BusinessArea, FileTemp
 from hope.apps.core.utils import chunks
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     ROLE_PRIMARY,
-    Individual,
-    IndividualRoleInHousehold,
 )
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
@@ -39,35 +36,37 @@ from hope.apps.payment.celery_tasks import (
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
 )
-from hope.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentDataCollector,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
 from hope.apps.payment.utils import get_link
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.targeting.models import (
-    TargetingCriteriaRule,
-    TargetingIndividualRuleFilterBlock,
-)
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    BusinessArea,
+    DeliveryMechanism,
+    FileTemp,
+    FinancialServiceProvider,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentDataCollector,
+    PaymentPlan,
+    PaymentPlanSplit,
+    Program,
+    ProgramCycle,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+    User,
+)
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.base_user import AbstractBaseUser
-    from django.contrib.auth.models import AnonymousUser
-
-    from hope.apps.account.models import AbstractUser
+    from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 
 class PaymentPlanService:
@@ -638,22 +637,22 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self.payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-            if not (fsp_id and delivery_mechanism_code):
-                self.payment_plan.delivery_mechanism = None
-                self.payment_plan.financial_service_provider = None
-                should_rebuild_list = True
+        if self.payment_plan.is_population_open():
+            current_fsp = self.payment_plan.financial_service_provider
+            current_dm = self.payment_plan.delivery_mechanism
+            has_current_values = current_fsp is not None or current_dm is not None
 
+            if not (fsp_id and delivery_mechanism_code) and has_current_values:
+                self.payment_plan.financial_service_provider = None
+                self.payment_plan.delivery_mechanism = None
+                should_rebuild_list = True
             if fsp_id and delivery_mechanism_code:
                 fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                if (
-                    self.payment_plan.financial_service_provider != fsp
-                    or self.payment_plan.delivery_mechanism != delivery_mechanism
-                ):
-                    should_rebuild_list = True
+                if current_fsp != fsp or current_dm != delivery_mechanism:
                     self.payment_plan.financial_service_provider = fsp
                     self.payment_plan.delivery_mechanism = delivery_mechanism
+                    should_rebuild_list = True
 
         self.payment_plan.save()
 
@@ -900,18 +899,35 @@ class PaymentPlanService:
         vulnerability_filter: bool,
         payment_plan: PaymentPlan,
     ) -> None:
+        from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection
+
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
+
         payment_plan.build_status_pending()
         payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
 
         if rebuild_full_list:
-            payment_plan_full_rebuild.delay(str(payment_plan.id))
+            if vulnerability_filter and payment_plan.steficon_rule_targeting:
+                # in case of full rebuild and vulnerability filter, need to run steficon after rebuild
+                chain(
+                    payment_plan_full_rebuild.si(str(payment_plan.id)),
+                    payment_plan_apply_steficon_hh_selection.si(
+                        str(payment_plan.id), str(payment_plan.steficon_rule_targeting.rule_id)
+                    ),
+                ).apply_async()
+            elif should_update_money_stats:
+                chain(
+                    payment_plan_full_rebuild.si(str(payment_plan.id)),
+                    payment_plan_rebuild_stats.si(str(payment_plan.id)),
+                ).apply_async()
+            else:
+                payment_plan_full_rebuild.delay(str(payment_plan.id))
+            return
 
         if should_update_money_stats:
             payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
         if vulnerability_filter:
-            # just remove all with vulnerability_score filter
             params = {}
             if payment_plan.vulnerability_score_max is not None:
                 params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max

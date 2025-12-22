@@ -9,8 +9,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
-from hope.apps.program.models import Program
+from hope.models import PDUOnlineEdit, Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -103,7 +102,7 @@ class TestPDUOnlineEditList:
                     "name": self.pdu_edit1.name,
                     "number_of_records": self.pdu_edit1.number_of_records,
                     "created_by": self.pdu_edit1.created_by.get_full_name(),
-                    "created_at": f"{self.pdu_edit1.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "created_at": f"{self.pdu_edit1.created_at:%Y-%m-%dT%H:%M:%SZ}",
                     "status": self.pdu_edit1.combined_status,
                     "status_display": self.pdu_edit1.combined_status_display,
                     "is_authorized": False,
@@ -113,7 +112,7 @@ class TestPDUOnlineEditList:
                     "name": self.pdu_edit2.name,
                     "number_of_records": self.pdu_edit2.number_of_records,
                     "created_by": self.pdu_edit2.created_by.get_full_name(),
-                    "created_at": f"{self.pdu_edit2.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+                    "created_at": f"{self.pdu_edit2.created_at:%Y-%m-%dT%H:%M:%SZ}",
                     "status": self.pdu_edit2.combined_status,
                     "status_display": self.pdu_edit2.combined_status_display,
                     "is_authorized": True,

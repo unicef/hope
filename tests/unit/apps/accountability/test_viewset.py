@@ -25,10 +25,8 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.accountability.models import Survey
 from hope.apps.core.services.rapid_pro.api import TokenNotProvidedError
-from hope.apps.payment.models import PaymentPlan
-from hope.apps.program.models import Program
+from hope.models import PaymentPlan, Program, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -207,7 +205,7 @@ class TestFeedbackViewSet:
                 assert (
                     feedback_result["created_by"] == f"{feedback.created_by.first_name} {feedback.created_by.last_name}"
                 )
-                assert feedback_result["created_at"] == f"{feedback.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert feedback_result["created_at"] == f"{feedback.created_at:%Y-%m-%dT%H:%M:%SZ}"
                 assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
@@ -649,7 +647,7 @@ class TestFeedbackViewSet:
                 feedback_result["created_by"]
                 == f"{self.feedback_1.created_by.first_name} {self.feedback_1.created_by.last_name}"
             )
-            assert feedback_result["created_at"] == f"{self.feedback_1.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+            assert feedback_result["created_at"] == f"{self.feedback_1.created_at:%Y-%m-%dT%H:%M:%SZ}"
             assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
@@ -1223,7 +1221,7 @@ class TestMessageViewSet:
                 assert message_result["title"] == message.title
                 assert message_result["number_of_recipients"] == message.number_of_recipients
                 assert message_result["created_by"] == f"{self.user.first_name} {self.user.last_name}"
-                assert message_result["created_at"] == f"{message.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert message_result["created_at"] == f"{message.created_at:%Y-%m-%dT%H:%M:%SZ}"
 
     def test_msg_filter_by_program(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1829,7 +1827,7 @@ class TestSurveyViewSet:
                 assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
                 assert survey_result["has_valid_sample_file"] is None
                 assert survey_result["sample_file_path"] is None
-                assert survey_result["created_at"] == f"{survey.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert survey_result["created_at"] == f"{survey.created_at:%Y-%m-%dT%H:%M:%SZ}"
                 assert survey_result["number_of_recipients"] == survey.number_of_recipients
 
     @pytest.mark.parametrize(

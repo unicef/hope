@@ -16,37 +16,39 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
-from hope.api.endpoints.rdi.common import DisabilityChoiceField, NullableChoiceField
+from hope.api.endpoints.rdi.common import (
+    DisabilityChoiceField,
+    NullableChoiceField,
+)
 from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.api.models import Grant
-from hope.apps.core.models import FlexibleAttribute
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Account,
+    AccountType,
+    Area,
+    Country,
     DocumentType,
+    FinancialInstitution,
+    FlexibleAttribute,
     IndividualRoleInHousehold,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
-from hope.apps.payment.models import (
-    Account,
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_data.models import RegistrationDataImport
-from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models.utils import Grant
 
 if TYPE_CHECKING:
-    from hope.apps.core.models import BusinessArea
+    from hope.models import BusinessArea
 
 BATCH_SIZE = 100
 
@@ -205,7 +207,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     def selected_rdi(self) -> RegistrationDataImport:
         """Get the selected RDI with proper error handling."""
         try:
-            return RegistrationDataImport.objects.get(
+            return RegistrationDataImport.objects.select_related("program").get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
                 business_area__slug=self.kwargs["business_area"],
@@ -224,7 +226,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> None:
         for document_data in documents_data:
             image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64)
+            doc_photo = self.get_photo(image_b64, self.selected_rdi.program.programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -260,7 +262,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         external_individual_id = serializer.validated_data.pop("individual_id")
 
         photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64)
+        photo_file = self.get_photo(photo_b64, self.selected_rdi.program.programme_code)
 
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(

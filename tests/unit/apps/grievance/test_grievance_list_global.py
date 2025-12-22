@@ -10,12 +10,28 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.grievance import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    TicketDeleteHouseholdDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketPaymentVerificationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
+)
 from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.payment import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.program.models import Program
+from hope.models import Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -728,3 +744,485 @@ class TestGrievanceTicketGlobalList:
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 29
+
+
+class TestGrievanceTicketOfficeSearch:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.global_url_name = "api:grievance:grievance-tickets-global-list"
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program.cycles.first()
+
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        self.household1, self.individuals1 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.household2, self.individuals2 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.household3, self.individuals3 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        self.program_cycle = ProgramCycleFactory(program=self.program)
+        self.payment_plan = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.program_cycle,
+        )
+        self.payment = PaymentFactory(
+            parent=self.payment_plan,
+            household=self.household1,
+            head_of_household=self.individuals1[0],
+            program=self.program,
+        )
+
+        self.complaint_ticket1 = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        )
+        self.complaint_details1 = GrievanceComplaintTicketWithoutExtrasFactory(
+            ticket=self.complaint_ticket1,
+            household=self.household1,
+            individual=self.individuals1[0],
+            payment=None,
+        )
+
+        self.sensitive_ticket2 = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        )
+        self.sensitive_details2 = SensitiveGrievanceTicketWithoutExtrasFactory(
+            ticket=self.sensitive_ticket2,
+            household=self.household2,
+            individual=self.individuals2[0],
+            payment=None,
+        )
+
+        self.complaint_ticket3 = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        )
+        self.complaint_details3 = GrievanceComplaintTicketWithoutExtrasFactory(
+            ticket=self.complaint_ticket3,
+            household=self.household3,
+            individual=self.individuals3[0],
+            payment=self.payment,
+        )
+
+        self.needs_adjudication_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        )
+
+        self.needs_adjudication_details = TicketNeedsAdjudicationDetails.objects.create(
+            ticket=self.needs_adjudication_ticket,
+            golden_records_individual=self.individuals1[0],
+        )
+        self.needs_adjudication_details.possible_duplicates.add(self.individuals2[1])
+
+        self.delete_individual_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        )
+        self.delete_individual_details = TicketDeleteIndividualDetailsFactory(
+            ticket=self.delete_individual_ticket,
+            individual=self.individuals3[1],
+        )
+
+        self.household4, self.individuals4 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        self.delete_household_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+        )
+        self.delete_household_details = TicketDeleteHouseholdDetailsFactory(
+            ticket=self.delete_household_ticket,
+            household=self.household4,
+        )
+
+        self.sanction_list_individual = SanctionListIndividualFactory()
+
+        self.system_flagging_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        )
+        self.system_flagging_details = TicketSystemFlaggingDetailsFactory(
+            ticket=self.system_flagging_ticket,
+            golden_records_individual=self.individuals1[1],
+            sanction_list_individual=self.sanction_list_individual,
+        )
+
+        self.household5, self.individuals5 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        self.payment_plan2 = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.program_cycle,
+        )
+        self.payment2 = PaymentFactory(
+            parent=self.payment_plan2,
+            household=self.household5,
+            head_of_household=self.individuals5[0],
+            program=self.program,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=self.payment_plan2)
+        self.payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=self.payment_plan2,
+        )
+        self.payment_verification = PaymentVerificationFactory(
+            payment=self.payment2,
+            payment_verification_plan=self.payment_verification_plan,
+        )
+
+        self.payment_verification_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        )
+        self.payment_verification_details = TicketPaymentVerificationDetailsFactory(
+            ticket=self.payment_verification_ticket,
+            payment_verification=self.payment_verification,
+        )
+
+    def test_search_by_grievance_ticket_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.complaint_ticket1.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.complaint_ticket1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.complaint_ticket1.id)
+
+    def test_search_by_household_unicef_id_complaint_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.complaint_ticket1.id) in result_ids
+
+    def test_search_by_household_unicef_id_sensitive_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household2.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
+
+    def test_search_by_individual_unicef_id_sensitive_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals2[0].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
+
+    def test_search_by_delete_individual_ticket_details(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals3[1].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.delete_individual_ticket.id)
+
+    def test_search_by_delete_individual_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Search by household of the individual being deleted
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household3.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.delete_individual_ticket.id) in result_ids
+
+    def test_search_by_payment_verification_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals5[0].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment_verification_ticket.id)
+
+    def test_search_by_payment_verification_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household5.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment_verification_ticket.id)
+
+    def test_search_by_household_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 3
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.complaint_ticket1.id) in result_ids
+        assert str(self.needs_adjudication_ticket.id) in result_ids
+        assert str(self.system_flagging_ticket.id) in result_ids
+
+    def test_search_by_individual_unicef_id_multiple_tickets(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals1[0].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.needs_adjudication_ticket.id) in result_ids
+        assert str(self.complaint_ticket1.id) in result_ids
+
+    def test_search_by_possible_duplicates_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals2[1].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.needs_adjudication_ticket.id)
+
+    def test_search_by_needs_adjudication_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.needs_adjudication_ticket.id) in result_ids
+
+    def test_search_by_payment_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        self.complaint_ticket3.refresh_from_db()
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.payment.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.complaint_ticket3.id)
+
+    def test_search_by_system_flagging_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.individuals1[1].unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.system_flagging_ticket.id)
+
+    def test_search_by_system_flagging_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household1.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.system_flagging_ticket.id) in result_ids
+        assert str(self.complaint_ticket1.id) in result_ids
+
+    def test_search_by_delete_household_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": self.household4.unicef_id},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.delete_household_ticket.id)

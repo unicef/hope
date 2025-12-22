@@ -6,8 +6,8 @@ from faker import Faker
 
 from extras.test_utils.factories.account import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.program.models import Program
 from hope.contrib.aurora.models import Organization, Project, Registration
+from hope.models import Program
 
 faker = Faker()
 

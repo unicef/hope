@@ -8,17 +8,18 @@ from django.forms import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
 from hope.admin.steficon import AutocompleteWidget
-from hope.apps.core.models import BusinessArea
-from hope.apps.household.models import (
+from hope.models import (
+    BusinessArea,
     Household,
     Individual,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    Program,
+    ProgramCycle,
+    RegistrationDataImport,
     XlsxUpdateFile,
 )
-from hope.apps.program.models import Program, ProgramCycle
-from hope.apps.registration_data.models import RegistrationDataImport
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:
@@ -114,11 +115,6 @@ class UpdateByXlsxStage2Form(forms.Form):
         if not len(columns_not_found):
             return data
         raise ValidationError("Unicef Id columns have to be selected")
-
-
-class UpdateIndividualsIBANFromXlsxForm(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    file = forms.FileField()
 
 
 class WithdrawForm(forms.Form):

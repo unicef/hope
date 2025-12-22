@@ -14,11 +14,15 @@ import requests
 
 from hope.apps.account.models import User
 from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.core.models import XLSXKoboTemplate
+from hope.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task,
+    upload_new_kobo_template_and_update_flex_fields_task_with_retry,
+)
 from hope.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
     UploadNewKoboTemplateAndUpdateFlexFieldsTask,
 )
+from hope.models import XLSXKoboTemplate
 
 
 class MockSuperUser:
@@ -116,6 +120,7 @@ class TestKoboTemplateUpload(BaseTestCase):
     )
     def test_upload_valid_template(self) -> None:
         response = self.upload_file("kobo-template-valid.xlsx")
+        # assert not response.context["form"].errors
         messages = [m.message for m in get_messages(response.wsgi_request)]
 
         assert response.status_code == 302 or response.redirect_chain
@@ -123,6 +128,19 @@ class TestKoboTemplateUpload(BaseTestCase):
             "Core field validation successful, running KoBo Template upload task..., "
             "Import status will change after task completion"
         ) in messages
+
+    def test_upload_template_with_validation_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid.xlsx")
+        assert "Field: residence_status_h_c" in response.text
+        assert "Choice: RETURNEE is not present" in response.text
+        assert "Field: size_h_c - Field must be required" in response.text
+        assert "Field: tax_id_no_i_c - Field is missing" in response.text
+        assert "Upload XLS" in response.text
+
+    def test_upload_template_with_missing_sheet_error(self) -> None:
+        response = self.upload_file("kobo-template-invalid-missing-sheet.xlsx")
+        form = response.context["form"]
+        assert "Missing sheet: 'Worksheet survey does not exist.'" in form.errors["xls_file"]
 
 
 class TestKoboErrorHandling(BaseTestCase):
@@ -216,3 +234,13 @@ class TestKoboErrorHandling(BaseTestCase):
             empty_template.refresh_from_db()
             assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
             assert empty_template.first_connection_failed_time is None
+
+    def test_upload_new_kobo_template_and_update_flex_fields_task_with_retry(self) -> None:
+        # coverage imports
+        empty_template = self.generate_empty_template()
+        upload_new_kobo_template_and_update_flex_fields_task_with_retry(str(empty_template.id))
+
+    def test_upload_new_kobo_template_and_update_flex_fields_task(self) -> None:
+        # coverage imports
+        template = self.generate_empty_template()
+        upload_new_kobo_template_and_update_flex_fields_task(str(template.id))

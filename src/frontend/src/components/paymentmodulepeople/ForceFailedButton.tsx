@@ -12,7 +12,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { PERMISSIONS } from 'src/config/permissions';
 
 export interface ForceFailedButtonProps {
   paymentId: string;

@@ -61,7 +61,7 @@ export function CreateSurveyMenu(): ReactElement {
               }
               data-cy="button-new-survey"
               disabled={!isActiveProgram}
-              data-perm={PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE}
+              data-perm={`${PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE}, ${PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST}`}
             >
               {t('New Survey')}
             </Button>

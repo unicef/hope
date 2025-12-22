@@ -10,24 +10,22 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
-from hope.apps.payment.models import (
+from hope.apps.payment.utils import (
+    get_payment_delivered_quantity_status_and_value,
+    get_quantity_in_usd,
+    to_decimal,
+)
+from hope.models import (
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
-)
-from hope.apps.payment.models.payment import (
-    FinancialInstitution,
-    FinancialInstitutionMapping,
-)
-from hope.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd,
-    to_decimal,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,7 +115,10 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     extra_data = serializers.SerializerMethodField()
 
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
-        if financial_institution_pk := account_data.get("financial_institution"):
+        financial_institution_pk = account_data.get("financial_institution_pk") or account_data.get(
+            "financial_institution"
+        )  # TODO remove account_data.get("financial_institution") later
+        if financial_institution_pk:
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
             if financial_institution.is_generic:
                 return account_data

@@ -1,8 +1,8 @@
+from django.db.models import Max
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.apps.core.models import BusinessArea
-from hope.apps.steficon.models import Rule, RuleCommit
+from hope.models import BusinessArea, Rule, RuleCommit
 
 
 class RuleFactory(DjangoModelFactory):
@@ -20,7 +20,9 @@ class RuleCommitFactory(DjangoModelFactory):
         model = RuleCommit
 
     rule = factory.SubFactory(RuleFactory)
-    version = factory.Sequence(lambda n: n)
+    version = factory.LazyAttribute(
+        lambda o: (RuleCommit.objects.filter(rule=o.rule).aggregate(Max("version"))["version__max"] or 0) + 1
+    )
     affected_fields = ["value"]
     is_release = True
     enabled = True

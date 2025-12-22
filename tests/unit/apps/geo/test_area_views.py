@@ -21,7 +21,7 @@ from extras.test_utils.factories.geo import (
     generate_area_types,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.geo.models import Area, AreaType, Country
+from hope.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()
 
@@ -164,56 +164,56 @@ class TestAreaViews:
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_3_area_type_2.id),
             "name": self.area_3_area_type_2.name,
             "p_code": self.area_3_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         }
         assert {
             "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
             "area_type": str(self.area_type_other.id),
-            "updated_at": f"{self.area_other.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_other.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } not in response_json
 
     def test_list_areas_filter_by_level(
@@ -239,28 +239,28 @@ class TestAreaViews:
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_1.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json_1
         assert {
             "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json_1
         assert {
             "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
             "area_type": str(self.area_type_afg_2.id),
-            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_afg_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json_1
 
         response_level_2 = self.client.get(self.url_list, {"level": 2})
@@ -291,7 +291,7 @@ class TestAreaViews:
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
             "area_type": str(self.area_type_1_afg.id),
-            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_1.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
 
     def test_list_areas_filter_by_parent_id(
@@ -317,14 +317,14 @@ class TestAreaViews:
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_3_area_type_2.id),
             "name": self.area_3_area_type_2.name,
             "p_code": self.area_3_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
 
         # Different parent - should only return one child
@@ -338,7 +338,7 @@ class TestAreaViews:
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
 
         # Test filtering by parent that has no children
@@ -371,14 +371,14 @@ class TestAreaViews:
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_1_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
         assert {
             "id": str(self.area_3_area_type_2.id),
             "name": self.area_3_area_type_2.name,
             "p_code": self.area_3_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_3_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
 
         response = self.client.get(self.url_list, {"parent_p_code": "AREA2-ARTYPE1"})
@@ -392,7 +392,7 @@ class TestAreaViews:
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
             "area_type": str(self.area_type_2_afg.id),
-            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
+            "updated_at": f"{self.area_2_area_type_2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
         } in response_json
 
     def test_list_areas_search_by_name(

@@ -692,9 +692,13 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number | string,
+  amount: number | string | null | undefined,
   currency = 'USD',
 ): string {
+  // If amount is null or undefined just show '-'
+  if (amount === null || amount === undefined) {
+    return '-';
+  }
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
@@ -1324,7 +1328,7 @@ export function deepCamelize(data) {
 }
 
 export function deepUnderscore(data) {
-  const notUnderscoreKeys = ['dataFields'];
+  const notUnderscoreKeys = [];
   if (_.isArray(data)) {
     return data.map(deepUnderscore);
   } else if (_.isObject(data)) {
@@ -1568,3 +1572,32 @@ export function splitCamelCase(str: string): string {
     .replace(/^./, (s) => s.toUpperCase());
   return withSpaces.trim();
 }
+
+export const renderNestedObject = (obj: Record<string, any>): string => {
+  return Object.entries(obj)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Handle nested objects - render all properties generically
+        const parts = Object.entries(v)
+          .map(([key, val]) => {
+            let valStr: string;
+            if (val === null || val === undefined) {
+              valStr = '-';
+            } else if (typeof val === 'boolean') {
+              valStr = val ? 'true' : 'false';
+            } else if (typeof val === 'number') {
+              valStr = val.toString();
+            } else if (typeof val === 'object') {
+              valStr = JSON.stringify(val);
+            } else {
+              valStr = val as string;
+            }
+            return `${key}: ${valStr}`;
+          })
+          .join(', ');
+        return `${k}: ${parts}`;
+      }
+      return `${k}: ${String(v)}`;
+    })
+    .join('\n');
+};

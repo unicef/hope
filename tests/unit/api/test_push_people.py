@@ -4,7 +4,6 @@ from io import BytesIO
 from django.test import testcases
 from parameterized import parameterized
 from PIL import Image
-import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -16,10 +15,8 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
-from hope.api.models import Grant
-from hope.apps.core.models import DataCollectingType
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     HEAD,
@@ -27,13 +24,17 @@ from hope.apps.household.models import (
     MALE,
     NOT_COLLECTED,
     NOT_DISABLED,
+)
+from hope.models import (
+    DataCollectingType,
     DocumentType,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    Program,
+    RegistrationDataImport,
 )
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 
@@ -360,15 +361,15 @@ class TestPushPeople(HOPEApiTestCase):
         assert ind.household.admin4 is None
 
 
-class TestPeopleUploadMixin:
-    @pytest.fixture
-    def rdi(self) -> RegistrationDataImport:
-        create_afghanistan()
-        rdi: RegistrationDataImport = RegistrationDataImportFactory()
-        return rdi
+class TestPeopleUploadMixin(testcases.TestCase):
+    databases = {"default"}
 
-    @pytest.mark.django_db
-    def test_create_individual_with_photo_remove_prefix(self, rdi: RegistrationDataImport) -> None:
+    def setUp(self) -> None:
+        super().setUp()
+        create_afghanistan()
+        self.rdi: RegistrationDataImport = RegistrationDataImportFactory()
+
+    def test_create_individual_with_photo_remove_prefix(self) -> None:
         prefix = "data:image/png;base64,"
 
         buffer = BytesIO()
@@ -386,17 +387,18 @@ class TestPeopleUploadMixin:
             "last_registration_date": "2000-01-01",
         }
         assert base64_photo.startswith(prefix) is True
-
-        individual = PeopleUploadMixin()._create_individual(
+        people_upload_mixin = PeopleUploadMixin()
+        people_upload_mixin.selected_rdi = self.rdi
+        individual = people_upload_mixin._create_individual(
             documents=[],
             accounts=[],
             hh=None,
             person_data=person_data,
-            rdi=rdi,
+            rdi=self.rdi,
         )
 
-        assert individual.photo.name[:5] == "photo"
-        assert individual.photo.name[-4:] == ".png"
+        assert individual.photo.name.startswith(self.rdi.program.programme_code)
+        assert individual.photo.name.endswith(".png")
         photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
         assert photo_saved.startswith(prefix) is False
         assert photo_saved == photo_data

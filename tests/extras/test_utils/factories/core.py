@@ -6,18 +6,18 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from hope.apps.core.models import (
+from hope.apps.periodic_data_update.utils import field_label_to_field_name
+from hope.models import (
     BusinessArea,
+    Country,
     CountryCodeMap,
     DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeGroup,
     PeriodicFieldData,
+    Program,
     StorageFile,
 )
-from hope.apps.geo.models import Country
-from hope.apps.periodic_data_update.utils import field_label_to_field_name
-from hope.apps.program.models import Program
 
 faker = Faker()
 
@@ -34,6 +34,7 @@ def create_afghanistan() -> BusinessArea:
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
             "kobo_token": "XXX",
+            "active": True,  # Set active=True for tests
         },
     )[0]
 
