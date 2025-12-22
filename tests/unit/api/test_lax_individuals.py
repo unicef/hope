@@ -68,7 +68,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "photo": "",
             "documents": [
@@ -155,7 +155,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Doe",
                 "birth_date": "1990-01-01",
                 "sex": "MALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "SINGLE",
             },
             {
@@ -165,7 +165,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Smith",
                 "birth_date": "1992-05-15",
                 "sex": "FEMALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "MARRIED",
             },
         ]
@@ -186,7 +186,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "INVALID_SEX",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -207,7 +207,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Doe",
                 "birth_date": "1990-01-01",
                 "sex": "MALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "SINGLE",
             },
             {
@@ -217,7 +217,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 "family_name": "Smith",
                 "birth_date": "1992-05-15",
                 "sex": "FEMALE",
-                "observed_disability": "NONE",
+                "observed_disability": ["NONE"],
                 "marital_status": "MARRIED",
             },
         ]
@@ -251,7 +251,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -270,7 +270,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
         }
 
@@ -286,7 +286,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "photo": self.base64_encoded_data,
         }
@@ -311,7 +311,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "disability_certificate_picture": self.base64_encoded_data,
         }
@@ -336,7 +336,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
             "family_name": "Doe",
             "birth_date": "1990-01-01",
             "sex": "MALE",
-            "observed_disability": "NONE",
+            "observed_disability": ["NONE"],
             "marital_status": "SINGLE",
             "documents": [
                 {

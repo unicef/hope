@@ -298,6 +298,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 File(disability_certificate_picture_file),
                 save=False,
             )
+            self.staging.saved_file_fields.append(ind.disability_certificate_picture)
 
         calculate_phone_numbers_validity(ind)
 
