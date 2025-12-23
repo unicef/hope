@@ -338,6 +338,14 @@ class TestPaymentCeleryTask(TestCase):
             # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
             assert mock_mailjet_send.call_count == 3
 
+        # coverage for memoryview/bytes values
+        from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+            XlsxPaymentPlanExportPerFspService,
+        )
+
+        assert XlsxPaymentPlanExportPerFspService._as_plain_text(memoryview(b"zip-pass")) == "zip-pass"
+        assert XlsxPaymentPlanExportPerFspService._as_plain_text(b"xlsx-pass") == "xlsx-pass"
+
     @patch("hope.apps.payment.celery_tasks.logger")
     @patch("hope.models.User")
     def test_send_payment_plan_payment_list_xlsx_per_fsp_password_failure(
