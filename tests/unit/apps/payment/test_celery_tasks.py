@@ -327,8 +327,10 @@ class TestPaymentCeleryTask(TestCase):
 
             assert payment_plan.background_action_status is None
             assert payment_plan.export_file_per_fsp == file_obj
-            assert file_obj.password is not None
-            assert file_obj.xlsx_password is not None
+            assert isinstance(file_obj.password, str)
+            assert isinstance(file_obj.xlsx_password, str)
+            assert len(file_obj.xlsx_password) == 12
+            assert len(file_obj.password) == 12
 
             send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
