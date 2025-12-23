@@ -1,4 +1,5 @@
 import abc
+import random
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q, QuerySet
@@ -43,14 +44,20 @@ class Sampling:
         self.payment_records = sampling.payment_records
 
         if sampling.sampling_type == PaymentVerificationPlan.SAMPLING_RANDOM:
-            self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
+            payment_ids = list(self.payment_records.values_list("id", flat=True))
+            sample_size = min(sampling.sample_size, len(payment_ids))
+            if sample_size:
+                sampled_ids = random.sample(payment_ids, sample_size)
+                self.payment_records = self.payment_records.filter(id__in=sampled_ids)
+            else:
+                self.payment_records = self.payment_records.none()
 
         return payment_verification_plan, self.payment_records
 
     def generate_sampling(self) -> tuple[int, int]:
-        payment_record_count = self.payment_records.count()
+        payment_record_count = self.payment_records.only("id").count()
         sampling = self._get_sampling()
-        sampling.sampling(self.payment_records)
+        sampling.sampling(self.payment_records.only("id"))
 
         return payment_record_count, sampling.sample_size
 
