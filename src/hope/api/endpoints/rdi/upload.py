@@ -116,7 +116,7 @@ class AccountSerializerUpload(serializers.ModelSerializer):
 
     class Meta:
         model = PendingAccount
-        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+        fields = ["type", "number", "financial_institution", "data"]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
