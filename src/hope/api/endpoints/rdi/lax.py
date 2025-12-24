@@ -437,7 +437,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    consent_sign = serializers.CharField(allow_null=True, required=False)
+    consent_sign = serializers.CharField(allow_blank=True, required=False)
     head_of_household = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
