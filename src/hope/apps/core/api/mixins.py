@@ -307,7 +307,7 @@ class PermissionsMixin:
 
     token_permission = Grant.API_READ_ONLY
 
-    def is_external_request(self) -> bool:
+    def is_external_request(self) -> bool | list[bytes]:
         # condition for the swagger
         if not self.request:  # pragma: no cover
             return False

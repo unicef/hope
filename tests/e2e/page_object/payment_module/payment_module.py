@@ -45,11 +45,11 @@ class PaymentModule(BaseComponents):
     def get_nav_registration_data_import(self) -> WebElement:
         return self.wait_for(self.nav_registration_data_import)
 
-    def get_nav_program_population(self) -> WebElement:
-        return self.wait_for(self.nav_program_population)
+    def get_nav_program_population(self, name: str = "Main Menu") -> WebElement:
+        return self.wait_for(self.nav_programme_population.format(name))
 
-    def get_nav_individuals(self) -> WebElement:
-        return self.wait_for(self.nav_individuals)
+    def get_nav_individuals(self, name: str = "Items") -> WebElement:
+        return self.wait_for(self.nav_individuals.format(name))
 
     def get_nav_program_details(self) -> WebElement:
         return self.wait_for(self.nav_program_details)
@@ -135,7 +135,7 @@ class PaymentModule(BaseComponents):
     def get_table_title(self) -> WebElement:
         return self.wait_for(self.table_title)
 
-    def get_table_label(self) -> [WebElement]:
+    def get_table_label(self) -> list[WebElement]:
         return self.get_elements(self.table_label)
 
     def get_status_container(self) -> WebElement:
@@ -144,7 +144,7 @@ class PaymentModule(BaseComponents):
     def get_table_pagination(self) -> WebElement:
         return self.wait_for(self.table_pagination)
 
-    def get_rows(self) -> [WebElement]:
+    def get_rows(self) -> list[WebElement]:
         self.wait_for(self.rows)
         return self.get_elements(self.rows)
 

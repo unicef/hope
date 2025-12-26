@@ -1158,7 +1158,7 @@ class TestAccountModel(TestCase):
 
     def test_validate_uniqueness(self) -> None:
         AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
-        Account.update_unique_field = mock.Mock()  # type: ignore
+        Account.update_unique_field = mock.Mock()
         Account.validate_uniqueness(Account.objects.all())
         Account.update_unique_field.assert_called_once()
 

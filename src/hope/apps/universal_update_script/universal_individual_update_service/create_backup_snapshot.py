@@ -40,7 +40,7 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     universal_update.save()
 
 
-def create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
+def create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: list[str]) -> str:
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()
     if db_count != len(unicef_ids):
         unicef_ids_from_db = list(

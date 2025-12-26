@@ -84,6 +84,7 @@ def test_test_button_with_raw_data(rule_test_setup: Tuple[DjangoClient, Rule]) -
     }
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 1
@@ -107,6 +108,7 @@ def test_test_button_with_failing_raw_data(rule_test_setup: Tuple[DjangoClient, 
 
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 1
@@ -120,6 +122,7 @@ def test_test_button_get_request(rule_test_setup: Tuple[DjangoClient, Rule]) -> 
     url = reverse("admin:steficon_rule_test", args=[rule.pk])
     response = client.get(url)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "form" in response.context_data
     assert isinstance(response.context_data["form"], RuleTestForm)
 
@@ -134,6 +137,7 @@ def test_test_button_with_invalid_form(rule_test_setup: Tuple[DjangoClient, Rule
     }
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "form" in response.context_data
     assert response.context_data["form"].errors
 
@@ -151,6 +155,7 @@ def test_test_button_with_file(rule_test_setup: tuple) -> None:
 
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 2
@@ -191,6 +196,7 @@ def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient,
 
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 2
@@ -220,6 +226,7 @@ def test_test_button_with_content_type(rule_test_setup: Tuple[DjangoClient, Rule
 
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 2
@@ -253,6 +260,7 @@ def test_test_button_for_rule_commit(rule_test_setup: Tuple[DjangoClient, Rule])
     }
     response = client.post(url, post_data)
     assert response.status_code == 200
+    assert response.context_data is not None
     assert "results" in response.context_data
     results = response.context_data["results"]
     assert len(results) == 1

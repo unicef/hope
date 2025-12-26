@@ -42,7 +42,7 @@ class Rule(LimitBusinessAreaModelMixin):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -109,15 +109,9 @@ class Rule(LimitBusinessAreaModelMixin):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(
-        self,
-        force_insert: bool = False,
-        force_update: bool = False,
-        using: Any | None = None,
-        update_fields: Any | None = None,
-    ) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         with atomic():
-            super().save(force_insert, force_update, using, update_fields)
+            super().save(*args, **kwargs)
             self.commit()
 
     def commit(self, is_release: bool = False, force: bool = False) -> Optional["RuleCommit"]:
@@ -217,7 +211,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)

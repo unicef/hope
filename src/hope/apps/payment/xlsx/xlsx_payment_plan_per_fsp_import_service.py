@@ -107,7 +107,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if delivered_quantity is not None and delivered_quantity != "":
             delivered_quantity = to_decimal(delivered_quantity)
-            if delivered_quantity != payment.delivered_quantity:  # update value
+            if (
+                delivered_quantity is not None
+                and payment.delivered_quantity is not None
+                and delivered_quantity != payment.delivered_quantity
+            ):  # update value
                 entitlement_quantity = payment.entitlement_quantity or Decimal(0)
                 if delivered_quantity > entitlement_quantity:
                     self.errors.append(
@@ -350,7 +354,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=delivered_quantity,
+                    amount=delivered_quantity if delivered_quantity is not None else Decimal(0),
                     currency=self.payment_plan.currency,
                     exchange_rate=Decimal(exchange_rate),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,

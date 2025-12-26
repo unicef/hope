@@ -185,7 +185,7 @@ class PaymentModuleDetails(BaseComponents):
     def get_button_import(self) -> WebElement:
         return self.wait_for(self.button_import)
 
-    def get_table_label(self) -> [WebElement]:
+    def get_table_label(self) -> list[WebElement]:
         return self.get_elements(self.table_label)
 
     def get_table_row(self) -> WebElement:

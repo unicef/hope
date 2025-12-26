@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+    from rest_framework.views import APIView
 
 _NS = "v2"  # if we change something, bump the version
 
@@ -18,7 +22,7 @@ class ProfileVersioner:
         return f"profile:user:{_NS}:{user_id}"
 
     def _get_or_init(self, key: str, default: int = 1) -> int:
-        return cache.get_or_set(key, default, timeout=None)
+        return cache.get_or_set(key, default, timeout=None) or default
 
     def get_versions(self, user_id: int) -> tuple[int, int]:
         g = self._get_or_init(self._global_key())
@@ -51,13 +55,17 @@ profile_cache = ProfileVersioner()
 
 
 class ProfileEtagKey:
-    def __call__(self, view_instance, view_method, request, args, kwargs) -> str:
-        return profile_cache.etag_for(request.user.id)
+    def __call__(self, view_instance: APIView, view_method: str, request: Request, args: list, kwargs: dict) -> str:
+        user_id = request.user.id if request.user.is_authenticated else 0
+        return profile_cache.etag_for(user_id)
 
 
 class ProfileVersionsKeyBit(KeyBitBase):
-    def get_data(self, params, view_instance, view_method, request, args, kwargs):
-        return profile_cache.cache_key_for(request.user.id)
+    def get_data(
+        self, params: dict, view_instance: APIView, view_method: str, request: Request, args: list, kwargs: dict
+    ) -> str:
+        user_id = request.user.id if request.user.is_authenticated else 0
+        return profile_cache.cache_key_for(user_id)
 
 
 class ProfileKeyConstructor(KeyConstructor):

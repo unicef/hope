@@ -50,17 +50,17 @@ class PaymentRecord(BaseComponents):
         )
         return self.wait_for(self.button_ed_plan)
 
-    def get_label_status(self) -> [WebElement]:
+    def get_label_status(self) -> list[WebElement]:
         return self.get_elements(self.label_status)
 
-    def get_status(self) -> [WebElement]:
+    def get_status(self) -> list[WebElement]:
         self.wait_for(self.status_container)
         return self.get_elements(self.status_container)
 
     def get_status_container(self) -> WebElement:
         return self.wait_for(self.status_container)
 
-    def wait_for_status_container(self, status: str, timeout: int = 20) -> []:
+    def wait_for_status_container(self, status: str, timeout: int = 20) -> bool:
         return self.wait_for_text_to_be_exact(status, self.status_container, timeout=timeout)
 
     def get_label_household(self) -> WebElement:

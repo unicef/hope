@@ -61,8 +61,8 @@ class BaseValidator:
                 errors_list.append(e.message)
 
         if errors_list:
-            logger.warning(", ".join(errors_list))
-            raise Exception(", ".join(errors_list))
+            logger.warning(", ".join([str(error) for error in errors_list]))
+            raise Exception(", ".join([str(error) for error in errors_list]))
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:
@@ -75,7 +75,7 @@ def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list
     required_columns = {"list_name", "name"}
     if not required_columns.issubset(set(choices_headers_map)):
         missing_columns = required_columns - set(choices_headers_map)
-        str_missing_columns = ", ".join(missing_columns)
+        str_missing_columns = ", ".join([str(col) for col in missing_columns])
         msg = f"Choices sheet does not contain all required columns, missing columns: {str_missing_columns}"
         logger.warning(msg)
         raise ValidationError(msg)

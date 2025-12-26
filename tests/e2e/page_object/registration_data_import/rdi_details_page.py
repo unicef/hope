@@ -108,9 +108,9 @@ class RDIDetailsPage(BaseComponents):
                 break
             self.driver.refresh()
 
-    def wait_for_number_of_rows(self, string: str, timeout: int = 60) -> bool:
+    def wait_for_text_in_pagination(self, number: str, timeout: int = 60) -> bool:
         for _ in range(timeout):
             sleep(1)
-            if string in self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text:
+            if number in self.get('//*[@data-cy="table-pagination"]/div/p[2]', By.XPATH).text:
                 return True
         return False

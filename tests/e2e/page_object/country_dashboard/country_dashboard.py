@@ -78,7 +78,7 @@ class CountryDashboard(BaseComponents):
     def get_children_reached(self) -> WebElement:
         return self.wait_for(self.children_reached)
 
-    def get_table_label(self) -> [WebElement]:
+    def get_table_label(self) -> list[WebElement]:
         self.wait_for(self.table_label)
         return self.get_elements(self.table_label)
 
