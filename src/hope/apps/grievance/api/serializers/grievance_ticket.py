@@ -368,6 +368,7 @@ class AddIndividualDataSerializer(serializers.Serializer):
     blockchain_name = serializers.CharField(required=False)
     wallet_address = serializers.CharField(required=False)
     wallet_name = serializers.CharField(required=False)
+    photo = serializers.ImageField(required=False, allow_null=True)
 
 
 class IndividualUpdateDataSerializer(serializers.Serializer):
@@ -417,6 +418,7 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     blockchain_name = serializers.CharField(required=False)
     wallet_address = serializers.CharField(required=False)
     wallet_name = serializers.CharField(required=False)
+    photo = serializers.ImageField(required=False, allow_null=True)
     # people fields
     consent = serializers.CharField(required=False, allow_null=True, help_text="People update")
     residence_status = serializers.CharField(required=False, allow_blank=True, help_text="People update")

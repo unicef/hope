@@ -28,6 +28,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_document,
     handle_edit_document,
     handle_edit_identity,
+    handle_photo,
     handle_update_account,
     is_approved,
     prepare_edit_accounts_save,
@@ -80,6 +81,16 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
+        # Handle photo field - distinguish between "not provided" and "set to null"
+        _not_provided = object()
+        photo = individual_data.pop("photo", _not_provided)
+        if photo is not _not_provided:
+            if photo is None:
+                individual_data["photo"] = ""
+            else:
+                saved_photo = handle_photo(photo, None)
+                if saved_photo:  # Only set if handle_photo returned a valid path
+                    individual_data["photo"] = saved_photo
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
@@ -96,6 +107,8 @@ class IndividualDataUpdateService(DataChangeService):
                 "payment_delivery_phone_no",
             ):
                 current_value = str(current_value)
+            elif hasattr(current_value, "name"):  # ImageField
+                current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
             {"value": handle_document(document), "approve_status": False} for document in documents
@@ -159,6 +172,16 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
+        # Handle photo field - distinguish between "not provided" and "set to null"
+        _not_provided = object()
+        photo = new_individual_data.pop("photo", _not_provided)
+        if photo is not _not_provided:
+            if photo is None:
+                new_individual_data["photo"] = ""
+            else:
+                saved_photo = handle_photo(photo, None)
+                if saved_photo:  # Only set if handle_photo returned a valid path
+                    new_individual_data["photo"] = saved_photo
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
         individual_data_with_approve_status: dict[str, Any] = {
@@ -175,6 +198,8 @@ class IndividualDataUpdateService(DataChangeService):
                 "payment_delivery_phone_no",
             ):
                 current_value = str(current_value)
+            elif hasattr(current_value, "name"):  # ImageField
+                current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
             {"value": handle_document(document), "approve_status": False} for document in documents

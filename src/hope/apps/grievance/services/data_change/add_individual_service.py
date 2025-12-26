@@ -14,6 +14,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_add_document,
     handle_add_identity,
     handle_documents,
+    handle_photo,
     save_images,
     to_date_string,
     to_phone_number_str,
@@ -43,6 +44,12 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_date_string(individual_data, "birth_date")
+        # Handle photo field
+        photo = individual_data.pop("photo", None)
+        if photo is not None:
+            saved_photo = handle_photo(photo, None)
+            if saved_photo:
+                individual_data["photo"] = saved_photo
         individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
@@ -66,6 +73,12 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no")
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_date_string(new_individual_data, "birth_date")
+        # Handle photo field
+        photo = new_individual_data.pop("photo", None)
+        if photo is not None:
+            saved_photo = handle_photo(photo, None)
+            if saved_photo:
+                new_individual_data["photo"] = saved_photo
         new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
