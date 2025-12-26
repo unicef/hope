@@ -1,10 +1,11 @@
 nav:
   - index.md
   - setup.md
-  - contributing.md
-  - lint.md
+  - running.md
+  - testing.md
+  - linting.md
   - stack.md
-  - ...
+  - contributing.md
 
 collapse: true
 
