@@ -29,6 +29,8 @@ from hope.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Account,
@@ -112,12 +114,17 @@ class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
-    observed_disability = serializers.CharField(allow_blank=True, required=False)
-    marital_status = serializers.CharField(allow_blank=True, required=False)
+    observed_disability = serializers.MultipleChoiceField(
+        choices=OBSERVED_DISABILITY_CHOICE,
+        allow_empty=True,
+        required=False,
+    )
+    marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
-    photo = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    photo = serializers.CharField(allow_blank=True, required=False)
+    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
 
@@ -194,7 +201,7 @@ class HandleFlexFieldsMixin:
     def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set = None):
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-            model=PendingIndividual,
+            model=PendingHousehold,
             raw_data=raw_data,
             reserved_fields=reserved_fields,
         )
@@ -261,9 +268,13 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         external_individual_id = serializer.validated_data.pop("individual_id")
 
-        photo_b64 = serializer.validated_data.pop("photo", None)
-        photo_file = self.get_photo(photo_b64, self.selected_rdi.program.programme_code)
-
+        photo_file = self.get_photo(
+            serializer.validated_data.pop("photo", None), self.selected_rdi.program.programme_code
+        )
+        disability_certificate_picture_file = self.get_photo(
+            serializer.validated_data.pop("disability_certificate_picture", None),
+            self.selected_rdi.program.programme_code,
+        )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
             self.selected_rdi.program, validated_data.get("flex_fields")
@@ -276,9 +287,18 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             business_area=self.selected_rdi.business_area,
             **validated_data,
         )
+
         if photo_file:
             ind.photo.save(photo_file.name, File(photo_file), save=False)
             self.staging.saved_file_fields.append(ind.photo)
+
+        if disability_certificate_picture_file:
+            ind.disability_certificate_picture.save(
+                disability_certificate_picture_file.name,
+                File(disability_certificate_picture_file),
+                save=False,
+            )
+            self.staging.saved_file_fields.append(ind.disability_certificate_picture)
 
         calculate_phone_numbers_validity(ind)
 
@@ -401,11 +421,11 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 "results": results,
             }
 
-        except Exception:
+        except Exception as e:
             for field_file in self.staging.saved_file_fields:
                 with contextlib.suppress(Exception):
                     field_file.delete(save=False)
-            raise
+            raise e
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
 
@@ -415,9 +435,9 @@ class HouseholdSerializer(serializers.ModelSerializer):
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
-    size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    consent_sign = serializers.CharField(allow_blank=True, required=False)
     head_of_household = serializers.SlugRelatedField(
         slug_field="unicef_id",
         required=True,
@@ -477,7 +497,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateLaxHouseholds(CreateLaxBaseView):
+class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     """API to import households with selected RDI."""
 
     @extend_schema(request=HouseholdSerializer(many=True))
@@ -491,103 +511,121 @@ class CreateLaxHouseholds(CreateLaxBaseView):
 
         valid_payloads = []
         country_codes = set()
-
-        for household_data in request.data:
-            total_households += 1
-            self.handle_household_flex_fields(
-                household_data,
-                reserved_fields={"members", "primary_collector", "alternate_collector"},
-            )
-            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
-            if serializer.is_valid():
-                data = dict(serializer.validated_data)
-                members: list[str] = data.pop("members", [])
-                primary_collector = data.pop("primary_collector")
-                alternate_collector = data.pop("alternate_collector", None)
-
-                country_code = data.pop("country", None)
-                if country_code:
-                    country_codes.add(country_code)
-                country_origin_code = data.pop("country_origin", None)
-                if country_origin_code:
-                    country_codes.add(country_origin_code)
-
-                data["flex_fields"] = populate_pdu_with_null_values(self.selected_rdi.program, data.get("flex_fields"))
-
-                household_instance = PendingHousehold(
-                    registration_data_import=self.selected_rdi,
-                    program_id=self.selected_rdi.program.id,
-                    business_area=self.selected_business_area,
-                    **data,
+        saved_file_fields = []
+        try:
+            for household_data in request.data:
+                total_households += 1
+                self.handle_household_flex_fields(
+                    household_data,
+                    reserved_fields={"members", "primary_collector", "alternate_collector"},
                 )
-
-                valid_payloads.append(
-                    {
-                        "instance": household_instance,
-                        "members": members,
-                        "primary": primary_collector,
-                        "alternate": alternate_collector,
-                        "country_code": country_code,
-                        "country_origin_code": country_origin_code,
-                    }
-                )
-            else:
-                results.append(dict(serializer.errors))
-                total_errors += 1
-
-        if not valid_payloads:
-            return Response(
-                {
-                    "id": self.selected_rdi.id,
-                    "processed": total_households,
-                    "accepted": total_accepted,
-                    "errors": total_errors,
-                    "results": results,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-
-        if country_codes:
-            country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
-
-        for payload in valid_payloads:
-            hh: PendingHousehold = payload["instance"]
-            if cc := payload.get("country_code"):
-                hh.country = country_map.get(cc)
-            if coc := payload.get("country_origin_code"):
-                hh.country_origin = country_map.get(coc)
-
-        PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
-
-        roles_to_create: list[IndividualRoleInHousehold] = []
-        for payload in valid_payloads:
-            primary = payload["primary"]
-            alternate = payload["alternate"]
-
-            if payload["members"]:
-                PendingIndividual.objects.filter(
-                    registration_data_import=self.selected_rdi,
-                    program=self.selected_rdi.program,
-                    unicef_id__in=payload["members"],
-                ).update(household=payload["instance"])
-
-            roles_to_create.append(
-                IndividualRoleInHousehold(individual=primary, household=payload["instance"], role=ROLE_PRIMARY)
-            )
-            if alternate:
-                roles_to_create.append(
-                    IndividualRoleInHousehold(
-                        individual=alternate,
-                        household=payload["instance"],
-                        role=ROLE_ALTERNATE,
+                serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
+                if serializer.is_valid():
+                    data = dict(serializer.validated_data)
+                    members: list[str] = data.pop("members", [])
+                    primary_collector = data.pop("primary_collector")
+                    alternate_collector = data.pop("alternate_collector", None)
+                    consent_sign_file = self.get_photo(
+                        data.pop("consent_sign", None),
+                        self.selected_rdi.program.programme_code,
                     )
+                    country_code = data.pop("country", None)
+                    if country_code:
+                        country_codes.add(country_code)
+                    country_origin_code = data.pop("country_origin", None)
+                    if country_origin_code:
+                        country_codes.add(country_origin_code)
+
+                    data["flex_fields"] = populate_pdu_with_null_values(
+                        self.selected_rdi.program, data.get("flex_fields")
+                    )
+
+                    household_instance = PendingHousehold(
+                        registration_data_import=self.selected_rdi,
+                        program_id=self.selected_rdi.program.id,
+                        business_area=self.selected_business_area,
+                        **data,
+                    )
+                    if consent_sign_file:
+                        household_instance.consent_sign.save(
+                            consent_sign_file.name,
+                            File(consent_sign_file),
+                            save=False,
+                        )
+                        saved_file_fields.append(household_instance.consent_sign)
+
+                    valid_payloads.append(
+                        {
+                            "instance": household_instance,
+                            "members": members,
+                            "primary": primary_collector,
+                            "alternate": alternate_collector,
+                            "country_code": country_code,
+                            "country_origin_code": country_origin_code,
+                        }
+                    )
+                else:
+                    results.append(dict(serializer.errors))
+                    total_errors += 1
+
+            if not valid_payloads:
+                return Response(
+                    {
+                        "id": self.selected_rdi.id,
+                        "processed": total_households,
+                        "accepted": total_accepted,
+                        "errors": total_errors,
+                        "results": results,
+                    },
+                    status=status.HTTP_201_CREATED,
                 )
 
-            total_accepted += 1
-            results.append({"pk": payload["instance"].pk})  # noqa
+            if country_codes:
+                country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
 
-        if roles_to_create:
-            IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
+            for payload in valid_payloads:
+                hh: PendingHousehold = payload["instance"]
+                if cc := payload.get("country_code"):
+                    hh.country = country_map.get(cc)
+                if coc := payload.get("country_origin_code"):
+                    hh.country_origin = country_map.get(coc)
+
+            PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
+
+            roles_to_create: list[IndividualRoleInHousehold] = []
+            for payload in valid_payloads:
+                primary = payload["primary"]
+                alternate = payload["alternate"]
+
+                if payload["members"]:
+                    PendingIndividual.objects.filter(
+                        registration_data_import=self.selected_rdi,
+                        program=self.selected_rdi.program,
+                        unicef_id__in=payload["members"],
+                    ).update(household=payload["instance"])
+
+                roles_to_create.append(
+                    IndividualRoleInHousehold(individual=primary, household=payload["instance"], role=ROLE_PRIMARY)
+                )
+                if alternate:
+                    roles_to_create.append(
+                        IndividualRoleInHousehold(
+                            individual=alternate,
+                            household=payload["instance"],
+                            role=ROLE_ALTERNATE,
+                        )
+                    )
+
+                total_accepted += 1
+                results.append({"pk": payload["instance"].pk})  # noqa
+
+            if roles_to_create:
+                IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
+        except Exception as e:
+            for file_field in saved_file_fields:
+                with contextlib.suppress(Exception):
+                    file_field.delete(save=False)
+            raise e
 
         return Response(
             {

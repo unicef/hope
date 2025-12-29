@@ -234,6 +234,7 @@ OTHER_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "django_celery_boost",
     "django_filters",
     "explorer",
     "import_export",
