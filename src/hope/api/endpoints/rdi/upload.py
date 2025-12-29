@@ -102,7 +102,12 @@ class DocumentSerializerUpload(serializers.ModelSerializer):
 
 
 class AccountSerializerUpload(serializers.ModelSerializer):
-    account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    type = serializers.SlugRelatedField(
+        source="account_type",
+        slug_field="key",
+        required=True,
+        queryset=AccountType.objects.all(),
+    )
     number = serializers.CharField(allow_blank=True, required=False)
     financial_institution = serializers.PrimaryKeyRelatedField(
         required=False, queryset=FinancialInstitution.objects.all()
@@ -111,7 +116,7 @@ class AccountSerializerUpload(serializers.ModelSerializer):
 
     class Meta:
         model = PendingAccount
-        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+        fields = ["type", "number", "financial_institution", "data"]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
