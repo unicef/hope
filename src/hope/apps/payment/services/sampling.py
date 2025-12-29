@@ -55,9 +55,9 @@ class Sampling:
         return payment_verification_plan, self.payment_records
 
     def generate_sampling(self) -> tuple[int, int]:
-        payment_record_count = self.payment_records.only("id").count()
+        payment_record_count = self.payment_records.count()
         sampling = self._get_sampling()
-        sampling.sampling(self.payment_records.only("id"))
+        sampling.sampling(self.payment_records)
 
         return payment_record_count, sampling.sample_size
 
