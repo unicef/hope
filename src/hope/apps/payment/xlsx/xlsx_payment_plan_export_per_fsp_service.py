@@ -405,11 +405,17 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
+        zip_password = XlsxPaymentPlanExportPerFspService._as_plain_text(
+            payment_plan.export_file_per_fsp.password if payment_plan.export_file_per_fsp else None
+        )
+        xlsx_password = XlsxPaymentPlanExportPerFspService._as_plain_text(
+            payment_plan.export_file_per_fsp.xlsx_password if payment_plan.export_file_per_fsp else None
+        )
 
         msg = (
             f"Payment Plan {payment_plan.unicef_id} Payment List export file's Passwords.\n"
-            f"ZIP file password: {payment_plan.export_file_per_fsp.password}\n"
-            f"XLSX file password: {payment_plan.export_file_per_fsp.xlsx_password}\n"
+            f"ZIP file password: {zip_password}\n"
+            f"XLSX file password: {xlsx_password}\n"
         )
 
         context = {
@@ -417,6 +423,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": msg,
+            "zip_password": zip_password,
+            "xlsx_password": xlsx_password,
             "title": f"Payment Plan {payment_plan.unicef_id} Payment List file's Passwords",
             "link": "",
         }
@@ -425,3 +433,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             html_body=render_to_string(html_template, context=context),
             text_body=render_to_string(text_template, context=context),
         )
+
+    @staticmethod
+    def _as_plain_text(value: str | bytes | memoryview | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, memoryview):
+            value = value.tobytes()
+        if isinstance(value, bytes):
+            return value.decode()
+        return str(value)
