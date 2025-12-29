@@ -57,6 +57,32 @@ class TestSampling(TestCase):
         assert len(sampled_ids) == 2
         assert sampled_ids.issubset({p.id for p in payments})
 
+    def test_process_sampling_random_with_zero_sample_size_returns_empty(self) -> None:
+        payment_plan = PaymentPlanFactory()
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        PaymentFactory.create_batch(
+            2,
+            parent=payment_plan,
+            business_area=payment_plan.business_area,
+        )
+        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+        input_data = {
+            "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
+            "random_sampling_arguments": {
+                "confidence_interval": 95,
+                "margin_of_error": 5,
+                "sex": None,
+                "age": None,
+                "excluded_admin_areas": [],
+            },
+        }
+        sampling_service = Sampling(input_data, payment_plan, payment_plan.payment_items.all())
+
+        with patch("hope.apps.payment.services.sampling.get_number_of_samples", return_value=0):
+            _, sampled_records = sampling_service.process_sampling(verification_plan)
+
+        assert sampled_records.count() == 0
+
     def test_process_sampling_full_list_excludes_admin_areas(self) -> None:
         payment_plan = PaymentPlanFactory()
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
