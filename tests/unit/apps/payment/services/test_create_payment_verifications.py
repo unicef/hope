@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
@@ -32,3 +34,14 @@ class TestCreatePaymentVerifications(TestCase):
         created = PaymentVerification.objects.filter(payment_verification_plan=verification_plan)
         assert created.count() == 5
         assert all(pv.received_amount is None for pv in created)
+
+    def test_create_skips_when_no_payments(self) -> None:
+        payment_plan = PaymentPlanFactory()
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+        service = CreatePaymentVerifications(verification_plan, payment_plan.payment_items.none())
+
+        with patch.object(PaymentVerification.objects, "bulk_create") as mock_bulk_create:
+            service.create()
+
+        mock_bulk_create.assert_not_called()
