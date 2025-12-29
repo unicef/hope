@@ -542,7 +542,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
 
     def get_queryset(self):
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
-        return payment_plan.eligible_payments.all()
+        return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
 
     @extend_schema(
         responses={
