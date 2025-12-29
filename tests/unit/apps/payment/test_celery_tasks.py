@@ -327,14 +327,24 @@ class TestPaymentCeleryTask(TestCase):
 
             assert payment_plan.background_action_status is None
             assert payment_plan.export_file_per_fsp == file_obj
-            assert file_obj.password is not None
-            assert file_obj.xlsx_password is not None
+            assert isinstance(file_obj.password, str)
+            assert isinstance(file_obj.xlsx_password, str)
+            assert len(file_obj.xlsx_password) == 12
+            assert len(file_obj.password) == 12
 
             send_payment_plan_payment_list_xlsx_per_fsp_password(str(payment_plan.pk), str(self.user.pk))
 
             # 2 first calls from > create_payment_plan_payment_list_xlsx_per_fsp
             # third call from > send_payment_plan_payment_list_xlsx_per_fsp_password
             assert mock_mailjet_send.call_count == 3
+
+        # coverage for memoryview/bytes values
+        from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+            XlsxPaymentPlanExportPerFspService,
+        )
+
+        assert XlsxPaymentPlanExportPerFspService._as_plain_text(memoryview(b"zip-pass")) == "zip-pass"
+        assert XlsxPaymentPlanExportPerFspService._as_plain_text(b"xlsx-pass") == "xlsx-pass"
 
     @patch("hope.apps.payment.celery_tasks.logger")
     @patch("hope.models.User")
