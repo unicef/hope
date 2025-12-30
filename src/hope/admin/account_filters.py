@@ -13,21 +13,6 @@ from hope.models import BusinessArea, Role
 logger = logging.getLogger(__name__)
 
 
-class HasKoboAccount(SimpleListFilter):
-    parameter_name = "kobo_account"
-    title = "Has Kobo Access"
-
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> tuple:
-        return (1, "Yes"), (0, "No")
-
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
-        if self.value() == "0":
-            return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
-        if self.value() == "1":
-            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
-        return queryset
-
-
 class BusinessAreaFilter(SimpleListFilter):
     parameter_name = "ba"
     title = "Business Area"

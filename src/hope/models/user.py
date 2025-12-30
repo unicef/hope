@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
+from unicef_security.models import SecurityMixin
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.account.utils import test_conditional
@@ -35,14 +36,13 @@ USER_STATUS_CHOICES = (
 )
 
 
-class User(AbstractUser, NaturalKeyModel, UUIDModel):
+class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
-    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 

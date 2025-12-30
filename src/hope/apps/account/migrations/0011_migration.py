@@ -337,9 +337,4 @@ class Migration(migrations.Migration):
         ("account", "0010_migration"),
     ]
 
-    operations = [
-        migrations.RunPython(create_constant_objects, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_user_roles, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_partner_roles_and_access, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(migrate_unicef_partners, reverse_code=migrations.RunPython.noop),
-    ]
+    operations = []
