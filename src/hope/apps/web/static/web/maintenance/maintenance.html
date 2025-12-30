@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Under Maintenance</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #ffffff;
+        text-align: center;
+        padding-top: 150px;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      div.logo-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+      }
+
+      div.square-logo {
+        display: inline-block;
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      div.text-container {
+        max-width: 450px;
+        text-align: center;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: lighter;
+        color: #233944;
+        line-height: 32px;
+      }
+
+      p {
+        font-size: 24px;
+        color: #666666;
+        line-height: 32px;
+      }
+
+      a.button-link {
+        text-decoration: none;
+      }
+
+      button {
+        background-color: transparent;
+        border: 2px solid #033f91;
+        border-radius: 4px;
+        padding: 6px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 16px;
+        letter-spacing: 1.25px;
+        color: #033f91;
+        cursor: pointer;
+      }
+
+      img.icon {
+        vertical-align: middle;
+        margin-left: 5px;
+        width: 28px;
+        height: 28px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-container">
+      <img
+        src="./maintenance_hope_logo.png"
+        alt="Hope Logo"
+        width="186"
+        height="101"
+      />
+    </div>
+
+    <div class="square-logo">
+      <img
+        src="./maintenance_graphic_painter.png"
+        alt="Brush with paint"
+        width="354"
+        height="293"
+      />
+    </div>
+
+    <div class="text-container">
+      <h1>System under maintenance</h1>
+      <p>
+        Sorry for the inconvenience. Maintenance is underway to enhance our
+        services. System will be back shortly!
+      </p>
+    </div>
+
+    <a href="javascript:void(0);" onclick="goBack()" class="button-link">
+      <button>
+        REFRESH PAGE
+        <img
+          src="./refresh_icon.png"
+          alt="Refresh Icon"
+          width="20"
+          height="20"
+          class="icon"
+        />
+      </button>
+    </a>
+
+    <script>
+      function goBack() {
+        window.history.back();
+      }
+    </script>
+  </body>
+</html>
