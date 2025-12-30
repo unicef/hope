@@ -1,3 +1,4 @@
+from datetime import date
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -8,6 +9,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
 from extras.test_utils.factories.household import (
@@ -22,6 +24,7 @@ from extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
@@ -66,7 +69,6 @@ class TestUpdateIndividualDataService(TestCase):
         )
 
         cls.ticket = ticket_details.ticket
-        cls.ticket.save()
         rebuild_search_index()
 
     def test_add_document_of_same_type_not_unique_per_individual_valid(self) -> None:
@@ -158,6 +160,62 @@ class TestUpdateIndividualDataService(TestCase):
         assert f"Document of type {self.document_type_unique_for_individual} already exists for this individual" in str(
             e.value
         )
+
+    def test_save_sets_previous_value_for_phone_and_date(self) -> None:
+        ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        )
+        self.individual.phone_no = "123456"  # non-string-like to hit str conversion
+        self.individual.birth_date = date(2020, 1, 2)
+        self.individual.save(update_fields=["phone_no", "birth_date"])
+
+        extras = {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": self.individual,
+                    "individual_data": {
+                        "phone_no": "+999",
+                        "birth_date": date(2025, 2, 3),
+                    },
+                }
+            }
+        }
+        service = IndividualDataUpdateService(ticket, extras)
+        tickets = service.save()
+
+        ticket_details = tickets[0].individual_data_update_ticket_details
+        phone_prev = ticket_details.individual_data["phone_no"]["previous_value"]
+        birth_prev = ticket_details.individual_data["birth_date"]["previous_value"]
+        assert phone_prev == "123456"
+        assert birth_prev == "2020-01-02"
+
+    def test_update_sets_previous_value_for_phone_and_date(self) -> None:
+        ticket_details = TicketIndividualDataUpdateDetailsFactory(
+            individual=self.individual,
+            individual_data={},
+        )
+        ticket = ticket_details.ticket
+        self.individual.phone_no = "789"
+        self.individual.birth_date = date(2021, 3, 4)
+        self.individual.save(update_fields=["phone_no", "birth_date"])
+
+        extras = {
+            "individual_data_update_issue_type_extras": {
+                "individual_data": {
+                    "phone_no": "+123",
+                    "birth_date": date(2025, 5, 6),
+                }
+            }
+        }
+        service = IndividualDataUpdateService(ticket, extras)
+        updated_ticket = service.update()
+
+        ticket_details = updated_ticket.individual_data_update_ticket_details
+        phone_prev = ticket_details.individual_data["phone_no"]["previous_value"]
+        birth_prev = ticket_details.individual_data["birth_date"]["previous_value"]
+        assert phone_prev == "789"
+        assert birth_prev == "2021-03-04"
 
         assert Document.objects.filter(document_number="111111").count() == 0
 
