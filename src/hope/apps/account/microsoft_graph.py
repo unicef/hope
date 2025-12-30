@@ -14,7 +14,7 @@ DJANGO_USER_MAP = {
     "email": "mail",
     "first_name": "givenName",
     "last_name": "surname",
-    "ad_uuid": "id",
+    "azure_id": "id",
 }
 
 

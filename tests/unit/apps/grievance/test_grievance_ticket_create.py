@@ -518,3 +518,152 @@ class TestGrievanceTicketCreate:
         ]
         response = self.api_client.post(self.list_url, input_data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
+
+    def test_create_grievance_ticket_update_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.afghanistan,
+            self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        data = {
+            "description": "Update Individual with Photo",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "extras.issue_type.individual_data_update_issue_type_extras.individual": str(self.individuals[0].pk),
+            "extras.issue_type.individual_data_update_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketIndividualDataUpdateDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="multipart")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        ticket = GrievanceTicket.objects.first()
+        ticket_details = ticket.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"]
+        assert ticket_details.individual_data["photo"]["approve_status"] is False
+
+    def test_create_grievance_ticket_update_individual_clear_photo(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        # Set photo on individual first
+        self.individuals[0].photo = "photos/existing.jpg"
+        self.individuals[0].save()
+
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Clear Individual Photo",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].pk),
+                        "individual_data": {
+                            "photo": None,
+                        },
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        ticket = GrievanceTicket.objects.first()
+        ticket_details = ticket.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"] == ""
+        assert ticket_details.individual_data["photo"]["previous_value"] == "photos/existing.jpg"
+
+    def test_create_grievance_ticket_update_individual_photo_previous_value(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        # Set photo on individual first
+        self.individuals[0].photo = "photos/old_photo.jpg"
+        self.individuals[0].save()
+
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.afghanistan,
+            self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "new_photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        data = {
+            "description": "Update Individual Photo",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "extras.issue_type.individual_data_update_issue_type_extras.individual": str(self.individuals[0].pk),
+            "extras.issue_type.individual_data_update_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.post(self.list_url, data, format="multipart")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        ticket = GrievanceTicket.objects.first()
+        ticket_details = ticket.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"]
+        assert ticket_details.individual_data["photo"]["previous_value"] == "photos/old_photo.jpg"
+
+    def test_create_grievance_ticket_add_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.afghanistan,
+            self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        data = {
+            "description": "Add Individual with Photo",
+            "assigned_to": str(self.user.id),
+            "issue_type": 16,
+            "category": 2,
+            "consent": True,
+            "language": "PL",
+            "program": str(self.program.pk),
+            "documentation": [],
+            "extras.issue_type.add_individual_issue_type_extras.household": str(self.household_one.id),
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.given_name": "PhotoTest",
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.full_name": "PhotoTest Test",
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.family_name": "Test",
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.sex": "MALE",
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.birth_date": date(
+                year=1980, month=2, day=1
+            ).isoformat(),
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.marital_status": SINGLE,
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.estimated_birth_date": False,
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.relationship": RELATIONSHIP_UNKNOWN,
+            "extras.issue_type.add_individual_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketAddIndividualDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="multipart")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        ticket = GrievanceTicket.objects.first()
+        ticket_details = ticket.add_individual_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]

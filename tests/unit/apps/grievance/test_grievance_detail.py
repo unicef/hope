@@ -1682,3 +1682,289 @@ class TestGrievanceTicketDetail:
                 "updated_at": f"{self.grievance_document.updated_at:%Y-%m-%dT%H:%M:%SZ}",
             }
         ]
+
+    def test_grievance_detail_individual_data_update_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals1[0],
+            individual_data={
+                "photo": {
+                    "value": "photos/new_photo.jpg",
+                    "previous_value": "photos/old_photo.jpg",
+                    "approve_status": False,
+                }
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        # Verify photo URLs are serialized correctly
+        photo_data = data["ticket_details"]["individual_data"]["photo"]
+        assert "photos/new_photo.jpg" in photo_data["value"]
+        assert "photos/old_photo.jpg" in photo_data["previous_value"]
+
+    def test_grievance_detail_individual_data_update_with_photo_value_only(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals1[0],
+            individual_data={
+                "photo": {
+                    "value": "photos/new_photo.jpg",
+                    "previous_value": "",
+                    "approve_status": False,
+                }
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        photo_data = data["ticket_details"]["individual_data"]["photo"]
+        assert "photos/new_photo.jpg" in photo_data["value"]
+        assert photo_data["previous_value"] == ""
+
+    def test_grievance_detail_add_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketAddIndividualDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household1,
+            approve_status=True,
+            individual_data={
+                "given_name": "Test",
+                "full_name": "Test Example",
+                "family_name": "Example",
+                "sex": "MALE",
+                "birth_date": date(year=1980, month=2, day=1).isoformat(),
+                "marital_status": SINGLE,
+                "documents": [],
+                "photo": "photos/individual_photo.jpg",
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        # Verify photo URL is serialized correctly
+        assert "photos/individual_photo.jpg" in data["ticket_details"]["individual_data"]["photo"]
+
+    def test_grievance_detail_individual_data_update_no_photo(self, create_user_role_with_permissions: Any) -> None:
+        """Test that individual_data without photo works correctly."""
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals1[0],
+            individual_data={
+                "full_name": {
+                    "value": "New Name",
+                    "previous_value": "Old Name",
+                    "approve_status": False,
+                }
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+        assert "photo" not in data["ticket_details"]["individual_data"]
+
+    def test_grievance_detail_add_individual_no_photo(self, create_user_role_with_permissions: Any) -> None:
+        """Test that add individual without photo works correctly."""
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketAddIndividualDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household1,
+            approve_status=True,
+            individual_data={
+                "given_name": "Test",
+                "full_name": "Test Example",
+                "family_name": "Example",
+                "sex": "MALE",
+                "birth_date": date(year=1980, month=2, day=1).isoformat(),
+                "marital_status": SINGLE,
+                "documents": [],
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+        assert "photo" not in data["ticket_details"]["individual_data"]
+
+    def test_grievance_detail_individual_data_update_null_individual_data(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        """Test that null individual_data is handled correctly."""
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals1[0],
+            individual_data=None,
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+        assert data["ticket_details"]["individual_data"] is None
+
+    def test_grievance_detail_add_individual_null_individual_data(self, create_user_role_with_permissions: Any) -> None:
+        """Test that null individual_data in add individual is handled correctly."""
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        TicketAddIndividualDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household1,
+            approve_status=True,
+            individual_data=None,
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+        assert data["ticket_details"]["individual_data"] is None

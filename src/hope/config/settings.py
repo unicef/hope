@@ -216,6 +216,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "unicef_security",
     "hijack",
     "jsoneditor",
     "django_countries",
