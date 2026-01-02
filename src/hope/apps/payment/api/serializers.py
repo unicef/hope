@@ -1044,7 +1044,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str, get_alternate_collector: bool= False) -> dict | None:
+    def get_collector_field(
+        cls, payment: "Payment", field_name: str, get_alternate_collector: bool = False
+    ) -> dict | None:
         """Return primary_collector or alternate_collector field value or None."""
         # to get data from alternate_collector please use get_alternate_collector = True
         household_snapshot = getattr(payment, "household_snapshot", None)
