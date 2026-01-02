@@ -89,6 +89,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
                 self.primary_collector.unicef_id,
                 self.alternate_collector.unicef_id,
             ],
+            "originating_id": "PRF#123#123",
         }
 
         response = self.client.post(self.url, [household_data], format="json")
@@ -104,6 +105,7 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.size == 3
         assert sorted(household.consent_sharing) == sorted(["UNICEF", "PRIVATE_PARTNER"])
         assert household.village == "Test Village"
+        assert household.originating_id == "PRF#123#123"
         assert household.head_of_household == self.head_of_household
         assert household.primary_collector == self.primary_collector
         assert household.alternate_collector == self.alternate_collector

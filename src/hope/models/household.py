@@ -652,11 +652,19 @@ class Household(
         db_index=True,
         help_text="Household unhcr id",
     )
+    # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
     detail_id = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID",
+    )
+    originating_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+                     and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
     start = models.DateTimeField(blank=True, null=True, help_text="Data collection start date")
 
@@ -740,6 +748,7 @@ class Household(
         default=BLANK,
         help_text="Household org name enumerator [sys]",
     )
+    # TODO: kobo_submission_uuid and kobo_submission_time are deprecated, will be removed soon.
     kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
     kobo_submission_time = models.DateTimeField(
         max_length=150,
