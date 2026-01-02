@@ -983,6 +983,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
     collector_phone_no = serializers.SerializerMethodField()
     collector_phone_no_alt = serializers.SerializerMethodField()
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
+    snapshot_alternate_collector_full_name = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector Full Name"
+    )
+    snapshot_alternate_collector_id = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector ID"
+    )
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
     verification = serializers.SerializerMethodField()
