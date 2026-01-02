@@ -92,8 +92,7 @@ class Individual(
             "duplicate",
             "withdrawn",
             "individual_id",
-            "photo",
-            "full_name",
+            "photofull_name",
             "given_name",
             "middle_name",
             "family_name",
@@ -377,11 +376,19 @@ class Individual(
     sanction_list_confirmed_match = models.BooleanField(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
+    # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
     detail_id = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]",
+    )
+    originating_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+                     and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
     program_registration_id = models.CharField(
         max_length=100,
