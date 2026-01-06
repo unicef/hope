@@ -7,6 +7,7 @@ from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
+from flags.models import FlagState
 from freezegun import freeze_time
 from parameterized import parameterized
 import pytest
@@ -24,25 +25,25 @@ from extras.test_utils.factories.household import (
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
-    Household,
-    Individual,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
-from hope.apps.registration_data.models import (
-    KoboImportedSubmission,
-    RegistrationDataImport,
 )
 from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models import (
+    Household,
+    Individual,
+    KoboImportedSubmission,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -227,6 +228,7 @@ class TestRdiMergeTask(TestCase):
 
         cls.individuals = [PendingIndividualFactory(**individual) for individual in individuals_to_create]
 
+    # @pytest.mark.xfail(reason="Failing In ONE MODEL")
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
         hh = PendingHouseholdFactory(
@@ -515,6 +517,9 @@ class TestRdiMergeTask(TestCase):
         },
     )
     @mock.patch(
+        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_individuals_status"
+    )
+    @mock.patch(
         "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
     )
     @mock.patch(
@@ -524,7 +529,15 @@ class TestRdiMergeTask(TestCase):
         self,
         update_rdis_deduplication_statistics_mock: mock.Mock,
         create_grievance_tickets_for_duplicates_mock: mock.Mock,
+        report_individuals_status_mock: mock.Mock,
     ) -> None:
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
         program.save()
@@ -538,6 +551,14 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
+
+        args, _ = report_individuals_status_mock.call_args
+        assert args[0] == program
+        assert set(args[1]) == {
+            str(_id)
+            for _id in Individual.objects.filter(registration_data_import=self.rdi).values_list("id", flat=True)
+        }
+        assert args[2] == "merged"
 
     def test_merge_empty_rdi(self) -> None:
         rdi = self.rdi

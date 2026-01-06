@@ -12,11 +12,7 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service
-from hope.apps.periodic_data_update.models import (
-    PDUOnlineEdit,
-    PDUXlsxTemplate,
-    PDUXlsxUpload,
-)
+from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID

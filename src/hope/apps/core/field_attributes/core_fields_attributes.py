@@ -73,8 +73,7 @@ from hope.apps.core.field_attributes.lookup_functions import (
     get_unhcr_id_no,
 )
 from hope.apps.core.languages import Languages
-from hope.apps.geo.models import Area, Country
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -89,7 +88,8 @@ from hope.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import Area, Country
+from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -590,7 +590,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "photo_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE, Scope.INDIVIDUAL_UPDATE],
     },
     {
         "id": "35ede8c4-877e-40dc-a93a-0a9a3bc511dc",

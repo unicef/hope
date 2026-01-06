@@ -11,8 +11,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory, PDUOnlineEditSentBackCommentFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.periodic_data_update.models import PDUOnlineEdit
-from hope.apps.program.models import Program
+from hope.models import PDUOnlineEdit, Program
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

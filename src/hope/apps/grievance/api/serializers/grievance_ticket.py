@@ -3,12 +3,9 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
-from hope.apps.account.models import Partner, User
-from hope.apps.accountability.models import Feedback
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaListSerializer
-from hope.apps.geo.models import Area
 from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
@@ -20,18 +17,22 @@ from hope.apps.household.api.serializers.individual import (
     IndividualSimpleSerializer,
     IndividualSmallSerializer,
 )
-from hope.apps.household.models import (
-    ROLE_CHOICE,
+from hope.apps.household.const import ROLE_CHOICE
+from hope.apps.payment.api.serializers import PaymentSmallSerializer
+from hope.apps.program.api.serializers import ProgramSmallSerializer
+from hope.models import (
+    Area,
     Document,
     DocumentType,
+    Feedback,
     Household,
     Individual,
     IndividualIdentity,
+    Partner,
+    Payment,
+    Program,
+    User,
 )
-from hope.apps.payment.api.serializers import PaymentSmallSerializer
-from hope.apps.payment.models import Payment
-from hope.apps.program.api.serializers import ProgramSmallSerializer
-from hope.apps.program.models import Program
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -367,6 +368,7 @@ class AddIndividualDataSerializer(serializers.Serializer):
     blockchain_name = serializers.CharField(required=False)
     wallet_address = serializers.CharField(required=False)
     wallet_name = serializers.CharField(required=False)
+    photo = serializers.ImageField(required=False, allow_null=True)
 
 
 class IndividualUpdateDataSerializer(serializers.Serializer):
@@ -416,6 +418,7 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     blockchain_name = serializers.CharField(required=False)
     wallet_address = serializers.CharField(required=False)
     wallet_name = serializers.CharField(required=False)
+    photo = serializers.ImageField(required=False, allow_null=True)
     # people fields
     consent = serializers.CharField(required=False, allow_null=True, help_text="People update")
     residence_status = serializers.CharField(required=False, allow_blank=True, help_text="People update")

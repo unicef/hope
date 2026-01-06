@@ -2,6 +2,7 @@ from datetime import date
 from typing import Any
 
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 import pytest
 from rest_framework import status
@@ -37,11 +38,8 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.account.models import AdminAreaLimitedTo
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.geo import models as geo_models
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
@@ -52,7 +50,7 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketNote,
 )
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     FEMALE,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -61,13 +59,19 @@ from hope.apps.household.models import (
     ROLE_PRIMARY,
     SINGLE,
     WIDOWED,
+)
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    AdminAreaLimitedTo,
+    BusinessArea,
     DocumentType,
     IndividualRoleInHousehold,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    Program,
+    country as geo_models,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import Program
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.apps.utils.models import MergeStatusModel
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -997,6 +1001,7 @@ class TestGrievanceTicketApprove:
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=self.area_1,
             business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_NEW,
         )
         self.individual_data_change_grv.programs.set([self.program])
         TicketIndividualDataUpdateDetailsFactory(
@@ -2021,3 +2026,105 @@ class TestGrievanceTicketApprove:
         assert len(resp_data) == 2
         assert resp_data[0]["ticket_notes"][0]["description"] == "New Note bulk create"
         assert resp_data[1]["ticket_notes"][0]["description"] == "New Note bulk create"
+
+    def test_update_grievance_ticket_individual_data_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras.individual_data_update_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"]
+
+    def test_update_grievance_ticket_add_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.add_individual_grv.pk),
+            },
+        )
+        data = {
+            "extras.add_individual_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.add_individual_grv.refresh_from_db()
+        ticket_details = self.add_individual_grv.add_individual_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]
+
+    def test_update_grievance_ticket_individual_data_clear_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras": {
+                "individual_data_update_issue_type_extras": {
+                    "individual_data": {
+                        "photo": None,
+                    }
+                }
+            }
+        }
+        response = self.api_client.patch(url, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"] == ""

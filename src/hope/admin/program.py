@@ -1,4 +1,8 @@
+from io import BytesIO
+import os
+from pathlib import Path
 from typing import Any
+import zipfile
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -6,11 +10,15 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet
 from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django_celery_boost.models import AsyncJobModel
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
@@ -18,17 +26,24 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
-from hope.apps.account.models import AdminAreaLimitedTo, Partner
-from hope.apps.geo.models import Area
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program, ProgramCycle
 from hope.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
+from hope.models import (
+    AdminAreaLimitedTo,
+    Area,
+    AsyncJob,
+    FileTemp,
+    Household,
+    Individual,
+    Partner,
+    Program,
+    ProgramCycle,
+)
 
 
 @admin.register(ProgramCycle)
@@ -79,6 +94,21 @@ class PartnerAreaLimitForm(forms.Form):
     )
 
 
+class BulkUploadIndividualsPhotosForm(forms.Form):
+    file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
+
+    def clean_file(self):
+        file = self.cleaned_data["file"]
+
+        if not file.name.lower().endswith(".zip"):
+            raise ValidationError("The uploaded file must be a .zip archive.")
+
+        if not zipfile.is_zipfile(file):
+            raise ValidationError("The uploaded file is not a valid ZIP archive.")
+
+        return file
+
+
 @admin.register(Program)
 class ProgramAdmin(
     SoftDeletableAdminMixin,
@@ -117,6 +147,7 @@ class ProgramAdmin(
         "cash_plus",
         "is_visible",
     )
+    filter_horizontal = ("sanction_lists",)
     search_fields = ("name", "programme_code")
     autocomplete_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
 
@@ -129,6 +160,7 @@ class ProgramAdmin(
             if original.biometric_deduplication_enabled != obj.biometric_deduplication_enabled:
                 service = BiometricDeduplicationService()
                 if obj.biometric_deduplication_enabled:
+                    service.create_deduplication_set(obj)
                     service.mark_rdis_as_pending(obj)
                 else:
                     service.delete_deduplication_set(obj)
@@ -262,3 +294,135 @@ class ProgramAdmin(
         )
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))
+
+    @button(label="Bulk Upload Individual Photos", permission="program.can_bulk_upload_individual_photos")
+    def bulk_upload_individuals_photos(self, request: HttpRequest, pk: int) -> TemplateResponse:
+        program = Program.objects.get(pk=pk)
+        context: dict = self.get_common_context(request, processed=False)
+        context["pk"] = pk
+        if request.method == "GET":
+            form = BulkUploadIndividualsPhotosForm()
+            context["form"] = form
+        else:
+            form = BulkUploadIndividualsPhotosForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                try:
+                    zip_file = form.cleaned_data["file"]
+                    file_temp = FileTemp.objects.create(
+                        object_id=program.pk,
+                        content_type=get_content_type_for_model(program),
+                        file=zip_file,
+                    )
+                    job = AsyncJob.objects.create(
+                        program=program,
+                        owner=request.user,
+                        type=AsyncJobModel.JobType.JOB_TASK,
+                        action="hope.admin.program.bulk_upload_individuals_photos_action",
+                        config={"file_id": str(file_temp.pk)},
+                        description=f"Bulk upload individuals photos for program {program.pk}",
+                    )
+                    job.queue()
+                    self.message_user(
+                        request,
+                        f"Photos import task scheduled [{job.pk}]AsyncJob",
+                        messages.SUCCESS,
+                    )
+                except Exception as e:  # noqa
+                    self.message_user(request, f"Error scheduling task: {e}", messages.ERROR)
+
+            else:
+                self.message_user(request, "Form validation error", messages.ERROR)
+                context["form"] = form
+        return TemplateResponse(request, "admin/program/program/bulk_upload_individuals_photos.html", context)
+
+
+def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
+    """Update individual photos from the ZIP attached to this job.
+
+    - Collect all JPEG filenames (IND-...*.jpg) from job.file.file.
+    - Bulk-load Individuals by their unicef_id (or your ID field).
+    - Save each image into individual.photo.
+    - Store errors in job.errors.
+    """
+    job.errors = {}
+
+    file_id = job.config.get("file_id")
+    file = FileTemp.objects.filter(pk=file_id).first()
+    if not file:
+        job.errors = {"file": "This job requires the file."}
+        job.save(update_fields=["errors"])
+        raise ValueError("BulkUploadIndividualsPhotosJob requires a file.")
+
+    file_field = file.file
+    invalid_filenames: list[str] = []
+    missing_individuals: list[str] = []
+    updated_count = 0
+
+    entries: list[tuple[str, str, str]] = []  # (member_name, filename, individual_id)
+    individual_unicef_ids: set[str] = set()
+
+    # read ZIP once into memory
+    with file_field.open("rb") as f:
+        data = f.read()
+
+    try:
+        with zipfile.ZipFile(BytesIO(data)) as zf:
+            for name in zf.namelist():
+                if name.endswith("/"):
+                    continue
+
+                filename = Path(name).name
+                stem, ext = os.path.splitext(filename)
+
+                if ext.lower() not in (".jpg", ".jpeg"):
+                    continue
+
+                individual_unicef_id = stem.strip()
+                if not individual_unicef_id.startswith("IND-"):
+                    invalid_filenames.append(filename)
+                    continue
+
+                entries.append((name, filename, individual_unicef_id))
+                individual_unicef_ids.add(individual_unicef_id)
+    except zipfile.BadZipFile as exc:
+        job.errors = {"file": f"Invalid ZIP archive: {exc}"}
+        job.save(update_fields=["errors"])
+        raise ValueError(f"Invalid ZIP archive: {exc}") from exc
+
+    if not entries:
+        job.errors = {"file": "No valid JPEG files found in archive."}
+        job.save(update_fields=["errors"])
+        return 0
+
+    individuals = Individual.objects.filter(program=job.program, unicef_id__in=individual_unicef_ids).only(
+        "id", "unicef_id", "photo"
+    )
+
+    individuals_by_unicef_id = {ind.unicef_id: ind for ind in individuals}
+
+    with zipfile.ZipFile(BytesIO(data)) as zf:
+        for member_name, filename, individual_id in entries:
+            individual = individuals_by_unicef_id.get(individual_id)
+            if not individual:
+                missing_individuals.append(filename)
+                continue
+
+            with zf.open(member_name) as img_fp:
+                img_bytes = img_fp.read()
+
+            individual.photo.save(
+                filename,
+                ContentFile(img_bytes),
+                save=True,
+            )
+            updated_count += 1
+
+    if invalid_filenames:
+        job.errors["invalid_filenames"] = sorted(set(invalid_filenames))
+    if missing_individuals:
+        job.errors["missing_individuals"] = sorted(set(missing_individuals))
+    job.save(update_fields=["errors"])
+
+    if not updated_count:
+        raise ValueError(f"None photos matched to an individual: {job.errors}")
+    return updated_count

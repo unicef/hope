@@ -11,19 +11,23 @@ from extras.test_utils.factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )
-from hope.api.models import Grant
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingHousehold,
 )
-from hope.apps.payment.models import AccountType, FinancialInstitution, PendingAccount
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import (
+    AccountType,
+    DocumentType,
+    FinancialInstitution,
+    PendingAccount,
+    PendingHousehold,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 from unit.api.factories import UserFactory
 
@@ -66,6 +70,42 @@ class CreateRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
         assert "User with this email does not exist." in str(response.json())
+
+    def test_create_rdi_with_biometric_deduplication_enabled(self) -> None:
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_with_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_with_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+    def test_create_rdi_with_biometric_deduplication_disabled(self) -> None:
+        self.program.biometric_deduplication_enabled = False
+        self.program.save()
+
+        user = UserFactory()
+        data = {
+            "name": "rdi_without_biometric",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": user.email,
+        }
+        response = self.client.post(self.url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        rdi = RegistrationDataImport.objects.filter(name="rdi_without_biometric").first()
+        assert rdi is not None
+        assert rdi.deduplication_engine_status is None
 
 
 class PushToRDITests(HOPEApiTestCase):
@@ -122,7 +162,7 @@ class PushToRDITests(HOPEApiTestCase):
                         ],
                         "accounts": [
                             {
-                                "account_type": "bank",
+                                "type": "bank",
                                 "number": "123",
                                 # "financial_institution": self.fi.id,  # use generic financial institution
                                 "data": {"field_name": "field_value"},

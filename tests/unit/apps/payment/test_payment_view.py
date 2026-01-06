@@ -10,10 +10,8 @@ from extras.test_utils.factories.household import IndividualFactory, IndividualR
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import DataCollectingType
-from hope.apps.household.models import ROLE_ALTERNATE
-from hope.apps.payment.models import Payment, PaymentPlan
-from hope.apps.program.models import Program
+from hope.apps.household.const import ROLE_ALTERNATE
+from hope.models import DataCollectingType, Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 

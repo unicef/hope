@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.utils import timezone
 
-from hope.apps.activity_log.models import log_create
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
@@ -15,6 +14,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_add_document,
     handle_add_identity,
     handle_documents,
+    handle_photo,
     save_images,
     to_date_string,
     to_phone_number_str,
@@ -22,19 +22,16 @@ from hope.apps.grievance.services.data_change.utils import (
     verify_flex_fields,
 )
 from hope.apps.grievance.signals import individual_added
-from hope.apps.household.models import (
+from hope.apps.household.const import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
-    Document,
-    Household,
-    Individual,
-    IndividualIdentity,
 )
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.models import MergeStatusModel
 from hope.apps.utils.querysets import evaluate_qs
+from hope.models import Document, Household, Individual, IndividualIdentity, log_create
+from hope.models.utils import MergeStatusModel
 
 
 class AddIndividualService(DataChangeService):
@@ -47,6 +44,12 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_date_string(individual_data, "birth_date")
+        # Handle photo field
+        photo = individual_data.pop("photo", None)
+        if photo is not None:
+            saved_photo = handle_photo(photo, None)
+            if saved_photo:
+                individual_data["photo"] = saved_photo
         individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
@@ -70,6 +73,12 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no")
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_date_string(new_individual_data, "birth_date")
+        # Handle photo field
+        photo = new_individual_data.pop("photo", None)
+        if photo is not None:
+            saved_photo = handle_photo(photo, None)
+            if saved_photo:
+                new_individual_data["photo"] = saved_photo
         new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()

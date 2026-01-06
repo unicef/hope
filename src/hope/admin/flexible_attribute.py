@@ -10,11 +10,10 @@ from django.http import HttpRequest
 from jsoneditor.forms import JSONEditor
 
 from hope.admin.utils import SoftDeletableAdminMixin
-from hope.apps.core.models import FlexibleAttribute
+from hope.models import FlexibleAttribute
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 

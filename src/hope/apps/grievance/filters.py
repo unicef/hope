@@ -15,11 +15,10 @@ from django_filters import (
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.apps.household.models import HEAD, Individual
-from hope.apps.program.models import Program
+from hope.apps.household.const import HEAD
+from hope.models import BusinessArea, Individual, Program
 
 logger = logging.getLogger(__name__)
 
@@ -293,7 +292,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
                 household_path = lookups["household"]
                 q_filters |= Q(**{f"{ticket_type}__{household_path}__unicef_id": unicef_id})
 
-        q_filters |= Q(delete_household_ticket_details__household__unicef_id=unicef_id)
         q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
 
         return queryset.filter(q_filters).distinct()
@@ -313,8 +311,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
         q_filters |= Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=unicef_id)
         q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
         q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
-
-        q_filters |= Q(delete_individual_ticket_details__individual__unicef_id=unicef_id)
 
         return queryset.filter(q_filters).distinct()
 

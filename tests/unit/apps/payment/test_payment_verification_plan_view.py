@@ -20,15 +20,15 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.models import (
+from hope.models import (
     Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    Program,
     build_summary,
 )
-from hope.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -634,3 +634,156 @@ class TestPaymentVerificationViewSet:
 
             assert "id" in resp_data
             assert resp_data["verification"]["received_amount"] == "123.22"
+
+    def test_verifications_list_filter_search(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        url = reverse(
+            "api:payments:verification-records-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.pk),
+            },
+        )
+        response = self.client.get(url, {"search": self.payment_1.unicef_id})
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()["results"]
+        assert len(resp_data) == 1
+        assert resp_data[0]["unicef_id"] == self.payment_1.unicef_id
+
+    def test_verifications_list_filter_verification_status(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        self.verification_1.status = PaymentVerification.STATUS_RECEIVED
+        self.verification_1.save()
+        self.verification_2.status = PaymentVerification.STATUS_PENDING
+        self.verification_2.save()
+
+        url = reverse(
+            "api:payments:verification-records-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.pk),
+            },
+        )
+        response = self.client.get(url, {"verification_status": PaymentVerification.STATUS_RECEIVED})
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()["results"]
+        assert len(resp_data) == 1
+        assert resp_data[0]["verification"]["status"] == PaymentVerification.STATUS_RECEIVED
+
+    def test_verifications_list_filter_verification_channel(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        pvp_xlsx = PaymentVerificationPlanFactory(
+            payment_plan=self.pp,
+            sampling=PaymentVerificationPlan.SAMPLING_FULL_LIST,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+        )
+        payment_3 = PaymentFactory(
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=200,
+            entitlement_quantity=200,
+        )
+        PaymentVerificationFactory(
+            payment_verification_plan=pvp_xlsx,
+            payment=payment_3,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+
+        url = reverse(
+            "api:payments:verification-records-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.pk),
+            },
+        )
+        response = self.client.get(url, {"verification_channel": PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL})
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()["results"]
+        assert len(resp_data) == 2
+        for payment in resp_data:
+            assert (
+                payment["verification"]["verification_channel"] == PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            )
+
+    def test_verifications_list_filter_verification_plan_id(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        pvp_2 = PaymentVerificationPlanFactory(
+            payment_plan=self.pp,
+            sampling=PaymentVerificationPlan.SAMPLING_FULL_LIST,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+        )
+        payment_3 = PaymentFactory(
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=200,
+            entitlement_quantity=200,
+        )
+        PaymentVerificationFactory(
+            payment_verification_plan=pvp_2,
+            payment=payment_3,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+
+        url = reverse(
+            "api:payments:verification-records-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.pk),
+            },
+        )
+        response = self.client.get(url, {"verification_plan_id": str(self.pvp.pk)})
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()["results"]
+        assert len(resp_data) == 2
+        for payment in resp_data:
+            assert payment["verification"]["payment_verification_plan_unicef_id"] == self.pvp.unicef_id
+
+    def test_verifications_list_ordering(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        url = reverse(
+            "api:payments:verification-records-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.pk),
+            },
+        )
+        response_asc = self.client.get(url, {"ordering": "unicef_id"})
+        assert response_asc.status_code == status.HTTP_200_OK
+        resp_data_asc = response_asc.json()["results"]
+
+        response_desc = self.client.get(url, {"ordering": "-unicef_id"})
+        assert response_desc.status_code == status.HTTP_200_OK
+        resp_data_desc = response_desc.json()["results"]
+
+        assert resp_data_asc[0]["unicef_id"] == resp_data_desc[-1]["unicef_id"]
+        assert resp_data_asc[-1]["unicef_id"] == resp_data_desc[0]["unicef_id"]

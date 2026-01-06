@@ -25,7 +25,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hope.api.caches import etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.models import log_create
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -35,9 +34,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
-from hope.apps.core.models import BusinessArea
 from hope.apps.core.utils import check_concurrency_version_in_mutation
-from hope.apps.household.models import Individual, IndividualRoleInHousehold
 from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
@@ -47,6 +44,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PaymentVerificationRecordFilter,
     PendingPaymentFilter,
     TargetPopulationFilter,
 )
@@ -92,17 +90,6 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
-from hope.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -124,10 +111,25 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hope.apps.program.models import ProgramCycle
-from hope.apps.steficon.models import Rule
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import (
+    BusinessArea,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Individual,
+    IndividualRoleInHousehold,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    ProgramCycle,
+    Rule,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -515,13 +517,9 @@ class PaymentVerificationViewSet(
         )
 
 
-class PaymentVerificationRecordViewSet(
-    CountActionMixin, ProgramMixin, SerializerActionMixin, PaymentPlanMixin, BaseViewSet
-):
+class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, SerializerActionMixin, BaseViewSet):
+    queryset = Payment.objects.all()
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.filter(
-        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("-created_at")
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -533,12 +531,18 @@ class PaymentVerificationRecordViewSet(
         "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
         "partial_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentVerificationRecordFilter
 
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
     def get_verification_record(self) -> PaymentVerificationPlan:
         return get_object_or_404(Payment, id=self.kwargs.get("pk"))
+
+    def get_queryset(self):
+        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
+        return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
 
     @extend_schema(
         responses={
@@ -547,14 +551,13 @@ class PaymentVerificationRecordViewSet(
     )
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Return list of verification records."""
-        payment_plan = self.get_object()
-        payments = payment_plan.eligible_payments.all()
-        page = self.paginate_queryset(payments)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(payments, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:

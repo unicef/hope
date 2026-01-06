@@ -1,12 +1,13 @@
+from copy import deepcopy
 from datetime import date
 from typing import Any
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import (
     TicketAddIndividualDetails,
     TicketDeleteHouseholdDetails,
@@ -21,10 +22,9 @@ from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
 )
-from hope.apps.household.models import Individual
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
-from hope.apps.program.models import Program
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
+from hope.models import BusinessArea, Individual, Program
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -37,6 +37,8 @@ class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
 
 
 class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
+    individual_data = serializers.SerializerMethodField()
+
     class Meta:
         model = TicketIndividualDataUpdateDetails
         fields = (
@@ -45,8 +47,23 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
             "role_reassign_data",
         )
 
+    def get_individual_data(self, obj: TicketIndividualDataUpdateDetails) -> dict | None:
+        data = obj.individual_data
+        if not data:
+            return data
+        data = deepcopy(data)
+        photo_data = data.get("photo")
+        if isinstance(photo_data, dict):
+            if photo_data.get("value"):
+                photo_data["value"] = default_storage.url(photo_data["value"])
+            if photo_data.get("previous_value"):
+                photo_data["previous_value"] = default_storage.url(photo_data["previous_value"])
+        return data
+
 
 class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
+    individual_data = serializers.SerializerMethodField()
+
     class Meta:
         model = TicketAddIndividualDetails
         fields = (
@@ -54,6 +71,15 @@ class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
             "approve_status",
             "individual_data",
         )
+
+    def get_individual_data(self, obj: TicketAddIndividualDetails) -> dict | None:
+        data = obj.individual_data
+        if not data:
+            return data
+        data = deepcopy(data)
+        if data.get("photo"):
+            data["photo"] = default_storage.url(data["photo"])
+        return data
 
 
 class DeleteIndividualTicketDetailsSerializer(serializers.ModelSerializer):

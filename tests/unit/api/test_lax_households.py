@@ -1,4 +1,12 @@
+import base64
+import os
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
+
 from django.core.management import call_command
+from django.test.utils import override_settings
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -6,10 +14,8 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.household import PendingIndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.api.models import Grant
-from hope.apps.household.models import PendingHousehold
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import RegistrationDataImport
+from hope.models import PendingHousehold, Program, RegistrationDataImport
+from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
 
@@ -33,6 +39,9 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         cls.admin2 = AreaFactory(parent=cls.admin1, p_code="AF0101", area_type=admin_type_2)
         cls.admin3 = AreaFactory(parent=cls.admin2, p_code="AF010101", area_type=admin_type_3)
         cls.admin4 = AreaFactory(parent=cls.admin3, p_code="AF01010101", area_type=admin_type_4)
+
+        image = Path(__file__).parent / "logo.png"
+        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
 
     def setUp(self) -> None:
         super().setUp()
@@ -231,3 +240,69 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert household.admin2 == self.admin2
         assert household.admin3 == self.admin3
         assert household.admin4 == self.admin4
+
+    def test_create_household_with_consent_sign(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["processed"] == 1
+        assert response.data["accepted"] == 1
+        assert response.data["errors"] == 0
+
+        household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+        assert household.consent_sign is not None
+        assert household.consent_sign.name.startswith(self.program.programme_code)
+        assert household.consent_sign.name.endswith(".png")
+
+    def test_consent_sign_cleanup_on_failure(self) -> None:
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF", "PRIVATE_PARTNER"],
+            "consent_sign": self.base64_encoded_data,
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [
+                self.head_of_household.unicef_id,
+                self.primary_collector.unicef_id,
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args, **kwargs):
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for consent sign cleanup test")
+
+                with patch(
+                    "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
+                    side_effect=fail_after_files_exist,
+                ):
+                    with pytest.raises(RuntimeError):
+                        self.client.post(self.url, [household_data], format="json")
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []

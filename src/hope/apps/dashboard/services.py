@@ -17,10 +17,8 @@ from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 import sentry_sdk
 
-from hope.apps.core.models import BusinessArea
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
-from hope.apps.household.models import Household
-from hope.apps.payment.models import Payment, PaymentPlan
+from hope.models import BusinessArea, DataCollectingType, Household, Payment, PaymentPlan
 
 logger = logging.getLogger(__name__)
 
@@ -315,13 +313,15 @@ class DashboardCacheBase(Protocol):
 
             for hh in households_qs:
                 size_value = hh.get("size")
+                dct_type = hh.get("program__data_collecting_type__type")
+                is_sw_program = dct_type == DataCollectingType.Type.SOCIAL
                 household_map[hh["id"]] = {
-                    "size": 1 if size_value is None else size_value,
-                    "children_count": hh.get("children_count"),  # Return the raw value or None
+                    "size": 1 if is_sw_program or size_value is None else size_value,
+                    "children_count": hh.get("children_count"),
                     "pwd_count": hh.get("pwd_count_calc") or 0,
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
                     "country": hh.get("country_name_hh", "Unknown Country"),
-                    "dct_type": hh.get("program__data_collecting_type__type"),
+                    "dct_type": dct_type,
                 }
         return household_map
 
@@ -519,16 +519,17 @@ class DashboardDataCache(DashboardCacheBase):
                 current_summary["individuals"] += int(h_data.get("size", 0))
 
                 children_count = h_data.get("children_count")
-                is_sw_program = h_data.get("dct_type") == "SOCIAL"
+                is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
 
-                if is_sw_program or children_count is None:
-                    payment_year = payment.get("year")
-                    country_name = h_data.get("country", "Unknown Country")
-                    if payment_year:
-                        fertility_rate = get_fertility_rate(country_name, payment_year)
-                        current_summary["children_counts"] += fertility_rate
-                else:
-                    current_summary["children_counts"] += children_count
+                if not is_sw_program:
+                    if children_count is None:
+                        payment_year = payment.get("year")
+                        country_name = h_data.get("country", "Unknown Country")
+                        if payment_year:
+                            fertility_rate = get_fertility_rate(country_name, payment_year)
+                            current_summary["children_counts"] += fertility_rate
+                    else:
+                        current_summary["children_counts"] += children_count
 
                 current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                 current_summary["_seen_households"].add(household_id)
@@ -716,19 +717,18 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     h_data = household_map.get(household_id, {})
                     current_summary["individuals"] += int(h_data.get("size", 0))
 
-                    # --- Start of modified children_count logic ---
                     children_count = h_data.get("children_count")
-                    is_sw_program = h_data.get("dct_type") == "SOCIAL"
+                    is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
 
-                    if is_sw_program or children_count is None:
-                        payment_year = payment.get("year")
-                        country_name = h_data.get("country", "Unknown Country")
-                        if payment_year:
-                            fertility_rate = get_fertility_rate(country_name, payment_year)
-                            current_summary["children_counts"] += fertility_rate
-                    else:
-                        current_summary["children_counts"] += children_count
-                    # --- End of modified children_count logic ---
+                    if not is_sw_program:
+                        if children_count is None:
+                            payment_year = payment.get("year")
+                            country_name = h_data.get("country", "Unknown Country")
+                            if payment_year:
+                                fertility_rate = get_fertility_rate(country_name, payment_year)
+                                current_summary["children_counts"] += fertility_rate
+                        else:
+                            current_summary["children_counts"] += children_count
 
                     current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                     current_summary["_seen_households"].add(household_id)

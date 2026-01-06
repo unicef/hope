@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING, Sequence
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
-from hope.apps.activity_log.models import log_create
-from hope.apps.core.models import BusinessArea
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
@@ -19,19 +17,23 @@ from hope.apps.grievance.utils import (
     traverse_sibling_tickets,
     validate_all_individuals_before_close_needs_adjudication,
 )
+from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Household, Individual
-from hope.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hope.models import (
+    BusinessArea,
+    DeduplicationEngineSimilarityPair,
+    Household,
+    Individual,
+    RegistrationDataImport,
+    log_create,
+)
 
 if TYPE_CHECKING:
-    from hope.apps.program.models import Program
+    from hope.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -95,10 +97,10 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             service.report_false_positive_duplicate(
                 photos[0],
                 photos[1],
-                str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
+                str(ticket_details.ticket.registration_data_import.program.unicef_id),
             )
-        except service.api.API_EXCEPTION_CLASS:
-            logger.warning("Failed to report false positive duplicate to Deduplication Engine")
+        except service.api.API_EXCEPTION_CLASS:  # pragma no cover
+            logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -213,7 +215,7 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
-    from hope.apps.household.models import Individual
+    from hope.models import Individual
 
     if not individuals_queryset:
         return

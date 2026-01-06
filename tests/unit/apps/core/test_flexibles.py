@@ -3,15 +3,11 @@ from typing import Any
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from openpyxl.utils.exceptions import InvalidFileException
 import pytest
-from xlrd import XLRDError
 
 from hope.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hope.apps.core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-)
+from hope.models import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class MockSuperUser:
@@ -25,7 +21,7 @@ class TestFlexibles(TestCase):
         task.import_xls(f"{settings.TESTS_ROOT}/apps/core/test_files/{name}")
 
     def test_flexible_init_update_delete(self) -> None:
-        self.load_xls("flex_init.xls")
+        self.load_xls("flex_init.xlsx")
         # Check if created correct amount of objects
         expected_attributes_count = 45
         expected_groups_count = 10
@@ -110,7 +106,7 @@ class TestFlexibles(TestCase):
             assert no_choice.flex_attributes.filter(id=attrib.id).exists()
 
         # Test updating/deleting values
-        self.load_xls("flex_updated.xls")
+        self.load_xls("flex_updated.xlsx")
 
         deleted_groups = [
             "household_questions",
@@ -136,7 +132,7 @@ class TestFlexibles(TestCase):
 
     def test_flexibles_type_validation(self) -> None:
         # import valid file
-        self.load_xls("flex_init_valid_types.xls")
+        self.load_xls("flex_init_valid_types.xlsx")
 
         groups_from_db = FlexibleAttributeGroup.objects.all()
         flex_attrs_from_db = FlexibleAttribute.objects.all()
@@ -167,7 +163,7 @@ class TestFlexibles(TestCase):
         )
 
         with pytest.raises(ValidationError):
-            self.load_xls("flex_update_invalid_types.xls")
+            self.load_xls("flex_update_invalid_types.xlsx")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         assert len(group) == 1
@@ -178,7 +174,7 @@ class TestFlexibles(TestCase):
             ValidationError,
             "Name is required",
             self.load_xls,
-            "flex_field_missing_name.xls",
+            "flex_field_missing_name.xlsx",
         )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
@@ -190,7 +186,7 @@ class TestFlexibles(TestCase):
             ValidationError,
             "English label cannot be empty",
             self.load_xls,
-            "flex_field_missing_english_label.xls",
+            "flex_field_missing_english_label.xlsx",
         )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
@@ -198,11 +194,11 @@ class TestFlexibles(TestCase):
         assert len(attribs) == 0
 
     def test_load_invalid_file(self) -> None:
-        with pytest.raises(XLRDError):
+        with pytest.raises(InvalidFileException):
             self.load_xls("erd arrows.jpg")
 
     def test_reimport_soft_deleted_objects(self) -> None:
-        self.load_xls("flex_init_valid_types.xls")
+        self.load_xls("flex_init_valid_types.xlsx")
         field = FlexibleAttribute.objects.get(name="introduction_h_f")
         group = FlexibleAttributeGroup.objects.get(name="consent")
 
@@ -215,6 +211,6 @@ class TestFlexibles(TestCase):
         assert field.is_removed
         assert group.is_removed
 
-        self.load_xls("flex_init_valid_types.xls")
+        self.load_xls("flex_init_valid_types.xlsx")
 
         assert field.group == group

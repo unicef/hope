@@ -1,10 +1,11 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Any, Callable, Generator
 from unittest.mock import Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
+from flags.models import FlagState
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -18,16 +19,19 @@ from extras.test_utils.factories.registration_data import (
     RegistrationDataImportFactory,
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
-from hope.apps.account.models import Role, RoleAssignment
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.models import Household, Individual
-from hope.apps.program.models import Program
-from hope.apps.registration_data.models import (
+from hope.apps.household.documents import IndividualDocumentAfghanistan
+from hope.models import (
+    Household,
     ImportData,
+    Individual,
     KoboImportData,
+    Program,
     RegistrationDataImport,
+    Role,
+    RoleAssignment,
+    SanctionList,
 )
-from hope.apps.sanction_list.models import SanctionList
 from unit.api.base import HOPEApiTestCase
 
 
@@ -42,6 +46,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             Permissions.RDI_REFUSE_IMPORT,
             Permissions.RDI_RERUN_DEDUPE,
             Permissions.RDI_IMPORT_DATA,
+            Permissions.RDI_WEBHOOK_DEDUPLICATION,
         ]
         unicef_partner = PartnerFactory(name="UNICEF")
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
@@ -74,15 +79,29 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert resp.data == {"message": "Deduplication process started"}
         mock_deduplication_engine_process.assert_called_once_with(str(self.program.id))
 
+        RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+        resp = self.client.post(url, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json() == ["Deduplication is already in progress for some RDIs"]
+
+        self.program.biometric_deduplication_enabled = False
+        self.program.save()
+        resp = self.client.post(url, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json() == ["Biometric deduplication is not enabled for this program"]
+
     @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:registration-data:registration-data-imports-webhook-deduplication",
             args=["afghanistan", self.program.slug],
         )
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        mock_fetch_dedup_results.assert_called_once_with(self.program.deduplication_set_id)
+        mock_fetch_dedup_results.assert_called_once_with(str(self.program.id))
 
     def test_list_registrations(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -308,7 +327,30 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert not rdi.erased
 
-    def test_refuse_rdi(self) -> None:
+    @patch.dict(
+        "os.environ",
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
+    )
+    @patch(
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_individuals_status"
+    )
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_refuse_rdi(
+        self, remove_elasticsearch_documents_by_matching_ids_moc: Any, report_refused_individuals_mock: Any
+    ) -> None:
+        FlagState.objects.get_or_create(
+            name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+
         self.client.force_authenticate(user=self.user)
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,
@@ -328,6 +370,9 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
                 {"program": self.program, "registration_data_import": rdi},
             ],
         )
+        individuals_ids_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
 
         assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
         assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
@@ -346,6 +391,13 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.status == RegistrationDataImport.REFUSED_IMPORT
         assert rdi.refuse_reason == "Testing refuse endpoint"
+
+        report_refused_individuals_mock.assert_called_once_with(
+            rdi.program, [str(_id) for _id in individuals_ids_to_remove], "rejected"
+        )
+        remove_elasticsearch_documents_by_matching_ids_moc.assert_called_once_with(
+            individuals_ids_to_remove, IndividualDocumentAfghanistan
+        )
 
     def test_refuse_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -987,7 +1039,16 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         response = self.client.post(url, {}, format="json")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_permission_checks_refuse(self) -> None:
+    @patch(
+        "hope.apps.registration_datahub.services"
+        ".biometric_deduplication"
+        ".BiometricDeduplicationService"
+        ".report_individuals_status"
+    )
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_permission_checks_refuse(
+        self, remove_elasticsearch_documents_by_matching_ids_moc: Any, report_refused_individuals_mock: Any
+    ) -> None:
         self.client.force_authenticate(user=self.user)
 
         rdi_to_refuse = RegistrationDataImportFactory(

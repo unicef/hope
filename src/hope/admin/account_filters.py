@@ -7,26 +7,10 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
-from hope.apps.account import models as account_models
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.models import BusinessArea
+from hope.models import BusinessArea, Role
 
 logger = logging.getLogger(__name__)
-
-
-class HasKoboAccount(SimpleListFilter):
-    parameter_name = "kobo_account"
-    title = "Has Kobo Access"
-
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> tuple:
-        return (1, "Yes"), (0, "No")
-
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
-        if self.value() == "0":
-            return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
-        if self.value() == "1":
-            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
-        return queryset
 
 
 class BusinessAreaFilter(SimpleListFilter):
@@ -61,7 +45,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     parameter_name = "role"
 
     def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
-        types = account_models.Role.objects.values_list("id", "name")
+        types = Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:

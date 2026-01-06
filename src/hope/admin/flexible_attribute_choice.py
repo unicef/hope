@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from jsoneditor.forms import JSONEditor
 
 from hope.admin.utils import SoftDeletableAdminMixin
-from hope.apps.core.models import FlexibleAttributeChoice
+from hope.models import FlexibleAttributeChoice
 
 logger = logging.getLogger(__name__)
 

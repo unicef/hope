@@ -42,8 +42,7 @@ from hope.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hope.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hope.apps.program.models import Program
+from hope.models import PaymentVerification, PaymentVerificationPlan, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -675,7 +674,7 @@ class TestGrievanceTicketFilters:
     @pytest.mark.parametrize(
         ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
-            ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1", 1, 3),
+            ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1", 2, 5),
             ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe2", 0, 0),
         ],
     )
@@ -695,7 +694,7 @@ class TestGrievanceTicketFilters:
     @pytest.mark.parametrize(
         ("filter_value", "expected_count_for_program", "expected_count_for_global"),
         [
-            ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6", 1, 3),
+            ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6", 1, 4),
             ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e8", 0, 0),
         ],
     )
