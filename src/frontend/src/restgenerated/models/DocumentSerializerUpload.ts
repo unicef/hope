@@ -21,6 +21,9 @@ export type DocumentSerializerUpload = {
     readonly updatedAt: string;
     lastSyncAt?: string | null;
     status?: DocumentSerializerUploadStatusEnum;
+    /**
+     * Cleared used to confirm FOSTER_CHILD relationship
+     */
     cleared?: boolean;
     clearedDate?: string;
     clearedBy?: string | null;
