@@ -48,7 +48,7 @@ const PaymentsTable = ({
   const initialFilter = {
     householdUnicefId: '',
     collectorFullname: '',
-    paymentPk: '',
+    paymentUnicefId: '',
   };
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
@@ -73,12 +73,14 @@ const PaymentsTable = ({
       programSlug: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
       collectorFullname: appliedFilter.collectorFullname || null,
+      paymentUnicefId: appliedFilter.paymentUnicefId || null,
     }),
     [
       businessArea,
       programId,
       appliedFilter.householdUnicefId,
       appliedFilter.collectorFullname,
+      appliedFilter.paymentUnicefId,
     ],
   );
 

@@ -53,10 +53,12 @@ export function PaymentsFilters({
         <Grid size={3}>
           <SearchTextField
             label={t('Payment ID')}
-            value={filter.paymentPk}
+            value={filter.paymentUnicefId}
             fullWidth
-            onChange={(e) => handleFilterChange('paymentPk', e.target.value)}
-            data-cy="filter-payment-pk"
+            onChange={(e) =>
+              handleFilterChange('paymentUnicefId', e.target.value)
+            }
+            data-cy="filter-payment-unicef-id"
           />
         </Grid>
         <Grid size={3}>
