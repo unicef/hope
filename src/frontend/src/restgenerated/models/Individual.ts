@@ -10,7 +10,9 @@ import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenR
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { DocumentSerializerLax } from './DocumentSerializerLax';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
+import type { MaritalStatusEnum } from './MaritalStatusEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
+import type { ObservedDisabilityEnum } from './ObservedDisabilityEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
 import type { RelationshipEnum } from './RelationshipEnum';
@@ -22,12 +24,13 @@ export type Individual = {
     firstRegistrationDate?: string;
     lastRegistrationDate?: string;
     readonly household: string;
-    observedDisability?: string;
-    maritalStatus?: string;
+    observedDisability?: Array<ObservedDisabilityEnum>;
+    maritalStatus?: MaritalStatusEnum;
     documents?: Array<DocumentSerializerLax>;
     birthDate: string;
     accounts?: Array<AccountLax>;
-    photo?: string | null;
+    photo?: string;
+    disabilityCertificatePicture?: string | null;
     individualId: string;
     disability?: DisabilityEnum;
     removedDate?: string | null;
@@ -123,10 +126,6 @@ export type Individual = {
      * Child is Head of Household flag
      */
     childHoh?: boolean;
-    /**
-     * Disability certificate picture
-     */
-    disabilityCertificatePicture?: string | null;
     /**
      * Seeing disability
      *

@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AccountSerializerUpload = {
-    type: string;
-    number?: string;
-    financialInstitution?: number;
-    data?: any;
+/**
+ * Serializer for Excel file upload validation.
+ */
+export type GenericImportUpload = {
+    file: string;
 };
 
