@@ -284,33 +284,112 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
     def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_household_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         q_filters = Q()
 
         for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             if "household" in lookups:
                 household_path = lookups["household"]
-                q_filters |= Q(**{f"{ticket_type}__{household_path}__unicef_id": unicef_id})
+                q_filters |= (
+                    Q(**{f"{ticket_type}__{household_path}__unicef_id": value})
+                    | Q(**{f"{ticket_type}__{household_path}__head_of_household__full_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{household_path}__head_of_household__given_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{household_path}__head_of_household__middle_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{household_path}__head_of_household__family_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{household_path}__head_of_household__phone_no__icontains": value})
+                    | Q(
+                        **{
+                            f"{ticket_type}__{household_path}__head_of_household__phone_no_alternative"
+                            f"__icontains": value
+                        }
+                    )
+                    | Q(
+                        **{
+                            f"{ticket_type}__{household_path}__head_of_household__documents__document_number"
+                            f"__icontains": value
+                        }
+                    )
+                )
 
-        q_filters |= Q(delete_household_ticket_details__reason_household__unicef_id=unicef_id)
+        q_filters |= (
+            Q(delete_household_ticket_details__reason_household__unicef_id=value)
+            | Q(delete_household_ticket_details__reason_household__head_of_household__full_name__icontains=value)
+            | Q(delete_household_ticket_details__reason_household__head_of_household__given_name__icontains=value)
+            | Q(delete_household_ticket_details__reason_household__head_of_household__middle_name__icontains=value)
+            | Q(delete_household_ticket_details__reason_household__head_of_household__family_name__icontains=value)
+            | Q(delete_household_ticket_details__reason_household__head_of_household__phone_no__icontains=value)
+            | Q(
+                delete_household_ticket_details__reason_household__head_of_household__phone_no_alternative__icontains=value
+            )
+            | Q(
+                delete_household_ticket_details__reason_household__head_of_household__documents__document_number__icontains=value
+            )
+        )
 
         return queryset.filter(q_filters).distinct()
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         q_filters = Q()
 
         for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             if "individual" in lookups:
                 individual_path = lookups["individual"]
-                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+                q_filters |= (
+                    Q(**{f"{ticket_type}__{individual_path}__unicef_id": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__full_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__given_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__middle_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__family_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__phone_no__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__phone_no_alternative__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__documents__document_number__icontains": value})
+                )
 
             if "golden_records_individual" in lookups:
                 individual_path = lookups["golden_records_individual"]
-                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+                q_filters |= (
+                    Q(**{f"{ticket_type}__{individual_path}__unicef_id": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__full_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__given_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__middle_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__family_name__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__phone_no__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__phone_no_alternative__icontains": value})
+                    | Q(**{f"{ticket_type}__{individual_path}__documents__document_number__icontains": value})
+                )
 
-        q_filters |= Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=unicef_id)
-        q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
-        q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
+        q_filters |= (
+            Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__full_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__given_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__middle_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__family_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__phone_no__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__phone_no_alternative__icontains=value)
+            | Q(needs_adjudication_ticket_details__possible_duplicates__documents__document_number__icontains=value)
+        )
+
+        q_filters |= (
+            Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__full_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__given_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__middle_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__family_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__phone_no__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__phone_no_alternative__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_individuals__documents__document_number__icontains=value)
+        )
+
+        q_filters |= (
+            Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__full_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__given_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__middle_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__family_name__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__phone_no__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__phone_no_alternative__icontains=value)
+            | Q(needs_adjudication_ticket_details__selected_distinct__documents__document_number__icontains=value)
+        )
 
         return queryset.filter(q_filters).distinct()
 

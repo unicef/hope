@@ -119,11 +119,29 @@ class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
     def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(payment_items__household__unicef_id=unicef_id).distinct()
+    def filter_by_household_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        return queryset.filter(
+            Q(payment_items__household__unicef_id=value)
+            | Q(payment_items__household__head_of_household__full_name__icontains=value)
+            | Q(payment_items__household__head_of_household__given_name__icontains=value)
+            | Q(payment_items__household__head_of_household__middle_name__icontains=value)
+            | Q(payment_items__household__head_of_household__family_name__icontains=value)
+            | Q(payment_items__household__head_of_household__phone_no__icontains=value)
+            | Q(payment_items__household__head_of_household__phone_no_alternative__icontains=value)
+            | Q(payment_items__household__head_of_household__documents__document_number__icontains=value)
+        ).distinct()
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(payment_items__head_of_household__unicef_id=unicef_id).distinct()
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        return queryset.filter(
+            Q(payment_items__head_of_household__unicef_id=value)
+            | Q(payment_items__head_of_household__full_name__icontains=value)
+            | Q(payment_items__head_of_household__given_name__icontains=value)
+            | Q(payment_items__head_of_household__middle_name__icontains=value)
+            | Q(payment_items__head_of_household__family_name__icontains=value)
+            | Q(payment_items__head_of_household__phone_no__icontains=value)
+            | Q(payment_items__head_of_household__phone_no_alternative__icontains=value)
+            | Q(payment_items__head_of_household__documents__document_number__icontains=value)
+        ).distinct()
 
     def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(payment_items__unicef_id=unicef_id).distinct()
@@ -137,11 +155,29 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
     def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(household__unicef_id=unicef_id)
+    def filter_by_household_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        return queryset.filter(
+            Q(household__unicef_id=value)
+            | Q(household__head_of_household__full_name__icontains=value)
+            | Q(household__head_of_household__given_name__icontains=value)
+            | Q(household__head_of_household__middle_name__icontains=value)
+            | Q(household__head_of_household__family_name__icontains=value)
+            | Q(household__head_of_household__phone_no__icontains=value)
+            | Q(household__head_of_household__phone_no_alternative__icontains=value)
+            | Q(household__head_of_household__documents__document_number__icontains=value)
+        ).distinct()
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(head_of_household__unicef_id=unicef_id)
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        return queryset.filter(
+            Q(head_of_household__unicef_id=value)
+            | Q(head_of_household__full_name__icontains=value)
+            | Q(head_of_household__given_name__icontains=value)
+            | Q(head_of_household__middle_name__icontains=value)
+            | Q(head_of_household__family_name__icontains=value)
+            | Q(head_of_household__phone_no__icontains=value)
+            | Q(head_of_household__phone_no_alternative__icontains=value)
+            | Q(head_of_household__documents__document_number__icontains=value)
+        ).distinct()
 
     def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(parent__unicef_id=unicef_id)
