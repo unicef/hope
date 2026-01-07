@@ -224,6 +224,9 @@ class PaymentSearchFilter(FilterSet):
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
     )
+    payment_unicef_id = django_filters.CharFilter(
+        field_name="unicef_id",
+    )
 
     class Meta:
         model = Payment

@@ -210,3 +210,15 @@ class TestPaymentViewSet:
         assert (
             Payment.objects.get(unicef_id=payment["unicef_id"]).collector.full_name == self.payment.collector.full_name
         )
+
+    def test_filter_by_payment_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        response = self.client.get(self.url_list + f"?payment_unicef_id={self.payment.unicef_id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        payment = resp_data["results"][0]
+        assert payment["unicef_id"] == self.payment.unicef_id
