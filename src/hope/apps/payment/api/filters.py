@@ -220,12 +220,15 @@ class PaymentVerificationRecordFilter(FilterSet):
 class PaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(
         field_name="collector__full_name",
+        lookup_expr="istartswith",
     )
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
+        lookup_expr="istartswith",
     )
     payment_unicef_id = django_filters.CharFilter(
         field_name="unicef_id",
+        lookup_expr="istartswith",
     )
 
     class Meta:
