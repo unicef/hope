@@ -9041,12 +9041,17 @@ export class RestService {
         businessAreaSlug,
         paymentPlanPk,
         programSlug,
+        collectorFullName,
+        householdUnicefId,
         limit,
         offset,
+        paymentUnicefId,
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
         programSlug: string,
+        collectorFullName?: string,
+        householdUnicefId?: string,
         /**
          * Number of results to return per page.
          */
@@ -9055,6 +9060,7 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        paymentUnicefId?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9065,8 +9071,11 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'collector_full_name': collectorFullName,
+                'household_unicef_id': householdUnicefId,
                 'limit': limit,
                 'offset': offset,
+                'payment_unicef_id': paymentUnicefId,
             },
         });
     }
@@ -9160,10 +9169,16 @@ export class RestService {
         businessAreaSlug,
         paymentPlanPk,
         programSlug,
+        collectorFullName,
+        householdUnicefId,
+        paymentUnicefId,
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
         programSlug: string,
+        collectorFullName?: string,
+        householdUnicefId?: string,
+        paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9172,6 +9187,11 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
+            },
+            query: {
+                'collector_full_name': collectorFullName,
+                'household_unicef_id': householdUnicefId,
+                'payment_unicef_id': paymentUnicefId,
             },
         });
     }
