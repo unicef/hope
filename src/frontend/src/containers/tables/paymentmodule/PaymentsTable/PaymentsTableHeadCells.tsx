@@ -41,6 +41,12 @@ export const headCells: HeadCell<PaymentList>[] = [
   },
   {
     disablePadding: false,
+    label: 'Alternative Collector',
+    id: 'snapshot_alternate_collector_id',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'FSP',
     id: 'financial_service_provider__name',
     numeric: false,

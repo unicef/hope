@@ -10,7 +10,11 @@ import { PaymentList } from '@restgenerated/models/PaymentList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useMemo, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { PaymentsFilters } from '../../paymentmodule/PaymentsTable/PaymentsFilters';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './PeoplePaymentsTableHeadCells';
@@ -40,13 +44,44 @@ const PeoplePaymentsTable = ({
   const { t } = useTranslation();
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
-  const initialQueryVariables = {
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    paymentPlanId: paymentPlan.id,
+  const location = useLocation();
+  const initialFilter = {
+    householdUnicefId: '',
+    collectorFullname: '',
+    paymentPk: '',
   };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
+    setShouldScroll(false),
+  );
   const [page, setPage] = useState(0);
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      householdUnicefId: appliedFilter.householdUnicefId || null,
+      collectorFullname: appliedFilter.collectorFullname || null,
+    }),
+    [
+      businessArea,
+      programId,
+      appliedFilter.householdUnicefId,
+      appliedFilter.collectorFullname,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentsData,
@@ -68,7 +103,7 @@ const PeoplePaymentsTable = ({
             programSlug: programId,
             paymentPlanPk: paymentPlan.id,
           },
-          queryVariables,
+          { ...queryVariables },
           { withPagination: true },
         ),
       );
@@ -100,51 +135,66 @@ const PeoplePaymentsTable = ({
   });
 
   const itemsCount = usePersistedCount(page, paymentsCount);
-
+  const handleAppliedFilterChange = (newFilter) => {
+    setAppliedFilter(newFilter);
+    setShouldScroll(true);
+    setPage(0);
+  };
   return (
     <>
-      <TableWrapper>
-        <Paper>
-          <StyledBox p={6} display="flex" justifyContent="space-between">
-            <Typography data-cy="table-title" variant="h6">
-              {t('Payee List')}
-            </Typography>
-            {(paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
-              paymentPlan.status === PaymentPlanStatusEnum.FINISHED) && (
-              <ImportXlsxPaymentPlanPaymentListPerFsp
-                paymentPlan={paymentPlan}
-                permissions={permissions}
-              />
-            )}
-          </StyledBox>
-          <UniversalRestTable
-            isOnPaper={false}
-            headCells={headCells}
-            rowsPerPageOptions={[10, 25, 50]}
-            defaultOrderBy="createdAt"
-            defaultOrderDirection="desc"
-            isLoading={isLoading}
-            error={error}
-            queryVariables={queryVariables}
-            setQueryVariables={setQueryVariables}
-            data={paymentsData}
-            itemsCount={itemsCount}
-            page={page}
-            setPage={setPage}
-            renderRow={(row: PaymentList) => (
-              <PeoplePaymentsTableRow
-                key={row.id}
-                payment={row}
-                canViewDetails={canViewDetails}
-                onWarningClick={(payment) => {
-                  setDialogPayment(payment);
-                }}
-                permissions={permissions}
-              />
-            )}
-          />
-        </Paper>
-      </TableWrapper>
+      <Box p={4}>
+        <PaymentsFilters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={handleAppliedFilterChange}
+        />
+      </Box>
+      <div ref={tableRef}>
+        <TableWrapper>
+          <Paper>
+            <StyledBox p={6} display="flex" justifyContent="space-between">
+              <Typography data-cy="table-title" variant="h6">
+                {t('Payee List')}
+              </Typography>
+              {(paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
+                paymentPlan.status === PaymentPlanStatusEnum.FINISHED) && (
+                <ImportXlsxPaymentPlanPaymentListPerFsp
+                  paymentPlan={paymentPlan}
+                  permissions={permissions}
+                />
+              )}
+            </StyledBox>
+            <UniversalRestTable
+              isOnPaper={false}
+              headCells={headCells}
+              rowsPerPageOptions={[10, 25, 50]}
+              defaultOrderBy="createdAt"
+              defaultOrderDirection="desc"
+              isLoading={isLoading}
+              error={error}
+              queryVariables={queryVariables}
+              setQueryVariables={setQueryVariables}
+              data={paymentsData}
+              itemsCount={itemsCount}
+              page={page}
+              setPage={setPage}
+              renderRow={(row: PaymentList) => (
+                <PeoplePaymentsTableRow
+                  key={row.id}
+                  payment={row}
+                  canViewDetails={canViewDetails}
+                  onWarningClick={(payment) => {
+                    setDialogPayment(payment);
+                  }}
+                  permissions={permissions}
+                />
+              )}
+            />
+          </Paper>
+        </TableWrapper>
+      </div>
       <WarningTooltipTable
         paymentPlan={paymentPlan}
         payment={dialogPayment}
