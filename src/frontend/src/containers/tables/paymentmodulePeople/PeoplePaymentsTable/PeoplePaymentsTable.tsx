@@ -47,7 +47,7 @@ const PeoplePaymentsTable = ({
   const location = useLocation();
   const initialFilter = {
     householdUnicefId: '',
-    collectorFullname: '',
+    collectorFullName: '',
     paymentPk: '',
   };
   const [filter, setFilter] = useState(
@@ -68,14 +68,14 @@ const PeoplePaymentsTable = ({
       businessAreaSlug: businessArea,
       programSlug: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
-      collectorFullname: appliedFilter.collectorFullname || null,
+      collectorFullName: appliedFilter.collectorFullName || null,
       paymentUnicefId: appliedFilter.paymentUnicefId || null,
     }),
     [
       businessArea,
       programId,
       appliedFilter.householdUnicefId,
-      appliedFilter.collectorFullname,
+      appliedFilter.collectorFullName,
       appliedFilter.paymentUnicefId,
     ],
   );
