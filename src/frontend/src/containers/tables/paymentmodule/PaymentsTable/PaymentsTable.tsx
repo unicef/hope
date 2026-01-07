@@ -109,7 +109,7 @@ const PaymentsTable = ({
             programSlug: programId,
             paymentPlanPk: paymentPlan.id,
           },
-          { ...queryVariables },
+          queryVariables,
           { withPagination: true },
         ),
       );
@@ -133,7 +133,7 @@ const PaymentsTable = ({
             programSlug: programId,
             paymentPlanPk: paymentPlan.id,
           },
-          { ...queryVariables },
+          queryVariables,
         ),
       ),
     // fetch count only on the first page and persist it across pages
