@@ -75,10 +75,10 @@ export function PaymentsFilters({
         <Grid size={3}>
           <SearchTextField
             label={t('Collector Full Name')}
-            value={filter.collectorFullname}
+            value={filter.collectorFullName}
             fullWidth
             onChange={(e) =>
-              handleFilterChange('collectorFullname', e.target.value)
+              handleFilterChange('collectorFullName', e.target.value)
             }
             data-cy="filter-collector-fullname"
           />

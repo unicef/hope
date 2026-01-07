@@ -47,7 +47,7 @@ const PaymentsTable = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialFilter = {
     householdUnicefId: '',
-    collectorFullname: '',
+    collectorFullName: '',
     paymentUnicefId: '',
   };
 
@@ -72,14 +72,14 @@ const PaymentsTable = ({
       businessAreaSlug: businessArea,
       programSlug: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
-      collectorFullname: appliedFilter.collectorFullname || null,
+      collectorFullName: appliedFilter.collectorFullName || null,
       paymentUnicefId: appliedFilter.paymentUnicefId || null,
     }),
     [
       businessArea,
       programId,
       appliedFilter.householdUnicefId,
-      appliedFilter.collectorFullname,
+      appliedFilter.collectorFullName,
       appliedFilter.paymentUnicefId,
     ],
   );
