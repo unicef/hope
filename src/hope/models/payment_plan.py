@@ -234,11 +234,11 @@ class PaymentPlan(
         "total_undelivered_quantity_usd",
     ]
 
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business Area")
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT, help_text="Business Area")
     program_cycle = models.ForeignKey(
         "program.ProgramCycle",
         related_name="payment_plans",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         help_text="Program Cycle",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
@@ -314,7 +314,7 @@ class PaymentPlan(
         "self",
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="follow_ups",
         help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
     )
