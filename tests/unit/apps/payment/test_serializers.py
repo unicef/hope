@@ -158,6 +158,25 @@ class PaymentListSerializerTest(TestCase):
         account_data = PaymentListSerializer.get_collector_field(payment, "account_data")
         assert account_data is None
 
+    def test_get_snapshot_alt_collector_full_name_and_id(self) -> None:
+        household_data = {
+            "primary_collector": {
+                "full_name": "Name_Pr_Collector",
+            },
+            "alternate_collector": {"full_name": "Full_Name_Alt_Collector", "id": "uuid_1234"},
+        }
+        PaymentHouseholdSnapshot.objects.create(
+            payment=self.payment,
+            snapshot_data=household_data,
+            household_id=self.payment.household.id,
+        )
+        payment_qs = Payment.objects.filter(id=self.payment.id)
+        serializer = PaymentListSerializer(payment_qs, many=True, context={"request": Mock(user=self.user)})
+        data = serializer.data[0]
+
+        assert data["snapshot_alternate_collector_full_name"] == "Full_Name_Alt_Collector"
+        assert data["snapshot_alternate_collector_id"] == "uuid_1234"
+
 
 class PaymentPlanListSerializerTest(TestCase):
     @classmethod
