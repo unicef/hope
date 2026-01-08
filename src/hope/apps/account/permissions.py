@@ -2,7 +2,7 @@ from enum import Enum, auto, unique
 import logging
 from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
 
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
@@ -343,12 +343,13 @@ def check_creator_or_owner_permission(
     program: Optional["Program"],
 ) -> None:
     scope = program or business_area
-    if not user.is_authenticated or not (
-        user.has_perm(general_permission.value, scope)
-        or (is_creator and user.has_perm(creator_permission.value, scope))
-        or (is_owner and user.has_perm(owner_permission.value, scope))
-    ):
-        raise PermissionDenied("Permission Denied")
+    required_permissions = [general_permission.value]
+    if is_creator:
+        required_permissions.append(creator_permission.value)
+    if is_owner:
+        required_permissions.append(owner_permission.value)
+    if not user.is_authenticated or not any(user.has_perm(perm, scope) for perm in required_permissions):
+        raise PermissionDenied(detail={"required_permissions": required_permissions})
 
 
 def has_creator_or_owner_permission(

@@ -1852,14 +1852,12 @@ class PaymentPlanManagerialViewSet(
         business_area: BusinessArea,
         request: Request,
     ) -> None:
+        perm = self._get_action_permission(input_data["action"])
         if not self.request.user.has_perm(
-            self._get_action_permission(input_data["action"]),  # type: ignore
+            perm,  # type: ignore
             payment_plan.program_cycle.program or business_area,
         ):
-            raise PermissionDenied(
-                f"You do not have permission to perform action {input_data['action']} "
-                f"on payment plan with id {payment_plan.unicef_id}."
-            )
+            raise PermissionDenied(detail={"required_permissions": [perm]})
 
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:

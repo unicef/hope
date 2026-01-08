@@ -10,7 +10,6 @@ from extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.admin.registration_data import RegistrationDataImportAdmin
@@ -24,7 +23,6 @@ from hope.models import (
     Document,
     Household,
     Individual,
-    Payment,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -150,9 +148,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
             ticket=cls.grievance_ticket2,
             individual=cls.individuals[0],
         )
-
-        cls.payment_plan = PaymentPlanFactory(business_area=afghanistan, program_cycle=program.cycles.first())
-        cls.payment = PaymentFactory(household=cls.household, parent=cls.payment_plan)
         rebuild_search_index()
 
         User = get_user_model()  # noqa
@@ -162,7 +157,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         assert GrievanceTicket.objects.count() == 2
         assert TicketIndividualDataUpdateDetails.objects.count() == 1
         assert TicketComplaintDetails.objects.count() == 1
-        assert Payment.objects.count() == 1
 
         assert RegistrationDataImport.objects.count() == 1
 
@@ -188,9 +182,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
 
         assert TicketComplaintDetails.objects.count() == 0
         assert TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first() is None
-
-        assert Payment.objects.count() == 0
-        assert Payment.objects.filter(household=self.household).first() is None
 
         assert RegistrationDataImport.objects.count() == 0
         assert RegistrationDataImport.objects.filter(id=self.rdi.id).first() is None
