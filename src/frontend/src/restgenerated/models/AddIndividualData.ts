@@ -41,5 +41,6 @@ export type AddIndividualData = {
     blockchainName?: string;
     walletAddress?: string;
     walletName?: string;
+    photo?: string | null;
 };
 

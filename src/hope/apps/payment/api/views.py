@@ -44,6 +44,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PaymentSearchFilter,
     PaymentVerificationRecordFilter,
     PendingPaymentFilter,
     TargetPopulationFilter,
@@ -1939,6 +1940,7 @@ class PaymentViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = Payment.objects.all()
     lookup_field = "payment_id"
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -1957,6 +1959,8 @@ class PaymentViewSet(
         "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
         "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
         payment_id = self.kwargs["payment_id"]
