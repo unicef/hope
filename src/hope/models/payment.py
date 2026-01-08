@@ -110,7 +110,7 @@ class Payment(
         "self",
         null=True,
         blank=True,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
