@@ -4,7 +4,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import styled from 'styled-components';
 import AccessDeniedGraphic from './access_denied.png';
 import HopeLogo from './access_denied_hope_logo.png';
-import { FC } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -46,7 +47,21 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const AccessDenied: FC = () => {
+const SmallerPermissions = styled.p`
+  font-size: 16px;
+  color: #888;
+  line-height: 24px;
+  margin-top: 16px;
+`;
+
+export function AccessDenied() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const requiredPermissions = searchParams.get('required_permissions');
+  const permissionsArray = requiredPermissions
+    ? requiredPermissions.split(',')
+    : [];
+
   const refreshAndClearCache = () => {
     window.history.back();
   };
@@ -74,10 +89,23 @@ export const AccessDenied: FC = () => {
       </SquareLogo>
       <TextContainer>
         <Title>Access Denied</Title>
-        <Paragraph>
-          Sorry, the page you&apos;re trying to reach either doesn&apos;t exist
-          or you don&apos;t have the required permissions to view it.
-        </Paragraph>
+        {permissionsArray.length === 0 ? (
+          <Paragraph>
+            Sorry, the page you&apos;re trying to reach either doesn&apos;t
+            exist or you don&apos;t have the required permissions to view it.
+          </Paragraph>
+        ) : (
+          <SmallerPermissions>
+            <strong>Required Permissions:</strong>
+            <br />
+            {permissionsArray.map((perm, idx) => (
+              <span key={perm}>
+                {perm}
+                {idx < permissionsArray.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </SmallerPermissions>
+        )}
       </TextContainer>
       <Box display="flex" justifyContent="center" alignItems="center">
         <Box mr={4}>
@@ -103,4 +131,4 @@ export const AccessDenied: FC = () => {
       </Box>
     </Container>
   );
-};
+}
