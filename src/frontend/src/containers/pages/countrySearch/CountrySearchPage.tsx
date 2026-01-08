@@ -285,7 +285,7 @@ const OfficeSearchPage = (): ReactElement => {
   ].filter(Boolean);
 
   if (!hasPermissions(PERMISSIONS.SEARCH_BUSINESS_AREAS, permissions)) {
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.SEARCH_BUSINESS_AREAS} />;
   }
 
   return (
