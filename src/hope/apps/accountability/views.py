@@ -13,7 +13,7 @@ def download_cash_plan_payment_verification(request: HttpRequest, survey_id: str
     survey = get_object_or_404(Survey, id=survey_id)
 
     if not request.user.has_perm(Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS.name, survey.business_area):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied({"required_permissions": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS.name]})
 
     try:
         if sample_file_path := survey.sample_file_path():

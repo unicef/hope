@@ -26,8 +26,6 @@ def download_payment_verification_plan(  # type: ignore
     request: "HttpRequest", verification_id: str
 ) -> Union[
     "HttpResponseRedirect",
-    "HttpResponseRedirect",
-    "HttpResponsePermanentRedirect",
     "HttpResponsePermanentRedirect",
 ]:
     payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_id)
@@ -35,7 +33,7 @@ def download_payment_verification_plan(  # type: ignore
         Permissions.PAYMENT_VERIFICATION_EXPORT.value,
         payment_verification_plan.business_area,
     ):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied({"required_permissions": [Permissions.PAYMENT_VERIFICATION_EXPORT.value]})
     if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
         raise ValidationError("You can only download verification file when XLSX channel is selected")
 
@@ -64,7 +62,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
     if not request.user.has_perm(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied({"required_permissions": [Permissions.PM_VIEW_LIST.value]})
 
     if payment_plan.status not in (
         PaymentPlan.Status.LOCKED,
@@ -95,7 +93,7 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
     if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied({"required_permissions": [Permissions.PM_EXPORT_PDF_SUMMARY.value]})
 
     if payment_plan.status not in (
         PaymentPlan.Status.IN_REVIEW,
@@ -120,6 +118,6 @@ def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: 
     payment_plan = report.payment_plan
 
     if not request.user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.value, payment_plan.program):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied({"required_permissions": [Permissions.RECEIVE_WU_QCF.value]})
 
     return redirect(report.report_file.file.url)
