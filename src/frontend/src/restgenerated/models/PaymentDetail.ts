@@ -26,6 +26,14 @@ export type PaymentDetail = {
      * Get from Household Snapshot
      */
     readonly snapshotCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector Full Name
+     */
+    readonly snapshotAlternateCollectorFullName: any;
+    /**
+     * Get from Snapshot Alternate Collector ID
+     */
+    readonly snapshotAlternateCollectorId: any;
     readonly fspName: string;
     entitlementQuantity?: string | null;
     entitlementQuantityUsd?: string | null;

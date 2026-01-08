@@ -2,10 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AccountSerializerUpload = {
-    type: string;
-    number?: string;
-    financialInstitution?: number;
-    data?: any;
+export type GroupList = {
+    readonly id: number;
+    name: string;
 };
 
