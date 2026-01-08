@@ -1,20 +1,20 @@
 import { StatusBox } from '@components/core/StatusBox';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { IconButton, TableCell } from '@mui/material';
-import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { createApiParams } from '@utils/apiUtils';
-import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePersistedCount } from '@hooks/usePersistedCount';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
-import { RestService } from '@restgenerated/services/RestService';
+import { IconButton, TableCell } from '@mui/material';
 import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
 import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
-import { usePersistedCount } from '@hooks/usePersistedCount';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 
 const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
   {
@@ -99,7 +99,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         createApiParams(
           { businessAreaSlug, programSlug: programId },
           queryVariables,
-          { withPagination: true },
+          { withPagination: true, rowsPerPage: 5 },
         ),
       );
     },
