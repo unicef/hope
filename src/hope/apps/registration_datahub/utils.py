@@ -104,7 +104,7 @@ def get_rdi_program_population(
             household_ids_q = Q(unicef_id__in=list_of_ids) | Q(individuals__unicef_id__in=list_of_ids)
         else:
             # For non-SW programs: only household IDs expected
-            # add Individuals who can have any role in household
+            # add Individuals who can have roles in household
             ind_ids_with_role = list(
                 IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
                 .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
