@@ -1060,7 +1060,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             args=["afghanistan", target_program.slug],
         )
 
-        # Import using individual IDs (one from each household)
+        # Import using individual IDs
         data = {
             "import_from_program_id": str(import_from_program.id),
             "import_from_ids": f"{individuals1[0].unicef_id}, {individuals2[0].unicef_id}",
