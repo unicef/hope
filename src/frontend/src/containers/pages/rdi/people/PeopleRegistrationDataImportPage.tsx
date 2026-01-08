@@ -77,7 +77,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   if (permissions === null || loading) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_LIST} />;
 
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>

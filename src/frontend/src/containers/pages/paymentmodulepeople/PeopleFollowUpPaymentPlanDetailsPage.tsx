@@ -65,7 +65,7 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
 
   const { status } = paymentPlan;
 

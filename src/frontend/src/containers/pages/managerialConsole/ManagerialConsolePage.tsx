@@ -148,7 +148,9 @@ export const ManagerialConsolePage: FC = () => {
   );
 
   if (!hasPermissions(PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied permission={PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL} />
+    );
 
   return (
     <>

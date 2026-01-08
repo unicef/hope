@@ -130,7 +130,8 @@ export const UniversalRestTable = <T, K>({
 
   if (error) {
     console.error(error);
-    if (isPermissionDeniedError(error)) return <PermissionDenied />;
+    if (isPermissionDeniedError(error))
+      return <PermissionDenied permission="Permission Denied" />;
     return <div>Unexpected error</div>;
   }
 
