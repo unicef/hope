@@ -48,6 +48,7 @@ export function PaymentsTableRow({
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.householdId}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collectorId}`;
+  const alternateCollectorDetailsPath = `/${baseUrl}/population/individuals/${payment.snapshotAlternateCollectorId}`;
 
   const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
@@ -125,12 +126,21 @@ export function PaymentsTableRow({
         {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
       <TableCell align="left">
-        {canViewDetails ? (
+        {canViewDetails && payment.snapshotCollectorFullName ? (
           <BlackLink to={collectorDetailsPath}>
             {payment.snapshotCollectorFullName}
           </BlackLink>
         ) : (
-          payment.snapshotCollectorFullName
+          payment.snapshotCollectorFullName || '-'
+        )}
+      </TableCell>
+      <TableCell align="left">
+        {canViewDetails && payment.snapshotAlternateCollectorFullName ? (
+          <BlackLink to={alternateCollectorDetailsPath}>
+            {payment.snapshotAlternateCollectorFullName}
+          </BlackLink>
+        ) : (
+          payment.snapshotAlternateCollectorFullName || '-'
         )}
       </TableCell>
       <TableCell align="left">

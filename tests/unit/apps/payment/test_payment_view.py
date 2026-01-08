@@ -182,3 +182,43 @@ class TestPaymentViewSet:
             assert resp_data["delivered_quantity"] == "111.00"
             assert resp_data["status"] == "Partially Distributed"
             assert resp_data["delivery_date"] == "2024-01-01T00:00:00Z"
+
+    def test_filter_by_household_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        response = self.client.get(self.url_list + f"?household_unicef_id={self.payment.household.unicef_id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        payment = resp_data["results"][0]
+        assert payment["household_unicef_id"] == self.payment.household.unicef_id
+
+    def test_filter_by_collector_full_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        collector_full_name = self.payment.collector.full_name
+        response = self.client.get(self.url_list + f"?collector_full_name={collector_full_name[:5]}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        payment = resp_data["results"][0]
+        assert payment["household_unicef_id"] == self.payment.household.unicef_id
+        assert (
+            Payment.objects.get(unicef_id=payment["unicef_id"]).collector.full_name == self.payment.collector.full_name
+        )
+
+    def test_filter_by_payment_unicef_id(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        response = self.client.get(self.url_list + f"?payment_unicef_id={self.payment.unicef_id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        payment = resp_data["results"][0]
+        assert payment["unicef_id"] == self.payment.unicef_id
