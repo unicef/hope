@@ -16,9 +16,9 @@ export type Household = {
     lastRegistrationDate?: string;
     country?: CountryEnum | null;
     countryOrigin?: CountryOriginEnum | null;
-    size?: number | null;
     consentSharing?: Array<ConsentSharingEnum>;
     village?: string | null;
+    consentSign?: string;
     headOfHousehold: string | null;
     primaryCollector: string | null;
     alternateCollector?: string | null;
@@ -34,10 +34,6 @@ export type Household = {
     readonly updatedAt: string;
     lastSyncAt?: string | null;
     internalData?: any;
-    /**
-     * Household consent sign image
-     */
-    consentSign?: string;
     /**
      * Household consent
      */
@@ -62,6 +58,10 @@ export type Household = {
      * Household zip code
      */
     zipCode?: string | null;
+    /**
+     * Household size
+     */
+    size?: number | null;
     /**
      * Household female age group 0-5
      */
