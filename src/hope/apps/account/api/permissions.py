@@ -22,5 +22,9 @@ class BaseRestPermission(BasePermission):
             return True
 
         required_permissions = [getattr(permission, "value", str(permission)) for permission in permissions or []]
-        # Always return a list in the payload, even if empty
-        raise PermissionDenied(detail={"required_permissions": required_permissions})
+        raise PermissionDenied(
+            detail={
+                "detail": str(PermissionDenied.default_detail),
+                "required_permissions": required_permissions,
+            }
+        )
