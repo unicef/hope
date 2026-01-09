@@ -5,7 +5,7 @@ from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
-from hope.models import Household, Individual, IndividualRoleInHousehold, Payment
+from hope.models import Household, Individual, IndividualRoleInHousehold
 
 if TYPE_CHECKING:
     from hope.models import Program
@@ -228,7 +228,6 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         6. Store the head of household identification key, we will have no access to it when we delete individuals
         7. Update the individuals in the old household with the new ones
         8. Delete the individuals that are in the old household but not in the new household
-           (raises error if any individual has existing payments)
         9. Add the new individuals to the old household
         10. Get the fresh list of individuals in the old household
         11. Update the roles in the old household, based on the dict of roles by identification key
@@ -239,7 +238,6 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
         Raises:
             ValueError: If any individual in either household lacks an identification key
-            ValueError: If any individual to be removed has existing payments (as collector or head_of_household)
 
         """
         # 1. Sanity check - household_to_merge must have an identification key
@@ -301,24 +299,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             self._update_accounts(individual_original, individual_source)
             self._update_individual(individual_original, individual_source)
         # 8. Delete the individuals that are in the old household but not in the new household
-        # First check if any of these individuals have payments - if so, raise an error
-        individuals_to_remove_ids = [ind.id for ind in individuals_to_remove]
-        individuals_with_payments = list(
-            Payment.objects.filter(collector_id__in=individuals_to_remove_ids).values_list(
-                "collector__unicef_id", flat=True
-            )
-        ) + list(
-            Payment.objects.filter(head_of_household_id__in=individuals_to_remove_ids).values_list(
-                "head_of_household__unicef_id", flat=True
-            )
-        )
-        if individuals_with_payments:
-            unicef_ids = ", ".join(set(individuals_with_payments))
-            raise ValueError(
-                f"Cannot remove individuals with existing payments: {unicef_ids}. "
-                f"These individuals have payment records and cannot be deleted during household merge."
-            )
-        Individual.all_objects.filter(id__in=individuals_to_remove_ids).delete()
+        Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_remove]).delete()
         # 9. Add the new individuals to the old household
         Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_add]).update(
             household=old_household_id,
