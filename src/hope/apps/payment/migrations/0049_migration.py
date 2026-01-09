@@ -36,4 +36,60 @@ class Migration(migrations.Migration):
             name="household",
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="household.household"),
         ),
+        migrations.AlterField(
+            model_name="payment",
+            name="business_area",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="core.businessarea"),
+        ),
+        migrations.AlterField(
+            model_name="payment",
+            name="parent",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="payment_items",
+                to="payment.paymentplan",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="payment",
+            name="source_payment",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="follow_ups",
+                to="payment.payment",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="paymentplan",
+            name="business_area",
+            field=models.ForeignKey(
+                help_text="Business Area",
+                on_delete=django.db.models.deletion.PROTECT,
+                to="core.businessarea",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="paymentplan",
+            name="program_cycle",
+            field=models.ForeignKey(
+                help_text="Program Cycle",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="payment_plans",
+                to="program.programcycle",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="paymentplan",
+            name="source_payment_plan",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="follow_ups",
+                to="payment.paymentplan",
+            ),
+        ),
     ]
