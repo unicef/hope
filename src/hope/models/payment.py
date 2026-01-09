@@ -82,7 +82,7 @@ class Payment(
 
     parent = models.ForeignKey(
         "payment.PaymentPlan",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="payment_items",
     )
     parent_split = models.ForeignKey(
@@ -110,7 +110,7 @@ class Payment(
         "self",
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
