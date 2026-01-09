@@ -22,6 +22,7 @@ from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.documents import IndividualDocumentAfghanistan
 from hope.models import (
+    DataCollectingType,
     Household,
     ImportData,
     Individual,
@@ -915,6 +916,166 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_rdi_social_worker_program_with_household_ids(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create social worker DCT
+        social_dct = DataCollectingTypeFactory(
+            label="Social",
+            code="social",
+            type=DataCollectingType.Type.SOCIAL,
+        )
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        # Create source and target programs with social worker DCT
+        import_from_program = ProgramFactory(
+            name="Source Social Worker Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        target_program = ProgramFactory(
+            name="Target Social Worker Program",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        social_dct.compatible_types.add(social_dct)
+
+        # Create households with individuals in source program
+        household1, individuals1 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", target_program.slug],
+        )
+
+        # Import using household IDs
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": f"{household1.unicef_id}, {household2.unicef_id}",
+            "name": "Test Social Worker Import - Households",
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Social Worker Import - Households"
+        # Should import both households
+        assert response.data["number_of_households"] == 2
+        assert response.data["number_of_individuals"] == 2
+        mock_registration_task.assert_called_once()
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_rdi_social_worker_program_with_individual_ids(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create social worker DCT
+        social_dct = DataCollectingTypeFactory(
+            label="Social",
+            code="social",
+            type=DataCollectingType.Type.SOCIAL,
+        )
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        # Create source and target programs with social worker DCT
+        import_from_program = ProgramFactory(
+            name="Source Social Worker Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        target_program = ProgramFactory(
+            name="Target Social Worker Program",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        social_dct.compatible_types.add(social_dct)
+
+        # Create households with individuals in source program
+        household1, individuals1 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", target_program.slug],
+        )
+
+        # Import using individual IDs
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": f"{individuals1[0].unicef_id}, {individuals2[0].unicef_id}",
+            "name": "Test Social Worker Import - Individuals",
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Social Worker Import - Individuals"
+        assert response.data["number_of_households"] == 2
+        assert response.data["number_of_individuals"] == 2
+        mock_registration_task.assert_called_once()
 
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
