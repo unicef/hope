@@ -58,6 +58,7 @@ export function AccessDenied() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const requiredPermissions = searchParams.get('required_permissions');
+  const detail = searchParams.get('detail');
   const permissionsArray = requiredPermissions
     ? requiredPermissions.split(',')
     : [];
@@ -89,6 +90,7 @@ export function AccessDenied() {
       </SquareLogo>
       <TextContainer>
         <Title>Access Denied</Title>
+        {detail && <Paragraph>{detail}</Paragraph>}
         {permissionsArray.length === 0 ? (
           <Paragraph>
             Sorry, the page you&apos;re trying to reach either doesn&apos;t

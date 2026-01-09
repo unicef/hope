@@ -319,7 +319,6 @@ export const sendRequest = async (
       response?.status == 403 &&
       content?.detail !== 'Authentication credentials were not provided.'
     ) {
-      // Only handle required_permissions (snake_case)
       if (
         Array.isArray(content?.required_permissions) &&
         content.required_permissions.length > 0
@@ -329,6 +328,9 @@ export const sendRequest = async (
           'required_permissions',
           content.required_permissions.join(','),
         );
+        if (content?.detail) {
+          params.set('detail', content.detail);
+        }
         window.location.href = `/access-denied?${params.toString()}`;
         return response;
       } else {
