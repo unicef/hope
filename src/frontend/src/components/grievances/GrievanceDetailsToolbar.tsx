@@ -131,6 +131,9 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
+  const isBeneficiaryTicket =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.BENEFICIARY;
+
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
       const householdData = ticket.ticketDetails?.householdData || {};
@@ -399,6 +402,20 @@ export const GrievanceDetailsToolbar = ({
               data-perm={PERMISSIONS.GRIEVANCES_UPDATE}
             >
               {t('Edit')}
+            </Button>
+          </Box>
+        )}
+        {isBeneficiaryTicket && (
+          <Box mr={3}>
+            <Button
+              color="primary"
+              variant="contained"
+              component={Link}
+              to={`/${baseUrl}/grievance/new-ticket?linked=${ticket.id}`}
+              data-cy="button-create-linked-ticket"
+              disabled={!isActiveProgram}
+            >
+              {t('Create Linked Ticket')}
             </Button>
           </Box>
         )}
