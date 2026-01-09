@@ -983,6 +983,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
     collector_phone_no = serializers.SerializerMethodField()
     collector_phone_no_alt = serializers.SerializerMethodField()
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
+    snapshot_alternate_collector_full_name = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector Full Name"
+    )
+    snapshot_alternate_collector_id = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector ID"
+    )
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
     verification = serializers.SerializerMethodField()
@@ -1014,6 +1020,8 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "hoh_phone_no",
             "hoh_phone_no_alternative",
             "snapshot_collector_full_name",
+            "snapshot_alternate_collector_full_name",
+            "snapshot_alternate_collector_id",
             "fsp_name",
             "entitlement_quantity",
             "entitlement_quantity_usd",
@@ -1042,20 +1050,30 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> dict | None:
+    def get_collector_field(
+        cls, payment: "Payment", field_name: str, get_alternate_collector: bool = False
+    ) -> dict | None:
         """Return primary_collector or alternate_collector field value or None."""
+        # to get data from alternate_collector please use get_alternate_collector = True
         household_snapshot = getattr(payment, "household_snapshot", None)
         if not household_snapshot:
             return None
 
         data = household_snapshot.snapshot_data or {}
-        collector_data = data.get("primary_collector") or data.get("alternate_collector") or None
+        collector = "primary_collector" if not get_alternate_collector else "alternate_collector"
+        collector_data = data.get(collector) or None
         if not isinstance(collector_data, dict):
             return None
         return collector_data.get(field_name)
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name")
+
+    def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name", True)
+
+    def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "id", True)
 
     def get_fsp_name(self, obj: Payment) -> str:
         return obj.financial_service_provider.name if obj.financial_service_provider else ""

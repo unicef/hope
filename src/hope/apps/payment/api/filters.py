@@ -215,3 +215,22 @@ class PaymentVerificationRecordFilter(FilterSet):
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
         return qs.filter(unicef_id__istartswith=value)
+
+
+class PaymentSearchFilter(FilterSet):
+    collector_full_name = django_filters.CharFilter(
+        field_name="collector__full_name",
+        lookup_expr="istartswith",
+    )
+    household_unicef_id = django_filters.CharFilter(
+        field_name="household__unicef_id",
+        lookup_expr="istartswith",
+    )
+    payment_unicef_id = django_filters.CharFilter(
+        field_name="unicef_id",
+        lookup_expr="istartswith",
+    )
+
+    class Meta:
+        model = Payment
+        fields = []
