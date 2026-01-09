@@ -5,6 +5,7 @@ from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
+from hope.apps.household.const import REMOVED_BY_COLLISION
 from hope.models import Household, Individual, IndividualRoleInHousehold
 
 if TYPE_CHECKING:
@@ -183,6 +184,49 @@ class AbstractCollisionDetector:
             data[key] = value
         destination.__class__.objects.filter(pk=destination.id).update(**data)
 
+    def _process_removed_individual(
+        self,
+        individual: Individual,
+        household_id: str,
+        old_head_of_household_id: Any,
+    ) -> None:
+        """Process an individual being removed from household during collision.
+
+        Instead of deleting:
+        1. Get previous roles
+        2. Check if was head_of_household
+        3. Store previous data in internal_data
+        4. Update relationship to REMOVED_BY_COLLISION
+        5. Remove roles from IndividualRoleInHousehold
+        6. Withdraw the individual
+        """
+        # 1. Get previous roles before deleting them
+        previous_roles = list(
+            IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).values_list(
+                "role", flat=True
+            )
+        )
+
+        # 2. Check if was head_of_household
+        was_head = individual.id == old_head_of_household_id
+
+        # 3. Store previous data in internal_data
+        individual.internal_data["removed_by_collision_detector"] = {
+            "previous_relationship": individual.relationship,
+            "previous_roles": previous_roles,
+            "was_head_of_household": was_head,
+        }
+
+        # 4. Update relationship to REMOVED_BY_COLLISION
+        individual.relationship = REMOVED_BY_COLLISION
+        individual.save(update_fields=["relationship", "internal_data"])
+
+        # 5. Remove roles from IndividualRoleInHousehold
+        IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).delete()
+
+        # 6. Withdraw the individual
+        individual.withdraw()
+
 
 class NoopCollisionDetector(AbstractCollisionDetector):
     def detect_collision(self, household: Household) -> str | None:
@@ -227,7 +271,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         5. Store the new roles (by identification_keys), because it will be deleted when we delete individuals
         6. Store the head of household identification key, we will have no access to it when we delete individuals
         7. Update the individuals in the old household with the new ones
-        8. Delete the individuals that are in the old household but not in the new household
+        8. Process individuals that are in the old household but not in the new household
         9. Add the new individuals to the old household
         10. Get the fresh list of individuals in the old household
         11. Update the roles in the old household, based on the dict of roles by identification key
@@ -286,6 +330,8 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             role.individual.identification_key: role.role
             for role in household_to_merge.individuals_and_roles(manager="all_objects").all()
         }
+        # Store old head_of_household_id before we clear it (needed for step 8)
+        old_head_of_household_id = old_household.head_of_household_id
         # 6. Store the head of household identification key, we will have no access to it when we delete individuals
         head_of_household_identification_key = household_to_merge.head_of_household.identification_key
         old_household.head_of_household = None
@@ -298,8 +344,9 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             self._update_individual_identities(individual_original, individual_source)
             self._update_accounts(individual_original, individual_source)
             self._update_individual(individual_original, individual_source)
-        # 8. Delete the individuals that are in the old household but not in the new household
-        Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_remove]).delete()
+        # 8. Process individuals that are in the old household but not in the new household
+        for individual in individuals_to_remove:
+            self._process_removed_individual(individual, old_household_id, old_head_of_household_id)
         # 9. Add the new individuals to the old household
         Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_add]).update(
             household=old_household_id,

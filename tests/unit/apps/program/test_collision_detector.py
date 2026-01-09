@@ -6,6 +6,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.const import (
     FEMALE,
     MALE,
+    REMOVED_BY_COLLISION,
 )
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models import (
@@ -576,10 +577,14 @@ def test_update_household_collision(
 
     additional_individual = Individual.objects.get(identification_key=additional_individual_key)
 
-    assert Account.all_objects.count() == 1
-    account = Account.objects.first()
-
-    assert account.number == "ACC-123456"
+    # 2 accounts exist: one from source (active), one from withdrawn individual (deactivated)
+    assert Account.all_objects.count() == 2
+    # The source account is active
+    source_account = Account.objects.get(number="ACC-123456")
+    assert source_account.active is True
+    # The withdrawn individual's account is deactivated
+    withdrawn_account = Account.objects.get(number="999")
+    assert withdrawn_account.active is False
 
     assert destination_household_obj.id == destination_original_id
     assert destination_household_obj.unicef_id == destination_original_unicef_id
@@ -601,3 +606,133 @@ def test_update_household_collision(
     assert roles.get(role="ALTERNATE").individual.identification_key == additional_individual.identification_key
 
     assert Individual.objects.filter(id=individual_to_keep_and_update.id).exists()
+
+
+def test_collision_withdraws_removed_individual_instead_of_deleting(
+    program: Program,
+    admin1: Area,
+) -> None:
+    """Test that collision detector withdraws individuals instead of deleting them.
+
+    Scenario:
+    - Destination household has 2 individuals: IND-KEY-001 (head) and IND-KEY-TO-REMOVE
+    - Source household has 1 individual: IND-KEY-001
+    - IND-KEY-TO-REMOVE is not in source, so it would be "removed"
+    - But instead of deleting, we should:
+      - Store previous data in internal_data
+      - Set relationship to REMOVED_BY_COLLISION
+      - Remove roles from IndividualRoleInHousehold
+      - Withdraw the individual
+      - Keep household FK
+
+    Expected behavior:
+    - Individual still exists (not deleted)
+    - Individual.relationship == REMOVED_BY_COLLISION
+    - Individual.internal_data has removed_by_collision_detector
+    - Individual.withdrawn == True
+    - Individual.household still points to destination household
+    - No roles in IndividualRoleInHousehold for this individual
+    """
+    destination_household, destination_individuals = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-DEST-001",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "program": program,
+            "admin1": admin1,
+            "identification_key": "COLLISION-KEY-001",
+        },
+        individuals_data=[
+            {
+                "unicef_id": "IND-DEST-001",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "sex": MALE,
+                "identification_key": "IND-KEY-001",
+                "relationship": "HEAD",
+            },
+            {
+                "unicef_id": "IND-DEST-002",
+                "rdi_merge_status": "MERGED",
+                "business_area": program.business_area,
+                "sex": FEMALE,
+                "identification_key": "IND-KEY-TO-REMOVE",
+                "relationship": "WIFE_HUSBAND",
+            },
+        ],
+    )
+
+    individual_to_remove = destination_individuals[1]
+    assert individual_to_remove.identification_key == "IND-KEY-TO-REMOVE"
+    original_relationship = individual_to_remove.relationship
+
+    destination_household.head_of_household = individual_to_remove
+    destination_household.save()
+
+    IndividualRoleInHousehold.objects.create(
+        individual=individual_to_remove,
+        household=destination_household,
+        role="PRIMARY",
+    )
+
+    source_household, source_individuals = create_household_and_individuals(
+        household_data={
+            "unicef_id": "HH-SRC-001",
+            "rdi_merge_status": "PENDING",
+            "business_area": program.business_area,
+            "program": program,
+            "admin1": admin1,
+            "identification_key": "COLLISION-KEY-001",
+        },
+        individuals_data=[
+            {
+                "unicef_id": "IND-SRC-001",
+                "rdi_merge_status": "PENDING",
+                "business_area": program.business_area,
+                "sex": MALE,
+                "identification_key": "IND-KEY-001",
+            },
+        ],
+    )
+
+    source_household.head_of_household = source_individuals[0]
+    source_household.save()
+
+    IndividualRoleInHousehold.objects.create(
+        individual=source_individuals[0],
+        household=source_household,
+        role="PRIMARY",
+    )
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save()
+
+    detector = IdentificationKeyCollisionDetector(program)
+    detector.initialize()
+
+    collision_id = detector.detect_collision(source_household)
+    assert collision_id == str(destination_household.id)
+
+    detector.update_household(source_household)
+
+    individual_to_remove.refresh_from_db()
+    assert Individual.all_objects.filter(id=individual_to_remove.id).exists(), (
+        "Individual should NOT be deleted, only withdrawn"
+    )
+
+    assert individual_to_remove.relationship == REMOVED_BY_COLLISION
+
+    assert "removed_by_collision_detector" in individual_to_remove.internal_data
+    collision_data = individual_to_remove.internal_data["removed_by_collision_detector"]
+    assert collision_data["previous_relationship"] == original_relationship
+    assert "PRIMARY" in collision_data["previous_roles"]
+    assert collision_data["was_head_of_household"] is True
+
+    assert individual_to_remove.withdrawn is True
+    assert individual_to_remove.withdrawn_date is not None
+
+    assert individual_to_remove.household_id == destination_household.id
+
+    assert not IndividualRoleInHousehold.objects.filter(
+        individual=individual_to_remove, household=destination_household
+    ).exists()
