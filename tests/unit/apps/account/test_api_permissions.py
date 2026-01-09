@@ -36,8 +36,8 @@ class TestBaseRestPermission:
 
         assert mock_check_permissions.called
         detail = excinfo.value.detail
-        assert "required_permissions" in detail
         assert detail["required_permissions"] == [p.value for p in perms]
+        assert detail["detail"] == "You do not have permission to perform this action."
 
     @patch("hope.apps.account.api.permissions.check_permissions", return_value=True)
     def test_permission_allowed(self, mock_check_permissions):

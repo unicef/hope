@@ -118,6 +118,6 @@ def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: 
     payment_plan = report.payment_plan
 
     if not request.user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.value, payment_plan.program):
-        raise PermissionDenied({"required_permissions": [Permissions.RECEIVE_WU_QCF.value]})
+        raise PermissionDenied({"required_permissions": [Permissions.RECEIVE_PARSED_WU_QCF.value]})
 
     return redirect(report.report_file.file.url)
