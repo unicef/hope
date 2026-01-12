@@ -1327,11 +1327,6 @@ class TestTargeting:
         page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
         page_targeting_create.click_button_target_population_create()
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list()
-        # ToDo: Add after merge to develop
-        # assert (
-        #     test_data["text"]
-        #     in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
-        # )
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
             By.CSS_SELECTOR, page_targeting_details.icon_selected
         )

@@ -496,7 +496,6 @@ class TestPaymentVerificationViewSet:
         self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
         self.pvp.save()
-        # file = generate_valid_xlsx_file(worksheet_title_list=["Payment Verifications", "Meta"])
         file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/unordered_columns_1.xlsx").read_bytes())
         file.name = "unordered_columns_1.xlsx"
         response = self.client.post(

@@ -67,11 +67,9 @@ ignore = [
 
     "PLR0911",  # too many returns
     "PLR0912", # too many branches
-    "PLR0913",  # too many arguments
     "PLR0915",  # too many statements
     "C901",  # too complex
     "PLC0415",  # `import` should be at the top-level of a file
-    "ERA001",  # e2e comments..
 
 ]
 
