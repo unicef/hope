@@ -337,7 +337,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
         document_key = document_to_edit.get("key")
         country = document_to_edit.get("country")
         document_number = document_to_edit.get("number")
-        document_photo = document_to_edit.get("photo")
+        document_photo = document_to_edit.get("new_photo")
         document_photoraw = document_to_edit.get("photoraw")
 
         document_photo = handle_photo(document_photo, document_photoraw)
