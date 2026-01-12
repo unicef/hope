@@ -282,6 +282,13 @@ RELATIONSHIP_CHOICE = (
     (FOSTER_CHILD, "Foster child"),
     (FREE_UNION, "Free union"),
 )
+
+# User-selectable relationship choices for Kobo templates and imports.
+# Excludes system-generated values like REMOVED_BY_COLLISION.
+RELATIONSHIP_CHOICE_USER_SELECTABLE = tuple(
+    choice for choice in RELATIONSHIP_CHOICE if choice[0] != REMOVED_BY_COLLISION
+)
+
 YES = "1"
 NO = "0"
 YES_NO_CHOICE = (
