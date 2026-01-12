@@ -24,6 +24,7 @@ from hope.models import (
     PeriodicFieldData,
     Program,
     ProgramCycle,
+    RegistrationDataImport,
 )
 
 
@@ -342,6 +343,7 @@ class ProgramOnlyNameSerializer(serializers.ModelSerializer):
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
     registration_imports_total_count = serializers.SerializerMethodField()
+    can_import_rdi = serializers.SerializerMethodField()
     target_populations_count = serializers.SerializerMethodField()
     screen_beneficiary = serializers.BooleanField(read_only=True)
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
@@ -357,12 +359,30 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "partners",
             "partner_access",
             "registration_imports_total_count",
+            "can_import_rdi",
             "target_populations_count",
             "population_goal",
             "screen_beneficiary",
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
         )
+
+    def get_can_import_rdi(self, obj: Program) -> bool:
+        if not hasattr(obj, "registration_imports"):
+            return True
+
+        if obj.biometric_deduplication_enabled:
+            not_merged_rdis = obj.registration_imports.filter(
+                status__in=[RegistrationDataImport.IN_REVIEW],
+                deduplication_engine_status__in=[
+                    RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+                    RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+                ],
+            )
+            if not_merged_rdis.exists():
+                return False
+
+        return True
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
         return obj.registration_imports.count() if hasattr(obj, "registration_imports") else 0
