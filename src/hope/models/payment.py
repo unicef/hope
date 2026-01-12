@@ -82,7 +82,7 @@ class Payment(
 
     parent = models.ForeignKey(
         "payment.PaymentPlan",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="payment_items",
     )
     parent_split = models.ForeignKey(
@@ -92,25 +92,25 @@ class Payment(
         null=True,
         blank=True,
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT)
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
+    household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey(
         "household.Individual",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="collector_payments",
     )
     source_payment = models.ForeignKey(
         "self",
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
