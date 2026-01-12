@@ -580,7 +580,7 @@ class TestGenericImportPermissions:
         page_generic_import.navigate_to_generic_import()
 
         # Wait for page to load and check for 403 error
-        page_generic_import.wait_for_text("403", "body", timeout=5)
+        page_generic_import.wait_for_text("Permission denied", "body", timeout=5)
         page_source = page_generic_import.driver.page_source
 
         # Check for 403 Forbidden or permission denied message
