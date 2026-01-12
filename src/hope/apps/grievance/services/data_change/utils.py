@@ -426,7 +426,8 @@ def generate_filename() -> str:
 
 def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None) -> str | None:
     if isinstance(photo, InMemoryUploadedFile):
-        return default_storage.save(f"{generate_filename()}.jpg", photo)
+        photo = default_storage.save(f"{generate_filename()}.jpg", photo)
+        return default_storage.url(photo)
     if isinstance(photo, str):
         return photoraw
     return None
