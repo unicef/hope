@@ -20,7 +20,8 @@ from extras.test_utils.factories.registration_data import (
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.documents import IndividualDocumentAfghanistan
+from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
+from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     DataCollectingType,
     Household,
@@ -257,8 +258,13 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
-    def test_erase_rdi(self) -> None:
+    @patch("hope.apps.registration_data.api.views.BiometricDeduplicationService")
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_erase_rdi(self, mock_remove_es: Mock, mock_biometric_service: Mock) -> None:
         self.client.force_authenticate(user=self.user)
+        mock_service = mock_biometric_service.return_value
+        mock_service.INDIVIDUALS_REFUSED = BiometricDeduplicationService.INDIVIDUALS_REFUSED
+
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,
             program=self.program,
@@ -278,6 +284,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             ],
         )
 
+        individual_ids = [ind.id for ind in individuals]
+
         assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
         assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
 
@@ -294,6 +302,11 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         rdi.refresh_from_db()
         assert rdi.erased
+
+        mock_remove_es.assert_called_once_with(individual_ids, get_individual_doc(self.business_area.slug))
+        mock_service.report_individuals_status.assert_called_once_with(
+            self.program, [str(_id) for _id in individual_ids], BiometricDeduplicationService.INDIVIDUALS_REFUSED
+        )
 
     def test_erase_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
