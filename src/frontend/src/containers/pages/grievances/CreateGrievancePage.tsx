@@ -144,8 +144,8 @@ const CreateGrievancePage = (): ReactElement => {
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
     selectedHousehold &&
-      (typeof selectedHousehold === 'string' ||
-        typeof selectedHousehold === 'number'),
+    (typeof selectedHousehold === 'string' ||
+      typeof selectedHousehold === 'number'),
   );
 
   const entityProgramSlug =
@@ -172,8 +172,8 @@ const CreateGrievancePage = (): ReactElement => {
   // Fetch full individual object if selectedIndividual is an ID (string/number)
   const shouldFetchIndividual = Boolean(
     selectedIndividual &&
-      (typeof selectedIndividual === 'string' ||
-        typeof selectedIndividual === 'number'),
+    (typeof selectedIndividual === 'string' ||
+      typeof selectedIndividual === 'number'),
   );
 
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
@@ -325,7 +325,7 @@ const CreateGrievancePage = (): ReactElement => {
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_CREATE} />;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

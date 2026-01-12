@@ -63,7 +63,11 @@ function PopulationHouseholdPage(): ReactElement {
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST}
+      />
+    );
 
   if (!choicesData) return null;
 
