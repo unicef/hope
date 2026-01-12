@@ -262,8 +262,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
     @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
     def test_erase_rdi(self, mock_remove_es: Mock, mock_biometric_service: Mock) -> None:
         self.client.force_authenticate(user=self.user)
+        mock_biometric_service.INDIVIDUALS_REFUSED = BiometricDeduplicationService.INDIVIDUALS_REFUSED
         mock_service = mock_biometric_service.return_value
-        mock_service.INDIVIDUALS_REFUSED = BiometricDeduplicationService.INDIVIDUALS_REFUSED
 
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,
@@ -305,7 +305,9 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         mock_remove_es.assert_called_once_with(individual_ids, get_individual_doc(self.business_area.slug))
         mock_service.report_individuals_status.assert_called_once_with(
-            self.program, [str(_id) for _id in individual_ids], BiometricDeduplicationService.INDIVIDUALS_REFUSED
+            self.program,
+            [str(_id) for _id in individual_ids],
+            mock_biometric_service.INDIVIDUALS_REFUSED,
         )
 
     def test_erase_rdi_with_invalid_status(self) -> None:
