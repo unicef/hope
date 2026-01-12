@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -42,58 +42,59 @@ export function DocumentField({
     id,
   )}`;
 
-
   return (
-    <Grid container alignItems="center" spacing={3}>
-      <Grid size={4}>
-        <Field
-          name={`${docFieldName}.key`}
-          fullWidth
-          variant="outlined"
-          label={t('Type')}
-          component={FormikSelectField}
-          choices={documentTypeChoices}
-          required={!isEditTicket}
-          disabled={isEditTicket}
-        />
-      </Grid>
-      <Grid size={2}>
-        <Field
-          name={`${docFieldName}.country`}
-          fullWidth
-          variant="outlined"
-          label={t('Country')}
-          component={FormikSelectField}
-          choices={countryChoices}
-          required={!isEditTicket}
-          disabled={isEditTicket}
-        />
-      </Grid>
-      <Grid size={3}>
-        <Field
-          name={`${docFieldName}.number`}
-          fullWidth
-          variant="outlined"
-          label={t('Document Number')}
-          component={FormikTextField}
-          required={!isEditTicket}
-          disabled={isEditTicket}
-        />
-      </Grid>
-      <Grid size={3}>
-        <GrievanceDocumentPhotoModalEditable
-          photoSrc={photoSrc}
-          setFieldValue={setFieldValue}
-          fieldName={`${docFieldName}.photo`}
-        />
-      </Grid>
-      {!isEdited ? (
-        <Grid size={1}>
-          <IconButton disabled={isEditTicket} onClick={onDelete}>
-            <Delete />
-          </IconButton>
+    <Box mt={2}>
+      <Grid container alignItems="center" spacing={3}>
+        <Grid size={3}>
+          <Field
+            name={`${docFieldName}.key`}
+            fullWidth
+            variant="outlined"
+            label={t('Type')}
+            component={FormikSelectField}
+            choices={documentTypeChoices}
+            required={!isEditTicket}
+            disabled={isEditTicket}
+          />
         </Grid>
-      ) : null}
-    </Grid>
+        <Grid size={2}>
+          <Field
+            name={`${docFieldName}.country`}
+            fullWidth
+            variant="outlined"
+            label={t('Country')}
+            component={FormikSelectField}
+            choices={countryChoices}
+            required={!isEditTicket}
+            disabled={isEditTicket}
+          />
+        </Grid>
+        <Grid size={3}>
+          <Field
+            name={`${docFieldName}.number`}
+            fullWidth
+            variant="outlined"
+            label={t('Document Number')}
+            component={FormikTextField}
+            required={!isEditTicket}
+            disabled={isEditTicket}
+          />
+        </Grid>
+        <Grid size={3}>
+          <GrievanceDocumentPhotoModalEditable
+            photoSrc={photoSrc}
+            setFieldValue={setFieldValue}
+            fieldName={`${docFieldName}.photo`}
+          />
+        </Grid>
+        {!isEdited ? (
+          <Grid size={1}>
+            <IconButton disabled={isEditTicket} onClick={onDelete}>
+              <Delete />
+            </IconButton>
+          </Grid>
+        ) : null}
+      </Grid>
+    </Box>
   );
 }

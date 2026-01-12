@@ -7,7 +7,8 @@ export type EditIndividualDocument = {
     country: string;
     key: string;
     number: string;
-    photo?: string | null;
+    readonly photo: string | null;
+    newPhoto?: string | null;
     photoraw?: string | null;
 };
 
