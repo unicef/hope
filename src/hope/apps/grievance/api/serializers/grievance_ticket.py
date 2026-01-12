@@ -261,7 +261,8 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
-    photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
+    photo = serializers.CharField(required=False, read_only=True, allow_null=True)
+    new_photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
     photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
 
 
