@@ -4,8 +4,9 @@ from typing import Any, Callable
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import (

@@ -2,7 +2,7 @@ import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.test import TestCase
 import pytest
@@ -287,7 +287,7 @@ class TestGrievanceUtils(TestCase):
                 "full_name": "Tester Test",
             },
         )
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
         assert (
             f"The selected individual {individuals[0].unicef_id} is not valid, "
@@ -297,7 +297,7 @@ class TestGrievanceUtils(TestCase):
         ticket_details.possible_duplicates.add(individuals[0])
 
         individuals[0].withdraw()
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
         assert (
             e.value.args[0] == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
@@ -339,7 +339,7 @@ class TestGrievanceUtils(TestCase):
         ticket_details.possible_duplicates.add(individuals_2[0])
         ticket_details.save()
 
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
             e.value.args[0]
@@ -347,7 +347,7 @@ class TestGrievanceUtils(TestCase):
             "individuals is withdrawn or duplicate"
         )
 
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert (
             e.value.args[0] == "Close ticket is possible when at least one individual is flagged as distinct or one "
@@ -356,7 +356,7 @@ class TestGrievanceUtils(TestCase):
 
         ticket_details.selected_distinct.add(individuals_2[0])
         ticket_details.save()
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
         assert e.value.args[0] == "Close ticket is possible when all active Individuals are flagged"
 
@@ -511,7 +511,7 @@ class TestGrievanceUtils(TestCase):
 
         ind_2.withdraw()  # make withdraw
 
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             close_needs_adjudication_ticket_service(grievance, user)
         assert e.value.args[0] == "Close ticket is not possible when all Individuals are flagged as duplicates"
 
@@ -533,7 +533,7 @@ class TestGrievanceUtils(TestCase):
         ticket_details_2.possible_duplicates.add(ind_2)  # all possible duplicates
         ticket_details_2.ticket = gr
         ticket_details_2.save()
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(DRFValidationError) as e:
             close_needs_adjudication_ticket_service(gr, user)
         assert (
             e.value.args[0]
