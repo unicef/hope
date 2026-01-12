@@ -81,7 +81,7 @@ from hope.apps.household.const import (
     OBSERVED_DISABILITY_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     REGISTRATION_METHOD_CHOICES,
-    RELATIONSHIP_CHOICE,
+    RELATIONSHIP_CHOICE_USER_SELECTABLE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
@@ -427,7 +427,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": f"Relationship to {TEMPLATE_HOH}"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE_USER_SELECTABLE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
         "scope": [
