@@ -360,7 +360,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
                     "key": document.type.key,
                     "country": document.country.iso_code3,
                     "number": document.document_number,
-                    "photo": document.photo.name,
+                    "photo": document.photo.url if document.photo else None,
                     "photoraw": document.photo.name,
                 },
             }
