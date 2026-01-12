@@ -526,6 +526,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return "user" if self.category in range(2, 8) else "system"
 
     def can_change_status(self, status: int) -> bool:
+        if self.category == self.CATEGORY_BENEFICIARY:
+            return status in BENEFICIARY_STATUS_FLOW.get(self.status, ())
         return status in self.ticket_details.STATUS_FLOW[self.status]
 
 
@@ -588,6 +590,26 @@ GENERAL_STATUS_FLOW = {
     GrievanceTicket.STATUS_CLOSED: (),
 }
 FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+
+BENEFICIARY_STATUS_FLOW = {
     GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
     GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
     GrievanceTicket.STATUS_IN_PROGRESS: (
