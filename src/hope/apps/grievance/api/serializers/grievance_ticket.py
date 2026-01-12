@@ -252,7 +252,7 @@ class IndividualDocumentSerializer(serializers.Serializer):
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
-    photo = serializers.FileField(use_url=False, required=False, allow_null=True)
+    photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
     photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
 
 
@@ -261,7 +261,7 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
-    photo = serializers.FileField(use_url=False, required=False, allow_null=True)
+    photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
     photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
 
 
