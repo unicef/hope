@@ -143,16 +143,12 @@ const CreateGrievancePage = (): ReactElement => {
     });
 
   // Fetch linked ticket details when linked query param is provided
-  const {
-    data: linkedTicketData,
-    isLoading: linkedTicketLoading,
-    error: linkedTicketError,
-  } = useQuery({
+  const { data: linkedTicketData, isLoading: linkedTicketLoading } = useQuery({
     queryKey: ['linkedTicket', businessArea, linkedTicketIdFromQuery],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug: businessArea,
-        id: linkedTicketIdFromQuery!,
+        id: linkedTicketIdFromQuery,
       }),
     enabled: Boolean(linkedTicketIdFromQuery),
   });
