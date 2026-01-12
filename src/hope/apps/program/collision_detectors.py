@@ -224,8 +224,9 @@ class AbstractCollisionDetector:
         # 5. Remove roles from IndividualRoleInHousehold
         IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).delete()
 
-        # 6. Withdraw the individual
-        individual.withdraw()
+        # 6. Withdraw the individual (only if not already withdrawn)
+        if not individual.withdrawn:
+            individual.withdraw()
 
 
 class NoopCollisionDetector(AbstractCollisionDetector):
