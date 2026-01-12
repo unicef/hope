@@ -434,7 +434,7 @@ def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None)
 
 
 def handle_document(document: dict) -> dict:
-    photo = document.get("photo")
+    photo = document.pop("new_photo") or document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
     document["photoraw"] = document["photo"]
