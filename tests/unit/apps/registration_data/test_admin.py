@@ -148,6 +148,7 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
             ticket=cls.grievance_ticket2,
             individual=cls.individuals[0],
         )
+
         rebuild_search_index()
 
         User = get_user_model()  # noqa
