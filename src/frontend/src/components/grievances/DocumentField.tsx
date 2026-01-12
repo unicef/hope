@@ -42,9 +42,10 @@ export function DocumentField({
     id,
   )}`;
 
+
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid size={2}>
+      <Grid size={4}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth
