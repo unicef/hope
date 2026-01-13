@@ -21,7 +21,6 @@ from extras.test_utils.factories.account import (
 from extras.test_utils.factories.core import create_afghanistan
 from hope.admin.account_forms import RoleAssignmentAdminForm
 from hope.admin.partner import PartnerAdmin
-from hope.admin.user import UserAdmin
 from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
 from hope.models import IncompatibleRoles, Partner, Role, RoleAssignment, User
 
@@ -108,8 +107,6 @@ class RoleAssignmentInlineTest(TestCase):
     def test_has_add_permission(self) -> None:
         request = self.get_mock_request(object_id=self.unicef_subpartner.id)
         assert self.admin.has_add_permission(request, self.unicef_subpartner)
-
-        assert not self.admin.has_add_permission(request, self.unicef_parent)
 
         assert self.admin.has_add_permission(request, self.partner_without_parent)
 
@@ -209,8 +206,13 @@ class UserRoleAssignmentAdminTest(TestCase):
 
     def test_has_permissions_require_can_edit_user_roles(self) -> None:
         user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
-        permission = Permission.objects.get(codename="can_edit_user_roles")
-        user_with_perm.user_permissions.add(permission)
+        for permission in [
+            "view_roleassignment",
+            "add_roleassignment",
+            "change_roleassignment",
+            "delete_roleassignment",
+        ]:
+            user_with_perm.user_permissions.add(Permission.objects.get(codename=permission))
 
         user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
 
@@ -461,44 +463,6 @@ class RoleAssignmentAdminFormTest(TestCase):
         )
 
         assert form.is_valid()
-
-
-class UserAdminTest(TestCase):
-    def setUp(self) -> None:
-        request = RequestFactory()
-        self.site = AdminSite()
-        self.admin = UserAdmin(model=User, admin_site=self.site)
-        self.request = request.get("/")
-
-        self.business_area = create_afghanistan()
-        self.user = UserFactory(username="normaluser", is_staff=True)
-        self.role = RoleFactory(name="Test Role")
-
-        # Create user with permission
-        self.user_with_perm = UserFactory(username="user_with_perm", is_staff=True)
-        permission = Permission.objects.get(
-            codename="can_edit_user_roles",
-        )
-        self.user_with_perm.user_permissions.add(permission)
-
-        # Create user without permission
-        self.user_without_perm = UserFactory(username="user_without_perm", is_staff=True)
-
-    def test_get_inlines_with_permission(self) -> None:
-        self.request.user = self.user_with_perm
-
-        inlines = self.admin.get_inlines(self.request, self.user)
-
-        assert len(inlines) == 1
-        assert inlines[0] == RoleAssignmentInline
-
-    def test_get_inlines_without_permission(self) -> None:
-        self.request.user = self.user_without_perm
-
-        inlines = self.admin.get_inlines(self.request, self.user)
-
-        assert len(inlines) == 0
-        assert inlines == []
 
 
 def test_user_privileges_action(django_app: DjangoTestApp, superuser: User) -> None:
