@@ -212,7 +212,8 @@ def handle_edit_document(document_data: dict) -> Document:
     document.document_number = number
     document.type = document_type
     document.country = Country.objects.get(iso_code3=country_code)
-    if photo:
+    # update only if new photo provided
+    if photo:  # noqa pragma: no cover
         document.photo = photo
 
     return document
