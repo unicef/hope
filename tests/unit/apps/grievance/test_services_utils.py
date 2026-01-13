@@ -1,9 +1,11 @@
+from io import BytesIO
 import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -658,3 +660,16 @@ class TestGrievanceUtils(TestCase):
             photoraw="https://cdn.example.com/photo.jpg",
         )
         assert result == "https://cdn.example.com/photo.jpg"
+
+    def test_handle_photo_saves_and_return(self):
+        file = InMemoryUploadedFile(
+            file=BytesIO(b"123"),
+            field_name="photo",
+            name="test123.jpg",
+            content_type="image/jpeg",
+            size=3,
+            charset=None,
+        )
+        result = handle_photo(file, photoraw=None)
+        assert result is not None
+        assert result.endswith(".jpg")
