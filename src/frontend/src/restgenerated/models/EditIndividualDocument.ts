@@ -9,6 +9,5 @@ export type EditIndividualDocument = {
     number: string;
     readonly photo: string | null;
     newPhoto?: string | null;
-    photoraw?: string | null;
 };
 

@@ -7,6 +7,6 @@ export type IndividualDocument = {
     key: string;
     number: string;
     newPhoto?: string | null;
-    photoraw?: string | null;
+    photo?: string | null;
 };
 
