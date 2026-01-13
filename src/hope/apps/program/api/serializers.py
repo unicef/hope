@@ -368,9 +368,6 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
         )
 
     def get_can_import_rdi(self, obj: Program) -> bool:
-        if not hasattr(obj, "registration_imports"):
-            return True
-
         if obj.biometric_deduplication_enabled:
             not_merged_rdis = obj.registration_imports.filter(
                 status__in=[RegistrationDataImport.IN_REVIEW],
