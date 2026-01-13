@@ -266,6 +266,30 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         return status, quantity
 
+    def _get_optional_cell_value(self, row: Row, header_name: str) -> Any:
+        if header_name in self.xlsx_headers:
+            return row[self.xlsx_headers.index(header_name)].value
+        return None
+
+    def _update_payment_verification(self, payment: Payment, delivered_quantity: Decimal | None) -> None:
+        payment_verification = payment.payment_verifications.first()
+        if payment_verification and payment_verification.status != PaymentVerification.STATUS_PENDING:
+            if payment_verification.received_amount == delivered_quantity:
+                pv_status = PaymentVerification.STATUS_RECEIVED
+            elif delivered_quantity == 0 or delivered_quantity is None:
+                pv_status = PaymentVerification.STATUS_NOT_RECEIVED
+            else:
+                pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+
+            payment_verification.status = pv_status
+            payment_verification.status_date = timezone.now()
+            self.payment_verifications_to_save.append(payment_verification)
+
+            payment_verification_plan = payment_verification.payment_verification_plan
+            self.logger.info(f"Calculating counts for payment verification plan {payment_verification_plan.id}")
+            calculate_counts(payment_verification_plan)
+            payment_verification_plan.save()
+
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
@@ -274,42 +298,13 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.logger.info(f"Importing row for payment {payment_id}")
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
-        if "delivery_date" in self.xlsx_headers:
-            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
-        else:
-            delivery_date = None
-
-        if "reference_id" in self.xlsx_headers:
-            reference_id = row[self.xlsx_headers.index("reference_id")].value
-        else:
-            reference_id = None
-
-        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
-            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
-        else:
-            reason_for_unsuccessful_payment = None
-
-        if "additional_collector_name" in self.xlsx_headers:
-            additional_collector_name = row[self.xlsx_headers.index("additional_collector_name")].value
-        else:
-            additional_collector_name = None
-
-        if "additional_document_type" in self.xlsx_headers:
-            additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
-        else:
-            additional_document_type = None
-
-        if "additional_document_number" in self.xlsx_headers:
-            additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
-        else:
-            additional_document_number = None
-
-        if "transaction_status_blockchain_link" in self.xlsx_headers:
-            transaction_status_blockchain_link = row[
-                self.xlsx_headers.index("transaction_status_blockchain_link")
-            ].value
-        else:
-            transaction_status_blockchain_link = None
+        delivery_date = self._get_optional_cell_value(row, "delivery_date")
+        reference_id = self._get_optional_cell_value(row, "reference_id")
+        reason_for_unsuccessful_payment = self._get_optional_cell_value(row, "reason_for_unsuccessful_payment")
+        additional_collector_name = self._get_optional_cell_value(row, "additional_collector_name")
+        additional_document_type = self._get_optional_cell_value(row, "additional_document_type")
+        additional_document_number = self._get_optional_cell_value(row, "additional_document_number")
+        transaction_status_blockchain_link = self._get_optional_cell_value(row, "transaction_status_blockchain_link")
 
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
@@ -370,21 +365,4 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.transaction_status_blockchain_link = transaction_status_blockchain_link
 
                 self.payments_to_save.append(payment)
-                # update PaymentVerification status
-                payment_verification = payment.payment_verifications.first()
-                if payment_verification and payment_verification.status != PaymentVerification.STATUS_PENDING:
-                    if payment_verification.received_amount == delivered_quantity:
-                        pv_status = PaymentVerification.STATUS_RECEIVED
-                    elif delivered_quantity == 0 or delivered_quantity is None:
-                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
-                    else:
-                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-
-                    payment_verification.status = pv_status
-                    payment_verification.status_date = timezone.now()
-                    self.payment_verifications_to_save.append(payment_verification)
-
-                    payment_verification_plan = payment_verification.payment_verification_plan
-                    self.logger.info(f"Calculating counts for payment verification plan {payment_verification_plan.id}")
-                    calculate_counts(payment_verification_plan)
-                    payment_verification_plan.save()
+                self._update_payment_verification(payment, delivered_quantity)

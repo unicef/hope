@@ -103,6 +103,20 @@ class ADUSerMixin:
         else:
             raise Http404
 
+    def _create_user_from_ad_data(self, ms_graph: MicrosoftGraphAPI, email: str, partner: Partner) -> User:
+        user_data = ms_graph.get_user_data(email=email)
+        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+        user = User(**user_args, partner=partner)
+        if user.first_name is None:
+            user.first_name = ""
+        if user.last_name is None:
+            user.last_name = ""
+        job_title = user_data.get("jobTitle")
+        if job_title is not None:
+            user.job_title = job_title
+        user.set_unusable_password()
+        return user
+
     @button(label="AD Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request: HttpRequest) -> None:
         not_found = []
@@ -168,17 +182,7 @@ class ADUSerMixin:
                             self._sync_ad_data(user)
                             results.updated.append(user)
                         else:
-                            user_data = ms_graph.get_user_data(email=email)
-                            user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                            user = User(**user_args, partner=partner)
-                            if user.first_name is None:
-                                user.first_name = ""
-                            if user.last_name is None:
-                                user.last_name = ""
-                            job_title = user_data.get("jobTitle")
-                            if job_title is not None:
-                                user.job_title = job_title
-                            user.set_unusable_password()
+                            user = self._create_user_from_ad_data(ms_graph, email, partner)
                             users_to_bulk_create.append(user)
                             global_business_area = BusinessArea.objects.filter(slug="global").first()
                             basic_role = Role.objects.filter(name="Basic User").first()
@@ -379,6 +383,53 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
+    def _process_csv_row(
+        self,
+        request: HttpRequest,
+        row: dict,
+        partner: Partner,
+        business_area: BusinessArea,
+        role: Role,
+        enable_kobo: bool,
+    ) -> dict:
+        try:
+            email = row["email"].strip()
+        except KeyError as e:
+            raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+
+        user_info = {
+            "email": email,
+            "is_new": False,
+            "kobo": False,
+            "error": "",
+        }
+        if "username" in row:
+            username = row["username"].strip()
+        else:
+            username = row["email"].replace("@", "_").replace(".", "_").lower()
+
+        u, isnew = User.objects.get_or_create(
+            email=email,
+            partner=partner,
+            defaults={"username": username},
+        )
+        if isnew:
+            ur = u.role_assignments.create(business_area=business_area, role=role)
+            self.log_addition(request, u, "User imported by CSV")
+            self.log_addition(request, ur, "User Role added")
+        else:
+            try:
+                IncompatibleRoles.objects.validate_user_role(u, business_area, role)
+                ur, _ = u.role_assignments.get_or_create(business_area=business_area, role=role)
+                self.log_addition(request, ur, "User Role added")
+            except ValidationError as e:
+                self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
+
+        if enable_kobo:
+            self._grant_kobo_accesss_to_user(u, sync=False)
+
+        return user_info
+
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
@@ -412,50 +463,11 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
-                        try:
-                            for row in reader:
-                                try:
-                                    email = row["email"].strip()
-                                except KeyError as e:
-                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
-
-                                user_info = {
-                                    "email": email,
-                                    "is_new": False,
-                                    "kobo": False,
-                                    "error": "",
-                                }
-                                if "username" in row:
-                                    username = row["username"].strip()
-                                else:
-                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
-                                u, isnew = User.objects.get_or_create(
-                                    email=email,
-                                    partner=partner,
-                                    defaults={"username": username},
-                                )
-                                if isnew:
-                                    ur = u.role_assignments.create(business_area=business_area, role=role)
-                                    self.log_addition(request, u, "User imported by CSV")
-                                    self.log_addition(request, ur, "User Role added")
-                                else:  # check role validity
-                                    try:
-                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        u.role_assignments.get_or_create(business_area=business_area, role=role)
-                                        self.log_addition(request, ur, "User Role added")
-                                    except ValidationError as e:
-                                        self.message_user(
-                                            request,
-                                            f"Error on {u}: {e}",
-                                            messages.ERROR,
-                                        )
-
-                                if enable_kobo:
-                                    self._grant_kobo_accesss_to_user(u, sync=False)
-
-                                context["results"].append(user_info)
-                        except Exception:
-                            raise
+                        for row in reader:
+                            user_info = self._process_csv_row(
+                                request, row, partner, business_area, role, enable_kobo
+                            )
+                            context["results"].append(user_info)
                 except (csv.Error, HTTPError, Error) as e:
                     logger.warning(e)
                     context["form"] = form

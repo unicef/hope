@@ -11,6 +11,46 @@ from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 
+def _handle_validation_errors(import_data, rdi, errors, logger) -> None:
+    from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
+    from hope.models import ImportData, RegistrationDataImport
+
+    import_data.status = ImportData.STATUS_VALIDATION_ERROR
+    import_data.validation_errors = str(errors)
+    import_data.save(update_fields=["status", "validation_errors"])
+
+    error_details = format_validation_errors(errors)
+    error_message = f"Validation errors ({len(errors)} errors found):\n\n{error_details}"
+
+    rdi.status = RegistrationDataImport.IMPORT_ERROR
+    rdi.error_message = error_message
+    rdi.save(update_fields=["status", "error_message"])
+
+    logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
+
+
+def _handle_import_success(import_data, rdi, logger) -> None:
+    from hope.models import Household, ImportData, Individual, RegistrationDataImport
+
+    households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
+    individuals_count = Individual.pending_objects.filter(registration_data_import=rdi).count()
+
+    import_data.status = ImportData.STATUS_FINISHED
+    import_data.number_of_households = households_count
+    import_data.number_of_individuals = individuals_count
+    import_data.save(update_fields=["status", "number_of_households", "number_of_individuals"])
+
+    rdi.status = RegistrationDataImport.IN_REVIEW
+    rdi.number_of_households = households_count
+    rdi.number_of_individuals = individuals_count
+    rdi.save(update_fields=["status", "number_of_households", "number_of_individuals"])
+
+    logger.info(
+        f"Import {rdi.id} completed successfully: "
+        f"{households_count} households, {individuals_count} individuals"
+    )
+
+
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
@@ -70,41 +110,9 @@ def process_generic_import_task(
             errors = importer.import_data()
 
             if errors:
-                # Set validation error status
-                import_data.status = ImportData.STATUS_VALIDATION_ERROR
-                import_data.validation_errors = str(errors)
-                import_data.save(update_fields=["status", "validation_errors"])
-
-                # Format error message with details in human-readable format
-                error_details = format_validation_errors(errors)
-                error_message = f"Validation errors ({len(errors)} errors found):\n\n{error_details}"
-
-                rdi.status = RegistrationDataImport.IMPORT_ERROR
-                rdi.error_message = error_message
-                rdi.save(update_fields=["status", "error_message"])
-
-                logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
+                _handle_validation_errors(import_data, rdi, errors, logger)
             else:
-                # Update stats
-                from hope.models import Household, Individual
-
-                households_count = Household.pending_objects.filter(registration_data_import=rdi).count()
-                individuals_count = Individual.pending_objects.filter(registration_data_import=rdi).count()
-
-                import_data.status = ImportData.STATUS_FINISHED
-                import_data.number_of_households = households_count
-                import_data.number_of_individuals = individuals_count
-                import_data.save(update_fields=["status", "number_of_households", "number_of_individuals"])
-
-                rdi.status = RegistrationDataImport.IN_REVIEW
-                rdi.number_of_households = households_count
-                rdi.number_of_individuals = individuals_count
-                rdi.save(update_fields=["status", "number_of_households", "number_of_individuals"])
-
-                logger.info(
-                    f"Import {rdi.id} completed successfully: "
-                    f"{households_count} households, {individuals_count} individuals"
-                )
+                _handle_import_success(import_data, rdi, logger)
 
     except AlreadyRunningError:
         logger.exception("Task already running")

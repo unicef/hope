@@ -336,34 +336,12 @@ class ProgramAdmin(
         return TemplateResponse(request, "admin/program/program/bulk_upload_individuals_photos.html", context)
 
 
-def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
-    """Update individual photos from the ZIP attached to this job.
-
-    - Collect all JPEG filenames (IND-...*.jpg) from job.file.file.
-    - Bulk-load Individuals by their unicef_id (or your ID field).
-    - Save each image into individual.photo.
-    - Store errors in job.errors.
-    """
-    job.errors = {}
-
-    file_id = job.config.get("file_id")
-    file = FileTemp.objects.filter(pk=file_id).first()
-    if not file:
-        job.errors = {"file": "This job requires the file."}
-        job.save(update_fields=["errors"])
-        raise ValueError("BulkUploadIndividualsPhotosJob requires a file.")
-
-    file_field = file.file
-    invalid_filenames: list[str] = []
-    missing_individuals: list[str] = []
-    updated_count = 0
-
-    entries: list[tuple[str, str, str]] = []  # (member_name, filename, individual_id)
+def _collect_zip_entries(
+    data: bytes, job: "AsyncJob"
+) -> tuple[list[tuple[str, str, str]], set[str], list[str]]:
+    entries: list[tuple[str, str, str]] = []
     individual_unicef_ids: set[str] = set()
-
-    # read ZIP once into memory
-    with file_field.open("rb") as f:
-        data = f.read()
+    invalid_filenames: list[str] = []
 
     try:
         with zipfile.ZipFile(BytesIO(data)) as zf:
@@ -388,6 +366,36 @@ def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
         job.errors = {"file": f"Invalid ZIP archive: {exc}"}
         job.save(update_fields=["errors"])
         raise ValueError(f"Invalid ZIP archive: {exc}") from exc
+
+    return entries, individual_unicef_ids, invalid_filenames
+
+
+def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
+    """Update individual photos from the ZIP attached to this job.
+
+    - Collect all JPEG filenames (IND-...*.jpg) from job.file.file.
+    - Bulk-load Individuals by their unicef_id (or your ID field).
+    - Save each image into individual.photo.
+    - Store errors in job.errors.
+    """
+    job.errors = {}
+
+    file_id = job.config.get("file_id")
+    file = FileTemp.objects.filter(pk=file_id).first()
+    if not file:
+        job.errors = {"file": "This job requires the file."}
+        job.save(update_fields=["errors"])
+        raise ValueError("BulkUploadIndividualsPhotosJob requires a file.")
+
+    file_field = file.file
+    missing_individuals: list[str] = []
+    updated_count = 0
+
+    # read ZIP once into memory
+    with file_field.open("rb") as f:
+        data = f.read()
+
+    entries, individual_unicef_ids, invalid_filenames = _collect_zip_entries(data, job)
 
     if not entries:
         job.errors = {"file": "No valid JPEG files found in archive."}

@@ -63,6 +63,18 @@ class AccountPayload:
     data_fields: list[AccountPayloadField]
 
 
+def _handle_photo_field(new_individual_data: dict) -> None:
+    _not_provided = object()
+    photo = new_individual_data.pop("photo", _not_provided)
+    if photo is not _not_provided:
+        if photo is None:
+            new_individual_data["photo"] = ""
+        else:
+            saved_photo = handle_photo(photo, None)
+            if saved_photo:
+                new_individual_data["photo"] = saved_photo
+
+
 class IndividualDataUpdateService(DataChangeService):
     def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
@@ -81,16 +93,7 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        # Handle photo field - distinguish between "not provided" and "set to null"
-        _not_provided = object()
-        photo = individual_data.pop("photo", _not_provided)
-        if photo is not _not_provided:
-            if photo is None:
-                individual_data["photo"] = ""
-            else:
-                saved_photo = handle_photo(photo, None)
-                if saved_photo:  # Only set if handle_photo returned a valid path
-                    individual_data["photo"] = saved_photo
+        _handle_photo_field(individual_data)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
@@ -172,16 +175,7 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        # Handle photo field - distinguish between "not provided" and "set to null"
-        _not_provided = object()
-        photo = new_individual_data.pop("photo", _not_provided)
-        if photo is not _not_provided:
-            if photo is None:
-                new_individual_data["photo"] = ""
-            else:
-                saved_photo = handle_photo(photo, None)
-                if saved_photo:  # Only set if handle_photo returned a valid path
-                    new_individual_data["photo"] = saved_photo
+        _handle_photo_field(new_individual_data)
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
         individual_data_with_approve_status: dict[str, Any] = {
@@ -237,6 +231,65 @@ class IndividualDataUpdateService(DataChangeService):
         self.grievance_ticket.refresh_from_db()
         return self.grievance_ticket
 
+    def _process_documents_identities_accounts(
+        self,
+        new_individual: Individual,
+        documents: list,
+        documents_to_edit: list,
+        documents_to_remove: list,
+        identities: list,
+        identities_to_edit: list,
+        identities_to_remove: list,
+        accounts: list,
+        accounts_to_edit: list,
+    ) -> None:
+        documents_to_create = [handle_add_document(document, new_individual) for document in documents]
+        documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
+        identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
+        identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
+        accounts_to_create = [handle_add_account(account, new_individual) for account in accounts]
+        accounts_to_update = [handle_update_account(account) for account in accounts_to_edit]
+
+        Account.objects.bulk_update(accounts_to_update, ["data", "number", "financial_institution"])
+        Account.objects.bulk_create(accounts_to_create)
+        Account.validate_uniqueness(accounts_to_update)  # type: ignore
+        Account.validate_uniqueness(accounts_to_create)
+        Document.objects.bulk_create(documents_to_create)
+        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
+        Document.objects.filter(id__in=documents_to_remove).delete()
+        IndividualIdentity.objects.bulk_create(identities_to_create)
+        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
+        IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+
+    def _update_household_fields(self, household: Household, only_approved_data: dict) -> None:
+        hh_fields = [
+            "consent",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "currency",
+            "unhcr_id",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "registration_method",
+            "admin_area_title",
+        ]
+        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
+        if hh_approved_data:
+            if hh_country_origin := hh_approved_data.get("country_origin"):
+                hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
+            if hh_country := hh_approved_data.get("country"):
+                hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
+            admin_area_title = hh_approved_data.pop("admin_area_title", None)
+            Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
+            updated_household = Household.objects.get(id=household.id)
+            if admin_area_title:
+                area = Area.objects.filter(p_code=admin_area_title).first()
+                updated_household.set_admin_areas(area)
+
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         program_qs = self.grievance_ticket.programs.all()
@@ -281,43 +334,11 @@ class IndividualDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
-        if "phone_no" in only_approved_data:
-            only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
-
-        if "phone_no_alternative" in only_approved_data:
-            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
-                only_approved_data["phone_no_alternative"]
-            )
-        # people update
-        hh_fields = [
-            "consent",
-            "residence_status",
-            "country_origin",
-            "country",
-            "address",
-            "village",
-            "currency",
-            "unhcr_id",
-            "name_enumerator",
-            "org_enumerator",
-            "org_name_enumerator",
-            "registration_method",
-            "admin_area_title",
-        ]
-        # move HH fields from only_approved_data into hh_approved_data
-        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
-        if hh_approved_data:
-            if hh_country_origin := hh_approved_data.get("country_origin"):
-                hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
-            if hh_country := hh_approved_data.get("country"):
-                hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
-            admin_area_title = hh_approved_data.pop("admin_area_title", None)
-            # people update HH
-            Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
-            updated_household = Household.objects.get(id=household.id)
-            if admin_area_title:
-                area = Area.objects.filter(p_code=admin_area_title).first()
-                updated_household.set_admin_areas(area)
+        for field, valid_field in [("phone_no", "phone_no_valid"), ("phone_no_alternative", "phone_no_alternative_valid")]:
+            if field in only_approved_data:
+                only_approved_data[valid_field] = is_valid_phone_number(only_approved_data[field])
+        if household:
+            self._update_household_fields(household, only_approved_data)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
@@ -338,23 +359,17 @@ class IndividualDataUpdateService(DataChangeService):
             household = Household.objects.select_for_update().get(id=household.id)
             household.head_of_household = new_individual
             household.save()
-        documents_to_create = [handle_add_document(document, new_individual) for document in documents]
-        documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
-        identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
-        identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
-        accounts_to_create = [handle_add_account(account, new_individual) for account in accounts]
-        accounts_to_update = [handle_update_account(account) for account in accounts_to_edit]
-
-        Account.objects.bulk_update(accounts_to_update, ["data", "number", "financial_institution"])
-        Account.objects.bulk_create(accounts_to_create)
-        Account.validate_uniqueness(accounts_to_update)  # type: ignore
-        Account.validate_uniqueness(accounts_to_create)
-        Document.objects.bulk_create(documents_to_create)
-        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
-        Document.objects.filter(id__in=documents_to_remove).delete()
-        IndividualIdentity.objects.bulk_create(identities_to_create)
-        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
-        IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+        self._process_documents_identities_accounts(
+            new_individual,
+            documents,
+            documents_to_edit,
+            documents_to_remove,
+            identities,
+            identities_to_edit,
+            identities_to_remove,
+            accounts,
+            accounts_to_edit,
+        )
 
         if new_individual.household:
             recalculate_data(new_individual.household)
