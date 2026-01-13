@@ -88,7 +88,12 @@ function ProgramDetailsPage(): ReactElement {
   if (loading || choicesLoading || businessAreaDataLoading)
     return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}
+      />
+    );
 
   if (!choices || !businessAreaData || permissions === null) return null;
 

@@ -256,6 +256,7 @@ FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 FREE_UNION = "FREE_UNION"
+REMOVED_BY_COLLISION = "REMOVED_BY_COLLISION"
 
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
@@ -274,12 +275,20 @@ RELATIONSHIP_CHOICE = (
         "Not a Family Member. Can only act as a recipient.",
     ),
     (RELATIONSHIP_OTHER, "Other"),
+    (REMOVED_BY_COLLISION, "Removed by collision"),
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
     (FOSTER_CHILD, "Foster child"),
     (FREE_UNION, "Free union"),
 )
+
+# User-selectable relationship choices for Kobo templates and imports.
+# Excludes system-generated values like REMOVED_BY_COLLISION.
+RELATIONSHIP_CHOICE_USER_SELECTABLE = tuple(
+    choice for choice in RELATIONSHIP_CHOICE if choice[0] != REMOVED_BY_COLLISION
+)
+
 YES = "1"
 NO = "0"
 YES_NO_CHOICE = (

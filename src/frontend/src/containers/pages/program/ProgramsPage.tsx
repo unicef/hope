@@ -67,7 +67,14 @@ function ProgramsPage(): ReactElement {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+          PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
+        ]}
+      />
+    );
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>

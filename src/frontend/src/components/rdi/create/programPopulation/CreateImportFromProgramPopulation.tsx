@@ -199,7 +199,7 @@ export const CreateImportFromProgramPopulationForm = ({
             variant="outlined"
             label={t(
               isSocialDctType
-                ? `${beneficiaryGroup?.memberLabelPlural} IDs`
+                ? `${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural} IDs`
                 : `${beneficiaryGroup?.groupLabelPlural} IDs`,
             )}
             component={FormikTextField}
