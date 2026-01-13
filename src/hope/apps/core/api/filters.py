@@ -33,15 +33,18 @@ class OfficeSearchFilterMixin(FilterSet):
 
         value = value.strip()
 
-        prefix_map = {
-            "HH-": self.filter_by_household_for_office_search,
-            "IND-": self.filter_by_individual_for_office_search,
-            "PP-": self.filter_by_payment_plan_for_office_search,
-            "RCPT-": self.filter_by_payment_for_office_search,
-            "GRV-": self.filter_by_grievance_for_office_search,
-        }
+        handlers = [
+            ("HH-", "filter_by_household_for_office_search"),
+            ("IND-", "filter_by_individual_for_office_search"),
+            ("PP-", "filter_by_payment_plan_for_office_search"),
+            ("RCPT-", "filter_by_payment_for_office_search"),
+            ("GRV-", "filter_by_grievance_for_office_search"),
+        ]
 
-        for prefix, handler in prefix_map.items():
+        for prefix, handler_name in handlers:
+            handler = getattr(self, handler_name, None)
+            if handler is None:
+                continue
             if value.startswith(prefix):
                 return handler(queryset, value)
 
