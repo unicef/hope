@@ -19,17 +19,19 @@ class OfficeSearchFilterMixin(FilterSet):
 
     Filters querysets based on UNICEF ID prefixes:
     - HH-XXX: Household
-    - IND-XXX: Individual
+    - IND-XXX: Individual (also supports phone number and name search)
     - PP-XXX: Payment Plan
     - RCPT-XXX: Payment (Receipt)
     - GRV-XXX: Grievance Ticket
+
+    When searching without a prefix, defaults to individual search by phone number or name.
     """
 
     office_search = CharFilter(method="filter_office_search")
 
     def filter_office_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
         if not value:
-            return queryset
+            return queryset.none()
 
         value = value.strip()
 
@@ -44,4 +46,5 @@ class OfficeSearchFilterMixin(FilterSet):
         if value.startswith("GRV-"):
             return self.filter_by_grievance_for_office_search(queryset, value)
 
-        return queryset.none()
+        # No prefix - treat as individual search (phone number or name)
+        return self.filter_by_individual_for_office_search(queryset, value)
