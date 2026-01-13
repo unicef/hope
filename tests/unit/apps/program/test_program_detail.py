@@ -226,9 +226,7 @@ class TestProgramDetail:
         )
         assert response_data["population_goal"] == self.program.population_goal
 
-    def test_program_detail_can_import_rdi_blocked_when_biometric_in_review(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
+    def test_program_detail_can_import_rdi(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
@@ -237,7 +235,23 @@ class TestProgramDetail:
         )
         self.program.biometric_deduplication_enabled = True
         self.program.save()
-        RegistrationDataImportFactory(
+
+        # No registration data imports
+        response = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()
+        assert response_data["can_import_rdi"] is True
+
+        # Deduplicated RDI in review
+        rdi = RegistrationDataImportFactory(
             program=self.program,
             business_area=self.afghanistan,
             status=RegistrationDataImport.IN_REVIEW,
@@ -256,3 +270,19 @@ class TestProgramDetail:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert response_data["can_import_rdi"] is False
+
+        # Deduplicated RDI merged
+        rdi.status = RegistrationDataImport.MERGED
+        rdi.save()
+        response = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()
+        assert response_data["can_import_rdi"] is True
