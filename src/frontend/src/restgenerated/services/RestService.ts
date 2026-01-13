@@ -26,6 +26,8 @@ import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FieldAttribute } from '../models/FieldAttribute';
 import type { FspChoices } from '../models/FspChoices';
+import type { GenericImportResponse } from '../models/GenericImportResponse';
+import type { GenericImportUpload } from '../models/GenericImportUpload';
 import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
@@ -38,6 +40,7 @@ import type { GrievanceReassignRole } from '../models/GrievanceReassignRole';
 import type { GrievanceStatusChange } from '../models/GrievanceStatusChange';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
+import type { GroupDetail } from '../models/GroupDetail';
 import type { Household } from '../models/Household';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
@@ -65,6 +68,7 @@ import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedF
 import type { PaginatedFSPXlsxTemplateList } from '../models/PaginatedFSPXlsxTemplateList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
+import type { PaginatedGroupListList } from '../models/PaginatedGroupListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
@@ -732,9 +736,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -794,9 +795,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -846,9 +844,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -5360,9 +5355,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -5425,9 +5417,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -5480,9 +5469,6 @@ export class RestService {
          */
         ordering?: string,
         programId?: string,
-        /**
-         * A search term.
-         */
         search?: string,
         user?: string,
         userId?: string,
@@ -6114,6 +6100,32 @@ export class RestService {
                 'ordering': ordering,
                 'search': search,
             },
+        });
+    }
+    /**
+     * Upload Excel file for generic import
+     * Upload an Excel file to be processed asynchronously. Creates ImportData and RDI records, triggers Celery task. Returns identifiers for status polling.
+     * @returns GenericImportResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsGenericImportUploadUploadCreate({
+        businessAreaSlug,
+        programSlug,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        formData: GenericImportUpload,
+    }): CancelablePromise<GenericImportResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/generic-import-upload/upload/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -9029,12 +9041,17 @@ export class RestService {
         businessAreaSlug,
         paymentPlanPk,
         programSlug,
+        collectorFullName,
+        householdUnicefId,
         limit,
         offset,
+        paymentUnicefId,
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
         programSlug: string,
+        collectorFullName?: string,
+        householdUnicefId?: string,
         /**
          * Number of results to return per page.
          */
@@ -9043,6 +9060,7 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        paymentUnicefId?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9053,8 +9071,11 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'collector_full_name': collectorFullName,
+                'household_unicef_id': householdUnicefId,
                 'limit': limit,
                 'offset': offset,
+                'payment_unicef_id': paymentUnicefId,
             },
         });
     }
@@ -9148,10 +9169,16 @@ export class RestService {
         businessAreaSlug,
         paymentPlanPk,
         programSlug,
+        collectorFullName,
+        householdUnicefId,
+        paymentUnicefId,
     }: {
         businessAreaSlug: string,
         paymentPlanPk: string,
         programSlug: string,
+        collectorFullName?: string,
+        householdUnicefId?: string,
+        paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9160,6 +9187,11 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_pk': paymentPlanPk,
                 'program_slug': programSlug,
+            },
+            query: {
+                'collector_full_name': collectorFullName,
+                'household_unicef_id': householdUnicefId,
+                'payment_unicef_id': paymentUnicefId,
             },
         });
     }
@@ -14651,6 +14683,78 @@ export class RestService {
                 'offset': offset,
                 'ordering': ordering,
                 'type': type,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedGroupListList
+     * @throws ApiError
+     */
+    public static restGroupsList({
+        limit,
+        offset,
+        ordering,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedGroupListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/groups/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns GroupDetail
+     * @throws ApiError
+     */
+    public static restGroupsRetrieve({
+        id,
+    }: {
+        /**
+         * A unique integer value identifying this group.
+         */
+        id: number,
+    }): CancelablePromise<GroupDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/groups/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restGroupsCountRetrieve({
+        ordering,
+    }: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/groups/count/',
+            query: {
+                'ordering': ordering,
             },
         });
     }

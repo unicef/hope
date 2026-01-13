@@ -44,6 +44,7 @@ from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanOfficeSearchFilter,
+    PaymentSearchFilter,
     PaymentVerificationRecordFilter,
     PendingPaymentFilter,
     TargetPopulationFilter,
@@ -1852,14 +1853,12 @@ class PaymentPlanManagerialViewSet(
         business_area: BusinessArea,
         request: Request,
     ) -> None:
+        perm = self._get_action_permission(input_data["action"])
         if not self.request.user.has_perm(
-            self._get_action_permission(input_data["action"]),  # type: ignore
+            perm,  # type: ignore
             payment_plan.program_cycle.program or business_area,
         ):
-            raise PermissionDenied(
-                f"You do not have permission to perform action {input_data['action']} "
-                f"on payment plan with id {payment_plan.unicef_id}."
-            )
+            raise PermissionDenied(detail={"required_permissions": [perm]})
 
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:
@@ -1941,6 +1940,7 @@ class PaymentViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = Payment.objects.all()
     lookup_field = "payment_id"
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -1959,6 +1959,8 @@ class PaymentViewSet(
         "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
         "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
         payment_id = self.kwargs["payment_id"]

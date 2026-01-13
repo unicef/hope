@@ -15,6 +15,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PERMISSIONS } from 'src/config/permissions';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
@@ -55,7 +56,15 @@ function GrievancesDashboardPage(): ReactElement {
       perm.includes('GRIEVANCES_VIEW_DETAILS'),
   );
 
-  if (!hasGrievancesViewPermission) return <PermissionDenied />;
+  if (!hasGrievancesViewPermission)
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_VIEW_LIST,
+          PERMISSIONS.GRIEVANCES_VIEW_DETAILS,
+        ]}
+      />
+    );
 
   const {
     ticketsByCategory,

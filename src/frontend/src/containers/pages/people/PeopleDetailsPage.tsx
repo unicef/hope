@@ -125,7 +125,12 @@ const PeopleDetailsPage = (): ReactElement => {
   )
     return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS}
+      />
+    );
   if (
     !individual ||
     !individualChoicesData ||
