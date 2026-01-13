@@ -11,6 +11,7 @@ terms:
     - "Payment Plan#Payment Plan"
     - "Payment Record#Payment Record"
     - Payment Verification
+    - Payment Gateway
     - Purchase Order
     - Financial Service Provider
     - FSP
@@ -46,6 +47,10 @@ List of <glossary:Payment Record>
 Single entry of a <glossary:Payment Plan> containing informations about Household and relative amounts
 
 ## Payment Verification
+
+## Payment Gateway
+
+A dedicated portal for managing payment operations. It transmits payment records to API-integrated Financial Service Providers (FSPs) and receives payment confirmation notifications in real-time.
 
 ## Purchase Order
 
