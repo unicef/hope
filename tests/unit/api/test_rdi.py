@@ -164,7 +164,6 @@ class PushToRDITests(HOPEApiTestCase):
                             {
                                 "type": "bank",
                                 "number": "123",
-                                # "financial_institution": self.fi.id,  # use generic financial institution
                                 "data": {"field_name": "field_value"},
                             }
                         ],

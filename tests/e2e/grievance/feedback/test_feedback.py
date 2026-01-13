@@ -298,7 +298,7 @@ class TestFeedback:
         # Go to Feedback
         page_feedback.get_nav_grievance().click()
         page_feedback.get_nav_feedback().click()
-        # Edit field Programme in Feedback
+        # Edit field Program in Feedback
         page_feedback.get_row(0).click()
         assert "-" in page_feedback_details.get_programme().text
         page_feedback_details.get_button_edit().click()
@@ -433,7 +433,7 @@ class TestFeedback:
         # Go to Feedback
         page_feedback.get_nav_grievance().click()
         page_feedback.get_nav_feedback().click()
-        # Edit field Programme in Feedback
+        # Edit field Program in Feedback
         page_feedback.get_row(0).click()
         assert "-" in page_feedback_details.get_programme().text
         page_feedback_details.get_button_edit().click()
@@ -501,11 +501,6 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
-        # ToDo: Uncomment after fix 209087
-        # page_new_feedback.get_button_next().click()
-        # assert for page_new_feedback.get_error().text
-        # with pytest.raises(Exception):
-        #     page_new_feedback.get_household_tab()
         page_new_feedback.choose_option_by_name("Negative feedback")
         page_new_feedback.get_button_next().click()
         page_new_feedback.get_household_tab()
@@ -547,31 +542,15 @@ class TestFeedback:
         page_new_feedback.get_button_next().click()
 
         page_new_feedback.get_input_questionnaire_size().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_household_size().text
         page_new_feedback.get_input_questionnaire_malechildrencount().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_number_of_male_children().text
         page_new_feedback.get_input_questionnaire_femalechildrencount().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_number_of_female_children().text
         page_new_feedback.get_input_questionnaire_childrendisabledcount().click()
         assert "-" in page_new_feedback.get_label_number_of_disabled_children().text
         page_new_feedback.get_input_questionnaire_headofhousehold().click()
-        # TODO: Uncomment after fix: 211708
-        # assert "" in page_new_feedback.get_label_head_of_household().text
         page_new_feedback.get_input_questionnaire_countryorigin().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_country_of_origin().text
         page_new_feedback.get_input_questionnaire_address().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_address().text
         page_new_feedback.get_input_questionnaire_village().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_village().text
         page_new_feedback.get_input_questionnaire_admin_1().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_administrative_level_1().text
         page_new_feedback.get_input_questionnaire_admin_2().click()
         assert "Shakardara" in page_new_feedback.get_label_administrative_level_2().text
         page_new_feedback.get_input_questionnaire_admin_3().click()
@@ -587,13 +566,9 @@ class TestFeedback:
         )
         assert individual_name in page_new_feedback.get_label_individual_full_name().text
         page_new_feedback.get_input_questionnaire_birthdate().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "-" in page_new_feedback.get_label_birth_date().text
         page_new_feedback.get_input_questionnaire_phoneno().click()
         assert "-" in page_new_feedback.get_label_phone_number().text
         page_new_feedback.get_input_questionnaire_relationship().click()
-        # ToDo: Uncomment after fix: 211708
-        # assert "Head of Household" in page_new_feedback.get_label_relationship_to_hoh().text
         page_new_feedback.get_received_consent().click()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text

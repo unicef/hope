@@ -497,12 +497,8 @@ class TestSmokeTargeting:
         assert "OPEN" in page_targeting_details.get_target_population_status().text
         assert "CREATED BY" in page_targeting_details.get_labelized_field_container_created_by().text
         page_targeting_details.get_label_created_by()
-        # assert "PROGRAMME POPULATION CLOSE DATE" in page_targeting_details.getLabelizedFieldContainerCloseDate().text
         assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
         assert "Test Programm" in page_targeting_details.get_label_programme().text
-        # assert "SEND BY" in page_targeting_details.getLabelizedFieldContainerSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendDate().text
         assert "5" in page_targeting_details.get_label_female_children().text
         assert "3" in page_targeting_details.get_label_male_children().text
         assert "2" in page_targeting_details.get_label_female_adults().text
@@ -956,7 +952,6 @@ class TestCreateTargeting:
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
         page_targeting_create.get_add_people_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
-        # page_targeting_create.select_listbox_element("Test String Attribute SW")  # not works
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
@@ -1088,7 +1083,6 @@ class TestTargeting:
     ) -> None:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
-        # filters.selectFiltersSatus("TP_OPEN")
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_label_status()
         page_targeting_details.get_lock_button().click()
@@ -1144,20 +1138,14 @@ class TestTargeting:
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.SPACE)
-        # page_targeting_create.getButtonHouseholdRule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
         page_targeting_create.select_listbox_element("What is the Household size?")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys("What is the Household size")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_details.get_household_size_from().send_keys("0")
         page_targeting_details.get_household_size_to().send_keys("9")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
-        # page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_details.clear_input(page_targeting_details.get_input_name())
         page_targeting_details.get_input_name().send_keys("New Test Data")
         page_targeting_details.get_input_name().send_keys(Keys.ENTER)
-        # page_targeting_create.get_button_save().click()
         page_targeting_details.get_button_edit()
         assert page_targeting_details.wait_for_text_title_page("New Test Data")
         assert "9" in page_targeting_details.get_criteria_container().text
