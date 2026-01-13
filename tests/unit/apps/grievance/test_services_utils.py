@@ -34,6 +34,7 @@ from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
+    handle_photo,
     handle_role,
     to_phone_number_str,
     verify_flex_fields,
@@ -650,3 +651,10 @@ class TestGrievanceUtils(TestCase):
         )
         assert ticket is None
         assert ticket_details is None
+
+    def test_handle_photo_string_returns_photoraw(self):
+        result = handle_photo(
+            photo="already-exists",
+            photoraw="https://cdn.example.com/photo.jpg",
+        )
+        assert result == "https://cdn.example.com/photo.jpg"
