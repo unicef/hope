@@ -215,42 +215,48 @@ class HouseholdFilter(UpdatedAtFilter):
         search = value.strip()
         search_type = self.data.get("search_type")
 
-        if search_type == "household_id":
-            return qs.filter(unicef_id__icontains=search)
-        if search_type == "individual_id":
-            return qs.filter(head_of_household__unicef_id__icontains=search)
-        if search_type == "full_name":
-            return qs.filter(head_of_household__full_name__icontains=search)
-        if search_type == "phone_no":
-            return qs.filter(
-                Q(head_of_household__phone_no__icontains=search)
-                | Q(head_of_household__phone_no_alternative__icontains=search)
-            )
-        if search_type == "detail_id":
-            try:
-                int(search)
-            except ValueError:
-                raise SearchError("The search value for a given search type should be a number")
-            return qs.filter(detail_id__istartswith=search)
-        if search_type == "kobo_asset_id":
-            inner_query = Q()
-            split_values_list = search.split(" ")
-            for split_value in split_values_list:
-                striped_value = split_value.strip(",")
-                if striped_value.startswith(("HOPE-", "KOBO-")):
-                    _value = _prepare_kobo_asset_id_value(search)
-                    # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                    # will filter by '111222' like 111222 is ID
-                    inner_query |= Q(kobo_asset_id__endswith=_value)
-                else:
-                    inner_query = Q(kobo_asset_id__endswith=search)
-            return qs.filter(inner_query)
+        handlers = {
+            "household_id": lambda qs_, term: qs_.filter(unicef_id__icontains=term),
+            "individual_id": lambda qs_, term: qs_.filter(head_of_household__unicef_id__icontains=term),
+            "full_name": lambda qs_, term: qs_.filter(head_of_household__full_name__icontains=term),
+            "phone_no": lambda qs_, term: qs_.filter(
+                Q(head_of_household__phone_no__icontains=term)
+                | Q(head_of_household__phone_no_alternative__icontains=term)
+            ),
+            "detail_id": self._filter_detail_id,
+            "kobo_asset_id": self._filter_kobo_asset_id,
+        }
+
         if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(
                 head_of_household__documents__type__key=search_type,
                 head_of_household__documents__document_number__icontains=search,
             )
+
+        handler = handlers.get(search_type or "")
+        if handler:
+            return handler(qs, search)
+
         raise SearchError(f"Invalid search key '{search_type}'")
+
+    def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
+        try:
+            int(search)
+        except ValueError:
+            raise SearchError("The search value for a given search type should be a number")
+        return qs.filter(detail_id__istartswith=search)
+
+    def _filter_kobo_asset_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
+        inner_query = Q()
+        split_values_list = search.split(" ")
+        for split_value in split_values_list:
+            striped_value = split_value.strip(",")
+            if striped_value.startswith(("HOPE-", "KOBO-")):
+                _value = _prepare_kobo_asset_id_value(search)
+                inner_query |= Q(kobo_asset_id__endswith=_value)
+            else:
+                inner_query = Q(kobo_asset_id__endswith=search)
+        return qs.filter(inner_query)
 
     def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs

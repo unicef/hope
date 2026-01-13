@@ -33,15 +33,16 @@ class OfficeSearchFilterMixin(FilterSet):
 
         value = value.strip()
 
-        if value.startswith("HH-"):
-            return self.filter_by_household_for_office_search(queryset, value)
-        if value.startswith("IND-"):
-            return self.filter_by_individual_for_office_search(queryset, value)
-        if value.startswith("PP-"):
-            return self.filter_by_payment_plan_for_office_search(queryset, value)
-        if value.startswith("RCPT-"):
-            return self.filter_by_payment_for_office_search(queryset, value)
-        if value.startswith("GRV-"):
-            return self.filter_by_grievance_for_office_search(queryset, value)
+        prefix_map = {
+            "HH-": self.filter_by_household_for_office_search,
+            "IND-": self.filter_by_individual_for_office_search,
+            "PP-": self.filter_by_payment_plan_for_office_search,
+            "RCPT-": self.filter_by_payment_for_office_search,
+            "GRV-": self.filter_by_grievance_for_office_search,
+        }
+
+        for prefix, handler in prefix_map.items():
+            if value.startswith(prefix):
+                return handler(queryset, value)
 
         return queryset.none()

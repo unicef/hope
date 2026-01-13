@@ -444,43 +444,49 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-
             choice_type = self.all_fields[header]["type"]
 
-            if choice_type == TYPE_SELECT_ONE:
-                if isinstance(value, str):
-                    return value.strip() in choices
-                if value not in choices:
-                    str_value = str(value)
-                    return str_value in choices
-                return False
-
-            if choice_type == TYPE_SELECT_MANY:
-                if isinstance(value, str):
-                    if "," in value:
-                        selected_choices = value.split(",")
-                    elif ";" in value:
-                        selected_choices = value.split(";")
-                    else:
-                        selected_choices = value.split(" ")
-                else:
-                    selected_choices = [value]
-
-                for unstrip_choice in selected_choices:
-                    if isinstance(unstrip_choice, str):
-                        choice = unstrip_choice.strip()
-                        if choice in choices or choice.upper() in choices:
-                            return True
-                    else:
-                        choice = unstrip_choice
-                    if choice in choices:
-                        return True
-                return False
+            handlers: dict[str, Callable[[Any, set], bool]] = {
+                TYPE_SELECT_ONE: self._validate_select_one_choice,
+                TYPE_SELECT_MANY: self._validate_select_many_choice,
+            }
+            handler = handlers.get(choice_type)
+            if handler:
+                return handler(value, choices)
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
+        if isinstance(value, str):
+            return value.strip() in choices
+        if value not in choices:
+            return str(value) in choices
+        return False
+
+    def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
+        if isinstance(value, str):
+            if "," in value:
+                selected_choices = value.split(",")
+            elif ";" in value:
+                selected_choices = value.split(";")
+            else:
+                selected_choices = value.split(" ")
+        else:
+            selected_choices = [value]
+
+        for unstrip_choice in selected_choices:
+            if isinstance(unstrip_choice, str):
+                choice = unstrip_choice.strip()
+                if choice in choices or choice.upper() in choices:
+                    return True
+            else:
+                choice = unstrip_choice
+            if choice in choices:
+                return True
+        return False
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
