@@ -30,9 +30,6 @@ class OfficeSearchFilterMixin(FilterSet):
     office_search = CharFilter(method="filter_office_search")
 
     def filter_office_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        if not value:
-            return queryset.none()
-
         value = value.strip()
 
         if value.startswith("HH-"):
