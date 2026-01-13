@@ -532,7 +532,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -1514,7 +1514,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(
+    def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
         business_area: BusinessArea,

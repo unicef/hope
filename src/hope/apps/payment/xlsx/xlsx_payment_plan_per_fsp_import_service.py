@@ -266,7 +266,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         return status, quantity
 
-    def _import_row(self, row: Row, exchange_rate: float) -> None:
+    def _import_row(self, row: Row, exchange_rate: float) -> None:  # noqa: PLR0912
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
             return  # safety check

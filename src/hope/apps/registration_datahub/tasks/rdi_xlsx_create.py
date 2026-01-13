@@ -441,7 +441,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 collection_date = self._handle_date_field(collection_date_cell)
             PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
 
-    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
+    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:  # noqa: PLR0912
         complex_fields: dict[str, dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,

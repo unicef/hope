@@ -11,7 +11,7 @@ from hope.apps.utils.celery_tasks import send_email_task
 class MailjetClient:
     """Mailjet client to send emails using Mailjet API."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         subject: str,
         recipients: list[str],
