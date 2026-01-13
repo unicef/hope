@@ -129,6 +129,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
+        result: str | None = None
 
         lookup = core_field["lookup"]
         main_key = None  # just help find specific field from snapshot
@@ -137,45 +138,46 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             snapshot_field_path_split = snapshot_field_path.split("__")
             main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
 
-            if main_key in {"country_origin_id", "country_id"}:
+            area_keys = {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}
+            country_keys = {"country_origin_id", "country_id"}
+            if main_key in country_keys:
                 country = countries_dict.get(household_data.get(main_key))  # type: ignore
-                return country["iso_code3"] if country else None
+                result = country["iso_code3"] if country else None
 
-            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+            elif main_key in area_keys:
                 area = admin_areas_dict.get(household_data.get(main_key))  # type: ignore
-                return f"{area['p_code']} - {area['name']}" if area else None
+                result = f"{area['p_code']} - {area['name']}" if area else None
 
-            if main_key == "roles":
+            elif main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
-                if not lookup_id:
-                    return None
+                if lookup_id:
+                    for role in household_data.get("roles", []):
+                        individual = role.get("individual", {})
+                        if individual.get("id") == lookup_id:
+                            result = role.get("role")
+                            break
 
-                for role in household_data.get("roles", []):
-                    individual = role.get("individual", {})
-                    if individual.get("id") == lookup_id:
-                        return role.get("role")
-                # return None if role not found
-                return None
+            elif main_key in {"primary_collector", "alternate_collector"}:
+                result = household_data.get(main_key, {}).get("id")
 
-            if main_key in {"primary_collector", "alternate_collector"}:
-                return household_data.get(main_key, {}).get("id")
-
-            if main_key == "documents":
+            elif main_key == "documents":
                 doc_type, doc_lookup = (
                     snapshot_field_path_split[1],
                     snapshot_field_path_split[2],
                 )
                 documents_list = collector_data.get("documents", [])
                 documents_dict = {doc.get("type"): doc for doc in documents_list}
-                return documents_dict.get(doc_type, {}).get(doc_lookup)
+                result = documents_dict.get(doc_type, {}).get(doc_lookup)
+
+        if result is not None:
+            return result
 
         if core_field["associated_with"] == _INDIVIDUAL:
-            return collector_data.get(lookup, None) or collector_data.get(main_key, None)
+            result = collector_data.get(lookup, None) or collector_data.get(main_key, None)
+        elif core_field["associated_with"] == _HOUSEHOLD:
+            result = household_data.get(lookup)
 
-        if core_field["associated_with"] == _HOUSEHOLD:
-            return household_data.get(lookup)
-
-        return None
+        return result
 
     @staticmethod
     def get_column_from_core_field(
@@ -269,23 +271,24 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if column_name in DocumentType.get_all_doc_types():
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
+        result: str | float | list | None
         if column_name in additional_columns:
             method, args = additional_columns[column_name]
-            return method(*args)  # type: ignore
+            result = method(*args)  # type: ignore
+        elif column_name in map_obj_name_column:
+            obj, nested_field = map_obj_name_column[column_name]
+            if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:
+                result = float(-1)
+            elif column_name == "delivery_date" and payment.delivery_date is not None:
+                result = str(payment.delivery_date)
+            elif isinstance(obj, dict):
+                result = obj.get(nested_field, "")
+            else:
+                result = getattr(obj, nested_field, None) or ""
+        else:
+            result = "wrong_column_name"
 
-        if column_name not in map_obj_name_column:
-            return "wrong_column_name"
-        if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
-            return float(-1)
-        if column_name == "delivery_date" and payment.delivery_date is not None:
-            return str(payment.delivery_date)
-
-        obj, nested_field = map_obj_name_column[column_name]
-        # return if obj is dictionary from snapshot
-        if isinstance(obj, dict):
-            return obj.get(nested_field, "")
-        # return if obj is model
-        return getattr(obj, nested_field, None) or ""
+        return result
 
     @classmethod
     def get_account_value_from_payment(cls, payment: "Payment", key_name: str) -> str | float | list | None:
