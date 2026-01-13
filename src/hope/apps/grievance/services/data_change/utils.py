@@ -212,7 +212,8 @@ def handle_edit_document(document_data: dict) -> Document:
     document.document_number = number
     document.type = document_type
     document.country = Country.objects.get(iso_code3=country_code)
-    document.photo = photo
+    if photo:
+        document.photo = photo
 
     return document
 
@@ -352,8 +353,8 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
                     "key": document_key,
                     "country": country,
                     "number": document_number,
-                    "photo": document_photo,
-                    "photoraw": document_photo,
+                    "photo": default_storage.url(document_photo) if document_photo else None,
+                    "photoraw": document_photo if document_photo else None,
                 },
                 "previous_value": {
                     "id": document_id,
@@ -361,7 +362,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
                     "country": document.country.iso_code3,
                     "number": document.document_number,
                     "photo": document.photo.url if document.photo else None,
-                    "photoraw": document.photo.name,
+                    "photoraw": document.photo.name if document.photo else None,
                 },
             }
         )
@@ -426,18 +427,18 @@ def generate_filename() -> str:
 
 def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None) -> str | None:
     if isinstance(photo, InMemoryUploadedFile):
-        photo = default_storage.save(f"{generate_filename()}.jpg", photo)
-        return default_storage.url(photo)
+        return default_storage.save(f"{generate_filename()}.jpg", photo)
     if isinstance(photo, str):
         return photoraw
     return None
 
 
 def handle_document(document: dict) -> dict:
-    photo = document.pop("new_photo") or document.get("photo")
-    photoraw = document.get("photoraw")
-    document["photo"] = handle_photo(photo, photoraw)
-    document["photoraw"] = document["photo"]
+    # photo is photo URL and raw photo is just name
+    photo = document.pop("new_photo") if "new_photo" in document else document.get("photo")
+    photo_name = handle_photo(photo, document.get("photo"))
+    document["photo"] = default_storage.url(photo_name) if photo else None
+    document["photoraw"] = photo_name if photo else None
     return document
 
 

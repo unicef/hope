@@ -253,7 +253,7 @@ class IndividualDocumentSerializer(serializers.Serializer):
     key = serializers.CharField()
     number = serializers.CharField()
     new_photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
-    photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
+    photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
 
 
 class EditIndividualDocumentSerializer(serializers.Serializer):
@@ -263,7 +263,6 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     number = serializers.CharField()
     photo = serializers.CharField(required=False, read_only=True, allow_null=True)
     new_photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
-    photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
 
 
 class IndividualIdentityGTSerializer(serializers.Serializer):
