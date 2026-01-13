@@ -89,7 +89,7 @@ jobs:
     - name: Get scan results
       uses: actions/download-artifact@v6
     - name: Convert pipeline scan output to SARIF format
-      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2
+      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.4
       with:
         pipeline-results-json: veracode_sast.json
         output-results-sarif: veracode_sast.sarif
@@ -107,7 +107,7 @@ jobs:
   #      java -jar pipeline-scan.jar -vid '${{ secrets.API_ID }}' -vkey '${{ secrets.API_KEY }}' --file "target/dvja-1.0-SNAPSHOT.war" --fail_on_severity "Very High, High"
   #      rm -rf pipeline-scan-LATEST.zip pipeline-scan.jar
     - name: Veracode Upload And Scan
-      uses: veracode/veracode-uploadandscan-action@0.2
+      uses: veracode/veracode-uploadandscan-action@0.2.11
       continue-on-error: true
       with:
           appname: 'Hope'
@@ -116,7 +116,7 @@ jobs:
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
     - name: Veracode SCA
-      uses: veracode/container_iac_secrets_scanning@v1
+      uses: veracode/container_iac_secrets_scanning@v1.0.6
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
@@ -140,7 +140,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Veracode Container Scan
-      uses: veracode/container_iac_secrets_scanning@v1
+      uses: veracode/container_iac_secrets_scanning@v1.0.6
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}

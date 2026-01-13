@@ -17,10 +17,10 @@ echo "Frontend files changed, rebuilding..."
 cd src/frontend && yarn build-for-backend
 
 # Check if build output differs from staged version
-if git diff --name-only src/hope/apps/web/static/web/ | grep -q .; then
+if git diff --name-only -- src/hope/apps/web/static/web/ | grep -q .; then
     echo ""
     echo "ERROR: Frontend build output changed. Please stage the updated files:"
-    git diff --stat src/hope/apps/web/static/web/
+    git diff --stat -- src/hope/apps/web/static/web/
     echo ""
     echo "Run: git add src/hope/apps/web/static/web/"
     exit 1

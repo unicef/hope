@@ -9,3 +9,4 @@ archive
 output.json
 pytest_html_report.html
 .pdm-python
+src/hope/apps/web/static
