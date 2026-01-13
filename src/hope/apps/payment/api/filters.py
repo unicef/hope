@@ -124,7 +124,6 @@ class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter payment plans by individual UNICEF ID, phone number or name."""
-
         q_filters = (
             Q(payment_items__head_of_household__unicef_id=value)
             | Q(payment_items__head_of_household__phone_no__icontains=value)
@@ -153,7 +152,6 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter payments by individual UNICEF ID, phone number or name."""
-
         q_filters = (
             Q(head_of_household__unicef_id=value)
             | Q(head_of_household__phone_no__icontains=value)

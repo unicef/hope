@@ -566,7 +566,6 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter households by individual UNICEF ID, phone number or name."""
-
         q_filters = (
             Q(individuals__unicef_id=value)
             | Q(individuals__phone_no__icontains=value)
@@ -627,7 +626,6 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter individuals by UNICEF ID, phone number or name."""
-
         q_filters = (
             Q(unicef_id=value)
             | Q(phone_no__icontains=value)

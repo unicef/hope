@@ -298,7 +298,6 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
         """Filter grievance tickets by individual UNICEF ID, phone number or name."""
-
         q_filters = Q()
 
         searchable_fields = [
