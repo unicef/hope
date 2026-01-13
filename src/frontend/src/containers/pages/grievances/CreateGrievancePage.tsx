@@ -49,7 +49,7 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -118,7 +118,13 @@ const CreateGrievancePage = (): ReactElement => {
     },
   };
 
-  const linkedTicketId = location.state?.linkedTicketId;
+  // Support linked ticket from both location.state and query param
+  const [searchParams] = useSearchParams();
+  const linkedTicketIdFromQuery = searchParams.get('linked');
+  const linkedTicketIdFromState = location.state?.linkedTicketId;
+  const linkedTicketId = linkedTicketIdFromQuery || linkedTicketIdFromState;
+  const isLinkedFromUrl = Boolean(linkedTicketIdFromQuery);
+
   const selectedHousehold = location.state?.selectedHousehold;
   const feedbackProgramId = location.state?.feedbackProgramId;
 
@@ -135,6 +141,17 @@ const CreateGrievancePage = (): ReactElement => {
           ),
         ),
     });
+
+  // Fetch linked ticket details when linked query param is provided
+  const { data: linkedTicketData, isLoading: linkedTicketLoading } = useQuery({
+    queryKey: ['linkedTicket', businessArea, linkedTicketIdFromQuery],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug: businessArea,
+        id: linkedTicketIdFromQuery,
+      }),
+    enabled: Boolean(linkedTicketIdFromQuery),
+  });
 
   const feedbackProgram = feedbackProgramId
     ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
@@ -198,8 +215,12 @@ const CreateGrievancePage = (): ReactElement => {
   const isFeedbackWithHouseholdOnly =
     location.state?.isFeedbackWithHouseholdOnly;
 
+  // Prefill description from linked ticket if available
+  const linkedTicketDescription =
+    isLinkedFromUrl && linkedTicketData ? linkedTicketData.description : '';
+
   const initialValues = {
-    description: '',
+    description: linkedTicketDescription || '',
     category:
       typeof category === 'number' ? category : Number(category) || null,
     language: '',
@@ -319,7 +340,8 @@ const CreateGrievancePage = (): ReactElement => {
     programsDataLoading ||
     allEditPeopleFieldsLoading ||
     (fetchedIndividualLoading && shouldFetchIndividual) ||
-    fetchedHouseholdLoading
+    fetchedHouseholdLoading ||
+    (linkedTicketLoading && isLinkedFromUrl)
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -564,6 +586,7 @@ const CreateGrievancePage = (): ReactElement => {
                             setFieldValue={setFieldValue}
                             errors={errors}
                             permissions={permissions}
+                            isLinkedFromUrl={isLinkedFromUrl}
                           />
                           <DataChangeComponent
                             values={values}
