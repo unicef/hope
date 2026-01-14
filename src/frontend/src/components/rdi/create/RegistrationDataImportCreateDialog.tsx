@@ -72,7 +72,7 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
       title={t(
         'Program has to be active to create a new RegistrationDataImport',
       )}
-      disabled={!isActiveProgram}
+      disabled={!isActiveProgram || !selectedProgram.canImportRdi}
     >
       {t('IMPORT')}
     </ButtonTooltip>
