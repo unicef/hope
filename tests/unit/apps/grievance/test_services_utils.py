@@ -1,9 +1,11 @@
+from io import BytesIO
 import re
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -34,6 +36,7 @@ from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
+    handle_photo,
     handle_role,
     to_phone_number_str,
     verify_flex_fields,
@@ -650,3 +653,23 @@ class TestGrievanceUtils(TestCase):
         )
         assert ticket is None
         assert ticket_details is None
+
+    def test_handle_photo_string_returns_photoraw(self):
+        result = handle_photo(
+            photo="already-exists",
+            photoraw="https://cdn.example.com/photo.jpg",
+        )
+        assert result == "https://cdn.example.com/photo.jpg"
+
+    def test_handle_photo_saves_and_return(self):
+        file = InMemoryUploadedFile(
+            file=BytesIO(b"123"),
+            field_name="photo",
+            name="test123.jpg",
+            content_type="image/jpeg",
+            size=3,
+            charset=None,
+        )
+        result = handle_photo(file, photoraw=None)
+        assert result is not None
+        assert result.endswith(".jpg")
