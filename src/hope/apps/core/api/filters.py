@@ -1,5 +1,5 @@
 from django.db.models import QuerySet
-from django_filters import CharFilter, DateFromToRangeFilter, FilterSet
+from django_filters import BooleanFilter, CharFilter, DateFromToRangeFilter, FilterSet
 
 from hope.models import BusinessArea
 
@@ -23,9 +23,12 @@ class OfficeSearchFilterMixin(FilterSet):
     - PP-XXX: Payment Plan
     - RCPT-XXX: Payment (Receipt)
     - GRV-XXX: Grievance Ticket
+
+    Also supports filtering by active programs only.
     """
 
     office_search = CharFilter(method="filter_office_search")
+    active_programs_only = BooleanFilter(method="filter_active_programs_only")
 
     def filter_office_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
         if not value:

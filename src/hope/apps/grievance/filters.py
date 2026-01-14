@@ -324,6 +324,11 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
         return queryset.filter(q_filters).distinct()
 
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(programs__status=Program.ACTIVE).distinct()
+        return queryset
+
 
 class TicketNoteFilter(FilterSet):
     ticket = UUIDFilter(field_name="ticket", required=True)
