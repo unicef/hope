@@ -418,3 +418,52 @@ class TestPaymentOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.payment2.id)
+
+    def test_search_with_active_programs_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
+        finished_cycle = finished_program.cycles.first()
+        finished_payment_plan = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=finished_cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        finished_household, finished_individuals = create_household_and_individuals(
+            household_data={
+                "program": finished_program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        PaymentFactory(
+            parent=finished_payment_plan,
+            household=finished_household,
+            head_of_household=finished_individuals[0],
+            program=finished_program,
+            status=Payment.STATUS_SUCCESS,
+        )
+
+        # Set same phone number for both active and finished program individuals
+        self.individuals1[0].phone_no = "+5555556666"
+        self.individuals1[0].save()
+
+        finished_individuals[0].phone_no = "+5555556666"
+        finished_individuals[0].save()
+
+        # Search with active_programs=true filter - should only return active program payment
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5555556666", "active_programs": "true"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment1.id)
