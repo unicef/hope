@@ -2,7 +2,7 @@ import datetime
 from decimal import Decimal
 import io
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from dateutil.parser import parse
 from django.utils import timezone
