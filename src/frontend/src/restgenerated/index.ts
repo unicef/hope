@@ -104,6 +104,8 @@ export type { FspChoice as FspChoiceCamelCase } from './models/FspChoice';
 export type { FspChoices as FspChoicesCamelCase } from './models/FspChoices';
 export type { FSPXlsxTemplate as FSPXlsxTemplateCamelCase } from './models/FSPXlsxTemplate';
 export type { FullList as FullListCamelCase } from './models/FullList';
+export type { GenericImportResponse as GenericImportResponseCamelCase } from './models/GenericImportResponse';
+export type { GenericImportUpload as GenericImportUploadCamelCase } from './models/GenericImportUpload';
 export type { GetKoboAssetList as GetKoboAssetListCamelCase } from './models/GetKoboAssetList';
 export type { GrievanceChoices as GrievanceChoicesCamelCase } from './models/GrievanceChoices';
 export type { GrievanceComplaintTicketExtras as GrievanceComplaintTicketExtrasCamelCase } from './models/GrievanceComplaintTicketExtras';
@@ -120,6 +122,8 @@ export type { GrievanceTicketDetail as GrievanceTicketDetailCamelCase } from './
 export type { GrievanceTicketList as GrievanceTicketListCamelCase } from './models/GrievanceTicketList';
 export { GrievanceTicketStatusEnum as GrievanceTicketStatusEnumCamelCase } from './models/GrievanceTicketStatusEnum';
 export type { GrievanceUpdateApproveStatus as GrievanceUpdateApproveStatusCamelCase } from './models/GrievanceUpdateApproveStatus';
+export type { GroupDetail as GroupDetailCamelCase } from './models/GroupDetail';
+export type { GroupList as GroupListCamelCase } from './models/GroupList';
 export type { HeadOfHousehold as HeadOfHouseholdCamelCase } from './models/HeadOfHousehold';
 export { HearingDisabilityEnum as HearingDisabilityEnumCamelCase } from './models/HearingDisabilityEnum';
 export type { Household as HouseholdCamelCase } from './models/Household';
@@ -181,6 +185,7 @@ export type { PaginatedFinancialInstitutionListList as PaginatedFinancialInstitu
 export type { PaginatedFSPXlsxTemplateList as PaginatedFSPXlsxTemplateListCamelCase } from './models/PaginatedFSPXlsxTemplateList';
 export type { PaginatedGrievanceTicketDetailList as PaginatedGrievanceTicketDetailListCamelCase } from './models/PaginatedGrievanceTicketDetailList';
 export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListListCamelCase } from './models/PaginatedGrievanceTicketListList';
+export type { PaginatedGroupListList as PaginatedGroupListListCamelCase } from './models/PaginatedGroupListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedHouseholdMemberList as PaginatedHouseholdMemberListCamelCase } from './models/PaginatedHouseholdMemberList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
@@ -270,6 +275,7 @@ export type { PDUXlsxUploadList as PDUXlsxUploadListCamelCase } from './models/P
 export type { PendingPayment as PendingPaymentCamelCase } from './models/PendingPayment';
 export type { PeriodicField as PeriodicFieldCamelCase } from './models/PeriodicField';
 export type { PeriodicFieldData as PeriodicFieldDataCamelCase } from './models/PeriodicFieldData';
+export type { Permission as PermissionCamelCase } from './models/Permission';
 export { PhysicalDisabilityEnum as PhysicalDisabilityEnumCamelCase } from './models/PhysicalDisabilityEnum';
 export type { PositiveFeedbackTicketExtras as PositiveFeedbackTicketExtrasCamelCase } from './models/PositiveFeedbackTicketExtras';
 export { PreferredLanguageEnum as PreferredLanguageEnumCamelCase } from './models/PreferredLanguageEnum';
