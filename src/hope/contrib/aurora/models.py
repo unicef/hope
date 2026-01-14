@@ -1,3 +1,4 @@
+import copy
 import json
 
 from django.db import models
@@ -113,7 +114,11 @@ class Record(models.Model):
     def get_data(self) -> dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+
+        fields_copy = copy.deepcopy(self.fields) if self.fields is not None else {}
+
         if not self.files:
-            return self.fields
+            return fields_copy
+
         files = json.loads(self.files.tobytes().decode())
-        return combine_collections(files, self.fields)
+        return combine_collections(files, fields_copy)
