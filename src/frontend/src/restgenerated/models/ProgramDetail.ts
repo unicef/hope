@@ -101,6 +101,7 @@ export type ProgramDetail = {
      */
     partnerAccess?: PartnerAccessEnum;
     readonly registrationImportsTotalCount: number;
+    readonly canImportRdi: boolean;
     readonly targetPopulationsCount: number;
     readonly screenBeneficiary: boolean;
     reconciliationWindowInDays?: number;
