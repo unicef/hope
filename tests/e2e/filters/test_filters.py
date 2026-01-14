@@ -458,6 +458,8 @@ class TestSmokeFilters:
                 ],
                 id="Payment Module",
             ),
+            # TODO: uncomment after fix bug: 206395
+            pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
         ],
     )
     def test_filters_happy_path_search_filter(
