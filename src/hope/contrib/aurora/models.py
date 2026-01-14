@@ -105,11 +105,11 @@ class Record(models.Model):
     def mark_as_invalid(self, msg: str) -> None:
         self.error_message = msg
         self.status = self.STATUS_ERROR
-        self.save()
+        self.save(update_fields=["status", "error_message"])
 
     def mark_as_imported(self) -> None:
         self.status = self.STATUS_IMPORTED
-        self.save()
+        self.save(update_fields=["status"])
 
     def get_data(self) -> dict:
         if self.storage:
