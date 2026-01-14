@@ -212,6 +212,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "123-123-UX-321",
+                                    "new_photo": None,
                                 }
                             ],
                             "identities": [
@@ -265,6 +266,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
                                     "country": "POL",
                                     "number": "321-321-XU-987",
+                                    "new_photo": None,
                                 }
                             ],
                             "documents_to_edit": [
@@ -273,6 +275,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "321-321-XU-123",
+                                    "new_photo": None,
                                 }
                             ],
                             "identities": [

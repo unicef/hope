@@ -7,6 +7,7 @@ import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { AreaList } from '../models/AreaList';
 import type { AreaTree } from '../models/AreaTree';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
+import type { BeneficiaryTicketCreate } from '../models/BeneficiaryTicketCreate';
 import type { Bulk } from '../models/Bulk';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
 import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
@@ -189,6 +190,27 @@ export class RestService {
                 'format': format,
                 'lang': lang,
             },
+        });
+    }
+    /**
+     * @returns BeneficiaryTicketCreate
+     * @throws ApiError
+     */
+    public static restBeneficiaryTicketsCreate({
+        businessArea,
+        requestBody,
+    }: {
+        businessArea: string,
+        requestBody: BeneficiaryTicketCreate,
+    }): CancelablePromise<BeneficiaryTicketCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/{business_area}/beneficiary-tickets/',
+            path: {
+                'business_area': businessArea,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -1292,8 +1314,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -1528,8 +1551,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2068,8 +2092,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2292,8 +2317,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2526,8 +2552,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2762,8 +2789,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3000,8 +3028,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3238,8 +3267,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3476,8 +3506,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3728,8 +3759,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -6192,8 +6224,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -6424,8 +6457,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
