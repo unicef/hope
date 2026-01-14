@@ -2,7 +2,6 @@ from datetime import datetime
 import json
 from typing import Any, Dict, Optional, Tuple
 
-from constance.test import override_config
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -1951,7 +1950,6 @@ class TestHouseholdFilter:
             household2_data={"residence_status": HOST},
         )
 
-    @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
         ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
         [
