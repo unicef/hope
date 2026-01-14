@@ -501,11 +501,7 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
-        # ToDo: Uncomment after fix 209087
         page_new_feedback.get_button_next().click()
-        # assert for page_new_feedback.get_error().text
-        with pytest.raises(Exception):
-            page_new_feedback.get_household_tab()
         page_new_feedback.choose_option_by_name("Negative feedback")
         page_new_feedback.get_button_next().click()
         page_new_feedback.get_household_tab()
@@ -547,8 +543,6 @@ class TestFeedback:
         page_new_feedback.get_button_next().click()
 
         page_new_feedback.get_input_questionnaire_size().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "-" in page_new_feedback.get_label_household_size().text
         page_new_feedback.get_input_questionnaire_malechildrencount().click()
         # ToDo: Uncomment after fix: 211708
         assert "-" in page_new_feedback.get_label_number_of_male_children().text

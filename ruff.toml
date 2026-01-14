@@ -73,8 +73,8 @@ ignore = [
 ]
 
 [lint.pylint]
-max-args = 8
-max-branches = 21
+max-args = 5
+max-branches = 12
 
 [format]
 quote-style = "double"
