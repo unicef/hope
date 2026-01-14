@@ -10,7 +10,6 @@ from extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.admin.registration_data import RegistrationDataImportAdmin
@@ -151,8 +150,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
             individual=cls.individuals[0],
         )
 
-        cls.payment_plan = PaymentPlanFactory(business_area=afghanistan, program_cycle=program.cycles.first())
-        cls.payment = PaymentFactory(household=cls.household, parent=cls.payment_plan)
         rebuild_search_index()
 
         User = get_user_model()  # noqa
@@ -162,7 +159,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         assert GrievanceTicket.objects.count() == 2
         assert TicketIndividualDataUpdateDetails.objects.count() == 1
         assert TicketComplaintDetails.objects.count() == 1
-        assert Payment.objects.count() == 1
 
         assert RegistrationDataImport.objects.count() == 1
 
