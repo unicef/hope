@@ -444,14 +444,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-            choice_type = self.all_fields[header]["type"]
-
             handlers: dict[str, Callable[[Any, set], bool]] = {
                 TYPE_SELECT_ONE: self._validate_select_one_choice,
                 TYPE_SELECT_MANY: self._validate_select_many_choice,
             }
-            handler = handlers.get(choice_type)
-            if handler:
+            if handler := handlers.get(self.all_fields[header]["type"]):
                 return handler(value, choices)
 
             return False
@@ -460,33 +457,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
-        if isinstance(value, str):
-            return value.strip() in choices
-        if value not in choices:
-            return str(value) in choices
-        return False
+        return str(value).strip() in choices
 
     def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
-        if isinstance(value, str):
-            if "," in value:
-                selected_choices = value.split(",")
-            elif ";" in value:
-                selected_choices = value.split(";")
-            else:
-                selected_choices = value.split(" ")
-        else:
-            selected_choices = [value]
-
-        for unstrip_choice in selected_choices:
-            if isinstance(unstrip_choice, str):
-                choice = unstrip_choice.strip()
-                if choice in choices or choice.upper() in choices:
-                    return True
-            else:
-                choice = unstrip_choice
-            if choice in choices:
-                return True
-        return False
+        selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
+        return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
@@ -1457,19 +1432,12 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             return None if custom_validate(str_value) else message
 
         choices = found_field["choices"]
-        for unstrip_choice in self._split_selected_choices(str_value):
+        for unstrip_choice in re.split(r"[,\s;]+", value.strip()):
             choice = unstrip_choice.strip()
             if choice in choices or choice.upper() in choices:
                 continue
             return message
         return None
-
-    def _split_selected_choices(self, raw_value: str) -> list[str]:
-        if "," in raw_value:
-            return raw_value.split(",")
-        if ";" in raw_value:
-            return raw_value.split(";")
-        return raw_value.split(" ")
 
     def _get_field_type_error(
         self,

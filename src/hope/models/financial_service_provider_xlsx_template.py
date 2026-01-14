@@ -169,10 +169,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 documents_dict = {doc.get("type"): doc for doc in documents_list}
                 result = documents_dict.get(doc_type, {}).get(doc_lookup)
 
-        if result is not None:
-            return result
-
-        if core_field["associated_with"] == _INDIVIDUAL:
+        elif core_field["associated_with"] == _INDIVIDUAL:
             result = collector_data.get(lookup, None) or collector_data.get(main_key, None)
         elif core_field["associated_with"] == _HOUSEHOLD:
             result = household_data.get(lookup)

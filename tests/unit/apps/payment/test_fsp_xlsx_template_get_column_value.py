@@ -24,6 +24,7 @@ from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     IndividualRoleInHousehold,
+    Payment,
     PaymentPlan,
 )
 
@@ -73,16 +74,18 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
 
     @parameterized.expand(
         [
-            ("field_payment_id", "payment_id"),
-            ("field_household_id", "household_id"),
-            ("field_household_size", "household_size"),
-            ("field_collector_name", "collector_name"),
-            ("field_currency", "currency"),
-            ("field_registration_token", "registration_token"),
-            ("test_wrong_column_name", "invalid_column_name"),
+            ("field_payment_id", "payment_id", Payment.STATUS_PENDING),
+            ("field_household_id", "household_id", Payment.STATUS_PENDING),
+            ("field_household_size", "household_size", Payment.STATUS_PENDING),
+            ("field_collector_name", "collector_name", Payment.STATUS_PENDING),
+            ("field_currency", "currency", Payment.STATUS_PENDING),
+            ("field_registration_token", "registration_token", Payment.STATUS_PENDING),
+            ("test_wrong_column_name", "invalid_column_name", Payment.STATUS_PENDING),
+            ("field_delivered_quantity", "delivered_quantity", Payment.STATUS_PENDING),
+            ("field_delivered_quantity_error", "delivered_quantity", Payment.STATUS_ERROR),
         ]
     )
-    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
+    def test_get_column_value_from_payment(self, helper: str, field_name: str, payment_status: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
             individual_args={
@@ -106,6 +109,7 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
             currency="PLN",
             financial_service_provider=self.fsp,
             delivery_type=self.dm_cash,
+            status=payment_status,
         )
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
         document_type = DocumentTypeFactory(key="registration_token")
@@ -119,12 +123,14 @@ class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
         )
 
         accepted_results = {
-            "payment_id": payment.unicef_id,
-            "household_id": household.unicef_id,
-            "household_size": 1,
-            "collector_name": primary.full_name,
-            "currency": "PLN",
-            "registration_token": document.document_number,
-            "invalid_column_name": "wrong_column_name",
+            "field_payment_id": payment.unicef_id,
+            "field_household_id": household.unicef_id,
+            "field_household_size": 1,
+            "field_collector_name": primary.full_name,
+            "field_currency": "PLN",
+            "field_registration_token": document.document_number,
+            "test_wrong_column_name": "wrong_column_name",
+            "field_delivered_quantity": payment.delivered_quantity,
+            "field_delivered_quantity_error": float(-1),
         }
-        assert accepted_results.get(field_name) == result
+        assert accepted_results.get(helper) == result
