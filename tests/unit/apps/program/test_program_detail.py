@@ -18,7 +18,7 @@ from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import Partner, PaymentPlan, Program
+from hope.models import Partner, PaymentPlan, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 
@@ -218,9 +218,71 @@ class TestProgramDetail:
             },
         ]
         assert response_data["partner_access"] == self.program.partner_access
+        assert response_data["can_import_rdi"] is True
         assert response_data["registration_imports_total_count"] == self.program.registration_imports.count()
         assert (
             response_data["target_populations_count"]
             == PaymentPlan.objects.filter(program_cycle__program=self.program).count()
         )
         assert response_data["population_goal"] == self.program.population_goal
+
+    def test_program_detail_can_import_rdi(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            self.program,
+        )
+        self.program.biometric_deduplication_enabled = True
+        self.program.save()
+
+        # No registration data imports
+        response = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()
+        assert response_data["can_import_rdi"] is True
+
+        # Deduplicated RDI in review
+        rdi = RegistrationDataImportFactory(
+            program=self.program,
+            business_area=self.afghanistan,
+            status=RegistrationDataImport.IN_REVIEW,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+        )
+
+        response = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()
+        assert response_data["can_import_rdi"] is False
+
+        # Deduplicated RDI merged
+        rdi.status = RegistrationDataImport.MERGED
+        rdi.save()
+        response = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "slug": self.program.slug,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()
+        assert response_data["can_import_rdi"] is True

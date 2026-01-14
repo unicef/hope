@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
 from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -188,3 +189,26 @@ class TestDataChangeValidator:
         }
         with pytest.raises(DRFValidationError, match="Values must be booleans"):
             DataChangeValidator.verify_approve_data(data)
+
+
+@pytest.mark.django_db
+def test_can_change_status_beneficiary_ticket() -> None:
+    """Test that Beneficiary tickets follow BENEFICIARY_STATUS_FLOW."""
+    create_afghanistan()
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_BENEFICIARY,
+        status=GrievanceTicket.STATUS_NEW,
+    )
+
+    # NEW -> ASSIGNED allowed
+    assert ticket.can_change_status(GrievanceTicket.STATUS_ASSIGNED) is True
+    # NEW -> IN_PROGRESS not allowed
+    assert ticket.can_change_status(GrievanceTicket.STATUS_IN_PROGRESS) is False
+
+    ticket.status = GrievanceTicket.STATUS_ASSIGNED
+    # ASSIGNED -> IN_PROGRESS allowed
+    assert ticket.can_change_status(GrievanceTicket.STATUS_IN_PROGRESS) is True
+
+    ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    # IN_PROGRESS -> CLOSED allowed (feedback flow)
+    assert ticket.can_change_status(GrievanceTicket.STATUS_CLOSED) is True

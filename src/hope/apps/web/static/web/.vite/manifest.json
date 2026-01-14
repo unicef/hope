@@ -1,6 +1,6 @@
 {
-  "_vendor-Ndp-tk4r.js": {
-    "file": "assets/vendor-Ndp-tk4r.js",
+  "_vendor-CpzGV7fY.js": {
+    "file": "assets/vendor-CpzGV7fY.js",
     "name": "vendor"
   },
   "src/assets/TargetingDiagramImage.png": {
@@ -56,19 +56,15 @@
     "src": "src/images/logo.jpg"
   },
   "src/main.tsx": {
-<<<<<<< Updated upstream
-    "file": "assets/main-Ch93gWRE.js",
-=======
-    "file": "assets/main-DEeQcHOE.js",
->>>>>>> Stashed changes
+    "file": "assets/main-DJSFKQlA.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "imports": [
-      "_vendor-Ndp-tk4r.js"
+      "_vendor-CpzGV7fY.js"
     ],
     "css": [
-      "assets/main-F-PFOQeq.css"
+      "assets/main-DQ3nh3aq.css"
     ],
     "assets": [
       "assets/404_graphic-D8eUPzUS.png",

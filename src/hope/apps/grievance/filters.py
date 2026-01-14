@@ -296,21 +296,38 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
         return queryset.filter(q_filters).distinct()
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter grievance tickets by individual UNICEF ID, phone number or name."""
         q_filters = Q()
 
+        searchable_fields = [
+            "phone_no",
+            "phone_no_alternative",
+            "full_name",
+            "given_name",
+            "middle_name",
+            "family_name",
+        ]
+
+        # Search in ticket type lookups
         for ticket_type, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
-            if "individual" in lookups:
-                individual_path = lookups["individual"]
-                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+            for lookup_key in ["individual", "golden_records_individual"]:
+                if lookup_key in lookups:
+                    individual_path = lookups[lookup_key]
+                    q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": value})
+                    for field_name in searchable_fields:
+                        q_filters |= Q(**{f"{ticket_type}__{individual_path}__{field_name}__icontains": value})
 
-            if "golden_records_individual" in lookups:
-                individual_path = lookups["golden_records_individual"]
-                q_filters |= Q(**{f"{ticket_type}__{individual_path}__unicef_id": unicef_id})
+        related_paths = [
+            "needs_adjudication_ticket_details__possible_duplicates",
+            "needs_adjudication_ticket_details__selected_individuals",
+            "needs_adjudication_ticket_details__selected_distinct",
+        ]
 
-        q_filters |= Q(needs_adjudication_ticket_details__possible_duplicates__unicef_id=unicef_id)
-        q_filters |= Q(needs_adjudication_ticket_details__selected_individuals__unicef_id=unicef_id)
-        q_filters |= Q(needs_adjudication_ticket_details__selected_distinct__unicef_id=unicef_id)
+        for path in related_paths:
+            q_filters |= Q(**{f"{path}__unicef_id": value})
+            for field_name in searchable_fields:
+                q_filters |= Q(**{f"{path}__{field_name}__icontains": value})
 
         return queryset.filter(q_filters).distinct()
 
