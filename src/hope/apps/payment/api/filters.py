@@ -128,6 +128,11 @@ class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
     def filter_by_payment_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(payment_items__unicef_id=unicef_id).distinct()
 
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program_cycle__program__status="ACTIVE")
+        return queryset
+
 
 class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
     class Meta:
@@ -173,6 +178,11 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
             return queryset.filter(id__in=payment_ids)
 
         return queryset.none()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status="ACTIVE")
+        return queryset
 
 
 class PaymentVerificationRecordFilter(FilterSet):
