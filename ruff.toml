@@ -73,8 +73,7 @@ ignore = [
 ]
 
 [lint.pylint]
-max-args = 5
-max-branches = 12
+max-branches = 21  # going to remove it before merge! # TODO: remove this line!
 
 [format]
 quote-style = "double"

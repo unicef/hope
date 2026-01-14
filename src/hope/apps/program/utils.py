@@ -68,7 +68,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
 
 
 class CopyProgramPopulation:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         copy_from_individuals: QuerySet[Individual],
         copy_from_households: QuerySet[Household],

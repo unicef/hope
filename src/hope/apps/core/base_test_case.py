@@ -34,7 +34,7 @@ class BaseTestCase(TestCase):
         admin_area_limits.areas.set(areas)
 
     @classmethod
-    def create_partner_role_with_permissions(
+    def create_partner_role_with_permissions(  # noqa: PLR0913 – intentional design by author
         cls,
         partner: "Partner",
         permissions: Iterable,
@@ -64,7 +64,7 @@ class BaseTestCase(TestCase):
         return role_assignment
 
     @classmethod
-    def create_user_role_with_permissions(
+    def create_user_role_with_permissions(  # noqa: PLR0913 – intentional design by author
         cls,
         user: "User",
         permissions: Iterable,

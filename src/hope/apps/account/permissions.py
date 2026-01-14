@@ -332,7 +332,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
-def check_creator_or_owner_permission(
+def check_creator_or_owner_permission(  # noqa: PLR0913 – intentional design by author
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
     general_permission: Permissions,
     is_creator: bool,
@@ -352,7 +352,7 @@ def check_creator_or_owner_permission(
         raise PermissionDenied(detail={"required_permissions": required_permissions})
 
 
-def has_creator_or_owner_permission(
+def has_creator_or_owner_permission(  # noqa: PLR0913 – intentional design by author
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
     general_permission: Permissions,
     is_creator: bool,

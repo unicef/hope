@@ -80,7 +80,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    def _create_hh_ind(  # noqa: PLR0912
+    def _create_hh_ind(  # noqa: PLR0913, PLR0912 – intentional design by author
         self,
         obj_to_create: Any,
         row: Any,

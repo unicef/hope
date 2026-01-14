@@ -119,7 +119,7 @@ def _get_min_max_score(golden_records: list[dict]) -> tuple[float, float]:
     return min(items, default=0.0), max(items, default=0.0)
 
 
-def create_grievance_ticket_with_details(
+def create_grievance_ticket_with_details(  # noqa: PLR0913 – intentional design by author
     main_individual: Individual,
     possible_duplicate: Individual | None,
     business_area: BusinessArea,

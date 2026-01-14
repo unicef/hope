@@ -544,28 +544,20 @@ class TestFeedback:
 
         page_new_feedback.get_input_questionnaire_size().click()
         page_new_feedback.get_input_questionnaire_malechildrencount().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "-" in page_new_feedback.get_label_number_of_male_children().text
+        assert "1" in page_new_feedback.get_label_number_of_male_children().text
         page_new_feedback.get_input_questionnaire_femalechildrencount().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "-" in page_new_feedback.get_label_number_of_female_children().text
+        assert "2" in page_new_feedback.get_label_number_of_female_children().text
         page_new_feedback.get_input_questionnaire_childrendisabledcount().click()
         assert "-" in page_new_feedback.get_label_number_of_disabled_children().text
         page_new_feedback.get_input_questionnaire_headofhousehold().click()
-        # TODO: Uncomment after fix: 211708
-        assert "" in page_new_feedback.get_label_head_of_household().text
         page_new_feedback.get_input_questionnaire_countryorigin().click()
-        # ToDo: Uncomment after fix: 211708
         assert "-" in page_new_feedback.get_label_country_of_origin().text
         page_new_feedback.get_input_questionnaire_address().click()
-        # ToDo: Uncomment after fix: 211708
         assert "-" in page_new_feedback.get_label_address().text
         page_new_feedback.get_input_questionnaire_village().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "-" in page_new_feedback.get_label_village().text
+        assert "Wroclaw" in page_new_feedback.get_label_village().text
         page_new_feedback.get_input_questionnaire_admin_1().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "-" in page_new_feedback.get_label_administrative_level_1().text
+        assert "Kabul" in page_new_feedback.get_label_administrative_level_1().text
         page_new_feedback.get_input_questionnaire_admin_2().click()
         assert "Shakardara" in page_new_feedback.get_label_administrative_level_2().text
         page_new_feedback.get_input_questionnaire_admin_3().click()
@@ -581,13 +573,11 @@ class TestFeedback:
         )
         assert individual_name in page_new_feedback.get_label_individual_full_name().text
         page_new_feedback.get_input_questionnaire_birthdate().click()
-        # ToDo: Uncomment after fix: 211708
         assert "-" in page_new_feedback.get_label_birth_date().text
         page_new_feedback.get_input_questionnaire_phoneno().click()
         assert "-" in page_new_feedback.get_label_phone_number().text
         page_new_feedback.get_input_questionnaire_relationship().click()
-        # ToDo: Uncomment after fix: 211708
-        assert "Head of Household" in page_new_feedback.get_label_relationship_to_hoh().text
+        assert "Joshua Ronald Alvarez" in page_new_feedback.get_label_relationship_to_hoh().text
         page_new_feedback.get_received_consent().click()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text

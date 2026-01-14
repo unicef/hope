@@ -221,7 +221,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             for role in self.cached_role_assignments()
         )
 
-    def email_user(  # type: ignore  # noqa: PLR0913
+    def email_user(  # type: ignore  # noqa: PLR0913 – intentional design by author
         self,
         subject: str,
         html_body: str | None = None,

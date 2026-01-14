@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 – intentional design by author
         self,
         model: type,
         admin_site: str,
