@@ -22,8 +22,10 @@ from hope.models import Program, country as geo_models
 if TYPE_CHECKING:
     from hope.models import Individual
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.django_db(),
+]
 
 
 @pytest.mark.elasticsearch

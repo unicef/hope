@@ -37,6 +37,7 @@ from hope.models import (
 )
 
 
+@pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestEnrolHouseholdToProgram(TestCase):
     """Test enroll household to program."""
 
