@@ -1759,7 +1759,7 @@ class TestHouseholdOfficeSearch:
                 self.global_url_name,
                 kwargs={"business_area_slug": self.afghanistan.slug},
             ),
-            {"office_search": "+5551234567"},
+            {"office_search": "+5551234567", "active_programs_only": "false"},
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 2
