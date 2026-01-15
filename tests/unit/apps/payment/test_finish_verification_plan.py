@@ -103,7 +103,7 @@ def finish_verification_setup():
     }
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 class TestFinishVerificationPlan:
     @mock.patch("hope.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")

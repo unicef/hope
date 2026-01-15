@@ -13,7 +13,7 @@ from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
 )
 from hope.models import KoboImportData
 
-pytestmark = pytest.mark.django_db(databases=(("default",)), transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPullKoboSubmissions:

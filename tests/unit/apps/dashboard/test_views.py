@@ -19,7 +19,18 @@ from hope.apps.dashboard.services import DashboardGlobalDataCache
 from hope.apps.dashboard.views import DashboardReportView
 from hope.models import BusinessArea, RoleAssignment
 
-pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
+
+@pytest.fixture
+def use_default_db_for_dashboard():
+    with patch("hope.apps.dashboard.services.settings.DASHBOARD_DB", "default"), \
+         patch("hope.apps.dashboard.celery_tasks.settings.DASHBOARD_DB", "default"):
+        yield
+
+
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.usefixtures("use_default_db_for_dashboard"),
+]
 
 
 @pytest.fixture
@@ -261,7 +272,6 @@ def test_dashboard_data_view_permissions(
         assert response["Content-Type"] == "application/json"
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
 def test_dashboard_data_view_global_slug_cache_miss(
     setup_client: Dict[str, Optional[object]],
     populate_dashboard_cache: Callable,

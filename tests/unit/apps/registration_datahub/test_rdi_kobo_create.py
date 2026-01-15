@@ -23,7 +23,6 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Area,
     AreaType,
@@ -39,10 +38,9 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
@@ -106,7 +104,6 @@ class TestRdiKoboCreateTask(TestCase):
             number_of_individuals=99,
             number_of_households=33,
         )
-        rebuild_search_index()
         generate_delivery_mechanisms()
 
     @mock.patch(

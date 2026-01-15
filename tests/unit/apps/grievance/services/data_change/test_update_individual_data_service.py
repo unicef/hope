@@ -28,13 +28,11 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import AccountType, Country, Document
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestUpdateIndividualDataService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -69,7 +67,6 @@ class TestUpdateIndividualDataService(TestCase):
         )
 
         cls.ticket = ticket_details.ticket
-        rebuild_search_index()
 
     def test_add_document_of_same_type_not_unique_per_individual_valid(self) -> None:
         DocumentFactory(

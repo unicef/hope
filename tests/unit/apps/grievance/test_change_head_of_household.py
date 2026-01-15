@@ -16,19 +16,17 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import AUNT_UNCLE, BROTHER_SISTER, HEAD
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Program, country as geo_models
 
 if TYPE_CHECKING:
     from hope.models import Individual
 
 pytestmark = [
-    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.usefixtures("mock_elasticsearch"),
     pytest.mark.django_db(),
 ]
 
 
-@pytest.mark.elasticsearch
 class TestChangeHeadOfHousehold:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
@@ -90,7 +88,6 @@ class TestChangeHeadOfHousehold:
                 }
             },
         )
-        rebuild_search_index()
 
     def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
         self, create_user_role_with_permissions: Any

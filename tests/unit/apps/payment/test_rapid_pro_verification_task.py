@@ -152,7 +152,7 @@ def rapidpro_task_setup():
     }
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 class TestRapidProVerificationTask:
     @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
