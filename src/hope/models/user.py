@@ -215,12 +215,6 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             for role in self.cached_role_assignments()
         )
 
-    def can_add_business_area_to_partner(self) -> bool:
-        return any(
-            self.has_perm(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
-            for role in self.cached_role_assignments()
-        )
-
     def email_user(  # type: ignore  # noqa: PLR0913 – intentional design by author
         self,
         subject: str,
@@ -263,7 +257,6 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             ("can_change_allowed_partners", "Can change allowed partners"),
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
-            ("can_edit_user_roles", "Can edit user role assignments"),
         )
         indexes = [
             # Optimize JOIN queries between User and Partner in permissions methods

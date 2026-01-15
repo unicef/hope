@@ -247,9 +247,6 @@ class Permissions(Enum):
     # Geo
     GEO_VIEW_LIST = auto()
 
-    # Django Admin
-    CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
-
     # Country Search
     SEARCH_BUSINESS_AREAS = auto()
 
