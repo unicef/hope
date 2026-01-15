@@ -154,7 +154,7 @@ def rapidpro_verification_setup(afghanistan, user, program):
     }
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 class TestPhoneNumberVerification:
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self, rapidpro_verification_setup) -> None:
         setup = rapidpro_verification_setup

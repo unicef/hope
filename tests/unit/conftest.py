@@ -114,6 +114,7 @@ def pytest_configure(config: Config) -> None:
             "TIMEOUT": 1800,
         }
     }
+    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
 
 
@@ -126,6 +127,30 @@ def pytest_unconfigure(config: Config) -> None:
 disabled_locally_test = pytest.mark.skip(
     reason="Elasticsearch error - to investigate",
 )
+
+
+@pytest.fixture
+def mock_elasticsearch(mocker: Any) -> None:
+    """Mock ES functions for tests that don't need actual ES.
+
+    Use this fixture instead of django_elasticsearch_setup for tests that
+    call ES functions but don't verify search/deduplication results.
+    """
+    # Mock ES utility functions
+    mocker.patch("hope.apps.utils.elasticsearch_utils.rebuild_search_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Mock deduplication that uses ES
+    mocker.patch(
+        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals"
+    )
+    mocker.patch(
+        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+    )
+    mocker.patch(
+        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+    )
 
 
 @pytest.fixture(scope="session")

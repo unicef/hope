@@ -12,7 +12,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import PDUOnlineEdit, PeriodicFieldData, Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPDUOnlineEditSaveData:

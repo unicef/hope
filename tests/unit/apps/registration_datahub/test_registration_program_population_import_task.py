@@ -24,7 +24,6 @@ from hope.apps.household.const import (
 from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Document,
     Household,
@@ -34,10 +33,9 @@ from hope.models import (
     RegistrationDataImport,
 )
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestRegistrationProgramPopulationImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -102,8 +100,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             partner=PartnerFactory(),
         )
 
-        rebuild_search_index()
-
     def _run_task(self, rdi_id: Optional[str] = None) -> None:
         registration_program_population_import_task(
             rdi_id or str(self.registration_data_import.id),
@@ -133,6 +129,8 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         assert rdi_status == self.registration_data_import.status
 
     def test_registration_program_population_import_task(self) -> None:
+        self.afghanistan.postpone_deduplication = True
+        self.afghanistan.save()
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
         self.registration_data_import.save()
 

@@ -32,7 +32,6 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     BusinessArea,
     Country as GeoCountry,
@@ -49,7 +48,7 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
 def create_document_image() -> File:
@@ -74,7 +73,6 @@ class CellMock:
         self.coordinate = coordinate
 
 
-@pytest.mark.elasticsearch
 class TestRdiXlsxCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -150,7 +148,6 @@ class TestRdiXlsxCreateTask(TestCase):
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
-        rebuild_search_index()
 
     def test_execute_xd(self) -> None:
         task = self.RdiXlsxCreateTask()

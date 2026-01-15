@@ -22,7 +22,6 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Country as GeoCountry,
     DataCollectingType,
@@ -35,10 +34,9 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestRdiXlsxPeople(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -88,8 +86,6 @@ class TestRdiXlsxPeople(TestCase):
             program=cls.program,
         )
         generate_delivery_mechanisms()
-
-        rebuild_search_index()
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(

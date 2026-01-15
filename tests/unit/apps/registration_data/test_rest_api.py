@@ -303,12 +303,16 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.erased
 
-        mock_remove_es.assert_called_once_with(individual_ids, get_individual_doc(self.business_area.slug))
-        mock_service.report_individuals_status.assert_called_once_with(
-            self.program,
-            [str(_id) for _id in individual_ids],
-            mock_biometric_service.INDIVIDUALS_REFUSED,
-        )
+        mock_remove_es.assert_called_once()
+        es_call_args = mock_remove_es.call_args[0]
+        assert set(es_call_args[0]) == set(individual_ids)  # Order doesn't matter
+        assert es_call_args[1] == get_individual_doc(self.business_area.slug)
+
+        mock_service.report_individuals_status.assert_called_once()
+        report_call_args = mock_service.report_individuals_status.call_args[0]
+        assert report_call_args[0] == self.program
+        assert set(report_call_args[1]) == {str(_id) for _id in individual_ids}  # Order doesn't matter
+        assert report_call_args[2] == mock_biometric_service.INDIVIDUALS_REFUSED
 
     def test_erase_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)

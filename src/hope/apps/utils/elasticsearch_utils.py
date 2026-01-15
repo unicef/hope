@@ -102,3 +102,14 @@ def wait_until_es_healthy() -> None:
             f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
             f"number of pending tasks:{health.get('number_of_pending_tasks')}"
         )
+
+
+def ensure_index_ready(index_name: str) -> None:
+    """Check ES is not RED and refresh index to ensure documents are searchable."""
+    conn = connections.get_connection()
+    health = conn.cluster.health()
+
+    if health.get("status") == HealthStatus.RED.value:
+        raise Exception("ES cluster is RED - cannot proceed")
+
+    conn.indices.refresh(index=index_name)

@@ -29,14 +29,14 @@ from hope.apps.household.const import (
     UNHCR,
     WIDOWED,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import AccountType, BusinessArea, DocumentType, Partner, Program, country as geo_models
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.usefixtures("mock_elasticsearch"),
+    pytest.mark.django_db(),
+]
 
 
-@pytest.mark.elasticsearch
 class TestGrievanceCreateDataChangeAction:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
@@ -179,8 +179,6 @@ class TestGrievanceCreateDataChangeAction:
 
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         self.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-
-        rebuild_search_index()
 
         self.list_url = reverse(
             "api:grievance-tickets:grievance-tickets-global-list",

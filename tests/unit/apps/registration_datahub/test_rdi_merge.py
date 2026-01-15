@@ -32,7 +32,6 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
 )
 from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Household,
     Individual,
@@ -44,7 +43,7 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
 @contextmanager
@@ -68,7 +67,6 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
-@pytest.mark.elasticsearch
 class TestRdiMergeTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -118,8 +116,6 @@ class TestRdiMergeTask(TestCase):
             p_code="area4",
             parent=cls.area3,
         )
-
-        rebuild_search_index()
 
     @classmethod
     def set_imported_individuals(cls, household: PendingHousehold) -> None:

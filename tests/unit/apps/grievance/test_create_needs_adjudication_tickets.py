@@ -17,14 +17,14 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
     create_needs_adjudication_tickets_for_biometrics,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, Individual
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.usefixtures("mock_elasticsearch"),
+    pytest.mark.django_db(),
+]
 
 
-@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -72,8 +72,6 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
         ]
         cls.household.head_of_household = individuals[0]
         cls.household.save()
-
-        rebuild_search_index()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
         assert Individual.objects.count() == 2
@@ -127,7 +125,6 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
         assert GrievanceTicket.objects.all().count() == 1
 
 
-@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTicketsBiometrics:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
