@@ -1734,7 +1734,7 @@ class TestHouseholdOfficeSearch:
             user=self.user,
             permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
             business_area=self.afghanistan,
-            program=self.program,
+            whole_business_area_access=True,
         )
 
         finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
@@ -1753,13 +1753,27 @@ class TestHouseholdOfficeSearch:
         finished_individuals[0].phone_no = "+5551234567"
         finished_individuals[0].save()
 
-        # Search with active_programs=true filter - should only return active program household
+        # First, search WITHOUT active_programs filter - should return both households
         response = self.api_client.get(
             reverse(
                 self.global_url_name,
                 kwargs={"business_area_slug": self.afghanistan.slug},
             ),
-            {"office_search": "+5551234567", "active_programs": "true"},
+            {"office_search": "+5551234567"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.household1.id) in result_ids
+        assert str(finished_household.id) in result_ids
+
+        # Now search WITH active_programs_only filter - should only return active program household
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551234567", "active_programs_only": "true"},
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
