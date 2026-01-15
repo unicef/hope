@@ -12,7 +12,7 @@ from hope.models import (
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
-    PaymentVerificationSummary,
+    PaymentVerificationSummary, Program,
 )
 
 
@@ -140,7 +140,7 @@ class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(program_cycle__program__status="ACTIVE")
+            return queryset.filter(program_cycle__program__status=Program.ACTIVE)
         return queryset
 
 
@@ -201,7 +201,7 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(program__status="ACTIVE")
+            return queryset.filter(program__status=Program.ACTIVE)
         return queryset
 
 
