@@ -3,7 +3,6 @@ from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -13,7 +12,7 @@ from parameterized import parameterized
 import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
     HouseholdCollectionFactory,
     HouseholdFactory,
@@ -74,8 +73,10 @@ class TestRdiMergeTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
-        call_command("init_core_fixtures")
+        # Create minimal geo data - no need for full geo/core fixtures
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)

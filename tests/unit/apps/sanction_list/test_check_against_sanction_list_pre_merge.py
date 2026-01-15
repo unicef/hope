@@ -2,11 +2,11 @@ from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
 from django.conf import settings
-from django.core.management import call_command
 from django.test import TestCase
 import pytest
 from strategy_field.utils import fqn
 
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -63,7 +63,9 @@ class TestSanctionListPreMerge(TestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(

@@ -6,9 +6,9 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
+from django_countries import countries
 import pytest
 import requests
 
@@ -50,12 +50,19 @@ def raise_as_func(exception: BaseException) -> Callable:
     return _raise
 
 
+def get_all_country_choices() -> list[dict]:
+    """Return all country choices from django_countries without requiring DB data."""
+    return [
+        {"label": {"English(EN)": c.name}, "value": countries.alpha3(c.code)}
+        for c in countries
+    ]
+
+
 class TestKoboTemplateUpload(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
-        call_command("init_geo_fixtures")
         cls.maxDiff = None
 
     def upload_file(self, filename: str):
@@ -72,7 +79,9 @@ class TestKoboTemplateUpload(BaseTestCase):
 
         return self.client.post(url, {"xls_file": uploaded_file}, follow=True, format="multipart")
 
-    def test_upload_invalid_template(self) -> None:
+    @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
+    def test_upload_invalid_template(self, mock_country_choices: Any) -> None:
+        mock_country_choices.return_value = get_all_country_choices()
         response = self.upload_file("kobo-template-invalid.xlsx")
         form = response.context["form"]
 
@@ -118,7 +127,9 @@ class TestKoboTemplateUpload(BaseTestCase):
         "hope.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
         new=lambda *args, **kwargs: None,
     )
-    def test_upload_valid_template(self) -> None:
+    @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
+    def test_upload_valid_template(self, mock_country_choices: Any) -> None:
+        mock_country_choices.return_value = get_all_country_choices()
         response = self.upload_file("kobo-template-valid.xlsx")
         # assert not response.context["form"].errors
         messages = [m.message for m in get_messages(response.wsgi_request)]
@@ -129,7 +140,9 @@ class TestKoboTemplateUpload(BaseTestCase):
             "Import status will change after task completion"
         ) in messages
 
-    def test_upload_template_with_validation_error(self) -> None:
+    @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
+    def test_upload_template_with_validation_error(self, mock_country_choices: Any) -> None:
+        mock_country_choices.return_value = get_all_country_choices()
         response = self.upload_file("kobo-template-invalid.xlsx")
         assert "Field: residence_status_h_c" in response.text
         assert "Choice: RETURNEE is not present" in response.text

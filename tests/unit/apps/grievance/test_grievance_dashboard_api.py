@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Any, List
 
-from django.core.management import call_command
 from django.urls import reverse
 import pytest
 import pytz
@@ -9,7 +8,7 @@ from rest_framework import status
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
@@ -21,7 +20,9 @@ pytestmark = pytest.mark.django_db
 class TestGrievanceDashboardAPI:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
@@ -181,7 +182,9 @@ class TestGrievanceDashboardAPI:
 class TestGrievanceProgramDashboardAPI:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")

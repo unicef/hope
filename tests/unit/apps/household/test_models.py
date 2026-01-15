@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 import pytest
@@ -155,9 +154,10 @@ class TestDocument(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
+        afghanistan = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         cls.business_area = create_afghanistan()
-        afghanistan = Country.objects.get(name="Afghanistan")
         _, (individual,) = create_household(household_args={"size": 1, "business_area": cls.business_area})
 
         cls.country = afghanistan

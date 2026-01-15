@@ -1,7 +1,7 @@
 from unittest import mock
 
-from django.core.management import call_command
-
+from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
@@ -12,7 +12,8 @@ class TestRegistrationDataXlsxImportCeleryManager(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadbusinessareas")
+        create_afghanistan()
+        BusinessAreaFactory(slug="sudan", name="Sudan")
 
     @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
     def test_querysets(self, mock_get_all_tasks: mock.MagicMock) -> None:
