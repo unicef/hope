@@ -12,7 +12,8 @@ from hope.models import (
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
-    PaymentVerificationSummary, Program,
+    PaymentVerificationSummary,
+    Program,
 )
 
 
