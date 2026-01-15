@@ -40,9 +40,7 @@ pytestmark = [
 class TestGrievanceCreateDataChangeAction:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         call_command("generatedocumenttypes")
         self.afghanistan = create_afghanistan()
@@ -213,6 +211,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "123-123-UX-321",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
@@ -267,6 +266,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
                                     "country": "POL",
                                     "number": "321-321-XU-987",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
@@ -276,6 +276,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "321-321-XU-123",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
