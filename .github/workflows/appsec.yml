@@ -72,7 +72,7 @@ jobs:
     #      path: output.zip
     - name: Veracode Pipeline
       id: pipeline-scan
-      uses: veracode/Veracode-pipeline-scan-action@v1
+      uses: veracode/Veracode-pipeline-scan-action@v1.0.20
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
