@@ -107,7 +107,8 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const isMerged = RegistrationDataImportStatusEnum.MERGED === data?.status;
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_DETAILS} />;
   if (!data || !choicesData || permissions === null) {
     return null;
   }

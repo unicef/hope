@@ -12,8 +12,9 @@
  * * `7` - Positive Feedback
  * * `6` - Referral
  * * `3` - Sensitive Grievance
+ * * `10` - Beneficiary
  */
-export enum CategoryD86Enum {
+export enum CategoryD54Enum {
     '_8' = 8,
     '_1' = 1,
     '_9' = 9,
@@ -23,4 +24,5 @@ export enum CategoryD86Enum {
     '_7' = 7,
     '_6' = 6,
     '_3' = 3,
+    '_10' = 10,
 }

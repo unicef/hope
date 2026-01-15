@@ -45,7 +45,11 @@ function FeedbackPage(): ReactElement {
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST}
+      />
+    );
   const canViewDetails = hasPermissions(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     permissions,

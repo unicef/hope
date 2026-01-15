@@ -109,7 +109,12 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   )
     return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS}
+      />
+    );
   if (!individual && error?.message === 'Not Found') {
     return (
       <SomethingWentWrong
