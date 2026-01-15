@@ -1,13 +1,13 @@
 from typing import Any
 
 from django.core.files.base import ContentFile
-from django.core.management import call_command
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
@@ -131,7 +131,9 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
 class TestCreateNeedsAdjudicationTicketsBiometrics:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         self.business_area = create_afghanistan()
         self.business_area.biometric_deduplication_threshold = 44.44
         self.business_area.save()

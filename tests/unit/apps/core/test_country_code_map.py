@@ -1,7 +1,7 @@
-from django.core.management import call_command
 from django.test import TestCase
 from parameterized import parameterized
 
+from extras.test_utils.factories.geo import CountryFactory
 from hope.models import CountryCodeMap
 
 
@@ -9,8 +9,14 @@ class TestCountryCodeMap(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
+        afg = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        aus = CountryFactory(
+            name="Australia", short_name="Australia", iso_code2="AU", iso_code3="AUS", iso_num="0036"
+        )
+        CountryCodeMap.objects.create(country=afg, ca_code="AFG")
+        CountryCodeMap.objects.create(country=aus, ca_code="AUL")
 
     @parameterized.expand(
         [

@@ -14,7 +14,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
@@ -79,7 +79,10 @@ pytestmark = pytest.mark.django_db()
 class TestGrievanceTicketUpdate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
@@ -869,7 +872,10 @@ class TestGrievanceTicketUpdate:
 class TestGrievanceTicketApprove:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)

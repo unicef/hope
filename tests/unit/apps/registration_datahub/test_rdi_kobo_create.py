@@ -7,7 +7,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -15,6 +14,7 @@ from django_countries.fields import Country
 import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
@@ -51,7 +51,12 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test (AFG, UKR in kobo_submissions.json, NGA in test_handle_household_dict)
+        country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
+        CountryFactory(name="Nigeria", short_name="Nigeria", iso_code2="NG", iso_code3="NGA", iso_num="0566")
         create_afghanistan()
         from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -86,8 +91,6 @@ class TestRdiKoboCreateTask(TestCase):
         cls.business_area = BusinessArea.objects.first()
         cls.business_area.kobo_username = "1234ABC"
         cls.business_area.save()
-
-        country = geo_models.Country.objects.first()
 
         admin1_type = AreaType.objects.create(name="Bakool", area_level=1, country=country)
         admin1 = Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)

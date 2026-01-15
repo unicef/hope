@@ -389,8 +389,8 @@ class TestUpdateIndividualDataService(TestCase):
         assert document_to_edit.document_number == "111111"
 
     def test_edit_account(self) -> None:
-        fi1 = FinancialInstitutionFactory(id="6")
-        fi2 = FinancialInstitutionFactory(id="7")
+        fi1 = FinancialInstitutionFactory()
+        fi2 = FinancialInstitutionFactory()
         account = AccountFactory(
             id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
             individual=self.individual,
