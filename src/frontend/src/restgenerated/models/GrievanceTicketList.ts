@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AreaList } from './AreaList';
-import type { CategoryD86Enum } from './CategoryD86Enum';
+import type { CategoryD54Enum } from './CategoryD54Enum';
 import type { GrievanceTicketStatusEnum } from './GrievanceTicketStatusEnum';
 import type { HouseholdSimple } from './HouseholdSimple';
 import type { IndividualSmall } from './IndividualSmall';
@@ -25,7 +25,7 @@ export type GrievanceTicketList = {
      * Date this ticket was most recently changed.
      */
     userModified?: string | null;
-    category: CategoryD86Enum;
+    category: CategoryD54Enum;
     issueType?: number | null;
     priority?: PriorityEnum;
     urgency?: UrgencyEnum;

@@ -23,6 +23,7 @@ class RoleAssignmentInline(admin.TabularInline):
     extra = 0
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
+    autocomplete_fields = ["business_area", "program", "role"]
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
@@ -46,23 +47,6 @@ class RoleAssignmentInline(admin.TabularInline):
                 kwargs["queryset"] = Role.objects.all()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def has_add_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        if isinstance(obj, Partner):
-            if obj.is_parent:
-                return False
-            return request.user.can_add_business_area_to_partner()
-        return True
-
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        if isinstance(obj, Partner):
-            return request.user.can_add_business_area_to_partner()
-        return True
-
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        if isinstance(obj, Partner):
-            return request.user.can_add_business_area_to_partner()
-        return True
 
 
 class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
@@ -119,21 +103,6 @@ class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         return qs.filter(user__isnull=False)
-
-    def has_module_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("account.can_edit_user_roles")
-
-    def has_view_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.has_perm("account.can_edit_user_roles")
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("account.can_edit_user_roles")
-
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.has_perm("account.can_edit_user_roles")
-
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.has_perm("account.can_edit_user_roles")
 
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
         return ["user", "business_area", "program", "role", "expiry_date", "group"]
