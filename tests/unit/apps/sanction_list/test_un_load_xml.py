@@ -30,9 +30,7 @@ def sanction_list(db: Any) -> "SanctionList":
 def program(db: Any, sanction_list: "SanctionList") -> "Program":
     from extras.test_utils.factories.program import ProgramFactory
 
-    CountryFactory(
-        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-    )
+    CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
     CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
     create_afghanistan()
     program = ProgramFactory()

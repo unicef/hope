@@ -28,9 +28,7 @@ pytestmark = pytest.mark.django_db()
 class TestGrievanceApproveAutomaticTickets:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="India", short_name="India", iso_code2="IN", iso_code3="IND", iso_num="0356")
         self.business_area = create_afghanistan()
         self.business_area.biometric_deduplication_threshold = 33.33

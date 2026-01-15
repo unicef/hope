@@ -3,7 +3,6 @@ from typing import Any
 
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -79,9 +78,7 @@ pytestmark = pytest.mark.django_db()
 class TestGrievanceTicketUpdate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
@@ -870,9 +867,7 @@ class TestGrievanceTicketUpdate:
 class TestGrievanceTicketApprove:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
