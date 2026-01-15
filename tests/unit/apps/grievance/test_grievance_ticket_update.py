@@ -60,7 +60,6 @@ from hope.apps.household.const import (
     SINGLE,
     WIDOWED,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AdminAreaLimitedTo,
     BusinessArea,
@@ -76,6 +75,7 @@ from hope.models.utils import MergeStatusModel
 pytestmark = pytest.mark.django_db()
 
 
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestGrievanceTicketUpdate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
@@ -214,8 +214,6 @@ class TestGrievanceTicketUpdate:
 
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         self.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-
-        rebuild_search_index()
 
         self.household_data_change_grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
