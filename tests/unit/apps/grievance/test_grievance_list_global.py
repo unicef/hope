@@ -1341,7 +1341,7 @@ class TestGrievanceTicketOfficeSearch:
         finished_individuals[0].phone_no = "+5557778888"
         finished_individuals[0].save()
 
-        # First, search WITHOUT active_programs filter - should return 2 grievances from active program and 1 from finished program
+        # First, search WITHOUT active_programs filter - should return 3 grievances (2 active, 1 finished)
         response = self.api_client.get(
             reverse(
                 self.global_url_name,
