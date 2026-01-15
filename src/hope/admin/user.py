@@ -261,11 +261,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
-    def get_inlines(self, request: HttpRequest, obj: Any | None = None) -> list:
-        if request.user.has_perm("account.can_edit_user_roles"):
-            return [RoleAssignmentInline]
-        return []
-
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
