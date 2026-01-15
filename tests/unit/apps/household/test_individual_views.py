@@ -2303,7 +2303,7 @@ class TestIndividualOfficeSearch:
             user=self.user,
             permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
             business_area=self.afghanistan,
-            program=self.program,
+            whole_business_area_access=True,
         )
 
         finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
@@ -2322,13 +2322,27 @@ class TestIndividualOfficeSearch:
         finished_individuals[0].phone_no = "+5551112222"
         finished_individuals[0].save()
 
-        # Search with active_programs=true filter - should only return active program individual
+        # First, search WITHOUT active_programs filter - should return both individuals
         response = self.api_client.get(
             reverse(
                 self.global_url_name,
                 kwargs={"business_area_slug": self.afghanistan.slug},
             ),
-            {"office_search": "+5551112222", "active_programs": "true"},
+            {"office_search": "+5551112222"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.individuals1[0].id) in result_ids
+        assert str(finished_individuals[0].id) in result_ids
+
+        # Now search WITH active_programs_only filter - should only return active program individual
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551112222", "active_programs_only": "true"},
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
