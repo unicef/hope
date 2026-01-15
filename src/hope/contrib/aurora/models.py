@@ -1,3 +1,4 @@
+import copy
 import json
 
 from django.db import models
@@ -104,16 +105,20 @@ class Record(models.Model):
     def mark_as_invalid(self, msg: str) -> None:
         self.error_message = msg
         self.status = self.STATUS_ERROR
-        self.save()
+        self.save(update_fields=["status", "error_message"])
 
     def mark_as_imported(self) -> None:
         self.status = self.STATUS_IMPORTED
-        self.save()
+        self.save(update_fields=["status"])
 
     def get_data(self) -> dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+
+        fields_copy = copy.deepcopy(self.fields) if self.fields is not None else {}
+
         if not self.files:
-            return self.fields
+            return fields_copy
+
         files = json.loads(self.files.tobytes().decode())
-        return combine_collections(files, self.fields)
+        return combine_collections(files, fields_copy)
