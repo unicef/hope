@@ -418,3 +418,135 @@ class TestPaymentOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.payment2.id)
+
+    def test_search_by_phone_number(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with phone number
+        self.individuals1[0].phone_no = "+1234567890"
+        self.individuals1[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+1234567890"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment1.id)
+
+    def test_search_by_phone_number_alternative(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with alternative phone number
+        self.individuals2[0].phone_no_alternative = "+9876543210"
+        self.individuals2[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+9876543210"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment2.id)
+
+    def test_search_by_individual_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with specific name
+        self.individuals3[0].full_name = "UniqueCharliePay"
+        self.individuals3[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "UniqueCharliePay"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment3.id)
+
+    def test_search_with_active_programs_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.PM_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
+        finished_cycle = finished_program.cycles.first()
+        finished_payment_plan = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=finished_cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        finished_household, finished_individuals = create_household_and_individuals(
+            household_data={
+                "program": finished_program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+        payment_finished = PaymentFactory(
+            parent=finished_payment_plan,
+            household=finished_household,
+            head_of_household=finished_individuals[0],
+            program=finished_program,
+            status=Payment.STATUS_SUCCESS,
+        )
+
+        # Set same phone number for both active and finished program individuals
+        self.individuals1[0].phone_no = "+5555556666"
+        self.individuals1[0].save()
+
+        finished_individuals[0].phone_no = "+5555556666"
+        finished_individuals[0].save()
+
+        # First, search WITHOUT active_programs filter - should return both payments
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5555556666", "active_programs_only": "false"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.payment1.id) in result_ids
+        assert str(payment_finished.id) in result_ids
+
+        # Now search WITH active_programs_only=true filter - should only return active program payment
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5555556666", "active_programs_only": "true"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.payment1.id)
