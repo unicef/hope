@@ -43,16 +43,20 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
 @contextmanager
 def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Any:
     now = timezone.now()
+    acquired = False
     try:
-        if cache.get_or_set(key, now, timeout=timeout) == now:
+        acquired = cache.get_or_set(key, now, timeout=timeout) == now
+
+        if acquired:
             logger.info(f"Task with key {key} started")
             yield True
         else:
             logger.info(f"Task with key {key} is already running")
             yield False
     finally:
-        cache.delete(key)
-        logger.info(f"Task with key {key} finished")
+        if acquired:
+            cache.delete(key)
+            logger.info(f"Task with key {key} finished")
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
