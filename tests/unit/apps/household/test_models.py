@@ -18,7 +18,7 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.models import BusinessArea, Country, Document, DocumentType, Household
+from hope.models import BusinessArea, Document, DocumentType, Household
 from hope.models.utils import MergeStatusModel
 
 

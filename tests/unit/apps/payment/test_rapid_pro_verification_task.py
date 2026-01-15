@@ -27,7 +27,6 @@ from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Area, BusinessArea, PaymentVerification, PaymentVerificationPlan
 
-
 START_UUID = "3d946aa7-af58-4838-8dfd-553786d9bb35"
 
 ORIGINAL_RAPIDPRO_RUNS_RESPONSE: List[Dict] = [

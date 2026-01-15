@@ -25,7 +25,6 @@ from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
 from hope.models import (
-    Country,
     DataCollectingType,
     DocumentType,
     PendingDocument,

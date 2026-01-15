@@ -142,9 +142,7 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
     mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
     # Mock deduplication that uses ES
-    mocker.patch(
-        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals"
-    )
+    mocker.patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
     mocker.patch(
         "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
     )

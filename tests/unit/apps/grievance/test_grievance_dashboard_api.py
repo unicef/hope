@@ -20,9 +20,7 @@ pytestmark = pytest.mark.django_db
 class TestGrievanceDashboardAPI:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
@@ -182,9 +180,7 @@ class TestGrievanceDashboardAPI:
 class TestGrievanceProgramDashboardAPI:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")

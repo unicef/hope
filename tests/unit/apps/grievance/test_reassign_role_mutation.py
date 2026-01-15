@@ -26,9 +26,7 @@ pytestmark = pytest.mark.django_db()
 class TestRoleReassignMutation:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner, first_name="TestUser")
@@ -132,9 +130,7 @@ class TestRoleReassignMutation:
 class TestRoleReassignMutationNewTicket:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner, first_name="TestUser")

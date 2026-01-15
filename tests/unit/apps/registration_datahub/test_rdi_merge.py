@@ -72,9 +72,7 @@ class TestRdiMergeTask(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         # Create minimal geo data - no need for full geo/core fixtures
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)

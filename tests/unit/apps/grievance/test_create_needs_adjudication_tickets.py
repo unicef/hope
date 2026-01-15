@@ -128,9 +128,7 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
 class TestCreateNeedsAdjudicationTicketsBiometrics:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.business_area = create_afghanistan()
         self.business_area.biometric_deduplication_threshold = 44.44
         self.business_area.save()

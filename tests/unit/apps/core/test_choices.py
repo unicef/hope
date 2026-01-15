@@ -93,9 +93,7 @@ class TestChoicesViewSet:
         assert len(response_none.data) == 0
 
     def test_get_countries(self) -> None:
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         response = self.client.get(reverse("api:choices-countries"))
         assert response.status_code == 200

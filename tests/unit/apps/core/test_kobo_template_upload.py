@@ -52,10 +52,7 @@ def raise_as_func(exception: BaseException) -> Callable:
 
 def get_all_country_choices() -> list[dict]:
     """Return all country choices from django_countries without requiring DB data."""
-    return [
-        {"label": {"English(EN)": c.name}, "value": countries.alpha3(c.code)}
-        for c in countries
-    ]
+    return [{"label": {"English(EN)": c.name}, "value": countries.alpha3(c.code)} for c in countries]
 
 
 class TestKoboTemplateUpload(BaseTestCase):
