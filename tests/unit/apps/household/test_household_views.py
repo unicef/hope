@@ -1671,6 +1671,7 @@ class TestHouseHoldChoices:
         }
 
 
+@pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestHouseholdFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
