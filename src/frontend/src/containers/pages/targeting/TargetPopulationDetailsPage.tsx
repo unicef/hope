@@ -44,7 +44,8 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (loading && !paymentPlan) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.TARGETING_VIEW_DETAILS} />;
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&

@@ -247,15 +247,15 @@ const OfficeSearchPage = (): ReactElement => {
     const allOptions = [
       canViewHouseholds && {
         value: 'HH',
-        label: `${beneficiaryGroup?.groupLabel || 'Household'}`,
+        label: `${beneficiaryGroup?.groupLabel || 'Household'} (ID)`,
       },
       canViewIndividuals && {
         value: 'IND',
-        label: `${beneficiaryGroup?.memberLabel || 'Individual'}`,
+        label: `${beneficiaryGroup?.memberLabel || 'Individual'} (ID, phone number, name)`,
       },
-      canViewGrievances && { value: 'GRV', label: 'Grievance' },
-      canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
-      canViewPayments && { value: 'RCPT', label: 'Payment' },
+      canViewGrievances && { value: 'GRV', label: 'Grievance (ID)' },
+      canViewPaymentPlans && { value: 'PP', label: 'Payment Plan (ID)' },
+      canViewPayments && { value: 'RCPT', label: 'Payment (ID)' },
     ].filter(Boolean);
 
     // Filter out incompatible combinations
@@ -285,7 +285,7 @@ const OfficeSearchPage = (): ReactElement => {
   ].filter(Boolean);
 
   if (!hasPermissions(PERMISSIONS.SEARCH_BUSINESS_AREAS, permissions)) {
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.SEARCH_BUSINESS_AREAS} />;
   }
 
   return (
@@ -323,12 +323,12 @@ const OfficeSearchPage = (): ReactElement => {
             </Grid>
             <Grid size={3}>
               <FormControl fullWidth size="small">
-                <InputLabel id="based-on-id-label">Based on ID</InputLabel>
+                <InputLabel id="based-on-id-label">Based on</InputLabel>
                 <Select
                   labelId="based-on-id-label"
                   id="based-on-id"
                   value={filter.basedOnId}
-                  label="Based on ID"
+                  label="Based on"
                   onChange={(e) =>
                     handleFilterChange('basedOnId', e.target.value)
                   }

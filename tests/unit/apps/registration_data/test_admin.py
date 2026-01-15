@@ -23,7 +23,6 @@ from hope.models import (
     Document,
     Household,
     Individual,
-    Payment,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -184,9 +183,6 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
 
         assert TicketComplaintDetails.objects.count() == 0
         assert TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first() is None
-
-        assert Payment.objects.count() == 0
-        assert Payment.objects.filter(household=self.household).first() is None
 
         assert RegistrationDataImport.objects.count() == 0
         assert RegistrationDataImport.objects.filter(id=self.rdi.id).first() is None

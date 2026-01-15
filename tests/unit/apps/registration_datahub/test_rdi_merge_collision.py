@@ -8,7 +8,7 @@ from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import create_household_and_individuals
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.household.const import MALE
+from hope.apps.household.const import MALE, REMOVED_BY_COLLISION
 from hope.models import Area, AreaType, Country, Household, Individual, Program, RegistrationDataImport
 
 pytestmark = [
@@ -252,6 +252,13 @@ def test_merge_rdi_with_collision(
     # 5. Verify merged individual was updated with pending individual data
     individual_to_check = merged_household_obj.individuals.get(identification_key=pending_individual.identification_key)
     assert individual_to_check.flex_fields.get("muac") == pending_individual.flex_fields.get("muac")
-    assert not Individual.all_objects.filter(id=merged_individual_to_remove.id).exists()
+
+    # 5b. Verify individual that was "removed" is withdrawn (not deleted)
+    merged_individual_to_remove.refresh_from_db()
+    assert Individual.all_objects.filter(id=merged_individual_to_remove.id).exists()
+    assert merged_individual_to_remove.withdrawn is True
+    assert merged_individual_to_remove.relationship == REMOVED_BY_COLLISION
+    assert "removed_by_collision_detector" in merged_individual_to_remove.internal_data
+
     # 6. Verify merged household has the in_review_rdi in extra_rdis
     assert in_review_rdi in merged_household_obj.extra_rdis.all()

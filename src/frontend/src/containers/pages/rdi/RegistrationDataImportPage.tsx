@@ -83,7 +83,7 @@ function RegistrationDataImportPage(): ReactElement {
   if (permissions === null || loading) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_LIST} />;
 
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
@@ -101,11 +101,12 @@ function RegistrationDataImportPage(): ReactElement {
             </ButtonTooltip>
           </Box>
         )}
-        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && !businessAreaData?.rdiImportXlsxDisabled && (
-          <Box>
-            <RegistrationDataImportCreateDialog />
-          </Box>
-        )}
+        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) &&
+          !businessAreaData?.rdiImportXlsxDisabled && (
+            <Box>
+              <RegistrationDataImportCreateDialog />
+            </Box>
+          )}
       </Box>
     </PageHeader>
   );

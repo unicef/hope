@@ -58,7 +58,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
   if (!paymentPlan) return null;
 
   const { status } = paymentPlan;
