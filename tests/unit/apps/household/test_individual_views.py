@@ -932,7 +932,7 @@ class TestIndividualDetail:
             "pdu_field_2": {"4": {"collection_date": "2021-01-01", "value": "Value D"}},
         }
 
-        assert data["documents"] == [
+        expected_documents = [
             {
                 "id": str(self.national_id.id),
                 "type": {
@@ -1024,6 +1024,7 @@ class TestIndividualDetail:
                 "photo": self.tax_id.photo.url,
             },
         ]
+        assert sorted(data["documents"], key=lambda x: x["id"]) == sorted(expected_documents, key=lambda x: x["id"])
         assert data["identities"] == [
             {
                 "id": self.identity.id,

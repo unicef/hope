@@ -11,7 +11,6 @@ from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
@@ -25,26 +24,25 @@ pytestmark = [
 ]
 
 
-class TestCreateNeedsAdjudicationTickets(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
+class TestCreateNeedsAdjudicationTickets:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.user = UserFactory.create()
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         program = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-        cls.household = HouseholdFactory.build(
+        self.household = HouseholdFactory.build(
             size=2,
             program=program,
         )
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = program
-        cls.household.registration_data_import.save()
-        cls.individuals_to_create = [
+        self.household.household_collection.save()
+        self.household.registration_data_import.imported_by.save()
+        self.household.registration_data_import.program = program
+        self.household.registration_data_import.save()
+        self.individuals_to_create = [
             {
                 "full_name": "test name",
                 "given_name": "test",
@@ -67,11 +65,11 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
             },
         ]
         individuals = [
-            IndividualFactory(household=cls.household, program=program, **individual)
-            for individual in cls.individuals_to_create
+            IndividualFactory(household=self.household, program=program, **individual)
+            for individual in self.individuals_to_create
         ]
-        cls.household.head_of_household = individuals[0]
-        cls.household.save()
+        self.household.head_of_household = individuals[0]
+        self.household.save()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
         assert Individual.objects.count() == 2
