@@ -24,7 +24,7 @@ from hope.models import (
     Program,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture

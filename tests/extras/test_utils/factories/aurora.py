@@ -42,7 +42,7 @@ class RegistrationFactory(DjangoModelFactory):
     slug = "reg-n"
     name = factory.LazyFunction(faker.city)
     project = factory.SubFactory(ProjectFactory)
-    source_id = factory.fuzzy.FuzzyInteger(1, 100)
+    source_id = factory.Sequence(lambda n: n + 1000000)
 
     @classmethod
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> Registration:

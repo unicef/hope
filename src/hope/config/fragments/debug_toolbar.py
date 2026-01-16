@@ -1,9 +1,10 @@
-from hope.config.settings import DEBUG, INSTALLED_APPS, IS_TEST
+from hope.config.settings import DEBUG, INSTALLED_APPS, IS_TEST, MIDDLEWARE
 
 if DEBUG and not IS_TEST:
     from constance import config
 
     INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: config.SHOW_TOOLBAR,
