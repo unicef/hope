@@ -351,6 +351,26 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
+    def list_of_integer_validator(self, values: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+        if values is None:
+            return True
+
+        if not self.required_validator(values, header, *args, **kwargs):
+            return False
+
+        # int like 23
+        if isinstance(values, int):
+            return True
+        try:
+            # like '2;34;12'
+            if isinstance(values, str):
+                # check if we can convert all strings into integer
+                [int(x.strip()) for x in values.split(";") if x.strip()]
+                return True
+        except Exception as e:  # pragma: no cover
+            logger.warning(e)
+            raise
+
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
@@ -552,7 +572,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "PHONE_NUMBER": self.phone_validator,
                 "GEOPOINT": self.geolocation_validator,
                 "IMAGE": self.image_validator,
-                "LIST_OF_IDS": self.integer_validator,
+                "LIST_OF_IDS": self.list_of_integer_validator,
             }
 
             invalid_rows = []
@@ -1114,7 +1134,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
-            pr_ids = [int(i) for i in primary_collector_ids if i is not None]
+            # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
+            pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
+            # convert [['1', '2'], ['3']] => [1, 2, 3]
+            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
+
             for index_id, relationship, pr_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
