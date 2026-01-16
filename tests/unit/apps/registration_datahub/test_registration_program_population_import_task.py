@@ -177,6 +177,19 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self.registration_data_import.refresh_from_db()
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
+    @patch("hope.apps.registration_datahub.tasks.rdi_program_population_create.DeduplicateTask")
+    def test_registration_program_population_import_with_deduplication(self, mock_dedupe_task: Any) -> None:
+        self.afghanistan.postpone_deduplication = False
+        self.afghanistan.save()
+        self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        self.registration_data_import.save()
+
+        self._run_task()
+
+        self.registration_data_import.refresh_from_db()
+        mock_dedupe_task.assert_called_once()
+        mock_dedupe_task.return_value.deduplicate_pending_individuals.assert_called_once()
+
     @patch("hope.apps.registration_datahub.celery_tasks.locked_cache")
     def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:
         mocked_locked_cache.return_value.__enter__.return_value = False
