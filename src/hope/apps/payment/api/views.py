@@ -1980,7 +1980,11 @@ class PaymentViewSet(
             queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
             to_attr="prefetched_individuals",
         )
-        return parent.eligible_payments.prefetch_related(individual_prefetch).all()
+        if parent.status == PaymentPlan.Status.OPEN:
+            qs = parent.eligible_payments_with_conflicts
+        else:
+            qs = parent.eligible_payments
+        return qs.prefetch_related(individual_prefetch).all()
 
     @action(
         detail=True,
