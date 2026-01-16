@@ -141,6 +141,10 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
     mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
     mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Also patch at usage locations (for modules that use `from X import Y`)
+    mocker.patch(
+        "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
+    )
     # Mock deduplication that uses ES
     mocker.patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
     mocker.patch(
