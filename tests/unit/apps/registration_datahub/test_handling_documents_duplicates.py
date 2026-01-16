@@ -1,12 +1,12 @@
 from typing import List
 
-from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import pytest
 
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
@@ -22,19 +22,18 @@ from hope.apps.household.const import (
     WIFE_HUSBAND,
 )
 from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, Document, DocumentType, country as geo_models
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -218,7 +217,6 @@ class TestGoldenRecordDeduplication(TestCase):
             cls.document8,
             cls.document9,
         ]
-        rebuild_search_index()
 
     def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
         return Document.objects.filter(id__in=[document.id for document in documents])

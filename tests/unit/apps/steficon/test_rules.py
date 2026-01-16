@@ -225,3 +225,9 @@ def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household]) -> None:
         "flags",
         "allowed_business_areas",
     ]
+
+
+@pytest.mark.django_db
+def test_rule_natural_key() -> None:
+    rule = Rule.objects.create(name="Test Rule")
+    assert rule.natural_key() == ("Test Rule",)

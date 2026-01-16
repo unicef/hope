@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 import uuid
 
 from django.conf import settings
-from django.core.management import call_command
 from django.db import Error
 from django.test import TestCase
 from django.utils import timezone
@@ -23,7 +22,7 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -538,7 +537,8 @@ class TestAutomatingRDICreationTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create Ukraine country for country_origin lookup
+        CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
@@ -893,8 +893,7 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadbusinessareas")
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         geo_models.Country.objects.create(name="Afghanistan")
 
         cls.rdi_1 = RegistrationDataImportFactory(status=RegistrationDataImport.IMPORT_ERROR)

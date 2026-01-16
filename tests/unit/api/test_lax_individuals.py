@@ -5,13 +5,13 @@ import tempfile
 from typing import Any
 from unittest.mock import patch
 
-from django.core.management import call_command
 from django.test import testcases
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
 from extras.test_utils.factories.program import ProgramFactory
@@ -31,8 +31,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         generate_delivery_mechanisms()
 
         image = Path(__file__).parent / "logo.png"

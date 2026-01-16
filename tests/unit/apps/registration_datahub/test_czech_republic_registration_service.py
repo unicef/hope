@@ -1,6 +1,5 @@
 import datetime
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 import pytz
@@ -11,6 +10,7 @@ from extras.test_utils.factories.aurora import (
     ProjectFactory,
     RegistrationFactory,
 )
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.const import (
     DISABLED,
@@ -38,7 +38,8 @@ from hope.models import (
 class TestCzechRepublicRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test
+        CountryFactory(name="Czechia", short_name="Czechia", iso_code2="CZ", iso_code3="CZE", iso_num="0203")
         document_types_to_create = []
 
         document_mapping = {
@@ -69,8 +70,6 @@ class TestCzechRepublicRegistrationService(TestCase):
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
-
-        geo_models.Country.objects.create(name="Czechia")
 
         consent = [
             {

@@ -1,8 +1,12 @@
 from decimal import Decimal
 
 from django.test import TestCase
+import pytest
 
-from hope.apps.core.utils import get_count_and_percentage
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.core.utils import get_count_and_percentage, to_dict
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 from hope.models import Payment
 
@@ -38,3 +42,37 @@ class TestCoreUtils(TestCase):
         )
         with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value(20.00, Decimal(10.00))
+
+
+@pytest.mark.django_db
+class TestToDict:
+    def test_to_dict_with_nested_fields_multi(self):
+        create_afghanistan()
+        program = ProgramFactory()
+        household = HouseholdFactory(program=program)
+        IndividualFactory(household=household, program=program)
+        IndividualFactory(household=household, program=program)
+
+        result = to_dict(
+            household,
+            fields=["id"],
+            dict_fields={"individuals": ["full_name", "birth_date"]},
+        )
+
+        assert "individuals" in result
+        assert len(result["individuals"]) == 2
+        assert all("full_name" in ind for ind in result["individuals"])
+
+    def test_to_dict_with_nested_dotted_fields(self):
+        create_afghanistan()
+        program = ProgramFactory()
+        individual = IndividualFactory(program=program)
+
+        result = to_dict(
+            individual,
+            fields=["id"],
+            dict_fields={"household": ["program.name"]},
+        )
+
+        assert "household" in result
+        assert "name" in result["household"]

@@ -3,11 +3,11 @@ from typing import Tuple
 from unittest import mock
 
 from django.conf import settings
-from django.core.management import call_command
 import openpyxl
 from parameterized import parameterized
 
 from extras.test_utils.factories.core import (
+    FlexibleAttributeFactory,
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
@@ -17,7 +17,7 @@ from extras.test_utils.factories.program import get_program_with_dct_type_and_na
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.utils import SheetImageLoader
 from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
-from hope.models import DataCollectingType, PeriodicFieldData
+from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
 
 
 class TestXLSXValidatorsMethods(BaseTestCase):
@@ -28,14 +28,22 @@ class TestXLSXValidatorsMethods(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
-        call_command("loadflexfieldsattributes")
         generate_delivery_mechanisms()
 
         cls.business_area = create_afghanistan()
         cls.program = get_program_with_dct_type_and_name()
         cls.social_worker_program = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
-        cls.country = CountryFactory()
+        # Create countries needed for xlsx validation (AFG, IMN, POL, PSE, SMR, VCT)
+        cls.country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Isle of Man", short_name="Isle of Man", iso_code2="IM", iso_code3="IMN", iso_num="0833")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        CountryFactory(name="Palestine", short_name="Palestine", iso_code2="PS", iso_code3="PSE", iso_num="0275")
+        CountryFactory(name="San Marino", short_name="San Marino", iso_code2="SM", iso_code3="SMR", iso_num="0674")
+        CountryFactory(
+            name="Saint Vincent", short_name="Saint Vincent", iso_code2="VC", iso_code3="VCT", iso_num="0670"
+        )
         cls.business_area.countries.add(cls.country)
         AreaFactory(p_code="AF29")
         AreaFactory(p_code="AF2401")
@@ -46,6 +54,12 @@ class TestXLSXValidatorsMethods(BaseTestCase):
         AreaFactory(p_code="AF0201")
         AreaFactory(p_code="AF11")
         AreaFactory(p_code="AF1115")
+        # Create flex field for validation test (assistance_type_h_f as SELECT_MANY with no choices)
+        FlexibleAttributeFactory(
+            name="assistance_type_h_f",
+            type=FlexibleAttribute.SELECT_MANY,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        )
 
     def test_string_validator(self) -> None:
         validator = UploadXLSXInstanceValidator(self.program)

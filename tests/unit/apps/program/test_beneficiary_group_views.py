@@ -80,3 +80,11 @@ class TestBeneficiaryGroupViewSet:
         assert response.status_code == status.HTTP_304_NOT_MODIFIED
         etag_after_cache_2 = response.headers["ETAG"]
         assert etag_after_cache_2 == after_delete_etag
+
+
+class TestBeneficiaryGroupModel:
+    def test_str(self):
+        from hope.models import BeneficiaryGroup
+
+        bg = BeneficiaryGroup(name="Test Group")
+        assert str(bg) == "Test Group"

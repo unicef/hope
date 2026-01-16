@@ -112,6 +112,7 @@ DATABASES = {
     "read_only": RO_CONN,
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
+DASHBOARD_DB = "read_only"
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: dict[str, str] = {}
