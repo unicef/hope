@@ -37,7 +37,7 @@ from hope.models import (
 )
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestEnrolHouseholdToProgram(TestCase):
     """Test enroll household to program."""
 
@@ -256,6 +256,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         assert hh.program == self.program2
 
     @pytest.mark.elasticsearch
+    @pytest.mark.usefixtures("django_elasticsearch_setup")
     def test_enroll_households_to_program_task(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
@@ -268,6 +269,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         assert ind_count == Individual.objects.count()
 
     @pytest.mark.elasticsearch
+    @pytest.mark.usefixtures("django_elasticsearch_setup")
     def test_enroll_households_to_program_task_already_running(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()

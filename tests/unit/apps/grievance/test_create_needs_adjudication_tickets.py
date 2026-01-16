@@ -19,7 +19,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
 from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, Individual
 
 pytestmark = [
-    pytest.mark.usefixtures("mock_elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.django_db(),
 ]
 
