@@ -139,7 +139,7 @@ class TestRdiXlsxPeople(TestCase):
         assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
 
         worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
-        assert worker_individuals.count() == 3
+        assert worker_individuals.count() == 2
 
         assert PendingAccount.objects.count() == 3
         dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")
