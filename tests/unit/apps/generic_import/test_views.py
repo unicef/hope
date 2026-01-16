@@ -1,14 +1,13 @@
 from datetime import timedelta
 from io import BytesIO
-from typing import Any, Callable
 from unittest.mock import patch
 
-import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import create_afghanistan
@@ -131,7 +130,14 @@ class TestGenericImportUploadView:
 
     @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
     def test_successful_upload_creates_objects_and_triggers_task(
-        self, mock_delay, client_with_import_permission, upload_url, upload_file, afghanistan, program, user_with_import_permission
+        self,
+        mock_delay,
+        client_with_import_permission,
+        upload_url,
+        upload_file,
+        afghanistan,
+        program,
+        user_with_import_permission,
     ):
         """Successful file upload creates ImportData, RDI, and triggers Celery task."""
         with TestCase.captureOnCommitCallbacks(execute=True):
@@ -405,12 +411,8 @@ class TestGenericImportUploadView:
             permissions=[Permissions.RDI_VIEW_LIST.value],
         )
 
-        RoleAssignment.objects.create(
-            user=user, role=role_import, business_area=other_ba, program=other_program
-        )
-        RoleAssignment.objects.create(
-            user=user, role=role_basic, business_area=afghanistan, program=program
-        )
+        RoleAssignment.objects.create(user=user, role=role_import, business_area=other_ba, program=other_program)
+        RoleAssignment.objects.create(user=user, role=role_basic, business_area=afghanistan, program=program)
 
         response = authenticated_client.post(
             upload_url,
@@ -428,7 +430,14 @@ class TestGenericImportUploadView:
 
     @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
     def test_form_invalid_shows_non_field_errors(
-        self, mock_delay, client_with_import_permission, upload_url, upload_file, afghanistan, user_with_import_permission, create_role_with_permissions
+        self,
+        mock_delay,
+        client_with_import_permission,
+        upload_url,
+        upload_file,
+        afghanistan,
+        user_with_import_permission,
+        create_role_with_permissions,
     ):
         """Non-field errors (__all__) are displayed correctly."""
         other_ba = BusinessArea.objects.create(
