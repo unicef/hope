@@ -13,9 +13,9 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class AreaManager(ValidityManager):
-    def get_by_natural_key(self, pcode: str, name: str, country: str, area_level: int) -> "AreaType":
+    def get_by_natural_key(self, p_code: str, name: str, country: str, area_level: int) -> "AreaType":
         return self.get(
-            pcode=pcode, area_type__name=name, area_type__country__isocode3=country, area_type__area_level=area_level
+            p_code=p_code, area_type__name=name, area_type__country__iso_code3=country, area_type__area_level=area_level
         )
 
 

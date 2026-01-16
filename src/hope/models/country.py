@@ -33,7 +33,7 @@ class UpgradeModel(models.Model):
 
 class CountryManager(ValidityManager):
     def get_by_natural_key(self, iso_code3: str) -> "Country":
-        return self.get(iso_code3=self.iso_code3)
+        return self.get(iso_code3=iso_code3)
 
 
 class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
