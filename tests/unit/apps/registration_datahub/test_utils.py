@@ -36,5 +36,4 @@ class TestRdiUtils(TestCase):
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1", "primary_collector_id")
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1;2;3", "primary_collector_id")
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(1, "primary_collector_id")
-
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "primary_collector_id")
