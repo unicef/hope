@@ -509,7 +509,6 @@ class TestAreaViews:
         create_user_role_with_permissions: Any,
     ) -> None:
         self.set_up(api_client, afghanistan)
-        # call_command("init-geo-fixtures")
         business_area = create_ukraine()
         country, _ = Country.objects.get_or_create(name="Ukraine")
         business_area.countries.add(country)

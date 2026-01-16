@@ -72,7 +72,7 @@ class LogEntry(models.Model):
         return f"{self.content_type} {self.object_id} [{self.action}]"
 
 
-def log_create(
+def log_create(  # noqa: PLR0913
     mapping: dict,
     business_area_field: Any,
     user: Union["AbstractUser", "User", "AnonymousUser"] | None = None,

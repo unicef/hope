@@ -212,7 +212,6 @@ class TestGrievanceCreateDataChangeAction:
                                     "country": "POL",
                                     "number": "123-123-UX-321",
                                     "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "identities": [
@@ -267,7 +266,6 @@ class TestGrievanceCreateDataChangeAction:
                                     "country": "POL",
                                     "number": "321-321-XU-987",
                                     "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "documents_to_edit": [
@@ -277,7 +275,6 @@ class TestGrievanceCreateDataChangeAction:
                                     "country": "POL",
                                     "number": "321-321-XU-123",
                                     "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "identities": [

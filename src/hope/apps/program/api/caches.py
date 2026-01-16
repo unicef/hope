@@ -21,7 +21,7 @@ class ProgramCycleKeyConstructor(KeyConstructorMixin):
 
 
 class BeneficiaryGroupListVersionsKeyBit(KeyBitBase):
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -43,7 +43,7 @@ class BeneficiaryGroupKeyConstructor(KeyConstructor):
 
 
 class ProgramListVersionKeyBit(BusinessAreaVersionKeyBit):
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -60,7 +60,7 @@ class ProgramListVersionKeyBit(BusinessAreaVersionKeyBit):
 
 
 class AllowedProgramsKeyBit(KeyBitBase):
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

@@ -67,10 +67,6 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     class Meta:
         app_label = "household"
         indexes = [
-            # GinIndex(
-            #     OpClass(Upper("document_number"), name="gin_trgm_ops"),
-            #     name="doc_number_upper_trgm_gin",
-            # ),
             models.Index(
                 fields=["type", "individual"],
                 name="doc_type_individual_idx",

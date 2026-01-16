@@ -9,7 +9,7 @@ from hope.api.caches import get_or_create_cache_key
 
 
 class UserListVersionsKeyBit(KeyBitBase):
-    def get_data(
+    def get_data(  # noqa: PLR0913 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

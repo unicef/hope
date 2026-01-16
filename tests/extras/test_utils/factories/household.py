@@ -324,7 +324,6 @@ def create_household(
     household.head_of_household = individuals[0]
     household.household_collection.save()
     household.program.save()
-    # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
     household.registration_data_import.save()
@@ -385,7 +384,6 @@ def create_household_with_individual_with_collectors(
     household.head_of_household = individuals[0]
     household.household_collection.save()
     household.program.save()
-    # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.program.save()
     household.registration_data_import.save()

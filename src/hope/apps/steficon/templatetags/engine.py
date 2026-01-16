@@ -26,7 +26,7 @@ class HtmlDiff(difflib.HtmlDiff):
             f'<td class="diff_header lineno"{identifier}>{line_number}</td><td class="code" nowrap="nowrap">{text}</td>'
         )
 
-    def make_table(
+    def make_table(  # noqa: PLR0913
         self,
         fromlines: Sequence[str],
         tolines: Sequence[str],

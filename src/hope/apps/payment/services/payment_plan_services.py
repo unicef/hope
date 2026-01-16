@@ -527,7 +527,7 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: dict) -> PaymentPlan:
+    def update(self, input_data: dict) -> PaymentPlan:  # noqa: PLR0912
         program = self.payment_plan.program_cycle.program
         should_update_money_stats = False
         should_rebuild_list = False

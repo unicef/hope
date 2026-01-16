@@ -56,7 +56,7 @@ class ProfileEtagKey:
 
 
 class ProfileVersionsKeyBit(KeyBitBase):
-    def get_data(self, params, view_instance, view_method, request, args, kwargs):
+    def get_data(self, params, view_instance, view_method, request, args, kwargs):  # noqa: PLR0913 – override of base method signature
         return profile_cache.cache_key_for(request.user.id)
 
 

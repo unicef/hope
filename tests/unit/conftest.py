@@ -310,16 +310,3 @@ def disable_activity_log(request, monkeypatch):
 
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
     yield
-
-
-# @pytest.fixture(autouse=True)
-# def ensure_contenttypes_and_permissions(db):
-#     ContentType.objects.clear_cache()
-#     for app_config in apps.get_app_configs():
-#         create_permissions(app_config, verbosity=0)
-
-
-# @pytest.fixture(scope="session", autouse=True)
-# def prevent_contenttype_flush(django_db_setup, django_db_blocker):
-#     with django_db_blocker.unblock():
-#         call_command("migrate", interactive=False, run_syncdb=True)

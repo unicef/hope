@@ -403,7 +403,7 @@ class UniversalIndividualUpdateService:
         )
         return individual_ids
 
-    def batch_update(
+    def batch_update(  # noqa: PLR0913
         self,
         document_fields_to_update: list,
         documents_to_create: list,

@@ -178,10 +178,6 @@ class BaseComponents(Common):
         return self.wait_for(self.drawer_items)
 
     def select_global_program_filter(self, name: str) -> None:
-        # TODO: remove this one after fix bug with cache
-        # self.get_menu_user_profile().click()
-        # self.get_menu_item_clear_cache().click()
-
         self.get_global_program_filter().click()
         self.get_global_program_filter_search_input().clear()
         self.clear_input(self.get_global_program_filter_search_input())

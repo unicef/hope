@@ -282,7 +282,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
         )
 
-    def handle_household(
+    def handle_household(  # noqa: PLR0913, PLR0912 – intentional design by author
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,

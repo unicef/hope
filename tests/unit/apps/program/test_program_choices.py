@@ -24,7 +24,7 @@ class TestProgramChoicesSerializer:
 
         self.ukraine = create_ukraine()
 
-        # DCT1: Active, not deprecated, not limited to any business area
+        # DCT1: Active, not deprecated, not limited to any business area  # noqa: ERA001
         self.dct_1 = DataCollectingType.objects.create(
             label="DCT 1",
             code="dct_1",
@@ -34,7 +34,7 @@ class TestProgramChoicesSerializer:
             deprecated=False,
         )
 
-        # DCT2: Active, not deprecated, limited to afghanistan
+        # DCT2: Active, not deprecated, limited to afghanistan  # noqa: ERA001
         self.dct_2 = DataCollectingType.objects.create(
             label="DCT 2",
             code="dct_2",
@@ -45,7 +45,7 @@ class TestProgramChoicesSerializer:
         )
         self.dct_2.limit_to.add(self.afghanistan)
 
-        # DCT3: Active, not deprecated, limited to ukraine
+        # DCT3: Active, not deprecated, limited to ukraine  # noqa: ERA001
         self.dct_3 = DataCollectingType.objects.create(
             label="DCT 3",
             code="dct_3",
@@ -55,8 +55,7 @@ class TestProgramChoicesSerializer:
             deprecated=False,
         )
         self.dct_3.limit_to.add(self.ukraine)
-
-        # DCT4: Inactive
+        # DCT4: Inactive  # noqa: ERA001
         self.dct_4 = DataCollectingType.objects.create(
             label="DCT 4 (Inactive)",
             code="dct_4",
@@ -65,8 +64,7 @@ class TestProgramChoicesSerializer:
             active=False,
             deprecated=False,
         )
-
-        # DCT5: Deprecated
+        # DCT5: Deprecated  # noqa: ERA001
         self.dct_5 = DataCollectingType.objects.create(
             label="DCT 5 (Deprecated)",
             code="dct_5",
@@ -75,8 +73,7 @@ class TestProgramChoicesSerializer:
             active=True,
             deprecated=True,
         )
-
-        # DCT6: code 'unknown'
+        # DCT6: code 'unknown'  # noqa: ERA001
         self.dct_6 = DataCollectingType.objects.create(
             label="DCT 6 (Unknown Code)",
             code="unknown",

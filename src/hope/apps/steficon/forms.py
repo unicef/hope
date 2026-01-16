@@ -110,7 +110,7 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
 
 
 class TPModelChoiceField(forms.ModelChoiceField):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         empty_label: str = "---------",

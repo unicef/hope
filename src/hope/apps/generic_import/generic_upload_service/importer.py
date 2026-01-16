@@ -66,7 +66,7 @@ def format_validation_errors(errors: list) -> str:
 
 
 class Importer:
-    def __init__(
+    def __init__(  # noqa: PLR0913 – intentional design by author
         self,
         registration_data_import: RegistrationDataImport,
         households_data,
