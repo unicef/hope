@@ -126,7 +126,11 @@ def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program
 
     captured_unicef_ids = []
 
-    def dummy_create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
+    def dummy_create_snapshot_content(
+        log_message: Callable[[str], None], program_id: str, unicef_ids: list[str]
+    ) -> str:
+        captured_unicef_ids.extend(unicef_ids)
+        return '{"dummy": "snapshot"}'
         captured_unicef_ids.extend(unicef_ids)
         return '{"dummy": "snapshot"}'
 
@@ -163,7 +167,11 @@ def test_snapshot_json_generation_no_unicef_id(monkeypatch: MonkeyPatch, program
 
     captured_unicef_ids = []
 
-    def dummy_create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
+    def dummy_create_snapshot_content(
+        log_message: Callable[[str], None], program_id: str, unicef_ids: list[str]
+    ) -> str:
+        captured_unicef_ids.extend(unicef_ids)
+        return '{"dummy": "snapshot"}'
         captured_unicef_ids.extend(unicef_ids)
         return '{"dummy": "snapshot"}'
 

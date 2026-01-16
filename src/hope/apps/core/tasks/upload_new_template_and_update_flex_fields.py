@@ -73,7 +73,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                     xlsx_kobo_template_object,
                     str(e),
                     XLSXKoboTemplate.UNSUCCESSFUL,
-                    template_id,
+                    str(template_id),
                 )
             else:
                 xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
@@ -87,7 +87,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 xlsx_kobo_template_object,
                 str(e),
                 XLSXKoboTemplate.UNSUCCESSFUL,
-                template_id,
+                str(template_id),
             )
             logger.warning(e)
             raise e

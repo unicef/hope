@@ -152,7 +152,7 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock = MagicMock()
 
-        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
+        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]
         with (
             patch(
                 "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",

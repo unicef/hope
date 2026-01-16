@@ -127,7 +127,7 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
 
 class PeriodicFieldSerializer(serializers.ModelSerializer):
     pdu_data = PeriodicFieldDataSerializer()
-    label = serializers.SerializerMethodField()  # type: ignore
+    label = serializers.SerializerMethodField()
 
     class Meta:
         model = FlexibleAttribute

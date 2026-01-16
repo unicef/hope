@@ -217,7 +217,7 @@ class BaseComponents(Common):
     def get_nav_program_log(self) -> WebElement:
         return self.wait_for(self.nav_program_log)
 
-    def wait_for_rows(self) -> [WebElement]:
+    def wait_for_rows(self) -> list[WebElement]:
         self.wait_for(self.rows)
         WebDriverWait(self.driver, 10).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, self.rows)))
         return self.get_elements(self.rows)
@@ -233,7 +233,7 @@ class BaseComponents(Common):
                 return
         assert text in self.wait_for(self.row_index_.format(index + 1)).text
 
-    def get_rows(self) -> [WebElement]:
+    def get_rows(self) -> list[WebElement]:
         return self.get_elements(self.rows)
 
     def get_alert(self) -> WebElement:

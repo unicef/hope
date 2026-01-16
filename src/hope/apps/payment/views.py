@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_payment_verification_plan(  # type: ignore
+def download_payment_verification_plan(
     request: "HttpRequest", verification_id: str
 ) -> Union[
     "HttpResponseRedirect",
@@ -42,7 +42,7 @@ def download_payment_verification_plan(  # type: ignore
             xlsx_file = payment_verification_plan.get_xlsx_verification_file
             xlsx_file.was_downloaded = True
             xlsx_file.save()
-        return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)  # type: ignore # FIXME
+        return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)
     log_and_raise(
         f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}",
         error_type=FileNotFoundError,
@@ -51,7 +51,7 @@ def download_payment_verification_plan(  # type: ignore
 
 
 @login_required
-def download_payment_plan_payment_list(  # type: ignore # missing return
+def download_payment_plan_payment_list(
     request: "HttpRequest", payment_plan_id: str
 ) -> Union[
     "HttpResponseRedirect",
@@ -72,7 +72,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
         raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
 
     if payment_plan.has_export_file:
-        return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
+        return redirect(payment_plan.payment_list_export_file_link)
 
     log_and_raise(
         f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
@@ -82,7 +82,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
 
 
 @login_required
-def download_payment_plan_summary_pdf(  # type: ignore # missing return
+def download_payment_plan_summary_pdf(
     request: "HttpRequest", payment_plan_id: str
 ) -> Union[
     "HttpResponseRedirect",

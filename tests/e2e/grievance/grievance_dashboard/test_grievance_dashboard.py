@@ -48,7 +48,7 @@ def add_grievances() -> None:
 
 
 @pytest.fixture
-def grievances() -> [GrievanceTicket]:
+def grievances() -> list[GrievanceTicket]:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
     grievances = []
@@ -68,8 +68,7 @@ def grievances() -> [GrievanceTicket]:
     grievances.append(
         generate_grievance(
             created_at=str(timezone.now() - timedelta(days=60)),
-            status=GrievanceTicket.STATUS_NEW,
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            status=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         )
     )
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
@@ -168,7 +167,7 @@ class TestSmokeGrievanceDashboard:
     def test_grievance_dashboard_happy_path(
         self,
         active_program: Program,
-        grievances: [GrievanceTicket],
+        grievances: list[GrievanceTicket],
         page_grievance_dashboard: GrievanceDashboard,
         page_grievance_tickets: GrievanceTickets,
         page_grievance_details_page: GrievanceDetailsPage,

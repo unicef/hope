@@ -32,4 +32,4 @@ class DynamicChoiceArrayField(ArrayField):
             "choices_callable": self.choices_callable,
         }
         defaults.update(kwargs)
-        return super().formfield(**defaults)
+        return super().formfield(**defaults)  # type: ignore

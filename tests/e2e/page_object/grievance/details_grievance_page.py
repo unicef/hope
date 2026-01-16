@@ -386,7 +386,7 @@ class GrievanceDetailsPage(BaseComponents):
     def get_button_new_note(self) -> WebElement:
         return self.wait_for(self.button_new_note)
 
-    def get_note_rows(self) -> [WebElement]:
+    def get_note_rows(self) -> list[WebElement]:
         self.wait_for(self.note_row)
         return self.get_elements(self.note_row)
 
@@ -486,14 +486,14 @@ class GrievanceDetailsPage(BaseComponents):
     def get_checkbox_household_data(self) -> WebElement:
         return self.wait_for(self.checkbox_household_data)
 
-    def get_checkbox_approve(self) -> [WebElement]:
+    def get_checkbox_approve(self) -> list[WebElement]:
         self.wait_for(self.checkbox_approve, By.XPATH)
         return self.get_elements(self.checkbox_approve, By.XPATH)
 
     def get_checkbox_individual_data(self) -> WebElement:
         return self.wait_for(self.checkbox_individual_data)
 
-    def get_checkbox_requested_data_change(self) -> [WebElement]:
+    def get_checkbox_requested_data_change(self) -> list[WebElement]:
         self.wait_for(self.checkbox_requested_data_change)
         return self.get_elements(self.checkbox_requested_data_change)
 
@@ -557,28 +557,28 @@ class GrievanceDetailsPage(BaseComponents):
     def get_distinct_tooltip(self) -> WebElement:
         return self.wait_for(self.distinct_tooltip)
 
-    def get_individual_id_cell(self) -> [WebElement]:
+    def get_individual_id_cell(self) -> list[WebElement]:
         self.wait_for(self.individual_id_cell)
         return self.get_elements(self.individual_id_cell)
 
     def get_individual_id(self) -> WebElement:
         return self.wait_for(self.individual_id)
 
-    def get_household_id_cell(self) -> [WebElement]:
+    def get_household_id_cell(self) -> list[WebElement]:
         self.wait_for(self.household_id_cell)
         return self.get_elements(self.household_id_cell)
 
-    def get_household_id(self) -> [WebElement]:
+    def get_household_id(self) -> list[WebElement]:
         self.wait_for(self.household_id)
         return self.get_elements(self.household_id)
 
-    def get_full_name_cell(self) -> [WebElement]:
+    def get_full_name_cell(self) -> list[WebElement]:
         return self.wait_for(self.full_name_cell)
 
     def get_gender_cell(self) -> WebElement:
         return self.wait_for(self.gender_cell)
 
-    def get_birth_date_cell(self) -> [WebElement]:
+    def get_birth_date_cell(self) -> list[WebElement]:
         return self.wait_for(self.birth_date_cell)
 
     def get_similarity_score_cell(self) -> WebElement:
@@ -596,22 +596,22 @@ class GrievanceDetailsPage(BaseComponents):
     def get_admin_level2_cell(self) -> WebElement:
         return self.wait_for(self.admin_level2_cell)
 
-    def get_village_cell(self) -> [WebElement]:
+    def get_village_cell(self) -> list[WebElement]:
         self.wait_for(self.village_cell)
         return self.get_elements(self.village_cell)
 
     def get_possible_duplicate_row_by_unicef_id(self, unicef_id: str) -> WebElement:
         return self.wait_for(self.possible_duplicate_row_template.format(unicef_id))
 
-    def get_checkbox_cell(self) -> [WebElement]:
+    def get_checkbox_cell(self) -> list[WebElement]:
         self.wait_for(self.checkbox_cell)
         return self.get_elements(self.checkbox_cell)
 
-    def get_select_checkbox(self) -> [WebElement]:
+    def get_select_checkbox(self) -> list[WebElement]:
         self.wait_for(self.select_checkbox)
         return self.get_elements(self.select_checkbox)
 
-    def get_status_cell(self) -> [WebElement]:
+    def get_status_cell(self) -> list[WebElement]:
         self.wait_for(self.status_cell)
         return self.get_elements(self.status_cell)
 
@@ -675,7 +675,7 @@ class GrievanceDetailsPage(BaseComponents):
     def get_button_admin(self) -> WebElement:
         return self.wait_for(self.button_admin)
 
-    def get_log_row(self) -> [WebElement]:
+    def get_log_row(self) -> list[WebElement]:
         self.wait_for(self.log_row)
         return self.get_elements(self.log_row)
 
