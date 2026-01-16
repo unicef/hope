@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -133,14 +134,15 @@ class TestGenericImportUploadView:
         self, mock_delay, client_with_import_permission, upload_url, upload_file, afghanistan, program, user_with_import_permission
     ):
         """Successful file upload creates ImportData, RDI, and triggers Celery task."""
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-                "file": upload_file(),
-            },
-        )
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            response = client_with_import_permission.post(
+                upload_url,
+                data={
+                    "business_area": afghanistan.id,
+                    "program": program.id,
+                    "file": upload_file(),
+                },
+            )
 
         assert response.status_code == 302
         assert response.url == upload_url
@@ -314,14 +316,15 @@ class TestGenericImportUploadView:
         response = client.get(upload_url)
         assert response.status_code == 200
 
-        response = client.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-                "file": upload_file(),
-            },
-        )
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            response = client.post(
+                upload_url,
+                data={
+                    "business_area": afghanistan.id,
+                    "program": program.id,
+                    "file": upload_file(),
+                },
+            )
         assert response.status_code == 302
         mock_delay.assert_called_once()
 
@@ -347,14 +350,15 @@ class TestGenericImportUploadView:
         client.force_login(user, "django.contrib.auth.backends.ModelBackend")
 
         for prog in [program1, program2]:
-            response = client.post(
-                upload_url,
-                data={
-                    "business_area": afghanistan.id,
-                    "program": prog.id,
-                    "file": upload_file(),
-                },
-            )
+            with TestCase.captureOnCommitCallbacks(execute=True):
+                response = client.post(
+                    upload_url,
+                    data={
+                        "business_area": afghanistan.id,
+                        "program": prog.id,
+                        "file": upload_file(),
+                    },
+                )
             assert response.status_code == 302
 
         assert mock_delay.call_count == 2
