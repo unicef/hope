@@ -92,8 +92,8 @@ class TestRdiXlsxPeople(TestCase):
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
 
-        assert households_count == 4
-        assert individuals_count == 4
+        assert households_count == 5
+        assert individuals_count == 5
 
         individual_data = {
             "full_name": "Derek Index4",
@@ -132,7 +132,7 @@ class TestRdiXlsxPeople(TestCase):
         assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
 
         worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
-        assert worker_individuals.count() == 2
+        assert worker_individuals.count() == 3
 
         assert PendingAccount.objects.count() == 3
         dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")
