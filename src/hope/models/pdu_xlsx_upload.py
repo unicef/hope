@@ -51,20 +51,25 @@ class PDUXlsxUpload(TimeStampedModel, CeleryEnabledModel):
 
     @property
     def combined_status(self) -> str:  # pragma: no cover
-        if self.status == self.Status.SUCCESSFUL or self.get_celery_status() == self.CELERY_STATUS_SUCCESS:
-            return self.status
-        if self.status == self.Status.FAILED:
-            return self.status
-        if self.get_celery_status() == self.CELERY_STATUS_STARTED:
-            return self.Status.PROCESSING
-        if self.get_celery_status() == self.CELERY_STATUS_FAILURE:
-            return self.Status.FAILED
-        if self.get_celery_status() == self.CELERY_STATUS_NOT_SCHEDULED:
-            return self.Status.NOT_SCHEDULED
-        if self.get_celery_status() in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RETRY]:
-            return self.Status.PENDING
-        if self.get_celery_status() in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
-            return self.Status.CANCELED
+        celery_status = self.get_celery_status()
+
+        status_map = {
+            self.Status.SUCCESSFUL: self.Status.SUCCESSFUL,
+            self.Status.FAILED: self.Status.FAILED,
+            self.CELERY_STATUS_SUCCESS: self.Status.SUCCESSFUL,
+            self.CELERY_STATUS_STARTED: self.Status.PROCESSING,
+            self.CELERY_STATUS_FAILURE: self.Status.FAILED,
+            self.CELERY_STATUS_NOT_SCHEDULED: self.Status.NOT_SCHEDULED,
+            self.CELERY_STATUS_RECEIVED: self.Status.PENDING,
+            self.CELERY_STATUS_RETRY: self.Status.PENDING,
+            self.CELERY_STATUS_REVOKED: self.Status.CANCELED,
+            self.CELERY_STATUS_CANCELED: self.Status.CANCELED,
+        }
+
+        if self.status in status_map:
+            return status_map[self.status]
+        if celery_status in status_map:
+            return status_map[celery_status]
 
         return self.status
 

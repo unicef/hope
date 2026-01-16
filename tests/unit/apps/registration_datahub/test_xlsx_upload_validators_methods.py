@@ -165,12 +165,20 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             assert not upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c")
 
     def test_choice_validator(self) -> None:
-        test_correct_values = (("REFUGEE", "residence_status_h_c"),)
+        test_correct_values = (
+            ("REFUGEE", "residence_status_h_c"),
+            ("GOVERNMENT_PARTNER,UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER, UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER;UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER; UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER UNICEF", "consent_sharing_h_c"),
+        )
         test_incorrect_values = (
             ("YES", "work_status"),
             ("OTHER", "work_status"),
             ("Hearing Problems", "disability"),
-            ("Option 37", "assistance_type_h_f"),
+            ("Wrong Option", "assistance_type_h_f"),
+            ("YES", "consent_h_c"),
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_correct_values:

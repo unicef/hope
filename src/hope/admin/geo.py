@@ -202,42 +202,43 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
         self, request: "HttpRequest"
     ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:
         context = self.get_common_context(request, processed=False)
+        redirect_url = redirect("admin:geo_area_changelist")
+
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
+                error_message = None
                 csv_file = form.cleaned_data["file"]
                 data_set = csv_file.read().decode("utf-8-sig")
                 reader = csv.DictReader(data_set.splitlines())
                 rows = list(reader)
 
                 if not rows:
-                    self.message_user(request, "CSV file is empty.", messages.WARNING)
-                    return redirect("admin:geo_area_changelist")
+                    error_message = "CSV file is empty."
+                else:
+                    try:
+                        Country.objects.get(short_name=rows[0]["Country"])
+                    except Country.DoesNotExist:
+                        error_message = f"Country '{rows[0]['Country']}' not found"
+                    except KeyError:
+                        error_message = "CSV must have a 'Country' column"
 
-                try:
-                    Country.objects.get(short_name=rows[0]["Country"])
-                except Country.DoesNotExist:
-                    self.message_user(request, f"Country '{rows[0]['Country']}' not found", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
-                except KeyError:
-                    self.message_user(request, "CSV must have a 'Country' column", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
+                if error_message is None:
+                    keys = list(rows[0].keys())
+                    num_cols = len(keys)
+                    if num_cols % 2 != 0:
+                        error_message = "CSV must have an even number of columns (names and p-codes)"
+                    else:
+                        d = num_cols // 2
+                        name_headers = keys[:d]
+                        p_code_headers = keys[d:]
 
-                keys = list(rows[0].keys())
-                num_cols = len(keys)
-                if num_cols % 2 != 0:
-                    self.message_user(
-                        request, "CSV must have an even number of columns (names and p-codes)", messages.ERROR
-                    )
-                    return redirect("admin:geo_area_changelist")
+                        if name_headers[0] != "Country":
+                            error_message = "First column must be 'Country'"
 
-                d = num_cols // 2
-                name_headers = keys[:d]
-                p_code_headers = keys[d:]
-
-                if name_headers[0] != "Country":
-                    self.message_user(request, "First column must be 'Country'", messages.ERROR)
-                    return redirect("admin:geo_area_changelist")
+                if error_message:
+                    self.message_user(request, error_message, messages.ERROR)
+                    return redirect_url
 
                 all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
                 existing_p_codes = set(Area.objects.filter(p_code__in=all_p_codes).values_list("p_code", flat=True))
@@ -247,10 +248,10 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncModelAdmin, HOPEModelAd
 
                 self.message_user(
                     request,
-                    (f"Found {new_areas_count} new areas to create. The import is running in the background."),
+                    f"Found {new_areas_count} new areas to create. The import is running in the background.",
                     messages.SUCCESS,
                 )
-                return redirect("admin:geo_area_changelist")
+                return redirect_url
         else:
             form = ImportCSVForm()
         context["form"] = form
