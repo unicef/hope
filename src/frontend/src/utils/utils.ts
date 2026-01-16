@@ -1,20 +1,12 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import localForage from 'localforage';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
-  PAYMENT_PLAN_STATES,
-  PROGRAM_STATES,
-  TARGETING_STATES,
-} from './constants';
+import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
 // Formats a string or array value to Normal Case using lodash's startCase
 export function formatNormalCaseValue(value: string | string[]): string {
@@ -68,34 +60,6 @@ const Gender = new Map([
   ['NOT_ANSWERED', 'Not Answered'],
 ]);
 
-export function restChoicesToDict(choices: Choice[] | null): {
-  [key: string]: string;
-} {
-  if (!choices || !choices.length) return {};
-  return choices.reduce(
-    (dict, choice) => {
-      dict[choice.value] = choice.name;
-      return dict;
-    },
-    {} as { [key: string]: string },
-  );
-}
-
-const IdentificationType = new Map([
-  ['NA', 'N/A'],
-  ['BIRTH_CERTIFICATE', 'Birth Certificate'],
-  ['DRIVING_LICENSE', 'Driving License'],
-  ['UNHCR_ID_CARD', 'UNHCR ID Card'],
-  ['NATIONAL_ID', 'National ID'],
-  ['NATIONAL_PASSPORT', 'National Passport'],
-]);
-
-export const getIdentificationType = (idType: string): string => {
-  if (IdentificationType.has(idType)) {
-    return IdentificationType.get(idType);
-  }
-  return idType;
-};
 export const sexToCapitalize = (sex: string): string => {
   if (Gender.has(sex)) {
     return Gender.get(sex);
@@ -140,22 +104,6 @@ export function mapPartnerChoicesFromProgramWithoutUnicef(
     }));
 }
 
-export function periodicDataUpdatesStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'Processing':
-      return theme.hctPalette.orange;
-    case 'Successful':
-      return theme.hctPalette.green;
-    case 'Failed':
-      return theme.hctPalette.red;
-    default:
-      return theme.hctPalette.gray;
-  }
-}
-
 export function programStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -169,26 +117,6 @@ export function programStatusToColor(
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
-  }
-}
-
-export function maritalStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'SINGLE':
-      return theme.hctPalette.green;
-    case 'MARRIED':
-      return theme.hctPalette.orange;
-    case 'WIDOW':
-      return theme.hctPalette.gray;
-    case 'DIVORCED':
-      return theme.hctPalette.gray;
-    case 'SEPARATED':
-      return theme.hctPalette.gray;
-    default:
-      return theme.hctPalette.gray;
   }
 }
 
@@ -543,20 +471,6 @@ export function grievanceTicketBadgeColors(
   }
 }
 
-export function reportStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case 'Generated':
-      return theme.hctPalette.green;
-    case 'Processing':
-      return theme.hctPalette.gray;
-    default:
-      return theme.palette.error.main;
-  }
-}
-
 export function programCycleStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -571,16 +485,6 @@ export function programCycleStatusToColor(
     default:
       return theme.hctPalette.gray;
   }
-}
-
-export function selectFields(
-  fullObject,
-  keys: string[],
-): { [key: string]: any } {
-  return keys.reduce((acc, current) => {
-    acc[current] = fullObject[current];
-    return acc;
-  }, {});
 }
 
 export function camelToUnderscore(key): string {
@@ -727,11 +631,6 @@ export function getPercentage(
   return `${countPercentage(partialValue, totalValue)}%`;
 }
 
-export function formatNumber(value: number): string {
-  if (!value && value !== 0) return '0';
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-}
-
 export function formatThousands(value: string): string {
   if (!value) return value;
   if (parseInt(value, 10) >= 10000) {
@@ -740,20 +639,8 @@ export function formatThousands(value: string): string {
   return value;
 }
 
-export function PaymentPlanStatusMapping(status): string {
-  return TARGETING_STATES[status];
-}
-
-export function programStatusMapping(status): string {
-  return PROGRAM_STATES[status];
-}
-
 export function paymentPlanStatusMapping(status): string {
   return PAYMENT_PLAN_STATES[status];
-}
-
-export function paymentPlanBackgroundActionStatusMapping(status): string {
-  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
 export function stableSort(array, comparator) {
@@ -899,15 +786,6 @@ export const formatAge = (age): string | number => {
   return '<1';
 };
 
-export const renderIndividualName = (individual): string =>
-  individual?.fullName;
-
-export async function clearCache(apolloClient = null): Promise<void> {
-  if (apolloClient) apolloClient.resetStore();
-  localStorage.clear();
-  await localForage.clear();
-}
-
 export const round = (value: number, decimals = 2): number =>
   Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 
@@ -943,98 +821,6 @@ export const getFilterFromQueryParams = (
   }
 
   return filter;
-};
-
-export const setQueryParam = (
-  key: string,
-  value: string,
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): void => {
-  const params = new URLSearchParams(location.search);
-
-  // Remove all existing values for the given key
-  params.delete(key);
-
-  // Add the new value for the given key
-  params.append(key, value);
-
-  navigate({ search: params.toString() });
-};
-
-export const setFilterToQueryParams = (
-  filter: { [key: string]: FilterValue },
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): void => {
-  const params = new URLSearchParams(location.search);
-  Object.entries(filter).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      if (Array.isArray(value)) {
-        // remove all existing params for this key
-        params.delete(key);
-
-        // add each value as a separate param
-        value.forEach((val) => {
-          if (val !== null && val !== undefined) {
-            params.append(key, val);
-          }
-        });
-      } else {
-        const paramValue =
-          typeof value === 'boolean' ? value.toString() : value;
-        params.set(key, paramValue);
-      }
-    } else {
-      params.delete(key);
-    }
-  });
-  const search = params.toString();
-  navigate({ search });
-};
-
-export const createHandleFilterChange = (
-  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
-  initialFilter: Filter,
-  navigate: ReturnType<typeof useNavigate>,
-  location: Location,
-): ((key: string, value: FilterValue) => void) => {
-  let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
-
-  const handleFilterChange = (key: string, value: FilterValue): void => {
-    const newFilter = {
-      ...filterFromQueryParams,
-      [key]: value,
-    };
-
-    filterFromQueryParams = newFilter;
-    onFilterChange(newFilter);
-
-    const params = new URLSearchParams(location.search);
-    const isEmpty = (v: FilterValue): boolean =>
-      v === '' ||
-      v === null ||
-      v === undefined ||
-      (Array.isArray(v) && v.length === 0);
-
-    if (isEmpty(value)) {
-      params.delete(key);
-    } else if (Array.isArray(value)) {
-      const filteredValues = value.filter((v) => !isEmpty(v));
-      if (filteredValues.length > 0) {
-        params.set(key, filteredValues.join(','));
-      } else {
-        params.delete(key);
-      }
-    } else {
-      params.set(key, value.toString());
-    }
-
-    const search = params.toString();
-    navigate({ search });
-  };
-
-  return handleFilterChange;
 };
 
 type HandleFilterChange = (key: string, value: FilterValue) => void;
@@ -1143,66 +929,6 @@ export const handleAutocompleteChange = (
   }
 };
 
-export const handleAutocompleteClose = (
-  setOpen,
-  onInputTextChange,
-  reason,
-): void => {
-  setOpen(false);
-  if (reason === 'select-option') return;
-  onInputTextChange('');
-};
-
-export const getAutocompleteOptionLabel = (
-  option,
-  edges,
-  inputValue: string,
-  type: 'default' | 'individual' | 'language' = 'default',
-): string => {
-  const renderNameOrEmail = (node): string => {
-    if (!node) {
-      return '-';
-    }
-    if (node?.firstName && node?.lastName) {
-      return `${node.firstName} ${node.lastName}`;
-    }
-    if (node?.email) {
-      return `${node.email}`;
-    }
-    return '-';
-  };
-
-  let optionLabel;
-  if (option?.node) {
-    switch (type) {
-      case 'individual':
-        optionLabel = renderNameOrEmail(option.node);
-        break;
-      case 'language':
-        optionLabel = `${option.node.english}`;
-        break;
-      default:
-        optionLabel = `${option.node.name}`;
-    }
-  } else {
-    let foundNode;
-    switch (type) {
-      case 'individual':
-        foundNode = edges?.find((el) => el.node?.id === option)?.node;
-        optionLabel = foundNode ? renderNameOrEmail(foundNode) : inputValue;
-        break;
-      case 'language':
-        foundNode = edges?.find((el) => el.node?.code === option)?.node;
-        optionLabel = foundNode ? `${foundNode.english}` : inputValue;
-        break;
-      default:
-        foundNode = edges?.find((el) => el.node?.id === option)?.node;
-        optionLabel = foundNode ? `${foundNode?.name}` : inputValue;
-    }
-  }
-  return optionLabel;
-};
-
 export const handleOptionSelected = (
   option: string | undefined,
   value: string | null | undefined,
@@ -1212,21 +938,6 @@ export const handleOptionSelected = (
   }
   return option === value;
 };
-
-export const isProgramNodeUuidFormat = (id: string): boolean => {
-  const regex =
-    /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-  try {
-    const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
-    const decodedId = atob(base64);
-    return regex.test(decodedId);
-  } catch {
-    return false;
-  }
-};
-
-export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
-  a.length === b.length && a.every((val, index) => val === b[index]);
 
 export function adjustHeadCells<T>(
   headCells: HeadCell<T>[],

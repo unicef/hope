@@ -427,13 +427,3 @@ export function getTargetingCriteriaVariables(values) {
     })),
   };
 }
-
-const flexFieldClassificationMap = {
-  NOT_FLEX_FIELD: 'Not a Flex Field',
-  FLEX_FIELD_BASIC: 'Flex Field Basic',
-  FLEX_FIELD_PDU: 'Flex Field PDU',
-};
-
-export function mapFlexFieldClassification(key: string): string {
-  return flexFieldClassificationMap[key] || 'Unknown Classification';
-}

@@ -52,13 +52,11 @@ export function ActivateVerificationPlan({
     },
   });
 
-  const activate = async(): Promise<void> => {
+  const activate = async (): Promise<void> => {
     try {
       await activateVerificationPlanMutation.mutateAsync();
       setActivateDialogOpen(false);
       showMessage(t('Verification plan has been activated.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showApiErrorMessages(error, showMessage);
     }
