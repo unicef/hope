@@ -63,9 +63,7 @@ class TestSanctionListPreMerge(TestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(

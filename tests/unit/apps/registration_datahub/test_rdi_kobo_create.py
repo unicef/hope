@@ -34,7 +34,6 @@ from hope.models import (
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
-    country as geo_models,
 )
 from hope.models.utils import MergeStatusModel
 
