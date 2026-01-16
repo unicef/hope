@@ -36,6 +36,7 @@ const EndInputAdornment = styled(InputAdornment)`
 import { Close } from '@mui/icons-material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { showApiErrorMessages } from '@utils/utils';
 const XIcon = styled(Close)`
   color: #707070;
 `;
@@ -145,12 +146,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         await queryClient.invalidateQueries({
           queryKey: ['paymentPlan'],
         });
-        //        TODO: Maciej please check it
-      } catch (error: any) {
-        const errorMessages = error?.data.state.data?.map(
-          (x: any) => x.message,
-        ) || [t('An error occurred while assigning funds commitments')];
-        errorMessages.forEach((message) => showMessage(message));
+      } catch (e) {
+        showApiErrorMessages(e, showMessage);
       }
     }
   };
