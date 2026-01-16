@@ -21,9 +21,7 @@ class TestGrievanceTicketRelatedTickets(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         create_afghanistan()
         cls.generate_document_types_for_all_countries()

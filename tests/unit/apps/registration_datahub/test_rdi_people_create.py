@@ -48,7 +48,9 @@ class TestRdiXlsxPeople(TestCase):
         CountryFactory(name="San Marino", short_name="San Marino", iso_code2="SM", iso_code3="SMR", iso_num="0674")
         CountryFactory(name="Isle of Man", short_name="Isle of Man", iso_code2="IM", iso_code3="IMN", iso_num="0833")
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
-        CountryFactory(name="Saint Vincent", short_name="Saint Vincent", iso_code2="VC", iso_code3="VCT", iso_num="0670")
+        CountryFactory(
+            name="Saint Vincent", short_name="Saint Vincent", iso_code2="VC", iso_code3="VCT", iso_num="0670"
+        )
         area_type_l1 = AreaTypeFactory(country=afghanistan, area_level=1)
         area_type_l2 = AreaTypeFactory(country=afghanistan, area_level=2, parent=area_type_l1)
 

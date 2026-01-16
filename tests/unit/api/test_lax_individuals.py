@@ -31,9 +31,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         generate_delivery_mechanisms()
 
         image = Path(__file__).parent / "logo.png"

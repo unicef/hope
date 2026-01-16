@@ -11,13 +11,12 @@ from typing import (
 )
 from uuid import UUID
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 import sentry_sdk
-
-from django.conf import settings
 
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.models import BusinessArea, DataCollectingType, Household, Payment, PaymentPlan

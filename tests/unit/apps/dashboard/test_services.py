@@ -35,8 +35,10 @@ from hope.models import BusinessArea, Household, Payment, PaymentPlan, Program
 
 @pytest.fixture
 def use_default_db_for_dashboard():
-    with patch("hope.apps.dashboard.services.settings.DASHBOARD_DB", "default"), \
-         patch("hope.apps.dashboard.celery_tasks.settings.DASHBOARD_DB", "default"):
+    with (
+        patch("hope.apps.dashboard.services.settings.DASHBOARD_DB", "default"),
+        patch("hope.apps.dashboard.celery_tasks.settings.DASHBOARD_DB", "default"),
+    ):
         yield
 
 
