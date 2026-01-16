@@ -1,6 +1,5 @@
 import enum
 import logging
-from time import sleep
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Model
@@ -77,31 +76,6 @@ class HealthStatus(enum.Enum):
     RED = "red"
     YELLOW = "yellow"
     GREEN = "green"
-
-
-def wait_until_es_healthy() -> None:
-    max_tries = 12
-    sleep_time = 5
-    # https://www.yireo.com/blog/2022-08-31-elasticsearch-cluster-is-yellow-which-is-ok
-    expected_statuses = [HealthStatus.GREEN.value, HealthStatus.YELLOW.value]
-
-    for _ in range(max_tries):
-        health = connections.get_connection().cluster.health()
-        ok = (
-            health.get("status") in expected_statuses
-            and not health.get("timed_out")
-            and health.get("number_of_pending_tasks") == 0
-        )
-        if ok:
-            break
-
-        sleep(sleep_time)
-
-    else:
-        raise Exception(
-            f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
-            f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-        )
 
 
 def ensure_index_ready(index_name: str) -> None:

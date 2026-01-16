@@ -1,9 +1,10 @@
 from django.test import TestCase
+import pytest
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models import AdminAreaLimitedTo, Program, RoleAssignment
+from hope.models import AdminAreaLimitedTo, BusinessArea, Program, Role, RoleAssignment
 
 
 class TestSignalChangeAllowedBusinessAreas(TestCase):
@@ -83,3 +84,14 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         assert self.partner.role_assignments.filter(program=self.program_afg).first() is None
         assert self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first() is None
         assert self.partner.role_assignments.filter(program=self.program_ukr_2).first() is not None
+
+
+@pytest.mark.django_db
+class TestPostSaveUserSignal:
+    def test_user_created_assigns_basic_role(self):
+        global_ba = BusinessArea.objects.create(name="Global", slug="global", code="GLO")
+        basic_role = Role.objects.create(name="Basic User", permissions=[])
+
+        user = UserFactory()
+
+        assert RoleAssignment.objects.filter(user=user, business_area=global_ba, role=basic_role).exists()
