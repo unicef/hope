@@ -80,6 +80,53 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
+    def _handle_flex_field_value(
+        self, obj_to_create: Any, header: str, cell_value: Any, cell: Any, sheet_title: str, complex_types: dict, current_field: dict
+    ) -> None:
+        value = self._cast_value(cell_value, header)
+        type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
+        if type_name in complex_types:
+            fn_flex: Callable = complex_types[type_name]
+            value = fn_flex(
+                value=cell_value,
+                cell=cell,
+                header=header,
+                is_flex_field=True,
+                is_field_required=current_field.get("required", False),
+            )
+        if value is not None:
+            obj_to_create.flex_fields[header] = value
+
+    def _set_model_field_value(self, obj_to_create: Any, header: str, field_name: str, cell: Any, value: Any) -> None:
+        if header in ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c", "pp_admin4_i_c"):
+            setattr(obj_to_create, field_name, Area.objects.get(p_code=cell.value))
+        elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
+            setattr(obj_to_create, field_name, GeoCountry.objects.get(iso_code3=cell.value))
+        else:
+            setattr(obj_to_create, field_name, value)
+
+    def _finalize_hh_ind_object(
+        self, obj_to_create: Any, sheet_title: str, registration_data_import: Any
+    ) -> None:
+        if sheet_title == "households":
+            obj_to_create.set_admin_areas()
+            obj_to_create.save()
+            self.households[self.index_id] = obj_to_create
+        else:
+            obj_to_create = self._validate_birth_date(obj_to_create)
+            obj_to_create.age_at_registration = calculate_age_at_registration(
+                registration_data_import.created_at, str(obj_to_create.birth_date)
+            )
+            populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
+
+            household = self.households[self.index_id]
+            if household is not None:
+                obj_to_create.household = self.households[self.index_id]
+                household.head_of_household = obj_to_create
+                self.households_to_update.append(household)
+
+            self.individuals.append(obj_to_create)
+
     def _create_hh_ind(
         self,
         obj_to_create: Any,
@@ -138,19 +185,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                             value,
                         )
                 elif header in self.FLEX_FIELDS[sheet_title]:
-                    value = self._cast_value(cell_value, header)
-                    type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
-                    if type_name in complex_types:
-                        fn_flex: Callable = complex_types[type_name]
-                        value = fn_flex(
-                            value=cell_value,
-                            cell=cell,
-                            header=header,
-                            is_flex_field=True,
-                            is_field_required=current_field.get("required", False),
-                        )
-                    if value is not None:
-                        obj_to_create.flex_fields[header] = value
+                    self._handle_flex_field_value(
+                        obj_to_create, header, cell_value, cell, sheet_title, complex_types, current_field
+                    )
                 elif hasattr(
                     obj_to_create,
                     current_field["name"],
@@ -159,29 +196,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     if value in (None, ""):
                         continue
 
-                    if header in (
-                        "pp_admin1_i_c",
-                        "pp_admin2_i_c",
-                        "pp_admin3_i_c",
-                        "pp_admin4_i_c",
-                    ):
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            Area.objects.get(p_code=cell.value),
-                        )
-                    elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            GeoCountry.objects.get(iso_code3=cell.value),
-                        )
-                    else:
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            value,
-                        )
+                    self._set_model_field_value(obj_to_create, header, current_field["name"], cell, value)
 
             except Exception as e:
                 raise Exception(
@@ -191,24 +206,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
-        if sheet_title == "households":
-            obj_to_create.set_admin_areas()
-            obj_to_create.save()
-            self.households[self.index_id] = obj_to_create
-        else:
-            obj_to_create = self._validate_birth_date(obj_to_create)
-            obj_to_create.age_at_registration = calculate_age_at_registration(
-                registration_data_import.created_at, str(obj_to_create.birth_date)
-            )
-            populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
-
-            household = self.households[self.index_id]
-            if household is not None:
-                obj_to_create.household = self.households[self.index_id]
-                household.head_of_household = obj_to_create
-                self.households_to_update.append(household)
-
-            self.individuals.append(obj_to_create)
+        self._finalize_hh_ind_object(obj_to_create, sheet_title, registration_data_import)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: dict[str, dict[str, Callable]] = {

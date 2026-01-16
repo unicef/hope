@@ -116,11 +116,9 @@ class Command(BaseCommand):
             help="Comma-separated list of emails to be added as testers",
         )
 
-    def handle(self, *args: Any, **options: Any) -> None:
-        start_time = timezone.now()
+    def _wait_for_database(self) -> None:
         db_connection = connections["default"]
         connected = False
-
         self.stdout.write("Waiting for database connection...")
         while not connected:
             try:
@@ -130,28 +128,16 @@ class Command(BaseCommand):
                 connected = False
                 time.sleep(0.5)
 
-        if not options["skip_drop"]:
-            self.stdout.write("Dropping existing databases...")
-            call_command("dropalldb")
-            self.stdout.write("Migrating database...")
-            call_command("migrate")
-
-        # Flush databases
-        self.stdout.write("Flushing databases...")
-        call_command("flush", "--noinput")
-
-        # Load fixtures
+    def _setup_base_fixtures(self) -> User:
         self.stdout.write("Loading fixtures...")
         call_command("generateroles")
         generate_unicef_partners()
         call_command("loadcountries")
-        generate_country_codes()  # core
-        generate_business_areas()  # core
+        generate_country_codes()
+        generate_business_areas()
         self.stdout.write("Creating superuser...")
         user = create_superuser()
-
         call_command("generatedocumenttypes")
-        # Create UserRoles for superuser
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
         for ba_name in ["Global", "Afghanistan"]:
             RoleAssignment.objects.get_or_create(
@@ -159,50 +145,22 @@ class Command(BaseCommand):
                 role=role_with_all_perms,
                 business_area=BusinessArea.objects.get(name=ba_name),
             )
-        # Create role for WFP and UNHCR in Afghanistan
-        role_planner = Role.objects.get(name="Planner")
-        wfp_partner = Partner.objects.get(name="WFP")
-        unhcr_partner = Partner.objects.get(name="UNHCR")
-        afghanistan = BusinessArea.objects.get(slug="afghanistan")
-        for partner in [wfp_partner, unhcr_partner]:
-            partner.allowed_business_areas.add(afghanistan)
-            # TODO: remove the below line when the temporary solution is replaces with proper one
-            # (right now partner has to have a role in whole BA so it can be selected in program actions)
-            RoleAssignment.objects.get_or_create(partner=partner, role=role_planner, business_area=afghanistan)
+        return user
 
-        # Geo app
-        generate_area_types()
-        generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
-        # Core app
-        generate_data_collecting_types()
-        # set accountability flag
-        FlagState.objects.get_or_create(
-            name="ALLOW_ACCOUNTABILITY_MODULE",
-            condition="boolean",
-            value="True",
-            required=False,
-        )
-        generate_beneficiary_groups()
-
+    def _generate_demo_data(self) -> None:
         self.stdout.write("Generating programs...")
         generate_people_program()
-
         self.stdout.write("Generating RDIs...")
         generate_rdi()
-
         self.stdout.write("Generating additional document types...")
         generate_additional_doc_types()
-
         self.stdout.write("Generating Engine core ...")
         generate_rule_formulas()
-
         try:
             self.stdout.write("Rebuilding search index...")
             call_command("search_index", "--rebuild", "-f")
         except elasticsearch.exceptions.RequestError as e:
             logger.warning(f"Elasticsearch RequestError: {e}")
-
-        # Generate additional data
         self.stdout.write("Generating delivery mechanisms...")
         generate_delivery_mechanisms()
         self.stdout.write("Generating payment plan...")
@@ -212,7 +170,6 @@ class Command(BaseCommand):
         generate_reconciled_payment_plan()
         self.stdout.write("Updating FSPs...")
         update_fsps()
-
         self.stdout.write("Loading additional fixtures...")
         generate_pdu_data()
         self.stdout.write("Generating messages...")
@@ -223,52 +180,88 @@ class Command(BaseCommand):
         self.stdout.write("Generating grievances...")
         generate_fake_grievances()
 
-        # Retrieve email lists from environment variables or command-line arguments
+    def _create_users_from_email_lists(
+        self, email_list: list[str], tester_list: list[str], role_with_all_perms: Role
+    ) -> None:
+        if not email_list and not tester_list:
+            self.stdout.write("No email lists provided. Skipping user creation.")
+            return
+
+        afghanistan = BusinessArea.objects.get(slug="afghanistan")
+        partner = Partner.objects.get(name="UNICEF")
+        unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
+        combined_email_list: list[str] = [email.strip() for email in email_list + tester_list if email.strip()]
+
+        if combined_email_list:
+            self.stdout.write("Creating users...")
+            for email in combined_email_list:
+                try:
+                    user = User.objects.create_user(email, email, "password", partner=unicef_hq)
+                    RoleAssignment.objects.create(
+                        user=user,
+                        role=role_with_all_perms,
+                        business_area=afghanistan,
+                    )
+                    if email in email_list:
+                        user.is_staff = True
+                        user.is_superuser = True
+                    user.set_unusable_password()
+                    user.save()
+                    self.stdout.write(self.style.SUCCESS(f"Created user: {email}"))
+                except Error as e:
+                    logger.warning(f"Failed to create user {email}: {e}")
+
+    def handle(self, *args: Any, **options: Any) -> None:
+        start_time = timezone.now()
+
+        self._wait_for_database()
+
+        if not options["skip_drop"]:
+            self.stdout.write("Dropping existing databases...")
+            call_command("dropalldb")
+            self.stdout.write("Migrating database...")
+            call_command("migrate")
+
+        self.stdout.write("Flushing databases...")
+        call_command("flush", "--noinput")
+
+        user = self._setup_base_fixtures()
+        role_with_all_perms = Role.objects.get(name="Role with all permissions")
+
+        # Create role for WFP and UNHCR in Afghanistan
+        role_planner = Role.objects.get(name="Planner")
+        wfp_partner = Partner.objects.get(name="WFP")
+        unhcr_partner = Partner.objects.get(name="UNHCR")
+        afghanistan = BusinessArea.objects.get(slug="afghanistan")
+        for partner in [wfp_partner, unhcr_partner]:
+            partner.allowed_business_areas.add(afghanistan)
+            RoleAssignment.objects.get_or_create(partner=partner, role=role_planner, business_area=afghanistan)
+
+        # Geo app
+        generate_area_types()
+        generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
+        # Core app
+        generate_data_collecting_types()
+        FlagState.objects.get_or_create(
+            name="ALLOW_ACCOUNTABILITY_MODULE",
+            condition="boolean",
+            value="True",
+            required=False,
+        )
+        generate_beneficiary_groups()
+
+        self._generate_demo_data()
+
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")
         tester_list_env = os.getenv("INITDEMO_TESTER_LIST")
-
         email_list = (
-            options["email_list"].split(",")
-            if options.get("email_list")
-            else email_list_env.split(",")
-            if email_list_env
-            else []
+            options["email_list"].split(",") if options.get("email_list")
+            else email_list_env.split(",") if email_list_env else []
         )
-
         tester_list = (
-            options["tester_list"].split(",")
-            if options.get("tester_list")
-            else tester_list_env.split(",")
-            if tester_list_env
-            else []
+            options["tester_list"].split(",") if options.get("tester_list")
+            else tester_list_env.split(",") if tester_list_env else []
         )
-
-        if email_list or tester_list:
-            afghanistan = BusinessArea.objects.get(slug="afghanistan")
-            partner = Partner.objects.get(name="UNICEF")
-            unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
-
-            combined_email_list: list[str] = [email.strip() for email in email_list + tester_list if email.strip()]
-
-            if combined_email_list:
-                self.stdout.write("Creating users...")
-                for email in combined_email_list:
-                    try:
-                        user = User.objects.create_user(email, email, "password", partner=unicef_hq)
-                        RoleAssignment.objects.create(
-                            user=user,
-                            role=role_with_all_perms,
-                            business_area=afghanistan,
-                        )
-                        if email in email_list:
-                            user.is_staff = True
-                            user.is_superuser = True
-                        user.set_unusable_password()
-                        user.save()
-                        self.stdout.write(self.style.SUCCESS(f"Created user: {email}"))
-                    except Error as e:
-                        logger.warning(f"Failed to create user {email}: {e}")
-        else:
-            self.stdout.write("No email lists provided. Skipping user creation.")
+        self._create_users_from_email_lists(email_list, tester_list, role_with_all_perms)
 
         self.stdout.write(self.style.SUCCESS(f"Done in {timezone.now() - start_time}"))
