@@ -61,7 +61,6 @@ module.exports = defineConfig([
       import: fixupPluginRules(_import),
       'react-hooks': fixupPluginRules(reactHooks),
       '@tanstack/query': fixupPluginRules(tanstackQuery),
-      'unused-imports': require('eslint-plugin-unused-imports'),
     },
 
     settings: {
@@ -77,16 +76,6 @@ module.exports = defineConfig([
     },
 
     rules: {
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
-      ],
       '@typescript-eslint/brace-style': 'off',
       'object-curly-spacing': ['error', 'always'],
       'brace-style': ['error', '1tbs', { allowSingleLine: true }],
