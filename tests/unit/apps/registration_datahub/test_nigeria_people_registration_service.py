@@ -1,7 +1,6 @@
 import datetime
 import json
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -41,9 +40,10 @@ from hope.models import (
 class TestNigeriaPeopleRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("loadcountries")
         generate_delivery_mechanisms()
-        country = geo_models.Country.objects.create(name="Nigeria")
+        country = geo_models.Country.objects.create(
+            name="Nigeria", short_name="Nigeria", iso_code2="NG", iso_code3="NGA", iso_num="0566"
+        )
         area_type_1 = AreaType.objects.create(name="State", area_level=1, country=country)
         area_type_2 = AreaType.objects.create(
             name="Local government area", area_level=2, country=country, parent=area_type_1
