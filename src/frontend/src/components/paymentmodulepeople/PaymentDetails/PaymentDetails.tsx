@@ -94,12 +94,10 @@ export function PaymentDetails({
               </BlackLink>
             </LabelizedField>
           </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
-            />
-          </Grid>
+          <LabelizedField
+            label={t('Delivery Mechanism')}
+            value={payment.parent?.deliveryMechanism?.name}
+          />
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Related Payment Id')}
