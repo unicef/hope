@@ -2,7 +2,6 @@ import datetime
 import json
 from typing import Dict
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -12,7 +11,7 @@ from extras.test_utils.factories.aurora import (
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
@@ -44,7 +43,8 @@ class BaseTestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create Ukraine country for country_origin lookup
+        CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
