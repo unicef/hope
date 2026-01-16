@@ -100,8 +100,8 @@ function PaymentDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
+              label={t('Delivery Mechanism')}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
