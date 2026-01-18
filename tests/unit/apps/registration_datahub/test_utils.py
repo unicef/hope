@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.test import TestCase
+import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
@@ -32,8 +33,17 @@ class TestRdiUtils(TestCase):
 
     def test_list_of_integer_validator_for_primary_collector_id(self) -> None:
         business_area = create_afghanistan()
-        program = ProgramFactory(business_area=business_area)
-        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1", "primary_collector_id")
-        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1;2;3", "primary_collector_id")
-        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(1, "primary_collector_id")
-        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "primary_collector_id")
+        program = ProgramFactory(business_area=business_area, data_collecting_type__type="SOCIAL")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1", "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
+            "1;2;3", "pp_primary_collector_id"
+        )
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(1, "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("", "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_primary_collector_id")
+
+        with pytest.raises(ValueError, match="InvalidValue") as e:
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
+                "InvalidValue", "pp_primary_collector_id"
+            )
+        assert str(e.value) == "invalid literal for int() with base 10: 'InvalidValue'"

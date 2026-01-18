@@ -352,12 +352,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def list_of_integer_validator(self, values: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
-        if values is None:
-            return True
-
         if not self.required_validator(values, header, *args, **kwargs):
             return False
-
+        if values is None:
+            return True
         # int like 23
         if isinstance(values, int):
             return True
@@ -367,6 +365,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 # check if we can convert all strings into integer
                 [int(x.strip()) for x in values.split(";") if x.strip()]
                 return True
+            return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
