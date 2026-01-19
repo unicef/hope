@@ -251,8 +251,8 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     program_id = serializers.CharField(source="program_cycle.program_id")
     available_payment_records_count = serializers.SerializerMethodField()
     eligible_payments_count = serializers.SerializerMethodField()
-    bank_reconciliation_success = serializers.IntegerField()
-    bank_reconciliation_error = serializers.IntegerField()
+    bank_reconciliation_success = serializers.SerializerMethodField()
+    bank_reconciliation_error = serializers.SerializerMethodField()
     can_create_payment_verification_plan = serializers.BooleanField()
     # verificationPlansTotalCount
 
@@ -278,13 +278,33 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "version",
         )
 
-    def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
-        return payment_plan.payment_items.filter(
-            status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        ).count()
+    def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
+        if not hasattr(self, "_payments_summary_cache"):
+            self._payments_summary_cache: dict[str, dict[str, int]] = {}
+        cache_key = str(payment_plan.pk)
+        if cache_key not in self._payments_summary_cache:
+            self._payments_summary_cache[cache_key] = payment_plan.eligible_payments.aggregate(
+                available_count=Count(
+                    "id",
+                    filter=Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0),
+                ),
+                delivered_count=Count("id", filter=Q(status__in=Payment.DELIVERED_STATUSES)),
+                error_count=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
+                total_count=Count("id"),
+            )
+        return self._payments_summary_cache[cache_key]
+
+    def get_available_payment_records_count(self, obj: PaymentPlan) -> int:
+        return self._payments_summary(obj)["available_count"]
 
     def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
-        return obj.eligible_payments.count()
+        return self._payments_summary(obj)["total_count"]
+
+    def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
+        return self._payments_summary(obj)["delivered_count"]
+
+    def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
+        return self._payments_summary(obj)["error_count"]
 
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
@@ -582,8 +602,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
-    bank_reconciliation_success = serializers.IntegerField()
-    bank_reconciliation_error = serializers.IntegerField()
+    bank_reconciliation_success = serializers.SerializerMethodField()
+    bank_reconciliation_error = serializers.SerializerMethodField()
     can_create_payment_verification_plan = serializers.BooleanField()
     available_payment_records_count = serializers.SerializerMethodField()
     reconciliation_summary = serializers.SerializerMethodField()
@@ -596,7 +616,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    is_payment_gateway_and_all_sent_to_fsp = serializers.BooleanField()
+    is_payment_gateway_and_all_sent_to_fsp = serializers.SerializerMethodField()
     fsp_communication_channel = serializers.CharField()
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
@@ -668,6 +688,30 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
         )
 
+    def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
+        if not hasattr(self, "_payments_summary_cache"):
+            self._payments_summary_cache: dict[str, dict[str, int]] = {}
+        cache_key = str(payment_plan.pk)
+        if cache_key not in self._payments_summary_cache:
+            self._payments_summary_cache[cache_key] = payment_plan.eligible_payments.aggregate(
+                available_count=Count(
+                    "id",
+                    filter=Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0),
+                ),
+                delivered_fully_count=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
+                delivered_partially_count=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
+                not_delivered_count=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
+                unsuccessful_count=Count("id", filter=Q(status__in=Payment.FAILED_STATUSES)),
+                unsuccessful_non_not_delivered_count=Count(
+                    "id",
+                    filter=Q(status__in=tuple(set(Payment.FAILED_STATUSES) - {Payment.STATUS_NOT_DISTRIBUTED})),
+                ),
+                pending_count=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
+                error_count=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
+                total_count=Count("id"),
+            )
+        return self._payments_summary_cache[cache_key]
+
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
         delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
@@ -680,30 +724,27 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
 
     def get_payments_conflicts_count(self, payment_plan: PaymentPlan) -> int:
-        return payment_plan.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
+        # count conflict only for OPEN PaymentPlan
+        if payment_plan.status == PaymentPlan.Status.OPEN:
+            return payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count()
+        return 0
 
     def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
-        return payment_plan.payment_items.filter(
-            status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        ).count()
+        return self._payments_summary(payment_plan)["available_count"]
 
-    @staticmethod
-    def get_reconciliation_summary(obj: PaymentPlan) -> dict[str, int]:
-        return obj.eligible_payments.aggregate(
-            delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
-            delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
-            not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
-            unsuccessful=Count(
-                "id",
-                filter=Q(status__in=tuple(set(Payment.FAILED_STATUSES) - {Payment.STATUS_NOT_DISTRIBUTED})),
-            ),
-            pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
-            reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
-            number_of_payments=Count("id"),
-        )
+    def get_reconciliation_summary(self, obj: PaymentPlan) -> dict[str, int]:
+        summary = self._payments_summary(obj)
+        return {
+            "delivered_fully": summary["delivered_fully_count"],
+            "delivered_partially": summary["delivered_partially_count"],
+            "not_delivered": summary["not_delivered_count"],
+            "unsuccessful": summary["unsuccessful_non_not_delivered_count"],
+            "pending": summary["pending_count"],
+            "reconciled": summary["total_count"] - summary["pending_count"],
+            "number_of_payments": summary["total_count"],
+        }
 
-    @staticmethod
-    def get_excluded_households(obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
@@ -711,8 +752,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return HouseholdSmallSerializer(qs, many=True).data
 
-    @staticmethod
-    def get_excluded_individuals(obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
@@ -720,58 +760,69 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return IndividualSmallSerializer(qs, many=True).data
 
-    @staticmethod
-    def get_can_create_follow_up(parent: PaymentPlan) -> bool:
+    def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
-        if parent.is_follow_up:
+        if obj.is_follow_up:
             return False
 
-        qs = parent.unsuccessful_payments_for_follow_up()
+        qs = obj.unsuccessful_payments_for_follow_up()
 
         # Check if all payments are used in FPPs
-        follow_up_payment = parent.payments_used_in_follow_payment_plans()
+        follow_up_payment = obj.payments_used_in_follow_payment_plans()
 
         return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
             qs.values_list("id", flat=True)
         )
 
-    @staticmethod
-    def get_total_withdrawn_households_count(parent: PaymentPlan) -> int:
+    def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         return (
-            parent.eligible_payments.filter(household__withdrawn=True)
+            obj.eligible_payments.filter(household__withdrawn=True)
             .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
                 household_id__in=Payment.objects.filter(
                     is_follow_up=True,
-                    parent__source_payment_plan=parent,
-                    parent__program_cycle=parent.program_cycle,
+                    parent__source_payment_plan=obj,
+                    parent__program_cycle=obj.program_cycle,
                     excluded=False,
                 )
-                .exclude(parent=parent)
+                .exclude(parent=obj)
                 .values_list("household_id", flat=True)
             )
             .count()
         )
 
-    @staticmethod
-    def get_unsuccessful_payments_count(parent: PaymentPlan) -> int:
-        return parent.unsuccessful_payments_for_follow_up().count()
+    def get_unsuccessful_payments_count(self, obj: PaymentPlan) -> int:
+        return obj.unsuccessful_payments_for_follow_up().count()
 
-    @staticmethod
-    def get_can_split(parent: PaymentPlan) -> bool:
-        if parent.status != PaymentPlan.Status.ACCEPTED:
+    def get_can_split(self, obj: PaymentPlan) -> bool:
+        if obj.status != PaymentPlan.Status.ACCEPTED:
             return False
 
-        return not parent.splits.filter(
+        return not obj.splits.filter(
             sent_to_payment_gateway=True,
         ).exists()
 
-    @staticmethod
-    def get_total_households_count_with_valid_phone_no(parent: PaymentPlan) -> int:
-        return parent.eligible_payments.exclude(
+    def get_total_households_count_with_valid_phone_no(self, obj: PaymentPlan) -> int:
+        return obj.eligible_payments.exclude(
             household__head_of_household__phone_no_valid=False,
             household__head_of_household__phone_no_alternative_valid=False,
         ).count()
+
+    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
+        return self._payments_summary(obj)["total_count"]
+
+    def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
+        summary = self._payments_summary(obj)
+        return summary["delivered_fully_count"] + summary["delivered_partially_count"]
+
+    def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
+        return self._payments_summary(obj)["error_count"]
+
+    def get_is_payment_gateway_and_all_sent_to_fsp(self, obj: PaymentPlan) -> bool:
+        if not getattr(obj, "financial_service_provider", None):
+            return False
+        if not obj.financial_service_provider.is_payment_gateway:
+            return False
+        return self._payments_summary(obj)["pending_count"] == 0
 
     def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
         if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
@@ -818,15 +869,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
-    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
-        return obj.eligible_payments.count()
-
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
     def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
         available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
-        # Prefetch related items grouped by `funds_commitment_group`
+
         group = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
             .distinct()
@@ -837,23 +885,24 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                     to_attr="filtered_items",
                 )
             )
-        ).first()
+            .first()
+        )
 
-        if group:
-            return FundsCommitmentSerializer(
-                {
-                    "funds_commitment_number": group.funds_commitment_number,
-                    "funds_commitment_items": group.filtered_items,
-                }
-            ).data
-        return None
+        if not group:
+            return None
+
+        return FundsCommitmentSerializer(
+            {
+                "funds_commitment_number": group.funds_commitment_number,
+                "funds_commitment_items": group.filtered_items,
+            }
+        ).data
 
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
         )
 
-        # Prefetch related items grouped by `funds_commitment_group`
         groups = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
             .distinct()

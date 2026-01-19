@@ -1,9 +1,9 @@
-from django.core.management import call_command
 from django.test import TestCase
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import (
+    FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
@@ -34,7 +34,11 @@ class TestIndividualBlockFilter(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
+        FlexibleAttributeFactory(
+            name="muac_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            type=FlexibleAttribute.DECIMAL,
+        )
         generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()

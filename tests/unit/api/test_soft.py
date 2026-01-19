@@ -2,7 +2,6 @@ import base64
 from pathlib import Path
 from typing import Any, Dict
 
-from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 
@@ -29,8 +28,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
             label="--",
@@ -45,7 +42,9 @@ class PushLaxToRDITests(HOPEApiTestCase):
         )
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
 
-        country = CountryFactory()
+        country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)

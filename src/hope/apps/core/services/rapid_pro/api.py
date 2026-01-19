@@ -39,6 +39,8 @@ class RapidProAPI:
     MODE_MESSAGE = "message"
     MODE_SURVEY = "survey"
 
+    MAX_URNS_PER_REQUEST = 100  # RapidPro API limit: https://app.rapidpro.io/api/v2/flow_starts
+
     mode_to_token_dict = {
         MODE_VERIFICATION: "rapid_pro_payment_verification_token",
         MODE_MESSAGE: "rapid_pro_messages_token",
@@ -114,11 +116,11 @@ class RapidProAPI:
     def start_flow(
         self, flow_uuid: str, phone_numbers: list[str]
     ) -> tuple[list[RapidProFlowResponse], Exception | None]:
-        array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
-
         all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
-        by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
+        by_limit = [
+            all_urns[i : i + self.MAX_URNS_PER_REQUEST] for i in range(0, len(all_urns), self.MAX_URNS_PER_REQUEST)
+        ]
 
         def _start_flow(data: dict) -> dict:
             try:
@@ -253,8 +255,10 @@ class RapidProAPI:
             return str(e), None
 
     def broadcast_message(self, phone_numbers: list[str], message: str) -> None:
-        batch_size = 100
-        batched_phone_numbers = [phone_numbers[i : i + batch_size] for i in range(0, len(phone_numbers), batch_size)]
+        batched_phone_numbers = [
+            phone_numbers[i : i + self.MAX_URNS_PER_REQUEST]
+            for i in range(0, len(phone_numbers), self.MAX_URNS_PER_REQUEST)
+        ]
         for batch in batched_phone_numbers:
             self._broadcast_message_batch(batch, message)
 

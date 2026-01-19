@@ -59,8 +59,11 @@ const StyledAutocompletePopper = styled('div')`
 `;
 
 const PopperComponent = (props: PopperComponentProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { disablePortal, anchorEl, open, ...other } = props;
+  const other = Object.fromEntries(
+    Object.entries(props).filter(
+      ([key]) => !['disablePortal', 'anchorEl', 'open'].includes(key),
+    ),
+  );
   return <StyledAutocompletePopper {...other} />;
 };
 
@@ -173,6 +176,7 @@ export const GlobalProgramSelect = () => {
       pduFields: null,
       programmeCode: null,
       slug: null,
+      canImportRdi: true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -193,6 +197,7 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           programmeCode,
           slug,
+          canImportRdi,
         } = program;
 
         setSelectedProgram({
@@ -204,6 +209,7 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           programmeCode,
           slug,
+          canImportRdi,
         });
       }
     }

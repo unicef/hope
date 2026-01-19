@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml http://localhost:8080/api/rest/",
     "generate-rest-api-types": "yarn generate-rest-api-types-camelcase",
-    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node enhance_and_camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false"
+    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node enhance_and_camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
+    "prune-unused-exports": "npx ts-prune src | grep -v '(used in module)' | grep -v '/index.'"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -112,6 +113,7 @@
     "openapi-typescript-codegen": "^0.30.0",
     "prettier": "3.7.4",
     "react-test-renderer": "^19.2.3",
+    "ts-prune": "^0.10.3",
     "typescript": "5.9.3",
     "vite-plugin-csp-guard": "3.0.0",
     "vitest": "^4.0.17"
