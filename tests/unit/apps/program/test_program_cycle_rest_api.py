@@ -27,7 +27,7 @@ from hope.apps.program.api.serializers import (
 from hope.apps.program.api.views import ProgramCycleViewSet
 from hope.models import PaymentPlan, Program, ProgramCycle, User
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestProgramCycleAPI:

@@ -1,11 +1,11 @@
 from typing import List
 from uuid import UUID
 
-from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
@@ -30,8 +30,7 @@ class TestDelegatePeople(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
             label="--",
