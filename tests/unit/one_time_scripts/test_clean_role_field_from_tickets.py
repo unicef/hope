@@ -119,7 +119,7 @@ class TestCleanRoleFieldFromTickets(BaseTestCase):
             )
             tickets_data.append((ticket, ticket_details))
 
-        for i in range(2):
+        for _i in range(2):
             ticket = GrievanceTicket.objects.create(
                 business_area=self.business_area,
                 category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -141,7 +141,7 @@ class TestCleanRoleFieldFromTickets(BaseTestCase):
         clean_role_field_from_tickets()
 
         # Verify role field was removed from all tickets
-        for ticket, ticket_details in tickets_data:
+        for _ticket, ticket_details in tickets_data:
             ticket_details.refresh_from_db()
             assert "role" not in ticket_details.individual_data
 
