@@ -238,7 +238,9 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
+        self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update(
+            conflicted=True
+        )
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()

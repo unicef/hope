@@ -2,9 +2,9 @@ from collections import Counter
 from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.household.const import (
     HEAD,

@@ -4,7 +4,10 @@ from pathlib import Path
 from django.conf import settings
 from django.test import TestCase
 
+from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_datahub.utils import calculate_hash_for_kobo_submission
+from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
 class TestRdiUtils(TestCase):
@@ -26,3 +29,31 @@ class TestRdiUtils(TestCase):
 
         assert hash1 == hash2
         assert hash1 != hash3
+
+    def test_list_of_integer_validator_for_primary_collector_id(self) -> None:
+        business_area = create_afghanistan()
+        program = ProgramFactory(business_area=business_area, data_collecting_type__type="SOCIAL")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("1", "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
+            "1;2;3", "pp_primary_collector_id"
+        )
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(1, "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("", "pp_primary_collector_id")
+        assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_primary_collector_id")
+
+        # not allow to pass boolean
+        assert (
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(True, "pp_primary_collector_id")
+            is False
+        )
+
+        assert (
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
+                "InvalidValue", "pp_primary_collector_id"
+            )
+            is False
+        )
+
+        assert (
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_index_id") is False
+        )  # check if self.required_validator() works

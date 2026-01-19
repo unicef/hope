@@ -99,8 +99,8 @@ class TestRdiXlsxPeople(TestCase):
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
 
-        assert households_count == 4
-        assert individuals_count == 4
+        assert households_count == 5
+        assert individuals_count == 5
 
         individual_data = {
             "full_name": "Derek Index4",
