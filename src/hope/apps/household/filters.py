@@ -557,6 +557,11 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
 
         return queryset.none()
 
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status=Program.ACTIVE)
+        return queryset
+
 
 class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
     class Meta(IndividualFilter.Meta):
@@ -633,3 +638,8 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             return queryset.filter(id__in=individual_ids)
 
         return queryset.none()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status=Program.ACTIVE)
+        return queryset

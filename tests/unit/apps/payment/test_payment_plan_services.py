@@ -9,7 +9,6 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
 from django_fsm import TransitionNotAllowed
-from flaky import flaky
 from freezegun import freeze_time
 import pytest
 from pytz import utc
@@ -515,7 +514,6 @@ class TestPaymentPlanServices(BaseTestCase):
         assert payment_plan.dispersion_start_date == dispersion_start_date
         assert payment_plan.dispersion_end_date == dispersion_end_date
 
-    @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
     @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
@@ -605,16 +603,10 @@ class TestPaymentPlanServices(BaseTestCase):
 
         assert pp_splits.count() == unique_collectors_count
         assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR
-        assert pp_splits[0].split_payment_items.count() == 3
-        assert pp_splits[1].split_payment_items.count() == 1
-        assert pp_splits[2].split_payment_items.count() == 1
-        assert pp_splits[3].split_payment_items.count() == 1
-        assert pp_splits[4].split_payment_items.count() == 1
-        assert pp_splits[5].split_payment_items.count() == 1
-        assert pp_splits[6].split_payment_items.count() == 1
-        assert pp_splits[7].split_payment_items.count() == 1
-        assert pp_splits[8].split_payment_items.count() == 1
-        assert pp_splits[9].split_payment_items.count() == 1
+        # Assert on the distribution of payments across splits (order-independent)
+        split_payment_counts = sorted([s.split_payment_items.count() for s in pp_splits], reverse=True)
+        # Expected: 1 split with 3 payments, 9 splits with 1 payment each
+        assert split_payment_counts == [3, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         # split by records
         with self.assertNumQueries(16):

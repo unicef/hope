@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.test import TestCase
 import pytest
 
@@ -31,7 +30,6 @@ class TestBatchDeduplication(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -286,7 +284,6 @@ class TestGoldenRecordDeduplication(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

@@ -1,10 +1,10 @@
 from operator import itemgetter
 from typing import Dict, Tuple
 
-from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -492,7 +492,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create Afghanistan country for country_h_c validation
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=cls.business_area)
 

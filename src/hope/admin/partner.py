@@ -14,10 +14,6 @@ from hope.admin.utils import HopeModelAdminMixin
 from hope.models import Area, BusinessArea, Partner, Program
 
 
-def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:
-    return request.user.can_add_business_area_to_partner()
-
-
 class ProgramAreaForm(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
     program = forms.ModelChoiceField(queryset=Program.objects.all(), required=True)

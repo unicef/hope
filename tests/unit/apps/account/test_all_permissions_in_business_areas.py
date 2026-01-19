@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.utils import timezone
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -12,7 +12,7 @@ from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Program, Role, RoleAssignment
 
 
-class AllPermissionsInBusinessAreasTest(TransactionTestCase):
+class AllPermissionsInBusinessAreasTest(TestCase):
     def setUp(self) -> None:
         super().setUp()
         # Create business areas and ensure they're active

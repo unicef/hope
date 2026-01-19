@@ -1,6 +1,5 @@
 import datetime
 
-from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -33,7 +32,6 @@ class TestDetails(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)
