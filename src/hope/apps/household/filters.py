@@ -211,18 +211,6 @@ class HouseholdFilter(UpdatedAtFilter):
             raise SearchError("The search value for a given search type should be a number")
         return qs.filter(detail_id__istartswith=search)
 
-    def _filter_kobo_asset_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
-        inner_query = Q()
-        split_values_list = search.split(" ")
-        for split_value in split_values_list:
-            striped_value = split_value.strip(",")
-            if striped_value.startswith(("HOPE-", "KOBO-")):
-                _value = _prepare_kobo_asset_id_value(search)
-                inner_query |= Q(kobo_asset_id__endswith=_value)
-            else:
-                inner_query = Q(kobo_asset_id__endswith=search)
-        return qs.filter(inner_query)
-
     def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
 
