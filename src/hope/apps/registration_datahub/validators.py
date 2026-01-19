@@ -365,6 +365,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 # check if we can convert all strings into integer
                 [int(x.strip()) for x in values.split(";") if x.strip()]
                 return True
+        except ValueError:
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)

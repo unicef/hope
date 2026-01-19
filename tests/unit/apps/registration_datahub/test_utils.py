@@ -3,7 +3,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.test import TestCase
-import pytest
 
 from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.program import ProgramFactory
@@ -42,8 +41,13 @@ class TestRdiUtils(TestCase):
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("", "pp_primary_collector_id")
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_primary_collector_id")
 
-        with pytest.raises(ValueError, match="InvalidValue") as e:
+        assert (
             UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
                 "InvalidValue", "pp_primary_collector_id"
             )
-        assert str(e.value) == "invalid literal for int() with base 10: 'InvalidValue'"
+            is False
+        )
+
+        assert (
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_index_id") is False
+        )  # check if self.required_validator() works
