@@ -126,7 +126,36 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config) -> None:  # type: ignore
+    _patch_sync_apps_for_no_migrations()
+
     config.addinivalue_line(
         "markers",
         "night: This marker is intended for e2e tests conducted during the night on CI",

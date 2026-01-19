@@ -3080,25 +3080,27 @@ class TestPaymentPlanActions:
                 payment_gateway_id="123",
             )
             PaymentFactory.create_batch(
-                51,
+                3,
                 parent=self.pp,
                 status=Payment.STATUS_PENDING,
                 financial_service_provider=fsp_api,
             )
-            response_4 = self.client.post(self.url_pp_split, data, format="json")
-            assert response_4.status_code == status.HTTP_400_BAD_REQUEST
-            assert "Cannot split Payment Plan into more than 50 parts" in response_4.data
+            with patch.object(PaymentPlanSplit, "MAX_CHUNKS", 2):
+                response_4 = self.client.post(self.url_pp_split, data, format="json")
+                assert response_4.status_code == status.HTTP_400_BAD_REQUEST
+                assert "Cannot split Payment Plan into more than 2 parts" in response_4.data
 
             # success
-            response_ok = self.client.post(
-                self.url_pp_split,
-                {
-                    "payments_no": 30,
-                    "split_type": PaymentPlanSplit.SplitType.BY_RECORDS,
-                },
-                format="json",
-            )
-            assert response_ok.status_code == status.HTTP_200_OK
+            with patch.object(PaymentPlanSplit, "MIN_NO_OF_PAYMENTS_IN_CHUNK", 1):
+                response_ok = self.client.post(
+                    self.url_pp_split,
+                    {
+                        "payments_no": 1,
+                        "split_type": PaymentPlanSplit.SplitType.BY_RECORDS,
+                    },
+                    format="json",
+                )
+                assert response_ok.status_code == status.HTTP_200_OK
             assert "id" in response_ok.data
 
     @pytest.mark.parametrize(
