@@ -41,6 +41,12 @@ class TestRdiUtils(TestCase):
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator("", "pp_primary_collector_id")
         assert UploadXLSXInstanceValidator(program=program).list_of_integer_validator(None, "pp_primary_collector_id")
 
+        # not allow to pass boolean
+        assert (
+            UploadXLSXInstanceValidator(program=program).list_of_integer_validator(True, "pp_primary_collector_id")
+            is False
+        )
+
         assert (
             UploadXLSXInstanceValidator(program=program).list_of_integer_validator(
                 "InvalidValue", "pp_primary_collector_id"

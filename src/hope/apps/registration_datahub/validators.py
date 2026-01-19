@@ -357,19 +357,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         if values is None:
             return True
         # int like 23
-        if isinstance(values, int):
+        if isinstance(values, int) and not isinstance(values, bool):
             return True
-        try:
-            # like '2;34;12'
-            if isinstance(values, str):
+        # like '2;34;12'
+        if isinstance(values, str):
+            try:
                 # check if we can convert all strings into integer
                 [int(x.strip()) for x in values.split(";") if x.strip()]
                 return True
-        except ValueError:
+            except (ValueError, TypeError):
+                return False
+            except Exception as e:  # pragma: no cover
+                logger.warning(e)
+                raise
+        else:
             return False
-        except Exception as e:  # pragma: no cover
-            logger.warning(e)
-            raise
 
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
