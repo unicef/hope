@@ -15,8 +15,12 @@ from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.payment import generate_delivery_mechanisms
 from extras.test_utils.factories.program import get_program_with_dct_type_and_name
 from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.field_attributes.core_fields_attributes import TYPE_SELECT_MANY, TYPE_SELECT_ONE
 from hope.apps.core.utils import SheetImageLoader
-from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hope.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
+)
 from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
 
 
@@ -201,6 +205,55 @@ class TestXLSXValidatorsMethods(BaseTestCase):
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_incorrect_values:
             assert not upload_xlsx_instance_validator.choice_validator(value, header)
+
+    def test_import_choice_validator_empty_value_returns_message(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {"field_one": {"type": TYPE_SELECT_ONE, "choices": ["A"]}}
+
+        assert validator.choice_validator("", "field_one") == "Invalid choice  for field field_one"
+
+    def test_import_choice_validator_handler_none_returns_none(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {"field_one": {"type": "UNKNOWN", "choices": ["A"]}}
+
+        assert validator.choice_validator("A", "field_one") is None
+
+    def test_import_choice_validator_custom_select_one(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_one": {
+                "type": TYPE_SELECT_ONE,
+                "choices": ["YES", "NO"],
+                "custom_validate_choices": lambda v: v == "YES",
+            }
+        }
+
+        assert validator.choice_validator("YES", "field_one") is None
+        assert validator.choice_validator("NO", "field_one") == "Invalid choice NO for field field_one"
+
+    def test_import_choice_validator_custom_select_many(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_many": {
+                "type": TYPE_SELECT_MANY,
+                "choices": ["A", "B"],
+                "custom_validate_choices": lambda v: v == "A",
+            }
+        }
+
+        assert validator.choice_validator("A", "field_many") is None
+        assert validator.choice_validator("B", "field_many") == "Invalid choice B for field field_many"
+
+    def test_import_choice_validator_select_many_invalid_choice(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_many": {
+                "type": TYPE_SELECT_MANY,
+                "choices": ["A", "B"],
+            }
+        }
+
+        assert validator.choice_validator("C", "field_many") == "Invalid choice C for field field_many"
 
     def test_rows_validator_too_many_head_of_households(self) -> None:
         wb = openpyxl.load_workbook(
