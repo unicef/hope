@@ -1,6 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
@@ -125,7 +125,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        assert str(error.value.messages[0]) == "Cannot reassign role to individual from different program"
+        assert str(error.value.detail[0]) == "Cannot reassign role to individual from different program"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
         self,
@@ -151,7 +151,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.value.messages[0])
+            str(error.value.detail[0])
             == f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated"
         )
 
@@ -181,7 +181,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.value.messages[0])
+            str(error.value.detail[0])
             == f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated"
         )
 
@@ -243,9 +243,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        assert (
-            str(error.value.messages[0]) == "Cannot reassign the role. Selected individual has primary collector role."
-        )
+        assert str(error.value.detail[0]) == "Cannot reassign the role. Selected individual has primary collector role."
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
         self,
@@ -269,7 +267,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             reassign_roles_on_marking_as_duplicate_individual_service(
                 role_reassign_data, self.user, duplicated_individuals
             )
-        assert str(error.value.messages[0]) == "Invalid role name"
+        assert str(error.value.detail[0]) == "Invalid role name"
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
         self,
@@ -294,7 +292,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.value.messages[0])
+            str(error.value.detail[0])
             == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY "
             f"in household with unicef_id {self.household.unicef_id}"
         )
@@ -316,7 +314,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.value.messages[0]) == f"Role for head of household in household with unicef_id "
+            str(error.value.detail[0]) == f"Role for head of household in household with unicef_id "
             f"{self.household.unicef_id} was not reassigned, when individual "
             f"({self.primary_collector_individual.unicef_id}) was marked as "
             f"duplicated"
@@ -339,7 +337,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
                 role_reassign_data, self.user, duplicated_individuals
             )
         assert (
-            str(error.value.messages[0])
+            str(error.value.detail[0])
             == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated "
             f"individual({self.primary_collector_individual.unicef_id})"
         )
