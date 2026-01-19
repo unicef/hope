@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.test import TransactionTestCase
+from django.db import IntegrityError, transaction
+from django.test import TestCase
 import pytest
 
 from extras.test_utils.factories.account import (
@@ -16,7 +16,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.models import Program, RoleAssignment
 
 
-class TestRoleAssignmentModel(TransactionTestCase):
+class TestRoleAssignmentModel(TestCase):
     def setUp(self) -> None:
         self.business_area = create_afghanistan()
         self.role = RoleFactory(
@@ -154,7 +154,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             business_area=self.business_area,
             program=self.program1,
         )
-        with pytest.raises(IntegrityError):
+        with pytest.raises(IntegrityError), transaction.atomic():
             RoleAssignment.objects.create(
                 user=self.user,
                 partner=None,
@@ -170,7 +170,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             business_area=self.business_area,
             program=None,
         )
-        with pytest.raises(IntegrityError):
+        with pytest.raises(IntegrityError), transaction.atomic():
             RoleAssignment.objects.create(
                 user=self.user,
                 partner=None,
@@ -190,7 +190,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             business_area=self.business_area,
             program=self.program1,
         )
-        with pytest.raises(IntegrityError):
+        with pytest.raises(IntegrityError), transaction.atomic():
             RoleAssignment.objects.create(
                 user=None,
                 partner=self.partner,
@@ -206,7 +206,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
             business_area=self.business_area,
             program=None,
         )
-        with pytest.raises(IntegrityError):
+        with pytest.raises(IntegrityError), transaction.atomic():
             RoleAssignment.objects.create(
                 user=None,
                 partner=self.partner,

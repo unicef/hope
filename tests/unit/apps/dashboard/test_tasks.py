@@ -14,7 +14,21 @@ from hope.apps.dashboard.services import DashboardDataCache
 from hope.models import BusinessArea
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
+@pytest.fixture
+def use_default_db_for_dashboard():
+    with (
+        patch("hope.apps.dashboard.services.settings.DASHBOARD_DB", "default"),
+        patch("hope.apps.dashboard.celery_tasks.settings.DASHBOARD_DB", "default"),
+    ):
+        yield
+
+
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.usefixtures("use_default_db_for_dashboard"),
+]
+
+
 def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard_cache: Callable) -> None:
     """
     Test that generate_dash_report_task refreshes data for the given business area.
@@ -25,7 +39,6 @@ def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard
     assert data is not None
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
 @patch("hope.apps.dashboard.celery_tasks.logger.error")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_generate_dash_report_task_business_area_not_found(mock_refresh_data: Mock, mock_logger_error: Mock) -> None:
@@ -44,7 +57,6 @@ def test_generate_dash_report_task_business_area_not_found(mock_refresh_data: Mo
     mock_refresh_data.assert_not_called()
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) -> None:
     """
     Test that update_dashboard_figures retries on failure.
@@ -66,7 +78,6 @@ def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) ->
         mock_data_refresh.assert_any_call(afghanistan.slug)
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 def test_update_dashboard_figures_retry_on_global_failure(
     afghanistan: BusinessArea,
 ) -> None:
@@ -95,7 +106,6 @@ def test_update_dashboard_figures_retry_on_global_failure(
         mock_global_refresh.assert_called_once_with()
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -> None:
     """
     Test that generate_dash_report_task retries on failure.
@@ -110,7 +120,6 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
         mock_refresh.assert_called_once_with(afghanistan.slug)
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_success(
@@ -141,7 +150,6 @@ def test_update_recent_dashboard_figures_success(
     mock_global_refresh.assert_called_once_with(years_to_refresh=years_to_refresh)
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hope.apps.dashboard.celery_tasks.logger.error")
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
@@ -186,7 +194,6 @@ def test_update_recent_dashboard_figures_ba_error_continues(
     )
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hope.apps.dashboard.celery_tasks.logger.error")
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
@@ -219,7 +226,6 @@ def test_update_recent_dashboard_figures_global_error_continues(
     )
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:
@@ -235,7 +241,6 @@ def test_update_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_glob
     mock_global_refresh.assert_called_once_with()
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:

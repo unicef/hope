@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.test import TestCase
 
 from extras.test_utils.factories.core import create_afghanistan
@@ -15,7 +14,6 @@ class TestHouseholdWithdraw(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         create_afghanistan()
 
     def test_withdraw(self) -> None:

@@ -11,7 +11,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.api.serializers import PDU_ONLINE_EDIT_RELATED_PERMISSIONS
 from hope.models import Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPDUOnlineEditUsersAvailable:

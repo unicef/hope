@@ -6,6 +6,8 @@ import {
   MenuItem,
   Select,
   Typography,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { PageHeader } from '@components/core/PageHeader';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +78,7 @@ const OfficeSearchPage = (): ReactElement => {
     searchFor: '',
     basedOnId: '',
     officeSearch: '',
+    activePrograms: false,
   };
 
   const [filter, setFilter] = useState(
@@ -106,26 +109,31 @@ const OfficeSearchPage = (): ReactElement => {
   const hhQueryVariables = {
     businessAreaSlug: businessArea,
     officeSearch: appliedFilter.officeSearch,
+    activeProgramsOnly: appliedFilter.activePrograms ? 'true' : undefined,
   };
 
   const indQueryVariables = {
     businessAreaSlug: businessArea,
     officeSearch: appliedFilter.officeSearch,
+    activeProgramsOnly: appliedFilter.activePrograms ? 'true' : undefined,
   };
 
   const grvQueryVariables = {
     businessAreaSlug: businessArea,
     officeSearch: appliedFilter.officeSearch,
+    activeProgramsOnly: appliedFilter.activePrograms ? 'true' : undefined,
   };
 
   const ppQueryVariables = {
     businessAreaSlug: businessArea,
     officeSearch: appliedFilter.officeSearch,
+    activeProgramsOnly: appliedFilter.activePrograms ? 'true' : undefined,
   };
 
   const paymentsQueryVariables = {
     businessAreaSlug: businessArea,
     officeSearch: appliedFilter.officeSearch,
+    activeProgramsOnly: appliedFilter.activePrograms ? 'true' : undefined,
   };
 
   // Query variables for Payment Plans and Payments
@@ -141,6 +149,7 @@ const OfficeSearchPage = (): ReactElement => {
       hhQueryVariables,
       businessArea,
       appliedFilter.officeSearch,
+      appliedFilter.activePrograms,
     ],
     queryFn: () =>
       RestService.restBusinessAreasHouseholdsList(
@@ -162,6 +171,7 @@ const OfficeSearchPage = (): ReactElement => {
       indQueryVariables,
       businessArea,
       appliedFilter.officeSearch,
+      appliedFilter.activePrograms,
     ],
     queryFn: () =>
       RestService.restBusinessAreasIndividualsList(
@@ -184,6 +194,7 @@ const OfficeSearchPage = (): ReactElement => {
       businessArea,
       appliedFilter.searchFor,
       appliedFilter.officeSearch,
+      appliedFilter.activePrograms,
     ],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsList(
@@ -206,6 +217,7 @@ const OfficeSearchPage = (): ReactElement => {
       businessArea,
       appliedFilter.officeSearch,
       appliedFilter.searchFor,
+      appliedFilter.activePrograms,
     ],
     queryFn: () =>
       RestService.restBusinessAreasPaymentPlansList(
@@ -228,6 +240,7 @@ const OfficeSearchPage = (): ReactElement => {
       paymentsQueryVariables,
       businessArea,
       appliedFilter.officeSearch,
+      appliedFilter.activePrograms,
     ],
     queryFn: () =>
       RestService.restBusinessAreasPaymentsList(
@@ -341,7 +354,7 @@ const OfficeSearchPage = (): ReactElement => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={6}>
+            <Grid size={3}>
               <SearchTextField
                 label={t('Search Value')}
                 value={filter.officeSearch}
@@ -349,6 +362,21 @@ const OfficeSearchPage = (): ReactElement => {
                   handleFilterChange('officeSearch', e.target.value)
                 }
                 data-cy="office-filters-search"
+              />
+            </Grid>
+            <Grid size={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(filter.activePrograms)}
+                    onChange={(e) =>
+                      handleFilterChange('activePrograms', e.target.checked)
+                    }
+                    name="active_programs"
+                    data-cy="active-programs-checkbox"
+                  />
+                }
+                label={t('Only Active Programs')}
               />
             </Grid>
           </Grid>

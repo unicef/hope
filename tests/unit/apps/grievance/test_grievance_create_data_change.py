@@ -8,7 +8,7 @@ from rest_framework import status
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
@@ -29,18 +29,19 @@ from hope.apps.household.const import (
     UNHCR,
     WIDOWED,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import AccountType, BusinessArea, DocumentType, Partner, Program, country as geo_models
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.usefixtures("mock_elasticsearch"),
+    pytest.mark.django_db(),
+]
 
 
-@pytest.mark.elasticsearch
 class TestGrievanceCreateDataChangeAction:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         call_command("generatedocumenttypes")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
@@ -177,8 +178,6 @@ class TestGrievanceCreateDataChangeAction:
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         self.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
 
-        rebuild_search_index()
-
         self.list_url = reverse(
             "api:grievance-tickets:grievance-tickets-global-list",
             kwargs={"business_area_slug": self.afghanistan.slug},
@@ -212,6 +211,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "123-123-UX-321",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
@@ -266,6 +266,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
                                     "country": "POL",
                                     "number": "321-321-XU-987",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
@@ -275,6 +276,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                     "country": "POL",
                                     "number": "321-321-XU-123",
+                                    "new_photo": None,
                                     # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],

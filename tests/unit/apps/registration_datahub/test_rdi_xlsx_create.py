@@ -7,7 +7,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
@@ -20,7 +19,7 @@ from extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from extras.test_utils.factories.geo import AreaFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
     IndividualFactory,
     PendingIndividualFactory,
@@ -33,7 +32,6 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     BusinessArea,
     Country as GeoCountry,
@@ -50,7 +48,7 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
 def create_document_image() -> File:
@@ -75,12 +73,18 @@ class CellMock:
         self.coordinate = coordinate
 
 
-@pytest.mark.elasticsearch
 class TestRdiXlsxCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test xlsx file (new_reg_data_import.xlsx)
+        afghanistan = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        area_type_l1 = AreaTypeFactory(country=afghanistan, area_level=1)
+        area_type_l2 = AreaTypeFactory(country=afghanistan, area_level=2, parent=area_type_l1)
+
         generate_delivery_mechanisms()
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,
@@ -99,8 +103,8 @@ class TestRdiXlsxCreateTask(TestCase):
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = create_afghanistan()
-        parent = AreaFactory(p_code="AF11", name="Name")
-        AreaFactory(p_code="AF1115", name="Name2", parent=parent)
+        parent = AreaFactory(p_code="AF11", name="Name", area_type=area_type_l1)
+        AreaFactory(p_code="AF1115", name="Name2", parent=parent, area_type=area_type_l2)
 
         from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -144,7 +148,6 @@ class TestRdiXlsxCreateTask(TestCase):
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
-        rebuild_search_index()
 
     def test_execute_xd(self) -> None:
         task = self.RdiXlsxCreateTask()

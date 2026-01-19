@@ -1,8 +1,8 @@
-from django.core.management import call_command
 import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import create_afghanistan
 from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
@@ -18,7 +18,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.models import BusinessArea, IndividualRoleInHousehold
+from hope.models import IndividualRoleInHousehold
 from hope.models.utils import MergeStatusModel
 
 
@@ -26,9 +26,7 @@ class TestReassignRolesOnUpdate(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadbusinessareas")
-
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
 
         cls.household = HouseholdFactory.build(program=cls.program_one)

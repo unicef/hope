@@ -56,7 +56,7 @@ from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import DocumentType, FlexibleAttribute, Household, Payment, Program
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestHouseholdList:
@@ -1729,6 +1729,56 @@ class TestHouseholdOfficeSearch:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.household4.id)
 
+    def test_search_with_active_programs_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
+        finished_household, finished_individuals = create_household_and_individuals(
+            household_data={
+                "program": finished_program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        # Set same phone number for both active and finished program individuals
+        self.individuals1[0].phone_no = "+5551234567"
+        self.individuals1[0].save()
+
+        finished_individuals[0].phone_no = "+5551234567"
+        finished_individuals[0].save()
+
+        # First, search WITHOUT active_programs filter - should return both households
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551234567", "active_programs_only": "false"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.household1.id) in result_ids
+        assert str(finished_household.id) in result_ids
+
+        # Now search WITH active_programs_only filter - should only return active program household
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551234567", "active_programs_only": "true"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.household1.id)
+
 
 class TestHouseHoldChoices:
     @pytest.fixture(autouse=True)
@@ -1763,6 +1813,7 @@ class TestHouseHoldChoices:
         }
 
 
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestHouseholdFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -2043,6 +2094,80 @@ class TestHouseholdFilter:
             household2_data={"residence_status": HOST},
         )
 
+    def test_filter_by_last_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"last_registration_date_after": "2022-12-31"},
+            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
+            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
+        )
+
+    def test_filter_by_first_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"first_registration_date": "2022-12-31 00:00:00"},
+            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
+            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
+        )
+
+
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+class TestHouseholdFilterSearch:
+    """Tests for ES-based household search functionality. These tests need actual Elasticsearch."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.list_url = reverse(
+            "api:households:households-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
+        )
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+    def _create_test_households(
+        self,
+        household1_data: Optional[dict] = None,
+        household2_data: Optional[dict] = None,
+        hoh_1_data: Optional[dict] = None,
+        hoh_2_data: Optional[dict] = None,
+    ) -> Tuple[Household, Household]:
+        if household2_data is None:
+            household2_data = {}
+        if household1_data is None:
+            household1_data = {}
+        if hoh_1_data is None:
+            hoh_1_data = {}
+        if hoh_2_data is None:
+            hoh_2_data = {}
+        household1, _ = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                **household1_data,
+            },
+            individuals_data=[hoh_1_data, {}],
+        )
+        household2, _ = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                **household2_data,
+            },
+            individuals_data=[hoh_2_data, {}],
+        )
+        return household1, household2
+
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
         ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
@@ -2098,7 +2223,7 @@ class TestHouseholdFilter:
             ),
         ],
     )
-    def test_1_search(
+    def test_search(
         self,
         filters: Dict,
         household1_data: Dict,
@@ -2118,18 +2243,3 @@ class TestHouseholdFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(household1.id)
-        return response_data
-
-    def test_filter_by_last_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"last_registration_date_after": "2022-12-31"},
-            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
-            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
-        )
-
-    def test_filter_by_first_registration_date(self) -> None:
-        self._test_filter_households_in_list(
-            filters={"first_registration_date": "2022-12-31 00:00:00"},
-            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
-            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
-        )

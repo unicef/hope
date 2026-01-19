@@ -3,7 +3,6 @@ from typing import Any
 
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -14,7 +13,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
@@ -60,7 +59,6 @@ from hope.apps.household.const import (
     SINGLE,
     WIDOWED,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AdminAreaLimitedTo,
     BusinessArea,
@@ -76,10 +74,12 @@ from hope.models.utils import MergeStatusModel
 pytestmark = pytest.mark.django_db()
 
 
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestGrievanceTicketUpdate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
@@ -211,8 +211,6 @@ class TestGrievanceTicketUpdate:
 
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         self.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-
-        rebuild_search_index()
 
         self.household_data_change_grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -869,7 +867,8 @@ class TestGrievanceTicketUpdate:
 class TestGrievanceTicketApprove:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)

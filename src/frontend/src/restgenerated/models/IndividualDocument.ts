@@ -6,7 +6,7 @@ export type IndividualDocument = {
     country: string;
     key: string;
     number: string;
+    newPhoto?: string | null;
     photo?: string | null;
-    photoraw?: string | null;
 };
 

@@ -9,6 +9,11 @@ from hope.models.country import Country, UpgradeModel, ValidityManager
 from hope.models.utils import TimeStampedUUIDModel
 
 
+class AreaTypeManager(ValidityManager):
+    def get_by_natural_key(self, name: str, country: str, area_level: int) -> "AreaType":
+        return self.get(name=name, country__iso_code3=country, area_level=area_level)
+
+
 class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
@@ -25,7 +30,7 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     valid_until = models.DateTimeField(blank=True, null=True)
     extras = JSONField(default=dict, blank=True)
 
-    objects = ValidityManager()
+    objects = AreaTypeManager()
 
     class Meta:
         app_label = "geo"
