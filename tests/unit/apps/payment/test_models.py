@@ -267,7 +267,7 @@ class TestPaymentPlanModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        # Status != OPEN
+        # PP with Status != OPEN
         pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED)
         assert pp1.can_be_locked is False
 
