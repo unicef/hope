@@ -12,7 +12,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState, useMemo, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import { PaymentsFilters } from '../../paymentmodule/PaymentsTable/PaymentsFilters';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ import { WarningTooltipTable } from './WarningTooltipTable';
 import { createApiParams } from '@utils/apiUtils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { useProgramContext } from 'src/programContext';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -41,12 +42,16 @@ const PeoplePaymentsTable = ({
   canViewDetails = false,
 }: PeoplePaymentsTableProps): ReactElement => {
   const { baseUrl, programId } = useBaseUrl();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { t } = useTranslation();
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
   const location = useLocation();
   const initialFilter = {
     householdUnicefId: '',
+    individualUnicefId: '',
     collectorFullName: '',
     paymentPk: '',
   };
@@ -68,6 +73,7 @@ const PeoplePaymentsTable = ({
       businessAreaSlug: businessArea,
       programSlug: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
+      individualUnicefId: appliedFilter.individualUnicefId || null,
       collectorFullName: appliedFilter.collectorFullName || null,
       paymentUnicefId: appliedFilter.paymentUnicefId || null,
     }),
@@ -75,6 +81,7 @@ const PeoplePaymentsTable = ({
       businessArea,
       programId,
       appliedFilter.householdUnicefId,
+      appliedFilter.individualUnicefId,
       appliedFilter.collectorFullName,
       appliedFilter.paymentUnicefId,
     ],
@@ -137,6 +144,26 @@ const PeoplePaymentsTable = ({
   });
 
   const itemsCount = usePersistedCount(page, paymentsCount);
+
+  const replacements = isSocialDctType
+    ? {
+        individual__unicef_id: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.memberLabel} ${t('ID')}`,
+        household__size: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+      }
+    : {
+        household__unicef_id: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
+        household__size: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+      };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
   const handleAppliedFilterChange = (newFilter) => {
     setAppliedFilter(newFilter);
     setShouldScroll(true);
@@ -170,7 +197,7 @@ const PeoplePaymentsTable = ({
             </StyledBox>
             <UniversalRestTable
               isOnPaper={false}
-              headCells={headCells}
+              headCells={adjustedHeadCells}
               rowsPerPageOptions={[10, 25, 50]}
               defaultOrderBy="createdAt"
               defaultOrderDirection="desc"
