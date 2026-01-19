@@ -176,6 +176,7 @@ export const GlobalProgramSelect = () => {
       pduFields: null,
       programmeCode: null,
       slug: null,
+      canImportRdi: true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -196,6 +197,7 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           programmeCode,
           slug,
+          canImportRdi,
         } = program;
 
         setSelectedProgram({
@@ -207,6 +209,7 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup,
           programmeCode,
           slug,
+          canImportRdi,
         });
       }
     }
