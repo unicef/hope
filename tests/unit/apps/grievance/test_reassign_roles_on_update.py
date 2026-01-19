@@ -1,6 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.household import (
