@@ -17,7 +17,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import Payment, PDUOnlineEdit, PeriodicFieldData, Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPDUOnlineEditCreate:

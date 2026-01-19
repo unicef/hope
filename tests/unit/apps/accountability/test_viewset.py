@@ -1119,10 +1119,10 @@ class TestMessageViewSet:
         birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
         self.households = [
             create_household(
-                household_args={"program": self.program_active},
+                household_args={"program": self.program_active, "size": 1},
                 individual_args={"birth_date": birth_date_for_50yo, "sex": "MALE"},
             )[0]
-            for _ in range(14)
+            for _ in range(3)
         ]
         for hh in self.households:
             PaymentFactory(
@@ -1603,7 +1603,7 @@ class TestMessageViewSet:
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json() == {
-            "number_of_recipients": 14,
+            "number_of_recipients": 3,
             "sample_size": 1,
             "excluded_recipients_count": 0,
         }

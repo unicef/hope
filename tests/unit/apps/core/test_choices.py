@@ -1,10 +1,10 @@
 from typing import Any
 
-from django.core.management import call_command
 from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.geo import CountryFactory
 from hope.apps.core.languages import LANGUAGES, Languages
 
 pytestmark = pytest.mark.django_db
@@ -93,10 +93,11 @@ class TestChoicesViewSet:
         assert len(response_none.data) == 0
 
     def test_get_countries(self) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         response = self.client.get(reverse("api:choices-countries"))
         assert response.status_code == 200
         response_data = response.data
         assert response_data is not None
-        assert len(response_data) == 250
+        assert len(response_data) == 2
         assert response_data[0] == {"name": "Afghanistan", "value": "AFG"}
