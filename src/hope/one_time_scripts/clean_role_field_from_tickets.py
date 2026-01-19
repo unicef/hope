@@ -82,4 +82,3 @@ def clean_role_field_from_tickets() -> None:
         f"Cleaned 'role' field from {add_individual_count} Add Individual tickets "
         f"and {individual_data_update_count} Individual Data Update tickets"
     )
-
