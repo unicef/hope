@@ -21,13 +21,11 @@ from hope.apps.grievance.services.data_change.add_individual_service import (
 )
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
 from hope.apps.household.const import SINGLE
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Document, Individual, IndividualIdentity
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestAddIndividualService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -53,8 +51,6 @@ class TestAddIndividualService(TestCase):
 
         cls.household = household
         cls.ticket = ticket
-
-        rebuild_search_index()
 
     def test_increase_household_size_on_close_ticket(self) -> None:
         self.household.size = 3

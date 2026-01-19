@@ -10,7 +10,7 @@ from hope.apps.program.collision_detectors import IdentificationKeyCollisionDete
 from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hope.models import Country, Household, PendingIndividual, Program, RegistrationDataImport
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture

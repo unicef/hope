@@ -1,27 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 
-export const useDownloadPeriodicDataUpdateTemplate = () => {
-  return useMutation({
-    mutationFn: ({
-      businessAreaSlug,
-      programSlug,
-      templateId,
-    }: {
-      businessAreaSlug: string;
-      programSlug: string;
-      templateId: number;
-    }) =>
-      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesDownloadRetrieve(
-        {
-          businessAreaSlug,
-          programSlug,
-          id: templateId,
-        },
-      ),
-  });
-};
-
 export const useExportPeriodicDataUpdateTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({

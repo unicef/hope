@@ -4,7 +4,6 @@ import uuid
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -19,7 +18,6 @@ class TestMarkSubmissions(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()

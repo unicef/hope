@@ -10,7 +10,7 @@ from rest_framework import status
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
@@ -28,7 +28,8 @@ pytestmark = pytest.mark.django_db()
 class TestGrievanceApproveAutomaticTickets:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="India", short_name="India", iso_code2="IN", iso_code3="IND", iso_num="0356")
         self.business_area = create_afghanistan()
         self.business_area.biometric_deduplication_threshold = 33.33
         self.business_area.save()
