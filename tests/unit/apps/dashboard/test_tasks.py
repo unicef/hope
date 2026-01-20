@@ -4,7 +4,7 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
 from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
     update_dashboard_figures,

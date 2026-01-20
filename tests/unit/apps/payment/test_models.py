@@ -16,19 +16,19 @@ from django.utils import timezone
 from django.utils.timezone import now
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -38,10 +38,10 @@ from extras.test_utils.factories.payment import (
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.steficon import RuleCommitFactory
+from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.currencies import USDC
 from hope.apps.household.const import (
     LOT_DIFFICULTY,

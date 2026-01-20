@@ -7,8 +7,8 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from extras.test_utils.factories.account import BusinessAreaFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import ImportData, Program, RegistrationDataImport
 from hope.models.utils import Grant

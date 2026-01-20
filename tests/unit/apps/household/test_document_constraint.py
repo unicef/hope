@@ -2,10 +2,10 @@ from django.db import IntegrityError
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import DocumentTypeFactory, create_household
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import DocumentTypeFactory, create_household
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import Country, Document
 from hope.models.utils import MergeStatusModel
 

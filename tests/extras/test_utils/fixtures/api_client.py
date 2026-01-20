@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional
 import pytest
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.models import User
 
 

@@ -4,14 +4,14 @@ from typing import Any, Dict, List
 from dateutil.relativedelta import relativedelta
 from flaky import flaky
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import FlexibleAttributeFactory, create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import FlexibleAttributeFactory, create_afghanistan
+from extras.test_utils.old_factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models import (
     BusinessArea,

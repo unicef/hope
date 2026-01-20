@@ -10,19 +10,19 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     AdminAreaLimitedToFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.accountability import FeedbackFactory, SurveyFactory
-from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.accountability import FeedbackFactory, SurveyFactory
+from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.old_factories.geo import AreaFactory
+from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.models import INACTIVE, USER_STATUS_CHOICES, BusinessArea, Message, Partner, Program, Role

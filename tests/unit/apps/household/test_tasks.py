@@ -1,15 +1,15 @@
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import Household, Program
