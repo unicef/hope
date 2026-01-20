@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Any, Callable
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
@@ -8,7 +7,6 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -20,7 +18,7 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.validators import validate_file
-from hope.models import Feedback, Individual, Partner, User
+from hope.models import Individual, Partner
 
 logger = logging.getLogger(__name__)
 

@@ -119,25 +119,21 @@ DATABASE_APPS_MAPPING: dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hope.apps.core.dbrouters.DbRouter",)
 
-MIDDLEWARE = (
-    [
-    ]
-    + [
-        "corsheaders.middleware.CorsMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "hijack.middleware.HijackUserMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-        "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
-        "hope.middlewares.sentry.SentryScopeMiddleware",
-        "hope.middlewares.version.VersionMiddleware",
-    ]
-)
+MIDDLEWARE = [] + [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "hope.middlewares.sentry.SentryScopeMiddleware",
+    "hope.middlewares.version.VersionMiddleware",
+]
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 

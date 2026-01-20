@@ -5,17 +5,12 @@ from typing import Any, Callable
 from dateutil.parser import parse
 from django.db.models import QuerySet
 from django.forms import (
-    CharField,
     DateField,
     DateTimeField,
-    DecimalField,
-    Field,
     IntegerField,
 )
 from django.utils import timezone
 from django_filters import Filter
-
-from hope.models import BusinessArea
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
@@ -64,4 +59,3 @@ class IntegerFilter(Filter):
     """Custom Integer filter to parse Decimal values."""
 
     field_class = IntegerField
-

@@ -3,7 +3,6 @@ from enum import Enum, auto, unique
 import hashlib
 import json
 import logging
-import sys
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
 
 import celery
@@ -16,7 +15,6 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
-from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
@@ -26,8 +24,6 @@ from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 import redis
-import requests
-import sentry_sdk
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
