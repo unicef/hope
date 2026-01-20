@@ -34,11 +34,9 @@ class HouseholdFactory(DjangoModelFactory):
             return
 
         if extracted:
-            # Use provided individual
             self.head_of_household = extracted
             individual = extracted
         else:
-            # Create new individual as head of household
             individual = IndividualFactory(
                 household=self,
                 business_area=self.business_area,
@@ -49,7 +47,6 @@ class HouseholdFactory(DjangoModelFactory):
 
         self.save()
 
-        # Create primary collector role
         IndividualRoleInHouseholdFactory(
             household=self,
             individual=individual,
