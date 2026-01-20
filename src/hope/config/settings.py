@@ -121,7 +121,6 @@ DATABASE_ROUTERS = ("hope.apps.core.dbrouters.DbRouter",)
 
 MIDDLEWARE = (
     [
-        # "hope.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
     ]
     + [
         "corsheaders.middleware.CorsMiddleware",

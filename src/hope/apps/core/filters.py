@@ -38,58 +38,6 @@ def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
     return None
 
 
-class IntegerRangeField(Field):
-    def clean(self, value: Any) -> dict | None:
-        return _clean_data_for_range_field(value, IntegerField)
-
-
-class DecimalRangeField(Field):
-    def clean(self, value: Any) -> dict | None:
-        return _clean_data_for_range_field(value, DecimalField)
-
-
-class DateTimeRangeField(Field):
-    def clean(self, value: Any) -> dict | None:
-        return _clean_data_for_range_field(value, DateTimeField)
-
-
-class DateRangeField(Field):
-    def clean(self, value: Any) -> dict | None:
-        return _clean_data_for_range_field(value, DateField)
-
-
-class BaseRangeFilter(Filter):
-    field_class: type[Field] | None = None
-
-    def filter(self, qs: QuerySet, values: tuple) -> QuerySet:
-        if values:
-            min_value = values.get("min")
-            max_value = values.get("max")
-            if min_value is not None and max_value is not None:
-                self.lookup_expr = "range"
-                values = (min_value, max_value)
-            elif min_value is not None and max_value is None:
-                self.lookup_expr = "gte"
-                values = min_value
-            elif min_value is None and max_value is not None:
-                self.lookup_expr = "lte"
-                values = max_value
-
-        return super().filter(qs, values)
-
-
-class IntegerRangeFilter(BaseRangeFilter):
-    field_class = IntegerRangeField
-
-
-class DateTimeRangeFilter(BaseRangeFilter):
-    field_class = DateTimeRangeField
-
-
-class DecimalRangeFilter(BaseRangeFilter):
-    field_class = DecimalRangeField
-
-
 def filter_age(field_name: str, qs: QuerySet, min_age: int | None, max_age: int | None) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
@@ -117,14 +65,3 @@ class IntegerFilter(Filter):
 
     field_class = IntegerField
 
-
-class BusinessAreaSlugFilter(Filter):
-    field_class = CharField
-
-    def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
-        if not business_area_slug:
-            return qs
-        ba = BusinessArea.objects.only("id").get(slug=business_area_slug)
-        if business_area_slug:
-            return qs.filter(business_area_id=ba.id)
-        return qs
