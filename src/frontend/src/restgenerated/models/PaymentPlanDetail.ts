@@ -303,8 +303,8 @@ export type PaymentPlanDetail = {
      * Exclusion reason (Targeting level) [sys]
      */
     excludeHouseholdError?: string | null;
-    bankReconciliationSuccess: number;
-    bankReconciliationError: number;
+    readonly bankReconciliationSuccess: number;
+    readonly bankReconciliationError: number;
     canCreatePaymentVerificationPlan: boolean;
     readonly availablePaymentRecordsCount: number;
     readonly reconciliationSummary: Record<string, number>;
@@ -317,7 +317,7 @@ export type PaymentPlanDetail = {
     readonly canSplit: boolean;
     readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
     readonly totalHouseholdsCountWithValidPhoneNo: number;
-    isPaymentGatewayAndAllSentToFsp: boolean;
+    readonly isPaymentGatewayAndAllSentToFsp: boolean;
     fspCommunicationChannel: string;
     readonly financialServiceProvider: FinancialServiceProvider;
     readonly canExportXlsx: boolean;
