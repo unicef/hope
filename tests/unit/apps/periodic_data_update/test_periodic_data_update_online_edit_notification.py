@@ -5,10 +5,10 @@ from constance.test import override_config
 from django.test import override_settings
 import pytest
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.periodic_data_update import PDUOnlineEditFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
 from hope.models import BusinessArea, PDUOnlineEdit, Role, RoleAssignment

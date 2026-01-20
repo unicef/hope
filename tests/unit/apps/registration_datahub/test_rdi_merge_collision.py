@@ -4,10 +4,10 @@ from typing import Callable, Generator
 from django.db import DEFAULT_DB_ALIAS, connections
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import MALE, REMOVED_BY_COLLISION
 from hope.models import Area, AreaType, Country, Household, Individual, Program, RegistrationDataImport
 

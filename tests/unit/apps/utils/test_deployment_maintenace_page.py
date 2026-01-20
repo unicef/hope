@@ -2,7 +2,7 @@ from unittest import skip
 
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.apps.core.base_test_case import BaseTestCase
 
 

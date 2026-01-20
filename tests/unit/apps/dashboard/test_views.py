@@ -9,7 +9,7 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,

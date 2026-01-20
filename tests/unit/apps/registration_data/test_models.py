@@ -3,16 +3,16 @@ import datetime
 from django.test import TestCase
 from freezegun import freeze_time
 
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import PartnerFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import (
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )

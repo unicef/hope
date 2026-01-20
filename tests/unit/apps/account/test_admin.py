@@ -11,14 +11,14 @@ from django.urls import reverse
 from django_webtest import DjangoTestApp
 import pytest
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.old_factories.core import create_afghanistan
 from hope.admin.account_forms import RoleAssignmentAdminForm
 from hope.admin.partner import PartnerAdmin
 from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin

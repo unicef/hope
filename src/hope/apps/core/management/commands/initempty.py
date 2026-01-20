@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
-from extras.test_utils.factories.account import create_superuser
+from extras.test_utils.old_factories.account import create_superuser
 
 
 class Command(BaseCommand):
