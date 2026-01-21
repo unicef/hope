@@ -6,7 +6,7 @@ from factory.django import DjangoModelFactory
 import factory.fuzzy
 from pytz import utc
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.models import Area, BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, User
 
 

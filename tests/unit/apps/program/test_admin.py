@@ -2,27 +2,41 @@ from io import BytesIO
 from unittest.mock import MagicMock, patch
 import zipfile
 
+from concurrency.forms import get_signer
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms.models import model_to_dict
 from django.test import RequestFactory
 from django.urls import reverse
 from django_webtest import WebTest
 import pytest
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from extras.test_utils.factories.household import IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
-from hope.admin.program import ProgramAdmin, bulk_upload_individuals_photos_action
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.old_factories.household import IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from hope.admin.program import ProgramAdmin, ProgramAdminForm, bulk_upload_individuals_photos_action
+from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
 from hope.models import AdminAreaLimitedTo, Area, FileTemp, Partner, Program, RoleAssignment
 
 pytestmark = pytest.mark.django_db()
+
+
+def _program_form_data(program: Program, **overrides: object) -> dict:
+    data = model_to_dict(program)
+    data["collision_detector"] = program._meta.get_field("collision_detector").value_to_string(program)
+    version = data.get("version")
+    if version is not None:
+        signed = get_signer().sign(version)
+        data["version"] = signed if signed is not None else ""
+    data.update(overrides)
+    return data
 
 
 class ProgramAdminTest(WebTest):
@@ -134,76 +148,115 @@ class ProgramAdminTest(WebTest):
         )
         assert not AdminAreaLimitedTo.objects.filter(partner=self.partner_with_role, program=self.program).exists()
 
-    def test_save_model_existing_program_enable_biometric_deduplication_calls_service(self) -> None:
+    def test_form_existing_program_enable_biometric_deduplication_calls_service(self) -> None:
         """
         If obj.pk exists and biometric_deduplication_enabled changes False -> True,
         admin should create the deduplication set and mark RDIs as pending.
         """
         program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
-        obj = Program.objects.get(pk=program.pk)  # original in DB: False
-        obj.biometric_deduplication_enabled = True  # changed in memory: True
-
-        url = reverse(
-            "admin:program_program_change",
-            args=[program.pk],
-        )
-        request = RequestFactory().post(url)
-        request.user = self.user
-
-        admin_instance = ProgramAdmin(Program, AdminSite())
+        data = _program_form_data(program, biometric_deduplication_enabled=True)
+        form = ProgramAdminForm(data=data, instance=program)
 
         with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-            admin_instance.save_model(request, obj, None, True)
+            assert form.is_valid()
             service = service_cls.return_value
+            service.create_deduplication_set.assert_called_once_with(program)
             service.mark_rdis_as_pending.assert_called_once_with(program)
             service.delete_deduplication_set.assert_not_called()
 
-    def test_save_model_existing_program_disable_biometric_deduplication_calls_service(self) -> None:
+    def test_form_existing_program_disable_biometric_deduplication_calls_service(self) -> None:
         """
         If obj.pk exists and biometric_deduplication_enabled changes True -> False,
         admin should delete the deduplication set.
         """
         program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=True)
-        obj = Program.objects.get(pk=program.pk)
-        obj.biometric_deduplication_enabled = False
-
-        url = reverse(
-            "admin:program_program_change",
-            args=[program.pk],
-        )
-        request = RequestFactory().post(url)
-        request.user = self.user
-
-        admin_instance = ProgramAdmin(Program, AdminSite())
+        data = _program_form_data(program, biometric_deduplication_enabled=False)
+        form = ProgramAdminForm(data=data, instance=program)
 
         with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-            admin_instance.save_model(request, obj, None, True)
+            assert form.is_valid()
 
             service = service_cls.return_value
-            service.delete_deduplication_set.assert_called_once_with(obj)
+            service.delete_deduplication_set.assert_called_once_with(program)
             service.create_deduplication_set.assert_not_called()
             service.mark_rdis_as_pending.assert_not_called()
 
-    def test_save_model_new_program_does_not_call_deduplication_service(self) -> None:
-        """
-        When creating a new program (no pk yet), deduplication hooks should not run.
-        """
-        obj = ProgramFactory.build(
-            business_area=self.business_area,
-            biometric_deduplication_enabled=True,
-        )
-        obj.pk = None  # emulate new unsaved instance
-
-        request = RequestFactory().post(reverse("admin:program_program_add"))
-        request.user = self.user
-        admin_instance = ProgramAdmin(Program, AdminSite())
+    def test_form_existing_program_same_biometric_deduplication_value_does_not_call_service(self) -> None:
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
+        data = _program_form_data(program)
+        form = ProgramAdminForm(data=data, instance=program)
 
         with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-            admin_instance.save_model(request, obj, None, False)
+            assert form.is_valid()
 
         service_cls.assert_not_called()
-        assert obj.pk is not None
-        assert Program.objects.filter(pk=obj.pk).exists()
+
+    def test_form_new_program_biometric_enabled_calls_service(self) -> None:
+        """
+        When creating a new program with biometric deduplication enabled,
+        admin should create the deduplication set.
+        """
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=True)
+        programme_code = ProgramFactory.generate_programme_code(program)
+        data = _program_form_data(
+            program,
+            name=f"{program.name}-new",
+            programme_code=programme_code,
+            slug=programme_code.lower(),
+        )
+        form = ProgramAdminForm(data=data)
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            assert form.is_valid()
+
+        service = service_cls.return_value
+        service.create_deduplication_set.assert_called_once()
+        service.mark_rdis_as_pending.assert_called_once()
+        service.delete_deduplication_set.assert_not_called()
+
+    def test_form_new_program_biometric_disabled_does_not_call_service(self) -> None:
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
+        programme_code = ProgramFactory.generate_programme_code(program)
+        data = _program_form_data(
+            program,
+            name=f"{program.name}-new",
+            programme_code=programme_code,
+            slug=programme_code.lower(),
+            biometric_deduplication_enabled=False,
+        )
+        form = ProgramAdminForm(data=data)
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            assert form.is_valid()
+
+        service_cls.assert_not_called()
+
+    def test_form_api_exception_blocks_save_and_shows_error(self) -> None:
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
+        data = _program_form_data(program, biometric_deduplication_enabled=True)
+        form = ProgramAdminForm(data=data, instance=program)
+
+        with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
+            service = service_cls.return_value
+            service.create_deduplication_set.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError(
+                "API failure"
+            )
+            assert not form.is_valid()
+
+        assert "BiometricDeduplicationService Error" in form.errors["__all__"][0]
+        program.refresh_from_db()
+        assert program.biometric_deduplication_enabled is False
+
+    def test_form_missing_credentials_blocks_save_and_shows_error(self) -> None:
+        program = ProgramFactory(business_area=self.business_area, biometric_deduplication_enabled=False)
+        data = _program_form_data(program, biometric_deduplication_enabled=True)
+        form = ProgramAdminForm(data=data, instance=program)
+
+        error = DeduplicationEngineAPI.DeduplicationEngineMissingAPICredentialsError("Missing credentials")
+        with patch("hope.admin.program.BiometricDeduplicationService", side_effect=error):
+            assert not form.is_valid()
+
+        assert "BiometricDeduplicationService Error" in form.errors["__all__"][0]
 
 
 class TestProgramAdminBulkUploadIndividualsPhotos:

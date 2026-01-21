@@ -1,8 +1,8 @@
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.const import (
     FEMALE,
     MALE,

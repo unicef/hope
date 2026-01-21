@@ -4,15 +4,15 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.payment import PaymentFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.payment import PaymentFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import Payment, PDUOnlineEdit, PeriodicFieldData, Program

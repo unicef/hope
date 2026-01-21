@@ -6,8 +6,8 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.periodic_data_update import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
 )
 from hope.apps.periodic_data_update.celery_tasks import (

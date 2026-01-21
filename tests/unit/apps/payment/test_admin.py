@@ -6,8 +6,8 @@ from django.test import TestCase
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,

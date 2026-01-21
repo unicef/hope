@@ -9,14 +9,14 @@ from django.test import TestCase
 from flags.models import FlagState
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     IndividualFactory,
     PendingIndividualFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,

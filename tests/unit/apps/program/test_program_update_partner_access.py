@@ -5,14 +5,14 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import AdminAreaLimitedTo, Program, RoleAssignment
 

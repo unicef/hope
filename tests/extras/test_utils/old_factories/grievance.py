@@ -7,9 +7,9 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentVerificationFactory,
 )

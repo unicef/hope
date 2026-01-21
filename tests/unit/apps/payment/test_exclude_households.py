@@ -1,18 +1,18 @@
 from typing import Any
 from unittest import mock
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries

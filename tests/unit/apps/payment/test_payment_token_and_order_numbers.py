@@ -3,10 +3,10 @@ from django.db import IntegrityError
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
 from hope.models import Country, Household, Payment, PaymentPlan

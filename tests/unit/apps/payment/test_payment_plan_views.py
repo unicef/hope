@@ -18,14 +18,14 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import IndividualRoleInHouseholdFactory, create_household_and_individuals
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import IndividualRoleInHouseholdFactory, create_household_and_individuals
+from extras.test_utils.old_factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismFactory,
@@ -36,8 +36,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet

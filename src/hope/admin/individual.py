@@ -50,6 +50,9 @@ class IndividualAccountInline(admin.TabularInline):
     raw_fields = ("financial_institution",)
     readonly_fields = ("view_link",)
 
+    def get_queryset(self, request):
+        return Account.all_objects.select_related("financial_institution")
+
     def view_link(self, obj: Any) -> str:
         if obj.pk:
             url = reverse("admin:payment_account_change", args=[obj.pk])

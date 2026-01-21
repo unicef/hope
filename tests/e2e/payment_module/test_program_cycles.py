@@ -7,9 +7,9 @@ from selenium.webdriver.common.by import By
 
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import BeneficiaryGroup, DataCollectingType, Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db()

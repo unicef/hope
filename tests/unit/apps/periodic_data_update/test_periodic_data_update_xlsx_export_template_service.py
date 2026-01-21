@@ -2,17 +2,17 @@ from django.test import TestCase
 from freezegun import freeze_time
 import openpyxl
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.periodic_data_update import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,

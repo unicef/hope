@@ -3,9 +3,9 @@ from typing import Dict, Tuple
 
 from django.test import TestCase
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )

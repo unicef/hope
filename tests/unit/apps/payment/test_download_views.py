@@ -4,8 +4,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.payment import (
     PaymentPlanFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,

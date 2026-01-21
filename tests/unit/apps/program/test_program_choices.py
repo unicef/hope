@@ -4,8 +4,8 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.models import DataCollectingType, PeriodicFieldData, Program, ProgramCycle
