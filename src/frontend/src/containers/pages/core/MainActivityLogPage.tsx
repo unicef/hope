@@ -20,7 +20,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
- 
+
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string; userId?: string } = {};
   if (filters.userId !== '') {
@@ -126,7 +126,7 @@ export function ActivityLogPage(): ReactElement {
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.ACTIVITY_LOG_VIEW} />;
 
   if (!logsData && !logsLoading) {
     return <EmptyTable />;

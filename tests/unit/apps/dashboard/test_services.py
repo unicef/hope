@@ -3,6 +3,7 @@ from datetime import timezone as dt_timezone
 from decimal import Decimal
 import json
 from typing import Any, Callable, Dict, Optional, Type
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -30,6 +31,18 @@ from hope.apps.dashboard.services import (
     get_pwd_count_expression,
 )
 from hope.models import BusinessArea, Household, Payment, PaymentPlan, Program
+
+
+@pytest.fixture
+def use_default_db_for_dashboard():
+    with (
+        patch("hope.apps.dashboard.services.settings.DASHBOARD_DB", "default"),
+        patch("hope.apps.dashboard.celery_tasks.settings.DASHBOARD_DB", "default"),
+    ):
+        yield
+
+
+pytestmark = pytest.mark.usefixtures("use_default_db_for_dashboard")
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -85,7 +98,7 @@ def _create_test_payment_for_queryset(
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
     expected_key: str = f"dashboard_data_{slug}"
@@ -93,7 +106,7 @@ def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
     cache.set(
@@ -106,7 +119,7 @@ def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> Non
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is not found in the cache."""
     cache.delete(f"dashboard_data_{slug}")
@@ -115,7 +128,7 @@ def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> No
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that store_data correctly stores data in the cache."""
     data: Dict[str, Any] = {"test": f"{cache_name}_data"}
@@ -142,7 +155,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
         ),
     ],
 )
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_refresh_data(
     cache_name: str,
     cache_class: Any,
@@ -222,7 +235,7 @@ TEST_CASES = [
     TEST_CASES,
     ids=[case[0] for case in TEST_CASES],
 )
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_dashboard_data_cache(
     test_name: str,
     payment_updates: Dict[str, Any],
@@ -245,7 +258,7 @@ def test_dashboard_data_cache(
     assert total_usd == expected_total
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_country_dashboard_unique_household_metrics(
     populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
 ) -> None:
@@ -296,7 +309,7 @@ def test_country_dashboard_unique_household_metrics(
     assert agg_data["currency"] == common_currency
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_global_dashboard_unique_household_metrics(
     populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
 ) -> None:
@@ -341,7 +354,7 @@ def test_global_dashboard_unique_household_metrics(
     assert target_group_data["payments"] == expected_payment_count, "Payment count mismatch"
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_dashboard_reconciliation_verification_consistency(
     populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
 ) -> None:
@@ -391,7 +404,7 @@ def test_dashboard_reconciliation_verification_consistency(
     )
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_refresh_data_non_existent_ba() -> None:
     """Test refresh_data for DashboardDataCache with a non-existent business area slug."""
     slug = "non-existent-slug"
@@ -407,7 +420,7 @@ def test_refresh_data_non_existent_ba() -> None:
     assert json.loads(cached_data) == []
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_pwd_count_expression() -> None:
     """Test the get_pwd_count_expression for various PWD count scenarios."""
     ba = BusinessAreaFactory()
@@ -461,7 +474,7 @@ def test_pwd_count_expression() -> None:
             assert hh_annotated.calculated_pwd_count == 0, "PWD count mismatch for hh3 (all PWD fields None)"
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_payment_plan_counts() -> None:
     """Test _get_payment_plan_counts with different grouping criteria."""
     ba = BusinessAreaFactory()
@@ -561,7 +574,7 @@ def test_payment_plan_counts() -> None:
     assert result_empty["finished"] == {}, "Expected empty finished counts for no plans"
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
     """Test refresh_data for DashboardDataCache when a business area has no payments."""
     Payment.objects.filter(
@@ -591,7 +604,7 @@ def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
     assert json.loads(cached_data) == []
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_refresh_data_no_payments_global() -> None:
     """Test refresh_data for DashboardGlobalDataCache when there are no payments globally."""
     Payment.objects.filter(
@@ -620,7 +633,7 @@ def test_refresh_data_no_payments_global() -> None:
     assert json.loads(cached_data) == []
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_partial_refresh_empty_cache_fallback(
     afghanistan: BusinessArea,
 ) -> None:
@@ -670,7 +683,7 @@ def test_partial_refresh_empty_cache_fallback(
         (DashboardDataCache, False),
     ],
 )
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_partial_refresh_combines_data(
     cache_class_under_test: Type[DashboardCacheBase],
     is_global_scenario: bool,
@@ -761,7 +774,7 @@ def test_partial_refresh_combines_data(
     assert Decimal(data_map[year_new]["total_delivered_quantity_usd"]) == Decimal("300.00")
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_partial_refresh_global_no_new_payments(
     afghanistan: BusinessArea,
 ) -> None:
@@ -794,7 +807,7 @@ def test_partial_refresh_global_no_new_payments(
     assert Decimal(refreshed_data[0]["total_delivered_quantity_usd"]) == Decimal("50.00")
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_partial_refresh_ba_no_new_payments(
     afghanistan: BusinessArea,
 ) -> None:
@@ -822,7 +835,7 @@ def test_partial_refresh_ba_no_new_payments(
     assert Decimal(refreshed_data[0]["total_delivered_quantity_usd"]) == Decimal("50.00")
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> None:
     """Test partial refresh when the BA has no payments at all (even for other years)."""
     ba_slug = afghanistan.slug
@@ -835,7 +848,7 @@ def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> Non
     assert refreshed_data == []
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_base_queryset_filter_plan_status() -> None:
     """Test _get_base_payment_queryset filtering based on PaymentPlan.Status."""
     ba = BusinessAreaFactory.create()
@@ -862,7 +875,7 @@ def test_base_queryset_filter_plan_status() -> None:
     )
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_base_queryset_filter_bool_flags() -> None:
     """Test _get_base_payment_queryset filtering on boolean flags."""
     ba = BusinessAreaFactory.create()
@@ -912,7 +925,7 @@ def test_base_queryset_filter_bool_flags() -> None:
     assert not qs_excluded.filter(pk=payment_excluded.pk).exists()
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_base_queryset_filter_payment_status() -> None:
     """Test _get_base_payment_queryset filtering based on Payment.status."""
     ba = BusinessAreaFactory.create()
@@ -938,7 +951,7 @@ def test_base_queryset_filter_payment_status() -> None:
         )
 
 
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_get_base_payment_queryset_with_without_ba() -> None:
     """Test _get_base_payment_queryset with and without business_area argument."""
     ba1 = BusinessAreaFactory.create(name="BA1")
@@ -962,7 +975,7 @@ def test_get_base_payment_queryset_with_without_ba() -> None:
     ("test_id", "dct_type", "household_size", "expected_individuals"),
     INDIVIDUALS_COUNT_SCENARIOS,
 )
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_individuals_count_calculation_scenarios(
     test_id: str,
     dct_type: str,
@@ -1017,7 +1030,7 @@ def test_individuals_count_calculation_scenarios(
     ("test_id", "dct_type", "household_children_count", "fertility_rate", "expected_children"),
     CHILDREN_COUNT_SCENARIOS,
 )
-@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+@pytest.mark.django_db
 def test_children_count_calculation_scenarios(
     test_id: str,
     dct_type: str,

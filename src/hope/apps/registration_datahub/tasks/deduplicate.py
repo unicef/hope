@@ -24,9 +24,9 @@ from hope.apps.household.const import (
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
 from hope.apps.registration_datahub.utils import post_process_dedupe_results
 from hope.apps.utils.elasticsearch_utils import (
+    ensure_index_ready,
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
-    wait_until_es_healthy,
 )
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import (
@@ -102,7 +102,7 @@ class DeduplicateTask:
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
-        wait_until_es_healthy()
+        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
         rdi_id = individuals.first().registration_data_import_id
         log.info(f"RDI:{rdi_id} Deduplicating individuals against population")
         all_duplicates = []
@@ -153,7 +153,7 @@ class DeduplicateTask:
         log.info(f"RDI:{rdi_id} Updated all individuals with deduplication results")
 
     def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
-        wait_until_es_healthy()
+        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
 
         to_bulk_update_results = []
         all_duplicates = []
@@ -213,8 +213,9 @@ class DeduplicateTask:
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
         pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
 
-        wait_until_es_healthy()
-        populate_index(pending_individuals, get_individual_doc(self.business_area.slug))
+        doc = get_individual_doc(self.business_area.slug)
+        populate_index(pending_individuals, doc)
+        ensure_index_ready(doc._index._name)
 
         individuals_count = pending_individuals.count()
         allowed_duplicates_in_batch = round(

@@ -83,7 +83,7 @@ const EditPeoplePaymentPlanPage = (): ReactElement => {
   if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
 
   const initialValues = {
     currency: {
@@ -115,7 +115,7 @@ const EditPeoplePaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  const handleSubmit = async(values): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,

@@ -11,6 +11,7 @@ from typing import (
 )
 from uuid import UUID
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
@@ -168,7 +169,7 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_base_payment_queryset(cls, business_area: BusinessArea | None = None) -> models.QuerySet:
         qs = (
-            Payment.objects.using("read_only")
+            Payment.objects.using(settings.DASHBOARD_DB)
             .select_related(
                 "business_area",
                 "household",
@@ -292,7 +293,7 @@ class DashboardCacheBase(Protocol):
                 continue
 
             households_qs = (
-                Household.objects.using("read_only")
+                Household.objects.using(settings.DASHBOARD_DB)
                 .filter(id__in=batch_ids)
                 .select_related("admin1", "admin_area", "business_area", "program", "program__data_collecting_type")
                 .annotate(
@@ -400,7 +401,7 @@ class DashboardDataCache(DashboardCacheBase):
                 years_to_refresh = None
 
         try:
-            business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+            business_area = BusinessArea.objects.using(settings.DASHBOARD_DB).get(slug=business_area_slug)
         except BusinessArea.DoesNotExist:
             cls.store_data(business_area_slug, [])
             return []

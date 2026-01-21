@@ -319,7 +319,24 @@ export const sendRequest = async (
       response?.status == 403 &&
       content?.detail !== 'Authentication credentials were not provided.'
     ) {
-      window.location.href = '/access-denied/';
+      if (
+        Array.isArray(content?.required_permissions) &&
+        content.required_permissions.length > 0
+      ) {
+        const params = new URLSearchParams();
+        params.set(
+          'required_permissions',
+          content.required_permissions.join(','),
+        );
+        if (content?.detail) {
+          params.set('detail', content.detail);
+        }
+        window.location.href = `/access-denied?${params.toString()}`;
+        return response;
+      } else {
+        console.log('No permissions array found in response');
+      }
+      return response;
     } else if (
       response?.status == 403 &&
       content?.detail === 'Authentication credentials were not provided.'

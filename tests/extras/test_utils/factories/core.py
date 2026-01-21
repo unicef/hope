@@ -13,6 +13,7 @@ from hope.models import (
     CountryCodeMap,
     DataCollectingType,
     FlexibleAttribute,
+    FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     PeriodicFieldData,
     Program,
@@ -126,6 +127,25 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
         label = kwargs.pop("label", None)
         kwargs["label"] = {"English(EN)": label}
         return super()._create(target_class, *args, **kwargs)
+
+
+class FlexibleAttributeFactory(DjangoModelFactory):
+    name = factory.Sequence(lambda n: f"test_field_{n}")
+    label = factory.LazyAttribute(lambda o: {"English(EN)": o.name})
+    type = FlexibleAttribute.STRING
+    associated_with = FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+
+    class Meta:
+        model = FlexibleAttribute
+
+
+class FlexibleAttributeChoiceFactory(DjangoModelFactory):
+    list_name = factory.Sequence(lambda n: f"list_{n}")
+    name = factory.Sequence(lambda n: f"choice_{n}")
+    label = factory.LazyAttribute(lambda o: {"English(EN)": o.name})
+
+    class Meta:
+        model = FlexibleAttributeChoice
 
 
 def create_pdu_flexible_attribute(

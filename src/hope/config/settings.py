@@ -112,6 +112,7 @@ DATABASES = {
     "read_only": RO_CONN,
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
+DASHBOARD_DB = "read_only"
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: dict[str, str] = {}
@@ -145,7 +146,7 @@ TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(PROJECT_ROOT, "../apps", "core", "templates"),
+            os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
             "loaders": [
@@ -216,6 +217,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "unicef_security",
     "hijack",
     "jsoneditor",
     "django_countries",

@@ -118,7 +118,12 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   if (!individualChoicesData || permissions === null) return null;
 
-  if (!canViewHouseholdMembersPage) return <PermissionDenied />;
+  if (!canViewHouseholdMembersPage)
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}
+      />
+    );
 
   return (
     <>
@@ -205,7 +210,9 @@ export const HouseholdMembersPage = (): ReactElement => {
           ) : canViewPDUListAndDetails ? (
             <PeriodicDataUpdates />
           ) : (
-            <PermissionDenied />
+            <PermissionDenied
+              permission={PERMISSIONS.PDU_VIEW_LIST_AND_DETAILS}
+            />
           )}
         </Box>
       </Fade>

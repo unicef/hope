@@ -81,7 +81,7 @@ from hope.apps.household.const import (
     OBSERVED_DISABILITY_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     REGISTRATION_METHOD_CHOICES,
-    RELATIONSHIP_CHOICE,
+    RELATIONSHIP_CHOICE_USER_SELECTABLE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
@@ -427,7 +427,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": f"Relationship to {TEMPLATE_HOH}"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE_USER_SELECTABLE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
         "scope": [
@@ -590,7 +592,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "photo_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE, Scope.INDIVIDUAL_UPDATE],
     },
     {
         "id": "35ede8c4-877e-40dc-a93a-0a9a3bc511dc",
@@ -2146,7 +2148,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "primary_collector_id",
-        "custom_cast_value": Countries.get_country_value,
         "scope": [Scope.COLLECTOR, Scope.XLSX_PEOPLE],
         "snapshot_field": "primary_collector__id",
     },
@@ -2160,7 +2161,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
-        "custom_cast_value": Countries.get_country_value,
         "scope": [Scope.COLLECTOR, Scope.XLSX_PEOPLE],
         "snapshot_field": "alternate_collector__id",
     },

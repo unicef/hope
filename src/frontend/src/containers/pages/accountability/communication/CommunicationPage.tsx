@@ -47,7 +47,11 @@ export const CommunicationPage = (): ReactElement => {
       permissions,
     )
   )
-    return <PermissionDenied />;
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}
+      />
+    );
 
   return (
     <>

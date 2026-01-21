@@ -168,6 +168,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
 
 
 @pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestUniversalIndividualUpdateService:
     def test_update_individual(
         self,

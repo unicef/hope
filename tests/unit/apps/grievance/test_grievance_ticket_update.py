@@ -2,7 +2,7 @@ from datetime import date
 from typing import Any
 
 from django.core.files.base import ContentFile
-from django.core.management import call_command
+from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -13,7 +13,7 @@ from extras.test_utils.factories.account import (
     UserFactory,
 )
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
@@ -59,7 +59,6 @@ from hope.apps.household.const import (
     SINGLE,
     WIDOWED,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     AdminAreaLimitedTo,
     BusinessArea,
@@ -75,10 +74,12 @@ from hope.models.utils import MergeStatusModel
 pytestmark = pytest.mark.django_db()
 
 
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestGrievanceTicketUpdate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
@@ -210,8 +211,6 @@ class TestGrievanceTicketUpdate:
 
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         self.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-
-        rebuild_search_index()
 
         self.household_data_change_grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -868,7 +867,8 @@ class TestGrievanceTicketUpdate:
 class TestGrievanceTicketApprove:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
         self.afghanistan = create_afghanistan()
         # generate document types
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
@@ -1000,6 +1000,7 @@ class TestGrievanceTicketApprove:
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=self.area_1,
             business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_NEW,
         )
         self.individual_data_change_grv.programs.set([self.program])
         TicketIndividualDataUpdateDetailsFactory(
@@ -2024,3 +2025,105 @@ class TestGrievanceTicketApprove:
         assert len(resp_data) == 2
         assert resp_data[0]["ticket_notes"][0]["description"] == "New Note bulk create"
         assert resp_data[1]["ticket_notes"][0]["description"] == "New Note bulk create"
+
+    def test_update_grievance_ticket_individual_data_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras.individual_data_update_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"]
+
+    def test_update_grievance_ticket_add_individual_with_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        fake_photo = SimpleUploadedFile(
+            "photo.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+            content_type="image/png",
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.add_individual_grv.pk),
+            },
+        )
+        data = {
+            "extras.add_individual_issue_type_extras.individual_data.photo": fake_photo,
+        }
+        response = self.api_client.patch(url, data, format="multipart")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.add_individual_grv.refresh_from_db()
+        ticket_details = self.add_individual_grv.add_individual_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]
+
+    def test_update_grievance_ticket_individual_data_clear_photo(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            ],
+            self.afghanistan,
+            program=self.program,
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.individual_data_change_grv.pk),
+            },
+        )
+        data = {
+            "extras": {
+                "individual_data_update_issue_type_extras": {
+                    "individual_data": {
+                        "photo": None,
+                    }
+                }
+            }
+        }
+        response = self.api_client.patch(url, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+
+        self.individual_data_change_grv.refresh_from_db()
+        ticket_details = self.individual_data_change_grv.individual_data_update_ticket_details
+        assert "photo" in ticket_details.individual_data
+        assert ticket_details.individual_data["photo"]["value"] == ""
