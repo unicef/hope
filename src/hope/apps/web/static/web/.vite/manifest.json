@@ -1,6 +1,6 @@
 {
-  "_vendor-BVz2BpY3.js": {
-    "file": "assets/vendor-BVz2BpY3.js",
+  "_vendor-VYXVLZ_0.js": {
+    "file": "assets/vendor-VYXVLZ_0.js",
     "name": "vendor"
   },
   "src/assets/TargetingDiagramImage.png": {
@@ -56,12 +56,12 @@
     "src": "src/images/logo.jpg"
   },
   "src/main.tsx": {
-    "file": "assets/main-DAHZhiw9.js",
+    "file": "assets/main-ClMaRgep.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "imports": [
-      "_vendor-BVz2BpY3.js"
+      "_vendor-VYXVLZ_0.js"
     ],
     "css": [
       "assets/main-DQ3nh3aq.css"
