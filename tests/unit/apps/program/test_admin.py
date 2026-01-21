@@ -17,7 +17,6 @@ from extras.test_utils.old_factories.account import (
     RoleAssignmentFactory,
     UserFactory,
 )
-
 from extras.test_utils.old_factories.core import create_afghanistan
 from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.old_factories.household import IndividualFactory
