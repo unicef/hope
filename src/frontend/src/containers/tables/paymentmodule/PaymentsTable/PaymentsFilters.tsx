@@ -5,6 +5,7 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
 
 interface PaymentsFiltersProps {
   filter;
@@ -24,6 +25,8 @@ export function PaymentsFilters({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -62,15 +65,27 @@ export function PaymentsFilters({
           />
         </Grid>
         <Grid size={3}>
-          <SearchTextField
-            label={t('Household ID')}
-            value={filter.householdUnicefId}
-            fullWidth
-            onChange={(e) =>
-              handleFilterChange('householdUnicefId', e.target.value)
-            }
-            data-cy="filter-household-id"
-          />
+          {isSocialDctType ? (
+            <SearchTextField
+              label={t(`${beneficiaryGroup?.memberLabel} ID`)}
+              value={filter.individualUnicefId}
+              fullWidth
+              onChange={(e) =>
+                handleFilterChange('individualUnicefId', e.target.value)
+              }
+              data-cy="filter-individual-id"
+            />
+          ) : (
+            <SearchTextField
+              label={t(`${beneficiaryGroup?.groupLabel} ID`)}
+              value={filter.householdUnicefId}
+              fullWidth
+              onChange={(e) =>
+                handleFilterChange('householdUnicefId', e.target.value)
+              }
+              data-cy="filter-household-id"
+            />
+          )}
         </Grid>
         <Grid size={3}>
           <SearchTextField

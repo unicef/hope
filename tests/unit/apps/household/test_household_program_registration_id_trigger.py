@@ -1,11 +1,11 @@
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import (
     create_afghanistan,
     generate_data_collecting_types,
 )
-from extras.test_utils.factories.household import HouseholdFactory, create_household
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, create_household
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models import BusinessArea, DataCollectingType, Household, Partner, Program, User
 

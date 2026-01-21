@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.apps.changelog.factory import ChangelogFactory
 
 

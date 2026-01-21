@@ -6,14 +6,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.backends import PermissionsBackend
 from hope.models import BusinessArea, Program
 

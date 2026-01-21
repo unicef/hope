@@ -14,8 +14,8 @@ from factory import fuzzy
 from flaky import flaky
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
 from hope.admin.geo import AreaAdmin
 from hope.models import Area, AreaType, Country, User
 

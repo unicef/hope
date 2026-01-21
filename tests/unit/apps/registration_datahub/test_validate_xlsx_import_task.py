@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import get_program_with_dct_type_and_name
 from hope.apps.registration_datahub.tasks.validate_xlsx_import import ValidateXlsxImport
 from hope.models import DataCollectingType, ImportData
 

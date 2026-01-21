@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from rest_framework.exceptions import PermissionDenied
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.apps.account.api.permissions import BaseRestPermission
 from hope.apps.account.permissions import Permissions
 

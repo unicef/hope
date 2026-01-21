@@ -7,9 +7,9 @@ from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
 from faker import Faker
 
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
 from hope.apps.household.const import MALE, ROLE_PRIMARY
 from hope.models import (
     BusinessArea,

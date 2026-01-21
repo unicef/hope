@@ -4,8 +4,8 @@ import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import BusinessArea, PDUOnlineEdit, PDUOnlineEditSentBackComment, PDUXlsxTemplate, PDUXlsxUpload
 
 fake = Faker()

@@ -6,9 +6,9 @@ from uuid import uuid4
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 from hope.models import RegistrationDataImport
 
