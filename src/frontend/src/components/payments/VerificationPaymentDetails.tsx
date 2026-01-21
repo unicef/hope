@@ -56,7 +56,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent.unicefId}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
         </Grid>

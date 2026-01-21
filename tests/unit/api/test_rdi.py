@@ -5,9 +5,9 @@ from typing import Dict
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import (
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )

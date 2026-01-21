@@ -8,8 +8,8 @@ import factory
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
 from hope.apps.account.permissions import Permissions
 from hope.models import Role, RoleAssignment
 

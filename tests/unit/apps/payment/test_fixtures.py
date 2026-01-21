@@ -1,12 +1,12 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import HouseholdFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.household import HouseholdFactory
+from extras.test_utils.old_factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,

@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 from openpyxl import Workbook
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.old_factories.account import UserFactory
 from hope.apps.utils.mailjet import MailjetClient
 
 

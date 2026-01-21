@@ -9,18 +9,18 @@ from django.core.cache import cache
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import HouseholdFactory, create_household
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, create_household
+from extras.test_utils.old_factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     create_payment_verification_plan_with_status,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,

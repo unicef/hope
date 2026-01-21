@@ -2,8 +2,8 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
 from hope.models import DataCollectingType
 
 
