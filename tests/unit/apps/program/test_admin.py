@@ -12,15 +12,15 @@ from django.urls import reverse
 from django_webtest import WebTest
 import pytest
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from extras.test_utils.factories.household import IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.old_factories.household import IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.admin.program import ProgramAdmin, ProgramAdminForm, bulk_upload_individuals_photos_action
 from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
 from hope.models import AdminAreaLimitedTo, Area, FileTemp, Partner, Program, RoleAssignment

@@ -8,26 +8,26 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
-from extras.test_utils.factories.account import UserFactory, create_superuser
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import UserFactory, create_superuser
+from extras.test_utils.old_factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     EntitlementCardFactory,
     create_household_for_fixtures,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.targeting import (
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.targeting import (
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )

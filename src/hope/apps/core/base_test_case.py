@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Iterable, Optional
 
 from django.test import TestCase
 
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.models import AdminAreaLimitedTo, DocumentType, Role, RoleAssignment

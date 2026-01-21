@@ -4,10 +4,10 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,

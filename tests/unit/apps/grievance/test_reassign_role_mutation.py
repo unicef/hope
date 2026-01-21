@@ -4,16 +4,16 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import ROLE_PRIMARY

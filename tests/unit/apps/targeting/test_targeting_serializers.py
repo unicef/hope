@@ -1,13 +1,13 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.models import (

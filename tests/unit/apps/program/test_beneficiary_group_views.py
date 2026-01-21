@@ -5,9 +5,9 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 
 pytestmark = pytest.mark.django_db
 

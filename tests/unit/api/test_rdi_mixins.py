@@ -3,11 +3,11 @@ import base64
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import DocumentTypeFactory, PendingIndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import DocumentTypeFactory, PendingIndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin, get_photo_from_stream
 from hope.models import AccountType, PendingAccount, PendingDocument
 

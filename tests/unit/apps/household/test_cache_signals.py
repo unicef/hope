@@ -1,12 +1,12 @@
 from django.core.cache import cache
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     HouseholdFactory,
     IndividualFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.api.caches import (
     get_household_list_program_key,
     get_individual_list_program_key,

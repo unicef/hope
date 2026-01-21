@@ -1,9 +1,9 @@
 from unittest import mock
 
-from extras.test_utils.factories.account import BusinessAreaFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models import BusinessArea, ImportData, RegistrationDataImport
 

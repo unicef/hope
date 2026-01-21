@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from extras.test_utils.factories.account import generate_unicef_partners
+from extras.test_utils.old_factories.account import generate_unicef_partners
 from hope.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )

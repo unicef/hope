@@ -1,19 +1,19 @@
 from parameterized import parameterized
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.services.payment_household_snapshot_service import (

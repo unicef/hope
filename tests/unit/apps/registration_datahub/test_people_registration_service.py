@@ -6,14 +6,14 @@ from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.people_registration_service import (

@@ -1,9 +1,9 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import AdminAreaLimitedTo, Program, RoleAssignment
 
 

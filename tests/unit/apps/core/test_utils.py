@@ -3,9 +3,9 @@ from decimal import Decimal
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import get_count_and_percentage, to_dict
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
 from hope.models import Payment

@@ -3,8 +3,8 @@ from typing import Any
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.geo import CountryFactory
 from hope.apps.core.languages import LANGUAGES, Languages
 
 pytestmark = pytest.mark.django_db

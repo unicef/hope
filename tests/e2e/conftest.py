@@ -74,10 +74,10 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories.account import RoleFactory, UserFactory
-from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.program import BeneficiaryGroupFactory
+from extras.test_utils.old_factories.account import RoleFactory, UserFactory
+from extras.test_utils.old_factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.old_factories.household import DocumentTypeFactory
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User

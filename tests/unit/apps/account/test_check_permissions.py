@@ -1,10 +1,10 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions, check_permissions
 from hope.models import BusinessArea, Program, Role, RoleAssignment, User
 

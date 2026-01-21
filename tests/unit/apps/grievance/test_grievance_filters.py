@@ -6,18 +6,18 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     TicketPaymentVerificationDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -25,8 +25,8 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
