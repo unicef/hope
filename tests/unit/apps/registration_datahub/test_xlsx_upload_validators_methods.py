@@ -349,7 +349,8 @@ class TestXLSXValidatorsMethods(BaseTestCase):
                     {
                         "row_number": 4,
                         "header": "preferred_language_i_c",
-                        "message": "Sheet: 'Individuals', Unexpected value: TestInvalid for type select one of field preferred_language_i_c",
+                        "message": "Sheet: 'Individuals', Unexpected value: TestInvalid for "
+                        "type select one of field preferred_language_i_c",
                     },
                     {
                         "row_number": 8,
