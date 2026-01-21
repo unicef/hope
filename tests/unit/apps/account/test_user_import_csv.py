@@ -6,13 +6,13 @@ from django.urls import reverse
 from django_webtest import WebTest
 import responses
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
+from extras.test_utils.old_factories.core import create_afghanistan
 from hope.admin.account_mixins import get_valid_kobo_username
 from hope.models import BusinessArea, IncompatibleRoles, Role, User
 

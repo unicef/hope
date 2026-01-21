@@ -2,8 +2,8 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.accountability import SurveyFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.accountability import SurveyFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.accountability.views import download_cash_plan_payment_verification
 from hope.models import Survey

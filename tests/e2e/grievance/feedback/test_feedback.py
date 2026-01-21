@@ -7,17 +7,17 @@ from e2e.page_object.grievance.feedback import Feedback
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from extras.test_utils.factories.accountability import generate_feedback
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.accountability import generate_feedback
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.models import (
     HOST,
     Area,

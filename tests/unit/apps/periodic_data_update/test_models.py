@@ -3,11 +3,11 @@ from django.db import IntegrityError
 from django.test import TransactionTestCase
 import pytest
 
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import BusinessArea, FlexibleAttribute, Program
 
 
