@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_NOT_SET, URGENCY_NOT_SET, URGENCY_URGENT
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Program

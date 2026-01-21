@@ -5,10 +5,10 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
 from hope.apps.household.const import (
     AUNT_UNCLE,

@@ -16,9 +16,9 @@ from django.utils import timezone
 from flags.models import FlagState
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
@@ -27,8 +27,8 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_from_xlsx,

@@ -13,8 +13,8 @@ export type PaymentVerificationPlanDetails = {
     programCycleEndDate: string;
     readonly availablePaymentRecordsCount: number;
     readonly eligiblePaymentsCount: number;
-    bankReconciliationSuccess: number;
-    bankReconciliationError: number;
+    readonly bankReconciliationSuccess: number;
+    readonly bankReconciliationError: number;
     canCreatePaymentVerificationPlan: boolean;
     paymentVerificationPlans: Array<PaymentVerificationPlan>;
     paymentVerificationSummary: PaymentVerificationSummary;

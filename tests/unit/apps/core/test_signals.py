@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory
+from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory
 from hope.models import BusinessArea, Partner
 
 

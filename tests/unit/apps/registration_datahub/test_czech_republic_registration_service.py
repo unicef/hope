@@ -4,14 +4,14 @@ from django.test import TestCase
 from django.utils import timezone
 import pytz
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.const import (
     DISABLED,
     FEMALE,

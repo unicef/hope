@@ -8,16 +8,16 @@ from django.utils import timezone
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, SanctionListIndividual, country as geo_models
@@ -93,7 +93,7 @@ class TestGrievanceApproveAutomaticTickets:
         household_one.save()
         self.household_one = household_one
 
-        from extras.test_utils.factories.sanction_list import SanctionListFactory
+        from extras.test_utils.old_factories.sanction_list import SanctionListFactory
 
         sanction_list_individual_data = {
             "sanction_list": SanctionListFactory(),

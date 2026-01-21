@@ -4,12 +4,12 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.validators import (

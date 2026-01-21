@@ -1,7 +1,7 @@
 from django.test import TestCase
 from parameterized import parameterized
 
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.old_factories.geo import CountryFactory
 from hope.models import CountryCodeMap
 
 

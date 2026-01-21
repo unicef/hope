@@ -257,6 +257,10 @@ class PaymentSearchFilter(FilterSet):
         field_name="household__unicef_id",
         lookup_expr="istartswith",
     )
+    individual_unicef_id = django_filters.CharFilter(
+        field_name="household__individuals__unicef_id",
+        lookup_expr="istartswith",
+    )
     payment_unicef_id = django_filters.CharFilter(
         field_name="unicef_id",
         lookup_expr="istartswith",

@@ -12,13 +12,13 @@ from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.household import (
     create_household,
     create_individual_document,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import (
     HOST,
     SEEING,

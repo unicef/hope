@@ -14,8 +14,8 @@ from time import sleep
 import pytest
 
 from e2e.page_object.generic_import.generic_import import GenericImport
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import (
     Area,
     AreaType,
@@ -218,7 +218,7 @@ def financial_institution(somalia_business_area: BusinessArea) -> None:
 @pytest.fixture
 def user_without_import_permission(business_area: BusinessArea) -> User:
     """Create user without GENERIC_IMPORT_DATA permission."""
-    from extras.test_utils.factories.account import UserFactory
+    from extras.test_utils.old_factories.account import UserFactory
     from hope.apps.account.permissions import Permissions
 
     # Get UNICEF HQ partner

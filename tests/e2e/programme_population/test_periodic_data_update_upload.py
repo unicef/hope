@@ -13,17 +13,17 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.periodic_data_update import (
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )

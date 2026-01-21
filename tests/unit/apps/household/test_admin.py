@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 from django.urls import reverse
 from django_webtest import WebTest
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 
 if TYPE_CHECKING:
     from hope.models import User
