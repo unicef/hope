@@ -325,7 +325,7 @@ class GrievanceTicketViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id=Subquery(
+                fallback_individual_unicef_id_annotated=Subquery(
                     Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
                         :1
                     ]
@@ -532,7 +532,7 @@ class GrievanceTicketGlobalViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id=Subquery(
+                fallback_individual_unicef_id_annotated=Subquery(
                     Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
                         :1
                     ]
