@@ -9131,6 +9131,7 @@ export class RestService {
         programSlug,
         collectorFullName,
         householdUnicefId,
+        individualUnicefId,
         limit,
         offset,
         paymentUnicefId,
@@ -9140,6 +9141,7 @@ export class RestService {
         programSlug: string,
         collectorFullName?: string,
         householdUnicefId?: string,
+        individualUnicefId?: string,
         /**
          * Number of results to return per page.
          */
@@ -9161,6 +9163,7 @@ export class RestService {
             query: {
                 'collector_full_name': collectorFullName,
                 'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
                 'limit': limit,
                 'offset': offset,
                 'payment_unicef_id': paymentUnicefId,
@@ -9259,6 +9262,7 @@ export class RestService {
         programSlug,
         collectorFullName,
         householdUnicefId,
+        individualUnicefId,
         paymentUnicefId,
     }: {
         businessAreaSlug: string,
@@ -9266,6 +9270,7 @@ export class RestService {
         programSlug: string,
         collectorFullName?: string,
         householdUnicefId?: string,
+        individualUnicefId?: string,
         paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -9279,6 +9284,7 @@ export class RestService {
             query: {
                 'collector_full_name': collectorFullName,
                 'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
                 'payment_unicef_id': paymentUnicefId,
             },
         });
