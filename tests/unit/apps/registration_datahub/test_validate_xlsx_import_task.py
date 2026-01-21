@@ -45,7 +45,7 @@ class TestValidateXlsxImportTask(TestCase):
         import_data.refresh_from_db()
         assert import_data.status == ImportData.STATUS_FINISHED
         assert import_data.number_of_households == 0
-        assert import_data.number_of_individuals == 4
+        assert import_data.number_of_individuals == 5
 
     @patch("hope.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything")
     def test_import_individuals_without_errors(self, validate_everything_mock: Mock) -> None:

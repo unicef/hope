@@ -394,105 +394,73 @@ export const GrievancesTable = ({
   const headCells = getHeadCells();
 
   return (
-    <Box display="flex" flexDirection="column" px={5} pt={5}>
-      <Box display="flex" justifyContent="space-between" px={5}>
-        <Box display="flex" ml="auto">
-          <Box>
-            {/* TODO: Enable Export Report button */}
-            {/* <Button
-              startIcon={<GetAppOutlined />}
-              variant='text'
-              color='primary'
-              onClick={() => {
-                '';
-              }}
-            >
-              {t('Export Report')}
-            </Button> */}
-          </Box>
-          <Box ml={5} mr={7}>
-            {/* TODO: Enable Upload Tickets button */}
-            {/* <Button
-              startIcon={<PublishOutlined />}
-              variant='text'
-              color='primary'
-              onClick={() => {
-                '';
-              }}
-            >
-              {t('Upload Tickets')}
-            </Button> */}
-          </Box>
-        </Box>
-      </Box>
-      <TableWrapper>
-        <Paper>
-          <EnhancedTableToolbar title={t('Grievance Tickets List')} />
-          <Box
-            display="flex"
-            flexDirection="row"
-            marginX={6}
-            gap={4}
-            component="div"
-          >
-            <BulkAssignModal
-              selectedTickets={selectedTickets}
-              setSelected={setSelectedTickets}
-            />
-            <BulkSetPriorityModal
-              selectedTickets={selectedTickets}
-              setSelected={setSelectedTickets}
-            />
-            <BulkSetUrgencyModal
-              selectedTickets={selectedTickets}
-              setSelected={setSelectedTickets}
-            />
-            <BulkAddNoteModal
-              selectedTickets={selectedTickets}
-              setSelected={setSelectedTickets}
-            />
-          </Box>
-          <UniversalRestTable
-            isOnPaper={false}
-            headCells={headCells}
-            rowsPerPageOptions={[10, 15, 20, 40]}
-            onSelectAllClick={handleSelectAllCheckboxesClick}
-            numSelected={currentSelectedTickets?.length || 0}
-            data={
-              isAllPrograms
-                ? allProgramsGrievanceTicketsData
-                : selectedProgramGrievanceTicketsData
-            }
-            error={isAllPrograms ? errorAll : errorSelected}
-            isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
-            queryVariables={queryVariables}
-            setQueryVariables={setQueryVariables}
-            defaultOrderBy="created_at"
-            defaultOrderDirection="desc"
-            itemsCount={persistedCount}
-            renderRow={(row: GrievanceTicketList) => (
-              <GrievancesTableRow
-                key={row.id}
-                ticket={row}
-                statusChoices={statusChoices}
-                categoryChoices={categoryChoices}
-                issueTypeChoicesData={issueTypeChoicesData}
-                priorityChoicesData={priorityChoicesData}
-                urgencyChoicesData={urgencyChoicesData}
-                canViewDetails={getCanViewDetailsOfTicket(row)}
-                checkboxClickHandler={handleCheckboxClick}
-                isSelected={Boolean(
-                  selectedTickets.find((ticket) => ticket.id === row.id),
-                )}
-                optionsData={optionsData}
-                setInputValue={setInputValue}
-              />
-            )}
-            page={page}
-            setPage={setPage}
+    <TableWrapper>
+      <Paper>
+        <EnhancedTableToolbar title={t('Grievance Tickets List')} />
+        <Box
+          display="flex"
+          flexDirection="row"
+          marginX={6}
+          gap={4}
+          component="div"
+        >
+          <BulkAssignModal
+            selectedTickets={selectedTickets}
+            setSelected={setSelectedTickets}
           />
-        </Paper>
-      </TableWrapper>
-    </Box>
+          <BulkSetPriorityModal
+            selectedTickets={selectedTickets}
+            setSelected={setSelectedTickets}
+          />
+          <BulkSetUrgencyModal
+            selectedTickets={selectedTickets}
+            setSelected={setSelectedTickets}
+          />
+          <BulkAddNoteModal
+            selectedTickets={selectedTickets}
+            setSelected={setSelectedTickets}
+          />
+        </Box>
+        <UniversalRestTable
+          isOnPaper={false}
+          headCells={headCells}
+          rowsPerPageOptions={[10, 15, 20, 40]}
+          onSelectAllClick={handleSelectAllCheckboxesClick}
+          numSelected={currentSelectedTickets?.length || 0}
+          data={
+            isAllPrograms
+              ? allProgramsGrievanceTicketsData
+              : selectedProgramGrievanceTicketsData
+          }
+          error={isAllPrograms ? errorAll : errorSelected}
+          isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
+          defaultOrderBy="created_at"
+          defaultOrderDirection="desc"
+          itemsCount={persistedCount}
+          renderRow={(row: GrievanceTicketList) => (
+            <GrievancesTableRow
+              key={row.id}
+              ticket={row}
+              statusChoices={statusChoices}
+              categoryChoices={categoryChoices}
+              issueTypeChoicesData={issueTypeChoicesData}
+              priorityChoicesData={priorityChoicesData}
+              urgencyChoicesData={urgencyChoicesData}
+              canViewDetails={getCanViewDetailsOfTicket(row)}
+              checkboxClickHandler={handleCheckboxClick}
+              isSelected={Boolean(
+                selectedTickets.find((ticket) => ticket.id === row.id),
+              )}
+              optionsData={optionsData}
+              setInputValue={setInputValue}
+            />
+          )}
+          page={page}
+          setPage={setPage}
+        />
+      </Paper>
+    </TableWrapper>
   );
 };

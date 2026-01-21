@@ -769,8 +769,17 @@ class PaymentPlan(
         return self.payment_items.eligible()
 
     @property
+    def eligible_payments_with_conflicts(self) -> QuerySet:
+        return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
+
+    @property
     def can_be_locked(self) -> bool:
-        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
+        if self.status != PaymentPlan.Status.OPEN:
+            return False
+
+        return self.eligible_payments_with_conflicts.filter(
+            Q(payment_plan_hard_conflicted=False) & Q(excluded=False)
+        ).exists()
 
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
@@ -800,14 +809,6 @@ class PaymentPlan(
             if self.is_payment_gateway
             else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
         )
-
-    @property
-    def bank_reconciliation_success(self) -> int:
-        return self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).count()
-
-    @property
-    def bank_reconciliation_error(self) -> int:
-        return self.eligible_payments.filter(status=Payment.STATUS_ERROR).count()
 
     @property
     def excluded_household_ids_targeting_level(self) -> list[str]:
