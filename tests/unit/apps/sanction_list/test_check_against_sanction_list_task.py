@@ -15,7 +15,7 @@ from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )

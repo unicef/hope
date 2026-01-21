@@ -347,6 +347,11 @@ class TestXLSXValidatorsMethods(BaseTestCase):
                 wb["Individuals"],
                 [
                     {
+                        "row_number": 4,
+                        "header": "preferred_language_i_c",
+                        "message": "Sheet: 'Individuals', Unexpected value: TestInvalid for type select one of field preferred_language_i_c",
+                    },
+                    {
                         "row_number": 8,
                         "header": "relationship_i_c",
                         "message": "Sheet: 'Individuals', There is no household with provided id: TEXT",
