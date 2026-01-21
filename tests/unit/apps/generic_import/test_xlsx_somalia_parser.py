@@ -539,7 +539,7 @@ class TestXlsxSomaliaParser:
 
     def test_ba_without_countries(self):
         """Test that parser handles BA without countries (financial institution is None)."""
-        from extras.test_utils.factories.core import create_afghanistan
+        from extras.test_utils.old_factories.core import create_afghanistan
 
         create_afghanistan()
         from hope.models import BusinessArea

@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     FinancialServiceProviderFactory,
@@ -14,7 +14,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )

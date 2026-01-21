@@ -4,8 +4,8 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.periodic_data_update import PDUXlsxTemplateFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.periodic_data_update import PDUXlsxTemplateFactory
 from hope.apps.account.models import User
 from hope.models import PDUXlsxTemplate
 

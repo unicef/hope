@@ -11,11 +11,11 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import DocumentTypeFactory
-from extras.test_utils.factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import DocumentTypeFactory
+from extras.test_utils.old_factories.payment import FinancialInstitutionFactory, generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED

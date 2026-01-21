@@ -8,15 +8,15 @@ from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-from test_utils.factories.core import PeriodicFieldDataFactory
+from test_utils.old_factories.core import PeriodicFieldDataFactory
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import get_fields_attr_generators
 from hope.models import BusinessArea, FlexibleAttribute, FlexibleAttributeChoice, PeriodicFieldData

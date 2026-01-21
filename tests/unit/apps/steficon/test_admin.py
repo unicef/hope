@@ -7,11 +7,11 @@ from django.test import Client as DjangoClient
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.steficon import RuleFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.steficon import RuleFactory
 from hope.admin.steficon import AutocompleteWidget
 from hope.apps.steficon.forms import RuleTestForm
 from hope.models import Program, Rule

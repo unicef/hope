@@ -3,9 +3,9 @@ from datetime import datetime
 from django.test import TestCase
 from freezegun import freeze_time
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
