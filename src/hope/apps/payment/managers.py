@@ -22,7 +22,7 @@ class ArraySubquery(Subquery):
 
 
 class PaymentQuerySet(SoftDeletableQuerySet):
-    def with_payment_plan_conflicts(self) -> QuerySet:
+    def with_payment_plan_conflicts(self, program_cycle_id: models.UUIDField) -> QuerySet:
         from hope.models import Payment, PaymentPlan
 
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
@@ -67,9 +67,10 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 ),
             )
 
+        base_qs = Payment.objects.eligible().filter(parent__program_cycle_id=program_cycle_id)
+
         soft_conflicting_pps = (
-            self.eligible()
-            .select_related("parent")
+            base_qs.select_related("parent")
             .exclude(
                 Q(id=OuterRef("id"))
                 | Q(parent__id=OuterRef("parent_id"))
@@ -86,8 +87,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         soft_conflicting_pps = _annotate_conflict_data(soft_conflicting_pps)
 
         hard_conflicting_pps = (
-            self.eligible()
-            .select_related("parent")
+            base_qs.select_related("parent")
             .exclude(
                 Q(id=OuterRef("id"))
                 | Q(parent__id=OuterRef("parent_id"))
@@ -104,10 +104,32 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
 
         return self.annotate(
-            payment_plan_hard_conflicted=Exists(hard_conflicting_pps),
-            payment_plan_hard_conflicted_data=ArraySubquery(hard_conflicting_pps.values("conflict_data")),
-            payment_plan_soft_conflicted=Exists(soft_conflicting_pps),
-            payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
+            payment_plan_hard_conflicted=Case(
+                When(parent__status=PaymentPlan.Status.OPEN, then=Exists(hard_conflicting_pps)),
+                default=Value(False),
+                output_field=models.BooleanField(),
+            ),
+            payment_plan_hard_conflicted_data=Case(
+                When(
+                    parent__status=PaymentPlan.Status.OPEN,
+                    then=ArraySubquery(hard_conflicting_pps.values("conflict_data")),
+                ),
+                default=Value([]),
+                output_field=ArrayField(base_field=models.TextField()),
+            ),
+            payment_plan_soft_conflicted=Case(
+                When(parent__status=PaymentPlan.Status.OPEN, then=Exists(soft_conflicting_pps)),
+                default=Value(False),
+                output_field=models.BooleanField(),
+            ),
+            payment_plan_soft_conflicted_data=Case(
+                When(
+                    parent__status=PaymentPlan.Status.OPEN,
+                    then=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
+                ),
+                default=Value([]),
+                output_field=ArrayField(base_field=models.TextField()),
+            ),
         )
 
     def eligible(self) -> QuerySet:
@@ -119,7 +141,10 @@ class PaymentManager(SoftDeletableManager):
     use_for_related_fields = True
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().with_payment_plan_conflicts()
+        return super().get_queryset()
 
     def eligible(self) -> QuerySet:
         return self.get_queryset().eligible()
+
+    def eligible_with_conflicts_data(self, program_cycle_id: models.UUIDField) -> QuerySet:
+        return self.get_queryset().eligible().with_payment_plan_conflicts(program_cycle_id=program_cycle_id)

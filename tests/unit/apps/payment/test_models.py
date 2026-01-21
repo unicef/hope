@@ -267,27 +267,35 @@ class TestPaymentPlanModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
+        # Status != OPEN
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED)
         assert pp1.can_be_locked is False
 
-        # create hard conflicted payment
+        # Status == OPEN, There should be at least one non-conflicting payment
+        pp1.status = PaymentPlan.Status.OPEN
+        pp1.save()
+        assert pp1.can_be_locked is False
+
+        # create non-conflicting payment
+        p1 = PaymentFactory(parent=pp1, currency="PLN")
+        assert pp1.can_be_locked
+
+        # create hard conflicted payment in other pp
         pp1_conflicted = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
             program_cycle=program_cycle,
             created_by=self.user,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         PaymentFactory(
             parent=pp1_conflicted,
             household=p1.household,
-            conflicted=False,
             currency="PLN",
         )
-        assert pp1.payment_items.filter(payment_plan_hard_conflicted=True).count() == 1
+        assert pp1.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count() == 1
         assert pp1.can_be_locked is False
 
-        # create not conflicted payment
-        PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
+        # create not conflicted payment, for other random household
+        PaymentFactory(parent=pp1, currency="PLN")
         assert pp1.can_be_locked is True
 
     def test_is_population_finalized(self) -> None:
@@ -580,7 +588,7 @@ class TestPaymentModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user, status=PaymentPlan.Status.OPEN)
 
         # create hard conflicted payment
         pp2 = PaymentPlanFactory(
@@ -599,15 +607,15 @@ class TestPaymentModel(TestCase):
             program_cycle=program_cycle,
             created_by=self.user,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
-        p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False, currency="PLN")
-        p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False, currency="PLN")
-        p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False, currency="PLN")
+        p1 = PaymentFactory(parent=pp1, currency="PLN")
+        p2 = PaymentFactory(parent=pp2, household=p1.household, currency="PLN")
+        p3 = PaymentFactory(parent=pp3, household=p1.household, currency="PLN")
+        p4 = PaymentFactory(parent=pp4, household=p1.household, currency="PLN")
 
         for obj in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
             obj.refresh_from_db()  # update unicef_id from trigger
 
-        p1_data = Payment.objects.filter(id=p1.id).values()[0]
+        p1_data = pp1.eligible_payments_with_conflicts.filter(id=p1.id).values()[0]
         assert p1_data["payment_plan_hard_conflicted"] is True
         assert p1_data["payment_plan_soft_conflicted"] is True
 
@@ -653,7 +661,7 @@ class TestPaymentModel(TestCase):
         program_cycle.refresh_from_db()
         assert program_cycle.end_date is None
 
-        payment_data = Payment.objects.filter(id=p1.id).values()[0]
+        payment_data = pp1.eligible_payments_with_conflicts.filter(id=p1.id).values()[0]
         assert payment_data["payment_plan_hard_conflicted"] is True
         assert payment_data["payment_plan_soft_conflicted"] is True
 
@@ -693,6 +701,15 @@ class TestPaymentModel(TestCase):
             ]
         )
 
+        # No conflicts annotated for PP.Status != OPEN
+        pp1.status = PaymentPlan.Status.ACCEPTED
+        pp1.save()
+        payment_data = pp1.eligible_payments_with_conflicts.filter(id=p1.id).values()[0]
+        assert not getattr(payment_data, "payment_plan_hard_conflicted", None)
+        assert not getattr(payment_data, "payment_plan_soft_conflicted", None)
+        assert not getattr(payment_data, "payment_plan_hard_conflicted_data", None)
+        assert not getattr(payment_data, "payment_plan_soft_conflicted_data", None)
+
     def test_manager_annotations_conflicts_for_follow_up(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area)
         program = RealProgramFactory(business_area=self.business_area)
@@ -706,7 +723,7 @@ class TestPaymentModel(TestCase):
         )
         pp2_follow_up = PaymentPlanFactory(
             business_area=self.business_area,
-            status=PaymentPlan.Status.LOCKED,
+            status=PaymentPlan.Status.OPEN,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
@@ -739,7 +756,7 @@ class TestPaymentModel(TestCase):
         for _ in [pp1, pp2_follow_up, pp3, p1, p2]:
             _.refresh_from_db()  # update unicef_id from trigger
 
-        p2_data = Payment.objects.filter(id=p2.id).values()[0]
+        p2_data = pp2_follow_up.eligible_payments_with_conflicts.filter(id=p2.id).values()[0]
         assert p2_data["payment_plan_hard_conflicted"] is False
         assert p2_data["payment_plan_soft_conflicted"] is False
 
@@ -750,22 +767,21 @@ class TestPaymentModel(TestCase):
             currency="PLN",
         )
         p3.refresh_from_db()  # update unicef_id from trigger
-        self.maxDiff = None
-        p3_data = Payment.objects.filter(id=p3.id).values()[0]
-        assert p3_data["payment_plan_hard_conflicted"] is True
-        assert p3_data["payment_plan_soft_conflicted"] is False
+        p3_data = pp3.eligible_payments_with_conflicts.filter(id=p3.id).values()[0]
+        assert p3_data["payment_plan_hard_conflicted"] is False
+        assert p3_data["payment_plan_soft_conflicted"] is True
         import json
 
         data = {
             "payment_id": str(p2.id),
             "payment_plan_id": str(pp2_follow_up.id),
             "payment_unicef_id": str(p2.unicef_id),
-            "payment_plan_status": "LOCKED",
+            "payment_plan_status": "OPEN",
             "payment_plan_end_date": pp2_follow_up.program_cycle.end_date.isoformat(),
             "payment_plan_unicef_id": str(pp2_follow_up.unicef_id),
             "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
         }
-        assert p3_data["payment_plan_hard_conflicted_data"] == [json.dumps(data)]
+        assert p3_data["payment_plan_soft_conflicted_data"] == [json.dumps(data)]
 
 
 class TestPaymentPlanSplitModel(TestCase):
