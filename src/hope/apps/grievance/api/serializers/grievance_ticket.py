@@ -119,6 +119,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     related_tickets = serializers.SerializerMethodField()
     total_days = serializers.SerializerMethodField()
     created_by = UserSerializer()
+    target_id = serializers.SerializerMethodField()
 
     class Meta:
         model = GrievanceTicket
@@ -142,6 +143,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "total_days",
             "related_tickets",
             "programs",
+            "target_id",
         )
 
     def get_programs(self, obj: GrievanceTicket) -> dict:
@@ -152,6 +154,18 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
+
+    def get_target_id(self, obj: GrievanceTicket) -> str:
+        # qs annotated values in the list view
+        if getattr(obj, "has_social_worker_program_annotated", None):
+            ticket_details = obj.ticket_details
+            if ticket_details and getattr(ticket_details, "individual", None):
+                return ticket_details.individual.unicef_id if ticket_details.individual else ""
+            if fallback_individual_unicef_id := getattr(obj, "fallback_individual_unicef_id", None):
+                return fallback_individual_unicef_id
+            return ""
+
+        return obj.household_unicef_id or ""
 
 
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
@@ -170,6 +184,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     total_days = serializers.SerializerMethodField()
     programs = serializers.SerializerMethodField()
     created_by = UserSerializer()
+    target_id = serializers.SerializerMethodField()
 
     class Meta(GrievanceTicketListSerializer.Meta):
         fields = (
@@ -211,6 +226,9 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
+
+    def get_target_id(self, obj: GrievanceTicket) -> str:
+        return obj.target_id
 
     def get_payment_record(self, obj: GrievanceTicket) -> dict | None:
         payment_verification = getattr(obj.ticket_details, "payment_verification", None)

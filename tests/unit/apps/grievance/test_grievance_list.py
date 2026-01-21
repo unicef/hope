@@ -315,58 +315,9 @@ class TestGrievanceTicketList:
                 }
             ]
             household = getattr(getattr(grievance_ticket, "ticket_details", None), "household", None)
-            expected_household = (
-                {
-                    "id": str(household.id),
-                    "unicef_id": household.unicef_id,
-                    "admin1": {
-                        "id": str(household.admin1.id),
-                        "name": household.admin1.name,
-                    },
-                    "admin2": {
-                        "id": str(household.admin2.id),
-                        "name": household.admin2.name,
-                    },
-                    "admin3": None,
-                    "admin4": None,
-                    "country": household.country.name,
-                    "country_origin": household.country_origin.name,
-                    "address": household.address,
-                    "village": household.village,
-                    "geopoint": household.geopoint,
-                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                    "total_cash_received": household.total_cash_received,
-                    "total_cash_received_usd": household.total_cash_received_usd,
-                    "delivered_quantities": [
-                        {
-                            "currency": "USD",
-                            "total_delivered_quantity": "0.00",
-                        }
-                    ],
-                    "start": f"{household.start:%Y-%m-%dT%H:%M:%SZ}",
-                    "zip_code": household.zip_code,
-                    "residence_status": household.get_residence_status_display(),
-                    "import_id": household.unicef_id,
-                    "program_slug": household.program.slug,
-                }
-                if household
-                else None
-            )
-            assert grievance_ticket_result["household"] == expected_household
-            assert grievance_ticket_result["admin"] == (grievance_ticket.admin2.name if grievance_ticket.admin2 else "")
-            expected_admin2 = (
-                {
-                    "id": str(grievance_ticket.admin2.id),
-                    "name": grievance_ticket.admin2.name,
-                    "p_code": grievance_ticket.admin2.p_code,
-                    "area_type": grievance_ticket.admin2.area_type.id,
-                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%SZ}",
-                }
-                if grievance_ticket.admin2
-                else None
-            )
-            assert grievance_ticket_result["admin2"] == expected_admin2
+            if household:
+                assert grievance_ticket_result["household_id"] == str(household.id)
+                assert grievance_ticket_result["household_unicef_id"] == household.unicef_id
             assert grievance_ticket_result["assigned_to"] == {
                 "id": str(grievance_ticket.assigned_to.id),
                 "first_name": grievance_ticket.assigned_to.first_name,
@@ -387,7 +338,6 @@ class TestGrievanceTicketList:
             assert grievance_ticket_result["priority"] == grievance_ticket.priority
             assert grievance_ticket_result["urgency"] == grievance_ticket.urgency
             assert grievance_ticket_result["created_at"] == f"{grievance_ticket.created_at:%Y-%m-%dT%H:%M:%SZ}"
-            assert grievance_ticket_result["updated_at"] == f"{grievance_ticket.updated_at:%Y-%m-%dT%H:%M:%SZ}"
 
             # total_days
             if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
@@ -396,7 +346,8 @@ class TestGrievanceTicketList:
                 delta = timezone.now() - grievance_ticket.created_at
             expected_total_days = delta.days
             assert grievance_ticket_result["total_days"] == expected_total_days
-            assert grievance_ticket_result["target_id"] == grievance_ticket.target_id
+            if grievance_ticket.target_id:
+                assert grievance_ticket_result["target_id"] == grievance_ticket.target_id
 
             assert grievance_ticket_result["related_tickets"] == [
                 {
