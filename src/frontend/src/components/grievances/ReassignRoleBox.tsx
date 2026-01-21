@@ -140,7 +140,7 @@ export const ReassignRoleBox = ({
             household={el.household}
             individualToReassign={individual}
             initialSelectedIndividualId={
-              reassignDataDictByRole[el.role?.toLowerCase()]?.individual
+              reassignDataDictByRole[el.id]?.individual
             }
           />
         ) : null}
