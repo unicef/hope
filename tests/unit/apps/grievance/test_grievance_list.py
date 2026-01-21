@@ -593,7 +593,7 @@ class TestGrievanceTicketList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 9
-            assert len(ctx.captured_queries) == 62
+            assert len(ctx.captured_queries) == 47
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -615,7 +615,7 @@ class TestGrievanceTicketList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 57
+            assert len(ctx.captured_queries) == 42
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -626,7 +626,7 @@ class TestGrievanceTicketList:
             assert len(response.json()["results"]) == 6
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 51
+            assert len(ctx.captured_queries) == 39
 
         ticket.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -641,7 +641,7 @@ class TestGrievanceTicketList:
                 etag_third_call,
                 etag_changed_areas,
             ]
-            assert len(ctx.captured_queries) == 40
+            assert len(ctx.captured_queries) == 35
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
