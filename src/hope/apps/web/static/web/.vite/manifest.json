@@ -1,6 +1,6 @@
 {
-  "_vendor-DeJWFzbo.js": {
-    "file": "assets/vendor-DeJWFzbo.js",
+  "_vendor-CnWCQu-3.js": {
+    "file": "assets/vendor-CnWCQu-3.js",
     "name": "vendor"
   },
   "src/assets/TargetingDiagramImage.png": {
@@ -56,16 +56,12 @@
     "src": "src/images/logo.jpg"
   },
   "src/main.tsx": {
-    "file": "assets/main-FI0jsu9X.js",
+    "file": "assets/main-DHY9uZB0.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
-    "imports": [
-      "_vendor-DeJWFzbo.js"
-    ],
-    "css": [
-      "assets/main-DQ3nh3aq.css"
-    ],
+    "imports": ["_vendor-CnWCQu-3.js"],
+    "css": ["assets/main-DQ3nh3aq.css"],
     "assets": [
       "assets/404_graphic-D8eUPzUS.png",
       "assets/404_hope_logo-Cn7xyLMl.png",

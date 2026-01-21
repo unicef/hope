@@ -240,31 +240,32 @@ export function Entitlement({
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
                   {steficonData?.results?.map((each, index) => {
-                    const isSelected =
-                      String(each.id) === String(steficonRuleValue);
                     const hasDescription = Boolean(each?.description);
-                    const menuItem = (
+
+                    return (
                       <MenuItem
                         data-cy={`select-option-${index}`}
                         key={each.id}
                         value={each.id}
                       >
-                        {each.name}
+                        {hasDescription ? (
+                          <Tooltip
+                            title={each.description}
+                            placement="right"
+                            arrow
+                          >
+                            <Box
+                              component="span"
+                              sx={{ display: 'block', width: '100%' }}
+                            >
+                              {each.name}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          each.name
+                        )}
                       </MenuItem>
                     );
-                    if (isSelected && hasDescription) {
-                      return (
-                        <Tooltip
-                          key={each.id}
-                          title={each.description}
-                          placement="right"
-                          arrow
-                        >
-                          {menuItem}
-                        </Tooltip>
-                      );
-                    }
-                    return menuItem;
                   })}
                 </Select>
               </FormControl>
