@@ -8,7 +8,6 @@ import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlan
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
@@ -22,6 +21,7 @@ import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 
 export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();
@@ -58,7 +58,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
-    return <PermissionDenied />;
+    return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
   if (!paymentPlan) return null;
 
   const { status } = paymentPlan;

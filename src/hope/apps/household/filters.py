@@ -564,8 +564,18 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
     def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(individuals__unicef_id=unicef_id)
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter households by individual UNICEF ID, phone number or name."""
+        q_filters = (
+            Q(individuals__unicef_id=value)
+            | Q(individuals__phone_no__icontains=value)
+            | Q(individuals__phone_no_alternative__icontains=value)
+            | Q(individuals__full_name__icontains=value)
+            | Q(individuals__given_name__icontains=value)
+            | Q(individuals__middle_name__icontains=value)
+            | Q(individuals__family_name__icontains=value)
+        )
+        return queryset.filter(q_filters).distinct()
 
     def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
@@ -606,6 +616,11 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
 
         return queryset.none()
 
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status=Program.ACTIVE)
+        return queryset
+
 
 class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
     class Meta(IndividualFilter.Meta):
@@ -614,8 +629,18 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
     def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(household__unicef_id=unicef_id)
 
-    def filter_by_individual_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
-        return queryset.filter(unicef_id=unicef_id)
+    def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
+        """Filter individuals by UNICEF ID, phone number or name."""
+        q_filters = (
+            Q(unicef_id=value)
+            | Q(phone_no__icontains=value)
+            | Q(phone_no_alternative__icontains=value)
+            | Q(full_name__icontains=value)
+            | Q(given_name__icontains=value)
+            | Q(middle_name__icontains=value)
+            | Q(family_name__icontains=value)
+        )
+        return queryset.filter(q_filters).distinct()
 
     def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
@@ -672,3 +697,8 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             return queryset.filter(id__in=individual_ids)
 
         return queryset.none()
+
+    def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        if value:
+            return queryset.filter(program__status=Program.ACTIVE)
+        return queryset

@@ -1,5 +1,6 @@
 from typing import Any
 
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 
 from hope.apps.account.permissions import check_permissions
@@ -17,4 +18,13 @@ class BaseRestPermission(BasePermission):
             or request.query_params.get("program"),
         }
 
-        return check_permissions(user, permissions, **kwargs)
+        if check_permissions(user, permissions, **kwargs):
+            return True
+
+        required_permissions = [getattr(permission, "value", str(permission)) for permission in permissions or []]
+        raise PermissionDenied(
+            detail={
+                "detail": str(PermissionDenied.default_detail),
+                "required_permissions": required_permissions,
+            }
+        )

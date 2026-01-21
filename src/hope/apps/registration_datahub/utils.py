@@ -98,26 +98,20 @@ def get_rdi_program_population(
     # filter by rdi.import_from_ids HH or Ins ids based on Program.DCT
     list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
     if list_of_ids:
-        # add Individuals who can have any role in household
-        if not program.is_social_worker_program:
+        if program.is_social_worker_program:
+            # For SW programs: both individual and household IDs expected
+            individual_ids_q = Q(unicef_id__in=list_of_ids) | Q(household__unicef_id__in=list_of_ids)
+            household_ids_q = Q(unicef_id__in=list_of_ids) | Q(individuals__unicef_id__in=list_of_ids)
+        else:
+            # For non-SW programs: only household IDs expected
+            # add Individuals who can have roles in household
             ind_ids_with_role = list(
                 IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
                 .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
                 .values_list("individual__unicef_id", flat=True)
             )
-        else:
-            ind_ids_with_role = []
-
-        individual_ids_q = (
-            Q(unicef_id__in=list_of_ids + ind_ids_with_role)
-            if program.is_social_worker_program
-            else Q(Q(household__unicef_id__in=list_of_ids) | Q(unicef_id__in=ind_ids_with_role))
-        )
-        household_ids_q = (
-            Q(unicef_id__in=list_of_ids)
-            if not program.is_social_worker_program
-            else Q(individuals__unicef_id__in=list_of_ids)
-        )
+            individual_ids_q = Q(household__unicef_id__in=list_of_ids) | Q(unicef_id__in=ind_ids_with_role)
+            household_ids_q = Q(unicef_id__in=list_of_ids)
     else:
         individual_ids_q = Q()
         household_ids_q = Q()

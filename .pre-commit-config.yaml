@@ -3,9 +3,9 @@ repos:
         rev: v5.0.0
         hooks:
             -   id: end-of-file-fixer
-                exclude: ^src/frontend/
+                exclude: ^(src/frontend/|src/hope/apps/web/static/web/)
             -   id: trailing-whitespace
-                exclude: ^src/frontend/
+                exclude: ^(src/frontend/|src/hope/apps/web/static/web/)
     -   repo: https://github.com/python-jsonschema/check-jsonschema
         rev: 0.33.2
         hooks:
@@ -31,6 +31,14 @@ repos:
         hooks:
             -   id: djade
                 args: [ --target-version, "3.2" ]  # Replace with Django version
+    -   repo: local
+        hooks:
+            -   id: frontend-build-check
+                name: Check frontend build is up-to-date
+                entry: scripts/check-frontend-build.sh
+                language: script
+                pass_filenames: false
+                files: ^src/frontend/
     -   repo: meta
         hooks:
             -   id: check-hooks-apply

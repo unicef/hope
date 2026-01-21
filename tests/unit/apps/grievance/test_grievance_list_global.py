@@ -743,7 +743,7 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 29
+        assert len(response.json()) == 30
 
 
 class TestGrievanceTicketOfficeSearch:
@@ -804,6 +804,7 @@ class TestGrievanceTicketOfficeSearch:
             individual=self.individuals1[0],
             payment=None,
         )
+        self.complaint_ticket1.programs.add(self.program)
 
         self.sensitive_ticket2 = GrievanceTicketFactory(
             business_area=self.afghanistan,
@@ -815,6 +816,7 @@ class TestGrievanceTicketOfficeSearch:
             individual=self.individuals2[0],
             payment=None,
         )
+        self.complaint_ticket1.programs.add(self.program)
 
         self.complaint_ticket3 = GrievanceTicketFactory(
             business_area=self.afghanistan,
@@ -826,17 +828,18 @@ class TestGrievanceTicketOfficeSearch:
             individual=self.individuals3[0],
             payment=self.payment,
         )
+        self.complaint_ticket3.programs.add(self.program)
 
         self.needs_adjudication_ticket = GrievanceTicketFactory(
             business_area=self.afghanistan,
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         )
-
         self.needs_adjudication_details = TicketNeedsAdjudicationDetails.objects.create(
             ticket=self.needs_adjudication_ticket,
             golden_records_individual=self.individuals1[0],
         )
         self.needs_adjudication_details.possible_duplicates.add(self.individuals2[1])
+        self.needs_adjudication_ticket.programs.add(self.program)
 
         self.delete_individual_ticket = GrievanceTicketFactory(
             business_area=self.afghanistan,
@@ -847,6 +850,7 @@ class TestGrievanceTicketOfficeSearch:
             ticket=self.delete_individual_ticket,
             individual=self.individuals3[1],
         )
+        self.delete_individual_ticket.programs.add(self.program)
 
         self.household4, self.individuals4 = create_household_and_individuals(
             household_data={
@@ -865,6 +869,7 @@ class TestGrievanceTicketOfficeSearch:
             ticket=self.delete_household_ticket,
             household=self.household4,
         )
+        self.delete_household_ticket.programs.add(self.program)
 
         self.sanction_list_individual = SanctionListIndividualFactory()
 
@@ -877,6 +882,7 @@ class TestGrievanceTicketOfficeSearch:
             golden_records_individual=self.individuals1[1],
             sanction_list_individual=self.sanction_list_individual,
         )
+        self.system_flagging_ticket.programs.add(self.program)
 
         self.household5, self.individuals5 = create_household_and_individuals(
             household_data={
@@ -913,6 +919,7 @@ class TestGrievanceTicketOfficeSearch:
             ticket=self.payment_verification_ticket,
             payment_verification=self.payment_verification,
         )
+        self.payment_verification_ticket.programs.add(self.program)
 
     def test_search_by_grievance_ticket_unicef_id(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1226,3 +1233,138 @@ class TestGrievanceTicketOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.delete_household_ticket.id)
+
+    def test_search_by_phone_number(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with phone number
+        self.individuals1[0].phone_no = "+1234567890"
+        self.individuals1[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+1234567890"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.complaint_ticket1.id) in result_ids
+        assert str(self.needs_adjudication_ticket.id) in result_ids
+
+    def test_search_by_phone_number_alternative(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with alternative phone number
+        self.individuals2[0].phone_no_alternative = "+9876543210"
+        self.individuals2[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+9876543210"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.sensitive_ticket2.id)
+
+    def test_search_by_individual_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with specific name
+        self.individuals3[0].full_name = "UniqueGrievanceName"
+        self.individuals3[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "UniqueGrievanceName"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.complaint_ticket3.id)
+
+    def test_search_with_active_programs_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
+        finished_household, finished_individuals = create_household_and_individuals(
+            household_data={
+                "program": finished_program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        finished_ticket = GrievanceTicketFactory(
+            business_area=self.afghanistan,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        )
+        finished_ticket.programs.add(finished_program)
+        GrievanceComplaintTicketWithoutExtrasFactory(
+            ticket=finished_ticket,
+            household=finished_household,
+            individual=finished_individuals[0],
+            payment=None,
+        )
+
+        # Set same phone number for both active and finished program individuals
+        self.individuals1[0].phone_no = "+5557778888"
+        self.individuals1[0].save()
+
+        finished_individuals[0].phone_no = "+5557778888"
+        finished_individuals[0].save()
+
+        # First, search WITHOUT active_programs filter - should return 3 grievances (2 active, 1 finished)
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5557778888", "active_programs_only": "false"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 3
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.complaint_ticket1.id) in result_ids
+        assert str(self.needs_adjudication_ticket.id) in result_ids
+        assert str(finished_ticket.id) in result_ids
+
+        # Now search WITH active_programs_only filter - should only return active program grievances
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5557778888", "active_programs_only": "true"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        assert str(self.complaint_ticket1.id) in result_ids
+        assert str(self.needs_adjudication_ticket.id) in result_ids

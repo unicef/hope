@@ -52,7 +52,12 @@ function SurveyDetailsPage(): ReactElement {
 
   if (loading) return <LoadingComponent />;
 
-  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error))
+    return (
+      <PermissionDenied
+        permission={PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS}
+      />
+    );
 
   if (!data || permissions === null) return null;
 
@@ -65,7 +70,7 @@ function SurveyDetailsPage(): ReactElement {
     },
   ];
 
-  const exportSurveySample = async(): Promise<void> => {
+  const exportSurveySample = async (): Promise<void> => {
     try {
       await exportSurveyMutation.mutateAsync();
       showMessage(t('Survey sample exported.'));

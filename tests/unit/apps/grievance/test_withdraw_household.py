@@ -1,13 +1,12 @@
 from typing import Any
 
-from django.core.management import call_command
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
@@ -24,7 +23,7 @@ pytestmark = pytest.mark.django_db()
 class TestWithdrawHousehold:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.business_area = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)

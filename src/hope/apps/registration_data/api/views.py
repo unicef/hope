@@ -177,10 +177,25 @@ class RegistrationDataImportViewSet(
             logger.warning(msg)
             raise ValidationError(msg)
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
         rdi.save()
+
+        remove_elasticsearch_documents_by_matching_ids(
+            individuals_to_remove,
+            get_individual_doc(rdi.business_area.slug),
+        )
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                rdi.program,
+                [str(_id) for _id in individuals_to_remove],
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,

@@ -18,7 +18,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: DockerHub login
         uses: docker/login-action@v3
         with:
@@ -59,20 +59,20 @@ jobs:
     needs: [build_and_push_dev]
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Package Source code
       continue-on-error: true
       run: |
           zip -r output.zip src
 
     #- name: Upload zipped folder
-    #  uses: actions/upload-artifact@v4
+    #  uses: actions/upload-artifact@v6
     #  with:
     #      name: zipped-folder
     #      path: output.zip
     - name: Veracode Pipeline
       id: pipeline-scan
-      uses: veracode/Veracode-pipeline-scan-action@v1.0.18
+      uses: veracode/Veracode-pipeline-scan-action@v1.0.20
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
@@ -82,12 +82,12 @@ jobs:
           json_output: true
           json_output_file: "veracode_sast.json"
     - name: save results file
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: pipeline-flaws
         path: veracode_sast.json
     - name: Get scan results
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
     - name: Convert pipeline scan output to SARIF format
       uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.4
       with:
@@ -96,7 +96,7 @@ jobs:
         ref: ${{ github.ref }}
         commitSHA: ${{ github.sha }}
     - name: Upload SARIF file to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v3 # Check for the latest version
+      uses: github/codeql-action/upload-sarif@v4 # Check for the latest version
       with:
         sarif_file: 'veracode_sast.sarif'
   #  - name: Veracode Pipeline
@@ -116,7 +116,7 @@ jobs:
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
     - name: Veracode SCA
-      uses: veracode/container_iac_secrets_scanning@v1.0.5
+      uses: veracode/container_iac_secrets_scanning@v1.0.6
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}
@@ -140,7 +140,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Veracode Container Scan
-      uses: veracode/container_iac_secrets_scanning@v1.0.5
+      uses: veracode/container_iac_secrets_scanning@v1.0.6
       continue-on-error: true
       with:
           vid: ${{ secrets.VERACODE_API_ID }}

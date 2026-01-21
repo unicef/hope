@@ -18,6 +18,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
@@ -242,15 +243,33 @@ function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData?.results?.map((each, index) => (
-                    <MenuItem
-                      data-cy={`select-option-${index}`}
-                      key={each.id}
-                      value={each.id}
-                    >
-                      {each.name}
-                    </MenuItem>
-                  ))}
+                  {steficonData?.results?.map((each, index) => {
+                    const hasDescription = Boolean(each?.description);
+                    return (
+                      <MenuItem
+                        data-cy={`select-option-${index}`}
+                        key={each.id}
+                        value={each.id}
+                      >
+                        {hasDescription ? (
+                          <Tooltip
+                            title={each.description}
+                            placement="right"
+                            arrow
+                          >
+                            <Box
+                              component="span"
+                              sx={{ display: 'block', width: '100%' }}
+                            >
+                              {each.name}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          each.name
+                        )}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             </Grid>

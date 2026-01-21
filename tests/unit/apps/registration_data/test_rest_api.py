@@ -20,8 +20,10 @@ from extras.test_utils.factories.registration_data import (
 )
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.documents import IndividualDocumentAfghanistan
+from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
+from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
+    DataCollectingType,
     Household,
     ImportData,
     Individual,
@@ -256,8 +258,13 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
-    def test_erase_rdi(self) -> None:
+    @patch("hope.apps.registration_data.api.views.BiometricDeduplicationService")
+    @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+    def test_erase_rdi(self, mock_remove_es: Mock, mock_biometric_service: Mock) -> None:
         self.client.force_authenticate(user=self.user)
+        mock_biometric_service.INDIVIDUALS_REFUSED = BiometricDeduplicationService.INDIVIDUALS_REFUSED
+        mock_service = mock_biometric_service.return_value
+
         rdi = RegistrationDataImportFactory(
             business_area=self.business_area,
             program=self.program,
@@ -277,6 +284,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             ],
         )
 
+        individual_ids = [ind.id for ind in individuals]
+
         assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
         assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
 
@@ -293,6 +302,17 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
 
         rdi.refresh_from_db()
         assert rdi.erased
+
+        mock_remove_es.assert_called_once()
+        es_call_args = mock_remove_es.call_args[0]
+        assert set(es_call_args[0]) == set(individual_ids)  # Order doesn't matter
+        assert es_call_args[1] == get_individual_doc(self.business_area.slug)
+
+        mock_service.report_individuals_status.assert_called_once()
+        report_call_args = mock_service.report_individuals_status.call_args[0]
+        assert report_call_args[0] == self.program
+        assert set(report_call_args[1]) == {str(_id) for _id in individual_ids}  # Order doesn't matter
+        assert report_call_args[2] == mock_biometric_service.INDIVIDUALS_REFUSED
 
     def test_erase_rdi_with_invalid_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -916,6 +936,166 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_rdi_social_worker_program_with_household_ids(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create social worker DCT
+        social_dct = DataCollectingTypeFactory(
+            label="Social",
+            code="social",
+            type=DataCollectingType.Type.SOCIAL,
+        )
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        # Create source and target programs with social worker DCT
+        import_from_program = ProgramFactory(
+            name="Source Social Worker Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        target_program = ProgramFactory(
+            name="Target Social Worker Program",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        social_dct.compatible_types.add(social_dct)
+
+        # Create households with individuals in source program
+        household1, individuals1 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", target_program.slug],
+        )
+
+        # Import using household IDs
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": f"{household1.unicef_id}, {household2.unicef_id}",
+            "name": "Test Social Worker Import - Households",
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Social Worker Import - Households"
+        # Should import both households
+        assert response.data["number_of_households"] == 2
+        assert response.data["number_of_individuals"] == 2
+        mock_registration_task.assert_called_once()
+
+    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_rdi_social_worker_program_with_individual_ids(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole",
+            defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]},
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        # Create social worker DCT
+        social_dct = DataCollectingTypeFactory(
+            label="Social",
+            code="social",
+            type=DataCollectingType.Type.SOCIAL,
+        )
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        # Create source and target programs with social worker DCT
+        import_from_program = ProgramFactory(
+            name="Source Social Worker Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        target_program = ProgramFactory(
+            name="Target Social Worker Program",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group,
+            data_collecting_type=social_dct,
+        )
+
+        social_dct.compatible_types.add(social_dct)
+
+        # Create households with individuals in source program
+        household1, individuals1 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", target_program.slug],
+        )
+
+        # Import using individual IDs
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": f"{individuals1[0].unicef_id}, {individuals2[0].unicef_id}",
+            "name": "Test Social Worker Import - Individuals",
+            "screen_beneficiary": False,
+        }
+
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "Test Social Worker Import - Individuals"
+        assert response.data["number_of_households"] == 2
+        assert response.data["number_of_individuals"] == 2
+        mock_registration_task.assert_called_once()
+
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     @classmethod
@@ -1075,7 +1255,9 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         response = self.client.post(url, {"reason": "Test reason"}, format="json")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_permission_checks_deduplicate(self) -> None:
+    @patch("hope.apps.registration_datahub.celery_tasks.rdi_deduplication_task.delay")
+    def test_permission_checks_deduplicate(self, mock_dedup_task: Mock) -> None:
+        """Test that deduplicate endpoint requires RDI_RERUN_DEDUPE permission."""
         self.client.force_authenticate(user=self.user)
 
         rdi_to_deduplicate = RegistrationDataImportFactory(
