@@ -262,9 +262,20 @@ class TestGrievanceTicketGlobalList:
         )
 
         # test fallback_individual_unicef_id_annotated
+        self.sw_household, self.sw_individuals = create_household_and_individuals(
+            household_data={
+                "admin1": self.area1,
+                "admin2": self.area2,
+                "country": self.country,
+                "country_origin": self.country,
+                "program": self.program_afghanistan1,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
         TicketHouseholdDataUpdateDetails.objects.create(
             ticket=self.grievance_tickets[2],
-            household=self.household1,
+            household=self.sw_household,
             household_data={},
         )
 
