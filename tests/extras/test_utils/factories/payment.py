@@ -8,6 +8,8 @@ from factory.django import DjangoModelFactory
 
 from extras.test_utils.factories import UserFactory
 from hope.models import (
+    Account,
+    AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -28,6 +30,23 @@ class PaymentPlanFactory(DjangoModelFactory):
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     created_by = factory.SubFactory(UserFactory)
+
+
+class AccountTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = AccountType
+
+    key = factory.Sequence(lambda n: f"account_type_{n}")
+    label = factory.Sequence(lambda n: f"Account Type {n}")
+    unique_fields = []
+
+
+class AccountFactory(DjangoModelFactory):
+    class Meta:
+        model = Account
+
+    number = factory.Sequence(lambda n: f"ACC-{n}")
+    data = factory.LazyFunction(dict)
 
 
 class PaymentFactory(DjangoModelFactory):

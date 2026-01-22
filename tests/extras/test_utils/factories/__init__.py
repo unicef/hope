@@ -4,6 +4,8 @@ from .account import UserFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (
+    AccountFactory,
+    AccountTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -24,6 +26,8 @@ __all__ = [
     "HouseholdFactory",
     "IndividualFactory",
     "IndividualRoleInHouseholdFactory",
+    "AccountFactory",
+    "AccountTypeFactory",
     "DeliveryMechanismFactory",
     "FinancialServiceProviderFactory",
     "FinancialServiceProviderXlsxTemplateFactory",

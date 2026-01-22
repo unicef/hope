@@ -42,15 +42,13 @@ class HouseholdFactory(DjangoModelFactory):
                 business_area=self.business_area,
                 program=self.program,
                 registration_data_import=self.registration_data_import,
+                rdi_merge_status=self.rdi_merge_status,
             )
             self.head_of_household = individual
 
         self.save()
 
-        IndividualRoleInHouseholdFactory(
-            household=self,
-            individual=individual,
-        )
+        IndividualRoleInHouseholdFactory(household=self, individual=individual, rdi_merge_status=self.rdi_merge_status)
 
 
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
