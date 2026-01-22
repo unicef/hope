@@ -43,7 +43,7 @@ class PaymentPlanFactory(DjangoModelFactory):
             return
         if extracted is False:
             return
-        if not hasattr(self, "payment_verification_summary"):
+        if self.status == PaymentPlan.Status.FINISHED and not hasattr(self, "payment_verification_summary"):
             PaymentVerificationSummaryFactory(
                 payment_plan=self,
             )

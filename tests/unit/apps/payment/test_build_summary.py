@@ -4,14 +4,16 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationPlanFactory,
 )
-from hope.models import PaymentVerificationPlan, PaymentVerificationSummary, build_summary
+from hope.models import PaymentPlan, PaymentVerificationPlan, PaymentVerificationSummary, build_summary
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def payment_plan():
-    return PaymentPlanFactory()
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.FINISHED,
+    )
 
 
 @pytest.fixture
