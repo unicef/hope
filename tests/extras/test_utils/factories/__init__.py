@@ -2,6 +2,10 @@
 
 from .account import UserFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
+from .account import PartnerFactory, UserFactory
+from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
+from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
+from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (
     AccountFactory,
@@ -19,10 +23,16 @@ from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import RegistrationDataImportFactory
 
 __all__ = [
+    "AreaFactory",
+    "AreaTypeFactory",
     "BeneficiaryGroupFactory",
     "BusinessAreaFactory",
+    "CommunicationMessageFactory",
+    "CountryFactory",
     "DataCollectingTypeFactory",
     "FileTempFactory",
+    "FeedbackFactory",
+    "FeedbackMessageFactory",
     "HouseholdFactory",
     "IndividualFactory",
     "IndividualRoleInHouseholdFactory",
@@ -31,6 +41,7 @@ __all__ = [
     "DeliveryMechanismFactory",
     "FinancialServiceProviderFactory",
     "FinancialServiceProviderXlsxTemplateFactory",
+    "PartnerFactory",
     "PaymentFactory",
     "PaymentPlanFactory",
     "PaymentVerificationFactory",
@@ -39,5 +50,6 @@ __all__ = [
     "ProgramCycleFactory",
     "ProgramFactory",
     "RegistrationDataImportFactory",
+    "SurveyFactory",
     "UserFactory",
 ]
