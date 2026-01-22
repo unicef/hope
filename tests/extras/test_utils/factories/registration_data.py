@@ -5,6 +5,8 @@ from factory.django import DjangoModelFactory
 
 from hope.models import RegistrationDataImport
 
+from .account import UserFactory
+
 
 class RegistrationDataImportFactory(DjangoModelFactory):
     class Meta:
@@ -15,3 +17,4 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     status = RegistrationDataImport.MERGED
     number_of_individuals = 1
     number_of_households = 1
+    imported_by = factory.SubFactory(UserFactory)
