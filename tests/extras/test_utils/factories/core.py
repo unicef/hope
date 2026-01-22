@@ -1,9 +1,10 @@
 """Core-related factories."""
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, FileTemp
 
 
 class BusinessAreaFactory(DjangoModelFactory):
@@ -36,3 +37,10 @@ class DataCollectingTypeFactory(DjangoModelFactory):
 
     code = factory.Sequence(lambda n: f"dct_{n}")
     label = factory.Sequence(lambda n: f"DCT {n}")
+
+
+class FileTempFactory(DjangoModelFactory):
+    class Meta:
+        model = FileTemp
+
+    file = factory.LazyFunction(lambda: SimpleUploadedFile("test.txt", b"test"))

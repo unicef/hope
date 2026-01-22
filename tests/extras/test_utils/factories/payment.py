@@ -6,7 +6,11 @@ from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
 
+from extras.test_utils.factories import UserFactory
 from hope.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -23,6 +27,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     status = PaymentPlan.Status.OPEN
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
+    created_by = factory.SubFactory(UserFactory)
 
 
 class PaymentFactory(DjangoModelFactory):
@@ -49,3 +54,36 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
 class PaymentVerificationFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerification
+
+
+class DeliveryMechanismFactory(DjangoModelFactory):
+    class Meta:
+        model = DeliveryMechanism
+
+    code = factory.Sequence(lambda n: f"DM{n:04d}")
+    name = factory.Sequence(lambda n: f"Delivery Mechanism {n}")
+    payment_gateway_id = factory.Sequence(lambda n: f"dm-{n}")
+
+
+class FinancialServiceProviderFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialServiceProvider
+
+    name = factory.Sequence(lambda n: f"FSP {n}")
+    vision_vendor_number = factory.Sequence(lambda n: f"VEN{n:04d}")
+    communication_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+
+    @factory.post_generation
+    def delivery_mechanisms(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for delivery_mechanism in extracted:
+                self.delivery_mechanisms.add(delivery_mechanism)
+
+
+class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+
+    name = factory.Sequence(lambda n: f"FSP Template {n}")
