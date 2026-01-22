@@ -7,9 +7,9 @@ from .account import (
     RoleFactory,
     UserFactory,
 )
+from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
-from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .grievance import GrievanceTicketFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (
