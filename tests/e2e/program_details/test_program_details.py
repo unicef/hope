@@ -850,6 +850,6 @@ class TestProgrammeDetails:
     ) -> None:
         page_programme_details.select_global_program_filter("Active Programme")
         assert "ACTIVE" in page_programme_details.get_program_status().text
-        assert "1234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
+        assert "1,234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
         assert "1184.98" in page_programme_details.get_program_cycle_total_undelivered_quantity_usd()[0].text
         assert "50.01" in page_programme_details.get_program_cycle_total_delivered_quantity_usd()[0].text
