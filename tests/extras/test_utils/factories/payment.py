@@ -6,7 +6,6 @@ from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
 
-from extras.test_utils.factories import UserFactory
 from hope.models import (
     Account,
     AccountType,
@@ -20,6 +19,9 @@ from hope.models import (
     PaymentVerificationSummary,
 )
 
+from . import HouseholdFactory, IndividualFactory
+from .account import UserFactory
+from .core import BusinessAreaFactory
 from .program import ProgramCycleFactory
 
 
@@ -33,6 +35,18 @@ class PaymentPlanFactory(DjangoModelFactory):
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     program_cycle = factory.SubFactory(ProgramCycleFactory)
     created_by = factory.SubFactory(UserFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
+
+    @factory.post_generation
+    def create_payment_verification_summary(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted is False:
+            return
+        if not hasattr(self, "payment_verification_summary"):
+            PaymentVerificationSummaryFactory(
+                payment_plan=self,
+            )
 
 
 class AccountTypeFactory(DjangoModelFactory):
@@ -50,14 +64,30 @@ class AccountFactory(DjangoModelFactory):
 
     number = factory.Sequence(lambda n: f"ACC-{n}")
     data = factory.LazyFunction(dict)
+    individual = factory.SubFactory(IndividualFactory)
+    account_type = factory.SubFactory(AccountTypeFactory)
 
 
 class PaymentFactory(DjangoModelFactory):
     class Meta:
         model = Payment
 
+    parent = factory.SubFactory(PaymentPlanFactory)
     status_date = factory.LazyFunction(timezone.now)
     currency = "PLN"
+    business_area = factory.SelfAttribute("parent.business_area")
+    household = factory.SubFactory(
+        HouseholdFactory,
+        business_area=factory.SelfAttribute("..business_area"),
+        program=factory.SelfAttribute("..parent.program"),
+    )
+    collector = factory.SubFactory(
+        IndividualFactory,
+        household=factory.SelfAttribute("..household"),
+        business_area=factory.SelfAttribute("..household.business_area"),
+        program=factory.SelfAttribute("..household.program"),
+        registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
+    )
 
 
 class PaymentVerificationSummaryFactory(DjangoModelFactory):
@@ -69,6 +99,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationPlan
 
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
     verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
     sampling = "FULL_LIST"
 
@@ -76,6 +107,12 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
 class PaymentVerificationFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerification
+
+    payment = factory.SubFactory(PaymentFactory)
+    payment_verification_plan = factory.SubFactory(
+        PaymentVerificationPlanFactory,
+        payment_plan=factory.SelfAttribute("..payment.parent"),
+    )
 
 
 class DeliveryMechanismFactory(DjangoModelFactory):

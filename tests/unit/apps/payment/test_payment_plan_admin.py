@@ -5,17 +5,12 @@ from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
-    ProgramFactory,
-    RegistrationDataImportFactory,
     UserFactory,
 )
 from hope.admin.payment_plan import can_regenerate_export_file_per_fsp, can_sync_with_payment_gateway
@@ -31,11 +26,6 @@ def mock_payment_gateway_env_vars() -> None:
         {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
     ):
         yield
-
-
-@pytest.fixture
-def business_area():
-    return BusinessAreaFactory()
 
 
 @pytest.fixture
@@ -60,16 +50,6 @@ def admin_client(client, admin_user):
 
 
 @pytest.fixture
-def program(business_area):
-    return ProgramFactory(business_area=business_area)
-
-
-@pytest.fixture
-def program_cycle(program):
-    return ProgramCycleFactory(program=program)
-
-
-@pytest.fixture
 def delivery_mechanism():
     return DeliveryMechanismFactory()
 
@@ -84,44 +64,19 @@ def financial_service_provider(delivery_mechanism):
 
 
 @pytest.fixture
-def payment_plan(business_area, program_cycle, financial_service_provider, delivery_mechanism):
+def payment_plan(financial_service_provider, delivery_mechanism):
     return PaymentPlanFactory(
         name="Test Plan",
         status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
-        program_cycle=program_cycle,
         financial_service_provider=financial_service_provider,
         delivery_mechanism=delivery_mechanism,
     )
 
 
 @pytest.fixture
-def registration_data_import(business_area, program, admin_user):
-    return RegistrationDataImportFactory(
-        business_area=business_area,
-        program=program,
-        imported_by=admin_user,
-    )
-
-
-@pytest.fixture
-def household(business_area, program, registration_data_import):
-    return HouseholdFactory(
-        business_area=business_area,
-        program=program,
-        registration_data_import=registration_data_import,
-    )
-
-
-@pytest.fixture
-def payment(payment_plan, business_area, program, household, delivery_mechanism, financial_service_provider):
+def payment(payment_plan, delivery_mechanism, financial_service_provider):
     return PaymentFactory(
         parent=payment_plan,
-        business_area=business_area,
-        program=program,
-        household=household,
-        head_of_household=household.head_of_household,
-        collector=household.head_of_household,
         delivery_type=delivery_mechanism,
         financial_service_provider=financial_service_provider,
     )
@@ -133,10 +88,10 @@ def file_temp():
 
 
 @pytest.fixture
-def fsp_template(business_area):
+def fsp_template(payment_plan):
     template = FinancialServiceProviderXlsxTemplateFactory(name="Test Template AAA")
     fsp = FinancialServiceProviderFactory()
-    fsp.allowed_business_areas.add(business_area)
+    fsp.allowed_business_areas.add(payment_plan.business_area)
     fsp.xlsx_templates.add(template)
     return template
 

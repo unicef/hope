@@ -5,18 +5,9 @@ from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-    HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
-    ProgramCycleFactory,
-    ProgramFactory,
-    RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.models import FinancialServiceProvider, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -28,11 +19,6 @@ def mock_payment_gateway_env_vars() -> None:
         {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
     ):
         yield
-
-
-@pytest.fixture
-def business_area():
-    return BusinessAreaFactory()
 
 
 @pytest.fixture
@@ -57,71 +43,8 @@ def admin_client(client, admin_user):
 
 
 @pytest.fixture
-def program(business_area):
-    return ProgramFactory(business_area=business_area)
-
-
-@pytest.fixture
-def program_cycle(program):
-    return ProgramCycleFactory(program=program)
-
-
-@pytest.fixture
-def delivery_mechanism():
-    return DeliveryMechanismFactory()
-
-
-@pytest.fixture
-def financial_service_provider(delivery_mechanism):
-    return FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        payment_gateway_id="test123",
-        delivery_mechanisms=[delivery_mechanism],
-    )
-
-
-@pytest.fixture
-def payment_plan(business_area, program_cycle, financial_service_provider, delivery_mechanism):
-    return PaymentPlanFactory(
-        name="Test Plan",
-        status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
-        program_cycle=program_cycle,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism,
-    )
-
-
-@pytest.fixture
-def registration_data_import(business_area, program, admin_user):
-    return RegistrationDataImportFactory(
-        business_area=business_area,
-        program=program,
-        imported_by=admin_user,
-    )
-
-
-@pytest.fixture
-def household(business_area, program, registration_data_import):
-    return HouseholdFactory(
-        business_area=business_area,
-        program=program,
-        registration_data_import=registration_data_import,
-    )
-
-
-@pytest.fixture
-def payment(payment_plan, business_area, program, household, delivery_mechanism, financial_service_provider):
-    return PaymentFactory(
-        parent=payment_plan,
-        business_area=business_area,
-        program=program,
-        household=household,
-        head_of_household=household.head_of_household,
-        collector=household.head_of_household,
-        delivery_type=delivery_mechanism,
-        financial_service_provider=financial_service_provider,
-    )
+def payment():
+    return PaymentFactory()
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_record")
