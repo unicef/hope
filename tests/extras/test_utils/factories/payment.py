@@ -99,7 +99,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationPlan
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    payment_plan = factory.SubFactory(PaymentPlanFactory, status=PaymentPlan.Status.FINISHED)
     verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
     sampling = "FULL_LIST"
 
@@ -108,10 +108,11 @@ class PaymentVerificationFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerification
 
-    payment = factory.SubFactory(PaymentFactory)
     payment_verification_plan = factory.SubFactory(
         PaymentVerificationPlanFactory,
-        payment_plan=factory.SelfAttribute("..payment.parent"),
+    )
+    payment = factory.SubFactory(
+        PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
     )
 
 
