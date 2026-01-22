@@ -16,6 +16,7 @@ class CountryFactory(DjangoModelFactory):
             "iso_code3",
             "iso_num",
         )
+
     name = "Afghanistan"
     short_name = "Afghanistan"
     iso_code2 = "AF"
