@@ -779,6 +779,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "when any document data are provided",
             },
             {
+                "header": "preferred_language_i_c",
+                "message": "Invalid choice test for field preferred_language_i_c",
+            },
+            {
                 "header": "role_i_c",
                 "message": "Only one person can be a primary collector",
             },
