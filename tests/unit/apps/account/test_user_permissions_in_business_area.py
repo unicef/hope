@@ -14,8 +14,7 @@ from hope.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
 )
-from hope.models import BusinessArea, Role, RoleAssignment, User
-
+from hope.models import BusinessArea, Role, RoleAssignment
 
 pytestmark = pytest.mark.django_db
 
@@ -122,9 +121,7 @@ def test_unicef_partner_hq_has_permission_from_user_and_role_with_all_permission
 
     # Create "Role with all permissions" - UNICEF HQ gets these automatically
     role_with_all_permissions, created = Role.objects.get_or_create(
-        name="Role with all permissions",
-        subsystem="HOPE",
-        defaults={"permissions": []}
+        name="Role with all permissions", subsystem="HOPE", defaults={"permissions": []}
     )
     permissions = [
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -168,4 +165,3 @@ def test_unicef_partner_per_ba_has_permission_from_user_and_role_with_default_pe
 
     # Permission not assigned should not be present
     assert Permissions.GRIEVANCES_UPDATE.value not in user.permissions_in_business_area(business_area_afg.slug)
-

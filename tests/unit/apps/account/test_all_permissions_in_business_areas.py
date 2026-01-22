@@ -18,30 +18,27 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Partner, Program, Role, RoleAssignment, User
 
-
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def business_area_afg(db: Any) -> BusinessArea:
-    ba = BusinessAreaFactory(
+    return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
         name="Afghanistan",
         active=True,
     )
-    return ba
 
 
 @pytest.fixture
 def business_area_ukr(db: Any) -> BusinessArea:
-    ba = BusinessAreaFactory(
+    return BusinessAreaFactory(
         slug="ukraine",
         code="4410",
         name="Ukraine",
         active=True,
     )
-    return ba
 
 
 @pytest.fixture
@@ -292,6 +289,7 @@ def test_with_django_groups(
 
     # Create unique group name with timestamp to avoid conflicts
     import time
+
     group_name = f"Program Viewers Test {int(time.time())}"
     django_group = Group.objects.create(name=group_name)
     django_group.permissions.add(program_permission)
@@ -397,4 +395,3 @@ def test_expiry_date_edge_case(
 
     # Role expiring yesterday should NOT be included (expiry_date < timezone.now())
     assert len(permissions) == 0
-
