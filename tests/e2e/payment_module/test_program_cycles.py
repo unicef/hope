@@ -107,7 +107,7 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-"
+            "0"
             in first_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
