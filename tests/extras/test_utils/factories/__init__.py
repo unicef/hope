@@ -4,6 +4,7 @@ from .account import PartnerFactory, UserFactory
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
+from .grievance import GrievanceTicketFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (
     AccountFactory,
@@ -31,6 +32,7 @@ __all__ = [
     "FileTempFactory",
     "FeedbackFactory",
     "FeedbackMessageFactory",
+    "GrievanceTicketFactory",
     "HouseholdFactory",
     "IndividualFactory",
     "IndividualRoleInHouseholdFactory",
