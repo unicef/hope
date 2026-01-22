@@ -1,10 +1,8 @@
 """Factories for tests."""
 
-from .account import UserFactory
-from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .account import PartnerFactory, UserFactory
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
-from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
+from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (

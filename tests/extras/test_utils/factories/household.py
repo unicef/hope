@@ -7,7 +7,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import Household, Individual, IndividualRoleInHousehold
+from hope.models import Household, Individual, IndividualRoleInHousehold, MergeStatusModel
 
 
 class IndividualFactory(DjangoModelFactory):
@@ -19,7 +19,7 @@ class IndividualFactory(DjangoModelFactory):
     birth_date = date(1990, 1, 1)
     first_registration_date = factory.LazyFunction(date.today)
     last_registration_date = factory.LazyFunction(date.today)
-    rdi_merge_status = "MERGED"
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class HouseholdFactory(DjangoModelFactory):
@@ -28,7 +28,7 @@ class HouseholdFactory(DjangoModelFactory):
 
     first_registration_date = factory.LazyFunction(timezone.now)
     last_registration_date = factory.LazyFunction(timezone.now)
-    rdi_merge_status = "MERGED"
+    rdi_merge_status = MergeStatusModel.MERGED
 
     @factory.post_generation
     def head_of_household(self, create, extracted, **kwargs):
@@ -52,6 +52,7 @@ class HouseholdFactory(DjangoModelFactory):
                 rdi = RegistrationDataImportFactory(
                     business_area=self.business_area,
                     program=self.program,
+                    rdi_merge_status=self.rdi_merge_status,
                 )
                 self.registration_data_import = rdi
 
