@@ -587,8 +587,14 @@ export function formatCurrency(
   amount: number,
   onlyNumberValue = false,
 ): string {
-  const amountCleared = amount || 0;
-  return `${amountCleared.toLocaleString('en-US', {
+  let amountCleared = formatFigure(amount);
+  // If formatFigure returns '-', use '0' instead
+  if (amountCleared === '-') {
+    amountCleared = '0';
+  }
+  // Convert to number for toLocaleString
+  const numAmount = Number(amountCleared);
+  return `${numAmount.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -599,25 +605,21 @@ export function formatCurrencyWithSymbol(
   amount: number | string | null | undefined,
   currency = 'USD',
 ): string {
-  // If amount is null or undefined just show '-'
+  // If amount is null or undefined just show '0'
   if (amount === null || amount === undefined) {
-    return '-';
+    return '0';
   }
-  // Convert string to number if needed
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(numAmount)) {
-    return '-';
-  }
-  if (currency === 'USDC') return `${numAmount} ${currency}`;
+  const amountCleared = amount || 0;
+  if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(Number(numAmount), true);
+  if (!currency) return formatCurrency(Number(amountCleared), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(numAmount);
+  }).format(Number(formatFigure(amountCleared)));
 }
 
 export function countPercentage(
@@ -650,16 +652,16 @@ export function formatFigure(
     maximumFractionDigits?: number;
   },
 ): string {
-  // If value is null or undefined just show '-'
+  // If value is null or undefined just show '0'
   if (value === null || value === undefined) {
-    return '-';
+    return '0';
   }
 
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
 
-  // If parsing failed or value is NaN, return '-'
+  // If parsing failed or value is NaN, return '0'
   if (isNaN(numValue)) {
-    return '-';
+    return '0';
   }
 
   const opts = {
