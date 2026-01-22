@@ -9,19 +9,13 @@ from hope.models import Area, AreaType, Country
 class CountryFactory(DjangoModelFactory):
     class Meta:
         model = Country
-        django_get_or_create = (
-            "name",
-            "short_name",
-            "iso_code2",
-            "iso_code3",
-            "iso_num",
-        )
+        django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
 
-    name = "Afghanistan"
-    short_name = "Afghanistan"
-    iso_code2 = "AF"
-    iso_code3 = "AFG"
-    iso_num = "0004"
+    name = factory.Sequence(lambda n: f"Country {n}")
+    short_name = factory.LazyAttribute(lambda o: o.name)
+    iso_code2 = factory.Sequence(lambda n: f"{chr(65 + (n % 26))}{chr(65 + ((n // 26) % 26))}")  # AA, BA, CA, etc.
+    iso_code3 = factory.Sequence(lambda n: f"{chr(65 + (n % 26))}{chr(65 + ((n // 26) % 26))}A")  # AAA, BAA, etc.
+    iso_num = factory.Sequence(lambda n: f"{n:04d}")
 
 
 class AreaTypeFactory(DjangoModelFactory):
@@ -31,7 +25,7 @@ class AreaTypeFactory(DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"Area Type {n}")
     country = factory.SubFactory(CountryFactory)
-    area_level = 2
+    area_level = 1
 
 
 class AreaFactory(DjangoModelFactory):
@@ -40,5 +34,5 @@ class AreaFactory(DjangoModelFactory):
         django_get_or_create = ("p_code",)
 
     name = factory.Sequence(lambda n: f"Area {n}")
-    p_code = factory.Sequence(lambda n: f"AF{n:06d}")
+    p_code = factory.Sequence(lambda n: f"PC{n:06d}")
     area_type = factory.SubFactory(AreaTypeFactory)

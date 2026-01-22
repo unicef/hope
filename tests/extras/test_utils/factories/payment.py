@@ -14,6 +14,8 @@ from hope.models import (
     PaymentVerificationSummary,
 )
 
+from .program import ProgramCycleFactory
+
 
 class PaymentPlanFactory(DjangoModelFactory):
     class Meta:
@@ -23,6 +25,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     status = PaymentPlan.Status.OPEN
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
+    program_cycle = factory.SubFactory(ProgramCycleFactory)
 
 
 class PaymentFactory(DjangoModelFactory):

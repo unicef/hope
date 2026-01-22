@@ -9,6 +9,8 @@ from .account import (
 )
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
+from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
+from .grievance import GrievanceTicketFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from .payment import (
     PaymentFactory,
@@ -26,8 +28,12 @@ __all__ = [
     "AreaTypeFactory",
     "BeneficiaryGroupFactory",
     "BusinessAreaFactory",
+    "CommunicationMessageFactory",
     "CountryFactory",
     "DataCollectingTypeFactory",
+    "FeedbackFactory",
+    "FeedbackMessageFactory",
+    "GrievanceTicketFactory",
     "HouseholdFactory",
     "IndividualFactory",
     "IndividualRoleInHouseholdFactory",
@@ -42,5 +48,6 @@ __all__ = [
     "RegistrationDataImportFactory",
     "RoleAssignmentFactory",
     "RoleFactory",
+    "SurveyFactory",
     "UserFactory",
 ]
