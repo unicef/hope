@@ -30,7 +30,7 @@ from extras.test_utils.old_factories.payment import (
 from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails, TicketNeedsAdjudicationDetails
 from hope.models import DataCollectingType, Program
 
 pytestmark = pytest.mark.django_db()
@@ -259,6 +259,13 @@ class TestGrievanceTicketGlobalList:
                     }
                 ],
             },
+        )
+
+        # test fallback_individual_unicef_id_annotated
+        TicketHouseholdDataUpdateDetails.objects.create(
+            ticket=self.grievance_tickets[2],
+            household=self.household1,
+            household_data={},
         )
 
         self.grievance_ticket_ukraine = GrievanceTicketFactory(
