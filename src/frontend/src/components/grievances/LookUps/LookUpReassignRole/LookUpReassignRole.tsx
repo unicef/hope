@@ -61,12 +61,12 @@ export function LookUpReassignRole({
     role;
     household;
     individual;
-    new_individual;
+    newIndividual;
   }>({
     household: null,
     individual: null,
     role: null,
-    new_individual: null,
+    newIndividual: null,
   });
   const [shouldUseMultiple, setShouldUseMultiple] = useState(false);
 
@@ -111,17 +111,43 @@ export function LookUpReassignRole({
       default:
         break;
     }
-    const role = roleReassignData?.[individualRole.id];
+
+    let role = null;
+
+    if (roleReassignData) {
+      if (individualRole.id === 'HEAD') {
+        // For HEAD role, check both 'head' and 'HEAD' keys
+        role = roleReassignData['head'] || roleReassignData['HEAD'];
+      } else {
+        // For other roles, normalize UUID and do case-insensitive lookup
+        const normalizedId = individualRole.id.replace(/-/g, '');
+
+        // First try exact match
+        if (roleReassignData[normalizedId]) {
+          role = roleReassignData[normalizedId];
+        } else {
+          // Try case-insensitive match
+          const keys = Object.keys(roleReassignData);
+          const caseInsensitiveMatch = keys.find(
+            (key) => key.toLowerCase() === normalizedId.toLowerCase(),
+          );
+          if (caseInsensitiveMatch) {
+            role = roleReassignData[caseInsensitiveMatch];
+          }
+        }
+      }
+    }
 
     if (role) {
       setReAssigneeRole(role);
     }
-  }, [ticket, individualRole]);
+  }, [ticket, individualRole, initialSelectedIndividualId]);
 
   useEffect(() => {
     if (reAssigneeRole?.individual) {
-      setSelectedIndividualId(reAssigneeRole.new_individual);
-      // loadIndividual({ variables: { id: reAssigneeRole.individual } });
+      const individualId =
+        reAssigneeRole.newIndividual || reAssigneeRole.individual;
+      setSelectedIndividualId(individualId);
     }
   }, [reAssigneeRole]);
 

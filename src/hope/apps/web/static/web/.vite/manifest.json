@@ -1,6 +1,6 @@
 {
-  "_vendor-VYXVLZ_0.js": {
-    "file": "assets/vendor-VYXVLZ_0.js",
+  "_vendor-CnWCQu-3.js": {
+    "file": "assets/vendor-CnWCQu-3.js",
     "name": "vendor"
   },
   "src/assets/TargetingDiagramImage.png": {
@@ -56,12 +56,12 @@
     "src": "src/images/logo.jpg"
   },
   "src/main.tsx": {
-    "file": "assets/main-ClMaRgep.js",
+    "file": "assets/main-BZoExy7G.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "imports": [
-      "_vendor-VYXVLZ_0.js"
+      "_vendor-CnWCQu-3.js"
     ],
     "css": [
       "assets/main-DQ3nh3aq.css"
