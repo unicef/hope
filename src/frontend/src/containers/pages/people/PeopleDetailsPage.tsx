@@ -1,11 +1,15 @@
+import { AdminButton } from '@components/core/AdminButton';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
-import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualAccounts } from '@components/population/IndividualAccounts';
+import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import {
   BigValue,
@@ -14,14 +18,16 @@ import {
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
+import { Theme, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import { Theme, Typography } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -34,12 +40,6 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
-import { IndividualFlags } from '@components/population/IndividualFlags';
-import { AdminButton } from '@components/core/AdminButton';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { UniversalMoment } from '@components/core/UniversalMoment';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;

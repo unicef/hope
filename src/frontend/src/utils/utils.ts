@@ -603,17 +603,21 @@ export function formatCurrencyWithSymbol(
   if (amount === null || amount === undefined) {
     return '-';
   }
-  const amountCleared = amount || 0;
-  if (currency === 'USDC') return `${amountCleared} ${currency}`;
+  // Convert string to number if needed
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount)) {
+    return '-';
+  }
+  if (currency === 'USDC') return `${numAmount} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(Number(amountCleared), true);
+  if (!currency) return formatCurrency(Number(numAmount), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(Number(amountCleared));
+  }).format(numAmount);
 }
 
 export function countPercentage(
@@ -637,6 +641,37 @@ export function formatThousands(value: string): string {
     return `${value.toString().slice(0, -3)}k`;
   }
   return value;
+}
+
+export function formatFigure(
+  value: number | string | null | undefined,
+  options?: {
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+  },
+): string {
+  // If value is null or undefined just show '-'
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  const opts = {
+    minimumFractionDigits: options?.minimumFractionDigits ?? 0,
+    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
+  };
+
+  // Use Intl.NumberFormat to format number with proper punctuation (thousands separator and decimal point)
+  return new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: opts.minimumFractionDigits,
+    maximumFractionDigits: opts.maximumFractionDigits,
+  }).format(numValue);
 }
 
 export function paymentPlanStatusMapping(status): string {
