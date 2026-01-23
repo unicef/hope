@@ -3,7 +3,14 @@
 from .account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .changelog import ChangelogFactory
-from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
+from .core import (
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeChoiceFactory,
+    FlexibleAttributeFactory,
+    PeriodicFieldDataFactory,
+)
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import GrievanceTicketFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
@@ -28,6 +35,8 @@ __all__ = [
     "DataCollectingTypeFactory",
     "FeedbackFactory",
     "FeedbackMessageFactory",
+    "FlexibleAttributeChoiceFactory",
+    "FlexibleAttributeFactory",
     "GrievanceTicketFactory",
     "HouseholdFactory",
     "IndividualFactory",
@@ -38,6 +47,7 @@ __all__ = [
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
     "PaymentVerificationSummaryFactory",
+    "PeriodicFieldDataFactory",
     "ProgramCycleFactory",
     "ProgramFactory",
     "RegistrationDataImportFactory",
