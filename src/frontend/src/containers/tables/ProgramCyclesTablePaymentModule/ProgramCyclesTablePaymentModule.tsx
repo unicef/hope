@@ -213,7 +213,7 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.totalEntitledQuantityUsd != null
+        {row.totalEntitledQuantityUsd
           ? formatFigure(row.totalEntitledQuantityUsd)
           : '-'}
       </TableCell>
