@@ -1,7 +1,7 @@
 """Tests for Survey ViewSet."""
 
 import datetime
-from typing import Any, List
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
@@ -143,6 +143,42 @@ def srv_2(program_active, business_area, user_creator, payment_plan):
 
 
 @pytest.fixture
+def srv_created_2021(program_active, business_area, user, payment_plan):
+    srv = SurveyFactory(
+        program=program_active,
+        business_area=business_area,
+        created_by=user,
+        title="Survey 2021",
+        body="Survey body 2021",
+        flow_id="id2021",
+        sampling_type=Survey.SAMPLING_FULL_LIST,
+        category=Survey.CATEGORY_SMS,
+        payment_plan=payment_plan,
+    )
+    srv.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+    srv.save()
+    return srv
+
+
+@pytest.fixture
+def srv_created_2020(program_active, business_area, user_creator, payment_plan):
+    srv = SurveyFactory(
+        program=program_active,
+        business_area=business_area,
+        created_by=user_creator,
+        title="Survey 2020",
+        body="Survey body 2020",
+        flow_id="id2020",
+        sampling_type=Survey.SAMPLING_RANDOM,
+        category=Survey.CATEGORY_MANUAL,
+        payment_plan=payment_plan,
+    )
+    srv.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+    srv.save()
+    return srv
+
+
+@pytest.fixture
 def url_list(business_area, program_active):
     return reverse(
         "api:accountability:surveys-list",
@@ -210,19 +246,351 @@ def url_category_choices(business_area, program_active):
     )
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_survey_list(
-    permissions: List,
-    expected_status: int,
+@pytest.fixture
+def rdi_for_phone_tests(program_active, business_area):
+    return RegistrationDataImportFactory(program=program_active, business_area=business_area)
+
+
+@pytest.fixture
+def hoh_empty_phone(program_active, business_area, rdi_for_phone_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def hh_empty_phone(program_active, business_area, rdi_for_phone_tests, hoh_empty_phone):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_empty_phone,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def payment_empty_phone(payment_plan, program_active, business_area, hh_empty_phone, hoh_empty_phone):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=hh_empty_phone,
+        business_area=business_area,
+        collector=hoh_empty_phone,
+    )
+
+
+@pytest.fixture
+def hoh_invalid_phone(program_active, business_area, rdi_for_phone_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="invalid123",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def hh_invalid_phone(program_active, business_area, rdi_for_phone_tests, hoh_invalid_phone):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_invalid_phone,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def payment_invalid_phone(payment_plan, program_active, business_area, hh_invalid_phone, hoh_invalid_phone):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=hh_invalid_phone,
+        business_area=business_area,
+        collector=hoh_invalid_phone,
+    )
+
+
+@pytest.fixture
+def hoh_valid_phone(program_active, business_area, rdi_for_phone_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="+48600111111",
+        phone_no_valid=True,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def hh_valid_phone(program_active, business_area, rdi_for_phone_tests, hoh_valid_phone):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_valid_phone,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def payment_valid_phone(payment_plan, program_active, business_area, hh_valid_phone, hoh_valid_phone):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=hh_valid_phone,
+        business_area=business_area,
+        collector=hoh_valid_phone,
+    )
+
+
+@pytest.fixture
+def hoh_valid_phone2(program_active, business_area, rdi_for_phone_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="+48600222222",
+        phone_no_valid=True,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def hh_valid_phone2(program_active, business_area, rdi_for_phone_tests, hoh_valid_phone2):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_valid_phone2,
+        business_area=business_area,
+        registration_data_import=rdi_for_phone_tests,
+    )
+
+
+@pytest.fixture
+def payment_valid_phone2(payment_plan, program_active, business_area, hh_valid_phone2, hoh_valid_phone2):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=hh_valid_phone2,
+        business_area=business_area,
+        collector=hoh_valid_phone2,
+    )
+
+
+@pytest.fixture
+def payment_plan_all_invalid(user, business_area, program_active):
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=program_active.cycles.first(),
+    )
+
+
+@pytest.fixture
+def rdi_for_invalid_tests(program_active, business_area):
+    return RegistrationDataImportFactory(program=program_active, business_area=business_area)
+
+
+@pytest.fixture
+def hoh_invalid_1(program_active, business_area, rdi_for_invalid_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="invalid",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_invalid_tests,
+    )
+
+
+@pytest.fixture
+def hh_invalid_1(program_active, business_area, rdi_for_invalid_tests, hoh_invalid_1):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_invalid_1,
+        business_area=business_area,
+        registration_data_import=rdi_for_invalid_tests,
+    )
+
+
+@pytest.fixture
+def payment_invalid_1(payment_plan_all_invalid, program_active, business_area, hh_invalid_1, hoh_invalid_1):
+    return PaymentFactory(
+        parent=payment_plan_all_invalid,
+        program=program_active,
+        household=hh_invalid_1,
+        business_area=business_area,
+        collector=hoh_invalid_1,
+    )
+
+
+@pytest.fixture
+def hoh_invalid_2(program_active, business_area, rdi_for_invalid_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="invalid",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_invalid_tests,
+    )
+
+
+@pytest.fixture
+def hh_invalid_2(program_active, business_area, rdi_for_invalid_tests, hoh_invalid_2):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_invalid_2,
+        business_area=business_area,
+        registration_data_import=rdi_for_invalid_tests,
+    )
+
+
+@pytest.fixture
+def payment_invalid_2(payment_plan_all_invalid, program_active, business_area, hh_invalid_2, hoh_invalid_2):
+    return PaymentFactory(
+        parent=payment_plan_all_invalid,
+        program=program_active,
+        household=hh_invalid_2,
+        business_area=business_area,
+        collector=hoh_invalid_2,
+    )
+
+
+@pytest.fixture
+def payment_plan_mixed(user, business_area, program_active):
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=program_active.cycles.first(),
+    )
+
+
+@pytest.fixture
+def rdi_for_mixed_tests(program_active, business_area):
+    return RegistrationDataImportFactory(program=program_active, business_area=business_area)
+
+
+@pytest.fixture
+def hoh_valid_mixed(program_active, business_area, rdi_for_mixed_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="+48600333333",
+        phone_no_valid=True,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def hh_valid_mixed(program_active, business_area, rdi_for_mixed_tests, hoh_valid_mixed):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_valid_mixed,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def payment_valid_mixed(payment_plan_mixed, program_active, business_area, hh_valid_mixed, hoh_valid_mixed):
+    return PaymentFactory(
+        parent=payment_plan_mixed,
+        program=program_active,
+        household=hh_valid_mixed,
+        business_area=business_area,
+        collector=hoh_valid_mixed,
+    )
+
+
+@pytest.fixture
+def hoh_invalid_mixed(program_active, business_area, rdi_for_mixed_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="notavalidphone",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def hh_invalid_mixed(program_active, business_area, rdi_for_mixed_tests, hoh_invalid_mixed):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_invalid_mixed,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def payment_invalid_mixed(payment_plan_mixed, program_active, business_area, hh_invalid_mixed, hoh_invalid_mixed):
+    return PaymentFactory(
+        parent=payment_plan_mixed,
+        program=program_active,
+        household=hh_invalid_mixed,
+        business_area=business_area,
+        collector=hoh_invalid_mixed,
+    )
+
+
+@pytest.fixture
+def payment_plan_creation_invalid(user, business_area, program_active):
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=program_active.cycles.first(),
+    )
+
+
+@pytest.fixture
+def hoh_creation_invalid(program_active, business_area, rdi_for_mixed_tests):
+    return IndividualFactory(
+        household=None,
+        phone_no="invalid",
+        phone_no_valid=False,
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def hh_creation_invalid(program_active, business_area, rdi_for_mixed_tests, hoh_creation_invalid):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=hoh_creation_invalid,
+        business_area=business_area,
+        registration_data_import=rdi_for_mixed_tests,
+    )
+
+
+@pytest.fixture
+def payment_creation_invalid(
+    payment_plan_creation_invalid, program_active, business_area, hh_creation_invalid, hoh_creation_invalid
+):
+    return PaymentFactory(
+        parent=payment_plan_creation_invalid,
+        program=program_active,
+        household=hh_creation_invalid,
+        business_area=business_area,
+        collector=hoh_creation_invalid,
+    )
+
+
+def test_survey_list_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -232,44 +600,54 @@ def test_survey_list(
     srv_2,
     url_list,
 ) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
+    create_user_role_with_permissions(
+        user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], business_area, program_active
+    )
     response = authenticated_client.get(url_list)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_200_OK
-        response_results = response.json()["results"]
-        assert len(response_results) == 2
-        # Create a mapping of survey id to result for order-independent checking
-        result_by_id = {r["id"]: r for r in response_results}
-        for survey in [srv, srv_2]:
-            survey_result = result_by_id[str(survey.id)]
-            assert survey_result["unicef_id"] == str(survey.unicef_id)
-            assert survey_result["title"] == survey.title
-            assert survey_result["body"] == survey.body
-            assert survey_result["category"] == survey.get_category_display()
-            assert survey_result["flow_id"] == survey.flow_id
-            assert survey_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{survey.flow_id}/"
-            assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
-            assert survey_result["has_valid_sample_file"] is None
-            assert survey_result["sample_file_path"] is None
-            assert survey_result["created_at"] == f"{survey.created_at:%Y-%m-%dT%H:%M:%SZ}"
-            assert survey_result["number_of_recipients"] == survey.number_of_recipients
+    assert response.status_code == status.HTTP_200_OK
+    response_results = response.json()["results"]
+    assert len(response_results) == 2
+    result_by_id = {r["id"]: r for r in response_results}
+
+    srv_result = result_by_id[str(srv.id)]
+    assert srv_result["unicef_id"] == str(srv.unicef_id)
+    assert srv_result["title"] == srv.title
+    assert srv_result["body"] == srv.body
+    assert srv_result["category"] == srv.get_category_display()
+    assert srv_result["flow_id"] == srv.flow_id
+    assert srv_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{srv.flow_id}/"
+    assert srv_result["created_by"] == f"{srv.created_by.first_name} {srv.created_by.last_name}"
+    assert srv_result["has_valid_sample_file"] is None
+    assert srv_result["sample_file_path"] is None
+    assert srv_result["created_at"] == f"{srv.created_at:%Y-%m-%dT%H:%M:%SZ}"
+    assert srv_result["number_of_recipients"] == srv.number_of_recipients
+
+    srv_2_result = result_by_id[str(srv_2.id)]
+    assert srv_2_result["unicef_id"] == str(srv_2.unicef_id)
+    assert srv_2_result["title"] == srv_2.title
+    assert srv_2_result["body"] == srv_2.body
+    assert srv_2_result["category"] == srv_2.get_category_display()
+    assert srv_2_result["flow_id"] == srv_2.flow_id
+    assert srv_2_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{srv_2.flow_id}/"
+    assert srv_2_result["created_by"] == f"{srv_2.created_by.first_name} {srv_2.created_by.last_name}"
+    assert srv_2_result["has_valid_sample_file"] is None
+    assert srv_2_result["sample_file_path"] is None
+    assert srv_2_result["created_at"] == f"{srv_2.created_at:%Y-%m-%dT%H:%M:%SZ}"
+    assert srv_2_result["number_of_recipients"] == srv_2.number_of_recipients
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_survey_get_count(
-    permissions: List,
-    expected_status: int,
+def test_survey_list_returns_403_without_permission(
+    authenticated_client,
+    srv,
+    srv_2,
+    url_list,
+) -> None:
+    response = authenticated_client.get(url_list)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_survey_get_count_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -279,32 +657,27 @@ def test_survey_get_count(
     srv_2,
     url_count,
 ) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
+    create_user_role_with_permissions(
+        user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], business_area, program_active
+    )
     response = authenticated_client.get(url_count)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_200_OK
-        resp_data = response.json()
-        assert resp_data["count"] == 2
+    assert response.status_code == status.HTTP_200_OK
+    resp_data = response.json()
+    assert resp_data["count"] == 2
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [
-                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
-                Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
-            ],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_survey_details(
-    permissions: List,
-    expected_status: int,
+def test_survey_get_count_returns_403_without_permission(
+    authenticated_client,
+    srv,
+    srv_2,
+    url_count,
+) -> None:
+    response = authenticated_client.get(url_count)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_survey_details_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -313,29 +686,35 @@ def test_survey_details(
     srv,
     url_details,
 ) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+        ],
+        business_area,
+        program_active,
+    )
     response = authenticated_client.get(url_details)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_200_OK
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["title"] == "Survey 1"
-        assert resp_data["body"] == "Survey 1 body"
-        assert resp_data["category"] == "Survey with SMS"
+    assert response.status_code == status.HTTP_200_OK
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["title"] == "Survey 1"
+    assert resp_data["body"] == "Survey 1 body"
+    assert resp_data["category"] == "Survey with SMS"
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], status.HTTP_201_CREATED),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_create_survey(
-    permissions: List,
-    expected_status: int,
+def test_survey_details_returns_403_without_permission(
+    authenticated_client,
+    srv,
+    url_details,
+) -> None:
+    response = authenticated_client.get(url_details)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_create_survey_returns_created_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -345,7 +724,9 @@ def test_create_survey(
     payment,
     url_list,
 ) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
+    create_user_role_with_permissions(
+        user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], business_area, program_active
+    )
     response = authenticated_client.post(
         url_list,
         {
@@ -358,48 +739,68 @@ def test_create_survey(
         },
         format="json",
     )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_201_CREATED:
-        assert response.status_code == status.HTTP_201_CREATED
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["title"] == "New SRV"
-        assert resp_data["body"] == "LGTM"
-
-        # create new one with PaymentPlan (TP)
-        response = authenticated_client.post(
-            url_list,
-            {
-                "title": "New SRV with TP",
-                "body": "LGTM",
-                "category": "MANUAL",
-                "sampling_type": Survey.SAMPLING_FULL_LIST,
-                "full_list_arguments": {"excluded_admin_areas": []},
-                "random_sampling_arguments": None,
-                "payment_plan": str(payment_plan.pk),
-            },
-            format="json",
-        )
-        assert response.status_code == status.HTTP_201_CREATED
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["title"] == "New SRV with TP"
-        assert Survey.objects.get(title="New SRV with TP").payment_plan_id == payment_plan.pk
+    assert response.status_code == status.HTTP_201_CREATED
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["title"] == "New SRV"
+    assert resp_data["body"] == "LGTM"
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
-            status.HTTP_202_ACCEPTED,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_survey_export_sample(
-    permissions: List,
-    expected_status: int,
+def test_create_survey_with_payment_plan(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    payment_plan,
+    payment,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], business_area, program_active
+    )
+    response = authenticated_client.post(
+        url_list,
+        {
+            "title": "New SRV with TP",
+            "body": "LGTM",
+            "category": "MANUAL",
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+            "random_sampling_arguments": None,
+            "payment_plan": str(payment_plan.pk),
+        },
+        format="json",
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["title"] == "New SRV with TP"
+    assert Survey.objects.get(title="New SRV with TP").payment_plan_id == payment_plan.pk
+
+
+def test_create_survey_returns_403_without_permission(
+    authenticated_client,
+    payment_plan,
+    payment,
+    url_list,
+) -> None:
+    response = authenticated_client.post(
+        url_list,
+        {
+            "title": "New SRV",
+            "body": "LGTM",
+            "category": "MANUAL",
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
+            "full_list_arguments": {"excluded_admin_areas": []},
+            "payment_plan": str(payment_plan.pk),
+        },
+        format="json",
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_survey_export_sample_returns_accepted_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -408,14 +809,23 @@ def test_survey_export_sample(
     srv,
     url_export_sample,
 ) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
+    create_user_role_with_permissions(
+        user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], business_area, program_active
+    )
     response = authenticated_client.get(url_export_sample)
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_202_ACCEPTED:
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["title"] == "Survey 1"
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["title"] == "Survey 1"
+
+
+def test_survey_export_sample_returns_403_without_permission(
+    authenticated_client,
+    srv,
+    url_export_sample,
+) -> None:
+    response = authenticated_client.get(url_export_sample)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_get_category_choices(
@@ -484,8 +894,8 @@ def test_filter_surveys_by_created_at(
     authenticated_client,
     user,
     business_area,
-    srv,
-    srv_2,
+    srv_created_2021,
+    srv_created_2020,
     url_list,
 ) -> None:
     create_user_role_with_permissions(
@@ -494,10 +904,6 @@ def test_filter_surveys_by_created_at(
         business_area,
         whole_business_area_access=True,
     )
-    srv.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
-    srv.save()
-    srv_2.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
-    srv_2.save()
     response = authenticated_client.get(
         url_list,
         {
@@ -508,7 +914,7 @@ def test_filter_surveys_by_created_at(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(srv_2.id)
+    assert results[0]["id"] == str(srv_created_2020.id)
 
 
 def test_filter_surveys_by_created_by(
@@ -552,15 +958,16 @@ def test_search_surveys(
     response = authenticated_client.get(url_list, {"search": "Survey 1"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    assert len(results) == 1
-    assert results[0]["id"] == str(srv.id)
+    # srv should be found when searching for "Survey 1"
+    assert str(srv.id) in [r["id"] for r in results]
+    # Verify the found survey has correct title
+    srv_result = next(r for r in results if r["id"] == str(srv.id))
+    assert srv_result["title"] == "Survey 1"
 
-    # Search by unicef_id suffix (last 4 digits)
     unicef_id_suffix = srv.unicef_id[-4:]
     response = authenticated_client.get(url_list, {"search": unicef_id_suffix})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    # At least srv should be found
     assert str(srv.id) in [r["id"] for r in results]
 
     response = authenticated_client.get(url_list, {"search": "SUR-"})
@@ -661,106 +1068,16 @@ def test_sample_size_with_excluded_recipients_phone_validation(
     program_active,
     payment_plan,
     payment,
+    payment_empty_phone,
+    payment_invalid_phone,
+    payment_valid_phone,
+    payment_valid_phone2,
 ) -> None:
     create_user_role_with_permissions(
         user,
         [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
         business_area,
         program_active,
-    )
-
-    rdi = RegistrationDataImportFactory(program=program_active, business_area=business_area)
-
-    # Household 1: Empty phone number
-    hoh_empty_phone = IndividualFactory(
-        household=None,
-        phone_no="",
-        phone_no_valid=False,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_empty_phone = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_empty_phone,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        program=program_active,
-        household=hh_empty_phone,
-        business_area=business_area,
-        collector=hoh_empty_phone,
-    )
-
-    # Household 2: Invalid phone number
-    hoh_invalid_phone = IndividualFactory(
-        household=None,
-        phone_no="invalid123",
-        phone_no_valid=False,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_invalid_phone = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_invalid_phone,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        program=program_active,
-        household=hh_invalid_phone,
-        business_area=business_area,
-        collector=hoh_invalid_phone,
-    )
-
-    # Household 3: Valid phone number
-    hoh_valid_phone = IndividualFactory(
-        household=None,
-        phone_no="+48600111111",
-        phone_no_valid=True,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_valid_phone = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_valid_phone,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        program=program_active,
-        household=hh_valid_phone,
-        business_area=business_area,
-        collector=hoh_valid_phone,
-    )
-
-    # Household 4: Another valid phone number
-    hoh_valid_phone2 = IndividualFactory(
-        household=None,
-        phone_no="+48600222222",
-        phone_no_valid=True,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_valid_phone2 = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_valid_phone2,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        program=program_active,
-        household=hh_valid_phone2,
-        business_area=business_area,
-        collector=hoh_valid_phone2,
     )
 
     url = reverse(
@@ -781,8 +1098,6 @@ def test_sample_size_with_excluded_recipients_phone_validation(
     assert response.status_code == status.HTTP_202_ACCEPTED
 
     response_data = response.json()
-    # Should include 3 valid recipients (original hh_1 + 2 new valid phone households)
-    # Should exclude 2 recipients (empty phone, invalid phone)
     assert response_data["number_of_recipients"] == 3
     assert response_data["sample_size"] == 3
     assert response_data["excluded_recipients_count"] == 2
@@ -794,6 +1109,9 @@ def test_sample_size_all_excluded_recipients(
     user,
     business_area,
     program_active,
+    payment_plan_all_invalid,
+    payment_invalid_1,
+    payment_invalid_2,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -801,40 +1119,6 @@ def test_sample_size_all_excluded_recipients(
         business_area,
         program_active,
     )
-
-    rdi = RegistrationDataImportFactory(program=program_active, business_area=business_area)
-
-    # Create a new payment plan with only invalid phone households
-    payment_plan_invalid = PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=program_active.cycles.first(),
-    )
-
-    # Create households with only invalid phone numbers
-    for _i in range(2):
-        hoh_invalid = IndividualFactory(
-            household=None,
-            phone_no="invalid",
-            phone_no_valid=False,
-            program=program_active,
-            business_area=business_area,
-            registration_data_import=rdi,
-        )
-        hh_invalid = HouseholdFactory(
-            program=program_active,
-            head_of_household=hoh_invalid,
-            business_area=business_area,
-            registration_data_import=rdi,
-        )
-        PaymentFactory(
-            parent=payment_plan_invalid,
-            program=program_active,
-            household=hh_invalid,
-            business_area=business_area,
-            collector=hoh_invalid,
-        )
 
     url = reverse(
         "api:accountability:surveys-sample-size",
@@ -845,7 +1129,7 @@ def test_sample_size_all_excluded_recipients(
     )
 
     data = {
-        "payment_plan": str(payment_plan_invalid.pk),
+        "payment_plan": str(payment_plan_all_invalid.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }
@@ -859,12 +1143,16 @@ def test_sample_size_all_excluded_recipients(
     assert response_data["excluded_recipients_count"] == 2
 
 
-def test_survey_creation_with_excluded_recipients(
+def test_survey_creation_with_mixed_phone_validation(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
     business_area,
     program_active,
+    payment_plan_mixed,
+    payment_valid_mixed,
+    payment_invalid_mixed,
+    url_list,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -873,70 +1161,6 @@ def test_survey_creation_with_excluded_recipients(
         program_active,
     )
 
-    rdi = RegistrationDataImportFactory(program=program_active, business_area=business_area)
-
-    payment_plan_mixed = PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=program_active.cycles.first(),
-    )
-
-    # Valid phone household
-    hoh_valid = IndividualFactory(
-        household=None,
-        phone_no="+48600333333",
-        phone_no_valid=True,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_valid = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_valid,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan_mixed,
-        program=program_active,
-        household=hh_valid,
-        business_area=business_area,
-        collector=hoh_valid,
-    )
-
-    # Invalid phone household
-    hoh_invalid = IndividualFactory(
-        household=None,
-        phone_no="notavalidphone",
-        phone_no_valid=False,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_invalid = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_invalid,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan_mixed,
-        program=program_active,
-        household=hh_invalid,
-        business_area=business_area,
-        collector=hoh_invalid,
-    )
-
-    url = reverse(
-        "api:accountability:surveys-list",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
-        },
-    )
-
-    # Test successful survey creation with mixed phone validation
     data = {
         "title": "Test Survey with Mixed Recipients",
         "body": "Test survey body",
@@ -946,54 +1170,41 @@ def test_survey_creation_with_excluded_recipients(
         "full_list_arguments": {"excluded_admin_areas": []},
     }
 
-    response = authenticated_client.post(url, data=data, format="json")
+    response = authenticated_client.post(url_list, data=data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
 
     survey = Survey.objects.get(pk=response.json()["id"])
-    # Should have 1 valid recipient, 1 excluded
     assert survey.number_of_recipients == 1
     assert survey.recipients.count() == 1
     assert survey.recipients.first().head_of_household.phone_no_valid is True
 
-    # Test survey creation with all invalid recipients should fail
-    payment_plan_all_invalid = PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=program_active.cycles.first(),
+
+def test_survey_creation_fails_with_all_invalid_phones(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    payment_plan_creation_invalid,
+    payment_creation_invalid,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+        business_area,
+        program_active,
     )
 
-    hoh_no_valid = IndividualFactory(
-        household=None,
-        phone_no="invalid",
-        phone_no_valid=False,
-        program=program_active,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    hh_no_valid = HouseholdFactory(
-        program=program_active,
-        head_of_household=hoh_no_valid,
-        business_area=business_area,
-        registration_data_import=rdi,
-    )
-    PaymentFactory(
-        parent=payment_plan_all_invalid,
-        program=program_active,
-        household=hh_no_valid,
-        business_area=business_area,
-        collector=hoh_no_valid,
-    )
-
-    data_invalid = {
+    data = {
         "title": "Test Survey All Invalid",
         "body": "Test survey body",
         "category": Survey.CATEGORY_SMS,
-        "payment_plan": str(payment_plan_all_invalid.pk),
+        "payment_plan": str(payment_plan_creation_invalid.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }
 
-    response = authenticated_client.post(url, data=data_invalid, format="json")
+    response = authenticated_client.post(url_list, data=data, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "recipients were excluded because they do not have valid phone numbers" in str(response.json())
