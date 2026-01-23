@@ -31,6 +31,7 @@ class AreaTypeFactory(DjangoModelFactory):
 class AreaFactory(DjangoModelFactory):
     class Meta:
         model = Area
+        django_get_or_create = ("p_code",)
 
     name = factory.Sequence(lambda n: f"Area {n}")
     p_code = factory.Sequence(lambda n: f"PC{n:06d}")

@@ -1,6 +1,12 @@
 """Factories for tests."""
 
-from .account import PartnerFactory, UserFactory
+from .account import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
@@ -22,6 +28,7 @@ from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import RegistrationDataImportFactory
 
 __all__ = [
+    "AdminAreaLimitedToFactory",
     "AreaFactory",
     "AreaTypeFactory",
     "BeneficiaryGroupFactory",
@@ -50,6 +57,8 @@ __all__ = [
     "ProgramCycleFactory",
     "ProgramFactory",
     "RegistrationDataImportFactory",
+    "RoleAssignmentFactory",
+    "RoleFactory",
     "SurveyFactory",
     "UserFactory",
 ]
