@@ -1,6 +1,6 @@
 """Factories for tests."""
 
-from .account import PartnerFactory, UserFactory
+from .account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .changelog import ChangelogFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
@@ -41,6 +41,8 @@ __all__ = [
     "ProgramCycleFactory",
     "ProgramFactory",
     "RegistrationDataImportFactory",
+    "RoleAssignmentFactory",
+    "RoleFactory",
     "SurveyFactory",
     "UserFactory",
 ]
