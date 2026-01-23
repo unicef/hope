@@ -3,7 +3,6 @@ from enum import Enum, auto, unique
 import hashlib
 import json
 import logging
-import sys
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, T
 
 import celery
@@ -16,7 +15,6 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
-from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
@@ -26,8 +24,6 @@ from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 import redis
-import requests
-import sentry_sdk
 
 from hope.apps.core.celery import app
 from hope.apps.core.utils import nested_getattr
@@ -206,82 +202,6 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
         else:
             return super().delete(*args, **kwargs, using=using)
         return None
-
-
-class AbstractSession(models.Model):
-    timestamp = models.DateTimeField(auto_now_add=True)
-    SOURCE_MIS = "MIS"
-    SOURCE_CA = "CA"
-    # HOPE statueses
-    STATUS_PROCESSING = "PROCESSING"
-    STATUS_COMPLETED = "COMPLETED"
-    STATUS_FAILED = "FAILED"
-    # CA statuses
-    STATUS_NEW = "NEW"
-    STATUS_READY = "READY"
-    STATUS_EMPTY = "EMPTY"
-    STATUS_LOADING = "LOADING"
-    STATUS_ERRORED = "ERRORED"
-    STATUS_IGNORED = "IGNORED"
-
-    source = models.CharField(
-        max_length=3,
-        choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),
-    )
-    status = models.CharField(
-        max_length=11,
-        choices=(
-            (STATUS_NEW, "New"),
-            (STATUS_READY, "Ready"),
-            (STATUS_PROCESSING, "Processing"),
-            (STATUS_COMPLETED, "Completed"),
-            (STATUS_FAILED, "Failed"),
-            (STATUS_EMPTY, "Empty"),
-            (STATUS_IGNORED, "Ignored"),
-            (STATUS_LOADING, "Loading"),
-            (STATUS_ERRORED, "Errored"),
-        ),
-    )
-    last_modified_date = models.DateTimeField(auto_now=True)
-
-    business_area = models.CharField(
-        max_length=20,
-        help_text="""Same as the business area set on program, but
-            this is set as the same value, and all other
-            models this way can get easy access to the business area
-            via the session.""",
-    )
-
-    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
-    traceback = models.TextField(default="", blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self) -> str:
-        return f"#{self.id} on {self.timestamp}"
-
-    def process_exception(self, exc: BaseException, request: HttpRequest | None = None) -> int | None:
-        try:
-            from sentry_sdk import capture_exception
-
-            err = capture_exception(exc)
-            self.sentry_id = err
-        except (sentry_sdk.integrations.exceptions.IntegrationError, requests.exceptions.ConnectionError) as e:
-            logger.warning(f"Cannot log with Sentry: {e}")
-
-        try:
-            from django.views.debug import ExceptionReporter
-
-            reporter = ExceptionReporter(request, *sys.exc_info())
-            self.traceback = reporter.get_traceback_html()
-        except Exception as e:
-            logger.exception(e)
-            self.traceback = "N/A"
-        finally:
-            self.status = self.STATUS_FAILED
-
-        return self.sentry_id
 
 
 class AbstractSyncable(models.Model):
