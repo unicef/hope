@@ -127,11 +127,10 @@ export function GrievancesTableRow({
   };
 
   const mappedPrograms = getMappedPrograms();
-
   const getTargetUnicefId = (_ticket) => {
     return isSocialDctType || isAllPrograms
       ? _ticket?.targetId
-      : _ticket?.household?.unicefId;
+      : _ticket?.householdUnicefId;
   };
   const targetId = getTargetUnicefId(ticket);
 

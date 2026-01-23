@@ -792,7 +792,7 @@ class PaymentPlan(
         """Can regenerate export_file_per_fsp."""
         return (
             self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-            and self.export_file_per_fsp
+            and self.export_file_per_fsp is not None
             and self.background_action_status is None
         )
 
