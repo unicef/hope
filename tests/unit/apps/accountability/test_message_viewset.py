@@ -1,7 +1,7 @@
 """Tests for Message ViewSet."""
 
 import datetime
-from typing import Any, List
+from typing import Any
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
@@ -35,8 +35,10 @@ def business_area():
 
 
 @pytest.fixture
-def partner():
-    return PartnerFactory(name="unittest")
+def partner(business_area):
+    p = PartnerFactory(name="unittest")
+    p.allowed_business_areas.add(business_area)
+    return p
 
 
 @pytest.fixture
@@ -45,8 +47,18 @@ def user(partner):
 
 
 @pytest.fixture
+def superuser(partner):
+    return UserFactory(partner=partner, first_name="Super", last_name="User", is_superuser=True)
+
+
+@pytest.fixture
 def authenticated_client(api_client, user):
     return api_client(user)
+
+
+@pytest.fixture
+def authenticated_superuser_client(api_client, superuser):
+    return api_client(superuser)
 
 
 @pytest.fixture
@@ -80,36 +92,121 @@ def payment_plan(user, business_area, program_active):
 
 
 @pytest.fixture
-def households(program_active, payment_plan, business_area):
+def rdi(program_active, business_area):
+    return RegistrationDataImportFactory(program=program_active, business_area=business_area)
+
+
+@pytest.fixture
+def individual_hoh_1(program_active, business_area, rdi):
     birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
-    rdi = RegistrationDataImportFactory(program=program_active, business_area=business_area)
-    households = []
-    for i in range(3):
-        hoh = IndividualFactory(
-            household=None,
-            birth_date=birth_date_for_50yo,
-            sex="MALE",
-            program=program_active,
-            business_area=business_area,
-            registration_data_import=rdi,
-            phone_no=f"+4860012345{i}",
-            phone_no_valid=True,
-        )
-        hh = HouseholdFactory(
-            program=program_active,
-            head_of_household=hoh,
-            business_area=business_area,
-            registration_data_import=rdi,
-        )
-        PaymentFactory(
-            parent=payment_plan,
-            program=program_active,
-            household=hh,
-            business_area=business_area,
-            collector=hoh,
-        )
-        households.append(hh)
-    return households
+    return IndividualFactory(
+        household=None,
+        birth_date=birth_date_for_50yo,
+        sex="MALE",
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi,
+        phone_no="+48600123450",
+        phone_no_valid=True,
+    )
+
+
+@pytest.fixture
+def individual_hoh_2(program_active, business_area, rdi):
+    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    return IndividualFactory(
+        household=None,
+        birth_date=birth_date_for_50yo,
+        sex="MALE",
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi,
+        phone_no="+48600123451",
+        phone_no_valid=True,
+    )
+
+
+@pytest.fixture
+def individual_hoh_3(program_active, business_area, rdi):
+    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    return IndividualFactory(
+        household=None,
+        birth_date=birth_date_for_50yo,
+        sex="MALE",
+        program=program_active,
+        business_area=business_area,
+        registration_data_import=rdi,
+        phone_no="+48600123452",
+        phone_no_valid=True,
+    )
+
+
+@pytest.fixture
+def household_1(program_active, business_area, rdi, individual_hoh_1):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=individual_hoh_1,
+        business_area=business_area,
+        registration_data_import=rdi,
+    )
+
+
+@pytest.fixture
+def household_2(program_active, business_area, rdi, individual_hoh_2):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=individual_hoh_2,
+        business_area=business_area,
+        registration_data_import=rdi,
+    )
+
+
+@pytest.fixture
+def household_3(program_active, business_area, rdi, individual_hoh_3):
+    return HouseholdFactory(
+        program=program_active,
+        head_of_household=individual_hoh_3,
+        business_area=business_area,
+        registration_data_import=rdi,
+    )
+
+
+@pytest.fixture
+def payment_for_hh_1(payment_plan, program_active, business_area, household_1, individual_hoh_1):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=household_1,
+        business_area=business_area,
+        collector=individual_hoh_1,
+    )
+
+
+@pytest.fixture
+def payment_for_hh_2(payment_plan, program_active, business_area, household_2, individual_hoh_2):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=household_2,
+        business_area=business_area,
+        collector=individual_hoh_2,
+    )
+
+
+@pytest.fixture
+def payment_for_hh_3(payment_plan, program_active, business_area, household_3, individual_hoh_3):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        household=household_3,
+        business_area=business_area,
+        collector=individual_hoh_3,
+    )
+
+
+@pytest.fixture
+def households(household_1, household_2, household_3, payment_for_hh_1, payment_for_hh_2, payment_for_hh_3):
+    return [household_1, household_2, household_3]
 
 
 @pytest.fixture
@@ -161,6 +258,55 @@ def msg_3(program_finished, business_area, user):
 
 
 @pytest.fixture
+def msg_created_2021(program_active, business_area, user):
+    msg = CommunicationMessageFactory(
+        program=program_active,
+        business_area=business_area,
+        title="MSG 2021",
+        body="MSG body 2021",
+        created_by=user,
+        sampling_type=Survey.SAMPLING_FULL_LIST,
+    )
+    msg.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+    msg.save()
+    return msg
+
+
+@pytest.fixture
+def msg_created_2020(program_active, business_area, user):
+    msg = CommunicationMessageFactory(
+        program=program_active,
+        business_area=business_area,
+        title="MSG 2020",
+        body="MSG body 2020",
+        created_by=user,
+        sampling_type=Survey.SAMPLING_RANDOM,
+    )
+    msg.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+    msg.save()
+    return msg
+
+
+@pytest.fixture
+def payment_plan_empty(user, business_area, program_active):
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=program_active.cycles.first(),
+    )
+
+
+@pytest.fixture
+def rdi_empty(user, business_area, program_active):
+    return RegistrationDataImportFactory(
+        imported_by=user,
+        business_area=business_area,
+        program=program_active,
+    )
+
+
+@pytest.fixture
 def url_list(business_area, program_active):
     return reverse(
         "api:accountability:messages-list",
@@ -194,19 +340,7 @@ def url_details(business_area, program_active, msg_1):
     )
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_msg_get_list(
-    permissions: List,
-    expected_status: int,
+def test_msg_get_list_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -216,21 +350,35 @@ def test_msg_get_list(
     msg_2,
     url_list,
 ) -> None:
+    permissions = [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST]
     create_user_role_with_permissions(user, permissions, business_area, program_active)
     response = authenticated_client.get(url_list)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        response_results = response.json()["results"]
-        assert len(response_results) == 2
-        for i, message in enumerate([msg_1, msg_2]):
-            message_result = response_results[i]
-            assert message_result["id"] == str(message.id)
-            assert message_result["unicef_id"] == str(message.unicef_id)
-            assert message_result["title"] == message.title
-            assert message_result["number_of_recipients"] == message.number_of_recipients
-            assert message_result["created_by"] == f"{user.first_name} {user.last_name}"
-            assert message_result["created_at"] == f"{message.created_at:%Y-%m-%dT%H:%M:%SZ}"
+    assert response.status_code == status.HTTP_200_OK
+    response_results = response.json()["results"]
+    assert len(response_results) == 2
+    assert response_results[0]["id"] == str(msg_1.id)
+    assert response_results[0]["unicef_id"] == str(msg_1.unicef_id)
+    assert response_results[0]["title"] == msg_1.title
+    assert response_results[0]["number_of_recipients"] == msg_1.number_of_recipients
+    assert response_results[0]["created_by"] == f"{user.first_name} {user.last_name}"
+    assert response_results[0]["created_at"] == f"{msg_1.created_at:%Y-%m-%dT%H:%M:%SZ}"
+    assert response_results[1]["id"] == str(msg_2.id)
+    assert response_results[1]["unicef_id"] == str(msg_2.unicef_id)
+    assert response_results[1]["title"] == msg_2.title
+    assert response_results[1]["number_of_recipients"] == msg_2.number_of_recipients
+    assert response_results[1]["created_by"] == f"{user.first_name} {user.last_name}"
+    assert response_results[1]["created_at"] == f"{msg_2.created_at:%Y-%m-%dT%H:%M:%SZ}"
+
+
+def test_msg_get_list_returns_403_without_permission(
+    authenticated_client,
+    msg_1,
+    msg_2,
+    url_list,
+) -> None:
+    response = authenticated_client.get(url_list)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_msg_filter_by_program(
@@ -259,19 +407,7 @@ def test_msg_filter_by_program(
     assert str(msg_2.id) in results_ids
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_msg_get_count(
-    permissions: List,
-    expected_status: int,
+def test_msg_get_count_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -281,29 +417,26 @@ def test_msg_get_count(
     msg_2,
     url_count,
 ) -> None:
+    permissions = [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST]
     create_user_role_with_permissions(user, permissions, business_area, program_active)
     response = authenticated_client.get(url_count)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_200_OK
-        resp_data = response.json()
-        assert resp_data["count"] == 2
+    assert response.status_code == status.HTTP_200_OK
+    resp_data = response.json()
+    assert resp_data["count"] == 2
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
-            status.HTTP_200_OK,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_msg_details(
-    permissions: List,
-    expected_status: int,
+def test_msg_get_count_returns_403_without_permission(
+    authenticated_client,
+    msg_1,
+    msg_2,
+    url_count,
+) -> None:
+    response = authenticated_client.get(url_count)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_msg_details_returns_data_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -312,52 +445,44 @@ def test_msg_details(
     msg_1,
     url_details,
 ) -> None:
+    permissions = [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS]
     create_user_role_with_permissions(user, permissions, business_area, program_active)
     response = authenticated_client.get(url_details)
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_200_OK
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["body"] == "MSG body"
-        assert resp_data["households"] is not None
-        assert resp_data["payment_plan"] is not None
-        assert resp_data["registration_data_import"] is None
-        assert resp_data["sampling_type"] == Survey.SAMPLING_FULL_LIST
-        assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
-        assert resp_data["random_sampling_arguments"] is None
-        assert resp_data["sample_size"] == 0
-        assert resp_data["admin_url"] is None
+    assert response.status_code == status.HTTP_200_OK
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["body"] == "MSG body"
+    assert resp_data["households"] is not None
+    assert resp_data["payment_plan"] is not None
+    assert resp_data["registration_data_import"] is None
+    assert resp_data["sampling_type"] == Survey.SAMPLING_FULL_LIST
+    assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
+    assert resp_data["random_sampling_arguments"] is None
+    assert resp_data["sample_size"] == 0
+    assert resp_data["admin_url"] is None
 
 
-def test_msg_details_admin_url(
+def test_msg_details_returns_403_without_permission(
     authenticated_client,
-    user,
     msg_1,
     url_details,
 ) -> None:
-    user.is_superuser = True
-    user.save()
     response = authenticated_client.get(url_details)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
+
+def test_msg_details_admin_url(
+    authenticated_superuser_client,
+    msg_1,
+    url_details,
+) -> None:
+    response = authenticated_superuser_client.get(url_details)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["admin_url"] == msg_1.admin_url
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        (
-            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-            status.HTTP_201_CREATED,
-        ),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_create_new_message(
-    permissions: List,
-    expected_status: int,
+def test_create_new_message_returns_created_with_permission(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
@@ -366,6 +491,7 @@ def test_create_new_message(
     households,
     url_list,
 ) -> None:
+    permissions = [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE]
     create_user_role_with_permissions(user, permissions, business_area, program_active)
     broadcast_message_mock = MagicMock(return_value=None)
     with (
@@ -390,14 +516,43 @@ def test_create_new_message(
             },
             format="json",
         )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_201_CREATED:
-        assert response.status_code == status.HTTP_201_CREATED
-        resp_data = response.json()
-        assert "id" in resp_data
-        assert resp_data["title"] == "New Message for Active Program"
-        assert resp_data["body"] == "Thank you for tests! Looks Good To Me!"
-        assert resp_data["sample_size"] == 1
+    assert response.status_code == status.HTTP_201_CREATED
+    resp_data = response.json()
+    assert "id" in resp_data
+    assert resp_data["title"] == "New Message for Active Program"
+    assert resp_data["body"] == "Thank you for tests! Looks Good To Me!"
+    assert resp_data["sample_size"] == 1
+
+
+def test_create_new_message_returns_403_without_permission(
+    authenticated_client,
+    households,
+    url_list,
+) -> None:
+    broadcast_message_mock = MagicMock(return_value=None)
+    with (
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+            MagicMock(return_value=None),
+        ),
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+            broadcast_message_mock,
+        ),
+    ):
+        response = authenticated_client.post(
+            url_list,
+            {
+                "title": "New Message for Active Program",
+                "body": "Thank you for tests! Looks Good To Me!",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": None,
+                "households": [str(households[0].pk)],
+            },
+            format="json",
+        )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_create_new_message_by_households_full_list(
@@ -582,12 +737,13 @@ def test_create_new_message_target_population_random(
     assert resp_data["sample_size"] == 1
 
 
-def test_create_message_validation_error(
+def test_create_message_validation_error_payment_plan_no_recipients(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
     business_area,
     program_active,
+    payment_plan_empty,
     url_list,
 ) -> None:
     create_user_role_with_permissions(
@@ -596,14 +752,6 @@ def test_create_message_validation_error(
         business_area,
         program_active,
     )
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=program_active.cycles.first(),
-    )
-    rdi = RegistrationDataImportFactory(imported_by=user, business_area=business_area, program=program_active)
-
     response = authenticated_client.post(
         url_list,
         {
@@ -611,14 +759,30 @@ def test_create_message_validation_error(
             "body": "Thank you for tests!",
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
-            "payment_plan": str(payment_plan.pk),
+            "payment_plan": str(payment_plan_empty.pk),
         },
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "No recipients found for the given criteria" in response.json()
 
-    response_2 = authenticated_client.post(
+
+def test_create_message_validation_error_rdi_no_recipients(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    rdi_empty,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+        business_area,
+        program_active,
+    )
+    response = authenticated_client.post(
         url_list,
         {
             "title": "Test Error",
@@ -626,12 +790,12 @@ def test_create_message_validation_error(
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
             "random_sampling_arguments": None,
-            "registration_data_import": str(rdi.pk),
+            "registration_data_import": str(rdi_empty.pk),
         },
         format="json",
     )
-    assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-    assert "No recipients found for the given criteria" in response_2.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "No recipients found for the given criteria" in response.json()
 
 
 def test_create_message_invalid_request(
@@ -720,8 +884,9 @@ def test_filter_messages_by_created_at(
     authenticated_client,
     user,
     business_area,
-    msg_1,
-    msg_2,
+    program_active,
+    msg_created_2021,
+    msg_created_2020,
     url_list,
 ) -> None:
     create_user_role_with_permissions(
@@ -730,10 +895,6 @@ def test_filter_messages_by_created_at(
         business_area,
         whole_business_area_access=True,
     )
-    msg_1.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
-    msg_1.save()
-    msg_2.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
-    msg_2.save()
     response = authenticated_client.get(
         url_list,
         {
@@ -744,7 +905,7 @@ def test_filter_messages_by_created_at(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(msg_2.id)
+    assert results[0]["id"] == str(msg_created_2020.id)
 
 
 def test_filter_messages_by_title(
