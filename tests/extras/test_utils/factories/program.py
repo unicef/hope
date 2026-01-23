@@ -8,7 +8,7 @@ from factory.django import DjangoModelFactory
 
 from hope.models import Program, ProgramCycle
 
-from .core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -26,6 +26,7 @@ class ProgramFactory(DjangoModelFactory):
     population_goal = 1000
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
 
 
 class ProgramCycleFactory(DjangoModelFactory):
