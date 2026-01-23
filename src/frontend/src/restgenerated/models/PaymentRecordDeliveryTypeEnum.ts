@@ -8,21 +8,21 @@
  * * `cash` - Cash
  * * `cash_by_fsp` - Cash by FSP
  * * `cash_over_the_counter` - Cash over the counter
+ * * `b6e0ac66-86c3-4f53-9ccd-80084bbc70e8` - Certain attack suggest woman design.
  * * `cheque` - Cheque
- * * `7195b0af-ae48-4d10-b296-53eb6421b126` - Color it surface those.
  * * `deposit_to_card` - Deposit to Card
- * * `b62da004-d638-4c5b-a717-4572c04dbd94` - Make cell president.
- * * `1807e1d1-98d6-46ae-9b45-726c9657616a` - Mention live teacher reveal.
+ * * `6959f01f-0f93-4b8e-abe0-2becf93c593a` - Feel relationship mind inside.
+ * * `c39359f8-c9fe-4ce6-b06e-2e83267ef055` - Grow section share.
+ * * `44b10d36-cf9f-4243-aff0-336437f151ce` - Himself challenge approach tonight.
  * * `mobile_money` - Mobile Money
- * * `73d7ad7b-3ed2-4f0f-a8ae-d56312569eac` - Other by product.
  * * `pre-paid_card` - Pre-paid card
+ * * `faaa58d6-c87d-444d-9db6-11f9f38969a9` - Prepare major.
  * * `referral` - Referral
- * * `a3342fb1-b911-478b-a126-3c387336dacf` - Report dream case.
+ * * `caa4fd8d-4134-4b9c-b829-fdfb143a515d` - Save though list.
  * * `transfer` - Transfer
  * * `transfer_to_account` - Transfer to Account
  * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
  * * `voucher` - Voucher
- * * `a85f761b-adc0-426b-9227-cbc5c1c5c16c` - While religious.
  */
 export enum PaymentRecordDeliveryTypeEnum {
     ATM_CARD = 'atm_card',
@@ -30,19 +30,19 @@ export enum PaymentRecordDeliveryTypeEnum {
     CASH = 'cash',
     CASH_BY_FSP = 'cash_by_fsp',
     CASH_OVER_THE_COUNTER = 'cash_over_the_counter',
+    B6E0AC66_86C3_4F53_9CCD_80084BBC70E8 = 'b6e0ac66-86c3-4f53-9ccd-80084bbc70e8',
     CHEQUE = 'cheque',
-    _7195B0AF_AE48_4D10_B296_53EB6421B126 = '7195b0af-ae48-4d10-b296-53eb6421b126',
     DEPOSIT_TO_CARD = 'deposit_to_card',
-    B62DA004_D638_4C5B_A717_4572C04DBD94 = 'b62da004-d638-4c5b-a717-4572c04dbd94',
-    _1807E1D1_98D6_46AE_9B45_726C9657616A = '1807e1d1-98d6-46ae-9b45-726c9657616a',
+    _6959F01F_0F93_4B8E_ABE0_2BECF93C593A = '6959f01f-0f93-4b8e-abe0-2becf93c593a',
+    C39359F8_C9FE_4CE6_B06E_2E83267EF055 = 'c39359f8-c9fe-4ce6-b06e-2e83267ef055',
+    _44B10D36_CF9F_4243_AFF0_336437F151CE = '44b10d36-cf9f-4243-aff0-336437f151ce',
     MOBILE_MONEY = 'mobile_money',
-    _73D7AD7B_3ED2_4F0F_A8AE_D56312569EAC = '73d7ad7b-3ed2-4f0f-a8ae-d56312569eac',
     PRE_PAID_CARD = 'pre-paid_card',
+    FAAA58D6_C87D_444D_9DB6_11F9F38969A9 = 'faaa58d6-c87d-444d-9db6-11f9f38969a9',
     REFERRAL = 'referral',
-    A3342FB1_B911_478B_A126_3C387336DACF = 'a3342fb1-b911-478b-a126-3c387336dacf',
+    CAA4FD8D_4134_4B9C_B829_FDFB143A515D = 'caa4fd8d-4134-4b9c-b829-fdfb143a515d',
     TRANSFER = 'transfer',
     TRANSFER_TO_ACCOUNT = 'transfer_to_account',
     TRANSFER_TO_DIGITAL_WALLET = 'transfer_to_digital_wallet',
     VOUCHER = 'voucher',
-    A85F761B_ADC0_426B_9227_CBC5C1C5C16C = 'a85f761b-adc0-426b-9227-cbc5c1c5c16c',
 }
