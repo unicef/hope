@@ -213,9 +213,7 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.totalEntitledQuantityUsd
-          ? formatFigure(row.totalEntitledQuantityUsd)
-          : '-'}
+        {formatFigure(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.startDate}</UniversalMoment>
