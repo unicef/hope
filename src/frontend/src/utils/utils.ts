@@ -587,39 +587,58 @@ export function formatCurrency(
   amount: number,
   onlyNumberValue = false,
 ): string {
-  let amountCleared = formatFigure(amount);
-  // If formatFigure returns '-', use '0' instead
-  if (amountCleared === '-') {
-    amountCleared = '0';
+  // If amount is null or undefined, return '-'
+  if (amount === null || amount === undefined) {
+    return '-';
   }
-  // Convert to number for toLocaleString
-  const numAmount = Number(amountCleared);
-  return `${numAmount.toLocaleString('en-US', {
-    currency: 'USD',
+
+  // Use formatFigure for consistent formatting with 2 decimal places
+  const formatted = formatFigure(amount, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}${onlyNumberValue ? '' : ' USD'}`;
+  });
+
+  // If formatFigure returns '-' (for NaN or invalid values), return it as-is
+  if (formatted === '-') {
+    return '-';
+  }
+
+  return `${formatted}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
   amount: number | string | null | undefined,
   currency = 'USD',
 ): string {
-  // If amount is null or undefined just show '0'
+  // If amount is null or undefined just show '-'
   if (amount === null || amount === undefined) {
-    return '0';
+    return '-';
   }
-  const amountCleared = amount || 0;
-  if (currency === 'USDC') return `${amountCleared} ${currency}`;
+  // Handle 0 as a valid value
+  const amountCleared = amount === 0 ? 0 : amount || 0;
+
+  // Convert to number for processing
+  const numValue =
+    typeof amountCleared === 'string'
+      ? parseFloat(amountCleared)
+      : amountCleared;
+
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  if (currency === 'USDC') return `${formatFigure(numValue)} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(Number(amountCleared), true);
+  if (!currency) return formatCurrency(numValue, true);
+
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(Number(formatFigure(amountCleared)));
+  }).format(numValue);
 }
 
 export function countPercentage(
@@ -644,7 +663,6 @@ export function formatThousands(value: string): string {
   }
   return value;
 }
-
 export function formatFigure(
   value: number | string | null | undefined,
   options?: {
@@ -652,16 +670,16 @@ export function formatFigure(
     maximumFractionDigits?: number;
   },
 ): string {
-  // If value is null or undefined just show '0'
+  // If value is null or undefined just show '-'
   if (value === null || value === undefined) {
-    return '0';
+    return '-';
   }
 
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
 
-  // If parsing failed or value is NaN, return '0'
+  // If parsing failed or value is NaN, return '-'
   if (isNaN(numValue)) {
-    return '0';
+    return '-';
   }
 
   const opts = {
