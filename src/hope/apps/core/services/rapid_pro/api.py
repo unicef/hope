@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 import logging
 from typing import Any
-from uuid import UUID
 
 from constance import config
 from django.conf import settings
@@ -216,41 +215,6 @@ class RapidProAPI:
             response, _ = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
         except (requests.exceptions.HTTPError, ValidationError) as e:
-            logger.warning(e)
-            return str(e), None
-
-    def test_connection_flow_run(
-        self, flow_uuid: UUID, phone_number: str, timestamp: Any | None = None
-    ) -> tuple[None, dict[str, object | Any]] | tuple[str, None]:
-        try:
-            # getting start flow that was initiated during test, should be the most recent one with matching flow uuid
-            flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")
-            flow_start = [
-                flow_start for flow_start in flow_starts["results"] if flow_start["flow"]["uuid"] == flow_uuid
-            ]
-            flow_start_status = None
-            if flow_start:
-                flow_start_status = flow_start[0]["status"]
-
-            # get the flow run for the specified phone number
-            flow_runs_url = f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}"
-            if timestamp:
-                flow_runs_url += f"&after={timestamp}"
-            flow_runs = self._get_paginated_results(flow_runs_url)
-            results_for_contact = [
-                flow_run
-                for flow_run in flow_runs
-                if flow_run.get("contact", {}).get("urn", "") == f"tel:{phone_number}"
-            ]
-            # format results for template
-            responded = [result["values"] for result in results_for_contact if result["responded"]]
-            not_responded_count = len([result for result in results_for_contact if not result["responded"]])
-            return None, {
-                "responded": responded,
-                "not_responded": not_responded_count,
-                "flow_start_status": flow_start_status,
-            }
-        except requests.exceptions.HTTPError as e:
             logger.warning(e)
             return str(e), None
 
