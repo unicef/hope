@@ -1,10 +1,15 @@
 """Account-related factories."""
 
+from typing import Any
+
 from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import AdminAreaLimitedTo, Partner, Role, RoleAssignment
+
+from .core import BusinessAreaFactory
+from .program import ProgramFactory
 
 User = get_user_model()
 
@@ -41,10 +46,29 @@ class RoleAssignmentFactory(DjangoModelFactory):
         model = RoleAssignment
         django_get_or_create = ("user", "partner", "role", "business_area")
 
+    user = None
+    partner = None
+    role = factory.SubFactory(RoleFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
+        partner = kwargs.get("partner")
+        user = kwargs.get("user")
+        if not user and not partner:
+            user = UserFactory()
+            kwargs["user"] = user
+        if partner:
+            partner.allowed_business_areas.add(kwargs["business_area"])
+        return super()._create(model_class, *args, **kwargs)
+
 
 class AdminAreaLimitedToFactory(DjangoModelFactory):
     class Meta:
         model = AdminAreaLimitedTo
+
+    partner = factory.SubFactory(PartnerFactory)
+    program = factory.SubFactory(ProgramFactory)
 
     @factory.post_generation
     def areas(self, create, extracted, **kwargs):
