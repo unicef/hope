@@ -10,6 +10,7 @@ from .core import (
     FlexibleAttributeChoiceFactory,
     FlexibleAttributeFactory,
     PeriodicFieldDataFactory,
+    XLSXKoboTemplateFactory,
 )
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import GrievanceTicketFactory
@@ -55,4 +56,5 @@ __all__ = [
     "RoleFactory",
     "SurveyFactory",
     "UserFactory",
+    "XLSXKoboTemplateFactory",
 ]
