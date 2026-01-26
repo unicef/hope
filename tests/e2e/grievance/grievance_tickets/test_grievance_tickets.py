@@ -1110,7 +1110,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_questionnaire_phoneno().click()
         assert "-" in page_grievance_new_ticket.get_label_phone_number().text
         page_grievance_new_ticket.get_input_questionnaire_relationship().click()
-        assert "HEAD" in page_grievance_new_ticket.get_label_relationship_to_hoh().text
+        assert individual.get_relationship_display() in page_grievance_new_ticket.get_label_relationship_to_hoh().text
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
 
