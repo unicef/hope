@@ -54,7 +54,7 @@ class LoadUsersForm(forms.Form):
     partner = forms.ModelChoiceField(
         queryset=Partner.objects.all().order_by("name"),
         required=True,
-        widget=AutocompleteWidget(Partner, ""),
+        # widget=AutocompleteWidget(Partner, ""),  # FIXME
     )
     enable_kobo = forms.BooleanField(required=False)
 
@@ -225,6 +225,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
     ]
     list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
     fieldsets = (
+        (None, {"fields": (("username", "azure_id"), "password")}),
         (
             _("Personal info"),
             {
@@ -239,8 +240,70 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
             },
         ),
         (
-            _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "azure_id")},
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                ),
+            },
+        ),
+    )
+    extra_fieldsets = (
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    (
+                        "is_active",
+                        "is_staff",
+                        "is_superuser",
+                    ),
+                    ("groups",),
+                ),
+            },
+        ),
+    )
+    add_fieldsets = (
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    (
+                        "first_name",
+                        "last_name",
+                    ),
+                    ("email", "username"),
+                    ("partner",),
+                )
+            },
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    ("password1", "password2"),
+                    (
+                        "is_active",
+                        "is_staff",
+                        "is_superuser",
+                    ),
+                    ("groups",),
+                ),
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                ),
+            },
         ),
     )
     inlines = (RoleAssignmentInline,)
@@ -284,12 +347,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
-
-    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
-        fieldsets = self.fieldsets
-        if request.user.is_superuser:
-            fieldsets += self.extra_fieldsets  # type: ignore
-        return fieldsets
 
     def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
