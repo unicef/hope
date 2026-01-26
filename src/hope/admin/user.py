@@ -49,7 +49,7 @@ class LoadUsersForm(forms.Form):
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all().order_by("name"),
         required=True,
-        widget=AutocompleteWidget(BusinessArea, ""),
+        # widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
         queryset=Partner.objects.all().order_by("name"),
@@ -463,8 +463,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                         quoting=int(form.cleaned_data["quoting"]),
                         delimiter=form.cleaned_data["delimiter"],
                     )
-                    results = []
-                    context["results"] = results
+                    context["results"] = []
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
@@ -491,13 +490,14 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                                     defaults={"username": username},
                                 )
                                 if isnew:
+                                    user_info["is_new"] = True
                                     ur = u.role_assignments.create(business_area=business_area, role=role)
                                     self.log_addition(request, u, "User imported by CSV")
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
                                         IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        u.role_assignments.get_or_create(business_area=business_area, role=role)
+                                        ur, _ = u.role_assignments.get_or_create(business_area=business_area, role=role)
                                         self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:
                                         self.message_user(
