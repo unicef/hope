@@ -6,6 +6,7 @@ from factory.django import DjangoModelFactory
 from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
+    CountryCodeMap,
     DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
@@ -37,12 +38,22 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
     member_label_plural = "Individuals"
 
 
+class CountryCodeMapFactory(DjangoModelFactory):
+    class Meta:
+        model = CountryCodeMap
+        django_get_or_create = ("ca_code",)
+
+    ca_code = factory.Sequence(lambda n: f"C{n:02d}")
+    country = factory.SubFactory("extras.test_utils.factories.geo.CountryFactory")
+
+
 class DataCollectingTypeFactory(DjangoModelFactory):
     class Meta:
         model = DataCollectingType
 
     code = factory.Sequence(lambda n: f"dct_{n}")
     label = factory.Sequence(lambda n: f"DCT {n}")
+    type = DataCollectingType.Type.STANDARD
 
 
 class PeriodicFieldDataFactory(DjangoModelFactory):
