@@ -4,6 +4,7 @@ from typing import Any
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils import timezone
 
@@ -44,7 +45,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
     exclude = ("cleared_date", "cleared_by")
     show_full_result_count = False
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)

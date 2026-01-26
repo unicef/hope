@@ -7,6 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -264,7 +265,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     show_full_result_count = False
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)

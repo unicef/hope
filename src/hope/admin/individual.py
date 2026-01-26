@@ -276,7 +276,7 @@ class IndividualRoleInHouseholdAdmin(
     raw_id_fields = ("individual", "household", "copied_from")
     show_full_result_count = False
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -351,7 +351,7 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     inlines = [IndividualRepresentationInline]
     show_full_result_count = False
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
     def number_of_representations(self, obj):
