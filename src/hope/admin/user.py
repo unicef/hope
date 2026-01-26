@@ -27,7 +27,6 @@ from hope import models
 from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.account_mixins import KoboAccessMixin
-from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
@@ -49,12 +48,10 @@ class LoadUsersForm(forms.Form):
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all().order_by("name"),
         required=True,
-        widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
         queryset=Partner.objects.all().order_by("name"),
         required=True,
-        widget=AutocompleteWidget(Partner, ""),
     )
     enable_kobo = forms.BooleanField(required=False)
 
