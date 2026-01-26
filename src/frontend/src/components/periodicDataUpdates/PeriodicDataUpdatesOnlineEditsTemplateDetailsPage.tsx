@@ -30,6 +30,7 @@ import {
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  formatFigure,
   periodicDataUpdatesOnlineEditsStatusToColor,
   showApiErrorMessages,
 } from '@utils/utils';
@@ -491,7 +492,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Number of Records')}
-              value={numberOfRecords}
+              value={formatFigure(numberOfRecords)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>

@@ -34,7 +34,7 @@ import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationD
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -410,7 +410,7 @@ function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${paymentPlan.currency} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>
