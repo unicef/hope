@@ -84,19 +84,29 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     readonly_fields = ("unicef_id",)
     filter_horizontal = ("programs",)
     inlines = [GrievanceTicketCopiedToInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
         qs = (
-            self.model.objects.get_queryset()
-            .select_related(
-                "registration_data_import",
-                "business_area",
-                "assigned_to",
-                "created_by",
-                "admin2",
-                "partner",
+            super()
+            .get_queryset(request)
+            .select_related("created_by", "assigned_to", "registration_data_import")
+            .only(
+                "id",
+                "unicef_id",
+                "created_at",
+                "status",
+                "category",
+                "registration_data_import__name",
+                "created_by__first_name",
+                "created_by__last_name",
+                "created_by__email",
+                "created_by__username",
+                "assigned_to__first_name",
+                "assigned_to__last_name",
+                "assigned_to__email",
+                "assigned_to__username",
             )
-            .prefetch_related("programs")
         )
         ordering = self.get_ordering(request)
         if ordering:

@@ -7,7 +7,6 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
-from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -263,19 +262,35 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
+    show_full_result_count = False
+
+    def get_queryset(self, request):
         return (
             super()
             .get_queryset(request)
             .select_related(
                 "household",
-                "head_of_household",
-                "parent",
                 "business_area",
                 "program",
-                "source_payment",
                 "delivery_type",
-                "financial_service_provider",
+                "parent",
+            )
+            .only(
+                "id",
+                "unicef_id",
+                "status",
+                "entitlement_quantity",
+                "delivered_quantity",
+                "transaction_reference_id",
+                "conflicted",
+                "excluded",
+                "is_follow_up",
+                "is_cash_assist",
+                "household__unicef_id",
+                "business_area__name",
+                "program__name",
+                "delivery_type__name",
+                "parent__unicef_id",
             )
         )
 

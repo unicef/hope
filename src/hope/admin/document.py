@@ -4,7 +4,6 @@ from typing import Any
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
-from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils import timezone
 
@@ -43,9 +42,28 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
     )
     autocomplete_fields = ["type"]
     exclude = ("cleared_date", "cleared_by")
+    show_full_result_count = False
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("individual", "type", "country", "program")
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("individual", "type", "country", "program", "cleared_by")
+            .only(
+                "id",
+                "document_number",
+                "status",
+                "individual__unicef_id",
+                "type__label",
+                "country__name",
+                "program__name",
+                "cleared_by__first_name",
+                "cleared_by__last_name",
+                "cleared_by__email",
+                "cleared_by__username",
+            )
+            .defer("photo")
+        )
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "individual":
@@ -53,7 +71,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request: HttpRequest, obj: "Document", form: Any, change: bool) -> None:
-        if "cleared" in form.changed_data and obj.type.type == FOSTER_CHILD:
+        if "cleared" in form.changed_data and obj.individual.relationship == FOSTER_CHILD:
             cleared = form.cleaned_data["cleared"]
             obj.individual.set_relationship_confirmed_flag(cleared)
             obj.cleared_by = request.user
