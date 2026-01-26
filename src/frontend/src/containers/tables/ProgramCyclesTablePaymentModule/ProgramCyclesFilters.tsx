@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
 import { Grid, MenuItem } from '@mui/material';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
@@ -88,7 +88,7 @@ export const ProgramCyclesFilters = ({
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.totalEntitledQuantityUsdFrom}
+            value={formatFigure(filter.totalEntitledQuantityUsdFrom)}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
@@ -98,7 +98,7 @@ export const ProgramCyclesFilters = ({
         <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.totalEntitledQuantityUsdTo}
+            value={formatFigure(filter.totalEntitledQuantityUsdTo)}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityUsdTo', e.target.value)
