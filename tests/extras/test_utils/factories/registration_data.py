@@ -5,6 +5,10 @@ from factory.django import DjangoModelFactory
 
 from hope.models import RegistrationDataImport
 
+from .account import UserFactory
+from .core import BusinessAreaFactory
+from .program import ProgramFactory
+
 
 class RegistrationDataImportFactory(DjangoModelFactory):
     class Meta:
@@ -15,3 +19,6 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     status = RegistrationDataImport.MERGED
     number_of_individuals = 1
     number_of_households = 1
+    imported_by = factory.SubFactory(UserFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))

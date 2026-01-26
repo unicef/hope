@@ -238,6 +238,10 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                 )
             },
         ),
+        (
+            _("Custom Fields"),
+            {"classes": ["collapse"], "fields": ("custom_fields", "azure_id")},
+        ),
     )
     inlines = (RoleAssignmentInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
