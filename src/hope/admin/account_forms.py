@@ -120,7 +120,12 @@ class HopeUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ()
-        field_classes = {"username": UsernameField, "email": forms.EmailField}
+        field_classes = {
+            "username": UsernameField,
+            "email": forms.EmailField,
+            "password1": forms.PasswordInput,
+            "password2": forms.PasswordInput,
+        }
 
 
 class AddRoleForm(forms.Form):
