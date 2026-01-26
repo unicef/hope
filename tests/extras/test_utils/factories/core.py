@@ -1,5 +1,6 @@
 """Core-related factories."""
 
+from django.core.files.base import ContentFile
 import factory
 from factory.django import DjangoModelFactory
 
@@ -11,6 +12,7 @@ from hope.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     PeriodicFieldData,
+    XLSXKoboTemplate,
 )
 
 
@@ -82,3 +84,12 @@ class FlexibleAttributeChoiceFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: f"choice_{n}")
     list_name = factory.Sequence(lambda n: f"List {n}")
     label = factory.LazyFunction(lambda: {"English(EN)": "Choice"})
+
+
+class XLSXKoboTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = XLSXKoboTemplate
+
+    file_name = factory.Sequence(lambda n: f"template_{n}.xlsx")
+    status = XLSXKoboTemplate.UPLOADED
+    file = factory.LazyAttribute(lambda o: ContentFile(b"test content", name=o.file_name))
