@@ -49,7 +49,7 @@ import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { RapidPro } from '@restgenerated/models/RapidPro';
 import { Age } from '@restgenerated/models/Age';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -613,11 +613,11 @@ export const EditVerificationPlan = ({
                         Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)
                           ? ' 0'
-                          : ` ${sampleSizesData?.sampleSize?.sampleSize}`}{' '}
+                          : ` ${formatFigure(sampleSizesData?.sampleSize?.sampleSize)}`}{' '}
                         out of{' '}
                         {isNaN(sampleSizesData?.sampleSize?.paymentRecordCount)
                           ? ' 0'
-                          : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
+                          : ` ${formatFigure(sampleSizesData?.sampleSize?.paymentRecordCount)}`}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field

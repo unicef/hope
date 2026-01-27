@@ -14,6 +14,7 @@ import { Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
+  formatFigure,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -71,13 +72,13 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={formatFigure(payment.entitlementQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={formatFigure(payment.deliveredQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>

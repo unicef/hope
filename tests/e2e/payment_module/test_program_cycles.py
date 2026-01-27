@@ -107,7 +107,7 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-"
+            "0"
             in first_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
@@ -119,7 +119,7 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "1833.99"
+            "1,833.99"
             in second_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
@@ -131,7 +131,7 @@ class TestSmokeProgramCycle:
         )
         assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-"
+            "0"
             in third_cycle.find_element(
                 By.CSS_SELECTOR,
                 'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
