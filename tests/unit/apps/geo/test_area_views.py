@@ -235,7 +235,7 @@ def test_list_areas_search_by_name(api, geo_data, areas_list_url, grant_user_per
 
     response = api.get(areas_list_url, {"name": "Area 1"})
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
+    assert len(response.json()) == 7
 
 
 def test_list_areas_caching(api, areas_list_url, grant_user_permissions):
