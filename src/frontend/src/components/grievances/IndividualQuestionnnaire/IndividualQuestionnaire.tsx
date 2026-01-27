@@ -7,6 +7,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/index';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { useQuery } from '@tanstack/react-query';
+import { choicesToDict } from '@utils/utils';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -16,11 +20,22 @@ const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { data: choicesData } = useQuery<IndividualChoices>({
+    queryKey: ['individualChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
+  const relationshipChoicesDict = choicesToDict(
+    choicesData?.relationshipChoices,
+  );
+  const genderChoicesDict = choicesToDict(choicesData?.sexChoices);
   const questionFields = isSocialDctType
     ? [
         {
@@ -44,7 +59,7 @@ const IndividualQuestionnaire = ({
         {
           name: 'questionnaire_sex',
           label: t('Gender'),
-          value: selectedIndividualData.sex,
+          value: genderChoicesDict?.[selectedIndividualData.sex],
           size: 3,
         },
         {
@@ -118,7 +133,7 @@ const IndividualQuestionnaire = ({
         {
           name: 'questionnaire_sex',
           label: t('Gender'),
-          value: selectedIndividualData.sex,
+          value: genderChoicesDict?.[selectedIndividualData.sex],
           size: 3,
         },
         {
@@ -130,7 +145,7 @@ const IndividualQuestionnaire = ({
         {
           name: 'questionnaire_relationship',
           label: `Relationship to Head of ${beneficiaryGroup?.groupLabel}`,
-          value: selectedIndividualData.relationship,
+          value: relationshipChoicesDict?.[selectedIndividualData.relationship],
           size: 3,
         },
       ];
