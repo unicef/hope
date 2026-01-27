@@ -202,8 +202,8 @@ class PushToRDITests(HOPEApiTestCase):
         assert hh.primary_collector.full_name == "Mary Primary #1"
         assert hh.head_of_household.full_name == "James Head #1"
         assert hh.head_of_household.photo is not None
-        account_1 = PendingAccount.objects.filter(individual=hh.head_of_household).first()
-        account_2 = PendingAccount.objects.filter(individual=hh.head_of_household).last()
+        account_1 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").first()
+        account_2 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").last()
         assert account_1 is not None
         assert account_1.account_type.key == "bank"
         assert account_1.financial_institution.name == "mbank"
