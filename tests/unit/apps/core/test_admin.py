@@ -190,11 +190,17 @@ def test_business_area_admin_allowed_partners_updates_access(
     assert business_area in partner3.allowed_business_areas.all()
 
 
+@pytest.fixture
+def partner1_with_role_assignment(business_area, partners_with_access):
+    partner1, _, _ = partners_with_access
+    RoleAssignmentFactory(partner=partner1, business_area=business_area)
+    return partner1
+
+
 def test_business_area_admin_prevents_partner_removal_with_role_assignment(
-    django_app: "DjangoTestApp", admin_user, business_area, partners_with_access
+    django_app: "DjangoTestApp", admin_user, business_area, partners_with_access, partner1_with_role_assignment
 ):
     partner1, partner2, partner3 = partners_with_access
-    RoleAssignmentFactory(partner=partner1, business_area=business_area)
     url = reverse("admin:core_businessarea_allowed_partners", args=[business_area.pk])
     get_response = django_app.get(url, user=admin_user)
     form = list(get_response.forms.values())[-1]
@@ -222,6 +228,12 @@ def superuser():
 @pytest.fixture
 def role():
     return RoleFactory(name="Test Role", subsystem="HOPE")
+
+
+@pytest.fixture
+def role_assignment_for_partner(business_area):
+    partner = PartnerFactory(name="Partner with Assignment")
+    return RoleAssignmentFactory(partner=partner, business_area=business_area)
 
 
 def test_role_admin_members_redirects_to_user_role_assignment_list(client, superuser, role):
