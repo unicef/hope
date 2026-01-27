@@ -232,10 +232,12 @@ def test_list_areas_filter_by_parent_id(api, geo_data, areas_list_url, grant_use
 
 def test_list_areas_search_by_name(api, geo_data, areas_list_url, grant_user_permissions):
     grant_user_permissions([Permissions.GEO_VIEW_LIST])
+    area_name = Area.objects.filter(p_code="AREA1-ARTYPE1").first().name
+    count = Area.objects.filter(name__startswith=area_name).count()
+    response = api.get(areas_list_url, {"name": area_name})
 
-    response = api.get(areas_list_url, {"name": "Area 1"})
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 7
+    assert len(response.json()) == count
 
 
 def test_list_areas_caching(api, areas_list_url, grant_user_permissions):
