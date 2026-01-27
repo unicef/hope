@@ -72,7 +72,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
         raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
 
     if payment_plan.has_export_file:
-        return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
+        return redirect(payment_plan.payment_list_export_file_link)
 
     log_and_raise(
         f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
