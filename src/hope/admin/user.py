@@ -49,12 +49,12 @@ class LoadUsersForm(forms.Form):
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all().order_by("name"),
         required=True,
-        # widget=AutocompleteWidget(BusinessArea, ""),
+        widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
         queryset=Partner.objects.all().order_by("name"),
         required=True,
-        # widget=AutocompleteWidget(Partner, ""),  # FIXME
+        widget=AutocompleteWidget(Partner, ""),
     )
     enable_kobo = forms.BooleanField(required=False)
 
