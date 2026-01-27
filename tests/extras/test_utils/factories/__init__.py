@@ -8,6 +8,7 @@ from .account import (
     UserFactory,
 )
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
+from .changelog import ChangelogFactory
 from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import GrievanceTicketFactory
@@ -36,6 +37,7 @@ __all__ = [
     "AreaTypeFactory",
     "BeneficiaryGroupFactory",
     "BusinessAreaFactory",
+    "ChangelogFactory",
     "CommunicationMessageFactory",
     "CountryFactory",
     "DataCollectingTypeFactory",
