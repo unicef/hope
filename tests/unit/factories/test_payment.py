@@ -11,6 +11,8 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    WesternUnionInvoiceFactory,
+    WesternUnionPaymentPlanReportFactory,
 )
 
 pytestmark = pytest.mark.django_db
@@ -27,3 +29,5 @@ def test_payment_factories():
     assert DeliveryMechanismFactory()
     assert FinancialServiceProviderFactory()
     assert FinancialServiceProviderXlsxTemplateFactory()
+    assert WesternUnionInvoiceFactory()
+    assert WesternUnionPaymentPlanReportFactory()
