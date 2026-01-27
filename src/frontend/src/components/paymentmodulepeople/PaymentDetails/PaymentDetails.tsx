@@ -17,6 +17,7 @@ import {
   paymentStatusToColor,
   safeStringify,
   verificationRecordsStatusToColor,
+  formatFigure,
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,13 +66,21 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={
+                payment.entitlementQuantity != null
+                  ? formatFigure(payment.entitlementQuantity)
+                  : payment.entitlementQuantity
+              }
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={
+                payment.deliveredQuantity != null
+                  ? formatFigure(payment.deliveredQuantity)
+                  : payment.deliveredQuantity
+              }
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
