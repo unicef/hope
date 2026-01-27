@@ -10,7 +10,6 @@ from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
-from hope.admin.steficon import AutocompleteWidget
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
@@ -181,13 +180,13 @@ class ImportCSVForm(forms.Form):
         ),
         initial=csv.QUOTE_ALL,
     )
+
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
-    partner = forms.ModelChoiceField(queryset=Partner.objects.all(), widget=AutocompleteWidget(Partner, ""))
-    business_area = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.all(), widget=AutocompleteWidget(BusinessArea, "")
-    )
-    role = forms.ModelChoiceField(queryset=Role.objects.all(), widget=AutocompleteWidget(Role, ""))
+
     enable_kobo = forms.BooleanField(required=False)
+    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
+    role = forms.ModelChoiceField(queryset=Role.objects.all())
 
     _fieldsets = (
         (_("File"), {"fields": ("file",)}),
