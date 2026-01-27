@@ -17,6 +17,8 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    WesternUnionInvoice,
+    WesternUnionPaymentPlanReport,
 )
 
 from . import HouseholdFactory, IndividualFactory
@@ -147,3 +149,18 @@ class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
         model = FinancialServiceProviderXlsxTemplate
 
     name = factory.Sequence(lambda n: f"FSP Template {n}")
+
+
+class WesternUnionInvoiceFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionInvoice
+
+    name = factory.Sequence(lambda n: f"WU Invoice {n}")
+
+
+class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionPaymentPlanReport
+
+    qcf_file = factory.SubFactory(WesternUnionInvoiceFactory)
+    payment_plan = factory.SubFactory(PaymentPlanFactory)

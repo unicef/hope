@@ -23,9 +23,12 @@ from .payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    WesternUnionInvoiceFactory,
+    WesternUnionPaymentPlanReportFactory,
 )
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import RegistrationDataImportFactory
+from .steficon import RuleCommitFactory, RuleFactory
 
 __all__ = [
     "AdminAreaLimitedToFactory",
@@ -61,4 +64,8 @@ __all__ = [
     "RoleFactory",
     "SurveyFactory",
     "UserFactory",
+    "RuleCommitFactory",
+    "RuleFactory",
+    "WesternUnionInvoiceFactory",
+    "WesternUnionPaymentPlanReportFactory",
 ]
