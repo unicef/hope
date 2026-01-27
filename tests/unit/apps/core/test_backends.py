@@ -93,6 +93,90 @@ def backend():
     return PermissionsBackend()
 
 
+@pytest.fixture
+def role_programme_create_update():
+    return RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
+
+
+@pytest.fixture
+def role_programme_finish():
+    return RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
+
+
+@pytest.fixture
+def role_programme_create():
+    return RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE"])
+
+
+@pytest.fixture
+def program_other(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program Other",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def program_a(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program A",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def program_b(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program B",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def program_empty(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program Empty",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def program_for_user(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program For User",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def program_for_partner(business_area):
+    return ProgramFactory(
+        status=Program.ACTIVE,
+        name="Test Program For Partner",
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def business_area_other(db):
+    return BusinessAreaFactory()
+
+
+@pytest.fixture
+def role_test_user():
+    return RoleFactory(name="Test Role User", permissions=["PROGRAMME_CREATE"])
+
+
+@pytest.fixture
+def role_test_partner():
+    return RoleFactory(name="Test Role Partner", permissions=["PROGRAMME_FINISH"])
+
+
 def test_get_all_permissions_caches_result(
     backend,
     user,
@@ -134,9 +218,10 @@ def test_user_group_permissions_included(
     assert get_permission_name(permission) in permissions
 
 
-def test_role_assignment_user_role_permissions(backend, user, business_area, role_assignment_user):
-    role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
-    role_assignment_user.role = role
+def test_role_assignment_user_role_permissions(
+    backend, user, business_area, role_assignment_user, role_programme_create_update
+):
+    role_assignment_user.role = role_programme_create_update
     role_assignment_user.save()
 
     permissions = backend.get_all_permissions(user, business_area)
@@ -154,9 +239,10 @@ def test_role_assignment_user_group_permissions(backend, user, business_area, gr
     assert get_permission_name(permission) in permissions
 
 
-def test_role_assignment_partner_role_permissions(backend, user, business_area, role_assignment_partner):
-    role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role
+def test_role_assignment_partner_role_permissions(
+    backend, user, business_area, role_assignment_partner, role_programme_finish
+):
+    role_assignment_partner.role = role_programme_finish
     role_assignment_partner.save()
 
     permissions = backend.get_all_permissions(user, business_area)
@@ -200,10 +286,9 @@ def test_expired_role_assignment_excludes_permissions(
 
 
 def test_partner_role_assignment_grants_permission_for_specific_program(
-    backend, user, business_area, program, role_assignment_partner
+    backend, user, business_area, program, role_assignment_partner, role_programme_finish
 ):
-    role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role
+    role_assignment_partner.role = role_programme_finish
     role_assignment_partner.program = program
     role_assignment_partner.save()
 
@@ -212,28 +297,16 @@ def test_partner_role_assignment_grants_permission_for_specific_program(
     assert "PROGRAMME_FINISH" in permissions
 
 
-def test_no_permissions_for_program_without_role_assignment(backend, user, business_area):
-    program_other = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Other",
-        business_area=business_area,
-    )
-
+def test_no_permissions_for_program_without_role_assignment(backend, user, business_area, program_other):
     permissions = backend.get_all_permissions(user, program_other)
 
     assert set() == permissions
 
 
 def test_user_role_assignment_grants_permission_for_specific_program(
-    backend, user, business_area, role_assignment_user
+    backend, user, business_area, role_assignment_user, program_empty, role_programme_create_update
 ):
-    program_empty = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Empty",
-        business_area=business_area,
-    )
-    role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
-    role_assignment_user.role = role
+    role_assignment_user.role = role_programme_create_update
     role_assignment_user.program = program_empty
     role_assignment_user.save()
 
@@ -244,15 +317,9 @@ def test_user_role_assignment_grants_permission_for_specific_program(
 
 
 def test_partner_loses_permission_when_assigned_to_different_program(
-    backend, user, business_area, program, role_assignment_partner
+    backend, user, business_area, program, role_assignment_partner, program_other, role_programme_finish
 ):
-    program_other = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Other",
-        business_area=business_area,
-    )
-    role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role
+    role_assignment_partner.role = role_programme_finish
     role_assignment_partner.program = program
     role_assignment_partner.save()
 
@@ -269,19 +336,10 @@ def test_partner_loses_permission_when_assigned_to_different_program(
     assert "PROGRAMME_FINISH" in permissions_in_other
 
 
-def test_user_loses_permission_when_assigned_to_different_program(backend, user, business_area, role_assignment_user):
-    program_a = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program A",
-        business_area=business_area,
-    )
-    program_b = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program B",
-        business_area=business_area,
-    )
-    role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE"])
-    role_assignment_user.role = role
+def test_user_loses_permission_when_assigned_to_different_program(
+    backend, user, business_area, role_assignment_user, program_a, program_b, role_programme_create
+):
+    role_assignment_user.role = role_programme_create
     role_assignment_user.program = program_a
     role_assignment_user.save()
 
@@ -299,15 +357,9 @@ def test_user_loses_permission_when_assigned_to_different_program(backend, user,
 
 
 def test_partner_with_null_program_has_access_to_all_programs(
-    backend, user, business_area, program, role_assignment_partner
+    backend, user, business_area, program, role_assignment_partner, program_other, role_programme_finish
 ):
-    program_other = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Other",
-        business_area=business_area,
-    )
-    role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role
+    role_assignment_partner.role = role_programme_finish
     role_assignment_partner.program = None
     role_assignment_partner.save()
 
@@ -318,14 +370,10 @@ def test_partner_with_null_program_has_access_to_all_programs(
     assert "PROGRAMME_FINISH" in permissions_in_other
 
 
-def test_user_with_null_program_has_access_to_all_programs(backend, user, business_area, program, role_assignment_user):
-    program_other = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Other",
-        business_area=business_area,
-    )
-    role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
-    role_assignment_user.role = role
+def test_user_with_null_program_has_access_to_all_programs(
+    backend, user, business_area, program, role_assignment_user, program_other, role_programme_create_update
+):
+    role_assignment_user.role = role_programme_create_update
     role_assignment_user.program = None
     role_assignment_user.save()
 
@@ -360,6 +408,8 @@ def test_permissions_for_business_area_from_all_sources(
     content_type,
     role_assignment_user,
     role_assignment_partner,
+    role_test_user,
+    role_test_partner,
 ):
     permission1 = Permission.objects.create(
         codename="test_permission1",
@@ -391,12 +441,10 @@ def test_permissions_for_business_area_from_all_sources(
     role_assignment_partner.group = group_role_assignment_partner
     role_assignment_partner.save()
 
-    role_user = RoleFactory(name="Test Role User", permissions=["PROGRAMME_CREATE"])
-    role_assignment_user.role = role_user
+    role_assignment_user.role = role_test_user
     role_assignment_user.save()
 
-    role_partner = RoleFactory(name="Test Role Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role_partner
+    role_assignment_partner.role = role_test_partner
     role_assignment_partner.save()
 
     permissions = backend.get_all_permissions(user, business_area)
@@ -408,16 +456,14 @@ def test_permissions_for_business_area_from_all_sources(
     assert "PROGRAMME_FINISH" in permissions
 
 
-def test_no_permissions_for_other_business_area(backend, user):
-    business_area_other = BusinessAreaFactory()
-
+def test_no_permissions_for_other_business_area(backend, user, business_area_other):
     permissions = backend.get_all_permissions(user, business_area_other)
 
     assert set() == permissions
 
 
 def test_program_permissions_from_partner_role_assignment(
-    backend, user, business_area, program, content_type, role_assignment_partner
+    backend, user, business_area, program, content_type, role_assignment_partner, role_test_partner
 ):
     permission1 = Permission.objects.create(
         codename="test_permission1",
@@ -440,8 +486,7 @@ def test_program_permissions_from_partner_role_assignment(
     role_assignment_partner.program = program
     role_assignment_partner.save()
 
-    role_partner = RoleFactory(name="Test Role Partner", permissions=["PROGRAMME_FINISH"])
-    role_assignment_partner.role = role_partner
+    role_assignment_partner.role = role_test_partner
     role_assignment_partner.save()
 
     permissions = backend.get_all_permissions(user, program)
@@ -452,13 +497,8 @@ def test_program_permissions_from_partner_role_assignment(
 
 
 def test_program_permissions_from_user_role_assignment(
-    backend, user, business_area, content_type, role_assignment_user
+    backend, user, business_area, content_type, role_assignment_user, program_for_user, role_test_user
 ):
-    program_for_user = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program For User",
-        business_area=business_area,
-    )
     permission1 = Permission.objects.create(
         codename="test_permission1",
         name="Test Permission 1",
@@ -480,8 +520,7 @@ def test_program_permissions_from_user_role_assignment(
     role_assignment_user.program = program_for_user
     role_assignment_user.save()
 
-    role_user = RoleFactory(name="Test Role User", permissions=["PROGRAMME_CREATE"])
-    role_assignment_user.role = role_user
+    role_assignment_user.role = role_test_user
     role_assignment_user.save()
 
     permissions = backend.get_all_permissions(user, program_for_user)
@@ -492,28 +531,20 @@ def test_program_permissions_from_user_role_assignment(
 
 
 def test_no_permissions_for_program_without_any_role_assignment(
-    backend, user, business_area, role_assignment_user, role_assignment_partner
+    backend,
+    user,
+    business_area,
+    role_assignment_user,
+    role_assignment_partner,
+    program_for_user,
+    program_for_partner,
+    program_other,
 ):
-    program_for_user = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program For User",
-        business_area=business_area,
-    )
     role_assignment_user.program = program_for_user
     role_assignment_user.save()
 
-    role_assignment_partner.program = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program For Partner",
-        business_area=business_area,
-    )
+    role_assignment_partner.program = program_for_partner
     role_assignment_partner.save()
-
-    program_other = ProgramFactory(
-        status=Program.ACTIVE,
-        name="Test Program Other",
-        business_area=business_area,
-    )
 
     permissions = backend.get_all_permissions(user, program_other)
 
