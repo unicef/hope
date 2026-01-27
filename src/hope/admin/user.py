@@ -17,7 +17,6 @@ from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
-from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from unicef_security.admin import UserAdminPlus
@@ -224,88 +223,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
         BusinessAreaFilter,
     ]
     list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
-    fieldsets = (
-        (None, {"fields": (("username", "azure_id"), "password")}),
-        (
-            _("Personal info"),
-            {
-                "fields": (
-                    (
-                        "first_name",
-                        "last_name",
-                    ),
-                    ("email", "display_name"),
-                    ("job_title", "partner"),
-                )
-            },
-        ),
-        (
-            _("Important dates"),
-            {
-                "classes": ["collapse"],
-                "fields": (
-                    "last_login",
-                    "date_joined",
-                    "last_modify_date",
-                ),
-            },
-        ),
-    )
-    extra_fieldsets = (
-        (
-            _("Permissions"),
-            {
-                "fields": (
-                    (
-                        "is_active",
-                        "is_staff",
-                        "is_superuser",
-                    ),
-                    ("groups",),
-                ),
-            },
-        ),
-    )
-    add_fieldsets = (
-        (
-            _("Personal info"),
-            {
-                "fields": (
-                    (
-                        "first_name",
-                        "last_name",
-                    ),
-                    ("email", "username"),
-                    ("partner",),
-                )
-            },
-        ),
-        (
-            _("Permissions"),
-            {
-                "fields": (
-                    ("password1", "password2"),
-                    (
-                        "is_active",
-                        "is_staff",
-                        "is_superuser",
-                    ),
-                    ("groups",),
-                ),
-            },
-        ),
-        (
-            _("Important dates"),
-            {
-                "classes": ["collapse"],
-                "fields": (
-                    "last_login",
-                    "date_joined",
-                    "last_modify_date",
-                ),
-            },
-        ),
-    )
     inlines = (RoleAssignmentInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
     formfield_overrides = {
