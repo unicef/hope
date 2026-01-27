@@ -30,7 +30,9 @@ from extras.test_utils.old_factories.household import (
 )
 from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import HOST
 from hope.models import (
@@ -1099,11 +1101,11 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_questionnaire_birthdate().click()
         assert "-" in page_grievance_new_ticket.get_label_birth_date().text
         page_grievance_new_ticket.get_input_questionnaire_sex().click()
-        assert individual.sex in page_grievance_new_ticket.get_label_gender().text
+        assert individual.get_sex_display() in page_grievance_new_ticket.get_label_gender().text
         page_grievance_new_ticket.get_input_questionnaire_phoneno().click()
         assert "-" in page_grievance_new_ticket.get_label_phone_number().text
         page_grievance_new_ticket.get_input_questionnaire_relationship().click()
-        assert "HEAD" in page_grievance_new_ticket.get_label_relationship_to_hoh().text
+        assert individual.get_relationship_display() in page_grievance_new_ticket.get_label_relationship_to_hoh().text
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
 
