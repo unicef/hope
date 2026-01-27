@@ -31,7 +31,9 @@ from extras.test_utils.old_factories.payment import (
     generate_delivery_mechanisms,
 )
 from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.models import (
     Area,
     BeneficiaryGroup,
