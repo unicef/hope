@@ -263,19 +263,35 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
 
+    show_full_result_count = False
+
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
             .select_related(
                 "household",
-                "head_of_household",
-                "parent",
                 "business_area",
                 "program",
-                "source_payment",
                 "delivery_type",
-                "financial_service_provider",
+                "parent",
+            )
+            .only(
+                "id",
+                "unicef_id",
+                "status",
+                "entitlement_quantity",
+                "delivered_quantity",
+                "transaction_reference_id",
+                "conflicted",
+                "excluded",
+                "is_follow_up",
+                "is_cash_assist",
+                "household__unicef_id",
+                "business_area__name",
+                "program__name",
+                "delivery_type__name",
+                "parent__unicef_id",
             )
         )
 
