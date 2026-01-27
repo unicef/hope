@@ -17,6 +17,7 @@ from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from unicef_security.admin import UserAdminPlus
@@ -223,11 +224,36 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
         BusinessAreaFilter,
     ]
     list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
+    fieldsets = (
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    (
+                        "first_name",
+                        "last_name",
+                    ),
+                    ("email", "display_name"),
+                    ("job_title", "partner"),
+                )
+            },
+        ),
+        (
+            _("Custom Fields"),
+            {"classes": ["collapse"], "fields": ("custom_fields", "azure_id")},
+        ),
+    )
     inlines = (RoleAssignmentInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+
+    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
+        fieldsets = self.fieldsets
+        if request.user.is_superuser:
+            fieldsets += self.extra_fieldsets  # type: ignore
+        return fieldsets
 
     @button(permissions=is_root)
     def ad(self, request, pk):

@@ -123,8 +123,6 @@ class HopeUserCreationForm(UserCreationForm):
         field_classes = {
             "username": UsernameField,
             "email": forms.EmailField,
-            "password1": forms.PasswordInput,
-            "password2": forms.PasswordInput,
         }
 
 
