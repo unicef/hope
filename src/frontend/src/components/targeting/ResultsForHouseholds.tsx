@@ -20,6 +20,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 import { PaperContainer } from './PaperContainer';
+import { formatFigure } from '@utils/utils';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -214,7 +215,8 @@ function ResultsForHouseholds({
                       label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                     >
                       <SummaryValue data-cy="total-number-of-households-count">
-                        {targetPopulation.totalHouseholdsCount || '0'}
+                        {formatFigure(targetPopulation.totalHouseholdsCount) ||
+                          '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>
@@ -225,7 +227,8 @@ function ResultsForHouseholds({
                       label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
                     >
                       <SummaryValue>
-                        {targetPopulation.totalIndividualsCount || '0'}
+                        {formatFigure(targetPopulation.totalIndividualsCount) ||
+                          '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

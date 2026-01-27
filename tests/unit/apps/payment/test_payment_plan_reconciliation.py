@@ -17,7 +17,6 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -123,14 +122,12 @@ def payment_plan(user: User, business_area: BusinessArea, program_cycle: Program
 
 @pytest.fixture
 def payment_plan_finished(user: User, business_area: BusinessArea, program_cycle: ProgramCycle) -> PaymentPlan:
-    pp = PaymentPlanFactory(
+    return PaymentPlanFactory(
         created_by=user,
         business_area=business_area,
         program_cycle=program_cycle,
         status=PaymentPlan.Status.FINISHED,
     )
-    PaymentVerificationSummaryFactory(payment_plan=pp)
-    return pp
 
 
 @pytest.fixture

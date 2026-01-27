@@ -2,7 +2,7 @@ import { Box, Typography, Grid } from '@mui/material';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { countPercentage } from '@utils/utils';
+import { countPercentage, formatFigure } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -61,7 +61,7 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('PAYMENT RECORDS'),
-                value: planNode.availablePaymentRecordsCount,
+                value: formatFigure(planNode.availablePaymentRecordsCount),
               },
               {
                 label: t('START DATE'),
@@ -90,10 +90,10 @@ export function CashPlanDetailsSection({
             <Grid size={{ xs: 3 }}>
               <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
-                  <p>{bankReconciliationSuccessPercentage}%</p>
+                  <p>{formatFigure(bankReconciliationSuccessPercentage)}%</p>
                 </LabelizedField>
                 <LabelizedField label={t('ERRONEOUS')}>
-                  <p>{bankReconciliationErrorPercentage}%</p>
+                  <p>{formatFigure(bankReconciliationErrorPercentage)}%</p>
                 </LabelizedField>
               </Grid>
             </Grid>

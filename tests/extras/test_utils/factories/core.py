@@ -1,6 +1,7 @@
 """Core-related factories."""
 
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
 from factory.django import DjangoModelFactory
 
@@ -9,6 +10,7 @@ from hope.models import (
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
+    FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     PeriodicFieldData,
@@ -93,3 +95,10 @@ class XLSXKoboTemplateFactory(DjangoModelFactory):
     file_name = factory.Sequence(lambda n: f"template_{n}.xlsx")
     status = XLSXKoboTemplate.UPLOADED
     file = factory.LazyAttribute(lambda o: ContentFile(b"test content", name=o.file_name))
+
+
+class FileTempFactory(DjangoModelFactory):
+    class Meta:
+        model = FileTemp
+
+    file = factory.LazyFunction(lambda: SimpleUploadedFile("test.txt", b"test"))

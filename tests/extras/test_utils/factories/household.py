@@ -7,7 +7,11 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import Household, Individual, IndividualRoleInHousehold
+from hope.models import Household, Individual, IndividualRoleInHousehold, MergeStatusModel, RegistrationDataImport
+
+from .core import BusinessAreaFactory
+from .program import ProgramFactory
+from .registration_data import RegistrationDataImportFactory
 
 
 class IndividualFactory(DjangoModelFactory):
@@ -19,7 +23,14 @@ class IndividualFactory(DjangoModelFactory):
     birth_date = date(1990, 1, 1)
     first_registration_date = factory.LazyFunction(date.today)
     last_registration_date = factory.LazyFunction(date.today)
-    rdi_merge_status = "MERGED"
+    rdi_merge_status = MergeStatusModel.MERGED
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    registration_data_import = factory.SubFactory(
+        RegistrationDataImportFactory,
+        business_area=factory.SelfAttribute("..business_area"),
+        program=factory.SelfAttribute("..program"),
+    )
 
 
 class HouseholdFactory(DjangoModelFactory):
@@ -28,7 +39,9 @@ class HouseholdFactory(DjangoModelFactory):
 
     first_registration_date = factory.LazyFunction(timezone.now)
     last_registration_date = factory.LazyFunction(timezone.now)
-    rdi_merge_status = "MERGED"
+    rdi_merge_status = MergeStatusModel.MERGED
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
 
     @factory.post_generation
     def head_of_household(self, create, extracted, **kwargs):
@@ -38,36 +51,48 @@ class HouseholdFactory(DjangoModelFactory):
         if extracted:
             self.head_of_household = extracted
             individual = extracted
-            # Update the individual's household reference if not already set
             if individual.household_id != self.pk:
                 individual.household = self
                 individual.save(update_fields=["household"])
-        else:
-            # Import here to avoid circular import
-            from .registration_data import RegistrationDataImportFactory
+            self.save()
+            return
 
-            # Use existing registration_data_import or create one
-            rdi = self.registration_data_import
-            if rdi is None:
-                rdi = RegistrationDataImportFactory(
-                    business_area=self.business_area,
-                    program=self.program,
-                )
-                self.registration_data_import = rdi
+        from .registration_data import RegistrationDataImportFactory
 
-            individual = IndividualFactory(
-                household=self,
+        rdi = self.registration_data_import
+        if rdi is None:
+            rdi = RegistrationDataImportFactory(
                 business_area=self.business_area,
                 program=self.program,
-                registration_data_import=rdi,
+                status=RegistrationDataImport.MERGED
+                if self.rdi_merge_status == MergeStatusModel.MERGED
+                else RegistrationDataImport.IN_REVIEW,
             )
-            self.head_of_household = individual
+            self.registration_data_import = rdi
+
+        individual = IndividualFactory(
+            household=self,
+            business_area=self.business_area,
+            program=self.program,
+            registration_data_import=rdi,
+            rdi_merge_status=self.rdi_merge_status,
+        )
+        self.head_of_household = individual
 
         self.save()
 
+    @factory.post_generation
+    def create_role(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted is False:
+            return
+        if not self.head_of_household:
+            return
         IndividualRoleInHouseholdFactory(
             household=self,
-            individual=individual,
+            individual=self.head_of_household,
+            rdi_merge_status=self.rdi_merge_status,
         )
 
 
@@ -76,3 +101,11 @@ class IndividualRoleInHouseholdFactory(DjangoModelFactory):
         model = IndividualRoleInHousehold
 
     role = ROLE_PRIMARY
+    household = factory.SubFactory(HouseholdFactory, create_role=False)
+    individual = factory.SubFactory(
+        IndividualFactory,
+        household=factory.SelfAttribute("..household"),
+        business_area=factory.SelfAttribute("..household.business_area"),
+        program=factory.SelfAttribute("..household.program"),
+        registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
+    )
