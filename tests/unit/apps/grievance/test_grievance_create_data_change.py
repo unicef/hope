@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
 import pytest
@@ -8,14 +9,21 @@ from rest_framework import status
 
 from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
 from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
 from extras.test_utils.old_factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from extras.test_utils.old_factories.payment import AccountFactory, FinancialInstitutionFactory
+from extras.test_utils.old_factories.payment import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+)
 from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -29,7 +37,14 @@ from hope.apps.household.const import (
     UNHCR,
     WIDOWED,
 )
-from hope.models import AccountType, BusinessArea, DocumentType, Partner, Program, country as geo_models
+from hope.models import (
+    AccountType,
+    BusinessArea,
+    DocumentType,
+    Partner,
+    Program,
+    country as geo_models,
+)
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -40,8 +55,20 @@ pytestmark = [
 class TestGrievanceCreateDataChangeAction:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        CountryFactory(
+            name="Afghanistan",
+            short_name="Afghanistan",
+            iso_code2="AF",
+            iso_code3="AFG",
+            iso_num="0004",
+        )
+        CountryFactory(
+            name="Poland",
+            short_name="Poland",
+            iso_code2="PL",
+            iso_code3="POL",
+            iso_num="0616",
+        )
         call_command("generatedocumenttypes")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
@@ -212,6 +239,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "country": "POL",
                                     "number": "123-123-UX-321",
                                     "new_photo": None,
+                                    "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "identities": [
@@ -266,6 +294,7 @@ class TestGrievanceCreateDataChangeAction:
                                     "country": "POL",
                                     "number": "321-321-XU-987",
                                     "new_photo": None,
+                                    "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "documents_to_edit": [
