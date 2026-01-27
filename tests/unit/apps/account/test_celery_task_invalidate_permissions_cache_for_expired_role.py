@@ -22,7 +22,6 @@ from hope.apps.account.celery_tasks import (
 from hope.apps.account.signals import _invalidate_user_permissions_cache
 from hope.models import BusinessArea, Partner, Program, Role, RoleAssignment, User
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -60,47 +59,47 @@ def program(business_area_afg: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def role_expired(db: Any) -> Role:
-    return RoleFactory(name="Test Expired Role")
+def role_for_user_1(db: Any) -> Role:
+    return RoleFactory(name="Test User Role 1")
 
 
 @pytest.fixture
-def role_ok(db: Any) -> Role:
-    return RoleFactory(name="Test OK Role")
+def role_for_user_2(db: Any) -> Role:
+    return RoleFactory(name="Test User Role 2")
 
 
 @pytest.fixture
-def role_partner_expired(db: Any) -> Role:
-    return RoleFactory(name="Test Partner Expired Role")
+def role_for_partner(db: Any) -> Role:
+    return RoleFactory(name="Test Partner Role")
 
 
 @pytest.fixture
-def role_assignment_user1(user1: User, business_area_afg: BusinessArea, role_expired: Role) -> RoleAssignment:
+def role_assignment_user1(user1: User, business_area_afg: BusinessArea, role_for_user_1: Role) -> RoleAssignment:
     return RoleAssignment.objects.create(
         user=user1,
         partner=None,
         business_area=business_area_afg,
-        role=role_expired,
+        role=role_for_user_1,
     )
 
 
 @pytest.fixture
-def role_assignment_ok_user1(user1: User, business_area_afg: BusinessArea, role_ok: Role) -> RoleAssignment:
+def role_assignment_ok_user1(user1: User, business_area_afg: BusinessArea, role_for_user_2: Role) -> RoleAssignment:
     return RoleAssignment.objects.create(
         user=user1,
         partner=None,
         business_area=business_area_afg,
-        role=role_ok,
+        role=role_for_user_2,
     )
 
 
 @pytest.fixture
-def role_assignment_user2(user2: User, business_area_afg: BusinessArea) -> RoleAssignment:
+def role_assignment_user2(user2: User, business_area_afg: BusinessArea, role_for_user_1: Role) -> RoleAssignment:
     return RoleAssignment.objects.create(
         user=user2,
         partner=None,
         business_area=business_area_afg,
-        role=None,
+        role=role_for_user_1,
     )
 
 
@@ -108,14 +107,14 @@ def role_assignment_user2(user2: User, business_area_afg: BusinessArea) -> RoleA
 def role_assignment_partner(
     partner: Partner,
     business_area_afg: BusinessArea,
-    role_partner_expired: Role,
+    role_for_partner: Role,
 ) -> RoleAssignment:
     partner.allowed_business_areas.add(business_area_afg)
     return RoleAssignment.objects.create(
         user=None,
         partner=partner,
         business_area=business_area_afg,
-        role=role_partner_expired,
+        role=role_for_partner,
     )
 
 
@@ -269,4 +268,3 @@ def test_invalidate_permissions_cache_role_on_users_and_partner(
 
     assert get_cache_version(user1) == version_key_user1_after_update + 1
     assert get_cache_version(user2) == version_key_user2_after_update + 1
-
