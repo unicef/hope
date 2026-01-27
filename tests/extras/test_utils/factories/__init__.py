@@ -12,6 +12,7 @@ from .changelog import ChangelogFactory
 from .core import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
+    CountryCodeMapFactory,
     DataCollectingTypeFactory,
     FileTempFactory,
     FlexibleAttributeChoiceFactory,
@@ -49,6 +50,7 @@ __all__ = [
     "ChangelogFactory",
     "CommunicationMessageFactory",
     "CountryFactory",
+    "CountryCodeMapFactory",
     "DataCollectingTypeFactory",
     "FileTempFactory",
     "FeedbackFactory",
