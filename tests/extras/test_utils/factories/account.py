@@ -38,7 +38,7 @@ class RoleFactory(DjangoModelFactory):
         django_get_or_create = ("name", "subsystem")
 
     name = factory.Sequence(lambda n: f"Role {n}")
-    subsystem = "HOPE"
+    subsystem = Role.HOPE
 
 
 class RoleAssignmentFactory(DjangoModelFactory):
