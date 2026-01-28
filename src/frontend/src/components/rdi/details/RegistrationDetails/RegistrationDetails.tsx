@@ -223,7 +223,8 @@ function RegistrationDetails({
             </Grid>
           </Grid>
           {numbersComponent}
-          {registration.status === 'DEDUPLICATION_FAILED' ? null : (
+          {registration.status === 'DEDUPLICATION_FAILED' ||
+          registration.status === 'IN_REVIEW' ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
