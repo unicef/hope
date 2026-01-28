@@ -1,97 +1,140 @@
-from django.test import TestCase
+"""Tests for signal that changes allowed business areas for partners."""
+
+from typing import Any
+
 import pytest
 
-from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
-from extras.test_utils.old_factories.program import ProgramFactory
-from hope.models import AdminAreaLimitedTo, BusinessArea, Program, Role, RoleAssignment
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    ProgramFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+)
+from hope.models import AdminAreaLimitedTo, BusinessArea, Partner, Program, Role, RoleAssignment
+
+pytestmark = pytest.mark.django_db
 
 
-class TestSignalChangeAllowedBusinessAreas(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.business_area_afg = create_afghanistan()
-        cls.business_area_ukr = create_ukraine()
-
-        cls.partner = PartnerFactory(name="Partner")
-
-        cls.partner.allowed_business_areas.add(cls.business_area_afg)
-        role = RoleFactory(name="Role for Partner")
-
-        RoleAssignment.objects.create(
-            partner=cls.partner,
-            role=role,
-            business_area=cls.business_area_afg,
-            program=None,
-        )
-
-        cls.partner.allowed_business_areas.add(cls.business_area_ukr)
-
-        cls.program_afg = ProgramFactory.create(
-            status=Program.DRAFT,
-            business_area=cls.business_area_afg,
-            partner_access=Program.ALL_PARTNERS_ACCESS,
-        )
-        cls.program_ukr = ProgramFactory.create(
-            status=Program.DRAFT,
-            business_area=cls.business_area_ukr,
-            partner_access=Program.SELECTED_PARTNERS_ACCESS,
-        )
-        cls.program_ukr_2 = ProgramFactory.create(
-            status=Program.DRAFT,
-            business_area=cls.business_area_ukr,
-            partner_access=Program.SELECTED_PARTNERS_ACCESS,
-        )
-
-        RoleAssignment.objects.create(
-            partner=cls.partner,
-            role=role,
-            business_area=cls.business_area_ukr,
-            program=cls.program_ukr_2,
-        )
-
-    def test_signal_change_allowed_business_areas(self) -> None:
-        assert (
-            self.program_afg.role_assignments.count() == 1
-        )  # ALL_PARTNERS_ACCESS - Partner that has access to AFG (signal on program)
-        assert self.program_afg.role_assignments.first().partner == self.partner
-
-        assert (
-            RoleAssignment.objects.filter(business_area=self.business_area_afg, program=None).count() == 3
-        )  # UNICEF HQ, UNICEF for afg, self.partner
-
-        assert self.program_ukr.role_assignments.count() == 0  # SELECTED_PARTNERS_ACCESS
-
-        assert (
-            RoleAssignment.objects.filter(business_area=self.business_area_ukr, program=None).count() == 2
-        )  # UNICEF HQ, UNICEF for afg, self.partner
-
-        assert self.program_ukr_2.role_assignments.count() == 1  # SELECTED_PARTNERS_ACCESS
-        assert self.program_ukr_2.role_assignments.first().partner == self.partner
-
-        assert self.partner.role_assignments.count() == 3
-        assert self.partner.role_assignments.filter(program=self.program_afg).first() is not None
-        assert (
-            self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first() is not None
-        )
-        assert self.partner.role_assignments.filter(program=self.program_ukr_2).first() is not None
-
-        assert AdminAreaLimitedTo.objects.filter(partner=self.partner).count() == 0
-
-        self.partner.allowed_business_areas.remove(self.business_area_afg)
-        # removing from allowed BA -> removing roles in this BA
-        assert self.partner.role_assignments.filter(program=self.program_afg).first() is None
-        assert self.partner.role_assignments.filter(program=None, business_area=self.business_area_afg).first() is None
-        assert self.partner.role_assignments.filter(program=self.program_ukr_2).first() is not None
+@pytest.fixture
+def business_area_afg(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="afghanistan",
+        code="0060",
+        name="Afghanistan",
+    )
 
 
-@pytest.mark.django_db
-class TestPostSaveUserSignal:
-    def test_user_created_assigns_basic_role(self):
-        global_ba = BusinessArea.objects.create(name="Global", slug="global", code="GLO")
-        basic_role = Role.objects.create(name="Basic User", permissions=[])
+@pytest.fixture
+def business_area_ukr(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="ukraine",
+        code="4410",
+        name="Ukraine",
+    )
 
-        user = UserFactory()
 
-        assert RoleAssignment.objects.filter(user=user, business_area=global_ba, role=basic_role).exists()
+@pytest.fixture
+def partner(db: Any) -> Partner:
+    return PartnerFactory(name="Partner")
+
+
+@pytest.fixture
+def role(db: Any) -> Role:
+    return RoleFactory(name="Role for Partner")
+
+
+@pytest.fixture
+def role_assignment1(partner: Partner, role: Role, business_area_afg: BusinessArea) -> RoleAssignment:
+    return RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_afg,
+    )
+
+
+@pytest.fixture
+def program_afg(business_area_afg: BusinessArea) -> Program:
+    return ProgramFactory(
+        status=Program.DRAFT,
+        business_area=business_area_afg,
+        partner_access=Program.ALL_PARTNERS_ACCESS,
+    )
+
+
+@pytest.fixture
+def program_ukr(business_area_ukr: BusinessArea) -> Program:
+    return ProgramFactory(
+        status=Program.DRAFT,
+        business_area=business_area_ukr,
+        partner_access=Program.SELECTED_PARTNERS_ACCESS,
+    )
+
+
+@pytest.fixture
+def program_ukr_2(business_area_ukr: BusinessArea) -> Program:
+    return ProgramFactory(
+        status=Program.DRAFT,
+        business_area=business_area_ukr,
+        partner_access=Program.SELECTED_PARTNERS_ACCESS,
+    )
+
+
+@pytest.fixture
+def role_assignment2(
+    partner: Partner, role: Role, business_area_ukr: BusinessArea, program_ukr_2: Program
+) -> RoleAssignment:
+    return RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        role=role,
+        business_area=business_area_ukr,
+        program=program_ukr_2,
+    )
+
+
+def test_signal_change_allowed_business_areas(
+    partner: Partner,
+    role: Role,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    role_assignment1: RoleAssignment,
+    program_afg: Program,
+    program_ukr: Program,
+    program_ukr_2: Program,
+    role_assignment2: RoleAssignment,
+):
+    # ALL_PARTNERS_ACCESS - Partner that has access to AFG (signal on program)
+    assert program_afg.role_assignments.count() == 1
+    assert program_afg.role_assignments.first().partner == partner
+
+    # UNICEF HQ, UNICEF for afg, partner
+    assert RoleAssignment.objects.filter(business_area=business_area_afg, program=None).count() == 3
+
+    # SELECTED_PARTNERS_ACCESS - no auto-assignment
+    assert program_ukr.role_assignments.count() == 0
+
+    # UNICEF HQ, UNICEF for ukr
+    assert RoleAssignment.objects.filter(business_area=business_area_ukr, program=None).count() == 2
+
+    # SELECTED_PARTNERS_ACCESS - manually assigned
+    assert program_ukr_2.role_assignments.count() == 1
+    assert program_ukr_2.role_assignments.first().partner == partner
+
+    # Partner has 3 role assignments total
+    assert partner.role_assignments.count() == 3
+    assert partner.role_assignments.filter(program=program_afg).first() is not None
+    assert partner.role_assignments.filter(program=None, business_area=business_area_afg).first() is not None
+    assert partner.role_assignments.filter(program=program_ukr_2).first() is not None
+
+    # No area limits initially
+    assert AdminAreaLimitedTo.objects.filter(partner=partner).count() == 0
+
+    # Remove AFG from allowed business areas
+    partner.allowed_business_areas.remove(business_area_afg)
+
+    # Removing from allowed BA removes roles in this BA
+    assert partner.role_assignments.filter(program=program_afg).first() is None
+    assert partner.role_assignments.filter(program=None, business_area=business_area_afg).first() is None
+    assert partner.role_assignments.filter(program=program_ukr_2).first() is not None

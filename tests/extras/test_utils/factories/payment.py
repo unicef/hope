@@ -12,7 +12,9 @@ from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -92,6 +94,15 @@ class PaymentFactory(DjangoModelFactory):
     )
 
 
+class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentHouseholdSnapshot
+
+    payment = factory.SubFactory(PaymentFactory)
+    household_id = factory.LazyAttribute(lambda obj: obj.payment.household_id)
+    snapshot_data = factory.LazyFunction(dict)
+
+
 class PaymentVerificationSummaryFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationSummary
@@ -149,6 +160,15 @@ class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
         model = FinancialServiceProviderXlsxTemplate
 
     name = factory.Sequence(lambda n: f"FSP Template {n}")
+
+
+class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
+    class Meta:
+        model = FspXlsxTemplatePerDeliveryMechanism
+
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
 class WesternUnionInvoiceFactory(DjangoModelFactory):
