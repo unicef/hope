@@ -10,11 +10,12 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     ProgramFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.models import Area, BusinessArea, Program, Role, RoleAssignment, User
+from hope.models import Area, BusinessArea, Program, Role, User
 
 pytestmark = pytest.mark.django_db
 
@@ -99,7 +100,7 @@ def test_user_is_not_unicef_and_has_permission_in_different_program(
     user.partner = partner
     user.save()
 
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         user=user,
         partner=None,
         business_area=business_area,
@@ -122,8 +123,7 @@ def test_user_is_not_unicef_and_partner_has_permission_in_program(
     role: Role,
 ):
     partner = PartnerFactory(name="Partner")
-    partner.allowed_business_areas.add(business_area)
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         user=None,
         partner=partner,
         business_area=business_area,
@@ -152,7 +152,7 @@ def test_user_is_not_unicef_and_user_has_permission_in_program(
     user.partner = partner
     user.save()
 
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         user=user,
         partner=None,
         business_area=business_area,
@@ -175,8 +175,7 @@ def test_user_is_not_unicef_and_partner_has_permission_in_whole_ba(
     role: Role,
 ):
     partner = PartnerFactory(name="Partner")
-    partner.allowed_business_areas.add(business_area)
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         user=None,
         partner=partner,
         business_area=business_area,
@@ -204,7 +203,7 @@ def test_user_is_not_unicef_and_user_has_permission_in_whole_ba(
     user.partner = partner
     user.save()
 
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         user=user,
         partner=None,
         business_area=business_area,
