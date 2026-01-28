@@ -38,28 +38,34 @@ class RoleFactory(DjangoModelFactory):
         django_get_or_create = ("name", "subsystem")
 
     name = factory.Sequence(lambda n: f"Role {n}")
-    subsystem = "HOPE"
+    subsystem = Role.HOPE
 
 
 class RoleAssignmentFactory(DjangoModelFactory):
     class Meta:
         model = RoleAssignment
-        django_get_or_create = ("user", "partner", "role", "business_area")
+        django_get_or_create = ("user", "partner", "role", "business_area", "program")
 
     user = None
     partner = None
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
+    program = None
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
         partner = kwargs.get("partner")
         user = kwargs.get("user")
+        business_area = kwargs.get("business_area")
+
         if not user and not partner:
             user = UserFactory()
             kwargs["user"] = user
-        if partner:
-            partner.allowed_business_areas.add(kwargs["business_area"])
+
+        # Add business_area to partner's allowed_business_areas before creating the role assignment
+        if partner and business_area:
+            partner.allowed_business_areas.add(business_area)
+
         return super()._create(model_class, *args, **kwargs)
 
 
