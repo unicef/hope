@@ -2,6 +2,8 @@
 
 from typing import Callable
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -256,6 +258,70 @@ def test_list_areas_search_by_name(api, geo_data, areas_list_url, grant_user_per
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == count
+
+
+def test_list_areas_caching(api, geo_data, areas_list_url, grant_user_permissions):
+    grant_user_permissions([Permissions.GEO_VIEW_LIST])
+
+    def assert_cached_response(response, expected_queries):
+        assert response.status_code == status.HTTP_200_OK
+        return response.headers["etag"]
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_initial = assert_cached_response(response, expected_queries=10)
+        assert len(ctx.captured_queries) == 10
+
+    # Test that reoccurring requests use cached data
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_second = assert_cached_response(response, expected_queries=5)
+        assert len(ctx.captured_queries) == 5
+        assert etag_second == etag_initial
+
+    # After update of area, it does not use the cached data
+    area_1_area_type_1 = geo_data["areas"][0]
+    area_1_area_type_1.name = "Updated Area 1 Area Type 1"
+    area_1_area_type_1.save()
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_after_area_update = assert_cached_response(response, expected_queries=6)
+        assert len(ctx.captured_queries) == 6
+        assert etag_after_area_update != etag_initial
+
+    # After removing area_type, it does not use the cached data
+    area_type_1_afg = geo_data["area_type_1"]
+    area_type_1_afg.delete()
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_after_area_type_delete = assert_cached_response(response, expected_queries=6)
+        assert len(ctx.captured_queries) == 6
+        assert etag_after_area_type_delete != etag_after_area_update
+
+    # After removing country, it does not use the cached data
+    country_2_afg = geo_data["country_2"]
+    country_2_afg.delete()
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_after_country_delete = assert_cached_response(response, expected_queries=6)
+        assert len(ctx.captured_queries) == 6
+        assert etag_after_country_delete != etag_after_area_type_delete
+
+    # Cached data again
+    with CaptureQueriesContext(connection) as ctx:
+        response = api.get(areas_list_url)
+        etag_cached_again = assert_cached_response(response, expected_queries=5)
+        assert len(ctx.captured_queries) == 5
+        assert etag_cached_again == etag_after_country_delete
+
+    # Different filter - does not use cached data
+    with CaptureQueriesContext(connection):
+        response = api.get(areas_list_url, {"level": 1})
+        etag_with_filter = assert_cached_response(response, expected_queries=None)
+        assert etag_with_filter != etag_cached_again
 
 
 def test_areas_tree(api, ukraine_with_area_tree, user, create_user_role_with_permissions):
