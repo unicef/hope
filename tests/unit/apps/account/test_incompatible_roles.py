@@ -7,10 +7,11 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from hope.models import IncompatibleRoles, Role, RoleAssignment
+from hope.models import IncompatibleRoles, Role
 
 pytestmark = pytest.mark.django_db
 
@@ -58,13 +59,13 @@ def test_any_users_already_with_the_roles(role_1: Role, role_2: Role):
     )
     user = UserFactory()
 
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         role=role_1,
         business_area=business_area,
         user=user,
         partner=None,
     )
-    RoleAssignment.objects.create(
+    RoleAssignmentFactory(
         role=role_2,
         business_area=business_area,
         user=user,

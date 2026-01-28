@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     ProgramFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
@@ -75,7 +76,7 @@ def role_for_partner(db: Any) -> Role:
 
 @pytest.fixture
 def role_assignment_user1(user1: User, business_area_afg: BusinessArea, role_for_user_1: Role) -> RoleAssignment:
-    return RoleAssignment.objects.create(
+    return RoleAssignmentFactory(
         user=user1,
         partner=None,
         business_area=business_area_afg,
@@ -85,7 +86,7 @@ def role_assignment_user1(user1: User, business_area_afg: BusinessArea, role_for
 
 @pytest.fixture
 def role_assignment_ok_user1(user1: User, business_area_afg: BusinessArea, role_for_user_2: Role) -> RoleAssignment:
-    return RoleAssignment.objects.create(
+    return RoleAssignmentFactory(
         user=user1,
         partner=None,
         business_area=business_area_afg,
@@ -95,7 +96,7 @@ def role_assignment_ok_user1(user1: User, business_area_afg: BusinessArea, role_
 
 @pytest.fixture
 def role_assignment_user2(user2: User, business_area_afg: BusinessArea, role_for_user_1: Role) -> RoleAssignment:
-    return RoleAssignment.objects.create(
+    return RoleAssignmentFactory(
         user=user2,
         partner=None,
         business_area=business_area_afg,
@@ -109,8 +110,7 @@ def role_assignment_partner(
     business_area_afg: BusinessArea,
     role_for_partner: Role,
 ) -> RoleAssignment:
-    partner.allowed_business_areas.add(business_area_afg)
-    return RoleAssignment.objects.create(
+    return RoleAssignmentFactory(
         user=None,
         partner=partner,
         business_area=business_area_afg,
