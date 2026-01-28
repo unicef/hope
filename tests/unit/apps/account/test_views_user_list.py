@@ -226,6 +226,7 @@ def test_user_list_caching(
     user2: User,
     user3: User,
     user4: User,
+    user_in_different_ba: User,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(

@@ -297,6 +297,7 @@ def test_program_users_caching(
     user5: Any,
     partner_with_role_2: Any,
     user4: Any,
+    user_without_role: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

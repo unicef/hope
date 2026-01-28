@@ -12,5 +12,6 @@ class GrievanceTicketFactory(DjangoModelFactory):
 
     # business_area must be passed explicitly (no SubFactory)
     category = GrievanceTicket.CATEGORY_DATA_CHANGE
+    issue_type = GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL
     status = GrievanceTicket.STATUS_NEW
     description = factory.Sequence(lambda n: f"Test grievance ticket {n}")
