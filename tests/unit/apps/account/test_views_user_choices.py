@@ -40,16 +40,6 @@ def user(partner: Partner):
 
 
 @pytest.fixture
-def authenticated_client(api_client: Any, user: User):
-    return api_client(user)
-
-
-@pytest.fixture
-def choices_url(afghanistan):
-    return reverse("api:accounts:users-choices", kwargs={"business_area_slug": afghanistan.slug})
-
-
-@pytest.fixture
 def roles_setup(db: Any):
     RoleFactory(name="TestRole")
     RoleFactory(name="TestRole2")
@@ -64,6 +54,16 @@ def unicef_partners(db: Any):
         "unicef_hq": unicef_hq,
         "unicef_partner_for_afghanistan": unicef_partner_for_afghanistan,
     }
+
+
+@pytest.fixture
+def choices_url(afghanistan):
+    return reverse("api:accounts:users-choices", kwargs={"business_area_slug": afghanistan.slug})
+
+
+@pytest.fixture
+def authenticated_client(api_client: Any, user: User):
+    return api_client(user)
 
 
 def test_get_choices(
@@ -91,8 +91,7 @@ def test_get_choices(
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
         "role_choices": [
-            {"name": role.name, "value": role.id, "subsystem": role.subsystem}
-            for role in Role.objects.order_by("name")
+            {"name": role.name, "value": role.id, "subsystem": role.subsystem} for role in Role.objects.order_by("name")
         ],
         "status_choices": to_choice_object(USER_STATUS_CHOICES),
         "partner_choices": [
@@ -105,8 +104,6 @@ def test_get_choices(
         ],
         # TODO: below assert can be removed after temporary solution is removed for partners
         "partner_choices_temp": [
-            {"name": partner.name, "value": partner.id}
-            for partner in [unicef_hq, unicef_partner_in_afghanistan]
+            {"name": partner.name, "value": partner.id} for partner in [unicef_hq, unicef_partner_in_afghanistan]
         ],
     }
-
