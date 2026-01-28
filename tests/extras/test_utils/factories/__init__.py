@@ -49,6 +49,7 @@ from .payment import (
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import RegistrationDataImportFactory
 from .steficon import RuleCommitFactory, RuleFactory
+from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 
 __all__ = [
     "AdminAreaLimitedToFactory",
@@ -94,6 +95,8 @@ __all__ = [
     "RoleFactory",
     "RuleCommitFactory",
     "RuleFactory",
+    "TargetingCriteriaRuleFilterFactory",
+    "TargetingCriteriaRuleFactory",
     "SurveyFactory",
     "UserFactory",
     "WesternUnionInvoiceFactory",
