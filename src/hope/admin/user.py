@@ -230,7 +230,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         JSONField: {"widget": JSONEditor},
     }
     fieldsets = (
-        (None, {"fields": (("username", "azure_id"), "password")}),
+        (None, {"fields": (("username", "azure_id"))}),
         (
             _("Personal info"),
             {
