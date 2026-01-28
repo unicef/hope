@@ -134,7 +134,7 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
 
 
 @pytest.mark.parametrize(
-    ("test_name", "payment_updates", "expected_total", "cache_service"),
+    ("test_name", "payment_updates", "expected_total"),
     [
         (
             "delivered_quantity_usd prioritized",
@@ -143,19 +143,16 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
                 "entitlement_quantity_usd": Decimal("50.0"),
             },
             Decimal("500.0"),
-            DashboardDataCache,
         ),
         (
             "entitlement_quantity_usd used when delivered_quantity_usd is null",
             {"delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
             Decimal("250.0"),
-            DashboardDataCache,
         ),
         (
             "both fields null",
             {"delivered_quantity_usd": None, "entitlement_quantity_usd": None},
             Decimal("0.0"),
-            DashboardDataCache,
         ),
         (
             "Pending status with null delivered_quantity_usd",
@@ -165,16 +162,6 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
                 "entitlement_quantity_usd": Decimal("50.0"),
             },
             Decimal("250.0"),
-            DashboardDataCache,
-        ),
-        (
-            "global cache prioritizes delivered_quantity_usd",
-            {
-                "delivered_quantity_usd": Decimal("100.0"),
-                "entitlement_quantity_usd": Decimal("50.0"),
-            },
-            Decimal("500.0"),
-            DashboardGlobalDataCache,
         ),
     ],
     ids=[
@@ -182,23 +169,37 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
         "entitlement_quantity_usd used when delivered_quantity_usd is null",
         "both fields null",
         "Pending status with null delivered_quantity_usd",
-        "global cache prioritizes delivered_quantity_usd",
     ],
 )
 @pytest.mark.django_db
-def test_dashboard_data_cache(
+def test_dashboard_data_cache_ba(
     test_name: str,
     payment_updates: Dict[str, Any],
     expected_total: Decimal,
-    cache_service: Any,
     dashboard_cache_test_data,
 ) -> None:
     business_area, _ = dashboard_cache_test_data(payment_updates)
 
-    if cache_service == DashboardDataCache:
-        result = cache_service.refresh_data(business_area.slug)
-    else:
-        result = cache_service.refresh_data(identifier=GLOBAL_SLUG)
+    result = DashboardDataCache.refresh_data(business_area.slug)
+
+    total_usd = sum(Decimal(item["total_delivered_quantity_usd"]) for item in result)
+    assert len(result) > 0
+    assert total_usd == expected_total
+
+
+@pytest.mark.django_db
+def test_dashboard_global_data_cache_prioritizes_delivered_quantity_usd(
+    dashboard_cache_test_data,
+) -> None:
+    payment_updates = {
+        "delivered_quantity_usd": Decimal("100.0"),
+        "entitlement_quantity_usd": Decimal("50.0"),
+    }
+    expected_total = Decimal("500.0")
+
+    dashboard_cache_test_data(payment_updates)
+
+    result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
 
     total_usd = sum(Decimal(item["total_delivered_quantity_usd"]) for item in result)
     assert len(result) > 0
