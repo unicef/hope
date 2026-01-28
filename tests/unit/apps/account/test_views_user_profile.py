@@ -1,9 +1,12 @@
 """Tests for user profile API views."""
 
+import datetime
 from typing import Any
 
+from django.utils import timezone
 import pytest
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -15,7 +18,6 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Partner, Program, Role, User
-
 
 pytestmark = pytest.mark.django_db
 
@@ -54,74 +56,143 @@ def get_program_data(program: Program) -> dict:
 
 
 @pytest.fixture
-def user_profile_setup(api_client: Any) -> dict:
-    afghanistan = BusinessAreaFactory(
+def afghanistan(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",
         slug="afghanistan",
+        active=True,
     )
-    ukraine = BusinessAreaFactory(
+
+
+@pytest.fixture
+def ukraine(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
         code="1230",
         name="Ukraine",
         slug="ukraine",
+        active=True,
     )
 
-    partner = PartnerFactory(name="TestPartner")
-    partner.allowed_business_areas.add(afghanistan, ukraine)
 
-    user = UserFactory(partner=partner)
+@pytest.fixture
+def partner(afghanistan: BusinessArea, ukraine: BusinessArea) -> Partner:
+    return PartnerFactory(name="TestPartner")
 
-    program1 = ProgramFactory(
+
+@pytest.fixture
+def user(partner: Partner) -> User:
+    return UserFactory(
+        partner=partner,
+        last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+    )
+
+
+@pytest.fixture
+def program1(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
     )
-    program2 = ProgramFactory(
+
+
+@pytest.fixture
+def program2(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
     )
-    program3 = ProgramFactory(
+
+
+@pytest.fixture
+def program3(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
     )
-    program_u = ProgramFactory(
+
+
+@pytest.fixture
+def program_u(ukraine: BusinessArea) -> Program:
+    return ProgramFactory(
         business_area=ukraine,
         status=Program.ACTIVE,
     )
 
-    role1 = RoleFactory(
-        name="Role with ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW",
-        permissions=[Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
-    )
-    role2 = RoleFactory(
-        name="Role with ACTIVITY_LOG_VIEW",
-        permissions=[Permissions.ACTIVITY_LOG_VIEW.value],
-    )
-    role3 = RoleFactory(
-        name="Role with PM_VIEW_LIST",
-        permissions=[Permissions.PM_VIEW_LIST.value],
-    )
-    role4 = RoleFactory(
-        name="Role with ACTIVITY_LOG_CREATE",
-        permissions=[Permissions.ACTIVITY_LOG_CREATE.value],
+
+@pytest.fixture
+def role1(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRole1",
+        permissions=[
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value,
+            Permissions.PROGRAMME_FINISH.value,
+        ],
     )
 
-    role_p1 = RoleFactory(
-        name="Partner Role with ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW",
-        permissions=[Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
-        is_available_for_partner=True,
-    )
-    role_p2 = RoleFactory(
-        name="Partner Role with ACTIVITY_LOG_VIEW",
-        permissions=[Permissions.ACTIVITY_LOG_VIEW.value],
-        is_available_for_partner=True,
-    )
-    role_p3 = RoleFactory(
-        name="Partner Role with PM_VIEW_LIST",
-        permissions=[Permissions.PM_VIEW_LIST.value],
-        is_available_for_partner=True,
+
+@pytest.fixture
+def role2(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRole2",
+        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value],
     )
 
-    # User role assignments (assigned to user)
+
+@pytest.fixture
+def role3(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRole3",
+        permissions=[Permissions.TARGETING_VIEW_LIST.value],
+    )
+
+
+@pytest.fixture
+def role4(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRole4",
+        permissions=[Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE.value],
+    )
+
+
+@pytest.fixture
+def role_p1(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRoleP1",
+        permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value],
+    )
+
+
+@pytest.fixture
+def role_p2(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRoleP2",
+        permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value],
+    )
+
+
+@pytest.fixture
+def role_p3(db: Any) -> Role:
+    return RoleFactory(
+        name="TestRoleP3",
+        permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST.value],
+    )
+
+
+@pytest.fixture
+def user_role_assignments(
+    user: User,
+    afghanistan: BusinessArea,
+    ukraine: BusinessArea,
+    program1: Program,
+    program2: Program,
+    program3: Program,
+    program_u: Program,
+    role1: Role,
+    role2: Role,
+    role3: Role,
+    role4: Role,
+) -> None:
     RoleAssignmentFactory(
         user=user,
         role=role1,
@@ -142,10 +213,28 @@ def user_profile_setup(api_client: Any) -> dict:
     RoleAssignmentFactory(
         user=user,
         role=role4,
+        business_area=afghanistan,
+        program=program3,
+    )
+    RoleAssignmentFactory(
+        user=user,
+        role=role1,
         business_area=ukraine,
+        program=program_u,
     )
 
-    # Partner role assignments (assigned to partner)
+
+@pytest.fixture
+def partner_role_assignments(
+    partner: Partner,
+    afghanistan: BusinessArea,
+    ukraine: BusinessArea,
+    program1: Program,
+    program2: Program,
+    role_p1: Role,
+    role_p2: Role,
+    role_p3: Role,
+) -> None:
     RoleAssignmentFactory(
         partner=partner,
         role=role_p1,
@@ -155,55 +244,56 @@ def user_profile_setup(api_client: Any) -> dict:
         partner=partner,
         role=role_p2,
         business_area=afghanistan,
-        program=program3,
+        program=program1,
     )
     RoleAssignmentFactory(
         partner=partner,
         role=role_p3,
+        business_area=afghanistan,
+        program=program2,
+    )
+    RoleAssignmentFactory(
+        partner=partner,
+        role=role_p1,
         business_area=ukraine,
     )
 
-    return {
-        "api_client": api_client(user),
-        "user_profile_url": "api:accounts:users-profile",
-        "user": user,
-        "partner": partner,
-        "afghanistan": afghanistan,
-        "ukraine": ukraine,
-        "program1": program1,
-        "program2": program2,
-        "program3": program3,
-        "program_u": program_u,
-        "role1": role1,
-        "role2": role2,
-        "role3": role3,
-        "role4": role4,
-        "role_p1": role_p1,
-        "role_p2": role_p2,
-        "role_p3": role_p3,
-    }
+
+@pytest.fixture
+def user_profile_url(afghanistan: BusinessArea) -> str:
+    return reverse(
+        "api:accounts:users-profile",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
 
 
-def test_user_profile_in_scope_business_area(user_profile_setup: dict):
-    api_client = user_profile_setup["api_client"]
-    user_profile_url = user_profile_setup["user_profile_url"]
-    user = user_profile_setup["user"]
-    partner = user_profile_setup["partner"]
-    afghanistan = user_profile_setup["afghanistan"]
-    ukraine = user_profile_setup["ukraine"]
-    program1 = user_profile_setup["program1"]
-    program2 = user_profile_setup["program2"]
-    program3 = user_profile_setup["program3"]
-    program_u = user_profile_setup["program_u"]
-    role1 = user_profile_setup["role1"]
-    role2 = user_profile_setup["role2"]
-    role3 = user_profile_setup["role3"]
-    role4 = user_profile_setup["role4"]
-    role_p1 = user_profile_setup["role_p1"]
-    role_p2 = user_profile_setup["role_p2"]
-    role_p3 = user_profile_setup["role_p3"]
+@pytest.fixture
+def authenticated_client(api_client: Any, user: User):
+    return api_client(user)
 
-    response = api_client.get(user_profile_url)
+
+def test_user_profile_in_scope_business_area(
+    authenticated_client: Any,
+    user: User,
+    partner: Partner,
+    afghanistan: BusinessArea,
+    ukraine: BusinessArea,
+    program1: Program,
+    program2: Program,
+    program3: Program,
+    program_u: Program,
+    role1: Role,
+    role2: Role,
+    role3: Role,
+    role4: Role,
+    role_p1: Role,
+    role_p2: Role,
+    role_p3: Role,
+    user_role_assignments: None,
+    partner_role_assignments: None,
+    user_profile_url: str,
+):
+    response = authenticated_client.get(user_profile_url)
     assert response.status_code == status.HTTP_200_OK
 
     profile_data = response.data
@@ -222,135 +312,21 @@ def test_user_profile_in_scope_business_area(user_profile_setup: dict):
             "business_area": afghanistan.slug,
             "program": None,
             "role": get_role_data(role_p1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
         },
         {
             "business_area": afghanistan.slug,
-            "program": program3.slug,
+            "program": program1.name,
             "role": get_role_data(role_p2),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_VIEW.value],
         },
         {
-            "business_area": ukraine.slug,
-            "program": None,
+            "business_area": afghanistan.slug,
+            "program": program2.name,
             "role": get_role_data(role_p3),
-            "permissions_in_role": [Permissions.PM_VIEW_LIST.value],
         },
-    ]
-
-    assert profile_data["custom_fields"] is not None
-    assert profile_data["allowed_business_areas"] == [
-        get_business_area_data(afghanistan),
-        get_business_area_data(ukraine),
-    ]
-
-    # Business area (Afghanistan) filter
-    response = api_client.get(user_profile_url, {"business_area": afghanistan.slug})
-    assert response.status_code == status.HTTP_200_OK
-    profile_data = response.data
-
-    assert profile_data["roles_details"] == [
-        {
-            "business_area": get_business_area_data(afghanistan),
-            "program": None,
-            "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
-            "expiry_date": None,
-        },
-        {
-            "business_area": get_business_area_data(afghanistan),
-            "program": get_program_data(program1),
-            "role": get_role_data(role2),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_VIEW.value],
-            "expiry_date": None,
-        },
-        {
-            "business_area": get_business_area_data(afghanistan),
-            "program": get_program_data(program2),
-            "role": get_role_data(role3),
-            "permissions_in_role": [Permissions.PM_VIEW_LIST.value],
-            "expiry_date": None,
-        },
-    ]
-
-    assert profile_data["user_roles"] == [
-        {
-            "business_area": afghanistan.slug,
-            "program": None,
-            "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
-        },
-        {
-            "business_area": afghanistan.slug,
-            "program": program1.slug,
-            "role": get_role_data(role2),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_VIEW.value],
-        },
-        {
-            "business_area": afghanistan.slug,
-            "program": program2.slug,
-            "role": get_role_data(role3),
-            "permissions_in_role": [Permissions.PM_VIEW_LIST.value],
-        },
-    ]
-    assert set(profile_data["available_permissions"]) == {
-        Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value,
-        Permissions.ACTIVITY_LOG_VIEW.value,
-        Permissions.PM_VIEW_LIST.value,
-    }
-
-    # Ukraine filter
-    response = api_client.get(user_profile_url, {"business_area": ukraine.slug})
-    assert response.status_code == status.HTTP_200_OK
-    profile_data = response.data
-    assert profile_data["user_roles"] == [
         {
             "business_area": ukraine.slug,
             "program": None,
-            "role": get_role_data(role4),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_CREATE.value],
-        },
-    ]
-
-
-def test_user_profile_in_scope_program(user_profile_setup: dict):
-    api_client = user_profile_setup["api_client"]
-    user_profile_url = user_profile_setup["user_profile_url"]
-    user = user_profile_setup["user"]
-    partner = user_profile_setup["partner"]
-    afghanistan = user_profile_setup["afghanistan"]
-    ukraine = user_profile_setup["ukraine"]
-    program1 = user_profile_setup["program1"]
-    program2 = user_profile_setup["program2"]
-    program3 = user_profile_setup["program3"]
-    program_u = user_profile_setup["program_u"]
-    role1 = user_profile_setup["role1"]
-    role2 = user_profile_setup["role2"]
-    role3 = user_profile_setup["role3"]
-    role4 = user_profile_setup["role4"]
-    role_p1 = user_profile_setup["role_p1"]
-    role_p2 = user_profile_setup["role_p2"]
-    role_p3 = user_profile_setup["role_p3"]
-
-    # Program filter
-    response = api_client.get(user_profile_url, {"program": program1.slug})
-    assert response.status_code == status.HTTP_200_OK
-    profile_data = response.data
-
-    assert profile_data["roles_details"] == [
-        {
-            "business_area": get_business_area_data(afghanistan),
-            "program": None,
-            "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
-            "expiry_date": None,
-        },
-        {
-            "business_area": get_business_area_data(afghanistan),
-            "program": get_program_data(program1),
-            "role": get_role_data(role2),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_VIEW.value],
-            "expiry_date": None,
+            "role": get_role_data(role_p1),
         },
     ]
 
@@ -359,132 +335,257 @@ def test_user_profile_in_scope_program(user_profile_setup: dict):
             "business_area": afghanistan.slug,
             "program": None,
             "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
         },
         {
             "business_area": afghanistan.slug,
-            "program": program1.slug,
+            "program": program1.name,
             "role": get_role_data(role2),
-            "permissions_in_role": [Permissions.ACTIVITY_LOG_VIEW.value],
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program2.name,
+            "role": get_role_data(role3),
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program3.name,
+            "role": get_role_data(role4),
+        },
+        {
+            "business_area": ukraine.slug,
+            "program": program_u.name,
+            "role": get_role_data(role1),
         },
     ]
-    assert set(profile_data["available_permissions"]) == {
-        Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value,
-        Permissions.ACTIVITY_LOG_VIEW.value,
+    assert profile_data["business_areas"] == [
+        {
+            **get_business_area_data(afghanistan),
+            "permissions": {
+                str(perm)
+                for perm in [
+                    *role1.permissions,
+                    *role2.permissions,
+                    *role3.permissions,
+                    *role4.permissions,
+                    *role_p1.permissions,
+                    *role_p2.permissions,
+                    *role_p3.permissions,
+                ]
+            },
+        },
+        {
+            **get_business_area_data(ukraine),
+            "permissions": {
+                str(perm)
+                for perm in [
+                    *role1.permissions,
+                    *role_p1.permissions,
+                ]
+            },
+        },
+    ]
+
+    assert profile_data["permissions_in_scope"] == {
+        str(perm)
+        for perm in [
+            *role1.permissions,
+            *role2.permissions,
+            *role3.permissions,
+            *role4.permissions,
+            *role_p1.permissions,
+            *role_p2.permissions,
+            *role_p3.permissions,
+        ]
+    }
+    assert profile_data["cross_area_filter_available"] is False
+
+    assert profile_data["status"] == user.status
+    assert profile_data["last_login"] == f"{user.last_login:%Y-%m-%dT%H:%M:%SZ}"
+
+
+def test_user_profile_in_scope_program(
+    authenticated_client: Any,
+    user: User,
+    partner: Partner,
+    afghanistan: BusinessArea,
+    ukraine: BusinessArea,
+    program1: Program,
+    program2: Program,
+    program3: Program,
+    program_u: Program,
+    role1: Role,
+    role2: Role,
+    role3: Role,
+    role4: Role,
+    role_p1: Role,
+    role_p2: Role,
+    role_p3: Role,
+    user_role_assignments: None,
+    partner_role_assignments: None,
+    user_profile_url: str,
+):
+    response = authenticated_client.get(user_profile_url, {"program": program1.slug})
+    assert response.status_code == status.HTTP_200_OK
+
+    profile_data = response.data
+    assert profile_data["id"] == str(user.id)
+    assert profile_data["username"] == user.username
+    assert profile_data["email"] == user.email
+    assert profile_data["first_name"] == user.first_name
+    assert profile_data["last_name"] == user.last_name
+    assert profile_data["is_superuser"] == user.is_superuser
+    assert profile_data["partner"] == {
+        "id": partner.id,
+        "name": partner.name,
     }
 
-    # Program2 filter
-    response = api_client.get(user_profile_url, {"program": program2.slug})
-    assert response.status_code == status.HTTP_200_OK
-    profile_data = response.data
-    assert profile_data["user_roles"] == [
+    assert profile_data["partner_roles"] == [
         {
             "business_area": afghanistan.slug,
             "program": None,
-            "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
+            "role": get_role_data(role_p1),
         },
         {
             "business_area": afghanistan.slug,
-            "program": program2.slug,
-            "role": get_role_data(role3),
-            "permissions_in_role": [Permissions.PM_VIEW_LIST.value],
+            "program": program1.name,
+            "role": get_role_data(role_p2),
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program2.name,
+            "role": get_role_data(role_p3),
+        },
+        {
+            "business_area": ukraine.slug,
+            "program": None,
+            "role": get_role_data(role_p1),
         },
     ]
 
-    # Program3 filter
-    response = api_client.get(user_profile_url, {"program": program3.slug})
-    assert response.status_code == status.HTTP_200_OK
-    profile_data = response.data
     assert profile_data["user_roles"] == [
         {
             "business_area": afghanistan.slug,
             "program": None,
             "role": get_role_data(role1),
-            "permissions_in_role": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW.value],
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program1.name,
+            "role": get_role_data(role2),
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program2.name,
+            "role": get_role_data(role3),
+        },
+        {
+            "business_area": afghanistan.slug,
+            "program": program3.name,
+            "role": get_role_data(role4),
+        },
+        {
+            "business_area": ukraine.slug,
+            "program": program_u.name,
+            "role": get_role_data(role1),
         },
     ]
+    assert profile_data["business_areas"] == [
+        {
+            **get_business_area_data(afghanistan),
+            "permissions": {
+                str(perm)
+                for perm in [
+                    *role1.permissions,
+                    *role2.permissions,
+                    *role3.permissions,
+                    *role4.permissions,
+                    *role_p1.permissions,
+                    *role_p2.permissions,
+                    *role_p3.permissions,
+                ]
+            },
+        },
+        {
+            **get_business_area_data(ukraine),
+            "permissions": {
+                str(perm)
+                for perm in [
+                    *role1.permissions,
+                    *role_p1.permissions,
+                ]
+            },
+        },
+    ]
+
+    # change here - only permissions within the program
+    assert profile_data["permissions_in_scope"] == {
+        str(perm)
+        for perm in [
+            *role1.permissions,
+            *role2.permissions,
+            *role_p1.permissions,
+            *role_p2.permissions,
+        ]
+    }
+    assert profile_data["cross_area_filter_available"] is False
 
 
 @pytest.mark.parametrize(
-    ("role_permissions", "filter_available"),
+    ("permissions", "filter_available"),
     [
-        ([Permissions.CROSS_AREA_FILTER.value], True),
+        ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True),
         ([], False),
     ],
 )
 def test_cross_area_filter_available_in_scope_business_area(
-    api_client: Any, role_permissions: list, filter_available: bool
+    afghanistan: BusinessArea,
+    user: User,
+    user_profile_url: str,
+    api_client: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    filter_available: bool,
 ):
-    afghanistan = BusinessAreaFactory(
-        code="0060",
-        name="Afghanistan",
-        slug="afghanistan",
-    )
-    partner = PartnerFactory(name="TestPartner")
-    partner.allowed_business_areas.add(afghanistan)
-
-    user = UserFactory(partner=partner)
-    role1 = RoleFactory(
-        name="Role with CROSS_AREA_FILTER",
-        permissions=role_permissions,
-    )
-
-    RoleAssignmentFactory(
+    authenticated_client = api_client(user)
+    create_user_role_with_permissions(
         user=user,
-        role=role1,
+        permissions=permissions,
         business_area=afghanistan,
+        whole_business_area_access=True,
     )
 
-    api_client = api_client(user)
-    user_profile_url = "api:accounts:users-profile"
-
-    response = api_client.get(user_profile_url, {"business_area": afghanistan.slug})
+    response = authenticated_client.get(user_profile_url, {"business_area": afghanistan.slug})
     assert response.status_code == status.HTTP_200_OK
     profile_data = response.data
     assert profile_data["cross_area_filter_available"] == filter_available
 
 
 @pytest.mark.parametrize(
-    ("role_permissions", "filter_available"),
+    ("permissions", "filter_available"),
     [
-        ([Permissions.CROSS_AREA_FILTER.value], True),
+        ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True),
         ([], False),
     ],
 )
 def test_cross_area_filter_available_in_scope_program(
-    api_client: Any, role_permissions: list, filter_available: bool
+    afghanistan: BusinessArea,
+    user: User,
+    program1: Program,
+    user_profile_url: str,
+    api_client: Any,
+    create_user_role_with_permissions: Any,
+    permissions: list,
+    filter_available: bool,
 ):
-    afghanistan = BusinessAreaFactory(
-        code="0060",
-        name="Afghanistan",
-        slug="afghanistan",
-    )
-    partner = PartnerFactory(name="TestPartner")
-    partner.allowed_business_areas.add(afghanistan)
-
-    user = UserFactory(partner=partner)
-    program1 = ProgramFactory(
-        business_area=afghanistan,
-        status=Program.ACTIVE,
-    )
-    role1 = RoleFactory(
-        name="Role with CROSS_AREA_FILTER",
-        permissions=role_permissions,
-    )
-
-    RoleAssignmentFactory(
+    authenticated_client = api_client(user)
+    create_user_role_with_permissions(
         user=user,
-        role=role1,
+        permissions=permissions,
         business_area=afghanistan,
         program=program1,
     )
 
-    api_client = api_client(user)
-    user_profile_url = "api:accounts:users-profile"
-
-    response = api_client.get(user_profile_url, {"program": program1.slug})
+    response = authenticated_client.get(user_profile_url, {"program": program1.slug})
     assert response.status_code == status.HTTP_200_OK
     profile_data = response.data
     assert profile_data["cross_area_filter_available"] == filter_available
-
