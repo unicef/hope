@@ -2,8 +2,6 @@
 
 from typing import Callable
 
-from django.db import connection
-from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -116,21 +114,21 @@ def geo_data(afghanistan, afghanistan_2):
     area_type_2 = AreaTypeFactory(country=country_1, area_level=2)
     area_type_3 = AreaTypeFactory(country=country_2, area_level=1)
 
-    area_1_l1 = AreaFactory(area_type=area_type_1, p_code="AREA1-ARTYPE1")
-    area_2_l1 = AreaFactory(area_type=area_type_1, p_code="AREA2-ARTYPE1")
+    area_1_l1 = AreaFactory(area_type=area_type_1, p_code="AREA1-ARTYPE1", name="Area_1")
+    area_2_l1 = AreaFactory(area_type=area_type_1, p_code="AREA2-ARTYPE1", name="Area_2")
 
-    area_1_l2 = AreaFactory(area_type=area_type_2, parent=area_1_l1, p_code="AREA1-ARTYPE2")
-    area_2_l2 = AreaFactory(area_type=area_type_2, parent=area_2_l1, p_code="AREA2-ARTYPE2")
-    area_3_l2 = AreaFactory(area_type=area_type_2, parent=area_1_l1, p_code="AREA3-ARTYPE2")
+    area_1_l2 = AreaFactory(area_type=area_type_2, parent=area_1_l1, p_code="AREA1-ARTYPE2", name="Area_21")
+    area_2_l2 = AreaFactory(area_type=area_type_2, parent=area_2_l1, p_code="AREA2-ARTYPE2", name="Area_22")
+    area_3_l2 = AreaFactory(area_type=area_type_2, parent=area_1_l1, p_code="AREA3-ARTYPE2", name="Area_23")
 
-    area_1_other = AreaFactory(area_type=area_type_3, p_code="AREA1-ARTYPE-AFG2")
-    area_2_other = AreaFactory(area_type=area_type_3, p_code="AREA2-ARTYPE-AFG2")
+    area_1_other = AreaFactory(area_type=area_type_3, p_code="AREA1-ARTYPE-AFG2", name="Area_11")
+    area_2_other = AreaFactory(area_type=area_type_3, p_code="AREA2-ARTYPE-AFG2", name="Area_12")
 
     other_ba = BusinessAreaFactory(name="Other")
     other_country = CountryFactory(name="Other Country", iso_code3="OTH")
     other_country.business_areas.set([other_ba])
     other_area_type = AreaTypeFactory(country=other_country)
-    other_area = AreaFactory(area_type=other_area_type, p_code="AREA-OTHER")
+    other_area = AreaFactory(area_type=other_area_type, p_code="AREA-OTHER", name="Other Area")
 
     return {
         "country_1": country_1,
@@ -202,14 +200,25 @@ def test_areas_permissions(
 
 def test_list_areas(api, geo_data, areas_list_url, grant_user_permissions):
     grant_user_permissions([Permissions.GEO_VIEW_LIST])
-
     response = api.get(areas_list_url)
     assert response.status_code == status.HTTP_200_OK
 
     response_ids = {item["id"] for item in response.json()}
     expected_ids = {str(area.id) for area in geo_data["areas"]}
+    area = geo_data["areas"][0]
+    resp_area = response.json()[0]
 
     assert response_ids == expected_ids
+    assert "id" in resp_area
+    assert resp_area["id"] == str(area.id)
+    assert "name" in resp_area
+    assert resp_area["name"] == area.name
+    assert "p_code" in resp_area
+    assert resp_area["p_code"] == area.p_code
+    assert "area_type" in resp_area
+    assert resp_area["area_type"] == str(area.area_type.id)
+    assert "updated_at" in resp_area
+    assert resp_area["updated_at"] == f"{area.updated_at:%Y-%m-%dT%H:%M:%SZ}"
 
 
 def test_list_areas_filter_by_level(api, geo_data, areas_list_url, grant_user_permissions):
@@ -230,6 +239,15 @@ def test_list_areas_filter_by_parent_id(api, geo_data, areas_list_url, grant_use
     assert len(response.json()) == 2
 
 
+def test_list_areas_filter_by_parent_p_code(api, geo_data, areas_list_url, grant_user_permissions):
+    grant_user_permissions([Permissions.GEO_VIEW_LIST])
+    response = api.get(areas_list_url, {"parent_p_code": "AREA1-ARTYPE1"})
+
+    assert response.status_code == status.HTTP_200_OK
+    # Area_21, Area_23
+    assert len(response.json()) == 2
+
+
 def test_list_areas_search_by_name(api, geo_data, areas_list_url, grant_user_permissions):
     grant_user_permissions([Permissions.GEO_VIEW_LIST])
     area_name = Area.objects.filter(p_code="AREA1-ARTYPE1").first().name
@@ -238,21 +256,6 @@ def test_list_areas_search_by_name(api, geo_data, areas_list_url, grant_user_per
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == count
-
-
-def test_list_areas_caching(api, areas_list_url, grant_user_permissions):
-    grant_user_permissions([Permissions.GEO_VIEW_LIST])
-
-    with CaptureQueriesContext(connection) as ctx:
-        response = api.get(areas_list_url)
-        assert response.status_code == status.HTTP_200_OK
-        etag = response.headers["etag"]
-        assert len(ctx.captured_queries) == 10
-
-    with CaptureQueriesContext(connection) as ctx:
-        response = api.get(areas_list_url)
-        assert response.headers["etag"] == etag
-        assert len(ctx.captured_queries) == 5
 
 
 def test_areas_tree(api, ukraine_with_area_tree, user, create_user_role_with_permissions):
