@@ -1,60 +1,94 @@
-from django.test import TestCase
-from parameterized import parameterized
+import pytest
 
-from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.factories.core import CountryCodeMapFactory
+from extras.test_utils.factories.geo import CountryFactory
 from hope.models import CountryCodeMap
 
 
-class TestCountryCodeMap(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        afg = CountryFactory(
-            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
-        )
-        aus = CountryFactory(name="Australia", short_name="Australia", iso_code2="AU", iso_code3="AUS", iso_num="0036")
-        CountryCodeMap.objects.create(country=afg, ca_code="AFG")
-        CountryCodeMap.objects.create(country=aus, ca_code="AUL")
-
-    @parameterized.expand(
-        [
-            ("equal", "AFG", "AFG"),
-            ("case_insensitive", "afg", "AFG"),
-            ("alpha2", "af", "AFG"),
-            ("custom_code", "AUS", "AUL"),
-        ]
+@pytest.fixture
+def afghanistan(db):
+    return CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
     )
-    def test_get_code(self, helper: str, iso_code: str, expected: str) -> None:
-        assert CountryCodeMap.objects.get_code(iso_code) == expected
 
-    @parameterized.expand(
-        [
-            ("equal", "AFG", "AF"),
-            ("case_insensitive", "afg", "AF"),
-            ("custom_code", "AUL", "AU"),
-        ]
+
+@pytest.fixture
+def australia(db):
+    return CountryFactory(
+        name="Australia",
+        short_name="Australia",
+        iso_code2="AU",
+        iso_code3="AUS",
+        iso_num="0036",
     )
-    def test_get_iso2_code_from_ca_code(self, helper: str, ca_code: str, expected: str) -> None:
-        assert CountryCodeMap.objects.get_iso2_code(ca_code) == expected
 
-    @parameterized.expand(
-        [
-            ("equal", "AFG", "AFG"),
-            ("case_insensitive", "afg", "AFG"),
-            ("custom_code", "AUL", "AUS"),
-        ]
-    )
-    def test_get_iso3_code_from_ca_code(self, helper: str, ca_code: str, expected: str) -> None:
-        assert CountryCodeMap.objects.get_iso3_code(ca_code) == expected
 
-    def test_cache(self) -> None:
-        CountryCodeMap.objects._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
-        with self.assertNumQueries(1):
-            assert CountryCodeMap.objects.get_code("AFG") == "AFG"
-            assert CountryCodeMap.objects.get_code("afg") == "AFG"
-            assert CountryCodeMap.objects.get_code("af") == "AFG"
-            assert CountryCodeMap.objects.get_code("AUS") == "AUL"
-            assert CountryCodeMap.objects.get_iso3_code("AFG") == "AFG"
-            assert CountryCodeMap.objects.get_iso3_code("afg") == "AFG"
-            assert CountryCodeMap.objects.get_iso3_code("AUL") == "AUS"
-            assert CountryCodeMap.objects.get_iso2_code("AFg") == "AF"
+@pytest.fixture
+def country_code_maps(afghanistan, australia):
+    afg_map = CountryCodeMapFactory(country=afghanistan, ca_code="AFG")
+    aus_map = CountryCodeMapFactory(country=australia, ca_code="AUL")
+    return afg_map, aus_map
+
+
+@pytest.mark.parametrize(
+    ("iso_code", "expected"),
+    [
+        ("AFG", "AFG"),
+        ("afg", "AFG"),
+        ("af", "AFG"),
+        ("AUS", "AUL"),
+    ],
+    ids=["equal", "case_insensitive", "alpha2", "custom_code"],
+)
+def test_country_code_map_get_code_returns_expected_ca_code(country_code_maps, iso_code, expected):
+    result = CountryCodeMap.objects.get_code(iso_code)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    ("ca_code", "expected"),
+    [
+        ("AFG", "AF"),
+        ("afg", "AF"),
+        ("AUL", "AU"),
+    ],
+    ids=["equal", "case_insensitive", "custom_code"],
+)
+def test_country_code_map_get_iso2_code_returns_expected_iso2(country_code_maps, ca_code, expected):
+    result = CountryCodeMap.objects.get_iso2_code(ca_code)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    ("ca_code", "expected"),
+    [
+        ("AFG", "AFG"),
+        ("afg", "AFG"),
+        ("AUL", "AUS"),
+    ],
+    ids=["equal", "case_insensitive", "custom_code"],
+)
+def test_country_code_map_get_iso3_code_returns_expected_iso3(country_code_maps, ca_code, expected):
+    result = CountryCodeMap.objects.get_iso3_code(ca_code)
+
+    assert result == expected
+
+
+def test_country_code_map_uses_cache_for_multiple_queries(country_code_maps, django_assert_num_queries):
+    CountryCodeMap.objects._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
+
+    with django_assert_num_queries(1):
+        assert CountryCodeMap.objects.get_code("AFG") == "AFG"
+        assert CountryCodeMap.objects.get_code("afg") == "AFG"
+        assert CountryCodeMap.objects.get_code("af") == "AFG"
+        assert CountryCodeMap.objects.get_code("AUS") == "AUL"
+        assert CountryCodeMap.objects.get_iso3_code("AFG") == "AFG"
+        assert CountryCodeMap.objects.get_iso3_code("afg") == "AFG"
+        assert CountryCodeMap.objects.get_iso3_code("AUL") == "AUS"
+        assert CountryCodeMap.objects.get_iso2_code("AFg") == "AF"
