@@ -152,7 +152,6 @@ def user5(partner_with_role_2, afghanistan, program, role3):
     return user
 
 
-
 @pytest.fixture
 def user_without_role(partner):
     return UserFactory(partner=partner, first_name="Gina")
@@ -285,7 +284,7 @@ def test_program_users_returns_users_with_roles_in_program(
     ]
 
 
-def test_program_users_caching_with_etag(
+def test_program_users_caching(
     authenticated_client: Any,
     user: Any,
     create_user_role_with_permissions: Any,
@@ -354,4 +353,3 @@ def test_program_users_caching_with_etag(
         etag_fifth_call = response.headers["etag"]
         assert etag_fifth_call == etag_fourth_call
         assert len(ctx.captured_queries) == 10
-
