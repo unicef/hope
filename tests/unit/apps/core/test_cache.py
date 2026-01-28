@@ -1,26 +1,41 @@
 from django.core.cache import cache
+import pytest
 
 from hope.apps.core.utils import save_data_in_cache
 
+# === Fixtures ===
 
-class TestCache:
-    def test_simple_cache(self) -> None:
-        cache.clear()
-        assert cache.get("FOO", "NOTHING") == "NOTHING"
-        result_from_function = save_data_in_cache("FOO", lambda: "BAR")
-        assert result_from_function == "BAR"
-        assert cache.get("FOO", "NOTHING") == "BAR"
 
-    def test_conditional_false_cache(self) -> None:
-        cache.clear()
-        assert cache.get("FOO", "NOTHING") == "NOTHING"
-        result_from_function = save_data_in_cache("FOO", lambda: "BAR", cache_condition=lambda x: x != "BAR")
-        assert result_from_function == "BAR"
-        assert cache.get("FOO", "NOTHING") == "NOTHING"
+@pytest.fixture
+def clear_cache():
+    cache.clear()
 
-    def test_conditional_cache(self) -> None:
-        cache.clear()
-        assert cache.get("FOO", "NOTHING") == "NOTHING"
-        result_from_function = save_data_in_cache("FOO", lambda: "BAR", cache_condition=lambda x: x == "BAR")
-        assert result_from_function == "BAR"
-        assert cache.get("FOO", "NOTHING") == "BAR"
+
+# === Tests ===
+
+
+def test_save_data_in_cache_stores_value(clear_cache):
+    assert cache.get("FOO", "NOTHING") == "NOTHING"
+
+    result = save_data_in_cache("FOO", lambda: "BAR")
+
+    assert result == "BAR"
+    assert cache.get("FOO", "NOTHING") == "BAR"
+
+
+def test_save_data_in_cache_skips_caching_when_condition_false(clear_cache):
+    assert cache.get("FOO", "NOTHING") == "NOTHING"
+
+    result = save_data_in_cache("FOO", lambda: "BAR", cache_condition=lambda x: x != "BAR")
+
+    assert result == "BAR"
+    assert cache.get("FOO", "NOTHING") == "NOTHING"
+
+
+def test_save_data_in_cache_stores_value_when_condition_true(clear_cache):
+    assert cache.get("FOO", "NOTHING") == "NOTHING"
+
+    result = save_data_in_cache("FOO", lambda: "BAR", cache_condition=lambda x: x == "BAR")
+
+    assert result == "BAR"
+    assert cache.get("FOO", "NOTHING") == "BAR"

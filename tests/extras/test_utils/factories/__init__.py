@@ -9,7 +9,17 @@ from .account import (
 )
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .changelog import ChangelogFactory
-from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, FileTempFactory
+from .core import (
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    CountryCodeMapFactory,
+    DataCollectingTypeFactory,
+    FileTempFactory,
+    FlexibleAttributeChoiceFactory,
+    FlexibleAttributeFactory,
+    PeriodicFieldDataFactory,
+    XLSXKoboTemplateFactory,
+)
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import GrievanceTicketFactory
 from .household import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
@@ -40,10 +50,13 @@ __all__ = [
     "ChangelogFactory",
     "CommunicationMessageFactory",
     "CountryFactory",
+    "CountryCodeMapFactory",
     "DataCollectingTypeFactory",
     "FileTempFactory",
     "FeedbackFactory",
     "FeedbackMessageFactory",
+    "FlexibleAttributeChoiceFactory",
+    "FlexibleAttributeFactory",
     "GrievanceTicketFactory",
     "HouseholdFactory",
     "IndividualFactory",
@@ -59,15 +72,17 @@ __all__ = [
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
     "PaymentVerificationSummaryFactory",
+    "PeriodicFieldDataFactory",
     "ProgramCycleFactory",
     "ProgramFactory",
     "RegistrationDataImportFactory",
     "RoleAssignmentFactory",
     "RoleFactory",
-    "SurveyFactory",
-    "UserFactory",
     "RuleCommitFactory",
     "RuleFactory",
+    "SurveyFactory",
+    "UserFactory",
     "WesternUnionInvoiceFactory",
     "WesternUnionPaymentPlanReportFactory",
+    "XLSXKoboTemplateFactory",
 ]
