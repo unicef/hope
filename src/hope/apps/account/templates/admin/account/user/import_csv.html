@@ -22,7 +22,6 @@
                     <tr>
                         <th>Email</th>
                         <th>Status</th>
-                        <th>Kobo</th>
                         <th>Error</th>
                     </tr>
                 </thead>
@@ -37,7 +36,6 @@
                                     Existing
                                 {% endif %}
                             </td>
-                            <td>{{ entry.kobo|yesno:"Yes,No" }}</td>
                             <td>
                                 {% if entry.error %}
                                     <span class="errors">{{ entry.error }}</span>
@@ -58,7 +56,7 @@
         {% endif %}
         <div class="submit-row">
             <a class="button" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-            <a class="button default" href="{% url opts|admin_urlname:'import_csv' %}">Kobo Import</a>
+            <a class="button default" href="{% url opts|admin_urlname:'import_csv' %}">Back To Import CSV</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>

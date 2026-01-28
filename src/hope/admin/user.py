@@ -17,6 +17,7 @@ from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from unicef_security.admin import UserAdminPlus
@@ -25,7 +26,6 @@ from unicef_security.graph import Synchronizer
 from hope import models
 from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
-from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
@@ -55,7 +55,6 @@ class LoadUsersForm(forms.Form):
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
-    enable_kobo = forms.BooleanField(required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.request = kwargs.pop("request", None)
@@ -212,7 +211,7 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -224,10 +223,51 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
     ]
     list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
     inlines = (RoleAssignmentInline,)
-    actions = ["create_kobo_user_qs", "add_business_area_role"]
+    actions = [
+        "add_business_area_role",
+    ]
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+    fieldsets = (
+        (None, {"fields": (("username", "azure_id"), "password")}),
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    ("first_name", "last_name"),
+                    ("email", "display_name"),
+                    ("job_title", "partner"),
+                )
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                ),
+            },
+        ),
+    )
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "email",
+                    "partner",
+                ),
+            },
+        ),
+    )
 
     @button(permissions=is_root)
     def ad(self, request, pk):
@@ -301,8 +341,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
 
     def get_actions(self, request: HttpRequest) -> dict:
         actions = super().get_actions(request)
-        if not request.user.has_perm("account.can_create_kobo_user") and "create_kobo_user_qs" in actions:
-            del actions["create_kobo_user_qs"]
         if not request.user.has_perm("account.add_userrole") and "add_business_area_role" in actions:
             del actions["add_business_area_role"]
         return actions
@@ -366,7 +404,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                 try:
                     context["processed"] = True
                     csv_file = form.cleaned_data["file"]
-                    enable_kobo = form.cleaned_data["enable_kobo"]
                     partner = form.cleaned_data["partner"]
                     business_area = form.cleaned_data["business_area"]
                     role = form.cleaned_data["role"]
@@ -422,9 +459,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                                             f"Error on {u}: {e}",
                                             messages.ERROR,
                                         )
-
-                                if enable_kobo:
-                                    self._grant_kobo_accesss_to_user(u, sync=False)
 
                                 context["results"].append(user_info)
                         except Exception:

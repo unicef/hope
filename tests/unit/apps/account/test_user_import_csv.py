@@ -77,7 +77,6 @@ def test_import_csv_creates_user(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -111,7 +110,6 @@ def test_import_csv_with_kobo_creates_user_with_kobo_username(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = True
     res = form.submit()
 
     assert res.status_code == 200
@@ -143,7 +141,6 @@ def test_import_csv_detect_incompatible_roles_prevents_assignment(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -172,7 +169,6 @@ def test_import_csv_does_not_change_existing_partner(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner2.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -199,7 +195,6 @@ def test_import_csv_with_username_creates_user_with_custom_username(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200

@@ -181,7 +181,6 @@ class ImportCSVForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
-    enable_kobo = forms.BooleanField(required=False)
     partner = forms.ModelChoiceField(queryset=Partner.objects.all())
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     role = forms.ModelChoiceField(queryset=Role.objects.all())
@@ -193,7 +192,6 @@ class ImportCSVForm(forms.Form):
             {
                 "fields": (
                     (
-                        "enable_kobo",
                         "partner",
                         "business_area",
                         "role",
