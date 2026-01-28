@@ -225,7 +225,6 @@ def test_filter_by_partner(
     list_url: str,
     all_users: dict,
 ) -> None:
-
     response = authenticated_client.get(list_url, {"partner": partner_with_role_1.id})
     assert response.status_code == status.HTTP_200_OK
     response_results = response.data["results"]
@@ -240,7 +239,6 @@ def test_filter_by_role_returns_users_with_role(
     list_url: str,
     all_users: dict,
 ) -> None:
-
     response = authenticated_client.get(list_url, {"roles": str(role1.id)})
     assert response.status_code == status.HTTP_200_OK
     response_results = response.data["results"]
@@ -257,7 +255,6 @@ def test_filter_by_is_ticket_creator(
     list_url: str,
     all_users: dict,
 ) -> None:
-
     user2 = all_users["user2"]
     GrievanceTicketFactory(created_by=user2, business_area=afghanistan)
 
@@ -334,7 +331,6 @@ def test_search_by_name(
     list_url: str,
     all_users: dict,
 ) -> None:
-
     response = authenticated_client.get(list_url, {"search": "Bob"})
     assert response.status_code == status.HTTP_200_OK
     response_results = response.data["results"]
@@ -358,4 +354,3 @@ def test_search_by_email(
     response_results = response.data["results"]
     assert len(response_results) == 1
     assert response_results[0]["id"] == str(user_in_different_program.id)
-
