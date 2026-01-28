@@ -22,7 +22,14 @@ from .core import (
 )
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import GrievanceTicketFactory
-from .household import EntitlementCardFactory, HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
+from .household import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    EntitlementCardFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
 from .payment import (
     AccountFactory,
     AccountTypeFactory,
@@ -31,6 +38,7 @@ from .payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
+    PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
@@ -59,6 +67,8 @@ __all__ = [
     "FlexibleAttributeChoiceFactory",
     "FlexibleAttributeFactory",
     "GrievanceTicketFactory",
+    "DocumentFactory",
+    "DocumentTypeFactory",
     "EntitlementCardFactory",
     "HouseholdFactory",
     "IndividualFactory",
@@ -71,6 +81,7 @@ __all__ = [
     "FinancialServiceProviderXlsxTemplateFactory",
     "PartnerFactory",
     "PaymentFactory",
+    "PaymentHouseholdSnapshotFactory",
     "PaymentPlanFactory",
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
