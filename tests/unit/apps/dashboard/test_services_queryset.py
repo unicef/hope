@@ -83,6 +83,11 @@ def prog_for_base_queryset_tests(ba_for_base_queryset_tests):
     return ProgramFactory(business_area=ba_for_base_queryset_tests)
 
 
+@pytest.fixture
+def prog_invisible_for_base_queryset_tests(ba_for_base_queryset_tests):
+    return ProgramFactory(business_area=ba_for_base_queryset_tests, is_visible=False)
+
+
 # ============================================================================
 # Base Queryset Filter Tests
 # ============================================================================
@@ -149,10 +154,13 @@ def test_base_queryset_filter_visible_program(
 
 
 @pytest.mark.django_db
-def test_base_queryset_filter_invisible_program(ba_for_base_queryset_tests, create_payment_for_queryset) -> None:
-    prog_invisible = ProgramFactory(business_area=ba_for_base_queryset_tests, is_visible=False)
+def test_base_queryset_filter_invisible_program(
+    ba_for_base_queryset_tests,
+    prog_invisible_for_base_queryset_tests,
+    create_payment_for_queryset,
+) -> None:
     payment_invisible_prog, _ = create_payment_for_queryset(
-        prog_invisible, ba_for_base_queryset_tests, prog_is_visible=False
+        prog_invisible_for_base_queryset_tests, ba_for_base_queryset_tests, prog_is_visible=False
     )
     qs_invisible = DashboardCacheBase._get_base_payment_queryset(business_area=ba_for_base_queryset_tests)
     assert not qs_invisible.filter(pk=payment_invisible_prog.pk).exists()

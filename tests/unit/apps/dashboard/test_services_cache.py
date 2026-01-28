@@ -1,7 +1,7 @@
 from datetime import timezone as dt_timezone
 from decimal import Decimal
 import json
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -21,7 +21,6 @@ from extras.test_utils.factories import (
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
-    DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
 )
@@ -353,90 +352,30 @@ def test_partial_refresh_empty_cache_fallback(partial_refresh_data_for_ba) -> No
 
 
 @pytest.fixture
-def partial_refresh_combines_data_setup(afghanistan, fsp_common, delivery_mechanism_common):
-    def _setup(is_global_scenario):
-        if is_global_scenario:
-            cache_identifier = GLOBAL_SLUG
-            payment_ba = afghanistan
-            prog = ProgramFactory(business_area=payment_ba)
-            common_currency = "USD"
-        else:
-            payment_ba = BusinessAreaFactory()
-            cache_identifier = payment_ba.slug
-            prog = ProgramFactory(business_area=payment_ba)
-            common_currency = "AFG"
+def partial_refresh_combines_data_global(afghanistan, fsp_common, delivery_mechanism_common):
+    cache_identifier = GLOBAL_SLUG
+    payment_ba = afghanistan
+    prog = ProgramFactory(business_area=payment_ba)
+    common_currency = "USD"
 
-        household = HouseholdFactory(program=prog, business_area=payment_ba, size=1)
+    household = HouseholdFactory(program=prog, business_area=payment_ba, size=1)
 
-        year_old = CURRENT_YEAR - 2
-        year_mid = CURRENT_YEAR - 1
-        year_new = CURRENT_YEAR
+    year_old = CURRENT_YEAR - 2
+    year_mid = CURRENT_YEAR - 1
+    year_new = CURRENT_YEAR
 
-        PaymentFactory(
-            parent__status=PaymentPlan.Status.ACCEPTED,
-            household=household,
-            program=prog,
-            business_area=payment_ba,
-            delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=dt_timezone.utc),
-            delivered_quantity_usd=Decimal("100.00"),
-            status="Transaction Successful",
-            financial_service_provider=fsp_common,
-            delivery_type=delivery_mechanism_common,
-            currency=common_currency,
-        )
-
-        return {
-            "cache_identifier": cache_identifier,
-            "payment_ba": payment_ba,
-            "prog": prog,
-            "household": household,
-            "year_old": year_old,
-            "year_mid": year_mid,
-            "year_new": year_new,
-            "is_global_scenario": is_global_scenario,
-            "common_currency": common_currency,
-            "fsp": fsp_common,
-            "delivery_type": delivery_mechanism_common,
-        }
-
-    return _setup
-
-
-@pytest.mark.parametrize(
-    ("cache_class_under_test", "is_global_scenario"),
-    [
-        (DashboardGlobalDataCache, True),
-        (DashboardDataCache, False),
-    ],
-)
-@pytest.mark.django_db
-def test_partial_refresh_combines_data(
-    cache_class_under_test: Type[DashboardCacheBase],
-    is_global_scenario: bool,
-    partial_refresh_combines_data_setup,
-) -> None:
-    setup = partial_refresh_combines_data_setup(is_global_scenario)
-    cache_identifier = setup["cache_identifier"]
-    payment_ba = setup["payment_ba"]
-    prog = setup["prog"]
-    household = setup["household"]
-    year_old = setup["year_old"]
-    year_mid = setup["year_mid"]
-    year_new = setup["year_new"]
-    fsp = setup["fsp"]
-    delivery_type = setup["delivery_type"]
-    common_currency = setup["common_currency"]
-
-    if is_global_scenario:
-        cache_class_under_test.refresh_data(identifier=cache_identifier)
-    else:
-        cache_class_under_test.refresh_data(cache_identifier)
-    cached_data_step1 = cache_class_under_test.get_data(cache_identifier)
-    assert cached_data_step1 is not None, "cached_data_step1 should not be None after refresh"
-    assert len(cached_data_step1) == 1
-    assert cached_data_step1[0]["year"] == year_old
-    assert Decimal(cached_data_step1[0]["total_delivered_quantity_usd"]) == Decimal("100.00")
-
+    PaymentFactory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=household,
+        program=prog,
+        business_area=payment_ba,
+        delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=dt_timezone.utc),
+        delivered_quantity_usd=Decimal("100.00"),
+        status="Transaction Successful",
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=common_currency,
+    )
     PaymentFactory(
         parent__status=PaymentPlan.Status.ACCEPTED,
         household=household,
@@ -445,8 +384,8 @@ def test_partial_refresh_combines_data(
         delivery_date=timezone.datetime(year_mid, 1, 1, tzinfo=dt_timezone.utc),
         delivered_quantity_usd=Decimal("200.00"),
         status="Transaction Successful",
-        financial_service_provider=fsp,
-        delivery_type=delivery_type,
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
         currency=common_currency,
     )
     PaymentFactory(
@@ -457,17 +396,127 @@ def test_partial_refresh_combines_data(
         delivery_date=timezone.datetime(year_new, 1, 1, tzinfo=dt_timezone.utc),
         delivered_quantity_usd=Decimal("300.00"),
         status="Transaction Successful",
-        financial_service_provider=fsp,
-        delivery_type=delivery_type,
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
         currency=common_currency,
     )
 
-    if is_global_scenario:
-        refreshed_data = cache_class_under_test.refresh_data(
-            identifier=cache_identifier, years_to_refresh=[year_mid, year_new]
-        )
-    else:
-        refreshed_data = cache_class_under_test.refresh_data(cache_identifier, years_to_refresh=[year_mid, year_new])
+    return {
+        "cache_identifier": cache_identifier,
+        "year_old": year_old,
+        "year_mid": year_mid,
+        "year_new": year_new,
+    }
+
+
+@pytest.fixture
+def partial_refresh_combines_data_ba(fsp_common, delivery_mechanism_common):
+    payment_ba = BusinessAreaFactory()
+    cache_identifier = payment_ba.slug
+    prog = ProgramFactory(business_area=payment_ba)
+    common_currency = "AFG"
+
+    household = HouseholdFactory(program=prog, business_area=payment_ba, size=1)
+
+    year_old = CURRENT_YEAR - 2
+    year_mid = CURRENT_YEAR - 1
+    year_new = CURRENT_YEAR
+
+    PaymentFactory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=household,
+        program=prog,
+        business_area=payment_ba,
+        delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=dt_timezone.utc),
+        delivered_quantity_usd=Decimal("100.00"),
+        status="Transaction Successful",
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=common_currency,
+    )
+    PaymentFactory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=household,
+        program=prog,
+        business_area=payment_ba,
+        delivery_date=timezone.datetime(year_mid, 1, 1, tzinfo=dt_timezone.utc),
+        delivered_quantity_usd=Decimal("200.00"),
+        status="Transaction Successful",
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=common_currency,
+    )
+    PaymentFactory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=household,
+        program=prog,
+        business_area=payment_ba,
+        delivery_date=timezone.datetime(year_new, 1, 1, tzinfo=dt_timezone.utc),
+        delivered_quantity_usd=Decimal("300.00"),
+        status="Transaction Successful",
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=common_currency,
+    )
+
+    return {
+        "cache_identifier": cache_identifier,
+        "year_old": year_old,
+        "year_mid": year_mid,
+        "year_new": year_new,
+    }
+
+
+@pytest.mark.django_db
+def test_partial_refresh_combines_data_global(partial_refresh_combines_data_global) -> None:
+    data = partial_refresh_combines_data_global
+    cache_identifier = data["cache_identifier"]
+    year_old = data["year_old"]
+    year_mid = data["year_mid"]
+    year_new = data["year_new"]
+
+    DashboardGlobalDataCache.refresh_data(identifier=cache_identifier)
+    cached_data_step1 = DashboardGlobalDataCache.get_data(cache_identifier)
+    assert cached_data_step1 is not None, "cached_data_step1 should not be None after refresh"
+    assert len(cached_data_step1) == 3
+
+    cached_data_map = {item["year"]: item for item in cached_data_step1}
+    assert Decimal(cached_data_map[year_old]["total_delivered_quantity_usd"]) == Decimal("100.00")
+    assert Decimal(cached_data_map[year_mid]["total_delivered_quantity_usd"]) == Decimal("200.00")
+    assert Decimal(cached_data_map[year_new]["total_delivered_quantity_usd"]) == Decimal("300.00")
+
+    refreshed_data = DashboardGlobalDataCache.refresh_data(
+        identifier=cache_identifier, years_to_refresh=[year_mid, year_new]
+    )
+
+    assert refreshed_data is not None, "Refreshed data should not be None"
+    assert len(refreshed_data) == 3, "Should contain data for all three years"
+
+    data_map = {item["year"]: item for item in refreshed_data}
+    assert Decimal(data_map[year_old]["total_delivered_quantity_usd"]) == Decimal("100.00")
+    assert Decimal(data_map[year_mid]["total_delivered_quantity_usd"]) == Decimal("200.00")
+    assert Decimal(data_map[year_new]["total_delivered_quantity_usd"]) == Decimal("300.00")
+
+
+@pytest.mark.django_db
+def test_partial_refresh_combines_data_ba(partial_refresh_combines_data_ba) -> None:
+    data = partial_refresh_combines_data_ba
+    cache_identifier = data["cache_identifier"]
+    year_old = data["year_old"]
+    year_mid = data["year_mid"]
+    year_new = data["year_new"]
+
+    DashboardDataCache.refresh_data(cache_identifier)
+    cached_data_step1 = DashboardDataCache.get_data(cache_identifier)
+    assert cached_data_step1 is not None, "cached_data_step1 should not be None after refresh"
+    assert len(cached_data_step1) == 3
+
+    cached_data_map = {item["year"]: item for item in cached_data_step1}
+    assert Decimal(cached_data_map[year_old]["total_delivered_quantity_usd"]) == Decimal("100.00")
+    assert Decimal(cached_data_map[year_mid]["total_delivered_quantity_usd"]) == Decimal("200.00")
+    assert Decimal(cached_data_map[year_new]["total_delivered_quantity_usd"]) == Decimal("300.00")
+
+    refreshed_data = DashboardDataCache.refresh_data(cache_identifier, years_to_refresh=[year_mid, year_new])
 
     assert refreshed_data is not None, "Refreshed data should not be None"
     assert len(refreshed_data) == 3, "Should contain data for all three years"
