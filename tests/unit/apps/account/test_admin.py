@@ -219,13 +219,13 @@ def test_assign_multiple_roles_for_user_at_the_same_time(
         "role_assignments-0-business_area": business_area_afg.id,
         "role_assignments-1-business_area": business_area_afg.id,
     }
-    RoleAssignmentFormSet = inlineformset_factory(
+    role_assignment_formset = inlineformset_factory(
         User,
         RoleAssignment,
         fields=("__all__"),
         formset=RoleAssignmentInlineFormSet,
     )
-    formset = RoleAssignmentFormSet(instance=user, data=data)
+    formset = role_assignment_formset(instance=user, data=data)
     assert formset.is_valid()
 
 
@@ -246,13 +246,13 @@ def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_
         "role_assignments-0-business_area": business_area_afg.id,
         "role_assignments-1-business_area": business_area_afg.id,
     }
-    RoleAssignmentFormSet = inlineformset_factory(
+    role_assignment_formset = inlineformset_factory(
         User,
         RoleAssignment,
         fields=("__all__"),
         formset=RoleAssignmentInlineFormSet,
     )
-    formset = RoleAssignmentFormSet(instance=user, data=data)
+    formset = role_assignment_formset(instance=user, data=data)
     assert not formset.is_valid()
     assert len(formset.errors) == 2
 
