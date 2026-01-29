@@ -8,6 +8,7 @@ import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
 import {
+  formatFigure,
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
@@ -93,7 +94,9 @@ function RegistrationDetails({
                 label={t('Total Number of Registered People')}
                 dataCy="individuals"
               >
-                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfIndividuals)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -110,7 +113,9 @@ function RegistrationDetails({
                 label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                 dataCy="households"
               >
-                <BigValue>{registration?.numberOfHouseholds}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfHouseholds)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -120,7 +125,9 @@ function RegistrationDetails({
                 label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
                 dataCy="individuals"
               >
-                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfIndividuals)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -134,7 +141,7 @@ function RegistrationDetails({
                   dataCy="registered-individuals"
                 >
                   <BigValue>
-                    {registration?.numberOfRegisteredIndividuals}
+                    {formatFigure(registration?.numberOfRegisteredIndividuals)}
                   </BigValue>
                 </LabelizedField>
               </BigValueContainer>

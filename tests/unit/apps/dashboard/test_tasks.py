@@ -4,14 +4,21 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
-from extras.test_utils.factories.account import BusinessAreaFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    HouseholdFactory,
+    PaymentFactory,
+    ProgramFactory,
+)
 from hope.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
     update_dashboard_figures,
     update_recent_dashboard_figures,
 )
 from hope.apps.dashboard.services import DashboardDataCache
-from hope.models import BusinessArea
+from hope.models import BusinessArea, Payment, PaymentPlan
 
 
 @pytest.fixture
@@ -27,6 +34,81 @@ pytestmark = [
     pytest.mark.django_db,
     pytest.mark.usefixtures("use_default_db_for_dashboard"),
 ]
+
+
+# ============================================================================
+# Local Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+def afghanistan(db):
+    return BusinessAreaFactory(
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        slug="afghanistan",
+        has_data_sharing_agreement=True,
+        kobo_token="XXX",
+        active=True,
+    )
+
+
+@pytest.fixture
+def iraq(db):
+    return BusinessAreaFactory(
+        slug="iraq",
+        name="Iraq",
+        active=True,
+    )
+
+
+@pytest.fixture
+def area_kabul(db):
+    area_type = AreaTypeFactory(name="Province", area_level=1)
+    return AreaFactory(name="Kabul", area_type=area_type)
+
+
+@pytest.fixture
+def populate_dashboard_cache(area_kabul):
+    def _populate(ba, household_extra_args=None):
+        program = ProgramFactory(business_area=ba)
+        household = HouseholdFactory(
+            business_area=ba,
+            program=program,
+            size=5,
+            children_count=2,
+            female_age_group_0_5_disabled_count=1,
+            female_age_group_6_11_disabled_count=1,
+            male_age_group_60_disabled_count=1,
+            admin1=area_kabul,
+            **(household_extra_args or {}),
+        )
+        payment_statuses = [
+            Payment.STATUS_SUCCESS,
+            Payment.STATUS_DISTRIBUTION_SUCCESS,
+            Payment.STATUS_DISTRIBUTION_PARTIAL,
+            Payment.STATUS_PENDING,
+            Payment.STATUS_SUCCESS,
+        ]
+        for status in payment_statuses:
+            PaymentFactory(
+                household=household,
+                program=program,
+                business_area=ba,
+                parent__status=PaymentPlan.Status.ACCEPTED,
+                status=status,
+            )
+        return household
+
+    return _populate
+
+
+# ============================================================================
+# Tests
+# ============================================================================
 
 
 def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard_cache: Callable) -> None:
@@ -67,11 +149,7 @@ def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) ->
         "hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
         side_effect=Exception(mocked_error_message),
     ) as mock_data_refresh:
-        if not BusinessArea.objects.filter(slug=afghanistan.slug, active=True).exists():
-            afghanistan.active = True
-            afghanistan.save()
-        else:
-            BusinessArea.objects.filter(slug=afghanistan.slug).update(active=True)
+        BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
 
         with pytest.raises(Exception, match=mocked_error_message):
             update_dashboard_figures.apply(throw=True)
@@ -92,11 +170,7 @@ def test_update_dashboard_figures_retry_on_global_failure(
             side_effect=Exception(mocked_error_message),
         ) as mock_global_refresh,
     ):
-        if not BusinessArea.objects.filter(slug=afghanistan.slug, active=True).exists():
-            afghanistan.active = True
-            afghanistan.save()
-        else:
-            BusinessArea.objects.filter(slug=afghanistan.slug).update(active=True)
+        BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
 
         with pytest.raises(Exception, match=mocked_error_message):
             update_dashboard_figures.apply(throw=True)
@@ -123,15 +197,11 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
 @patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_success(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea
+    mock_ba_refresh: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea, iraq: BusinessArea
 ) -> None:
     """
     Test that update_recent_dashboard_figures calls refresh_data with correct year filters.
     """
-    iraq = BusinessAreaFactory.create(slug="iraq", name="Iraq", active=True)
-    afghanistan.active = True
-    afghanistan.save()
-
     BusinessArea.objects.exclude(slug__in=[afghanistan.slug, iraq.slug]).update(active=False)
 
     current_year = date.today().year
@@ -158,13 +228,11 @@ def test_update_recent_dashboard_figures_ba_error_continues(
     mock_global_refresh: Mock,
     mock_logger_error: Mock,
     afghanistan: BusinessArea,
+    iraq: BusinessArea,
 ) -> None:
     """
     Test that update_recent_dashboard_figures continues if one BA refresh fails.
     """
-    iraq = BusinessAreaFactory.create(slug="iraq", name="Iraq", active=True)
-    afghanistan.active = True
-    afghanistan.save()
     BusinessArea.objects.exclude(slug__in=[afghanistan.slug, iraq.slug]).update(active=False)
 
     current_year = date.today().year
@@ -206,8 +274,6 @@ def test_update_recent_dashboard_figures_global_error_continues(
     """
     Test that update_recent_dashboard_figures logs error if global refresh fails but BAs were processed.
     """
-    afghanistan.active = True
-    afghanistan.save()
     BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
 
     current_year = date.today().year

@@ -1,14 +1,14 @@
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import (
     DocumentTypeFactory,
     IndividualFactory,
 )
-from extras.test_utils.factories.payment import AccountTypeFactory, FinancialInstitutionFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.payment import AccountTypeFactory, FinancialInstitutionFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.models import BusinessArea
 

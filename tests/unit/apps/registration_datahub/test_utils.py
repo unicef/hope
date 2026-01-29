@@ -4,8 +4,8 @@ from pathlib import Path
 from django.conf import settings
 from django.test import TestCase
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.registration_datahub.utils import calculate_hash_for_kobo_submission
 from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 

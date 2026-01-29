@@ -1,12 +1,12 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.core import StorageFileFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import StorageFileFactory
+from extras.test_utils.old_factories.household import (
     DocumentAllowDuplicatesFactory,
     DocumentTypeFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
 from hope.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )

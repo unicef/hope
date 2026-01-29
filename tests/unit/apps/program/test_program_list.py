@@ -9,17 +9,17 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
     create_ukraine,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     HouseholdFactory,
 )
-from extras.test_utils.factories.program import (
+from extras.test_utils.old_factories.program import (
     BeneficiaryGroupFactory,
     ProgramFactory,
 )

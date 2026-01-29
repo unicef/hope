@@ -4,12 +4,12 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan, create_pdu_flexible_attribute
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan, create_pdu_flexible_attribute
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.periodic_data_update import PDUOnlineEditFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import PDUOnlineEdit, PeriodicFieldData, Program

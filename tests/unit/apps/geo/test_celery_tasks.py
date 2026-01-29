@@ -1,6 +1,6 @@
 import pytest
 
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.old_factories.geo import CountryFactory
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
 from hope.models import Area, AreaType, Country
 
