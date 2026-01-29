@@ -20,26 +20,24 @@ from hope.models import BusinessArea, ImportData, Program, RegistrationDataImpor
 from hope.models.api_token import APIToken
 from hope.models.utils import Grant
 
-pytestmark = pytest.mark.django_db
-
 
 @pytest.fixture
-def business_area(db) -> BusinessArea:
+def business_area() -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def program(db, business_area) -> Program:
+def program(business_area) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
 @pytest.fixture
-def user(db) -> User:
+def user() -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def role(db) -> Role:
+def role() -> Role:
     return RoleFactory(
         subsystem="API",
         name="GenericImportRole",
@@ -48,12 +46,12 @@ def role(db) -> Role:
 
 
 @pytest.fixture
-def role_assignment(db, user, role, business_area) -> RoleAssignment:
+def role_assignment(user, role, business_area) -> RoleAssignment:
     return RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
 
 @pytest.fixture
-def api_token(db, user, business_area) -> APIToken:
+def api_token(user, business_area) -> APIToken:
     token = APITokenFactory(user=user, grants=[Grant.API_GENERIC_IMPORT.name])
     token.valid_for.set([business_area])
     return token
@@ -83,6 +81,36 @@ def xlsx_file() -> SimpleUploadedFile:
     )
 
 
+@pytest.fixture
+def user_without_grant() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def token_without_grant(user_without_grant, business_area) -> APIToken:
+    token = APITokenFactory(user=user_without_grant, grants=[Grant.API_READ_ONLY.name])
+    token.valid_for.set([business_area])
+    return token
+
+
+@pytest.fixture
+def client_without_grant(token_without_grant) -> APIClient:
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token_without_grant.key}")
+    return client
+
+
+@pytest.fixture
+def other_business_area() -> BusinessArea:
+    return BusinessAreaFactory(name="Somalia", slug="somalia")
+
+
+@pytest.fixture
+def other_program(other_business_area) -> Program:
+    return ProgramFactory(business_area=other_business_area, status=Program.ACTIVE)
+
+
+@pytest.mark.django_db
 @patch("hope.apps.generic_import.celery_tasks.process_generic_import_task.delay")
 def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     mock_task, authenticated_api_client, upload_url, xlsx_file, user, business_area, program, role_assignment
@@ -116,6 +144,7 @@ def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     )
 
 
+@pytest.mark.django_db
 def test_upload_pdf_file_returns_400_with_file_validation_error(authenticated_api_client, upload_url, role_assignment):
     pdf_file = SimpleUploadedFile(
         "document.pdf",
@@ -130,27 +159,14 @@ def test_upload_pdf_file_returns_400_with_file_validation_error(authenticated_ap
     assert "Excel files" in str(response.data["file"])
 
 
-def test_upload_without_api_generic_import_grant_returns_403(db, business_area, program, xlsx_file):
-    user_without_grant = UserFactory()
-    token_no_grant = APITokenFactory(
-        user=user_without_grant,
-        grants=[Grant.API_READ_ONLY.name],
-    )
-    token_no_grant.valid_for.set([business_area])
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION=f"Token {token_no_grant.key}")
-
-    url = reverse(
-        "api:generic-import:generic-import-upload-upload",
-        args=[business_area.slug, program.slug],
-    )
-
-    response = client.post(url, {"file": xlsx_file}, format="multipart")
+@pytest.mark.django_db
+def test_upload_without_api_generic_import_grant_returns_403(client_without_grant, upload_url, xlsx_file):
+    response = client_without_grant.post(upload_url, {"file": xlsx_file}, format="multipart")
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@pytest.mark.django_db
 def test_upload_file_larger_than_50mb_returns_400(authenticated_api_client, upload_url, role_assignment):
     large_content = b"x" * (51 * 1024 * 1024)
     large_file = SimpleUploadedFile(
@@ -166,7 +182,8 @@ def test_upload_file_larger_than_50mb_returns_400(authenticated_api_client, uplo
     assert "50 MB" in str(response.data["file"])
 
 
-def test_upload_without_authorization_header_returns_403(db, upload_url, xlsx_file):
+@pytest.mark.django_db
+def test_upload_without_authorization_header_returns_403(upload_url, xlsx_file):
     client = APIClient()
 
     response = client.post(upload_url, {"file": xlsx_file}, format="multipart")
@@ -174,14 +191,13 @@ def test_upload_without_authorization_header_returns_403(db, upload_url, xlsx_fi
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@pytest.mark.django_db
 def test_upload_to_business_area_not_in_token_valid_for_returns_404(
-    authenticated_api_client, xlsx_file, program, role_assignment
+    authenticated_api_client, xlsx_file, program, role_assignment, other_business_area
 ):
-    other_ba = BusinessAreaFactory(name="Somalia", slug="somalia")
-
     url = reverse(
         "api:generic-import:generic-import-upload-upload",
-        args=[other_ba.slug, program.slug],
+        args=[other_business_area.slug, program.slug],
     )
 
     response = authenticated_api_client.post(url, {"file": xlsx_file}, format="multipart")
@@ -189,6 +205,7 @@ def test_upload_to_business_area_not_in_token_valid_for_returns_404(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.django_db
 def test_upload_with_nonexistent_program_slug_returns_404(
     authenticated_api_client, business_area, xlsx_file, role_assignment
 ):
@@ -202,12 +219,11 @@ def test_upload_with_nonexistent_program_slug_returns_404(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.django_db
 def test_upload_program_from_different_business_area_returns_404(
-    authenticated_api_client, api_token, business_area, xlsx_file, role_assignment
+    authenticated_api_client, api_token, business_area, xlsx_file, role_assignment, other_business_area, other_program
 ):
-    other_ba = BusinessAreaFactory(name="Somalia", slug="somalia")
-    other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
-    api_token.valid_for.add(other_ba)
+    api_token.valid_for.add(other_business_area)
 
     url = reverse(
         "api:generic-import:generic-import-upload-upload",
@@ -219,6 +235,7 @@ def test_upload_program_from_different_business_area_returns_404(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.django_db
 @patch("hope.apps.generic_import.celery_tasks.process_generic_import_task.delay")
 def test_upload_with_session_authentication_succeeds(mock_task, user, upload_url, xlsx_file, role_assignment, client):
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
@@ -227,10 +244,6 @@ def test_upload_with_session_authentication_succeeds(mock_task, user, upload_url
         response = client.post(upload_url, {"file": xlsx_file})
 
     assert response.status_code == status.HTTP_201_CREATED
-    data = response.json()
-    assert data["import_data_id"]
-    assert data["rdi_id"]
-    assert mock_task.called
     data = response.json()
     assert data["import_data_id"]
     assert data["rdi_id"]

@@ -8,7 +8,7 @@ from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser
 
 
 @pytest.fixture
-def business_area(db):
+def business_area():
     return BusinessAreaFactory()
 
 
