@@ -29,23 +29,7 @@ def import_areas_from_csv_task(csv_data: str) -> None:
 
         area_types_cache = {(at.name, at.area_level): at for at in AreaType.objects.filter(country=country)}
         for level, name_header in enumerate(name_headers):
-            if (name_header, level) not in area_types_cache:
-                parent_type = None
-                if level > 0:
-                    parent_level = level - 1
-                    parent_name = name_headers[parent_level]
-                    parent_type = area_types_cache.get((parent_name, parent_level))
-
-                area_type, created = AreaType.objects.get_or_create(
-                    name=name_header,
-                    country=country,
-                    area_level=level,
-                    defaults={"parent": parent_type},
-                )
-                if not created and area_type.parent != parent_type:
-                    area_type.parent = parent_type
-                    area_type.save()
-                area_types_cache[(name_header, level)] = area_type
+            _create_area_types(area_types_cache, country, level, name_header, name_headers)
 
         all_p_codes = {row[h] for row in rows for h in p_code_headers if row.get(h)}
         areas_cache = {a.p_code: a for a in Area.objects.filter(p_code__in=all_p_codes)}
@@ -83,3 +67,23 @@ def import_areas_from_csv_task(csv_data: str) -> None:
                     area = Area.objects.create(p_code=p_code, **defaults)
                     areas_cache[p_code] = area
                 parent_area = area
+
+
+def _create_area_types(area_types_cache, country, level, name_header, name_headers):
+    if (name_header, level) not in area_types_cache:
+        parent_type = None
+        if level > 0:
+            parent_level = level - 1
+            parent_name = name_headers[parent_level]
+            parent_type = area_types_cache.get((parent_name, parent_level))
+
+        area_type, created = AreaType.objects.get_or_create(
+            name=name_header,
+            country=country,
+            area_level=level,
+            defaults={"parent": parent_type},
+        )
+        if not created and area_type.parent != parent_type:
+            area_type.parent = parent_type
+            area_type.save()
+        area_types_cache[(name_header, level)] = area_type

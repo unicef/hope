@@ -66,7 +66,6 @@ ignore = [
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
 
     "PLR0911",  # too many returns
-    "PLR0912", # too many branches
     "PLR0915",  # too many statements
     "C901",  # too complex
     "PLC0415",  # `import` should be at the top-level of a file

@@ -62,28 +62,9 @@ class GrievancePermissionsMixin:
 
         # program-nested viewset
         if hasattr(self, "program"):
-            permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
-
-            can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
-            can_view_ex_sensitive_creator = permissions_map[action][1].value in permissions_in_program
-            can_view_ex_sensitive_owner = permissions_map[action][2].value in permissions_in_program
-            can_view_sensitive_all = permissions_map[action][3].value in permissions_in_program
-            can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
-            can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
-
-            if can_view_ex_sensitive_all:
-                filters |= ~Q(**sensitive_category_filter)
-            if can_view_sensitive_all:
-                filters |= Q(**sensitive_category_filter)
-            if can_view_ex_sensitive_creator:
-                filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
-            if can_view_ex_sensitive_owner:
-                filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
-            if can_view_sensitive_creator:
-                filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
-            if can_view_sensitive_owner:
-                filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
-
+            filters = self._permission_filteering_based_on_program(
+                action, assigned_to_filter, created_by_filter, filters, permissions_map, sensitive_category_filter, user
+            )
         # global viewset
         else:
             programs_can_view_ex_sensitive_all = set(
@@ -150,6 +131,33 @@ class GrievancePermissionsMixin:
                     & Q(**sensitive_category_filter)
                 )
 
+        return filters
+
+    def _permission_filteering_based_on_program(
+        self, action, assigned_to_filter, created_by_filter, filters, permissions_map, **kwargs
+    ) -> Q:
+        sensitive_category_filter = kwargs.get("sensitive_category_filter")
+        user = kwargs.get("user")
+        permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
+        can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
+        can_view_ex_sensitive_creator = permissions_map[action][1].value in permissions_in_program
+        can_view_ex_sensitive_owner = permissions_map[action][2].value in permissions_in_program
+        can_view_sensitive_all = permissions_map[action][3].value in permissions_in_program
+        can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
+        can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
+
+        if can_view_ex_sensitive_all:
+            filters |= ~Q(**sensitive_category_filter)
+        if can_view_sensitive_all:
+            filters |= Q(**sensitive_category_filter)
+        if can_view_ex_sensitive_creator:
+            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+        if can_view_ex_sensitive_owner:
+            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+        if can_view_sensitive_creator:
+            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
+        if can_view_sensitive_owner:
+            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
         return filters
 
 
@@ -439,21 +447,7 @@ class GrievanceMutationMixin:
         if assigned_to != grievance_ticket.assigned_to:
             messages.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
 
-            if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
-                grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
-
-            if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
-                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
-            if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-                messages.append(
-                    GrievanceNotification(
-                        grievance_ticket,
-                        GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                        approver=approver,
-                    )
-                )
+            self._set_status_based_on_assigned_to(approver, grievance_ticket, messages)
 
             grievance_ticket.assigned_to = assigned_to
         elif grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
@@ -471,6 +465,23 @@ class GrievanceMutationMixin:
 
         GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
+
+    def _set_status_based_on_assigned_to(self, approver, grievance_ticket, messages):
+        if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
+            grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+            messages.append(
+                GrievanceNotification(
+                    grievance_ticket,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    approver=approver,
+                )
+            )
 
     def get_permissions_for_status_change(
         self, status: int, current_status: int, is_feedback: bool

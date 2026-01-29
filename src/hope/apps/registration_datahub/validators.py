@@ -183,39 +183,7 @@ class ImportDataInstanceValidator:
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
-                    for name, value, validation_data, issuing_country in zip(
-                        values["names"],
-                        values["numbers"],
-                        values["validation_data"],
-                        issuing_countries,
-                        strict=False,
-                    ):
-                        row_number = validation_data.get("row_number")
-                        if not name and value:
-                            error = {
-                                "header": key_name,
-                                "message": f"Name for {key_name} is required, when number is provided: no: {value}",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if name and not value:
-                            error = {
-                                "header": key_name,
-                                "message": f"Number for {key_name} is required, when name is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if (name or value) and not issuing_country:
-                            error = {
-                                "header": key_name,
-                                "message": f"Issuing country for {key_name} is required, "
-                                "when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
+                    self._validate_other_id_type(invalid_rows, is_xlsx, issuing_countries, key_name, values)
                 else:
                     for validation_data, value, issuing_country in zip_longest(
                         values["validation_data"], values["numbers"], issuing_countries
@@ -245,6 +213,42 @@ class ImportDataInstanceValidator:
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_other_id_type(
+        self, invalid_rows: list[Any], is_xlsx: bool, issuing_countries: list[None] | Any, key_name: str | Any, values
+    ):
+        for name, value, validation_data, issuing_country in zip(
+            values["names"],
+            values["numbers"],
+            values["validation_data"],
+            issuing_countries,
+            strict=False,
+        ):
+            row_number = validation_data.get("row_number")
+            if not name and value:
+                error = {
+                    "header": key_name,
+                    "message": f"Name for {key_name} is required, when number is provided: no: {value}",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = row_number
+                invalid_rows.append(error)
+            if name and not value:
+                error = {
+                    "header": key_name,
+                    "message": f"Number for {key_name} is required, when name is provided",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = row_number
+                invalid_rows.append(error)
+            if (name or value) and not issuing_country:
+                error = {
+                    "header": key_name,
+                    "message": f"Issuing country for {key_name} is required, when any document data are provided",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = row_number
+                invalid_rows.append(error)
 
     def identity_validator(self, identities_numbers_dict: dict, is_xlsx: bool = True) -> list[dict[str, Any]]:
         try:
@@ -470,39 +474,45 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             choice_type = self.all_fields[header]["type"]
 
             if choice_type == TYPE_SELECT_ONE:
-                if isinstance(value, str):
-                    return value.strip() in choices
-                if value not in choices:
-                    str_value = str(value)
-                    return str_value in choices
-                return False
+                return self._validate_choise_select_one(choices, value)
 
             if choice_type == TYPE_SELECT_MANY:
-                if isinstance(value, str):
-                    if "," in value:
-                        selected_choices = value.split(",")
-                    elif ";" in value:
-                        selected_choices = value.split(";")
-                    else:
-                        selected_choices = value.split(" ")
-                else:
-                    selected_choices = [value]
-
-                for unstrip_choice in selected_choices:
-                    if isinstance(unstrip_choice, str):
-                        choice = unstrip_choice.strip()
-                        if choice in choices or choice.upper() in choices:
-                            return True
-                    else:
-                        choice = unstrip_choice
-                    if choice in choices:
-                        return True
-                return False
+                return self._validate_choice_select_many(choices, value)
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_choice_select_many(self, choices, value: str) -> bool:
+        if isinstance(value, str):
+            if "," in value:
+                selected_choices = value.split(",")
+            elif ";" in value:
+                selected_choices = value.split(";")
+            else:
+                selected_choices = value.split(" ")
+        else:
+            selected_choices = [value]
+
+        for unstrip_choice in selected_choices:
+            if isinstance(unstrip_choice, str):
+                choice = unstrip_choice.strip()
+                if choice in choices or choice.upper() in choices:
+                    return True
+            else:
+                choice = unstrip_choice
+            if choice in choices:
+                return True
+        return False
+
+    def _validate_choise_select_one(self, choices, value: str) -> bool:
+        if isinstance(value, str):
+            return value.strip() in choices
+        if value not in choices:
+            str_value = str(value)
+            return str_value in choices
+        return False
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
