@@ -18,6 +18,7 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
+import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -152,6 +153,12 @@ function RegistrationDetails({
       </Grid>
     );
   }
+  const showRegularDeduplicationResult =
+    registration.status !== RegistrationDataImportStatusEnum.DEDUPLICATION;
+  const showBiometricDeduplicationResult =
+    registration.biometricDeduplicationEnabled &&
+    registration.deduplicationEngineStatus ===
+      DeduplicationEngineStatusEnum.FINISHED;
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -226,23 +233,43 @@ function RegistrationDetails({
           {numbersComponent}
           {registration.status ===
             RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
-          registration.status ===
-            RegistrationDataImportStatusEnum.DEDUPLICATION ? null : (
+          (!showRegularDeduplicationResult &&
+            !showBiometricDeduplicationResult) ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
-                  <Grid size={{ xs: 4 }}>
-                    <BoldGrey>{t('Biographical')}</BoldGrey>
-                  </Grid>
-                  {registration.biometricDeduplicationEnabled && (
+                  {showRegularDeduplicationResult && (
+                    <Grid size={{ xs: 4 }}>
+                      <BoldGrey>{t('Biographical')}</BoldGrey>
+                    </Grid>
+                  )}
+                  {showBiometricDeduplicationResult && (
                     <Grid size={{ xs: 4 }}>
                       <BoldGrey>{t('Biometrics')}</BoldGrey>
                     </Grid>
                   )}
                 </Grid>
-                <DedupeBox label="Within Batch" options={withinBatchOptions} />
-                <DedupeBox label="In Population" options={populationOptions} />
+                <DedupeBox
+                  showRegularDeduplicationResult={
+                    showRegularDeduplicationResult
+                  }
+                  showBiometricDeduplicationResult={
+                    showBiometricDeduplicationResult
+                  }
+                  label="Within Batch"
+                  options={withinBatchOptions}
+                />
+                <DedupeBox
+                  showRegularDeduplicationResult={
+                    showRegularDeduplicationResult
+                  }
+                  showBiometricDeduplicationResult={
+                    showBiometricDeduplicationResult
+                  }
+                  label="In Population"
+                  options={populationOptions}
+                />
               </Grid>
             </Grid>
           )}
