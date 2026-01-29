@@ -7,7 +7,16 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import Household, Individual, IndividualRoleInHousehold, MergeStatusModel, RegistrationDataImport
+from hope.models import (
+    Document,
+    DocumentType,
+    EntitlementCard,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+    MergeStatusModel,
+    RegistrationDataImport,
+)
 
 from .core import BusinessAreaFactory
 from .program import ProgramFactory
@@ -109,3 +118,33 @@ class IndividualRoleInHouseholdFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+
+
+class EntitlementCardFactory(DjangoModelFactory):
+    class Meta:
+        model = EntitlementCard
+
+    card_number = factory.Sequence(lambda n: f"CARD-{n}")
+    card_type = "TYPE"
+    current_card_size = "SIZE"
+    card_custodian = "CUSTODIAN"
+    service_provider = "PROVIDER"
+    household = factory.SubFactory(HouseholdFactory)
+
+
+class DocumentTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = DocumentType
+
+    label = factory.Sequence(lambda n: f"Document Type {n}")
+    key = factory.Sequence(lambda n: f"doc_type_{n}")
+
+
+class DocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    individual = factory.SubFactory(IndividualFactory)
+    program = factory.SelfAttribute("individual.program")
+    document_number = factory.Sequence(lambda n: f"DOC-{n}")
+    type = factory.SubFactory(DocumentTypeFactory)
