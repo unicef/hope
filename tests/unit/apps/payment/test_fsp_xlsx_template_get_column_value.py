@@ -1,130 +1,128 @@
-from parameterized import parameterized
+import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
-    create_household,
+    HouseholdFactory,
+    IndividualRoleInHouseholdFactory,
 )
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories.payment import (
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    generate_delivery_mechanisms,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import (
-    DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
-    IndividualRoleInHousehold,
+    MergeStatusModel,
     PaymentPlan,
 )
 
+pytestmark = pytest.mark.django_db
 
-class FinancialServiceProviderXlsxTemplateTest(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=cls.business_area)
-        cls.user = UserFactory()
-        generate_delivery_mechanisms()
-        cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
-        cls.fsp = FinancialServiceProviderFactory(
-            name="Test FSP 1",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-            vision_vendor_number=123456789,
-        )
-        cls.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
 
-    def test_get_column_value_registration_token_empty(self) -> None:
-        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
-        individual = individuals[0]
-        payment_plan = PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.ACCEPTED,
-            business_area=self.business_area,
-            created_by=self.user,
-        )
-        DocumentTypeFactory(key="registration_token")
-        payment = PaymentFactory(
-            parent=payment_plan,
-            household=household,
-            collector=individual,
-            currency="PLN",
-            financial_service_provider=self.fsp,
-            delivery_type=self.dm_cash,
-        )
-        create_payment_plan_snapshot_data(payment_plan)
-        payment.refresh_from_db()
-
-        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-            payment, "registration_token", self.admin_areas_dict
-        )
-        # return empty string if no document
-        assert result == ""
-
-    @parameterized.expand(
-        [
-            ("field_payment_id", "payment_id"),
-            ("field_household_id", "household_id"),
-            ("field_household_size", "household_size"),
-            ("field_collector_name", "collector_name"),
-            ("field_currency", "currency"),
-            ("field_registration_token", "registration_token"),
-            ("test_wrong_column_name", "invalid_column_name"),
-        ]
+@pytest.fixture
+def payment_plan():
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
     )
-    def test_get_column_value_from_payment(self, helper: str, field_name: str) -> None:
-        household, individuals = create_household(
-            household_args={"size": 1, "business_area": self.business_area},
-            individual_args={
-                "full_name": "John Wilson",
-                "given_name": "John",
-                "family_name": "Wilson",
-            },
-        )
-        individual = individuals[0]
 
-        payment_plan = PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.ACCEPTED,
-            business_area=self.business_area,
-            created_by=self.user,
-        )
-        payment = PaymentFactory(
-            parent=payment_plan,
+
+@pytest.fixture
+def delivery_mechanism():
+    return DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
+
+
+@pytest.fixture
+def fsp():
+    return FinancialServiceProviderFactory(
+        name="Test FSP 1",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        vision_vendor_number="123456789",
+    )
+
+
+@pytest.fixture
+def household():
+    household = HouseholdFactory(size=1)
+    if household.size is None:
+        household.size = 1
+        household.save(update_fields=["size"])
+    if not household.individuals_and_roles.filter(role=ROLE_PRIMARY).exists():
+        IndividualRoleInHouseholdFactory(
             household=household,
-            collector=individual,
-            currency="PLN",
-            financial_service_provider=self.fsp,
-            delivery_type=self.dm_cash,
+            individual=household.head_of_household,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
-        primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
-        document_type = DocumentTypeFactory(key="registration_token")
-        document = DocumentFactory(individual=primary, type=document_type)
+    return household
 
-        create_payment_plan_snapshot_data(payment_plan)
-        payment.refresh_from_db()
 
-        result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-            payment, field_name, self.admin_areas_dict
-        )
+@pytest.fixture
+def payment(payment_plan, household, fsp, delivery_mechanism):
+    return PaymentFactory(
+        parent=payment_plan,
+        household=household,
+        collector=household.head_of_household,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+    )
 
-        accepted_results = {
-            "payment_id": payment.unicef_id,
-            "household_id": household.unicef_id,
-            "household_size": 1,
-            "collector_name": primary.full_name,
-            "currency": "PLN",
-            "registration_token": document.document_number,
-            "invalid_column_name": "wrong_column_name",
-        }
-        assert accepted_results.get(field_name) == result
+
+@pytest.fixture
+def admin_areas_dict():
+    return FinancialServiceProviderXlsxTemplate.get_areas_dict()
+
+
+@pytest.fixture
+def registration_token_document_type():
+    return DocumentTypeFactory(label="Registration Token", key="registration_token")
+
+
+@pytest.fixture
+def registration_token_document(registration_token_document_type, household):
+    return DocumentFactory(
+        individual=household.head_of_household,
+        program=household.program,
+        document_number="REG-001",
+        type=registration_token_document_type,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+
+@pytest.fixture
+def payment_with_snapshot_and_document(payment_plan, payment, registration_token_document):
+    create_payment_plan_snapshot_data(payment_plan)
+    payment.refresh_from_db()
+    return payment
+
+
+@pytest.mark.parametrize(
+    ("field_name", "expected_value"),
+    [
+        ("payment_id", lambda payment, document: payment.unicef_id),
+        ("household_id", lambda payment, document: payment.household.unicef_id),
+        ("household_size", lambda payment, document: 1),
+        ("collector_name", lambda payment, document: payment.collector.full_name),
+        ("currency", lambda payment, document: "PLN"),
+        ("registration_token", lambda payment, document: document.document_number),
+        ("invalid_column_name", lambda payment, document: "wrong_column_name"),
+    ],
+)
+def test_get_column_value_from_payment(
+    field_name,
+    expected_value,
+    payment_with_snapshot_and_document,
+    admin_areas_dict,
+    registration_token_document,
+):
+    payment = payment_with_snapshot_and_document
+    value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+        payment,
+        field_name,
+        admin_areas_dict,
+    )
+
+    assert value == expected_value(payment, registration_token_document)

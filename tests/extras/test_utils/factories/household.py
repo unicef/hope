@@ -8,6 +8,8 @@ from factory.django import DjangoModelFactory
 
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import (
+    Document,
+    DocumentType,
     EntitlementCard,
     Household,
     Individual,
@@ -128,3 +130,21 @@ class EntitlementCardFactory(DjangoModelFactory):
     card_custodian = "CUSTODIAN"
     service_provider = "PROVIDER"
     household = factory.SubFactory(HouseholdFactory)
+
+
+class DocumentTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = DocumentType
+
+    label = factory.Sequence(lambda n: f"Document Type {n}")
+    key = factory.Sequence(lambda n: f"doc_type_{n}")
+
+
+class DocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    individual = factory.SubFactory(IndividualFactory)
+    program = factory.SelfAttribute("individual.program")
+    document_number = factory.Sequence(lambda n: f"DOC-{n}")
+    type = factory.SubFactory(DocumentTypeFactory)
