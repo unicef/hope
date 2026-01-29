@@ -14,6 +14,7 @@ from hope.models import (
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -91,6 +92,15 @@ class PaymentFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+
+
+class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentHouseholdSnapshot
+
+    payment = factory.SubFactory(PaymentFactory)
+    household_id = factory.LazyAttribute(lambda obj: obj.payment.household_id)
+    snapshot_data = factory.LazyFunction(dict)
 
 
 class PaymentVerificationSummaryFactory(DjangoModelFactory):
