@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import StrEnum
 
 from django.forms import modelform_factory
@@ -66,27 +65,18 @@ def format_validation_errors(errors: list) -> str:
     return "\n".join(formatted_lines)
 
 
-@dataclass
-class ImportPayload:
-    households_data: list
-    individuals_data: list
-    documents_data: list
-    accounts_data: list
-    identities_data: list
-
-
 class Importer:
     def __init__(
         self,
         registration_data_import: RegistrationDataImport,
-        data: ImportPayload,
+        **kwargs,
     ):
         self.registration_data_import = registration_data_import
-        self.households_data = data.households_data
-        self.individuals_data = data.individuals_data
-        self.documents_data = data.documents_data
-        self.accounts_data = data.accounts_data
-        self.identities_data = data.identities_data
+        self.households_data = kwargs.get("households_data", [])
+        self.individuals_data = kwargs.get("individuals_data", [])
+        self.documents_data = kwargs.get("documents_data", [])
+        self.accounts_data = kwargs.get("accounts_data", [])
+        self.identities_data = kwargs.get("identities_data", [])
         self.households_to_create = []
         self.individuals_to_create = []
         self.documents_to_create = []
