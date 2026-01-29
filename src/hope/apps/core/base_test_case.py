@@ -34,20 +34,22 @@ class BaseTestCase(TestCase):
         admin_area_limits.areas.set(areas)
 
     @classmethod
-    def create_partner_role_with_permissions(  # noqa: PLR0913 – intentional design by author
+    def create_partner_role_with_permissions(
         cls,
         partner: "Partner",
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        name: str | None = None,
-        whole_business_area_access: bool | None = False,
+        **kwargs,
     ) -> RoleAssignment:
         """Create Partner Role with permissions.
 
+        kwargs: can has "name" and/or "whole_business_area_access"
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
+        name = kwargs.get("name")
+        whole_business_area_access = kwargs.get("whole_business_area_access")
         permission_list = [perm.value for perm in permissions]
         name = name or f"Partner Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})

@@ -119,20 +119,26 @@ def _get_min_max_score(golden_records: list[dict]) -> tuple[float, float]:
     return min(items, default=0.0), max(items, default=0.0)
 
 
-def create_grievance_ticket_with_details(  # noqa: PLR0913 – intentional design by author
+def create_grievance_ticket_with_details(
     main_individual: Individual,
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = None,
-    possible_duplicates: list[Individual] | None = None,
-    registration_data_import: RegistrationDataImport | None = None,
-    is_multiple_duplicates_version: bool = False,
+    **kwargs,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
+    """Create GRV ticket with details.
+
+    kwargs: can has "dedup_engine_similarity_pair", "possible_duplicates",
+    "registration_data_import", "is_multiple_duplicates_version".
+    """
     from hope.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair = kwargs.get("dedup_engine_similarity_pair")
+    possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
+    registration_data_import: RegistrationDataImport = kwargs.get("registration_data_import")
+    is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None

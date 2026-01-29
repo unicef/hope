@@ -11,8 +11,13 @@ from hope.models import BusinessArea, Program, RoleAssignment
 class BusinessAreaSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913 – intentional design by author
-        """Override to add data-slug attribute to options."""
+    def create_option(self, name, value, label, selected, index, **kwargs):
+        """Override to add data-slug attribute to options.
+
+        kwargs: can has "subindex" and/or "attrs".
+        """
+        subindex = kwargs.get("subindex")
+        attrs = kwargs.get("attrs")
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
             # Extract actual value from ModelChoiceIteratorValue if needed
@@ -30,8 +35,13 @@ class BusinessAreaSelectWidget(Select):
 class ProgramSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913 – intentional design by author
-        """Override to add data-slug attribute to options."""
+    def create_option(self, name, value, label, selected, index, **kwargs):
+        """Override to add data-slug attribute to options.
+
+        kwargs: can has "subindex" and/or "attrs".
+        """
+        subindex = kwargs.get("subindex")
+        attrs = kwargs.get("attrs")
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
             # Extract actual value from ModelChoiceIteratorValue if needed
