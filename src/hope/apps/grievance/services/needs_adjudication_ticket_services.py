@@ -135,6 +135,7 @@ def create_grievance_ticket_with_details(
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
+
     dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair = kwargs.get("dedup_engine_similarity_pair")
     possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
     registration_data_import: RegistrationDataImport = kwargs.get("registration_data_import")
