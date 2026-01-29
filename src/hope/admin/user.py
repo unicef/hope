@@ -269,6 +269,9 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         ),
     )
 
+    def get_inline_instances(self, request, obj=None):
+        return super().get_inline_instances(request, obj) if obj else []
+
     @button(permissions=is_root)
     def ad(self, request, pk):
         obj = self.get_object(request, pk)
