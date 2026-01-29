@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Any
 
-from constance.test import override_config
 from django.conf import settings
 from django.urls import reverse
 from django_webtest import WebTest
@@ -17,7 +16,6 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
-from hope.admin.account_mixins import get_valid_kobo_username
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, User
 
 pytestmark = pytest.mark.django_db
@@ -77,7 +75,6 @@ def test_import_csv_creates_user(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -111,13 +108,11 @@ def test_import_csv_with_kobo_creates_user_with_kobo_username(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = True
     res = form.submit()
 
     assert res.status_code == 200
     user = User.objects.filter(email="test@example.com", partner=partner_1).first()
     assert user, "User not found"
-    assert user.custom_fields["kobo_username"] == user.username
 
 
 @responses.activate
@@ -143,7 +138,6 @@ def test_import_csv_detect_incompatible_roles_prevents_assignment(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -172,7 +166,6 @@ def test_import_csv_does_not_change_existing_partner(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner2.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
@@ -199,69 +192,7 @@ def test_import_csv_with_username_creates_user_with_custom_username(
     form["business_area"] = business_area_afghanistan.id
     form["partner"] = partner_1.id
     form["role"] = role_no_access.id
-    form["enable_kobo"] = False
     res = form.submit()
 
     assert res.status_code == 200
     assert User.objects.filter(email="test@example.com", username="test_example1", partner=partner_1).exists()
-
-
-@responses.activate
-def test_sync_kobo_users_returns_success(
-    django_app: WebTest,
-    superuser_staff: User,
-    business_area_afghanistan: BusinessArea,
-):
-    url = reverse("admin:account_user_kobo_users_sync")
-
-    res = django_app.get(url, user=superuser_staff)
-
-    assert res.status_code == 200
-
-
-@responses.activate
-@override_config(KOBO_ADMIN_CREDENTIALS="kobo_admin:pwd")
-def test_create_kobo_user_creates_user_in_kobo_system(
-    django_app: WebTest,
-    superuser_staff: User,
-    business_area_afghanistan: BusinessArea,
-):
-    responses.add(
-        responses.POST,
-        f"{settings.KOBO_URL}/authorized_application/users/",
-        json={},
-        status=201,
-    )
-    responses.add(
-        responses.POST,
-        f"{settings.KOBO_URL}/admin/login/",
-        headers={"Location": "https://kobo-hope-trn.unitst.org/admin/"},
-        status=302,
-    )
-    responses.add(
-        responses.GET,
-        f"{settings.KOBO_URL}/admin/login/",
-        body='<input type="text" name="csrfmiddlewaretoken" value="1111">',
-        status=200,
-    )
-    kobo_username = get_valid_kobo_username(superuser_staff)
-    responses.add(
-        responses.GET,
-        f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=1",
-        body=f'action-checkbox. value="111"></td>< field-username <a>'
-        f'{superuser_staff.username}</a></td>field-email">{superuser_staff.email}</td>',
-        status=200,
-    )
-    responses.add(
-        responses.GET,
-        f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=2",
-        body=f'action-checkbox. value="111"></td>< field-username <a>{superuser_staff.username}'
-        f'</a></td>field-email">{superuser_staff.email}</td>',
-        status=200,
-    )
-    url = reverse("admin:account_user_create_kobo_user", args=[superuser_staff.pk])
-
-    res = django_app.get(url, user=superuser_staff)
-
-    assert res.status_code == 302, res.context["messages"]
-    superuser_staff.refresh_from_db()
