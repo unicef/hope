@@ -15,8 +15,6 @@ from hope.apps.generic_import.generic_upload_service.importer import format_vali
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
 from hope.models import Household, ImportData, Individual, Program, RegistrationDataImport
 
-# --- Fixtures ---
-
 
 @pytest.fixture
 def business_area():
@@ -76,9 +74,6 @@ def mock_importer_class():
         importer.import_data.return_value = []
         mock_cls.return_value = importer
         yield mock_cls
-
-
-# --- Tests: format_validation_errors ---
 
 
 def test_format_validation_errors_returns_no_errors_for_empty_list():
@@ -176,9 +171,6 @@ def test_format_validation_errors_uses_unknown_for_missing_identifier(error_type
     ]
     result = format_validation_errors(errors)
     assert expected_identifier in result
-
-
-# --- Tests: process_generic_import_task ---
 
 
 @pytest.mark.django_db

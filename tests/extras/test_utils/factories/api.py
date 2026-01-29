@@ -9,8 +9,6 @@ from hope.models.utils import Grant
 
 
 class APITokenFactory(DjangoModelFactory):
-    """Factory for API tokens."""
-
     class Meta:
         model = APIToken
 
