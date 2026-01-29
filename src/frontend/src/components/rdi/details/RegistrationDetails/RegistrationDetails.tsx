@@ -17,6 +17,7 @@ import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -223,8 +224,10 @@ function RegistrationDetails({
             </Grid>
           </Grid>
           {numbersComponent}
-          {registration.status === 'DEDUPLICATION_FAILED' ||
-          registration.status === 'IN_REVIEW' ? null : (
+          {registration.status ===
+            RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
+          registration.status ===
+            RegistrationDataImportStatusEnum.DEDUPLICATION ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
