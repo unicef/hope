@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from io import BytesIO
 from unittest.mock import patch
 
@@ -6,30 +6,30 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    ProgramFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, ImportData, Partner, Program, RegistrationDataImport, Role, RoleAssignment
+from hope.models import ImportData, Program, RegistrationDataImport
 
-pytestmark = pytest.mark.django_db
-
-
-# ============ Fixtures ============
+# ============ Core Fixtures ============
 
 
 @pytest.fixture
-def afghanistan():
-    create_afghanistan()
-    return BusinessArea.objects.get(slug="afghanistan")
+def business_area():
+    return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(afghanistan):
-    return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
+def program(business_area):
+    return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
 @pytest.fixture
@@ -44,8 +44,6 @@ def upload_url():
 
 @pytest.fixture
 def upload_file():
-    """Factory fixture for creating test upload files."""
-
     def _create(filename="test.xlsx"):
         return SimpleUploadedFile(
             filename,
@@ -58,409 +56,415 @@ def upload_file():
 
 @pytest.fixture
 def authenticated_client(client, user):
-    """Client with user logged in."""
     client.force_login(user, "django.contrib.auth.backends.ModelBackend")
     return client
 
 
-@pytest.fixture
-def create_role_with_permissions():
-    """Factory fixture for creating roles with permissions."""
-
-    def _create(user, permissions, business_area, program=None):
-        permission_list = [perm.value for perm in permissions]
-        role, _ = Role.objects.update_or_create(
-            name=f"Test Role {permission_list[0]}", defaults={"permissions": permission_list}
-        )
-        if not program:
-            program = ProgramFactory(business_area=business_area, name="Test Program")
-        RoleAssignment.objects.get_or_create(
-            user=user,
-            role=role,
-            business_area=business_area,
-            program=program,
-        )
-
-    return _create
+# ============ Role Fixtures ============
 
 
 @pytest.fixture
-def user_with_import_permission(user, afghanistan, program, create_role_with_permissions):
-    """User with GENERIC_IMPORT_DATA permission."""
-    create_role_with_permissions(user, [Permissions.GENERIC_IMPORT_DATA], afghanistan, program=program)
+def import_role():
+    return RoleFactory(permissions=[Permissions.GENERIC_IMPORT_DATA.value])
+
+
+@pytest.fixture
+def view_only_role():
+    return RoleFactory(permissions=[Permissions.RDI_VIEW_LIST.value])
+
+
+# ============ Import Permission Chain ============
+
+
+@pytest.fixture
+def import_role_assignment(user, import_role, business_area, program):
+    return RoleAssignmentFactory(user=user, role=import_role, business_area=business_area, program=program)
+
+
+@pytest.fixture
+def client_with_import_permission(client, user, import_role_assignment):
+    client.force_login(user, "django.contrib.auth.backends.ModelBackend")
+    return client
+
+
+# ============ Other BA Fixtures ============
+
+
+@pytest.fixture
+def other_business_area():
+    return BusinessAreaFactory()
+
+
+@pytest.fixture
+def other_program(other_business_area):
+    return ProgramFactory(business_area=other_business_area, status=Program.ACTIVE)
+
+
+# ============ Test-specific Fixtures ============
+
+
+@pytest.fixture
+def view_only_role_assignment(user, view_only_role, business_area):
+    return RoleAssignmentFactory(user=user, role=view_only_role, business_area=business_area)
+
+
+@pytest.fixture
+def expired_import_role_assignment(user, import_role, business_area):
+    return RoleAssignmentFactory(
+        user=user,
+        role=import_role,
+        business_area=business_area,
+        expiry_date=date.today() - timedelta(days=1),
+    )
+
+
+@pytest.fixture
+def deactivated_business_area(business_area, import_role_assignment):
+    business_area.active = False
+    business_area.save()
+    return business_area
+
+
+@pytest.fixture
+def test_partner(business_area):
+    partner = PartnerFactory()
+    partner.allowed_business_areas.add(business_area)
+    return partner
+
+
+@pytest.fixture
+def partner_import_role_assignment(test_partner, import_role, business_area, program):
+    return RoleAssignmentFactory(partner=test_partner, role=import_role, business_area=business_area, program=program)
+
+
+@pytest.fixture
+def user_with_test_partner(user, test_partner):
+    user.partner = test_partner
+    user.save()
     return user
 
 
 @pytest.fixture
-def client_with_import_permission(client, user_with_import_permission):
-    """Authenticated client with import permission."""
-    client.force_login(user_with_import_permission, "django.contrib.auth.backends.ModelBackend")
-    return client
+def program_2(business_area):
+    return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+
+
+@pytest.fixture
+def ba_wide_role_assignment(user, import_role, business_area):
+    return RoleAssignmentFactory(user=user, role=import_role, business_area=business_area, program=None)
+
+
+@pytest.fixture
+def import_assignment_on_other_ba(user, import_role, other_business_area, other_program):
+    return RoleAssignmentFactory(user=user, role=import_role, business_area=other_business_area, program=other_program)
+
+
+@pytest.fixture
+def invalid_upload_file():
+    return SimpleUploadedFile("test.pdf", b"fake content", content_type="application/pdf")
 
 
 # ============ Tests ============
 
 
-class TestGenericImportUploadView:
-    """Tests for GenericImportUploadView."""
+@pytest.mark.django_db
+def test_unauthenticated_user_is_redirected(client, upload_url):
+    response = client.get(upload_url)
+    assert response.status_code == 302
 
-    def test_view_requires_authentication(self, client, upload_url):
-        """Unauthenticated users are redirected."""
-        response = client.get(upload_url)
-        assert response.status_code == 302
 
-    def test_user_with_no_business_areas_gets_403(self, authenticated_client, upload_url):
-        """Users with no business area access get 403."""
-        response = authenticated_client.get(upload_url)
-        assert response.status_code == 403
+@pytest.mark.django_db
+def test_user_with_no_business_areas_gets_403(authenticated_client, upload_url):
+    response = authenticated_client.get(upload_url)
+    assert response.status_code == 403
 
-    def test_view_requires_permission(
-        self, authenticated_client, upload_url, user, afghanistan, create_role_with_permissions
-    ):
-        """Users without GENERIC_IMPORT_DATA permission get 403."""
-        create_role_with_permissions(user, [Permissions.RDI_VIEW_LIST], afghanistan)
-        response = authenticated_client.get(upload_url)
-        assert response.status_code == 403
 
-    def test_view_with_correct_permission(self, client_with_import_permission, upload_url):
-        """Users with GENERIC_IMPORT_DATA permission can access view."""
-        response = client_with_import_permission.get(upload_url)
-        assert response.status_code == 200
-        assert "generic_import/upload.html" in [t.name for t in response.templates]
+@pytest.mark.django_db
+def test_user_without_import_permission_gets_403(authenticated_client, upload_url, view_only_role_assignment):
+    response = authenticated_client.get(upload_url)
+    assert response.status_code == 403
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_successful_upload_creates_objects_and_triggers_task(
-        self,
-        mock_delay,
-        client_with_import_permission,
+
+@pytest.mark.django_db
+def test_user_with_import_permission_can_access_view(client_with_import_permission, upload_url):
+    response = client_with_import_permission.get(upload_url)
+    assert response.status_code == 200
+    assert "generic_import/upload.html" in [t.name for t in response.templates]
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_successful_upload_creates_objects_and_triggers_task(
+    mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program, user
+):
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = client_with_import_permission.post(
+            upload_url,
+            data={
+                "business_area": business_area.id,
+                "program": program.id,
+                "file": upload_file(),
+            },
+        )
+
+    assert response.status_code == 302
+    assert response.url == upload_url
+
+    assert ImportData.objects.count() == 1
+    import_data = ImportData.objects.first()
+    assert import_data.status == ImportData.STATUS_PENDING
+    assert import_data.business_area_slug == business_area.slug
+    assert import_data.data_type == ImportData.XLSX
+    assert import_data.created_by_id == user.id
+
+    assert RegistrationDataImport.objects.count() == 1
+    rdi = RegistrationDataImport.objects.first()
+    assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+    assert rdi.business_area == business_area
+    assert rdi.program == program
+    assert rdi.imported_by == user
+    assert rdi.data_source == RegistrationDataImport.XLS
+    assert rdi.import_data == import_data
+
+    mock_delay.assert_called_once()
+    call_kwargs = mock_delay.call_args[1]
+    assert call_kwargs["registration_data_import_id"] == str(rdi.id)
+    assert call_kwargs["import_data_id"] == str(import_data.id)
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_upload_without_permission_for_selected_ba_fails(
+    mock_delay, client_with_import_permission, upload_url, upload_file, other_business_area, other_program
+):
+    response = client_with_import_permission.post(
         upload_url,
-        upload_file,
-        afghanistan,
-        program,
-        user_with_import_permission,
-    ):
-        """Successful file upload creates ImportData, RDI, and triggers Celery task."""
-        with TestCase.captureOnCommitCallbacks(execute=True):
-            response = client_with_import_permission.post(
-                upload_url,
-                data={
-                    "business_area": afghanistan.id,
-                    "program": program.id,
-                    "file": upload_file(),
-                },
-            )
+        data={
+            "business_area": other_business_area.id,
+            "program": other_program.id,
+            "file": upload_file(),
+        },
+    )
 
-        assert response.status_code == 302
-        assert response.url == upload_url
+    assert response.status_code == 200
+    assert ImportData.objects.count() == 0
+    assert RegistrationDataImport.objects.count() == 0
+    mock_delay.assert_not_called()
 
-        # ImportData created
-        assert ImportData.objects.count() == 1
-        import_data = ImportData.objects.first()
-        assert import_data.status == ImportData.STATUS_PENDING
-        assert import_data.business_area_slug == afghanistan.slug
-        assert import_data.data_type == ImportData.XLSX
-        assert import_data.created_by_id == user_with_import_permission.id
 
-        # RDI created
-        assert RegistrationDataImport.objects.count() == 1
-        rdi = RegistrationDataImport.objects.first()
-        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
-        assert rdi.business_area == afghanistan
-        assert rdi.program == program
-        assert rdi.imported_by == user_with_import_permission
-        assert rdi.data_source == RegistrationDataImport.XLS
-        assert rdi.import_data == import_data
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_upload_with_invalid_file_shows_errors(
+    mock_delay, client_with_import_permission, upload_url, business_area, program, invalid_upload_file
+):
+    response = client_with_import_permission.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": program.id,
+            "file": invalid_upload_file,
+        },
+    )
 
-        # Task called
-        mock_delay.assert_called_once()
-        call_kwargs = mock_delay.call_args[1]
-        assert call_kwargs["registration_data_import_id"] == str(rdi.id)
-        assert call_kwargs["import_data_id"] == str(import_data.id)
+    assert response.status_code == 200
+    assert "form" in response.context
+    assert not response.context["form"].is_valid()
+    assert ImportData.objects.count() == 0
+    mock_delay.assert_not_called()
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_upload_without_permission_for_selected_ba_fails(
-        self, mock_delay, client_with_import_permission, upload_url, upload_file
-    ):
-        """Upload fails if user doesn't have permission for selected BA."""
-        other_ba = BusinessArea.objects.create(name="Other Country", slug="other-country", code="OTH")
-        other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
 
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": other_ba.id,
-                "program": other_program.id,
-                "file": upload_file(),
-            },
-        )
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_upload_without_file_shows_errors(
+    mock_delay, client_with_import_permission, upload_url, business_area, program
+):
+    response = client_with_import_permission.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": program.id,
+        },
+    )
 
-        assert response.status_code == 200  # form_invalid returns 200
-        assert ImportData.objects.count() == 0
-        assert RegistrationDataImport.objects.count() == 0
-        mock_delay.assert_not_called()
+    assert response.status_code == 200
+    assert "form" in response.context
+    assert not response.context["form"].is_valid()
+    assert "file" in response.context["form"].errors
+    mock_delay.assert_not_called()
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_upload_with_invalid_file_shows_errors(
-        self, mock_delay, client_with_import_permission, upload_url, afghanistan, program
-    ):
-        """Invalid file upload shows form errors."""
-        invalid_file = SimpleUploadedFile("test.pdf", b"fake content", content_type="application/pdf")
 
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-                "file": invalid_file,
-            },
-        )
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_rdi_name_format(mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program):
+    response = client_with_import_permission.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": program.id,
+            "file": upload_file(),
+        },
+    )
 
-        assert response.status_code == 200
-        assert "form" in response.context
-        assert not response.context["form"].is_valid()
-        assert ImportData.objects.count() == 0
-        mock_delay.assert_not_called()
+    assert response.status_code == 302
+    rdi = RegistrationDataImport.objects.first()
+    assert "Generic Import" in rdi.name
+    assert business_area.slug in rdi.name
+    assert program.name in rdi.name
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_upload_without_file_shows_errors(
-        self, mock_delay, client_with_import_permission, upload_url, afghanistan, program
-    ):
-        """Upload without file shows form errors."""
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-            },
-        )
 
-        assert response.status_code == 200
-        assert "form" in response.context
-        assert not response.context["form"].is_valid()
-        assert "file" in response.context["form"].errors
-        mock_delay.assert_not_called()
+@pytest.mark.django_db
+def test_context_data_includes_business_areas(client_with_import_permission, upload_url, business_area):
+    response = client_with_import_permission.get(upload_url)
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_rdi_name_format(
-        self, mock_delay, client_with_import_permission, upload_url, upload_file, afghanistan, program
-    ):
-        """RDI name follows expected format."""
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-                "file": upload_file(),
-            },
-        )
+    assert response.status_code == 200
+    assert "business_areas" in response.context
+    assert business_area in list(response.context["business_areas"])
 
-        assert response.status_code == 302
-        rdi = RegistrationDataImport.objects.first()
-        assert "Generic Import" in rdi.name
-        assert afghanistan.slug in rdi.name
-        assert program.name in rdi.name
 
-    def test_context_data_includes_business_areas(self, client_with_import_permission, upload_url, afghanistan):
-        """Template context includes user's business areas."""
-        response = client_with_import_permission.get(upload_url)
+@pytest.mark.django_db
+def test_expired_role_assignment_blocks_access(authenticated_client, upload_url, expired_import_role_assignment):
+    response = authenticated_client.get(upload_url)
+    assert response.status_code == 403
 
-        assert response.status_code == 200
-        assert "business_areas" in response.context
-        assert afghanistan in list(response.context["business_areas"])
 
-    def test_expired_role_assignment_blocks_access(self, authenticated_client, upload_url, user, afghanistan):
-        """Expired role assignments don't grant access."""
-        role = Role.objects.create(
-            name="Expired Role",
-            permissions=[Permissions.GENERIC_IMPORT_DATA.value],
-        )
-        RoleAssignment.objects.create(
-            user=user,
-            role=role,
-            business_area=afghanistan,
-            expiry_date=timezone.now() - timedelta(days=1),
-        )
+@pytest.mark.django_db
+def test_inactive_business_area_blocks_access(authenticated_client, upload_url, deactivated_business_area):
+    response = authenticated_client.get(upload_url)
+    assert response.status_code == 403
 
-        response = authenticated_client.get(upload_url)
-        assert response.status_code == 403
 
-    def test_inactive_business_area_blocks_access(
-        self, authenticated_client, upload_url, user, afghanistan, create_role_with_permissions
-    ):
-        """Inactive business areas are filtered out."""
-        create_role_with_permissions(user, [Permissions.GENERIC_IMPORT_DATA], afghanistan)
-        afghanistan.active = False
-        afghanistan.save()
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_user_with_partner_permissions(
+    mock_delay,
+    authenticated_client,
+    upload_url,
+    upload_file,
+    business_area,
+    program,
+    user_with_test_partner,
+    partner_import_role_assignment,
+):
+    response = authenticated_client.get(upload_url)
+    assert response.status_code == 200
 
-        response = authenticated_client.get(upload_url)
-        assert response.status_code == 403
-
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_user_with_partner_permissions(
-        self, mock_delay, client, upload_url, upload_file, user, afghanistan, program
-    ):
-        """Users inherit permissions from their partner."""
-        partner = Partner.objects.create(name="Test Partner")
-        partner.allowed_business_areas.add(afghanistan)
-
-        user.partner = partner
-        user.save()
-
-        role = Role.objects.create(
-            name="Partner Role",
-            permissions=[Permissions.GENERIC_IMPORT_DATA.value],
-        )
-        RoleAssignment.objects.create(
-            partner=partner,
-            role=role,
-            business_area=afghanistan,
-            program=program,
-        )
-
-        client.force_login(user, "django.contrib.auth.backends.ModelBackend")
-
-        response = client.get(upload_url)
-        assert response.status_code == 200
-
-        with TestCase.captureOnCommitCallbacks(execute=True):
-            response = client.post(
-                upload_url,
-                data={
-                    "business_area": afghanistan.id,
-                    "program": program.id,
-                    "file": upload_file(),
-                },
-            )
-        assert response.status_code == 302
-        mock_delay.assert_called_once()
-
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_ba_level_permission_grants_all_programs(
-        self, mock_delay, client, upload_url, upload_file, user, afghanistan
-    ):
-        """BA-level role assignment grants access to all programs."""
-        program1 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
-        program2 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
-
-        role = Role.objects.create(
-            name="BA Role",
-            permissions=[Permissions.GENERIC_IMPORT_DATA.value],
-        )
-        RoleAssignment.objects.create(
-            user=user,
-            role=role,
-            business_area=afghanistan,
-            program=None,  # BA-wide access
-        )
-
-        client.force_login(user, "django.contrib.auth.backends.ModelBackend")
-
-        for prog in [program1, program2]:
-            with TestCase.captureOnCommitCallbacks(execute=True):
-                response = client.post(
-                    upload_url,
-                    data={
-                        "business_area": afghanistan.id,
-                        "program": prog.id,
-                        "file": upload_file(),
-                    },
-                )
-            assert response.status_code == 302
-
-        assert mock_delay.call_count == 2
-
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    @patch("hope.apps.generic_import.views.ImportData.objects.create")
-    def test_database_error_prevents_task_trigger(
-        self, mock_create, mock_delay, client_with_import_permission, upload_url, upload_file, afghanistan, program
-    ):
-        """Database errors prevent task from being triggered."""
-        mock_create.side_effect = DatabaseError("Database error")
-
-        response = client_with_import_permission.post(
-            upload_url,
-            data={
-                "business_area": afghanistan.id,
-                "program": program.id,
-                "file": upload_file(),
-            },
-        )
-
-        assert response.status_code == 200
-        mock_delay.assert_not_called()
-
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_upload_to_ba_without_import_permission_for_that_ba(
-        self, mock_delay, authenticated_client, upload_url, upload_file, user, afghanistan, program
-    ):
-        """Upload fails when user has BA access but not GENERIC_IMPORT_DATA for selected BA."""
-        other_ba = BusinessArea.objects.create(
-            name="Other Country",
-            slug="other-country",
-            code="OTH",
-            active=True,
-        )
-        other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
-
-        role_import = Role.objects.create(
-            name="TestImportRole",
-            permissions=[Permissions.GENERIC_IMPORT_DATA.value],
-        )
-        role_basic = Role.objects.create(
-            name="TestBasicRole",
-            permissions=[Permissions.RDI_VIEW_LIST.value],
-        )
-
-        RoleAssignment.objects.create(user=user, role=role_import, business_area=other_ba, program=other_program)
-        RoleAssignment.objects.create(user=user, role=role_basic, business_area=afghanistan, program=program)
-
+    with TestCase.captureOnCommitCallbacks(execute=True):
         response = authenticated_client.post(
             upload_url,
             data={
-                "business_area": afghanistan.id,
+                "business_area": business_area.id,
                 "program": program.id,
                 "file": upload_file(),
             },
         )
+    assert response.status_code == 302
+    mock_delay.assert_called_once()
 
-        assert response.status_code == 200
-        mock_delay.assert_not_called()
-        messages_list = list(response.context["messages"])
-        assert any("permission" in str(m).lower() for m in messages_list)
 
-    @patch("hope.apps.generic_import.views.process_generic_import_task.delay")
-    def test_form_invalid_shows_non_field_errors(
-        self,
-        mock_delay,
-        client_with_import_permission,
-        upload_url,
-        upload_file,
-        afghanistan,
-        user_with_import_permission,
-        create_role_with_permissions,
-    ):
-        """Non-field errors (__all__) are displayed correctly."""
-        other_ba = BusinessArea.objects.create(
-            name="Other Country",
-            slug="other-country",
-            code="OTH",
-            active=True,
-        )
-        other_program = ProgramFactory(business_area=other_ba, status=Program.ACTIVE)
-
-        create_role_with_permissions(
-            user_with_import_permission, [Permissions.GENERIC_IMPORT_DATA], other_ba, program=other_program
-        )
-
-        # Submit with program from different BA
-        response = client_with_import_permission.post(
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_ba_level_permission_grants_all_programs(
+    mock_delay,
+    authenticated_client,
+    upload_url,
+    upload_file,
+    business_area,
+    program,
+    program_2,
+    ba_wide_role_assignment,
+):
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response_1 = authenticated_client.post(
             upload_url,
             data={
-                "business_area": afghanistan.id,
-                "program": other_program.id,
+                "business_area": business_area.id,
+                "program": program.id,
                 "file": upload_file(),
             },
         )
+    assert response_1.status_code == 302
 
-        assert response.status_code == 200
-        mock_delay.assert_not_called()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response_2 = authenticated_client.post(
+            upload_url,
+            data={
+                "business_area": business_area.id,
+                "program": program_2.id,
+                "file": upload_file(),
+            },
+        )
+    assert response_2.status_code == 302
+
+    assert mock_delay.call_count == 2
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+@patch("hope.apps.generic_import.views.ImportData.objects.create")
+def test_database_error_prevents_task_trigger(
+    mock_create, mock_delay, client_with_import_permission, upload_url, upload_file, business_area, program
+):
+    mock_create.side_effect = DatabaseError("Database error")
+
+    response = client_with_import_permission.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": program.id,
+            "file": upload_file(),
+        },
+    )
+
+    assert response.status_code == 200
+    mock_delay.assert_not_called()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_upload_to_ba_without_import_permission_for_that_ba(
+    mock_delay,
+    authenticated_client,
+    upload_url,
+    upload_file,
+    business_area,
+    program,
+    import_assignment_on_other_ba,
+    view_only_role_assignment,
+):
+    response = authenticated_client.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": program.id,
+            "file": upload_file(),
+        },
+    )
+
+    assert response.status_code == 200
+    mock_delay.assert_not_called()
+    messages_list = list(response.context["messages"])
+    assert any("permission" in str(m).lower() for m in messages_list)
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_task.delay")
+def test_form_invalid_shows_non_field_errors(
+    mock_delay,
+    client_with_import_permission,
+    upload_url,
+    upload_file,
+    business_area,
+    import_assignment_on_other_ba,
+    other_program,
+):
+    response = client_with_import_permission.post(
+        upload_url,
+        data={
+            "business_area": business_area.id,
+            "program": other_program.id,
+            "file": upload_file(),
+        },
+    )
+
+    assert response.status_code == 200
+    mock_delay.assert_not_called()

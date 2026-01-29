@@ -10,6 +10,7 @@ from hope.models import (
     Account,
     AccountType,
     DeliveryMechanism,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -176,6 +177,14 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
         model = WesternUnionInvoice
 
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
+
+
+class FinancialInstitutionFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialInstitution
+
+    name = factory.Sequence(lambda n: f"Financial Institution {n}")
+    type = FinancialInstitution.FinancialInstitutionType.BANK
 
 
 class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
