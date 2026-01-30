@@ -18,6 +18,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -124,6 +125,15 @@ class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
 class PaymentVerificationSummaryFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationSummary
+
+
+class PaymentPlanSplitFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanSplit
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    split_type = PaymentPlanSplit.SplitType.NO_SPLIT
+    order = 0
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):
