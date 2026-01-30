@@ -26,14 +26,13 @@ class HtmlDiff(difflib.HtmlDiff):
             f'<td class="diff_header lineno"{identifier}>{line_number}</td><td class="code" nowrap="nowrap">{text}</td>'
         )
 
-    def make_table(  # noqa: PLR0913
+    def make_table(
         self,
         fromlines: Sequence[str],
         tolines: Sequence[str],
         fromdesc: str = "",
         todesc: str = "",
-        context: bool = False,
-        numlines: int = 5,
+        **kwargs,
     ) -> str:
         """Return HTML table of side by side comparison with change highlights.
 
@@ -48,8 +47,11 @@ class HtmlDiff(difflib.HtmlDiff):
             When context is False, controls the number of lines to place
             the "next" link anchors before the next change (so click of
             "next" link jumps to just before the change).
+        kwargs: can has 'context', 'numlines'.
 
         """
+        context: bool = kwargs.get("context", False)
+        numlines: int = kwargs.get("numlines", 5)
         # make unique anchor prefixes so that multiple tables may exist
         # on the same page without conflict.
         self._make_prefix()

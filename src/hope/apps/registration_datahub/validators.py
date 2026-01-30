@@ -564,267 +564,155 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
         try:
             first_row = sheet[1]
-            combined_fields = {
-                **self.combined_fields[sheet.title.lower()],
-            }
+            combined_fields = self.combined_fields[sheet.title.lower()]
+            switch_dict = self._get_validator_map()
 
-            switch_dict: dict[str, Callable] = {
-                "ID": self.not_empty_validator,
-                "STRING": self.string_validator,
-                "INTEGER": self.integer_validator,
-                "DECIMAL": self.float_validator,
-                "BOOL": self.bool_validator,
-                "DATE": self.date_validator,
-                "DATETIME": self.date_validator,
-                "SELECT_ONE": self.choice_validator,
-                "SELECT_MANY": self.choice_validator,
-                "PHONE_NUMBER": self.phone_validator,
-                "GEOPOINT": self.geolocation_validator,
-                "IMAGE": self.image_validator,
-                "LIST_OF_IDS": self.list_of_integer_validator,
-            }
-
-            invalid_rows = []
-
-            household_id_col_idx = None
-            relationship_col_idx = None
-            for idx, header_cell in enumerate(first_row):
-                if header_cell.value == "household_id":
-                    household_id_col_idx = idx
-                elif header_cell.value == "relationship_i_c":
-                    relationship_col_idx = idx
-
-            identities_numbers = {
-                "unhcr_id_no_i_c": {
-                    "partner": "UNHCR",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "scope_id_no_i_c": {
-                    "partner": "WFP",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-            }
-            documents_numbers: dict[str, dict[str, Any]] = {
-                "birth_certificate_no_i_c": {
-                    "type": "BIRTH_CERTIFICATE",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "drivers_license_no_i_c": {
-                    "type": "DRIVERS_LICENSE",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "electoral_card_no_i_c": {
-                    "type": "ELECTORAL_CARD",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "national_id_no_i_c": {
-                    "type": "NATIONAL_ID",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "national_passport_no_i_c": {
-                    "type": "NATIONAL_PASSPORT",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "tax_id_no_i_c": {
-                    "type": "TAX_ID",
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "other_id_type_i_c": {
-                    "type": "OTHER",
-                    "names": [],
-                    "validation_data": [],
-                    "numbers": [],
-                    "issuing_countries": [],
-                },
-                "other_id_no_i_c": {},
-            }
-
-            def has_value(cell: Cell) -> bool:
-                if cell.value is None:
-                    return False
-                if isinstance(cell.value, str):
-                    return cell.value.strip() != ""
-                return True
+            household_id_idx, relationship_idx = self._resolve_special_columns(first_row)
 
             admin_area_code_tuples = []
+            invalid_rows = []
+
+            identities_numbers = self._init_identities_numbers()
+            documents_numbers = self._init_documents_numbers()
 
             for row in sheet.iter_rows(min_row=3):
-                # openpyxl keeps iterating on empty rows so need to omit empty rows
-                if not any(has_value(cell) for cell in row):
+                if self._is_empty_row(row):
                     continue
 
-                current_household_id = None
-                if household_id_col_idx is not None:
-                    household_id_cell = row[household_id_col_idx]
-                    if value := household_id_cell.value:
-                        if isinstance(value, float) and value.is_integer():
-                            value = int(value)
-                        current_household_id = value
-                        if sheet.title == "Households":
-                            self.household_ids.append(current_household_id)
-                            self.head_of_household_count[current_household_id] = 0
-
-                if relationship_col_idx is not None and current_household_id is not None:
-                    relationship_cell = row[relationship_col_idx]
-                    if relationship_cell.value == "HEAD":
-                        self.head_of_household_count[current_household_id] += 1
+                row_ctx = self._process_household_relationships(sheet, row, household_id_idx, relationship_idx)
 
                 for cell, header in zip(row, first_row, strict=True):
-                    current_field = combined_fields.get(header.value)
-                    if not current_field:
-                        continue
-
-                    row_number = cell.row
-
-                    value = cell.value
-                    if isinstance(value, float) and value.is_integer():
-                        value = int(value)
-
-                    household_id_can_be_empty = header.value == "household_id" and sheet.title != "Households"
-
-                    people_admin_columns = (
-                        "pp_admin1_i_c",
-                        "pp_admin2_i_c",
-                        "pp_admin3_i_c",
-                    )
-                    hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
-                    admin_columns_all = people_admin_columns + hh_admin_columns
-                    if header.value in admin_columns_all:
-                        if cell.value:
-                            admin_area_code_tuples.append((row_number, header.value, cell.value))
-                        # admin3 is not required for now
-                        elif not cell.value and header.value not in (
-                            "admin3_h_c",
-                            "pp_admin3_i_c",
-                        ):
-                            invalid_rows.append(
-                                {
-                                    "row_number": row_number,
-                                    "header": header.value,
-                                    "message": f"{header.value.capitalize()} field cannot be null",
-                                }
-                            )
-
-                    field_type = current_field["type"]
-                    fn: Callable = switch_dict[field_type]
-
-                    if (
-                        fn(value, header.value, cell) is False
-                        and household_id_can_be_empty is False
-                        and header.value not in admin_columns_all
-                    ):
-                        message = (
-                            f"Sheet: {sheet.title!r}, Unexpected value: "
-                            f"{value} for type "
-                            f"{field_type.replace('_', ' ').lower()} "
-                            f"of field {header.value}"
-                        )
-                        invalid_rows.append(
-                            {
-                                "row_number": cell.row,
-                                "header": header.value,
-                                "message": message,
-                            }
-                        )
-
-                    header_value_doc = header.value.removeprefix("pp_")
-                    if header_value_doc in documents_numbers:
-                        if header_value_doc == "other_id_type_i_c":
-                            documents_numbers["other_id_type_i_c"]["names"].append(value)
-                        elif header_value_doc == "other_id_no_i_c":
-                            documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
-                        else:
-                            documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
-
-                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
-                        documents_dict = documents_numbers
-                        if document_key in identities_numbers:
-                            documents_dict = identities_numbers
-                        if document_key:
-                            documents_dict[document_key]["issuing_countries"].append(value)
-
-                    if header_value_doc in identities_numbers:
-                        identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
-
-                if current_household_id and current_household_id not in self.household_ids:
-                    message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
-                    invalid_rows.append(
-                        {
-                            "row_number": row_number,
-                            "header": "relationship_i_c",
-                            "message": message,
-                        }
+                    self._validate_cell(
+                        sheet=sheet,
+                        cell=cell,
+                        header=header,
+                        combined_fields=combined_fields,
+                        switch_dict=switch_dict,
+                        row_ctx=row_ctx,
+                        invalid_rows=invalid_rows,
+                        admin_area_code_tuples=admin_area_code_tuples,
+                        documents_numbers=documents_numbers,
+                        identities_numbers=identities_numbers,
                     )
 
-                for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
-                    documents_or_identity_dict = (
-                        identities_numbers if header_value_doc in identities_numbers else documents_numbers
-                    )
-                    documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
-                self.errors.extend(self._validate_pdu(row, first_row, row_number))
+                self._post_row_validations(row, first_row, row_ctx, invalid_rows)
 
-            if sheet.title == "Individuals":
-                for household_id, count in self.head_of_household_count.items():
-                    if count == 0:
-                        message = (
-                            f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
-                        )
-                        invalid_rows.append(
-                            {
-                                "row_number": 0,
-                                "header": "relationship_i_c",
-                                "message": message,
-                            }
-                        )
-                    elif count > 1:
-                        message = (
-                            f"Sheet: 'Individuals', "
-                            f"There are multiple head of households for household with id: {household_id}"
-                        )
-                        invalid_rows.append(
-                            {
-                                "row_number": 0,
-                                "header": "relationship_i_c",
-                                "message": message,
-                            }
-                        )
-
-            if sheet.title in ("Households", "People"):
-                admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
-                if admin_area_invalid_rows:
-                    invalid_rows.extend(admin_area_invalid_rows)
-
-            invalid_doc_rows = []
-            invalid_ident_rows = []
-            if sheet.title in ["Individuals", "People"]:
-                invalid_doc_rows = self.documents_validator(documents_numbers)
-                invalid_ident_rows = self.identity_validator(identities_numbers)
-
-            self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
+            self._post_sheet_validations(
+                sheet,
+                invalid_rows,
+                documents_numbers,
+                identities_numbers,
+                admin_area_code_tuples,
+                business_area_slug=business_area_slug,
+            )
 
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _is_empty_row(self, row: tuple[Cell, ...]) -> bool:
+        return all(cell.value in (None, "", " ") for cell in row)
+
+    def _resolve_special_columns(self, first_row):
+        household_id_idx = None
+        relationship_idx = None
+
+        for idx, cell in enumerate(first_row):
+            if cell.value == "household_id":
+                household_id_idx = idx
+            elif cell.value == "relationship_i_c":
+                relationship_idx = idx
+
+        return household_id_idx, relationship_idx
+
+    def _process_household_relationships(
+        self,
+        sheet,
+        row,
+        household_id_idx,
+        relationship_idx,
+    ):
+        current_household_id = None
+
+        if household_id_idx is not None:
+            value = row[household_id_idx].value
+            if isinstance(value, float) and value.is_integer():
+                value = int(value)
+
+            current_household_id = value
+
+            if sheet.title == "Households" and value:
+                self.household_ids.append(value)
+                self.head_of_household_count[value] = 0
+
+        if relationship_idx is not None and current_household_id and row[relationship_idx].value == "HEAD":
+            self.head_of_household_count[current_household_id] += 1
+
+        return {
+            "row_number": row[0].row,
+            "household_id": current_household_id,
+        }
+
+    def _validate_cell(
+        self,
+        sheet,
+        cell,
+        header,
+        combined_fields,
+        switch_dict,
+        **kwargs,
+    ):
+        row_ctx = kwargs.get("row_ctx")
+        invalid_rows = kwargs.get("invalid_rows")
+        admin_area_code_tuples = kwargs.get("admin_area_code_tuples")
+        documents_numbers = kwargs.get("documents_numbers")
+        identities_numbers = kwargs.get("identities_numbers")
+        field = combined_fields.get(header.value)
+        if not field:
+            return
+
+        value = cell.value
+        if isinstance(value, float) and value.is_integer():
+            value = int(value)
+
+        self._collect_admin_area_data(header.value, value, row_ctx["row_number"], admin_area_code_tuples, invalid_rows)
+
+        fn = switch_dict[field["type"]]
+        if not fn(value, header.value, cell):
+            invalid_rows.append(
+                {
+                    "row_number": cell.row,
+                    "header": header.value,
+                    "message": self._build_validation_message(sheet, value, field, header),
+                }
+            )
+
+        self._collect_documents_and_identities(header.value, value, documents_numbers, identities_numbers)
+
+    def _post_sheet_validations(
+        self,
+        sheet,
+        invalid_rows,
+        documents_numbers,
+        identities_numbers,
+        admin_area_code_tuples,
+        **kwargs,
+    ):
+        business_area_slug = kwargs.get("business_area_slug")
+        if sheet.title == "Individuals":
+            self._validate_heads_of_household(invalid_rows)
+
+        if sheet.title in ("Households", "People"):
+            invalid_rows.extend(self.validate_admin_areas(admin_area_code_tuples, business_area_slug))
+
+        if sheet.title in ("Individuals", "People"):
+            self.errors.extend(self.documents_validator(documents_numbers))
+            self.errors.extend(self.identity_validator(identities_numbers))
+
+        self.errors.extend(invalid_rows)
 
     def validate_admin_areas(
         self,
