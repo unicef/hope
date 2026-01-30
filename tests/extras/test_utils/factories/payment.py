@@ -9,13 +9,17 @@ from factory.django import DjangoModelFactory
 from hope.models import (
     Account,
     AccountType,
+    Approval,
+    ApprovalProcess,
     DeliveryMechanism,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -51,6 +55,22 @@ class PaymentPlanFactory(DjangoModelFactory):
             PaymentVerificationSummaryFactory(
                 payment_plan=self,
             )
+
+
+class ApprovalProcessFactory(DjangoModelFactory):
+    class Meta:
+        model = ApprovalProcess
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+
+
+class ApprovalFactory(DjangoModelFactory):
+    class Meta:
+        model = Approval
+
+    approval_process = factory.SubFactory(ApprovalProcessFactory)
+    type = Approval.APPROVAL
+    created_by = factory.SubFactory(UserFactory)
 
 
 class AccountTypeFactory(DjangoModelFactory):
@@ -106,6 +126,15 @@ class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
 class PaymentVerificationSummaryFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationSummary
+
+
+class PaymentPlanSplitFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanSplit
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    split_type = PaymentPlanSplit.SplitType.NO_SPLIT
+    order = 0
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):
@@ -176,6 +205,14 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
         model = WesternUnionInvoice
 
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
+
+
+class FinancialInstitutionFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialInstitution
+
+    name = factory.Sequence(lambda n: f"Financial Institution {n}")
+    type = FinancialInstitution.FinancialInstitutionType.BANK
 
 
 class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
