@@ -1658,18 +1658,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 attachments = household.get("_attachments", [])
                 household_collectors_data = []
                 self._process_hh_items(
-                    alternate_collector_counter,
-                    attachments,
-                    docs_and_identities_to_validate,
-                    documents_numbers,
-                    errors,
-                    expected_hh_fields,
-                    head_of_hh_counter,
-                    household,
-                    household_collectors_data,
-                    identities_numbers,
-                    primary_collector_counter,
-                    skip_validate_pictures,
+                    alternate_collector_counter=alternate_collector_counter,
+                    attachments=attachments,
+                    docs_and_identities_to_validate=docs_and_identities_to_validate,
+                    documents_numbers=documents_numbers,
+                    errors=errors,
+                    expected_hh_fields=expected_hh_fields,
+                    head_of_hh_counter=head_of_hh_counter,
+                    household=household,
+                    household_collectors_data=household_collectors_data,
+                    identities_numbers=identities_numbers,
+                    primary_collector_counter=primary_collector_counter,
+                    skip_validate_pictures=skip_validate_pictures,
                 )
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
                     errors.append(collectors_error)
@@ -1708,17 +1708,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             expected_hh_fields.discard(hh_field)
             if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                 alternate_collector_counter, head_of_hh_counter, primary_collector_counter = self._get_individuals(
-                    alternate_collector_counter,
-                    attachments,
-                    docs_and_identities_to_validate,
-                    documents_numbers,
-                    errors,
-                    head_of_hh_counter,
-                    hh_value,
-                    household_collectors_data,
-                    identities_numbers,
-                    primary_collector_counter,
-                    skip_validate_pictures,
+                    alternate_collector_counter=alternate_collector_counter,
+                    attachments=attachments,
+                    docs_and_identities_to_validate=docs_and_identities_to_validate,
+                    documents_numbers=documents_numbers,
+                    errors=errors,
+                    head_of_hh_counter=head_of_hh_counter,
+                    hh_value=hh_value,
+                    household_collectors_data=household_collectors_data,
+                    identities_numbers=identities_numbers,
+                    primary_collector_counter=primary_collector_counter,
+                    skip_validate_pictures=skip_validate_pictures,
                 )
 
                 self._add_errors(alternate_collector_counter, errors, head_of_hh_counter, primary_collector_counter)

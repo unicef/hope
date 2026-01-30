@@ -152,8 +152,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -202,8 +202,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -249,8 +249,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -280,8 +280,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -333,8 +333,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             self.program.id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
@@ -427,8 +427,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(
@@ -508,8 +508,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(

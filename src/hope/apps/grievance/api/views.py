@@ -655,8 +655,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
@@ -756,8 +756,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
 
         GrievanceNotification.send_all_notifications(notifications)

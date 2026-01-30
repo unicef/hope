@@ -328,8 +328,8 @@ def mark_as_duplicate_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_remove,
+        old_object=old_individual,
+        new_object=individual_to_remove,
     )
     individual_marked_as_duplicated.send(sender=Individual, instance=individual_to_remove)
     if household:
@@ -350,8 +350,8 @@ def mark_as_distinct_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_distinct,
+        old_object=old_individual,
+        new_object=individual_to_distinct,
     )
     individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
     if household := individual_to_distinct.household:

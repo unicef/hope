@@ -231,8 +231,8 @@ class RdiMergeTask:
                         "business_area",
                         None,
                         obj_hct.program_id,
-                        old_obj_hct,
-                        obj_hct,
+                        old_object=old_obj_hct,
+                        new_object=obj_hct,
                     )
 
             except Exception:

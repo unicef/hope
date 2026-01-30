@@ -552,9 +552,9 @@ class PaymentPlanService:
             excluded_ids,
             exclusion_reason,
             input_data,
-            rules,
-            vulnerability_score_max,
-            vulnerability_score_min,
+            rules=rules,
+            vulnerability_score_max=vulnerability_score_max,
+            vulnerability_score_min=vulnerability_score_min,
         )
 
         if name:

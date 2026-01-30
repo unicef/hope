@@ -362,8 +362,8 @@ class DeduplicateTask:
                 "business_area",
                 None,
                 registration_data_import.program_id,
-                old_rdi,
-                registration_data_import,
+                old_object=old_rdi,
+                new_object=registration_data_import,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
@@ -692,8 +692,8 @@ class DeduplicateTask:
             "business_area",
             None,
             registration_data_import.program_id,
-            old_rdi,
-            registration_data_import,
+            old_object=old_rdi,
+            new_object=registration_data_import,
         )
 
 
@@ -767,11 +767,11 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_signatures,
                 already_processed_signatures,
                 documents_to_dedup,
-                new_document_signatures_duplicated_in_batch,
-                new_document_signatures_in_batch_per_individual_dict,
-                new_documents,
-                possible_duplicates_individuals_id_set,
-                ticket_data_dict,
+                new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
+                new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
+                new_documents=new_documents,
+                possible_duplicates_individuals_id_set=possible_duplicates_individuals_id_set,
+                ticket_data_dict=ticket_data_dict,
             )
 
             try:

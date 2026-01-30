@@ -761,8 +761,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     "business_area",
                     None,
                     rdi_mis.program_id,
-                    old_rdi_mis,
-                    rdi_mis,
+                    old_object=old_rdi_mis,
+                    new_object=rdi_mis,
                 )
         except Exception:  # pragma: no cover
             # print stack trace

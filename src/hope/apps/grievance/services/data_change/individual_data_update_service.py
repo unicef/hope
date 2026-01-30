@@ -361,8 +361,8 @@ class IndividualDataUpdateService(DataChangeService):
             "business_area",
             user,
             program_qs,
-            old_individual,
-            new_individual,
+            old_object=old_individual,
+            new_object=new_individual,
         )
 
         update_es(individual)

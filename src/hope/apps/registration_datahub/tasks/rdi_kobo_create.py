@@ -236,9 +236,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     head_of_households_mapping,
                     household,
                     households_to_create,
-                    individuals_ids_hash_dict,
-                    submission_meta_data,
-                    household_count,
+                    individuals_ids_hash_dict=individuals_ids_hash_dict,
+                    submission_meta_data=submission_meta_data,
+                    household_count=household_count,
                 )
             self.bulk_creates(head_of_households_mapping, households_to_create)
             head_of_households_mapping = {}
@@ -259,8 +259,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             "business_area",
             None,
             self.registration_data_import.program_id,
-            self.registration_data_import,
-            rdi_mis,
+            old_object=self.registration_data_import,
+            new_object=rdi_mis,
         )
         if not self.business_area.postpone_deduplication:
             DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(

@@ -384,22 +384,22 @@ class UniversalIndividualUpdateService:
             individuals_to_update.append(individual)
             if len(individuals_to_update) == self.batch_size:
                 self.batch_update(
-                    document_fields_to_update,
-                    documents_to_create,
-                    documents_to_update,
-                    household_fields_to_update,
-                    households_to_update,
-                    individual_fields_to_update,
-                    individuals_to_update,
+                    document_fields_to_update=document_fields_to_update,
+                    documents_to_create=documents_to_create,
+                    documents_to_update=documents_to_update,
+                    household_fields_to_update=household_fields_to_update,
+                    households_to_update=households_to_update,
+                    individual_fields_to_update=individual_fields_to_update,
+                    individuals_to_update=individuals_to_update,
                 )
         self.batch_update(
-            document_fields_to_update,
-            documents_to_create,
-            documents_to_update,
-            household_fields_to_update,
-            households_to_update,
-            individual_fields_to_update,
-            individuals_to_update,
+            document_fields_to_update=document_fields_to_update,
+            documents_to_create=documents_to_create,
+            documents_to_update=documents_to_update,
+            household_fields_to_update=household_fields_to_update,
+            households_to_update=households_to_update,
+            individual_fields_to_update=individual_fields_to_update,
+            individuals_to_update=individuals_to_update,
         )
         return individual_ids
 

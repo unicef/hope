@@ -157,8 +157,8 @@ class IndividualXlsxUpdate:
             "business_area",
             None,
             None,
-            old_individual,
-            individual,
+            old_object=old_individual,
+            new_object=individual,
         )
 
         return individual

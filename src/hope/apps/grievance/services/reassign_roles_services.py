@@ -176,8 +176,8 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
             "business_area",
             user,
             individual_before_change.program.pk,
-            individual_before_change,
-            individual_after_change,
+            old_object=individual_before_change,
+            new_object=individual_after_change,
         )
     new_individual.relationship = HEAD
     new_individual.save()
@@ -186,8 +186,8 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
         "business_area",
         user,
         new_individual.program.pk,
-        old_individual_to_log,
-        new_individual,
+        old_object=old_individual_to_log,
+        new_object=new_individual,
     )
 
 
@@ -220,8 +220,8 @@ def reassign_roles_on_disable_individual_service(
                 "business_area",
                 user,
                 getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
-                old_individual,
-                new_individual,
+                old_object=old_individual,
+                new_object=new_individual,
             )
 
         if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
@@ -286,8 +286,8 @@ def reassign_roles_on_update_service(
                 "business_area",
                 user,
                 getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
-                old_individual,
-                new_individual,
+                old_object=old_individual,
+                new_object=new_individual,
             )
 
         if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
