@@ -9,6 +9,8 @@ from factory.django import DjangoModelFactory
 from hope.models import (
     Account,
     AccountType,
+    Approval,
+    ApprovalProcess,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -51,6 +53,22 @@ class PaymentPlanFactory(DjangoModelFactory):
             PaymentVerificationSummaryFactory(
                 payment_plan=self,
             )
+
+
+class ApprovalProcessFactory(DjangoModelFactory):
+    class Meta:
+        model = ApprovalProcess
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+
+
+class ApprovalFactory(DjangoModelFactory):
+    class Meta:
+        model = Approval
+
+    approval_process = factory.SubFactory(ApprovalProcessFactory)
+    type = Approval.APPROVAL
+    created_by = factory.SubFactory(UserFactory)
 
 
 class AccountTypeFactory(DjangoModelFactory):
