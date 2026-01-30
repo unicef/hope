@@ -91,7 +91,7 @@ class CopyProgramPopulation:
         self.copy_from_households = copy_from_households
         self.program = program
         self.rdi_merge_status = rdi_merge_status
-        self.create_collection = kwargs("create_collection", True)
+        self.create_collection = kwargs.get("create_collection", True)
         self.rdi = rdi
         self.manager = "objects" if rdi_merge_status == MergeStatusModel.MERGED else "pending_objects"
 
