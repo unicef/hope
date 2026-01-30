@@ -13,21 +13,32 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.generic_import.generic_upload_service.importer import Importer
-from hope.models import Document, Household, Individual, IndividualIdentity
+from hope.models import (
+    AccountType,
+    BusinessArea,
+    Country,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
+    Program,
+    RegistrationDataImport,
+)
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area) -> Program:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def rdi(business_area, program):
+def rdi(business_area, program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         business_area=business_area,
         program=program,
@@ -35,28 +46,28 @@ def rdi(business_area, program):
 
 
 @pytest.fixture
-def country():
+def country() -> Country:
     return CountryFactory(name="Somalia", short_name="SOM", iso_code2="SO", iso_code3="SOM")
 
 
 @pytest.fixture
-def document_type():
+def document_type() -> DocumentType:
     return DocumentTypeFactory(key="national_id", label="National ID")
 
 
 @pytest.fixture
-def account_type():
+def account_type() -> AccountType:
     return AccountTypeFactory(key="mobile_money", label="Mobile Money")
 
 
 @pytest.fixture
-def generic_financial_institutions():
+def generic_financial_institutions() -> None:
     FinancialInstitutionFactory(name="Generic Bank")
     FinancialInstitutionFactory(name="Generic Telco Company")
 
 
 @pytest.fixture
-def individual(business_area, program):
+def individual(business_area, program) -> Individual:
     return IndividualFactory(
         business_area=business_area,
         program=program,

@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import date
 
 import openpyxl
@@ -5,15 +6,16 @@ import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import XlsxSomaliaParser
+from hope.models import BusinessArea
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def somalia_excel_file(tmp_path):
+def somalia_excel_file(tmp_path) -> str:
     excel_file = tmp_path / "somalia_test.xlsx"
 
     wb = openpyxl.Workbook()
@@ -91,7 +93,7 @@ def somalia_excel_file(tmp_path):
 
 
 @pytest.fixture
-def make_excel_file(tmp_path):
+def make_excel_file(tmp_path) -> Callable:
     def _make(filename, headers, rows):
         filepath = tmp_path / filename
         wb = openpyxl.Workbook()

@@ -18,8 +18,12 @@ from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import XlsxSomaliaParser
 from hope.models import (
     Account,
+    AccountType,
+    BusinessArea,
+    Country,
     DataCollectingType,
     Document,
+    DocumentType,
     Household,
     Individual,
     Program,
@@ -28,12 +32,12 @@ from hope.models import (
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area) -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     bg = BeneficiaryGroupFactory(master_detail=False)
     return ProgramFactory(
@@ -45,7 +49,7 @@ def program(business_area):
 
 
 @pytest.fixture
-def registration_data_import(business_area, program):
+def registration_data_import(business_area, program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         business_area=business_area,
         program=program,
@@ -54,23 +58,23 @@ def registration_data_import(business_area, program):
 
 
 @pytest.fixture
-def mobile_account_type():
+def mobile_account_type() -> AccountType:
     return AccountTypeFactory(key="mobile", label="Mobile Money")
 
 
 @pytest.fixture
-def generic_financial_institutions():
+def generic_financial_institutions() -> None:
     FinancialInstitutionFactory(name="Generic Bank")
     FinancialInstitutionFactory(name="Generic Telco Company")
 
 
 @pytest.fixture
-def document_type_other_id():
+def document_type_other_id() -> DocumentType:
     return DocumentTypeFactory(key="other_id", label="Other ID")
 
 
 @pytest.fixture
-def somalia_country():
+def somalia_country() -> Country:
     return CountryFactory(
         name="Somalia",
         short_name="Somalia",
@@ -81,7 +85,7 @@ def somalia_country():
 
 
 @pytest.fixture
-def somalia_excel_file_exact(tmp_path):
+def somalia_excel_file_exact(tmp_path) -> str:
     excel_file = tmp_path / "somalia_exact.xlsx"
 
     wb = openpyxl.Workbook()
@@ -158,7 +162,7 @@ def somalia_excel_file_exact(tmp_path):
 
 
 @pytest.fixture
-def multi_household_excel_file(tmp_path):
+def multi_household_excel_file(tmp_path) -> str:
     excel_file = tmp_path / "multiple_households.xlsx"
     wb = openpyxl.Workbook()
     ws = wb.active
