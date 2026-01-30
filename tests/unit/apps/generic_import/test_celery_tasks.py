@@ -1,5 +1,6 @@
+from collections.abc import Generator
 import contextlib
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -13,26 +14,26 @@ from extras.test_utils.factories import (
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
 from hope.apps.registration_datahub.exceptions import AlreadyRunningError
-from hope.models import Household, ImportData, Individual, Program, RegistrationDataImport
+from hope.models import BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
 @pytest.fixture
-def user():
+def user() -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def import_data(business_area):
+def import_data(business_area) -> ImportData:
     return ImportDataFactory(
         status=ImportData.STATUS_PENDING,
         business_area_slug=business_area.slug,
@@ -41,7 +42,7 @@ def import_data(business_area):
 
 
 @pytest.fixture
-def rdi(business_area, program, user, import_data):
+def rdi(business_area, program, user, import_data) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,
         business_area=business_area,
@@ -55,7 +56,7 @@ def rdi(business_area, program, user, import_data):
 
 
 @pytest.fixture
-def mock_parser_class():
+def mock_parser_class() -> Generator[MagicMock, None, None]:
     with patch("hope.apps.generic_import.celery_tasks.XlsxSomaliaParser") as mock_cls:
         parser = Mock()
         parser.households_data = []
@@ -68,7 +69,7 @@ def mock_parser_class():
 
 
 @pytest.fixture
-def mock_importer_class():
+def mock_importer_class() -> Generator[MagicMock, None, None]:
     with patch("hope.apps.generic_import.celery_tasks.Importer") as mock_cls:
         importer = Mock()
         importer.import_data.return_value = []

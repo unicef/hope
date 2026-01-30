@@ -1,10 +1,11 @@
+from collections.abc import Callable
 from datetime import date, timedelta
 from io import BytesIO
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 import pytest
 
@@ -17,33 +18,31 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import ImportData, Program, RegistrationDataImport
-
-# ============ Core Fixtures ============
+from hope.models import BusinessArea, ImportData, Partner, Program, RegistrationDataImport, Role, RoleAssignment, User
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
 @pytest.fixture
-def user():
+def user() -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def upload_url():
+def upload_url() -> str:
     return reverse("generic_import:generic-import")
 
 
 @pytest.fixture
-def upload_file():
+def upload_file() -> Callable:
     def _create(filename="test.xlsx"):
         return SimpleUploadedFile(
             filename,
@@ -55,61 +54,49 @@ def upload_file():
 
 
 @pytest.fixture
-def authenticated_client(client, user):
+def authenticated_client(client, user) -> Client:
     client.force_login(user, "django.contrib.auth.backends.ModelBackend")
     return client
 
 
-# ============ Role Fixtures ============
-
-
 @pytest.fixture
-def import_role():
+def import_role() -> Role:
     return RoleFactory(permissions=[Permissions.GENERIC_IMPORT_DATA.value])
 
 
 @pytest.fixture
-def view_only_role():
+def view_only_role() -> Role:
     return RoleFactory(permissions=[Permissions.RDI_VIEW_LIST.value])
 
 
-# ============ Import Permission Chain ============
-
-
 @pytest.fixture
-def import_role_assignment(user, import_role, business_area, program):
+def import_role_assignment(user, import_role, business_area, program) -> RoleAssignment:
     return RoleAssignmentFactory(user=user, role=import_role, business_area=business_area, program=program)
 
 
 @pytest.fixture
-def client_with_import_permission(client, user, import_role_assignment):
+def client_with_import_permission(client, user, import_role_assignment) -> Client:
     client.force_login(user, "django.contrib.auth.backends.ModelBackend")
     return client
 
 
-# ============ Other BA Fixtures ============
-
-
 @pytest.fixture
-def other_business_area():
+def other_business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def other_program(other_business_area):
+def other_program(other_business_area) -> Program:
     return ProgramFactory(business_area=other_business_area, status=Program.ACTIVE)
 
 
-# ============ Test-specific Fixtures ============
-
-
 @pytest.fixture
-def view_only_role_assignment(user, view_only_role, business_area):
+def view_only_role_assignment(user, view_only_role, business_area) -> RoleAssignment:
     return RoleAssignmentFactory(user=user, role=view_only_role, business_area=business_area)
 
 
 @pytest.fixture
-def expired_import_role_assignment(user, import_role, business_area):
+def expired_import_role_assignment(user, import_role, business_area) -> RoleAssignment:
     return RoleAssignmentFactory(
         user=user,
         role=import_role,
@@ -119,52 +106,49 @@ def expired_import_role_assignment(user, import_role, business_area):
 
 
 @pytest.fixture
-def deactivated_business_area(business_area, import_role_assignment):
+def deactivated_business_area(business_area, import_role_assignment) -> BusinessArea:
     business_area.active = False
     business_area.save()
     return business_area
 
 
 @pytest.fixture
-def test_partner(business_area):
+def test_partner(business_area) -> Partner:
     partner = PartnerFactory()
     partner.allowed_business_areas.add(business_area)
     return partner
 
 
 @pytest.fixture
-def partner_import_role_assignment(test_partner, import_role, business_area, program):
+def partner_import_role_assignment(test_partner, import_role, business_area, program) -> RoleAssignment:
     return RoleAssignmentFactory(partner=test_partner, role=import_role, business_area=business_area, program=program)
 
 
 @pytest.fixture
-def user_with_test_partner(user, test_partner):
+def user_with_test_partner(user, test_partner) -> User:
     user.partner = test_partner
     user.save()
     return user
 
 
 @pytest.fixture
-def program_2(business_area):
+def program_2(business_area) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
 
 
 @pytest.fixture
-def ba_wide_role_assignment(user, import_role, business_area):
+def ba_wide_role_assignment(user, import_role, business_area) -> RoleAssignment:
     return RoleAssignmentFactory(user=user, role=import_role, business_area=business_area, program=None)
 
 
 @pytest.fixture
-def import_assignment_on_other_ba(user, import_role, other_business_area, other_program):
+def import_assignment_on_other_ba(user, import_role, other_business_area, other_program) -> RoleAssignment:
     return RoleAssignmentFactory(user=user, role=import_role, business_area=other_business_area, program=other_program)
 
 
 @pytest.fixture
-def invalid_upload_file():
+def invalid_upload_file() -> SimpleUploadedFile:
     return SimpleUploadedFile("test.pdf", b"fake content", content_type="application/pdf")
-
-
-# ============ Tests ============
 
 
 @pytest.mark.django_db

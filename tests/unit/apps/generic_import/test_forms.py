@@ -6,40 +6,41 @@ import pytest
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory, UserFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.generic_import.forms import GenericImportForm
+from hope.models import BusinessArea, Program, User
 
 
 @pytest.fixture
-def business_area():
+def business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def other_business_area():
+def other_business_area() -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area):
+def program(business_area) -> Program:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def other_program(other_business_area):
+def other_program(other_business_area) -> Program:
     return ProgramFactory(business_area=other_business_area)
 
 
 @pytest.fixture
-def restricted_program(business_area):
+def restricted_program(business_area) -> Program:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def user():
+def user() -> User:
     return UserFactory(partner=None)
 
 
 @pytest.fixture
-def superuser():
+def superuser() -> User:
     return UserFactory(is_superuser=True, partner=None)
 
 
