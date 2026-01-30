@@ -282,16 +282,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
         )
 
-    def handle_household(  # noqa: PLR0913, PLR0912 – intentional design by author
+    def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        individuals_ids_hash_dict: dict,
-        submission_meta_data: dict,
-        household_count: int,
+        **kwargs,
     ) -> None:
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
+        submission_meta_data: dict = kwargs.get("submission_meta_data")
+        household_count: int = kwargs.get("household_count")
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

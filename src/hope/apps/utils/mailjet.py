@@ -11,17 +11,14 @@ from hope.apps.utils.celery_tasks import send_email_task
 class MailjetClient:
     """Mailjet client to send emails using Mailjet API."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         subject: str,
         recipients: list[str],
         mailjet_template_id: int | None = None,
         html_body: str | None = None,
         text_body: str | None = None,
-        ccs: list[str] | None = None,
-        variables: dict[str, Any] | None = None,
-        from_email: str | None = None,
-        from_email_display: str | None = None,
+        **kwargs: Any,
     ) -> None:
         self.mailjet_template_id = mailjet_template_id
         self.html_body = html_body
@@ -29,10 +26,10 @@ class MailjetClient:
         subject_prefix = settings.EMAIL_SUBJECT_PREFIX
         self.subject = f"[{subject_prefix}] {subject}" if subject_prefix else subject
         self.recipients = settings.CATCH_ALL_EMAIL if settings.CATCH_ALL_EMAIL else recipients
-        self.ccs = ccs or []
-        self.variables = variables
-        self.from_email = from_email or settings.DEFAULT_EMAIL
-        self.from_email_display = from_email_display or settings.DEFAULT_EMAIL_DISPLAY
+        self.ccs = kwargs.get("ccs") or []
+        self.variables = kwargs.get("variables")
+        self.from_email = kwargs.get("from_email") or settings.DEFAULT_EMAIL
+        self.from_email_display = kwargs.get("from_email_display") or settings.DEFAULT_EMAIL_DISPLAY
         self.attachments = []
 
     def _validate_email_data(self) -> None:

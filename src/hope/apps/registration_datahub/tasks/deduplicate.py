@@ -1,5 +1,4 @@
 from collections import defaultdict
-from collections.abc import dict_keys
 from dataclasses import dataclass, fields
 import itertools
 import logging
@@ -7,7 +6,7 @@ from typing import Any, Iterable
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, CharField, F, Model, Q, QuerySet, Value, When
+from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
@@ -844,10 +843,10 @@ class HardDocumentDeduplication:
 
     def _deduplication_documents(
         self,
-        all_matching_number_documents_dict: dict[Any, Model | Any],
-        all_matching_number_documents_signatures: dict_keys[Any, Model | Any],
-        already_processed_signatures: set[Any],
-        documents_to_dedup: QuerySet[Any, Any],
+        all_matching_number_documents_dict,
+        all_matching_number_documents_signatures,
+        already_processed_signatures,
+        documents_to_dedup,
         **kwargs,
     ):
         new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(

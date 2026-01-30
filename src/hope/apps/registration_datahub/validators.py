@@ -1550,7 +1550,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(  # noqa: PLR0912
+    def validate_everything(
         self,
         submissions: list,
         business_area: BusinessArea,
@@ -1656,112 +1656,21 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     *self.expected_household_fields,
                 }
                 attachments = household.get("_attachments", [])
-                hh_value: list[dict]
                 household_collectors_data = []
-                for hh_field, hh_value in household.items():
-                    expected_hh_fields.discard(hh_field)
-                    if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
-                        individual: dict
-                        for individual in hh_value:
-                            if individual.get("role_i_c") in ["primary", "alternate"]:
-                                household_collectors_data.append(individual)
-                            expected_i_fields = {
-                                *self.expected_individuals_fields,
-                            }
-                            current_individual_docs_and_identities = defaultdict(dict)
-                            i_field: str
-                            for i_field, i_value in individual.items():
-                                if i_field in documents_numbers:
-                                    if i_field == "other_id_type_i_c":
-                                        documents_numbers["other_id_type_i_c"]["names"].append(i_value)
-                                    elif i_field == "other_id_no_i_c":
-                                        documents_numbers["other_id_type_i_c"]["validation_data"].append(
-                                            {"value": i_value}
-                                        )
-                                        documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
-                                    else:
-                                        documents_numbers[i_field]["validation_data"].append({"value": i_value})
-                                        documents_numbers[i_field]["numbers"].append(i_value)
-                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-                                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
-                                    documents_dict: dict[str, dict[str, Any]] = documents_numbers
-                                    if document_key in identities_numbers:
-                                        documents_dict = identities_numbers
-                                    documents_dict[document_key]["issuing_countries"].append(i_value)
-
-                                if i_field in identities_numbers:
-                                    identities_numbers[i_field]["numbers"].append(i_value)
-                                    identities_numbers[i_field]["validation_data"].append({"value": i_value})
-
-                                if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
-                                    head_of_hh_counter += 1
-                                if i_field == "role_i_c":
-                                    role = i_value.upper()
-                                    if role == ROLE_PRIMARY:
-                                        primary_collector_counter += 1
-                                    elif role == ROLE_ALTERNATE:
-                                        alternate_collector_counter += 1
-
-                                expected_i_fields.discard(i_field)
-                                error = self._get_field_type_error(
-                                    i_field,
-                                    i_value,
-                                    attachments,
-                                    skip_validate_pictures,
-                                )
-                                if error:
-                                    errors.append(error)
-
-                            docs_and_identities_to_validate.append(current_individual_docs_and_identities)
-
-                            i_expected_field_errors = [
-                                {
-                                    "header": field,
-                                    "message": f"Missing individual required field {field}",
-                                }
-                                for field in expected_i_fields
-                            ]
-                            errors.extend(i_expected_field_errors)
-
-                        if head_of_hh_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": "Household has to have a head of household",
-                                }
-                            )
-                        if head_of_hh_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": "Only one person can be a head of household",
-                                }
-                            )
-                        if primary_collector_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Household must have a primary collector",
-                                }
-                            )
-                        if primary_collector_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Only one person can be a primary collector",
-                                }
-                            )
-                        if alternate_collector_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Only one person can be a alternate collector",
-                                }
-                            )
-                    else:
-                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
-                        if error:
-                            errors.append(error)
+                self._process_hh_items(
+                    alternate_collector_counter,
+                    attachments,
+                    docs_and_identities_to_validate,
+                    documents_numbers,
+                    errors,
+                    expected_hh_fields,
+                    head_of_hh_counter,
+                    household,
+                    household_collectors_data,
+                    identities_numbers,
+                    primary_collector_counter,
+                    skip_validate_pictures,
+                )
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
                     errors.append(collectors_error)
                 hh_expected_field_errors = [
@@ -1780,3 +1689,155 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _process_hh_items(self, **kwargs):
+        alternate_collector_counter = kwargs.get("alternate_collector_counter")
+        attachments = kwargs.get("attachments")
+        docs_and_identities_to_validate = kwargs.get("docs_and_identities_to_validate")
+        documents_numbers = kwargs.get("documents_numbers")
+        errors = kwargs.get("errors")
+        expected_hh_fields = kwargs.get("expected_hh_fields")
+        head_of_hh_counter = kwargs.get("head_of_hh_counter")
+        household = kwargs.get("household")
+        household_collectors_data = kwargs.get("household_collectors_data")
+        identities_numbers = kwargs.get("identities_numbers")
+        primary_collector_counter = kwargs.get("primary_collector_counter")
+        skip_validate_pictures = kwargs.get("skip_validate_pictures")
+
+        for hh_field, hh_value in household.items():
+            expected_hh_fields.discard(hh_field)
+            if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
+                alternate_collector_counter, head_of_hh_counter, primary_collector_counter = self._get_individuals(
+                    alternate_collector_counter,
+                    attachments,
+                    docs_and_identities_to_validate,
+                    documents_numbers,
+                    errors,
+                    head_of_hh_counter,
+                    hh_value,
+                    household_collectors_data,
+                    identities_numbers,
+                    primary_collector_counter,
+                    skip_validate_pictures,
+                )
+
+                self._add_errors(alternate_collector_counter, errors, head_of_hh_counter, primary_collector_counter)
+            else:
+                error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
+                if error:
+                    errors.append(error)
+
+    def _get_individuals(self, **kwargs):
+        alternate_collector_counter = kwargs.get("alternate_collector_counter")
+        attachments = kwargs.get("attachments")
+        docs_and_identities_to_validate = kwargs.get("docs_and_identities_to_validate")
+        documents_numbers = kwargs.get("documents_numbers")
+        errors = kwargs.get("errors")
+        head_of_hh_counter = kwargs.get("head_of_hh_counter")
+        hh_value = kwargs.get("hh_value")
+        household_collectors_data = kwargs.get("household_collectors_data")
+        identities_numbers = kwargs.get("identities_numbers")
+        primary_collector_counter = kwargs.get("primary_collector_counter")
+        skip_validate_pictures = kwargs.get("skip_validate_pictures")
+        individual: dict
+        for individual in hh_value:
+            if individual.get("role_i_c") in ["primary", "alternate"]:
+                household_collectors_data.append(individual)
+            expected_i_fields = {
+                *self.expected_individuals_fields,
+            }
+            current_individual_docs_and_identities = defaultdict(dict)
+            i_field: str
+            for i_field, i_value in individual.items():
+                if i_field in documents_numbers:
+                    self._handle_documents(documents_numbers, i_field, i_value)
+                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
+                    documents_dict: dict[str, dict[str, Any]] = documents_numbers
+                    if document_key in identities_numbers:
+                        documents_dict = identities_numbers
+                    documents_dict[document_key]["issuing_countries"].append(i_value)
+
+                if i_field in identities_numbers:
+                    identities_numbers[i_field]["numbers"].append(i_value)
+                    identities_numbers[i_field]["validation_data"].append({"value": i_value})
+
+                if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
+                    head_of_hh_counter += 1
+                if i_field == "role_i_c":
+                    role = i_value.upper()
+                    if role == ROLE_PRIMARY:
+                        primary_collector_counter += 1
+                    elif role == ROLE_ALTERNATE:
+                        alternate_collector_counter += 1
+
+                expected_i_fields.discard(i_field)
+                error = self._get_field_type_error(
+                    i_field,
+                    i_value,
+                    attachments,
+                    skip_validate_pictures,
+                )
+                if error:
+                    errors.append(error)
+
+            docs_and_identities_to_validate.append(current_individual_docs_and_identities)
+
+            i_expected_field_errors = [
+                {
+                    "header": field,
+                    "message": f"Missing individual required field {field}",
+                }
+                for field in expected_i_fields
+            ]
+            errors.extend(i_expected_field_errors)
+        return alternate_collector_counter, head_of_hh_counter, primary_collector_counter
+
+    def _handle_documents(self, documents_numbers, i_field, i_value):
+        if i_field == "other_id_type_i_c":
+            documents_numbers["other_id_type_i_c"]["names"].append(i_value)
+        elif i_field == "other_id_no_i_c":
+            documents_numbers["other_id_type_i_c"]["validation_data"].append({"value": i_value})
+            documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
+        else:
+            documents_numbers[i_field]["validation_data"].append({"value": i_value})
+            documents_numbers[i_field]["numbers"].append(i_value)
+
+    def _add_errors(
+        self, alternate_collector_counter: Any | None, errors, head_of_hh_counter, primary_collector_counter
+    ):
+        if head_of_hh_counter == 0:
+            errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Household has to have a head of household",
+                }
+            )
+        if head_of_hh_counter > 1:
+            errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Only one person can be a head of household",
+                }
+            )
+        if primary_collector_counter == 0:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Household must have a primary collector",
+                }
+            )
+        if primary_collector_counter > 1:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a primary collector",
+                }
+            )
+        if alternate_collector_counter > 1:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a alternate collector",
+                }
+            )

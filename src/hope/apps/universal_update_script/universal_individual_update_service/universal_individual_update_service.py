@@ -403,16 +403,17 @@ class UniversalIndividualUpdateService:
         )
         return individual_ids
 
-    def batch_update(  # noqa: PLR0913
+    def batch_update(
         self,
-        document_fields_to_update: list,
-        documents_to_create: list,
-        documents_to_update: list,
-        household_fields_to_update: list,
-        households_to_update: list,
-        individual_fields_to_update: list,
-        individuals_to_update: list,
+        **kwargs,
     ) -> None:
+        document_fields_to_update: list = kwargs.get("document_fields_to_update", [])
+        documents_to_create: list = kwargs.get("documents_to_create", [])
+        documents_to_update: list = kwargs.get("documents_to_update", [])
+        household_fields_to_update: list = kwargs.get("household_fields_to_update", [])
+        households_to_update: list = kwargs.get("households_to_update", [])
+        individual_fields_to_update: list = kwargs.get("individual_fields_to_update", [])
+        individuals_to_update: list = kwargs.get("individuals_to_update", [])
         Document.objects.bulk_update(documents_to_update, document_fields_to_update)
         Document.objects.bulk_create(documents_to_create)
         Household.objects.bulk_update(households_to_update, household_fields_to_update)
