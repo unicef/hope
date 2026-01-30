@@ -33,6 +33,8 @@ from .household import (
 from .payment import (
     AccountFactory,
     AccountTypeFactory,
+    ApprovalFactory,
+    ApprovalProcessFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -50,6 +52,7 @@ from .payment import (
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import RegistrationDataImportFactory
 from .steficon import RuleCommitFactory, RuleFactory
+from .targeting import TargetingCriteriaRuleFactory
 
 __all__ = [
     "AdminAreaLimitedToFactory",
@@ -76,6 +79,8 @@ __all__ = [
     "IndividualRoleInHouseholdFactory",
     "AccountFactory",
     "AccountTypeFactory",
+    "ApprovalFactory",
+    "ApprovalProcessFactory",
     "DeliveryMechanismFactory",
     "FinancialServiceProviderFactory",
     "FspXlsxTemplatePerDeliveryMechanismFactory",
@@ -96,6 +101,7 @@ __all__ = [
     "RoleFactory",
     "RuleCommitFactory",
     "RuleFactory",
+    "TargetingCriteriaRuleFactory",
     "SurveyFactory",
     "UserFactory",
     "WesternUnionInvoiceFactory",
