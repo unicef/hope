@@ -103,8 +103,115 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            return 'vendor';
+            if (
+              id.includes('@mui/') ||
+              id.includes('@emotion/') ||
+              id.includes('styled-components') ||
+              id.includes('@base-ui-components')
+            )
+              return 'vendor-mui';
+
+            if (
+              id.includes('chart.js') ||
+              id.includes('chartjs-plugin') ||
+              id.includes('react-chartjs')
+            )
+              return 'vendor-charts';
+
+            if (id.includes('/formik/') || id.includes('/yup/'))
+              return 'vendor-forms';
+
+            if (
+              id.includes('/moment/') ||
+              id.includes('/date-fns/') ||
+              id.includes('@date-io/')
+            )
+              return 'vendor-dates';
+
+            if (id.includes('@sentry/')) return 'vendor-sentry';
+
+            if (
+              id.includes('/react-dom/') ||
+              id.includes('/react-router') ||
+              id.includes('/react/') ||
+              id.includes('/@tanstack/') ||
+              id.includes('/react-i18next/') ||
+              id.includes('/i18next/')
+            )
+              return 'vendor-react';
+
+            return 'vendor-misc';
           }
+
+          // Feature chunks
+          if (
+            id.includes('/components/grievances/') ||
+            id.includes('/pages/grievances/') ||
+            id.includes('/routers/GrievanceRoutes')
+          )
+            return 'feature-grievances';
+
+          if (
+            id.includes('/components/paymentmodule') ||
+            id.includes('/pages/paymentmodule') ||
+            id.includes('/tables/paymentmodule') ||
+            id.includes('/routers/PaymentModuleRoutes') ||
+            id.includes('/routers/PaymentVerificationRoutes') ||
+            id.includes('/components/payments/') ||
+            id.includes('/pages/payments/') ||
+            id.includes('/tables/payments/')
+          )
+            return 'feature-payments';
+
+          if (
+            id.includes('/components/accountability/') ||
+            id.includes('/pages/accountability/') ||
+            id.includes('/tables/Communication/') ||
+            id.includes('/tables/Surveys/') ||
+            id.includes('/tables/Feedback/') ||
+            id.includes('/routers/AccountabilityRoutes')
+          )
+            return 'feature-accountability';
+
+          if (
+            id.includes('/components/targeting/') ||
+            id.includes('/pages/targeting/') ||
+            id.includes('/tables/targeting/') ||
+            id.includes('/routers/TargetingRoutes') ||
+            id.includes('/forms/TargetingCriteria') ||
+            id.includes('/dialogs/targetPopulation/')
+          )
+            return 'feature-targeting';
+
+          if (
+            id.includes('/components/rdi/') ||
+            id.includes('/pages/rdi/') ||
+            id.includes('/tables/rdi/') ||
+            id.includes('/routers/RegistrationRoutes')
+          )
+            return 'feature-rdi';
+
+          if (
+            id.includes('/components/population/') ||
+            id.includes('/pages/population/') ||
+            id.includes('/tables/population/') ||
+            id.includes('/components/people/') ||
+            id.includes('/pages/people/') ||
+            id.includes('/tables/people/') ||
+            id.includes('/routers/PopulationRoutes') ||
+            id.includes('/components/periodicDataUpdates/')
+          )
+            return 'feature-population';
+
+          if (
+            id.includes('/components/programs/') ||
+            id.includes('/pages/program/') ||
+            id.includes('/tables/ProgrammesTable/') ||
+            id.includes('/tables/ProgramCycle') ||
+            id.includes('/routers/ProgramRoutes') ||
+            id.includes('/dialogs/programs/')
+          )
+            return 'feature-programs';
         },
       },
     },
