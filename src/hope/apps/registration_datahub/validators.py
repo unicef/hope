@@ -172,7 +172,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -183,7 +183,39 @@ class ImportDataInstanceValidator:
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
-                    self._validate_other_id_type(invalid_rows, is_xlsx, issuing_countries, key_name, values)
+                    for name, value, validation_data, issuing_country in zip(
+                        values["names"],
+                        values["numbers"],
+                        values["validation_data"],
+                        issuing_countries,
+                        strict=False,
+                    ):
+                        row_number = validation_data.get("row_number")
+                        if not name and value:
+                            error = {
+                                "header": key_name,
+                                "message": f"Name for {key_name} is required, when number is provided: no: {value}",
+                            }
+                            if is_xlsx is True:
+                                error["row_number"] = row_number
+                            invalid_rows.append(error)
+                        if name and not value:
+                            error = {
+                                "header": key_name,
+                                "message": f"Number for {key_name} is required, when name is provided",
+                            }
+                            if is_xlsx is True:
+                                error["row_number"] = row_number
+                            invalid_rows.append(error)
+                        if (name or value) and not issuing_country:
+                            error = {
+                                "header": key_name,
+                                "message": f"Issuing country for {key_name} is required, "
+                                "when any document data are provided",
+                            }
+                            if is_xlsx is True:
+                                error["row_number"] = row_number
+                            invalid_rows.append(error)
                 else:
                     for validation_data, value, issuing_country in zip_longest(
                         values["validation_data"], values["numbers"], issuing_countries
@@ -213,42 +245,6 @@ class ImportDataInstanceValidator:
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
-
-    def _validate_other_id_type(
-        self, invalid_rows: list[Any], is_xlsx: bool, issuing_countries: list[None] | Any, key_name: str | Any, values
-    ):
-        for name, value, validation_data, issuing_country in zip(
-            values["names"],
-            values["numbers"],
-            values["validation_data"],
-            issuing_countries,
-            strict=False,
-        ):
-            row_number = validation_data.get("row_number")
-            if not name and value:
-                error = {
-                    "header": key_name,
-                    "message": f"Name for {key_name} is required, when number is provided: no: {value}",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = row_number
-                invalid_rows.append(error)
-            if name and not value:
-                error = {
-                    "header": key_name,
-                    "message": f"Number for {key_name} is required, when name is provided",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = row_number
-                invalid_rows.append(error)
-            if (name or value) and not issuing_country:
-                error = {
-                    "header": key_name,
-                    "message": f"Issuing country for {key_name} is required, when any document data are provided",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = row_number
-                invalid_rows.append(error)
 
     def identity_validator(self, identities_numbers_dict: dict, is_xlsx: bool = True) -> list[dict[str, Any]]:
         try:
@@ -458,7 +454,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -474,45 +470,39 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             choice_type = self.all_fields[header]["type"]
 
             if choice_type == TYPE_SELECT_ONE:
-                return self._validate_choise_select_one(choices, value)
+                if isinstance(value, str):
+                    return value.strip() in choices
+                if value not in choices:
+                    str_value = str(value)
+                    return str_value in choices
+                return False
 
             if choice_type == TYPE_SELECT_MANY:
-                return self._validate_choice_select_many(choices, value)
+                if isinstance(value, str):
+                    if "," in value:
+                        selected_choices = value.split(",")
+                    elif ";" in value:
+                        selected_choices = value.split(";")
+                    else:
+                        selected_choices = value.split(" ")
+                else:
+                    selected_choices = [value]
+
+                for unstrip_choice in selected_choices:
+                    if isinstance(unstrip_choice, str):
+                        choice = unstrip_choice.strip()
+                        if choice in choices or choice.upper() in choices:
+                            return True
+                    else:
+                        choice = unstrip_choice
+                    if choice in choices:
+                        return True
+                return False
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
-
-    def _validate_choice_select_many(self, choices, value: str) -> bool:
-        if isinstance(value, str):
-            if "," in value:
-                selected_choices = value.split(",")
-            elif ";" in value:
-                selected_choices = value.split(";")
-            else:
-                selected_choices = value.split(" ")
-        else:
-            selected_choices = [value]
-
-        for unstrip_choice in selected_choices:
-            if isinstance(unstrip_choice, str):
-                choice = unstrip_choice.strip()
-                if choice in choices or choice.upper() in choices:
-                    return True
-            else:
-                choice = unstrip_choice
-            if choice in choices:
-                return True
-        return False
-
-    def _validate_choise_select_one(self, choices, value: str) -> bool:
-        if isinstance(value, str):
-            return value.strip() in choices
-        if value not in choices:
-            str_value = str(value)
-            return str_value in choices
-        return False
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
@@ -564,155 +554,267 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
         try:
             first_row = sheet[1]
-            combined_fields = self.combined_fields[sheet.title.lower()]
-            switch_dict = self._get_validator_map()
+            combined_fields = {
+                **self.combined_fields[sheet.title.lower()],
+            }
 
-            household_id_idx, relationship_idx = self._resolve_special_columns(first_row)
+            switch_dict: dict[str, Callable] = {
+                "ID": self.not_empty_validator,
+                "STRING": self.string_validator,
+                "INTEGER": self.integer_validator,
+                "DECIMAL": self.float_validator,
+                "BOOL": self.bool_validator,
+                "DATE": self.date_validator,
+                "DATETIME": self.date_validator,
+                "SELECT_ONE": self.choice_validator,
+                "SELECT_MANY": self.choice_validator,
+                "PHONE_NUMBER": self.phone_validator,
+                "GEOPOINT": self.geolocation_validator,
+                "IMAGE": self.image_validator,
+                "LIST_OF_IDS": self.list_of_integer_validator,
+            }
 
-            admin_area_code_tuples = []
             invalid_rows = []
 
-            identities_numbers = self._init_identities_numbers()
-            documents_numbers = self._init_documents_numbers()
+            household_id_col_idx = None
+            relationship_col_idx = None
+            for idx, header_cell in enumerate(first_row):
+                if header_cell.value == "household_id":
+                    household_id_col_idx = idx
+                elif header_cell.value == "relationship_i_c":
+                    relationship_col_idx = idx
+
+            identities_numbers = {
+                "unhcr_id_no_i_c": {
+                    "partner": "UNHCR",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "scope_id_no_i_c": {
+                    "partner": "WFP",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+            }
+            documents_numbers: dict[str, dict[str, Any]] = {
+                "birth_certificate_no_i_c": {
+                    "type": "BIRTH_CERTIFICATE",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "drivers_license_no_i_c": {
+                    "type": "DRIVERS_LICENSE",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "electoral_card_no_i_c": {
+                    "type": "ELECTORAL_CARD",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "national_id_no_i_c": {
+                    "type": "NATIONAL_ID",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "national_passport_no_i_c": {
+                    "type": "NATIONAL_PASSPORT",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "tax_id_no_i_c": {
+                    "type": "TAX_ID",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "other_id_type_i_c": {
+                    "type": "OTHER",
+                    "names": [],
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "other_id_no_i_c": {},
+            }
+
+            def has_value(cell: Cell) -> bool:
+                if cell.value is None:
+                    return False
+                if isinstance(cell.value, str):
+                    return cell.value.strip() != ""
+                return True
+
+            admin_area_code_tuples = []
 
             for row in sheet.iter_rows(min_row=3):
-                if self._is_empty_row(row):
+                # openpyxl keeps iterating on empty rows so need to omit empty rows
+                if not any(has_value(cell) for cell in row):
                     continue
 
-                row_ctx = self._process_household_relationships(sheet, row, household_id_idx, relationship_idx)
+                current_household_id = None
+                if household_id_col_idx is not None:
+                    household_id_cell = row[household_id_col_idx]
+                    if value := household_id_cell.value:
+                        if isinstance(value, float) and value.is_integer():
+                            value = int(value)
+                        current_household_id = value
+                        if sheet.title == "Households":
+                            self.household_ids.append(current_household_id)
+                            self.head_of_household_count[current_household_id] = 0
+
+                if relationship_col_idx is not None and current_household_id is not None:
+                    relationship_cell = row[relationship_col_idx]
+                    if relationship_cell.value == "HEAD":
+                        self.head_of_household_count[current_household_id] += 1
 
                 for cell, header in zip(row, first_row, strict=True):
-                    self._validate_cell(
-                        sheet=sheet,
-                        cell=cell,
-                        header=header,
-                        combined_fields=combined_fields,
-                        switch_dict=switch_dict,
-                        row_ctx=row_ctx,
-                        invalid_rows=invalid_rows,
-                        admin_area_code_tuples=admin_area_code_tuples,
-                        documents_numbers=documents_numbers,
-                        identities_numbers=identities_numbers,
+                    current_field = combined_fields.get(header.value)
+                    if not current_field:
+                        continue
+
+                    row_number = cell.row
+
+                    value = cell.value
+                    if isinstance(value, float) and value.is_integer():
+                        value = int(value)
+
+                    household_id_can_be_empty = header.value == "household_id" and sheet.title != "Households"
+
+                    people_admin_columns = (
+                        "pp_admin1_i_c",
+                        "pp_admin2_i_c",
+                        "pp_admin3_i_c",
+                    )
+                    hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
+                    admin_columns_all = people_admin_columns + hh_admin_columns
+                    if header.value in admin_columns_all:
+                        if cell.value:
+                            admin_area_code_tuples.append((row_number, header.value, cell.value))
+                        # admin3 is not required for now
+                        elif not cell.value and header.value not in (
+                            "admin3_h_c",
+                            "pp_admin3_i_c",
+                        ):
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": header.value,
+                                    "message": f"{header.value.capitalize()} field cannot be null",
+                                }
+                            )
+
+                    field_type = current_field["type"]
+                    fn: Callable = switch_dict[field_type]
+
+                    if (
+                        fn(value, header.value, cell) is False
+                        and household_id_can_be_empty is False
+                        and header.value not in admin_columns_all
+                    ):
+                        message = (
+                            f"Sheet: {sheet.title!r}, Unexpected value: "
+                            f"{value} for type "
+                            f"{field_type.replace('_', ' ').lower()} "
+                            f"of field {header.value}"
+                        )
+                        invalid_rows.append(
+                            {
+                                "row_number": cell.row,
+                                "header": header.value,
+                                "message": message,
+                            }
+                        )
+
+                    header_value_doc = header.value.removeprefix("pp_")
+                    if header_value_doc in documents_numbers:
+                        if header_value_doc == "other_id_type_i_c":
+                            documents_numbers["other_id_type_i_c"]["names"].append(value)
+                        elif header_value_doc == "other_id_no_i_c":
+                            documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
+                        else:
+                            documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
+
+                    if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+                        document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
+                        documents_dict = documents_numbers
+                        if document_key in identities_numbers:
+                            documents_dict = identities_numbers
+                        if document_key:
+                            documents_dict[document_key]["issuing_countries"].append(value)
+
+                    if header_value_doc in identities_numbers:
+                        identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
+
+                if current_household_id and current_household_id not in self.household_ids:
+                    message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
+                    invalid_rows.append(
+                        {
+                            "row_number": row_number,
+                            "header": "relationship_i_c",
+                            "message": message,
+                        }
                     )
 
-                self._post_row_validations(row, first_row, row_ctx, invalid_rows)
+                for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
+                    documents_or_identity_dict = (
+                        identities_numbers if header_value_doc in identities_numbers else documents_numbers
+                    )
+                    documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
+                self.errors.extend(self._validate_pdu(row, first_row, row_number))
 
-            self._post_sheet_validations(
-                sheet,
-                invalid_rows,
-                documents_numbers,
-                identities_numbers,
-                admin_area_code_tuples,
-                business_area_slug=business_area_slug,
-            )
+            if sheet.title == "Individuals":
+                for household_id, count in self.head_of_household_count.items():
+                    if count == 0:
+                        message = (
+                            f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
+                        )
+                        invalid_rows.append(
+                            {
+                                "row_number": 0,
+                                "header": "relationship_i_c",
+                                "message": message,
+                            }
+                        )
+                    elif count > 1:
+                        message = (
+                            f"Sheet: 'Individuals', "
+                            f"There are multiple head of households for household with id: {household_id}"
+                        )
+                        invalid_rows.append(
+                            {
+                                "row_number": 0,
+                                "header": "relationship_i_c",
+                                "message": message,
+                            }
+                        )
+
+            if sheet.title in ("Households", "People"):
+                admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
+                if admin_area_invalid_rows:
+                    invalid_rows.extend(admin_area_invalid_rows)
+
+            invalid_doc_rows = []
+            invalid_ident_rows = []
+            if sheet.title in ["Individuals", "People"]:
+                invalid_doc_rows = self.documents_validator(documents_numbers)
+                invalid_ident_rows = self.identity_validator(identities_numbers)
+
+            self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
 
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
-
-    def _is_empty_row(self, row: tuple[Cell, ...]) -> bool:
-        return all(cell.value in (None, "", " ") for cell in row)
-
-    def _resolve_special_columns(self, first_row):
-        household_id_idx = None
-        relationship_idx = None
-
-        for idx, cell in enumerate(first_row):
-            if cell.value == "household_id":
-                household_id_idx = idx
-            elif cell.value == "relationship_i_c":
-                relationship_idx = idx
-
-        return household_id_idx, relationship_idx
-
-    def _process_household_relationships(
-        self,
-        sheet,
-        row,
-        household_id_idx,
-        relationship_idx,
-    ):
-        current_household_id = None
-
-        if household_id_idx is not None:
-            value = row[household_id_idx].value
-            if isinstance(value, float) and value.is_integer():
-                value = int(value)
-
-            current_household_id = value
-
-            if sheet.title == "Households" and value:
-                self.household_ids.append(value)
-                self.head_of_household_count[value] = 0
-
-        if relationship_idx is not None and current_household_id and row[relationship_idx].value == "HEAD":
-            self.head_of_household_count[current_household_id] += 1
-
-        return {
-            "row_number": row[0].row,
-            "household_id": current_household_id,
-        }
-
-    def _validate_cell(
-        self,
-        sheet,
-        cell,
-        header,
-        combined_fields,
-        switch_dict,
-        **kwargs,
-    ):
-        row_ctx = kwargs.get("row_ctx")
-        invalid_rows = kwargs.get("invalid_rows")
-        admin_area_code_tuples = kwargs.get("admin_area_code_tuples")
-        documents_numbers = kwargs.get("documents_numbers")
-        identities_numbers = kwargs.get("identities_numbers")
-        field = combined_fields.get(header.value)
-        if not field:
-            return
-
-        value = cell.value
-        if isinstance(value, float) and value.is_integer():
-            value = int(value)
-
-        self._collect_admin_area_data(header.value, value, row_ctx["row_number"], admin_area_code_tuples, invalid_rows)
-
-        fn = switch_dict[field["type"]]
-        if not fn(value, header.value, cell):
-            invalid_rows.append(
-                {
-                    "row_number": cell.row,
-                    "header": header.value,
-                    "message": self._build_validation_message(sheet, value, field, header),
-                }
-            )
-
-        self._collect_documents_and_identities(header.value, value, documents_numbers, identities_numbers)
-
-    def _post_sheet_validations(
-        self,
-        sheet,
-        invalid_rows,
-        documents_numbers,
-        identities_numbers,
-        admin_area_code_tuples,
-        **kwargs,
-    ):
-        business_area_slug = kwargs.get("business_area_slug")
-        if sheet.title == "Individuals":
-            self._validate_heads_of_household(invalid_rows)
-
-        if sheet.title in ("Households", "People"):
-            invalid_rows.extend(self.validate_admin_areas(admin_area_code_tuples, business_area_slug))
-
-        if sheet.title in ("Individuals", "People"):
-            self.errors.extend(self.documents_validator(documents_numbers))
-            self.errors.extend(self.identity_validator(identities_numbers))
-
-        self.errors.extend(invalid_rows)
 
     def validate_admin_areas(
         self,
@@ -1438,7 +1540,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(
+    def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
         business_area: BusinessArea,
@@ -1544,21 +1646,112 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     *self.expected_household_fields,
                 }
                 attachments = household.get("_attachments", [])
+                hh_value: list[dict]
                 household_collectors_data = []
-                self._process_hh_items(
-                    alternate_collector_counter=alternate_collector_counter,
-                    attachments=attachments,
-                    docs_and_identities_to_validate=docs_and_identities_to_validate,
-                    documents_numbers=documents_numbers,
-                    errors=errors,
-                    expected_hh_fields=expected_hh_fields,
-                    head_of_hh_counter=head_of_hh_counter,
-                    household=household,
-                    household_collectors_data=household_collectors_data,
-                    identities_numbers=identities_numbers,
-                    primary_collector_counter=primary_collector_counter,
-                    skip_validate_pictures=skip_validate_pictures,
-                )
+                for hh_field, hh_value in household.items():
+                    expected_hh_fields.discard(hh_field)
+                    if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
+                        individual: dict
+                        for individual in hh_value:
+                            if individual.get("role_i_c") in ["primary", "alternate"]:
+                                household_collectors_data.append(individual)
+                            expected_i_fields = {
+                                *self.expected_individuals_fields,
+                            }
+                            current_individual_docs_and_identities = defaultdict(dict)
+                            i_field: str
+                            for i_field, i_value in individual.items():
+                                if i_field in documents_numbers:
+                                    if i_field == "other_id_type_i_c":
+                                        documents_numbers["other_id_type_i_c"]["names"].append(i_value)
+                                    elif i_field == "other_id_no_i_c":
+                                        documents_numbers["other_id_type_i_c"]["validation_data"].append(
+                                            {"value": i_value}
+                                        )
+                                        documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
+                                    else:
+                                        documents_numbers[i_field]["validation_data"].append({"value": i_value})
+                                        documents_numbers[i_field]["numbers"].append(i_value)
+                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+                                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
+                                    documents_dict: dict[str, dict[str, Any]] = documents_numbers
+                                    if document_key in identities_numbers:
+                                        documents_dict = identities_numbers
+                                    documents_dict[document_key]["issuing_countries"].append(i_value)
+
+                                if i_field in identities_numbers:
+                                    identities_numbers[i_field]["numbers"].append(i_value)
+                                    identities_numbers[i_field]["validation_data"].append({"value": i_value})
+
+                                if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
+                                    head_of_hh_counter += 1
+                                if i_field == "role_i_c":
+                                    role = i_value.upper()
+                                    if role == ROLE_PRIMARY:
+                                        primary_collector_counter += 1
+                                    elif role == ROLE_ALTERNATE:
+                                        alternate_collector_counter += 1
+
+                                expected_i_fields.discard(i_field)
+                                error = self._get_field_type_error(
+                                    i_field,
+                                    i_value,
+                                    attachments,
+                                    skip_validate_pictures,
+                                )
+                                if error:
+                                    errors.append(error)
+
+                            docs_and_identities_to_validate.append(current_individual_docs_and_identities)
+
+                            i_expected_field_errors = [
+                                {
+                                    "header": field,
+                                    "message": f"Missing individual required field {field}",
+                                }
+                                for field in expected_i_fields
+                            ]
+                            errors.extend(i_expected_field_errors)
+
+                        if head_of_hh_counter == 0:
+                            errors.append(
+                                {
+                                    "header": "relationship_i_c",
+                                    "message": "Household has to have a head of household",
+                                }
+                            )
+                        if head_of_hh_counter > 1:
+                            errors.append(
+                                {
+                                    "header": "relationship_i_c",
+                                    "message": "Only one person can be a head of household",
+                                }
+                            )
+                        if primary_collector_counter == 0:
+                            errors.append(
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Household must have a primary collector",
+                                }
+                            )
+                        if primary_collector_counter > 1:
+                            errors.append(
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Only one person can be a primary collector",
+                                }
+                            )
+                        if alternate_collector_counter > 1:
+                            errors.append(
+                                {
+                                    "header": "role_i_c",
+                                    "message": "Only one person can be a alternate collector",
+                                }
+                            )
+                    else:
+                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
+                        if error:
+                            errors.append(error)
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
                     errors.append(collectors_error)
                 hh_expected_field_errors = [
@@ -1577,155 +1770,3 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
-
-    def _process_hh_items(self, **kwargs):
-        alternate_collector_counter = kwargs.get("alternate_collector_counter")
-        attachments = kwargs.get("attachments")
-        docs_and_identities_to_validate = kwargs.get("docs_and_identities_to_validate")
-        documents_numbers = kwargs.get("documents_numbers")
-        errors = kwargs.get("errors")
-        expected_hh_fields = kwargs.get("expected_hh_fields")
-        head_of_hh_counter = kwargs.get("head_of_hh_counter")
-        household = kwargs.get("household")
-        household_collectors_data = kwargs.get("household_collectors_data")
-        identities_numbers = kwargs.get("identities_numbers")
-        primary_collector_counter = kwargs.get("primary_collector_counter")
-        skip_validate_pictures = kwargs.get("skip_validate_pictures")
-
-        for hh_field, hh_value in household.items():
-            expected_hh_fields.discard(hh_field)
-            if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
-                alternate_collector_counter, head_of_hh_counter, primary_collector_counter = self._get_individuals(
-                    alternate_collector_counter=alternate_collector_counter,
-                    attachments=attachments,
-                    docs_and_identities_to_validate=docs_and_identities_to_validate,
-                    documents_numbers=documents_numbers,
-                    errors=errors,
-                    head_of_hh_counter=head_of_hh_counter,
-                    hh_value=hh_value,
-                    household_collectors_data=household_collectors_data,
-                    identities_numbers=identities_numbers,
-                    primary_collector_counter=primary_collector_counter,
-                    skip_validate_pictures=skip_validate_pictures,
-                )
-
-                self._add_errors(alternate_collector_counter, errors, head_of_hh_counter, primary_collector_counter)
-            else:
-                error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
-                if error:
-                    errors.append(error)
-
-    def _get_individuals(self, **kwargs):
-        alternate_collector_counter = kwargs.get("alternate_collector_counter")
-        attachments = kwargs.get("attachments")
-        docs_and_identities_to_validate = kwargs.get("docs_and_identities_to_validate")
-        documents_numbers = kwargs.get("documents_numbers")
-        errors = kwargs.get("errors")
-        head_of_hh_counter = kwargs.get("head_of_hh_counter")
-        hh_value = kwargs.get("hh_value")
-        household_collectors_data = kwargs.get("household_collectors_data")
-        identities_numbers = kwargs.get("identities_numbers")
-        primary_collector_counter = kwargs.get("primary_collector_counter")
-        skip_validate_pictures = kwargs.get("skip_validate_pictures")
-        individual: dict
-        for individual in hh_value:
-            if individual.get("role_i_c") in ["primary", "alternate"]:
-                household_collectors_data.append(individual)
-            expected_i_fields = {
-                *self.expected_individuals_fields,
-            }
-            current_individual_docs_and_identities = defaultdict(dict)
-            i_field: str
-            for i_field, i_value in individual.items():
-                if i_field in documents_numbers:
-                    self._handle_documents(documents_numbers, i_field, i_value)
-                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
-                    documents_dict: dict[str, dict[str, Any]] = documents_numbers
-                    if document_key in identities_numbers:
-                        documents_dict = identities_numbers
-                    documents_dict[document_key]["issuing_countries"].append(i_value)
-
-                if i_field in identities_numbers:
-                    identities_numbers[i_field]["numbers"].append(i_value)
-                    identities_numbers[i_field]["validation_data"].append({"value": i_value})
-
-                if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
-                    head_of_hh_counter += 1
-                if i_field == "role_i_c":
-                    role = i_value.upper()
-                    if role == ROLE_PRIMARY:
-                        primary_collector_counter += 1
-                    elif role == ROLE_ALTERNATE:
-                        alternate_collector_counter += 1
-
-                expected_i_fields.discard(i_field)
-                error = self._get_field_type_error(
-                    i_field,
-                    i_value,
-                    attachments,
-                    skip_validate_pictures,
-                )
-                if error:
-                    errors.append(error)
-
-            docs_and_identities_to_validate.append(current_individual_docs_and_identities)
-
-            i_expected_field_errors = [
-                {
-                    "header": field,
-                    "message": f"Missing individual required field {field}",
-                }
-                for field in expected_i_fields
-            ]
-            errors.extend(i_expected_field_errors)
-        return alternate_collector_counter, head_of_hh_counter, primary_collector_counter
-
-    def _handle_documents(self, documents_numbers, i_field, i_value):
-        if i_field == "other_id_type_i_c":
-            documents_numbers["other_id_type_i_c"]["names"].append(i_value)
-        elif i_field == "other_id_no_i_c":
-            documents_numbers["other_id_type_i_c"]["validation_data"].append({"value": i_value})
-            documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
-        else:
-            documents_numbers[i_field]["validation_data"].append({"value": i_value})
-            documents_numbers[i_field]["numbers"].append(i_value)
-
-    def _add_errors(
-        self, alternate_collector_counter: Any | None, errors, head_of_hh_counter, primary_collector_counter
-    ):
-        if head_of_hh_counter == 0:
-            errors.append(
-                {
-                    "header": "relationship_i_c",
-                    "message": "Household has to have a head of household",
-                }
-            )
-        if head_of_hh_counter > 1:
-            errors.append(
-                {
-                    "header": "relationship_i_c",
-                    "message": "Only one person can be a head of household",
-                }
-            )
-        if primary_collector_counter == 0:
-            errors.append(
-                {
-                    "header": "role_i_c",
-                    "message": "Household must have a primary collector",
-                }
-            )
-        if primary_collector_counter > 1:
-            errors.append(
-                {
-                    "header": "role_i_c",
-                    "message": "Only one person can be a primary collector",
-                }
-            )
-        if alternate_collector_counter > 1:
-            errors.append(
-                {
-                    "header": "role_i_c",
-                    "message": "Only one person can be a alternate collector",
-                }
-            )
