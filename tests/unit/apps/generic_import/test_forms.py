@@ -3,434 +3,376 @@ from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory, UserFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.generic_import.forms import GenericImportForm
-from hope.models import BusinessArea, Program
+from hope.models import BusinessArea, Program, User
+
+
+@pytest.fixture
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory()
+
+
+@pytest.fixture
+def other_business_area() -> BusinessArea:
+    return BusinessAreaFactory()
+
+
+@pytest.fixture
+def program(business_area) -> Program:
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def other_program(other_business_area) -> Program:
+    return ProgramFactory(business_area=other_business_area)
+
+
+@pytest.fixture
+def restricted_program(business_area) -> Program:
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def user() -> User:
+    return UserFactory(partner=None)
+
+
+@pytest.fixture
+def superuser() -> User:
+    return UserFactory(is_superuser=True, partner=None)
 
 
 @pytest.mark.django_db
-class TestGenericImportForm:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Set up test fixtures."""
-        # Create business areas
-        create_afghanistan()
-        self.afghanistan = BusinessArea.objects.get(slug="afghanistan")
-        self.other_ba = BusinessArea.objects.create(
-            name="Other Country",
-            slug="other-country",
-            code="OTH",
-            active=True,  # Must be active to be included in queryset
-        )
-
-        # Create programs - create them as needed in individual tests
-        self.program_afg = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-        )
-        self.program_other = ProgramFactory(
-            business_area=self.other_ba,
-            status=Program.ACTIVE,
-        )
-
-        # Create users without partners to avoid shared partner issues
-        # (PartnerFactory uses get_or_create which causes users to share partners)
-        self.user_single_ba = UserFactory(partner=None)
-        self.user_multi_ba = UserFactory(partner=None)
-
-    def test_form_with_single_business_area_preselects_field(self, create_user_role_with_permissions):
-        """Test that BA field is pre-selected when user has access to only one BA."""
-        from hope.apps.account.permissions import Permissions
-
-        # Create user with access to single BA
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-        )
-
-        form = GenericImportForm(user=self.user_single_ba)
-
-        # BA field should be pre-selected (autoselect behavior)
-        assert form.fields["business_area"].initial == self.afghanistan
-        # Queryset should contain only one BA
-        assert form.fields["business_area"].queryset.count() == 1
-
-    def test_form_with_multiple_business_areas_shows_field(self, create_user_role_with_permissions):
-        """Test that BA field is visible when user has access to multiple BAs."""
-        from hope.apps.account.permissions import Permissions
-
-        # Create user with access to multiple BAs
-        create_user_role_with_permissions(
-            self.user_multi_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-        )
-        create_user_role_with_permissions(
-            self.user_multi_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.other_ba,
-        )
-
-        form = GenericImportForm(user=self.user_multi_ba)
-
-        # BA field should be visible (not hidden)
-        assert form.fields["business_area"].widget.__class__.__name__ != "HiddenInput"
-
-    def test_form_with_single_program_preselects_field(self, create_user_role_with_permissions):
-        """Test that Program field is pre-selected when user has access to only one program."""
-        from hope.apps.account.permissions import Permissions
-
-        # Create user with access to single BA and single program
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        form = GenericImportForm(user=self.user_single_ba)
-
-        # BA field should be pre-selected (autoselect behavior)
-        assert form.fields["business_area"].initial == self.afghanistan
-        # Program field should be pre-selected (autoselect behavior)
-        assert form.fields["program"].initial == self.program_afg
-
-    def test_valid_file_upload(self, create_user_role_with_permissions):
-        """Test form validation with valid Excel file."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        # Create valid Excel file
-        file_content = BytesIO(b"fake excel content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xlsx",
-            file_content.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_afg.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert form.is_valid(), f"Form errors: {form.errors}"
-
-    def test_invalid_file_extension(self, create_user_role_with_permissions):
-        """Test that non-Excel files are rejected."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        # Create file with invalid extension
-        file_content = BytesIO(b"fake content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.pdf",
-            file_content.getvalue(),
-            content_type="application/pdf",
-        )
-
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_afg.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert not form.is_valid()
-        assert "file" in form.errors
-        assert "Only Excel files" in str(form.errors["file"])
-
-    def test_file_size_validation(self, create_user_role_with_permissions):
-        """Test that files larger than 50MB are rejected."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        # Create oversized file (simulate 51MB)
-        # Note: We don't actually create 51MB of data, just set the size attribute
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xlsx",
-            b"fake content",
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        uploaded_file.size = 51 * 1024 * 1024  # 51 MB
-
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_afg.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert not form.is_valid()
-        assert "file" in form.errors
-        assert "50 MB" in str(form.errors["file"])
-
-    def test_program_belongs_to_business_area_validation(self, create_user_role_with_permissions):
-        """Test that program must belong to selected business area."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_multi_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-        create_user_role_with_permissions(
-            self.user_multi_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.other_ba,
-            program=self.program_other,
-        )
-
-        file_content = BytesIO(b"fake excel content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xlsx",
-            file_content.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-        # Try to submit program from different BA
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_other.id,  # This program belongs to other_ba!
-        }
-        form = GenericImportForm(
-            user=self.user_multi_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        # Form should be invalid (Django field validation catches this before clean())
-        assert not form.is_valid()
-        assert "program" in form.errors or "__all__" in form.errors
-
-    def test_missing_file(self, create_user_role_with_permissions):
-        """Test that file field is required."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_afg.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={},  # No file
-        )
-
-        assert not form.is_valid()
-        assert "file" in form.errors
-
-    def test_business_area_queryset_filtered_by_user(self, create_user_role_with_permissions):
-        """Test that business_area queryset only includes accessible BAs."""
-        from hope.apps.account.permissions import Permissions
-
-        # User only has access to afghanistan
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-        )
-
-        form = GenericImportForm(user=self.user_single_ba)
-
-        # Queryset should only contain afghanistan
-        ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
-        assert self.afghanistan.id in ba_ids
-        assert self.other_ba.id not in ba_ids
-
-    def test_superuser_has_access_to_all_business_areas(self):
-        """Test that superuser can see all active business areas."""
-        # Create superuser
-        superuser = UserFactory(is_superuser=True, partner=None)
-
-        form = GenericImportForm(user=superuser)
-
-        # Superuser should see all active BAs
-        ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
-        assert self.afghanistan.id in ba_ids
-        assert self.other_ba.id in ba_ids
-
-    def test_valid_xls_file_upload(self, create_user_role_with_permissions):
-        """Test form validation with valid .xls file (old Excel format)."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        # Create valid .xls file
-        file_content = BytesIO(b"fake excel content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xls",  # .xls extension
-            file_content.getvalue(),
-            content_type="application/vnd.ms-excel",
-        )
-
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": self.program_afg.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert form.is_valid(), f"Form errors: {form.errors}"
-
-    def test_clean_program_with_invalid_string_id(self, create_user_role_with_permissions):
-        """Test that invalid program ID string raises validation error."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-        )
-
-        file_content = BytesIO(b"fake excel content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xlsx",
-            file_content.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-        # Submit with non-existent program ID as string
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": "99999999-9999-9999-9999-999999999999",  # Non-existent UUID
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert not form.is_valid()
-        assert "program" in form.errors
-        # Django's ModelChoiceField returns "Select a valid choice" error for invalid choices
-        assert "valid choice" in str(form.errors["program"]).lower() or "does not exist" in str(form.errors["program"])
-
-    def test_user_without_program_access(self, create_user_role_with_permissions):
-        """Test that user without access to program gets validation error."""
-        from hope.apps.account.permissions import Permissions
-
-        # Create another program that user won't have access to
-        restricted_program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-        )
-
-        # Give user access to BA but only to program_afg, not restricted_program
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        file_content = BytesIO(b"fake excel content")
-        uploaded_file = SimpleUploadedFile(
-            "test_import.xlsx",
-            file_content.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-        # Try to submit with restricted_program (user has BA access but not program access)
-        form_data = {
-            "business_area": self.afghanistan.id,
-            "program": restricted_program.id,
-        }
-        form = GenericImportForm(
-            user=self.user_single_ba,
-            data=form_data,
-            files={"file": uploaded_file},
-        )
-
-        assert not form.is_valid()
-        # Error should be in program field or __all__
-        error_message = str(form.errors)
-        assert "do not have access" in error_message or "program" in form.errors
-
-    def test_business_area_widget_adds_data_slug(self, create_user_role_with_permissions):
-        """Test that BusinessAreaSelectWidget adds data-slug attribute."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-        )
-
-        form = GenericImportForm(user=self.user_single_ba)
-
-        # Render the widget to trigger create_option
-        html = str(form["business_area"])
-
-        # Should contain data-slug attribute
-        assert "data-slug" in html
-        assert self.afghanistan.slug in html
-
-    def test_program_widget_adds_data_slug(self, create_user_role_with_permissions):
-        """Test that ProgramSelectWidget adds data-slug attribute."""
-        from hope.apps.account.permissions import Permissions
-
-        create_user_role_with_permissions(
-            self.user_single_ba,
-            [Permissions.GENERIC_IMPORT_DATA],
-            self.afghanistan,
-            program=self.program_afg,
-        )
-
-        form = GenericImportForm(user=self.user_single_ba)
-
-        # Set initial value to trigger widget rendering with program
-        form.fields["program"].initial = self.program_afg
-
-        # Render the widget - this will trigger create_option
-        html = str(form["program"])
-
-        # Should contain the program (though slug might be in different format)
-        assert self.program_afg.name in html or str(self.program_afg.id) in html
+def test_form_with_single_business_area_preselects_field(user, business_area, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+    )
+
+    form = GenericImportForm(user=user)
+
+    assert form.fields["business_area"].initial == business_area
+    assert form.fields["business_area"].queryset.count() == 1
+
+
+@pytest.mark.django_db
+def test_form_with_multiple_business_areas_shows_field(
+    user, business_area, other_business_area, create_user_role_with_permissions
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+    )
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        other_business_area,
+    )
+
+    form = GenericImportForm(user=user)
+
+    assert form.fields["business_area"].widget.__class__.__name__ != "HiddenInput"
+
+
+@pytest.mark.django_db
+def test_form_with_single_program_preselects_field(user, business_area, program, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    form = GenericImportForm(user=user)
+
+    assert form.fields["business_area"].initial == business_area
+    assert form.fields["program"].initial == program
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("filename", "content_type"),
+    [
+        ("test_import.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ("test_import.xls", "application/vnd.ms-excel"),
+    ],
+    ids=["xlsx", "xls"],
+)
+def test_valid_excel_file_upload(
+    user, business_area, program, create_user_role_with_permissions, filename, content_type
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    file_content = BytesIO(b"fake excel content")
+    uploaded_file = SimpleUploadedFile(
+        filename,
+        file_content.getvalue(),
+        content_type=content_type,
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert form.is_valid(), f"Form errors: {form.errors}"
+
+
+@pytest.mark.django_db
+def test_invalid_file_extension_rejects_non_excel(user, business_area, program, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    file_content = BytesIO(b"fake content")
+    uploaded_file = SimpleUploadedFile(
+        "test_import.pdf",
+        file_content.getvalue(),
+        content_type="application/pdf",
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert not form.is_valid()
+    assert "file" in form.errors
+    assert "Only Excel files" in str(form.errors["file"])
+
+
+@pytest.mark.django_db
+def test_file_size_validation_rejects_oversized_file(user, business_area, program, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    uploaded_file = SimpleUploadedFile(
+        "test_import.xlsx",
+        b"fake content",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    uploaded_file.size = 51 * 1024 * 1024  # 51 MB
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert not form.is_valid()
+    assert "file" in form.errors
+    assert "50 MB" in str(form.errors["file"])
+
+
+@pytest.mark.django_db
+def test_program_belongs_to_business_area_validation(
+    user, business_area, other_business_area, program, other_program, create_user_role_with_permissions
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        other_business_area,
+        program=other_program,
+    )
+
+    file_content = BytesIO(b"fake excel content")
+    uploaded_file = SimpleUploadedFile(
+        "test_import.xlsx",
+        file_content.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": other_program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert not form.is_valid()
+    assert "program" in form.errors or "__all__" in form.errors
+
+
+@pytest.mark.django_db
+def test_missing_file_is_required(user, business_area, program, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={},
+    )
+
+    assert not form.is_valid()
+    assert "file" in form.errors
+
+
+@pytest.mark.django_db
+def test_business_area_queryset_filtered_by_user(
+    user, business_area, other_business_area, create_user_role_with_permissions
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+    )
+
+    form = GenericImportForm(user=user)
+
+    ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
+    assert business_area.id in ba_ids
+    assert other_business_area.id not in ba_ids
+
+
+@pytest.mark.django_db
+def test_superuser_has_access_to_all_business_areas(superuser, business_area, other_business_area):
+    form = GenericImportForm(user=superuser)
+
+    ba_ids = list(form.fields["business_area"].queryset.values_list("id", flat=True))
+    assert business_area.id in ba_ids
+    assert other_business_area.id in ba_ids
+
+
+@pytest.mark.django_db
+def test_clean_program_with_invalid_string_id(user, business_area, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+    )
+
+    file_content = BytesIO(b"fake excel content")
+    uploaded_file = SimpleUploadedFile(
+        "test_import.xlsx",
+        file_content.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": "99999999-9999-9999-9999-999999999999",
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert not form.is_valid()
+    assert "program" in form.errors
+    assert "valid choice" in str(form.errors["program"]).lower() or "does not exist" in str(form.errors["program"])
+
+
+@pytest.mark.django_db
+def test_user_without_program_access(
+    user, business_area, program, restricted_program, create_user_role_with_permissions
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    file_content = BytesIO(b"fake excel content")
+    uploaded_file = SimpleUploadedFile(
+        "test_import.xlsx",
+        file_content.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    form_data = {
+        "business_area": business_area.id,
+        "program": restricted_program.id,
+    }
+    form = GenericImportForm(
+        user=user,
+        data=form_data,
+        files={"file": uploaded_file},
+    )
+
+    assert not form.is_valid()
+    error_message = str(form.errors)
+    assert "do not have access" in error_message or "program" in form.errors
+
+
+@pytest.mark.django_db
+def test_business_area_widget_adds_data_slug(user, business_area, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+    )
+
+    form = GenericImportForm(user=user)
+
+    html = str(form["business_area"])
+
+    assert "data-slug" in html
+    assert business_area.slug in html
+
+
+@pytest.mark.django_db
+def test_program_widget_adds_data_slug(user, business_area, program, create_user_role_with_permissions):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GENERIC_IMPORT_DATA],
+        business_area,
+        program=program,
+    )
+
+    form = GenericImportForm(user=user)
+
+    form.fields["program"].initial = program
+
+    html = str(form["program"])
+
+    assert program.name in html or str(program.id) in html
