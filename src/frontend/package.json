@@ -1,20 +1,20 @@
 {
   "name": "frontend",
-  "version": "4.7.1",
+  "version": "4.8.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-for-backend": "yarn build --outDir '../hope/apps/web/static/web' --emptyOutDir",
-    "build-and-watch": "yarn build-for-backend --watch",
+    "build-for-backend": "bun run build --outDir '../hope/apps/web/static/web' --emptyOutDir",
+    "build-and-watch": "bun run build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest",
     "preview": "vite preview",
     "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml http://localhost:8080/api/rest/",
-    "generate-rest-api-types": "yarn generate-rest-api-types-camelcase",
-    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node enhance_and_camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
-    "prune-unused-exports": "npx ts-prune src | grep -v '(used in module)' | grep -v '/index.'"
+    "generate-rest-api-types": "bun run generate-rest-api-types-camelcase",
+    "generate-rest-api-types-camelcase": "bun run download-dev-openapi && node enhance_and_camelize_openapi.js && bunx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
+    "prune-unused-exports": "bunx ts-prune src | grep -v '(used in module)' | grep -v '/index.'"
   },
   "engines": {
     "node": ">=20.0.0"

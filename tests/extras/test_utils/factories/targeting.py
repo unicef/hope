@@ -1,8 +1,11 @@
+"""Targeting-related factories."""
+
 import factory
 from factory.django import DjangoModelFactory
 
-from extras.test_utils.factories import PaymentPlanFactory
 from hope.models import TargetingCriteriaRule, TargetingCriteriaRuleFilter
+
+from .payment import PaymentPlanFactory
 
 
 class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):
@@ -16,6 +19,8 @@ class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):
 
 class TargetingCriteriaRuleFactory(DjangoModelFactory):
     payment_plan = factory.SubFactory(PaymentPlanFactory)
+    household_ids = ""
+    individual_ids = ""
 
     class Meta:
         model = TargetingCriteriaRule
