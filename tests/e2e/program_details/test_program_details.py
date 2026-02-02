@@ -18,7 +18,9 @@ from extras.test_utils.old_factories.core import (
 from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.old_factories.payment import PaymentPlanFactory
 from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.models import (
     Area,
     BeneficiaryGroup,

@@ -1399,7 +1399,6 @@ class TestGrievanceTickets:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
                     assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
 
-    @pytest.mark.xfail(reason="Unskip after fix bug: 209087")
     def test_grievance_tickets_create_new_error(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1409,7 +1408,10 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_button_new_ticket().click()
-        page_grievance_new_ticket.get_button_next().click()
+        # Verify that the Next button is disabled when no category is selected
+        next_button = page_grievance_new_ticket.get_button_next()
+        assert not next_button.is_enabled(), "Next button should be disabled when no category is selected"
+        # Verify that we're still on the first step (household tab should not be visible)
         with pytest.raises(NoSuchElementException):
             page_grievance_new_ticket.get_household_tab()
 
