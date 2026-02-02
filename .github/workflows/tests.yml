@@ -180,19 +180,14 @@ jobs:
             sleep 2
           done
 
-      - name: Set up Node.js & Yarn
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: src/frontend/yarn.lock
-
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install JS dependencies & build
         run: |
           cd src/frontend
-          yarn install --frozen-lockfile
-          yarn build-for-backend
+          bun install --frozen-lockfile
+          bun run build-for-backend
 
       - name: Install Python & UV
         uses: astral-sh/setup-uv@v6
