@@ -22,7 +22,7 @@ from .core import (
     XLSXKoboTemplateFactory,
 )
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
-from .grievance import GrievanceTicketFactory
+from .grievance import GrievanceTicketFactory, TicketSensitiveDetailsFactory
 from .household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -74,6 +74,7 @@ __all__ = [
     "FlexibleAttributeChoiceFactory",
     "FlexibleAttributeFactory",
     "GrievanceTicketFactory",
+    "TicketSensitiveDetailsFactory",
     "DocumentFactory",
     "DocumentTypeFactory",
     "EntitlementCardFactory",
