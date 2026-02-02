@@ -737,7 +737,7 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fixing")
+    # @pytest.mark.skip("Unskip after fixing")
     def test_program_details_edit_cycle_with_wrong_date(
         self,
         program_with_different_cycles: Program,
@@ -810,7 +810,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
         self,
         program_with_different_cycles: Program,
