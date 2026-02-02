@@ -349,16 +349,18 @@ def check_creator_or_owner_permission(  # noqa: PLR0913 – intentional design b
         raise PermissionDenied(detail={"required_permissions": required_permissions})
 
 
-def has_creator_or_owner_permission(  # noqa: PLR0913 – intentional design by author
+def has_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
     general_permission: Permissions,
     is_creator: bool,
     creator_permission: Permissions,
     is_owner: bool,
-    owner_permission: Permissions,
-    business_area: "BusinessArea",
-    program: Optional["Program"],
+    **kwargs,
 ) -> bool:
+    """Kwargs - can have 'owner_permission', 'business_area', 'program'."""
+    owner_permission: Permissions = kwargs.get("owner_permission")
+    business_area: "BusinessArea" = kwargs.get("business_area")
+    program: "Program" | None = kwargs.get("program")
     scope = program or business_area
     return user.is_authenticated and (
         user.has_perm(general_permission.value, scope)

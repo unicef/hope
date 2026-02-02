@@ -66,20 +66,23 @@ class BaseTestCase(TestCase):
         return role_assignment
 
     @classmethod
-    def create_user_role_with_permissions(  # noqa: PLR0913 – intentional design by author
+    def create_user_role_with_permissions(
         cls,
         user: "User",
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        name: str | None = None,
-        whole_business_area_access: bool | None = False,
+        **kwargs,
     ) -> RoleAssignment:
         """Create User Role with related permissions.
 
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
+        name: Name of the User Role.
+        kwargs: can has 'name' and/or 'whole_business_area_access'.
         """
+        name: str | None = kwargs.get("name")
+        whole_business_area_access: bool | None = kwargs.get("whole_business_area_access")
         permission_list = [perm.value for perm in permissions]
         name = name or f"User Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
