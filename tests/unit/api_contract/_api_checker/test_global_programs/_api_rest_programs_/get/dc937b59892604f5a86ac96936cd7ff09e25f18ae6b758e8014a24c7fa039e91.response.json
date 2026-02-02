@@ -1,0 +1,36 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "475"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/programs/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "9cebef40-9337-40d7-afa8-26e2c152123d",
+                "name": "Program 0",
+                "programme_code": "XWDG",
+                "status": "ACTIVE",
+                "start_date": "2026-02-02",
+                "end_date": "2027-02-02",
+                "budget": "1000000.00",
+                "frequency_of_payments": "ONE_OFF",
+                "sector": "MULTI_PURPOSE",
+                "scope": null,
+                "cash_plus": false,
+                "population_goal": 1000,
+                "business_area_code": "BA0013",
+                "beneficiary_group": "a465fd82-0a53-492f-86f1-d4fab0b6bf0e"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,39 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "468"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/areas/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "8f3a8cf5-b8eb-41b2-912f-0ad3ea741301",
+                "created_at": "2026-02-02T14:39:37Z",
+                "updated_at": "2026-02-02T14:39:37Z",
+                "original_id": null,
+                "name": "Area 0",
+                "p_code": "PC000000",
+                "longitude": null,
+                "latitude": null,
+                "valid_from": "2026-02-02T14:39:37Z",
+                "valid_until": null,
+                "extras": {},
+                "lft": 1,
+                "rght": 2,
+                "tree_id": 1,
+                "level": 0,
+                "parent": null,
+                "area_type": "414aba3c-4685-47e1-98ae-15e70aa20f39"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

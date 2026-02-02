@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "0db222608d9db52b65d3f5dbcaa141e0",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "312"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/beneficiary-groups/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "96e68d6e-91b1-4ada-b123-4fe2af6f0413",
+                "name": "Group 1",
+                "group_label": "Household",
+                "group_label_plural": "Households",
+                "member_label": "Individual",
+                "member_label_plural": "Individuals",
+                "master_detail": true
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,24 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "121"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/groups/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": 1,
+                "name": "Test Group"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
