@@ -1,5 +1,5 @@
 #!/bin/sh
 
 cd /code
-yarn run build
+bun run build
 cp -r build/* /srv/www/
