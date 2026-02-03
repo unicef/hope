@@ -699,14 +699,14 @@ def create_super_user(business_area: BusinessArea) -> User:
 
 
 # Global variable to track the current test item
-current_test_item = None
+_current_test_item = None
 
 
 # set up a hook to be able to check if a test has failed
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
-    global current_test_item  # noqa PLW0603
-    current_test_item = item
+    global _current_test_item  # noqa PLW0603
+    _current_test_item = item
     outcome = yield
     report = outcome.get_result()
     setattr(item, "rep_" + report.when, report)
@@ -728,8 +728,8 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 def attach(data=None, path=None, name="attachment", mime_type=None):
     """Drop-in replacement for pytest_html_reporter's attach()"""
-    global current_test_item  # noqa PLW0603
-    item = current_test_item
+    global _current_test_item  # noqa PLW0603
+    item = _current_test_item
     if item is None or not hasattr(item, "_html_extra_list"):
         return
 
