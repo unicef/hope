@@ -1,0 +1,46 @@
+{
+    "business_area": {
+        "master": {
+            "model": "core.businessarea",
+            "pk": "2f42dde6-5ed0-4707-bc58-2a813763fb1d",
+            "fields": {
+                "created_at": "2026-02-03T15:06:04.516Z",
+                "updated_at": "2026-02-03T15:06:04.516Z",
+                "code": "BA0002",
+                "slug": "business-area-2",
+                "name": "Business Area 2",
+                "long_name": "Business Area 2 Long Name",
+                "parent": null,
+                "office_country": null,
+                "is_split": false,
+                "region_code": "64",
+                "region_name": "TEST",
+                "has_data_sharing_agreement": false,
+                "is_accountability_applicable": false,
+                "rdi_import_xlsx_disabled": false,
+                "active": true,
+                "enable_email_notification": true,
+                "kobo_username": null,
+                "kobo_token": null,
+                "kobo_url": null,
+                "rapid_pro_host": null,
+                "rapid_pro_payment_verification_token": null,
+                "rapid_pro_messages_token": null,
+                "rapid_pro_survey_token": null,
+                "postpone_deduplication": false,
+                "deduplication_duplicate_score": 6.0,
+                "deduplication_possible_duplicate_score": 6.0,
+                "deduplication_batch_duplicates_percentage": 50,
+                "deduplication_batch_duplicates_allowed": 5,
+                "deduplication_golden_record_duplicates_percentage": 50,
+                "deduplication_golden_record_duplicates_allowed": 5,
+                "deduplication_ignore_withdraw": false,
+                "biometric_deduplication_threshold": 0.0,
+                "custom_fields": {},
+                "countries": [],
+                "payment_countries": []
+            }
+        },
+        "deps": []
+    }
+}

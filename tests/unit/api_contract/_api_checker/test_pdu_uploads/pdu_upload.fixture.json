@@ -1,0 +1,199 @@
+{
+    "pdu_upload": {
+        "master": {
+            "model": "periodic_data_update.pduxlsxupload",
+            "pk": 1,
+            "fields": {
+                "created_at": "2026-02-03T15:04:00.379Z",
+                "updated_at": "2026-02-03T15:04:00.379Z",
+                "celery_tasks_results_ids": {},
+                "template": 1,
+                "status": "SUCCESSFUL",
+                "created_by": "fb061f5c-5f43-4110-b188-773f82b03844",
+                "file": "test_W2K0n7n.xlsx",
+                "error_message": null
+            }
+        },
+        "deps": [
+            {
+                "model": "periodic_data_update.pduxlsxtemplate",
+                "pk": 1,
+                "fields": {
+                    "created_at": "2026-02-03T15:04:00.375Z",
+                    "updated_at": "2026-02-03T15:04:00.376Z",
+                    "celery_tasks_results_ids": {},
+                    "name": "Template 0",
+                    "business_area": "1a9159df-a416-4bbe-af3c-f53dcf63e848",
+                    "program": "a8154216-54c6-4f09-bef9-bbdb7447659c",
+                    "status": "TO_EXPORT",
+                    "created_by": "fb061f5c-5f43-4110-b188-773f82b03844",
+                    "number_of_records": 10,
+                    "file": null,
+                    "filters": {},
+                    "rounds_data": [
+                        {
+                            "field": "field_1",
+                            "round": 1,
+                            "round_name": "Round 1",
+                            "number_of_records": 10
+                        }
+                    ]
+                }
+            },
+            {
+                "model": "core.businessarea",
+                "pk": "1a9159df-a416-4bbe-af3c-f53dcf63e848",
+                "fields": {
+                    "created_at": "2026-02-03T15:04:00.136Z",
+                    "updated_at": "2026-02-03T15:04:00.136Z",
+                    "code": "BA0001",
+                    "slug": "business-area-1",
+                    "name": "Business Area 1",
+                    "long_name": "Business Area 1 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            },
+            {
+                "model": "program.program",
+                "pk": "a8154216-54c6-4f09-bef9-bbdb7447659c",
+                "fields": {
+                    "is_removed": false,
+                    "created_at": "2026-02-03T15:04:00.202Z",
+                    "updated_at": "2026-02-03T15:04:00.202Z",
+                    "last_sync_at": null,
+                    "version": 1770130093579041,
+                    "data_collecting_type": 1,
+                    "beneficiary_group": "27da36d8-bcbc-4b88-9037-9497661c4c14",
+                    "business_area": "1a9159df-a416-4bbe-af3c-f53dcf63e848",
+                    "name": "Program 0",
+                    "programme_code": "GWKO",
+                    "status": "ACTIVE",
+                    "slug": "gwko",
+                    "description": "",
+                    "start_date": "2026-02-03",
+                    "end_date": "2027-02-03",
+                    "sector": "MULTI_PURPOSE",
+                    "budget": "1000000.00",
+                    "frequency_of_payments": "ONE_OFF",
+                    "scope": null,
+                    "partner_access": "SELECTED_PARTNERS_ACCESS",
+                    "cash_plus": false,
+                    "population_goal": 1000,
+                    "administrative_areas_of_implementation": "",
+                    "biometric_deduplication_enabled": false,
+                    "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "is_visible": true,
+                    "household_count": 0,
+                    "individual_count": 0,
+                    "reconciliation_window_in_days": 0,
+                    "send_reconciliation_window_expiry_notifications": false,
+                    "admin_areas": [],
+                    "sanction_lists": []
+                }
+            },
+            {
+                "model": "core.datacollectingtype",
+                "pk": 1,
+                "fields": {
+                    "created": "2026-02-03T15:04:00.176Z",
+                    "modified": "2026-02-03T15:04:00.176Z",
+                    "code": "dct_0",
+                    "label": "DCT 0",
+                    "type": "STANDARD",
+                    "description": "",
+                    "active": true,
+                    "deprecated": false,
+                    "individual_filters_available": false,
+                    "household_filters_available": true,
+                    "recalculate_composition": false,
+                    "weight": 0,
+                    "compatible_types": [
+                        1
+                    ],
+                    "limit_to": []
+                }
+            },
+            {
+                "model": "program.beneficiarygroup",
+                "pk": "27da36d8-bcbc-4b88-9037-9497661c4c14",
+                "fields": {
+                    "created_at": "2026-02-03T15:04:00.184Z",
+                    "updated_at": "2026-02-03T15:04:00.184Z",
+                    "name": "Group 0",
+                    "group_label": "Household",
+                    "group_label_plural": "Households",
+                    "member_label": "Individual",
+                    "member_label_plural": "Individuals",
+                    "master_detail": true
+                }
+            },
+            {
+                "model": "account.user",
+                "pk": "fb061f5c-5f43-4110-b188-773f82b03844",
+                "fields": {
+                    "password": "",
+                    "last_login": null,
+                    "is_superuser": true,
+                    "username": "user_1",
+                    "first_name": "",
+                    "last_name": "",
+                    "is_staff": true,
+                    "is_active": true,
+                    "date_joined": "2026-02-03T15:04:00.098Z",
+                    "azure_id": null,
+                    "display_name": "user_1",
+                    "status": "INVITED",
+                    "partner": 5,
+                    "email": "user_1@example.com",
+                    "custom_fields": {},
+                    "job_title": "",
+                    "last_modify_date": "2026-02-03T15:04:00.366Z",
+                    "groups": [],
+                    "user_permissions": []
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 5,
+                "fields": {
+                    "name": "Partner 1",
+                    "parent": null,
+                    "is_un": false,
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 2,
+                    "level": 0,
+                    "allowed_business_areas": []
+                }
+            }
+        ]
+    }
+}

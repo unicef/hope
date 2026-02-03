@@ -1,0 +1,28 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "304"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/sanction-list/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "f2961abb-e6f8-4d98-aa81-f215e82bfece",
+                "full_name": "First0 Last0",
+                "reference_number": "REF-0",
+                "documents": [],
+                "dates_of_birth": [],
+                "sanction_list_name": "Sanction List 0"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

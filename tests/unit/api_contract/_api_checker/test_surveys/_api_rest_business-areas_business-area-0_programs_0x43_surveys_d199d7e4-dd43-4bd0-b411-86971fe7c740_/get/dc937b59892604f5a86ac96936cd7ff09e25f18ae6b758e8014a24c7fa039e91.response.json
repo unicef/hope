@@ -1,0 +1,30 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "355"
+    },
+    "data": {
+        "id": "d199d7e4-dd43-4bd0-b411-86971fe7c740",
+        "unicef_id": "SUR-26-0001",
+        "title": "Survey 0",
+        "body": "",
+        "category": "Survey with manual process",
+        "sampling_type": "FULL_LIST",
+        "flow_id": null,
+        "payment_plan": null,
+        "sample_file_path": null,
+        "has_valid_sample_file": null,
+        "rapid_pro_url": null,
+        "number_of_recipients": 0,
+        "created_at": "2026-02-03T14:58:21Z",
+        "created_by": " "
+    },
+    "content_type": "application/json"
+}

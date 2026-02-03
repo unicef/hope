@@ -1,0 +1,33 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "543"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/-v57/payment-verifications/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "d3bfceb4-f787-4f45-aa67-d83c5fe25560",
+                "unicef_id": "PP-BA0000-26-00000001",
+                "currency": null,
+                "total_delivered_quantity": null,
+                "program_cycle_start_date": "2026-02-03",
+                "program_cycle_end_date": "2026-02-03",
+                "verification_status": null,
+                "dispersion_start_date": "2026-02-03",
+                "dispersion_end_date": "2026-03-05",
+                "updated_at": "2026-02-03T14:58:25Z",
+                "program_cycle_title": "Default Programme Cycle"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

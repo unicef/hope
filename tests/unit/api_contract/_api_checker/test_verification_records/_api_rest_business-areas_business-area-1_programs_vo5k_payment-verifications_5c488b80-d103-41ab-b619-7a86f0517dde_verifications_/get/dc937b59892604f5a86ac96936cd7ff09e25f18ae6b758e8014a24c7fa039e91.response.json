@@ -1,0 +1,70 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1620"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-1/programs/vo5k/payment-verifications/5c488b80-d103-41ab-b619-7a86f0517dde/verifications/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "3c3709de-3100-4df2-b400-1b67a9c584df",
+                "unicef_id": "RCPT-BA0001-26-0.000.001",
+                "parent_id": "5c488b80-d103-41ab-b619-7a86f0517dde",
+                "parent_unicef_id": "PP-BA0001-26-00000001",
+                "household_id": "0c918085-3a68-447c-a9a9-8d865ffb63e2",
+                "household_unicef_id": "HH-26-0000.0001",
+                "household_size": null,
+                "household_admin2": "",
+                "household_status": "ACTIVE",
+                "hoh_phone_no": "None",
+                "hoh_phone_no_alternative": "None",
+                "snapshot_collector_full_name": null,
+                "snapshot_alternate_collector_full_name": null,
+                "snapshot_alternate_collector_id": null,
+                "fsp_name": "",
+                "entitlement_quantity": null,
+                "entitlement_quantity_usd": null,
+                "delivered_quantity": null,
+                "delivered_quantity_usd": null,
+                "delivery_date": null,
+                "delivery_type": null,
+                "status": "Pending",
+                "status_display": "Pending",
+                "currency": "PLN",
+                "fsp_auth_code": "",
+                "hoh_id": null,
+                "hoh_unicef_id": null,
+                "hoh_full_name": null,
+                "collector_id": "c8bd23f9-e815-4100-893a-f7b6c8a219ab",
+                "collector_phone_no": "",
+                "collector_phone_no_alt": "",
+                "verification": {
+                    "id": "b42a8317-654a-4897-9d5c-f63fa0d32d29",
+                    "received_amount": null,
+                    "status": "PENDING",
+                    "payment_verification_plan_unicef_id": "PVP-1",
+                    "verification_channel": "MANUAL",
+                    "admin_url": null,
+                    "version": 1770132779453337,
+                    "is_manually_editable": true
+                },
+                "payment_plan_hard_conflicted": false,
+                "payment_plan_hard_conflicted_data": [],
+                "payment_plan_soft_conflicted": false,
+                "payment_plan_soft_conflicted_data": [],
+                "people_individual": null,
+                "program_name": "Program 1",
+                "program_slug": "vo5k"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

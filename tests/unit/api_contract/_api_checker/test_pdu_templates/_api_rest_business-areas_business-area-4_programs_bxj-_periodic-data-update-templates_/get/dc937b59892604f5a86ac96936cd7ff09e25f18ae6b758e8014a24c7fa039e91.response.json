@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "415"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-4/programs/bxj-/periodic-data-update-templates/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": 2,
+                "name": "Template 1",
+                "number_of_records": 10,
+                "created_at": "2026-02-03T15:04:01Z",
+                "created_by": "",
+                "status": "NOT_SCHEDULED",
+                "status_display": "Not scheduled",
+                "can_export": true,
+                "admin_url": "/api/unicorn/periodic_data_update/pduxlsxtemplate/2/change/"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

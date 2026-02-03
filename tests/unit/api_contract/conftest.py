@@ -5,6 +5,8 @@ from django.core.serializers.json import DjangoJSONEncoder as _DjangoEncoder
 from django.db import DEFAULT_DB_ALIAS
 from django.http.response import ResponseHeaders
 import drf_api_checker.utils as _checker_utils
+import factory.base
+import pytest
 
 # ---------------------------------------------------------------------------
 # Monkeypatch 1: ResponseEncoder
@@ -93,3 +95,21 @@ def _load_fixtures_fixed(file, ignorenonexistent=False, using=DEFAULT_DB_ALIAS):
 
 
 _checker_utils.load_fixtures = _load_fixtures_fixed
+
+
+# ---------------------------------------------------------------------------
+# Reset factory_boy sequences before each test so that parallel workers
+# (-n auto) produce deterministic values regardless of execution order.
+# ---------------------------------------------------------------------------
+
+
+def _all_factory_subclasses(cls):
+    for sc in cls.__subclasses__():
+        yield sc
+        yield from _all_factory_subclasses(sc)
+
+
+@pytest.fixture(autouse=True)
+def _reset_factory_sequences():
+    for subcls in _all_factory_subclasses(factory.base.BaseFactory):
+        subcls.reset_sequence(0, force=True)

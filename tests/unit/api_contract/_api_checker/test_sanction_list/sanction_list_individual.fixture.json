@@ -1,0 +1,46 @@
+{
+    "sanction_list_individual": {
+        "master": {
+            "model": "sanction_list.sanctionlistindividual",
+            "pk": "f2961abb-e6f8-4d98-aa81-f215e82bfece",
+            "fields": {
+                "created_at": "2026-02-03T15:03:59.666Z",
+                "updated_at": "2026-02-03T15:03:59.666Z",
+                "first_name": "First0",
+                "second_name": "",
+                "third_name": "",
+                "fourth_name": "",
+                "full_name": "First0 Last0",
+                "name_original_script": "",
+                "list_type": "Type 0",
+                "un_list_type": "",
+                "reference_number": "REF-0",
+                "listed_on": null,
+                "comments": "",
+                "designation": "",
+                "street": "",
+                "city": "",
+                "state_province": "",
+                "address_note": "",
+                "data_id": 1,
+                "version_num": 1,
+                "country_of_birth": null,
+                "active": true,
+                "sanction_list": 1
+            }
+        },
+        "deps": [
+            {
+                "model": "sanction_list.sanctionlist",
+                "pk": 1,
+                "fields": {
+                    "created_at": "2026-02-03T15:03:59.665Z",
+                    "updated_at": "2026-02-03T15:03:59.665Z",
+                    "name": "Sanction List 0",
+                    "config": {},
+                    "strategy": "hope.apps.sanction_list.strategies.un.UNSanctionList"
+                }
+            }
+        ]
+    }
+}
