@@ -45,6 +45,7 @@ from .payment import (
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
+    PaymentPlanSupportingDocumentFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -55,6 +56,7 @@ from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, RegistrationDataImportFactory
 from .steficon import RuleCommitFactory, RuleFactory
 from .targeting import TargetingCriteriaRuleFactory
+from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
     "AdminAreaLimitedToFactory",
@@ -95,6 +97,7 @@ __all__ = [
     "PaymentFactory",
     "PaymentHouseholdSnapshotFactory",
     "PaymentPlanFactory",
+    "PaymentPlanSupportingDocumentFactory",
     "PaymentPlanSplitFactory",
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
@@ -113,4 +116,6 @@ __all__ = [
     "WesternUnionInvoiceFactory",
     "WesternUnionPaymentPlanReportFactory",
     "XLSXKoboTemplateFactory",
+    "FundsCommitmentGroupFactory",
+    "FundsCommitmentItemFactory",
 ]
