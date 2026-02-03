@@ -339,3 +339,20 @@ class TestReassignRolesOnUpdate(BaseTestCase):
             == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated "
             f"individual({self.primary_collector_individual.unicef_id})"
         )
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_hh_withdrawn(
+        self,
+    ) -> None:
+        self.household.withdrawn = True
+        self.household.save()
+        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
+        role_reassign_data = {
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": str(self.no_role_individual.id),
+                "household": str(self.household.id),
+                "individual": str(self.primary_collector_individual.id),
+            },
+        }
+        reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
+        assert IndividualRoleInHousehold.objects.filter(individual=self.primary_collector_individual).count() == 1

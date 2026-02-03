@@ -34,7 +34,7 @@ class BaseTestCase(TestCase):
         admin_area_limits.areas.set(areas)
 
     @classmethod
-    def create_partner_role_with_permissions(
+    def create_partner_role_with_permissions(  # pragma: no cover
         cls,
         partner: "Partner",
         permissions: Iterable,
@@ -66,7 +66,7 @@ class BaseTestCase(TestCase):
         return role_assignment
 
     @classmethod
-    def create_user_role_with_permissions(
+    def create_user_role_with_permissions(  # pragma: no cover
         cls,
         user: "User",
         permissions: Iterable,
