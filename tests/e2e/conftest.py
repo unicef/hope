@@ -705,6 +705,8 @@ current_test_item = None
 # set up a hook to be able to check if a test has failed
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
+    global current_test_item  # noqa PLW0603
+    current_test_item = item
     outcome = yield
     report = outcome.get_result()
     setattr(item, "rep_" + report.when, report)
