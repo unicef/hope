@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "2631"
+        "Content-Length": "2479"
     },
     "data": {
         "id": "08d72e72-68f9-4c2f-b143-696ad6df10ac",
@@ -105,16 +105,7 @@
         "org_name_enumerator": "",
         "registration_method": "",
         "consent_sharing": [],
-        "roles_in_household": [
-            {
-                "id": "012db2fb-be14-43c0-9197-3b3007bd7d65",
-                "individual": {
-                    "id": "08a1ef81-9a38-403f-9ac4-16df9144451c",
-                    "unicef_id": "IND-26-0000.0001"
-                },
-                "role": "PRIMARY"
-            }
-        ]
+        "roles_in_household": []
     },
     "content_type": "application/json"
 }

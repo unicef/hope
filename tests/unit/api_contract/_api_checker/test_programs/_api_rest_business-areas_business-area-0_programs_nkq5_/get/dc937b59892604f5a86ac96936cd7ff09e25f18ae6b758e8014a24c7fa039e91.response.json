@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1340"
+        "Content-Length": "1174"
     },
     "data": {
         "id": "686bc1de-0c37-4ddc-bf25-85f60ee98aca",
@@ -46,21 +46,8 @@
         "admin_url": "/api/unicorn/program/program/686bc1de-0c37-4ddc-bf25-85f60ee98aca/change/",
         "description": "",
         "administrative_areas_of_implementation": "",
-        "version": 1770122113596634,
-        "partners": [
-            {
-                "id": 2,
-                "name": "UNICEF HQ",
-                "area_access": "BUSINESS_AREA",
-                "areas": null
-            },
-            {
-                "id": 4,
-                "name": "UNICEF Partner for business-area-0",
-                "area_access": "BUSINESS_AREA",
-                "areas": null
-            }
-        ],
+        "version": 1770126213191334,
+        "partners": [],
         "partner_access": "SELECTED_PARTNERS_ACCESS",
         "registration_imports_total_count": 0,
         "can_import_rdi": true,

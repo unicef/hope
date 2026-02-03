@@ -14,7 +14,7 @@ class HopeRecorder(Recorder):
       strings/ints/floats before comparison with the stored baseline.
     - Skips ``created_at`` / ``updated_at`` dynamic-field assertions.
     - Skips Content-Length header check because skipped body fields
-      (partners, version, ...) with varying values change body size.
+      (version, ...) with varying values change body size.
     """
 
     headers = ["Content-Type", "Allow"]
@@ -46,10 +46,4 @@ class HopeRecorder(Recorder):
         pass
 
     def assert_version(self, response, expected, path):
-        pass
-
-    def assert_partners(self, response, expected, path):
-        pass
-
-    def assert_roles_in_household(self, response, expected, path):
         pass
