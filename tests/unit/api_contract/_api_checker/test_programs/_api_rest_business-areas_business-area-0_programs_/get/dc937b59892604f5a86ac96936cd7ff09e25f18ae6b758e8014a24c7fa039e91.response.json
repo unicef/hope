@@ -1,0 +1,56 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST, HEAD, OPTIONS",
+        "ETag": "74ce1774edc2753d122d25e6bc1ede2e",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "861"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "686bc1de-0c37-4ddc-bf25-85f60ee98aca",
+                "programme_code": "NKQ5",
+                "slug": "nkq5",
+                "name": "Program 0",
+                "start_date": "2026-02-03",
+                "end_date": "2027-02-03",
+                "budget": "1000000.00",
+                "frequency_of_payments": "ONE_OFF",
+                "sector": "MULTI_PURPOSE",
+                "cash_plus": false,
+                "population_goal": 1000,
+                "data_collecting_type": {
+                    "id": 1,
+                    "label": "DCT 0",
+                    "code": "dct_0",
+                    "type": "STANDARD",
+                    "type_display": "Standard",
+                    "individual_filters_available": false,
+                    "household_filters_available": true
+                },
+                "beneficiary_group": {
+                    "id": "ae03b457-d6c4-476d-97ec-d601e5a2ef40",
+                    "name": "Group 0",
+                    "group_label": "Household",
+                    "group_label_plural": "Households",
+                    "member_label": "Individual",
+                    "member_label_plural": "Individuals",
+                    "master_detail": true
+                },
+                "status": "ACTIVE",
+                "pdu_fields": [],
+                "household_count": 0
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

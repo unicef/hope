@@ -1,0 +1,29 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "a56c7b16fcbcf17f80b75042b9d2d79e",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "248"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/users/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "286710fb-2001-46a5-b444-40fc1d0bfb9f",
+                "first_name": "",
+                "last_name": "",
+                "email": "user_0@example.com",
+                "username": "user_0"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

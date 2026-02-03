@@ -13,7 +13,11 @@ class HopeRecorder(Recorder):
       Python-typed values (UUID, Decimal ...) become plain
       strings/ints/floats before comparison with the stored baseline.
     - Skips ``created_at`` / ``updated_at`` dynamic-field assertions.
+    - Skips Content-Length header check because skipped body fields
+      (partners, version, ...) with varying values change body size.
     """
+
+    headers = ["Content-Type", "Allow"]
 
     def __init__(self, *args, api_token=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,4 +43,10 @@ class HopeRecorder(Recorder):
         pass
 
     def assert_unicef_id(self, response, expected, path):
+        pass
+
+    def assert_version(self, response, expected, path):
+        pass
+
+    def assert_partners(self, response, expected, path):
         pass

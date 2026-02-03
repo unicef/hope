@@ -1,0 +1,70 @@
+{
+    "area": {
+        "master": {
+            "model": "geo.area",
+            "pk": "145b2749-a3c7-4dcf-adb8-b3be9dd76206",
+            "fields": {
+                "created_at": "2026-02-03T12:47:21.569Z",
+                "updated_at": "2026-02-03T12:47:21.569Z",
+                "original_id": null,
+                "name": "Area 0",
+                "parent": null,
+                "p_code": "PC000000",
+                "area_type": "5981001b-910c-47cc-a885-e99d18cd6e0f",
+                "longitude": null,
+                "latitude": null,
+                "valid_from": "2026-02-03T12:47:21.569Z",
+                "valid_until": null,
+                "extras": {},
+                "lft": 1,
+                "rght": 2,
+                "tree_id": 1,
+                "level": 0
+            }
+        },
+        "deps": [
+            {
+                "model": "geo.areatype",
+                "pk": "5981001b-910c-47cc-a885-e99d18cd6e0f",
+                "fields": {
+                    "created_at": "2026-02-03T12:47:21.565Z",
+                    "updated_at": "2026-02-03T12:47:21.565Z",
+                    "original_id": null,
+                    "name": "Area Type 0",
+                    "country": "48fd5c88-6e89-468e-80df-c0d508d89dc2",
+                    "area_level": 1,
+                    "parent": null,
+                    "valid_from": "2026-02-03T12:47:21.565Z",
+                    "valid_until": null,
+                    "extras": {},
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 1,
+                    "level": 0
+                }
+            },
+            {
+                "model": "geo.country",
+                "pk": "48fd5c88-6e89-468e-80df-c0d508d89dc2",
+                "fields": {
+                    "created_at": "2026-02-03T12:47:21.561Z",
+                    "updated_at": "2026-02-03T12:47:21.561Z",
+                    "original_id": null,
+                    "name": "Country 0",
+                    "short_name": "Country 0",
+                    "iso_code2": "AA",
+                    "iso_code3": "AAA",
+                    "iso_num": "0000",
+                    "parent": null,
+                    "valid_from": "2026-02-03T12:47:21.561Z",
+                    "valid_until": null,
+                    "extras": {},
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 1,
+                    "level": 0
+                }
+            }
+        ]
+    }
+}
