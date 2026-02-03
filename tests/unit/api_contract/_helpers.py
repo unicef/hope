@@ -50,3 +50,6 @@ class HopeRecorder(Recorder):
 
     def assert_partners(self, response, expected, path):
         pass
+
+    def assert_roles_in_household(self, response, expected, path):
+        pass
