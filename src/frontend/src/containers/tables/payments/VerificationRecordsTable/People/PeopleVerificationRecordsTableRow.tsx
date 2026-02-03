@@ -44,7 +44,7 @@ export function PeopleVerificationRecordsTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={payment.status}
+          status={payment.verification.status}
           statusToColor={verificationRecordsStatusToColor}
         />
       </TableCell>
