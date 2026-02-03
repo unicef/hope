@@ -1,0 +1,28 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "235"
+    },
+    "data": [
+        {
+            "id": "account_type_0__account_number",
+            "type": "STRING",
+            "name": "account_type_0__account_number",
+            "lookup": "account_type_0__account_number",
+            "label": {
+                "English(EN)": "Account_Type_0 Account_Number"
+            },
+            "hint": "",
+            "required": false,
+            "choices": []
+        }
+    ],
+    "content_type": "application/json"
+}

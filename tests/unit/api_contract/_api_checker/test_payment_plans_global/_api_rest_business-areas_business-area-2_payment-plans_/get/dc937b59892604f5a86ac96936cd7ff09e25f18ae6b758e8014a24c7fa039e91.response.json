@@ -1,0 +1,48 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "784"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-2/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "89198b97-1b9b-415c-b6fe-953a13922a68",
+                "unicef_id": "PP-BA0002-26-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2026-02-03",
+                "dispersion_end_date": "2026-03-05",
+                "is_follow_up": false,
+                "follow_ups": [],
+                "created_by": " ",
+                "created_at": "2026-02-03T12:12:42Z",
+                "updated_at": "2026-02-03T12:12:42Z",
+                "program": {
+                    "id": "0fff9483-092a-45ed-b94a-7aee65dd8a25",
+                    "programme_code": "3YD7",
+                    "slug": "3yd7",
+                    "name": "Program 2",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

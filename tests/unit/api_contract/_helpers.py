@@ -1,7 +1,7 @@
 import json
 
-import drf_api_checker.utils as _checker_utils
 from drf_api_checker.recorder import Recorder
+import drf_api_checker.utils as _checker_utils
 
 
 class HopeRecorder(Recorder):
@@ -29,13 +29,14 @@ class HopeRecorder(Recorder):
         return client
 
     def compare(self, response, expected, filename, view=None):
-        normalized = json.loads(
-            json.dumps(response, cls=_checker_utils.ResponseEncoder)
-        )
+        normalized = json.loads(json.dumps(response, cls=_checker_utils.ResponseEncoder))
         super().compare(normalized, expected, filename, view=view)
 
     def assert_created_at(self, response, expected, path):
         pass
 
     def assert_updated_at(self, response, expected, path):
+        pass
+
+    def assert_unicef_id(self, response, expected, path):
         pass

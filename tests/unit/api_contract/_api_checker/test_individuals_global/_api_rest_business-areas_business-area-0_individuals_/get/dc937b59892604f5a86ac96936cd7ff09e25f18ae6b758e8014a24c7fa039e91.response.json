@@ -1,0 +1,51 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1116"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "1c42552c-1e32-4444-b654-b6c8d7fb091c",
+                "unicef_id": "IND-26-0000.0001",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 36,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in batch",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "56bcc375-3f61-4bf6-9860-93736d86337a",
+                    "name": "Program 0",
+                    "slug": "3gg3"
+                },
+                "last_registration_date": "2026-02-03",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,39 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PATCH",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "648"
+    },
+    "data": {
+        "id": "48da08d4-2860-4e47-ad88-cc6ad5ec2678",
+        "unicef_id": "FED-26-0002",
+        "issue_type": "POSITIVE_FEEDBACK",
+        "household_unicef_id": null,
+        "household_id": null,
+        "individual_unicef_id": null,
+        "individual_id": null,
+        "linked_grievance_id": null,
+        "linked_grievance_unicef_id": null,
+        "linked_grievance_category": null,
+        "program_name": null,
+        "program_id": null,
+        "created_by": " ",
+        "created_at": "2026-02-03T12:18:26Z",
+        "feedback_messages": [],
+        "admin_url": "/api/unicorn/accountability/feedback/48da08d4-2860-4e47-ad88-cc6ad5ec2678/change/",
+        "description": "Feedback description 0",
+        "area": "",
+        "language": "",
+        "comments": null,
+        "consent": true,
+        "updated_at": "2026-02-03T12:18:26Z",
+        "admin2": null
+    },
+    "content_type": "application/json"
+}

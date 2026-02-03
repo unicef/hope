@@ -1,0 +1,109 @@
+{
+    "feedback": {
+        "master": {
+            "model": "accountability.feedback",
+            "pk": "48da08d4-2860-4e47-ad88-cc6ad5ec2678",
+            "fields": {
+                "created_at": "2026-02-03T12:18:26.413Z",
+                "updated_at": "2026-02-03T12:18:26.413Z",
+                "unicef_id": "FED-26-0001",
+                "issue_type": "POSITIVE_FEEDBACK",
+                "household_lookup": null,
+                "individual_lookup": null,
+                "business_area": "4fbbf244-14ed-4cee-a51c-1aa5ce74ddbd",
+                "program": null,
+                "area": "",
+                "admin2": null,
+                "description": "Feedback description 0",
+                "language": "",
+                "comments": null,
+                "created_by": "15067b71-93a5-4bd7-ae65-fd89d326c0db",
+                "linked_grievance": null,
+                "consent": true,
+                "copied_from": null
+            }
+        },
+        "deps": [
+            {
+                "model": "core.businessarea",
+                "pk": "4fbbf244-14ed-4cee-a51c-1aa5ce74ddbd",
+                "fields": {
+                    "created_at": "2026-02-03T12:18:26.305Z",
+                    "updated_at": "2026-02-03T12:18:26.305Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            },
+            {
+                "model": "account.user",
+                "pk": "15067b71-93a5-4bd7-ae65-fd89d326c0db",
+                "fields": {
+                    "password": "",
+                    "last_login": null,
+                    "is_superuser": true,
+                    "username": "user_0",
+                    "first_name": "",
+                    "last_name": "",
+                    "is_staff": true,
+                    "is_active": true,
+                    "date_joined": "2026-02-03T12:18:26.280Z",
+                    "azure_id": null,
+                    "display_name": "user_0",
+                    "status": "INVITED",
+                    "partner": 3,
+                    "email": "user_0@example.com",
+                    "custom_fields": {},
+                    "job_title": "",
+                    "last_modify_date": "2026-02-03T12:18:26.411Z",
+                    "groups": [],
+                    "user_permissions": []
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 3,
+                "fields": {
+                    "name": "Partner 0",
+                    "parent": null,
+                    "is_un": false,
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 2,
+                    "level": 0,
+                    "allowed_business_areas": []
+                }
+            }
+        ]
+    }
+}

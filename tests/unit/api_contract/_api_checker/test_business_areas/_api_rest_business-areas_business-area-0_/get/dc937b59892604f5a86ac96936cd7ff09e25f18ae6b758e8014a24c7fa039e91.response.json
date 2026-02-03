@@ -1,0 +1,27 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "281"
+    },
+    "data": {
+        "id": "91be5a55-9ff9-4d5e-ad17-e32405d1b750",
+        "name": "Business Area 0",
+        "code": "BA0000",
+        "long_name": "Business Area 0 Long Name",
+        "slug": "business-area-0",
+        "parent": null,
+        "is_split": false,
+        "active": true,
+        "is_accountability_applicable": false,
+        "rdi_import_xlsx_disabled": false,
+        "countries": []
+    },
+    "content_type": "application/json"
+}
