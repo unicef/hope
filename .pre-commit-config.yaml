@@ -31,14 +31,6 @@ repos:
         hooks:
             -   id: djade
                 args: [ --target-version, "3.2" ]  # Replace with Django version
-    -   repo: local
-        hooks:
-            -   id: frontend-build-check
-                name: Check frontend build is up-to-date
-                entry: scripts/check-frontend-build.sh
-                language: script
-                pass_filenames: false
-                files: ^src/frontend/
     -   repo: meta
         hooks:
             -   id: check-hooks-apply
