@@ -23,6 +23,8 @@ class _HopeEncoder(_DjangoEncoder):
     def default(self, obj):
         if isinstance(obj, ResponseHeaders):
             return dict(obj)
+        if isinstance(obj, set):
+            return sorted(obj)
         return super().default(obj)
 
 
