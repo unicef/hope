@@ -1,3 +1,5 @@
+"""Tests for program destroy API endpoint."""
+
 from typing import Any, Callable
 
 import pytest

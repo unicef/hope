@@ -1,3 +1,5 @@
+"""Tests for program choices API endpoints."""
+
 from typing import Any, Callable
 
 import pytest

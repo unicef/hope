@@ -1,3 +1,5 @@
+"""Tests for program finish API endpoint."""
+
 import datetime
 from typing import Any, Callable
 
