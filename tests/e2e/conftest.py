@@ -728,6 +728,7 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 def attach(data=None, path=None, name="attachment", mime_type=None):
     """Drop-in replacement for pytest_html_reporter's attach()"""
+    global current_test_item  # noqa PLW0603
     item = current_test_item
     if item is None or not hasattr(item, "_html_extra_list"):
         return
