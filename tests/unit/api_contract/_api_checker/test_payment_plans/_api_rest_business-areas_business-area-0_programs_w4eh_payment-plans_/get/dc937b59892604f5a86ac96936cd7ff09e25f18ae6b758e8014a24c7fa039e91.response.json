@@ -1,0 +1,50 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "00d5a83e35880f8dca28ff985f6e6946",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "798"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/w4eh/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "6df18e58-3491-46b9-8918-e689bf3f2cdc",
+                "unicef_id": "PP-BA0000-26-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2026-02-03",
+                "dispersion_end_date": "2026-03-05",
+                "is_follow_up": false,
+                "follow_ups": [],
+                "created_by": " ",
+                "created_at": "2026-02-03T13:37:26Z",
+                "updated_at": "2026-02-03T13:37:26Z",
+                "program": {
+                    "id": "673f132a-607c-4cc9-a48a-9542fc11f289",
+                    "programme_code": "W4EH",
+                    "slug": "w4eh",
+                    "name": "Program 0",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,65 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "71f210e7a871cd94d1666b838944dddc",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "932"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/vi58/grievance-tickets/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "774e8ac2-6216-498d-b457-7f0ab31d49ba",
+                "admin": "",
+                "unicef_id": "GRV-0000001",
+                "status": 1,
+                "household_unicef_id": "",
+                "individual_unicef_id": "",
+                "individual_id": "",
+                "household_id": "",
+                "assigned_to": {
+                    "id": "502225d0-af9a-4b47-aa44-56ecabd3deb2",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "user_modified": null,
+                "category": 2,
+                "issue_type": 16,
+                "priority": 0,
+                "urgency": 0,
+                "created_at": "2026-02-03T13:38:24Z",
+                "created_by": {
+                    "id": "502225d0-af9a-4b47-aa44-56ecabd3deb2",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "total_days": 0,
+                "related_tickets": [],
+                "programs": [
+                    {
+                        "id": "9b0c855a-3f63-46b3-8e63-cb9bc8ddae38",
+                        "programme_code": "VI58",
+                        "slug": "vi58",
+                        "name": "Program 0",
+                        "status": "ACTIVE",
+                        "screen_beneficiary": false
+                    }
+                ],
+                "target_id": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,32 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "1bd5216a832afe2931dce83c0b7c0667",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "366"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/gjzn/target-populations/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "9a6acfd8-f057-4e1f-a322-b2df2d5185ef",
+                "name": null,
+                "status": "OPEN",
+                "created_by": "",
+                "created_at": "2026-02-03T13:37:57Z",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "updated_at": "2026-02-03T13:37:57Z"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

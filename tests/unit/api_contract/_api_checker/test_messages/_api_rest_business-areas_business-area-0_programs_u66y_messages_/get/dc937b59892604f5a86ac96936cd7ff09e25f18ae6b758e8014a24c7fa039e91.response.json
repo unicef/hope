@@ -1,0 +1,28 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "309"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/u66y/messages/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "71873886-f3fa-4c73-bdcc-b3ca3c999986",
+                "unicef_id": "MSG-26-0002",
+                "title": "Message 0",
+                "number_of_recipients": 0,
+                "created_by": " ",
+                "created_at": "2026-02-03T13:38:52Z"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
