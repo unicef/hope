@@ -16,6 +16,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PERMISSIONS } from 'src/config/permissions';
+import { formatFigure } from '@utils/utils';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
@@ -97,18 +98,20 @@ function GrievancesDashboardPage(): ReactElement {
             <Box>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF TICKETS')}
-                topNumber={systemGeneratedCount + userGeneratedCount}
-                systemGenerated={systemGeneratedCount}
-                userGenerated={userGeneratedCount}
+                topNumber={formatFigure(
+                  systemGeneratedCount + userGeneratedCount,
+                )}
+                systemGenerated={formatFigure(systemGeneratedCount)}
+                userGenerated={formatFigure(userGeneratedCount)}
                 dataCy="total-number-of-tickets"
               />
             </Box>
             <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
-                topNumber={numberOfClosedTickets}
-                systemGenerated={closedSystemGeneratedCount}
-                userGenerated={closedUserGeneratedCount}
+                topNumber={formatFigure(numberOfClosedTickets)}
+                systemGenerated={formatFigure(closedSystemGeneratedCount)}
+                userGenerated={formatFigure(closedUserGeneratedCount)}
                 dataCy="total-number-of-closed-tickets"
               />
             </Box>

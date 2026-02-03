@@ -1,16 +1,19 @@
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { GrievanceRoutes } from './GrievanceRoutes';
-import { PaymentModuleRoutes } from './PaymentModuleRoutes';
-import { PaymentVerificationRoutes } from './PaymentVerificationRoutes';
-import { PopulationRoutes } from './PopulationRoutes';
-import { ProgramRoutes } from './ProgramRoutes';
-import { RegistrationRoutes } from './RegistrationRoutes';
-import { TargetingRoutes } from './TargetingRoutes';
-import { AccountabilityRoutes } from './AccountabilityRoutes';
-import { ReactElement } from 'react';
+import { ReactElement, Suspense } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 import UsersPage from '@containers/pages/core/UsersPage';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import {
+  LazyAccountabilityRoutes,
+  LazyGrievanceRoutes,
+  LazyPaymentModuleRoutes,
+  LazyPaymentVerificationRoutes,
+  LazyPopulationRoutes,
+  LazyProgramRoutes,
+  LazyRegistrationRoutes,
+  LazyTargetingRoutes,
+} from './lazyRoutes';
 
 export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([
@@ -29,16 +32,16 @@ export const SelectedProgramRoutesSwitch = (): ReactElement => {
   ]);
 
   return (
-    <>
+    <Suspense fallback={<LoadingComponent />}>
       {routes}
-      <AccountabilityRoutes />
-      <RegistrationRoutes />
-      <PopulationRoutes />
-      <ProgramRoutes />
-      <TargetingRoutes />
-      <PaymentModuleRoutes />
-      <PaymentVerificationRoutes />
-      <GrievanceRoutes />
-    </>
+      <LazyAccountabilityRoutes />
+      <LazyRegistrationRoutes />
+      <LazyPopulationRoutes />
+      <LazyProgramRoutes />
+      <LazyTargetingRoutes />
+      <LazyPaymentModuleRoutes />
+      <LazyPaymentVerificationRoutes />
+      <LazyGrievanceRoutes />
+    </Suspense>
   );
 };

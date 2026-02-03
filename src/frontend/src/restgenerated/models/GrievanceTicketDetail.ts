@@ -22,7 +22,6 @@ export type GrievanceTicketDetail = {
     admin?: string;
     admin2: AreaList;
     assignedTo: User;
-    createdBy: User;
     /**
      * Date this ticket was most recently changed.
      */
@@ -32,6 +31,7 @@ export type GrievanceTicketDetail = {
     priority?: PriorityEnum;
     urgency?: UrgencyEnum;
     readonly createdAt: string;
+    createdBy: User;
     readonly updatedAt: string;
     readonly totalDays: number | null;
     readonly targetId: string;

@@ -467,6 +467,7 @@ class HouseholdAdmin(
     ]
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
+    show_full_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
