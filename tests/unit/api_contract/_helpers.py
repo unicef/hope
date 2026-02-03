@@ -47,3 +47,9 @@ class HopeRecorder(Recorder):
 
     def assert_version(self, response, expected, path):
         pass
+
+    def assert_timestamp(self, response, expected, path):
+        pass
+
+    def assert_roles_in_household(self, response, expected, path):
+        pass
