@@ -271,7 +271,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment_id is None:
             return  # safety check
         payment = self.payments_dict[payment_id]
-        self.logger.info(f"Importing row for payment {payment_id}")
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
         if "delivery_date" in self.xlsx_headers:
