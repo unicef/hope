@@ -1,0 +1,80 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "724"
+    },
+    "data": [
+        {
+            "name": " | \u0639\u0631\u0628\u064aArabic",
+            "value": "ar-ae"
+        },
+        {
+            "name": "Deutsch",
+            "value": "de-de"
+        },
+        {
+            "name": "English | English",
+            "value": "en-us"
+        },
+        {
+            "name": "Espa\u00f1ol | Spanish",
+            "value": "es-es"
+        },
+        {
+            "name": "Fran\u00e7ais | French",
+            "value": "fr-fr"
+        },
+        {
+            "name": "Italiano",
+            "value": "it-it"
+        },
+        {
+            "name": "Magyar | Hungarian",
+            "value": "hu-hu"
+        },
+        {
+            "name": "Polskie | Polish",
+            "value": "pl-pl"
+        },
+        {
+            "name": "Portugu\u00eas",
+            "value": "pt-pt"
+        },
+        {
+            "name": "Rom\u00e2n\u0103",
+            "value": "ro-ro"
+        },
+        {
+            "name": "\u010de\u0161tina | Czech",
+            "value": "cs-cz"
+        },
+        {
+            "name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439 | Russian",
+            "value": "ru-ru"
+        },
+        {
+            "name": "\u0443\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0438\u0439 | Ukrainian",
+            "value": "uk-ua"
+        },
+        {
+            "name": "\u0939\u093f\u0902\u0926\u0940",
+            "value": "hi-hi"
+        },
+        {
+            "name": "\u0ba4\u0bae\u0bbf\u0bb4\u0bcd | Tamil",
+            "value": "ta-ta"
+        },
+        {
+            "name": "\u0dc3\u0dd2\u0d82\u0dc4\u0dbd | Sinhala",
+            "value": "si-si"
+        }
+    ],
+    "content_type": "application/json"
+}

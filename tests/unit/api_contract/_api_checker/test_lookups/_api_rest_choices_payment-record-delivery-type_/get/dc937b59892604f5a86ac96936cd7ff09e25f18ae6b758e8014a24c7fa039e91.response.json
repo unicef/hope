@@ -8,20 +8,13 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "181"
+        "Content-Length": "50"
     },
-    "data": {
-        "id": 1,
-        "name": "Test Group",
-        "permissions": [
-            {
-                "id": 148,
-                "name": "Can add admin area limited to",
-                "codename": "add_adminarealimitedto",
-                "app_label": "account",
-                "model": "adminarealimitedto"
-            }
-        ]
-    },
+    "data": [
+        {
+            "name": "Delivery Mechanism 0",
+            "value": "DM0000"
+        }
+    ],
     "content_type": "application/json"
 }

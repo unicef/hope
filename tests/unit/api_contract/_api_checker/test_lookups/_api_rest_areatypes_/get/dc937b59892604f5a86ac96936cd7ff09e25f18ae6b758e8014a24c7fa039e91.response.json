@@ -15,20 +15,20 @@
         "previous": null,
         "results": [
             {
-                "id": "414aba3c-4685-47e1-98ae-15e70aa20f39",
-                "created_at": "2026-02-02T14:39:37Z",
-                "updated_at": "2026-02-02T14:39:37Z",
+                "id": "594de036-3f5f-410c-8b5c-fb2f4ab36ab6",
+                "created_at": "2026-02-03T11:39:51Z",
+                "updated_at": "2026-02-03T11:39:51Z",
                 "original_id": null,
                 "name": "Area Type 0",
                 "area_level": 1,
-                "valid_from": "2026-02-02T14:39:37Z",
+                "valid_from": "2026-02-03T11:39:51Z",
                 "valid_until": null,
                 "extras": {},
                 "lft": 1,
                 "rght": 2,
                 "tree_id": 1,
                 "level": 0,
-                "country": "bcb5d985-42bb-4d68-ad64-3bb2e56ce0af",
+                "country": "122bfe2f-ccae-4e6c-bb24-32b944808116",
                 "parent": null
             }
         ]

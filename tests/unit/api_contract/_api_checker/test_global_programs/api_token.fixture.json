@@ -1,0 +1,101 @@
+{
+    "api_token": {
+        "master": {
+            "model": "api.apitoken",
+            "pk": 1,
+            "fields": {
+                "user": "999a6e60-e54d-4c84-bad3-d5dfbb9ceffb",
+                "key": "7451af765f5b385db0ddfb86b576d238c0006154",
+                "grants": "[\"API_READ_ONLY\"]",
+                "valid_from": "2026-02-03",
+                "valid_to": null,
+                "allowed_ips": null,
+                "valid_for": [
+                    "220441f7-8874-48a5-97f7-a331bb4b7062"
+                ]
+            }
+        },
+        "deps": [
+            {
+                "model": "account.user",
+                "pk": "999a6e60-e54d-4c84-bad3-d5dfbb9ceffb",
+                "fields": {
+                    "password": "",
+                    "last_login": null,
+                    "is_superuser": true,
+                    "username": "user_0",
+                    "first_name": "",
+                    "last_name": "",
+                    "is_staff": true,
+                    "is_active": true,
+                    "date_joined": "2026-02-03T08:23:15.051Z",
+                    "azure_id": null,
+                    "display_name": "user_0",
+                    "status": "INVITED",
+                    "partner": 3,
+                    "email": "user_0@example.com",
+                    "custom_fields": {},
+                    "job_title": "",
+                    "last_modify_date": "2026-02-03T08:23:15.067Z",
+                    "groups": [],
+                    "user_permissions": []
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 3,
+                "fields": {
+                    "name": "Partner 0",
+                    "parent": null,
+                    "is_un": false,
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 2,
+                    "level": 0,
+                    "allowed_business_areas": []
+                }
+            },
+            {
+                "model": "core.businessarea",
+                "pk": "220441f7-8874-48a5-97f7-a331bb4b7062",
+                "fields": {
+                    "created_at": "2026-02-03T08:23:15.074Z",
+                    "updated_at": "2026-02-03T08:23:15.074Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            }
+        ]
+    }
+}

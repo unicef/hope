@@ -2,11 +2,11 @@
     "beneficiary_group": {
         "master": {
             "model": "program.beneficiarygroup",
-            "pk": "96e68d6e-91b1-4ada-b123-4fe2af6f0413",
+            "pk": "489af139-6e59-4313-b5e1-80c3a4a5253c",
             "fields": {
-                "created_at": "2026-02-02T14:39:41.183Z",
-                "updated_at": "2026-02-02T14:39:41.183Z",
-                "name": "Group 1",
+                "created_at": "2026-02-03T11:09:03.280Z",
+                "updated_at": "2026-02-03T11:09:03.280Z",
+                "name": "Group 0",
                 "group_label": "Household",
                 "group_label_plural": "Households",
                 "member_label": "Individual",

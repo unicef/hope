@@ -15,20 +15,20 @@
         "previous": null,
         "results": [
             {
-                "id": "9cebef40-9337-40d7-afa8-26e2c152123d",
+                "id": "767827e9-c356-4c8e-931d-0ca5199327cc",
                 "name": "Program 0",
-                "programme_code": "XWDG",
+                "programme_code": "M90R",
                 "status": "ACTIVE",
-                "start_date": "2026-02-02",
-                "end_date": "2027-02-02",
+                "start_date": "2026-02-03",
+                "end_date": "2027-02-03",
                 "budget": "1000000.00",
                 "frequency_of_payments": "ONE_OFF",
                 "sector": "MULTI_PURPOSE",
                 "scope": null,
                 "cash_plus": false,
                 "population_goal": 1000,
-                "business_area_code": "BA0013",
-                "beneficiary_group": "a465fd82-0a53-492f-86f1-d4fab0b6bf0e"
+                "business_area_code": "BA0000",
+                "beneficiary_group": "982d5ebb-76de-42d1-8b42-c54b29f3f55a"
             }
         ]
     },

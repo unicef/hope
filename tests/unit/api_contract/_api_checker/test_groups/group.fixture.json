@@ -5,9 +5,29 @@
             "pk": 1,
             "fields": {
                 "name": "Test Group",
-                "permissions": []
+                "permissions": [
+                    148
+                ]
             }
         },
-        "deps": []
+        "deps": [
+            {
+                "model": "auth.permission",
+                "pk": 148,
+                "fields": {
+                    "name": "Can add admin area limited to",
+                    "content_type": 37,
+                    "codename": "add_adminarealimitedto"
+                }
+            },
+            {
+                "model": "contenttypes.contenttype",
+                "pk": 37,
+                "fields": {
+                    "app_label": "account",
+                    "model": "adminarealimitedto"
+                }
+            }
+        ]
     }
 }

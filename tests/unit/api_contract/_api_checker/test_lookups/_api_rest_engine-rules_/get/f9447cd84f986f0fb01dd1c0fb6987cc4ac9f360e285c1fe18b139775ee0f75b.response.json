@@ -8,19 +8,17 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "250"
+        "Content-Length": "176"
     },
     "data": {
-        "next": "http://testserver/api/rest/lookups/financial-institution/?limit=50&offset=50",
+        "next": "http://testserver/api/rest/engine-rules/?limit=50&offset=50&type=TARGETING",
         "previous": null,
         "results": [
             {
                 "id": 1,
-                "name": "Financial Institution 0",
-                "type": "bank",
-                "swift_code": null,
-                "country_iso_code3": null,
-                "updated_at": "2026-02-03T11:39:51Z"
+                "name": "Rule 0",
+                "description": null,
+                "type": "TARGETING"
             }
         ]
     },

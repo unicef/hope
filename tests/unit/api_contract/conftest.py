@@ -1,10 +1,10 @@
 import json
 
-import drf_api_checker.utils as _checker_utils
 from django.core import serializers as _ser
 from django.core.serializers.json import DjangoJSONEncoder as _DjangoEncoder
 from django.db import DEFAULT_DB_ALIAS
 from django.http.response import ResponseHeaders
+import drf_api_checker.utils as _checker_utils
 
 # ---------------------------------------------------------------------------
 # Monkeypatch 1: ResponseEncoder
@@ -41,13 +41,20 @@ _checker_utils.ResponseEncoder = _HopeEncoder
 
 
 def _save_or_update(deserialized_obj, using):
-    """Save a deserialized object, falling back to UPDATE on duplicate key."""
-    Model = deserialized_obj.object.__class__
+    """Save a deserialized object, falling back to UPDATE on duplicate key.
+
+    Also restores M2M relations (e.g. Group.permissions) which
+    ``save_base()`` does not handle.
+    """
+    Model = deserialized_obj.object.__class__  # noqa: N806
     pk = deserialized_obj.object.pk
     if pk is not None and Model.objects.using(using).filter(pk=pk).exists():
         deserialized_obj.object.save_base(using=using, raw=True, force_update=True)
     else:
-        deserialized_obj.save(using=using)
+        deserialized_obj.object.save_base(using=using, raw=True)
+    if deserialized_obj.m2m_data:
+        for accessor_name, object_list in deserialized_obj.m2m_data.items():
+            getattr(deserialized_obj.object, accessor_name).set(object_list)
 
 
 def _load_fixtures_fixed(file, ignorenonexistent=False, using=DEFAULT_DB_ALIAS):
@@ -60,10 +67,12 @@ def _load_fixtures_fixed(file, ignorenonexistent=False, using=DEFAULT_DB_ALIAS):
         if not many:
             master = [master]
 
-        # deps FIRST, then master (library had master + deps → FK violations)
+        # deps reversed (deepest FK targets first), then master.
+        # The library serializes deps in discovery order (shallow→deep),
+        # but DB inserts need deep→shallow so FK targets exist first.
         objects = _ser.deserialize(
             "json",
-            json.dumps(deps + master),
+            json.dumps(list(reversed(deps)) + master),
             using=using,
             ignorenonexistent=ignorenonexistent,
         )
@@ -73,7 +82,7 @@ def _load_fixtures_fixed(file, ignorenonexistent=False, using=DEFAULT_DB_ALIAS):
             saved.append(obj.object)
 
         # saved has [*deps, *master] — extract only master objects from the end
-        master_objects = saved[len(deps):]
+        master_objects = saved[len(deps) :]
         if many:
             ret[name] = master_objects
         else:
