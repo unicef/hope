@@ -187,7 +187,7 @@ def pytest_configure(config) -> None:  # type: ignore
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
     if (not pytest.SESSION_ID) and (not pytest.CSRF):
         pytest.session.get(f"{host}")
-        pytest.CSRF = csrf if csrf else pytest.session.cookies.get_dict()["csrftoken"]
+        pytest.CSRF = csrf or pytest.session.cookies.get_dict()["csrftoken"]
     headers = {
         "X-CSRFToken": pytest.CSRF,
         "Cookie": f"csrftoken={pytest.CSRF}",
@@ -698,15 +698,9 @@ def create_super_user(business_area: BusinessArea) -> User:
     return user
 
 
-# Global variable to track the current test item
-_current_test_item = None
-
-
 # set up a hook to be able to check if a test has failed
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
-    global _current_test_item  # noqa PLW0603
-    _current_test_item = item
     outcome = yield
     report = outcome.get_result()
     setattr(item, "rep_" + report.when, report)
@@ -728,9 +722,8 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 def attach(data=None, path=None, name="attachment", mime_type=None):
     """Drop-in replacement for pytest_html_reporter's attach()"""
-    global _current_test_item  # noqa PLW0603
-    item = _current_test_item
-    if item is None or not hasattr(item, "_html_extra_list"):
+    item = pytest._current_item
+    if not hasattr(item, "_html_extra_list"):
         return
 
     extra_list = item._html_extra_list
@@ -745,7 +738,7 @@ def attach(data=None, path=None, name="attachment", mime_type=None):
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
     SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
+    file_name = f"{node_id.rsplit('::', maxsplit=1)[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = SCREENSHOT_DIRECTORY / file_name
