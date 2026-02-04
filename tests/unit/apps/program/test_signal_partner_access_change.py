@@ -67,7 +67,7 @@ def partner_with_role_in_afg_2(business_area: BusinessArea, role: Role) -> Partn
 
 
 @pytest.fixture
-def partner_not_allowed_in_BA(db: Any) -> Partner:
+def partner_not_allowed_in_ba(db: Any) -> Partner:
     return PartnerFactory(name="Partner without role in Afg")
 
 
@@ -124,7 +124,7 @@ def program(
     unicef_partner: Partner,
     partner_with_role_in_afg_1: Partner,
     partner_with_role_in_afg_2: Partner,
-    partner_not_allowed_in_BA: Partner,
+    partner_not_allowed_in_ba: Partner,
     area_in_afg_1: Area,
     area_in_afg_2: Area,
     area_not_in_afg: Area,
