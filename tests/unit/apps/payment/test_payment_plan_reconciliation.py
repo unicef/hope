@@ -215,7 +215,7 @@ def test_import_row_updates_payment_and_verification_status(
     Row = namedtuple("Row", ["value"])
 
     import_service._import_row(
-        [Row(str(payment_1.id)), Row(999), Row(pytz.utc.localize(datetime(2023, 5, 12)))],
+        [Row(str(payment_1.id)), Row(999), Row("2023/05/12")],
         1,
     )
     import_service._import_row(
@@ -254,3 +254,39 @@ def test_import_row_updates_payment_and_verification_status(
     assert payment_3.delivered_quantity == 2999
     assert verification_3.received_amount is None
     assert verification_3.status == PaymentVerification.STATUS_PENDING
+
+    # more coverage
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = [
+        "payment_id",
+        "delivered_quantity",
+        "reason_for_unsuccessful_payment",
+        "additional_collector_name",
+        "additional_document_type",
+        "additional_document_number",
+    ]
+    import_service.payments_dict = {
+        str(payment_1.pk): payment_1,
+    }
+
+    Row = namedtuple("Row", ["value"])
+
+    import_service._import_row(
+        [
+            Row(str(payment_1.id)),
+            Row(999),
+            Row("Reason for unsuccessful Payment"),
+            Row("Additional Collector"),
+            Row("Additional Document Type"),
+            Row("Additional Document Number"),
+        ],
+        1,
+    )
+    payment_1.save()
+    payment_1.refresh_from_db()
+
+    assert payment_1.delivered_quantity == 999
+    assert payment_1.reason_for_unsuccessful_payment == "Reason for unsuccessful Payment"
+    assert payment_1.additional_collector_name == "Additional Collector"
+    assert payment_1.additional_document_type == "Additional Document Type"
+    assert payment_1.additional_document_number == "Additional Document Number"

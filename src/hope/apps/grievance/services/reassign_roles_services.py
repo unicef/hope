@@ -48,6 +48,44 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             "household_id", flat=True
         )
     )
+    _proccesing_role_reassign_data(
+        duplicated_individuals_ids, role_reassign_data, roles_to_bulk_update, roles_to_delete, user
+    )
+
+    for role_to_delete in roles_to_delete:
+        role_to_delete.delete(soft=False)
+    if roles_to_bulk_update:
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
+
+    # check if all households have head of household
+    for individual in duplicated_individuals:
+        household_to_check = Household.objects.get(id=individual.household.id)
+        if household_to_check.withdrawn:
+            continue
+        if str(household_to_check.head_of_household.id) in duplicated_individuals_ids:
+            raise ValidationError(
+                f"Role for head of household in household with unicef_id {household_to_check.unicef_id} "
+                f"was not reassigned, when individual ({individual.unicef_id}) was marked as duplicated"
+            )
+
+    # check if all households have primary role:
+    for household_id in duplicated_individuals_roles_households_ids:
+        household_to_check = Household.objects.get(id=household_id)
+        if household_to_check.withdrawn:
+            continue
+        primary_role = IndividualRoleInHousehold.objects.filter(household=household_id, role=ROLE_PRIMARY).first()
+        if primary_role is None:
+            raise ValidationError(f"Household with id {household_id} was left without primary role")  # pragma: no cover
+        if str(primary_role.individual.id) in duplicated_individuals_ids:
+            raise ValidationError(
+                f"Primary role in household with unicef_id {primary_role.household.unicef_id} is still assigned to "
+                f"duplicated individual({primary_role.individual.unicef_id})"
+            )
+
+
+def _proccesing_role_reassign_data(
+    duplicated_individuals_ids, role_reassign_data, roles_to_bulk_update, roles_to_delete, user
+):
     for role_data in role_reassign_data.values():
         role_name = role_data.get("role")
         new_individual = get_object_or_404(Individual, id=role_data.get("new_individual"))
@@ -99,36 +137,6 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
         role.individual = new_individual
         roles_to_bulk_update.append(role)
 
-    for role_to_delete in roles_to_delete:
-        role_to_delete.delete(soft=False)
-    if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
-
-    # check if all households have head of household
-    for individual in duplicated_individuals:
-        household_to_check = Household.objects.get(id=individual.household.id)
-        if household_to_check.withdrawn:
-            continue
-        if str(household_to_check.head_of_household.id) in duplicated_individuals_ids:
-            raise ValidationError(
-                f"Role for head of household in household with unicef_id {household_to_check.unicef_id} "
-                f"was not reassigned, when individual ({individual.unicef_id}) was marked as duplicated"
-            )
-
-    # check if all households have primary role:
-    for household_id in duplicated_individuals_roles_households_ids:
-        household_to_check = Household.objects.get(id=household_id)
-        if household_to_check.withdrawn:
-            continue
-        primary_role = IndividualRoleInHousehold.objects.filter(household=household_id, role=ROLE_PRIMARY).first()
-        if primary_role is None:
-            raise ValidationError(f"Household with id {household_id} was left without primary role")  # pragma: no cover
-        if str(primary_role.individual.id) in duplicated_individuals_ids:
-            raise ValidationError(
-                f"Primary role in household with unicef_id {primary_role.household.unicef_id} is still assigned to "
-                f"duplicated individual({primary_role.individual.unicef_id})"
-            )
-
 
 def reassign_head_of_household_relationship_for_need_adjudication_ticket(
     household: Household,
@@ -168,8 +176,8 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
             "business_area",
             user,
             individual_before_change.program.pk,
-            individual_before_change,
-            individual_after_change,
+            old_object=individual_before_change,
+            new_object=individual_after_change,
         )
     new_individual.relationship = HEAD
     new_individual.save()
@@ -178,8 +186,8 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
         "business_area",
         user,
         new_individual.program.pk,
-        old_individual_to_log,
-        new_individual,
+        old_object=old_individual_to_log,
+        new_object=new_individual,
     )
 
 
@@ -212,8 +220,8 @@ def reassign_roles_on_disable_individual_service(
                 "business_area",
                 user,
                 getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
-                old_individual,
-                new_individual,
+                old_object=old_individual,
+                new_object=new_individual,
             )
 
         if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
@@ -278,8 +286,8 @@ def reassign_roles_on_update_service(
                 "business_area",
                 user,
                 getattr(program_or_qs, "pk", None) if isinstance(program_or_qs, UUID) else program_or_qs,
-                old_individual,
-                new_individual,
+                old_object=old_individual,
+                new_object=new_individual,
             )
 
         if new_individual_current_role := IndividualRoleInHousehold.objects.filter(

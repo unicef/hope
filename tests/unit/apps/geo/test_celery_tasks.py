@@ -12,7 +12,7 @@ def country() -> Country:
     return CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLD", iso_num="999")
 
 
-def test_import_areas_from_cs(country: Country) -> None:
+def test_import_areas_from_csv(country: Country) -> None:
     """
     Test that the celery task correctly creates and updates AreaTypes and Areas,
     including their hierarchy.

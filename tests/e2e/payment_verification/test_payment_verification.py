@@ -533,10 +533,6 @@ class TestSmokePaymentVerification:
 
         page_payment_verification_details.get_export_xlsx().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
 
         xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
@@ -590,10 +586,6 @@ class TestSmokePaymentVerification:
 
         page_payment_verification_details.get_export_xlsx().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
 
         xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
@@ -633,10 +625,6 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_button_submit().click()
 
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
 
         page_payment_verification_details.get_download_xlsx().click()
 
@@ -680,15 +668,7 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_button_activate_plan().click()
         page_payment_verification_details.get_button_submit().click()
 
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
 
         page_payment_verification_details.get_download_xlsx().click()
 
@@ -712,23 +692,9 @@ class TestSmokePaymentVerification:
         page_payment_verification.get_cash_plan_table_row().click()
         page_payment_verification_details.get_button_activate_plan().click()
         page_payment_verification_details.get_button_submit().click()
-
         page_payment_verification_details.get_export_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_download_xlsx().click()
-
-        # ToDo: Workaround: Bug 220111
-        sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         page_payment_verification_details.get_button_mark_as_invalid().click()
 
-        # ToDo: Workaround: Bug 220111
         sleep(2)
-        page_payment_verification_details.driver.refresh()
-
         assert "INVALID" in page_payment_verification_details.get_verification_plan_status().text

@@ -75,7 +75,7 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        create_collection: bool = True,
+        **kwargs,
     ):
         """Copy the population data from a programme to another programme.
 
@@ -85,12 +85,13 @@ class CopyProgramPopulation:
         rdi_merge_status: rdi_merge_status for new objects
         create_collection: if True, new common collection will be created for original and copied object
         rdi: RegistrationDataImport object to which new objects will be assigned
+        kwargs: can has 'create_collection' bool  default True.
         """
         self.copy_from_individuals = copy_from_individuals
         self.copy_from_households = copy_from_households
         self.program = program
         self.rdi_merge_status = rdi_merge_status
-        self.create_collection = create_collection
+        self.create_collection = kwargs.get("create_collection", True)
         self.rdi = rdi
         self.manager = "objects" if rdi_merge_status == MergeStatusModel.MERGED else "pending_objects"
 

@@ -222,8 +222,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             payment_plan.program,
-            None,
-            verification_plan,
+            old_object=None,
+            new_object=verification_plan,
         )
         payment_plan.refresh_from_db()
         return Response(
@@ -259,8 +259,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_verification_plan.payment_plan).data,
@@ -293,8 +293,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -328,8 +328,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -361,8 +361,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -393,8 +393,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -426,8 +426,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            None,
+            old_object=old_payment_verification_plan,
+            new_object=None,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -461,8 +461,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -509,8 +509,8 @@ class PaymentVerificationViewSet(
             "business_area",
             request.user,
             program_id,
-            old_payment_verification_plan,
-            payment_verification_plan,
+            old_object=old_payment_verification_plan,
+            new_object=payment_verification_plan,
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
@@ -616,8 +616,8 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
             "business_area",
             request.user,
             getattr(payment_verification_plan.get_program, "pk", None),
-            old_payment_verification,
-            payment_verification,
+            old_object=old_payment_verification,
+            new_object=payment_verification,
         )
         payment.refresh_from_db()
 
@@ -1734,8 +1734,8 @@ class TargetPopulationViewSet(
                 "business_area",
                 user,
                 getattr(program, "pk", None),
-                None,
-                payment_plan_copy,
+                old_object=None,
+                new_object=payment_plan_copy,
             )
             response_serializer = TargetPopulationDetailSerializer(payment_plan_copy, context={"request": request})
             return Response(
