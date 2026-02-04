@@ -6,7 +6,10 @@ from django.db import DEFAULT_DB_ALIAS
 from django.http.response import ResponseHeaders
 import drf_api_checker.utils as _checker_utils
 import factory.base
+from freezegun import freeze_time
 import pytest
+
+FROZEN_TIME = "2025-01-01T00:00:00Z"
 
 # ---------------------------------------------------------------------------
 # Monkeypatch 1: ResponseEncoder
@@ -113,3 +116,9 @@ def _all_factory_subclasses(cls):
 def _reset_factory_sequences():
     for subcls in _all_factory_subclasses(factory.base.BaseFactory):
         subcls.reset_sequence(0, force=True)
+
+
+@pytest.fixture(autouse=True)
+def _freeze_time():
+    with freeze_time(FROZEN_TIME, ignore=["elasticsearch", "elasticsearch_dsl"]):
+        yield
