@@ -617,9 +617,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
@@ -698,9 +698,9 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket.created_by == user,
                 permissions_to_use[1],
                 grievance_ticket.assigned_to == user,
-                permissions_to_use[2],
-                grievance_ticket.business_area,
-                grievance_ticket.programs.first(),
+                owner_permission=permissions_to_use[2],
+                business_area=grievance_ticket.business_area,
+                program=grievance_ticket.programs.first(),
             )
 
         if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
@@ -783,9 +783,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         description = input_data["description"]
@@ -822,9 +822,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         self.verify_approve_data(individual_approve_data)
@@ -894,9 +894,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         self.verify_approve_data(household_approve_data)
@@ -962,9 +962,9 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket.created_by == user,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 grievance_ticket.assigned_to == user,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-                self.business_area,
-                grievance_ticket.programs.first(),
+                owner_permission=Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+                business_area=self.business_area,
+                program=grievance_ticket.programs.first(),
             )
         else:
             check_creator_or_owner_permission(
@@ -973,9 +973,9 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket.created_by == user,
                 Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
                 grievance_ticket.assigned_to == user,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-                self.business_area,
-                grievance_ticket.programs.first(),
+                owner_permission=Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+                business_area=self.business_area,
+                program=grievance_ticket.programs.first(),
             )
 
         ticket_details = grievance_ticket.ticket_details
@@ -1008,9 +1008,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         ticket_details = grievance_ticket.ticket_details
@@ -1061,9 +1061,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         duplicate_individuals = serializer.validated_data.get("duplicate_individual_ids", [])
@@ -1142,9 +1142,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         )
 
         if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:

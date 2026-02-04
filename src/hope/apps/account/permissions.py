@@ -1,6 +1,6 @@
 from enum import Enum, auto, unique
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -329,16 +329,18 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
-def check_creator_or_owner_permission(  # noqa: PLR0913 – intentional design by author
+def check_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
     general_permission: Permissions,
     is_creator: bool,
     creator_permission: Permissions,
     is_owner: bool,
-    owner_permission: Permissions,
-    business_area: "BusinessArea",
-    program: Optional["Program"],
+    **kwargs: Any,
 ) -> None:
+    """Kwargs: 'owner_permission', 'business_area', 'program'."""
+    owner_permission: Permissions = kwargs.get("owner_permission")
+    business_area: "BusinessArea" = kwargs.get("business_area")
+    program: "Program" | None = kwargs.get("program")
     scope = program or business_area
     required_permissions = [general_permission.value]
     if is_creator:
