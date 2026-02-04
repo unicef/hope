@@ -35,7 +35,7 @@ python manage.py runserver
 
 This command automatically:
 - Starts the Django development server on port `8000`
-- Runs `yarn build-and-watch` in the background
+- Runs `bun run build-and-watch` in the background
 - Builds frontend to `src/hope/apps/web/static/web/`
 - Watches for frontend changes and rebuilds automatically
 
@@ -79,7 +79,7 @@ In a separate terminal:
 
 ```bash
 cd src/frontend
-yarn dev
+bun dev
 ```
 
 This starts the Vite dev server on port `3000` with:
@@ -130,7 +130,7 @@ In a separate terminal:
 
 ```bash
 cd src/frontend
-yarn dev
+bun dev
 ```
 
 ### Access
@@ -230,5 +230,5 @@ Access Flower at http://localhost:5555/
 | Option | Command | Frontend URL | Backend URL |
 |--------|---------|--------------|-------------|
 | **1. Build + Watch** | `python manage.py runserver` | :8000 | :8000 |
-| **2. Vite Dev** | `runserver --classic` + `yarn dev` | :3000 | :8080 |
-| **3. Full Docker** | `docker compose up` + `yarn dev` | :3000 | :8080 |
+| **2. Vite Dev** | `runserver --classic` + `bun dev` | :3000 | :8080 |
+| **3. Full Docker** | `docker compose up` + `bun dev` | :3000 | :8080 |
