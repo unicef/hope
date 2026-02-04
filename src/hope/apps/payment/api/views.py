@@ -1977,7 +1977,7 @@ class PaymentViewSet(
         # Prefetch individuals within households, including their roles
         individual_prefetch = Prefetch(
             "household__individuals",
-            queryset=Individual.objects.only("id", "household_id").prefetch_related(role_prefetch),
+            queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
             to_attr="prefetched_individuals",
         )
         if parent.status == PaymentPlan.Status.OPEN:
