@@ -368,6 +368,7 @@ def test_program_count_with_permission(
     afghanistan: BusinessArea,
     count_url: str,
     program: Program,
+    program_in_ukraine: Program,
     program_with_dct_deprecated: Program,
     program_with_unknown_dct: Program,
     program_not_allowed: Program,
@@ -390,8 +391,10 @@ def test_program_count_without_permission(
     afghanistan: BusinessArea,
     count_url: str,
     program: Program,
+    program_in_ukraine: Program,
     program_with_dct_deprecated: Program,
     program_with_unknown_dct: Program,
+    program_not_allowed: Program,
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
