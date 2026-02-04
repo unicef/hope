@@ -2,7 +2,6 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from models import Payment
 import pytest
 
 from extras.test_utils.factories import (
@@ -16,7 +15,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
-from hope.models import PaymentPlan
+from hope.models import Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
