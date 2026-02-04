@@ -1,0 +1,48 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "a88ce8a9ef8e755d92e0d1bde9355e35",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "990"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/payments/payment-plans-managerial/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "80d52a2d-872c-434a-9b1a-3a27d22d9729",
+                "unicef_id": "PP-BA0000-26-00000001",
+                "name": null,
+                "status": "IN_APPROVAL",
+                "status_display": "In Approval",
+                "total_households_count": 0,
+                "currency": null,
+                "total_entitled_quantity": null,
+                "total_entitled_quantity_usd": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2026-02-04",
+                "dispersion_end_date": "2026-03-06",
+                "is_follow_up": false,
+                "follow_ups": [],
+                "program": "Program 0",
+                "program_id": "77bf6184-4416-42ad-9b98-262161fbc4ca",
+                "program_slug": "dq1x",
+                "program_cycle_id": "4ccbadc2-8aeb-43c0-8579-aa633607e647",
+                "last_approval_process_date": "2026-02-04T08:04:23.541Z",
+                "last_approval_process_by": null,
+                "admin_url": "/api/unicorn/payment/paymentplan/80d52a2d-872c-434a-9b1a-3a27d22d9729/change/",
+                "screen_beneficiary": false,
+                "has_payments_reconciliation_overdue": false
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

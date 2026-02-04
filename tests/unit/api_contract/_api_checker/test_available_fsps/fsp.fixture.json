@@ -1,0 +1,83 @@
+{
+    "fsp": {
+        "master": {
+            "model": "payment.financialserviceprovider",
+            "pk": "60ac57ad-cfe7-4036-af09-9cdb6ae17bf5",
+            "fields": {
+                "created_at": "2026-02-04T08:07:50.505Z",
+                "updated_at": "2026-02-04T08:07:50.507Z",
+                "internal_data": {},
+                "created_by": null,
+                "name": "FSP 0",
+                "vision_vendor_number": "VEN0000",
+                "distribution_limit": null,
+                "communication_channel": "XLSX",
+                "data_transfer_configuration": {},
+                "payment_gateway_id": null,
+                "allowed_business_areas": [
+                    "8c36a32a-755b-46f2-a204-d6d5104d862a"
+                ],
+                "delivery_mechanisms": [
+                    "16026442-4892-4e32-8448-6c8447b47acd"
+                ]
+            }
+        },
+        "deps": [
+            {
+                "model": "core.businessarea",
+                "pk": "8c36a32a-755b-46f2-a204-d6d5104d862a",
+                "fields": {
+                    "created_at": "2026-02-04T08:07:50.402Z",
+                    "updated_at": "2026-02-04T08:07:50.402Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            },
+            {
+                "model": "payment.deliverymechanism",
+                "pk": "16026442-4892-4e32-8448-6c8447b47acd",
+                "fields": {
+                    "created_at": "2026-02-04T08:07:50.502Z",
+                    "updated_at": "2026-02-04T08:07:50.502Z",
+                    "payment_gateway_id": "dm-0",
+                    "code": "DM0000",
+                    "name": "Delivery Mechanism 0",
+                    "is_active": true,
+                    "transfer_type": "CASH",
+                    "account_type": null
+                }
+            }
+        ]
+    }
+}

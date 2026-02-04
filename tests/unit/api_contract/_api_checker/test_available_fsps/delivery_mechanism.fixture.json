@@ -1,0 +1,19 @@
+{
+    "delivery_mechanism": {
+        "master": {
+            "model": "payment.deliverymechanism",
+            "pk": "16026442-4892-4e32-8448-6c8447b47acd",
+            "fields": {
+                "created_at": "2026-02-04T08:07:50.502Z",
+                "updated_at": "2026-02-04T08:07:50.502Z",
+                "payment_gateway_id": "dm-0",
+                "code": "DM0000",
+                "name": "Delivery Mechanism 0",
+                "is_active": true,
+                "transfer_type": "CASH",
+                "account_type": null
+            }
+        },
+        "deps": []
+    }
+}
