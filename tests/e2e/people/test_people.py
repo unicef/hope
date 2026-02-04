@@ -156,11 +156,7 @@ class TestSmokePeople:
         assert f"Individual ID: {individual.unicef_id}" in page_people_details.get_page_header_title().text
         assert individual.full_name in page_people_details.get_label_full_name().text
         assert individual.given_name in page_people_details.get_label_given_name().text
-        assert (
-            individual.middle_name
-            if individual.middle_name
-            else "-" in page_people_details.get_label_middle_name().text
-        )
+        assert individual.middle_name or "-" in page_people_details.get_label_middle_name().text
         assert individual.family_name in page_people_details.get_label_family_name().text
         assert individual.sex.lower().replace("_", " ") in page_people_details.get_label_gender().text.lower()
         assert page_people_details.get_label_age().text
@@ -170,62 +166,18 @@ class TestSmokePeople:
         assert "Not provided" in page_people_details.get_label_work_status().text
         assert page_people_details.get_label_pregnant().text
         assert page_people_details.get_label_role().text
-        assert (
-            individual.preferred_language
-            if individual.preferred_language
-            else "-" in page_people_details.get_label_preferred_language().text
-        )
+        assert individual.preferred_language or "-" in page_people_details.get_label_preferred_language().text
         assert "Non-displaced | Host" in page_people_details.get_label_residence_status().text
-        assert (
-            individual.household.country
-            if individual.household.country
-            else "-" in page_people_details.get_label_country().text
-        )
-        assert (
-            individual.household.country_origin
-            if individual.household.country_origin
-            else "-" in page_people_details.get_label_country_of_origin().text
-        )
-        assert (
-            individual.household.address
-            if individual.household.address
-            else "-" in page_people_details.get_label_address().text
-        )
-        assert (
-            individual.household.village
-            if individual.household.village
-            else "-" in page_people_details.get_label_vilage().text
-        )
-        assert (
-            individual.household.zip_code
-            if individual.household.zip_code
-            else "-" in page_people_details.get_label_zip_code().text
-        )
-        assert (
-            individual.household.admin1
-            if individual.household.admin1
-            else "-" in page_people_details.get_label_administrative_level_1().text
-        )
-        assert (
-            individual.household.admin2
-            if individual.household.admin2
-            else "-" in page_people_details.get_label_administrative_level_2().text
-        )
-        assert (
-            individual.household.admin3
-            if individual.household.admin3
-            else "-" in page_people_details.get_label_administrative_level_3().text
-        )
-        assert (
-            individual.household.admin4
-            if individual.household.admin4
-            else "-" in page_people_details.get_label_administrative_level_4().text
-        )
-        assert (
-            individual.household.geopoint
-            if individual.household.geopoint
-            else "-" in page_people_details.get_label_geolocation().text
-        )
+        assert individual.household.country or "-" in page_people_details.get_label_country().text
+        assert individual.household.country_origin or "-" in page_people_details.get_label_country_of_origin().text
+        assert individual.household.address or "-" in page_people_details.get_label_address().text
+        assert individual.household.village or "-" in page_people_details.get_label_vilage().text
+        assert individual.household.zip_code or "-" in page_people_details.get_label_zip_code().text
+        assert individual.household.admin1 or "-" in page_people_details.get_label_administrative_level_1().text
+        assert individual.household.admin2 or "-" in page_people_details.get_label_administrative_level_2().text
+        assert individual.household.admin3 or "-" in page_people_details.get_label_administrative_level_3().text
+        assert individual.household.admin4 or "-" in page_people_details.get_label_administrative_level_4().text
+        assert individual.household.geopoint or "-" in page_people_details.get_label_geolocation().text
         assert page_people_details.get_label_data_collecting_type().text
         assert page_people_details.get_label_observed_disabilities().text
         assert page_people_details.get_label_seeing_disability_severity().text
