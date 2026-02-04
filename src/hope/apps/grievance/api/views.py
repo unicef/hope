@@ -643,9 +643,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         ):
             update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
@@ -655,8 +655,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
@@ -756,8 +756,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
 
         GrievanceNotification.send_all_notifications(notifications)

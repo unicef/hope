@@ -222,6 +222,18 @@ export function VerificationPlanActions({
                     <StyledLink
                       download
                       href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
+                      onClick={() => {
+                        setTimeout(() => {
+                          queryClient.invalidateQueries({
+                            queryKey: [
+                              'PaymentVerificationPlanDetails',
+                              businessArea,
+                              paymentPlanNode.id,
+                              programSlug,
+                            ],
+                          });
+                        }, 1000);
+                      }}
                     >
                       <Button
                         color="primary"

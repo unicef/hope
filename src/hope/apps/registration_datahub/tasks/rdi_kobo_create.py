@@ -236,9 +236,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     head_of_households_mapping,
                     household,
                     households_to_create,
-                    individuals_ids_hash_dict,
-                    submission_meta_data,
-                    household_count,
+                    individuals_ids_hash_dict=individuals_ids_hash_dict,
+                    submission_meta_data=submission_meta_data,
+                    household_count=household_count,
                 )
             self.bulk_creates(head_of_households_mapping, households_to_create)
             head_of_households_mapping = {}
@@ -259,8 +259,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             "business_area",
             None,
             self.registration_data_import.program_id,
-            self.registration_data_import,
-            rdi_mis,
+            old_object=self.registration_data_import,
+            new_object=rdi_mis,
         )
         if not self.business_area.postpone_deduplication:
             DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
@@ -282,16 +282,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
         )
 
-    def handle_household(
+    def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        individuals_ids_hash_dict: dict,
-        submission_meta_data: dict,
-        household_count: int,
+        **kwargs,
     ) -> None:
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
+        submission_meta_data: dict = kwargs.get("submission_meta_data")
+        household_count: int = kwargs.get("household_count")
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

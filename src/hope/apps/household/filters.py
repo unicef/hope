@@ -665,22 +665,12 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
                 if "individual" in lookups:
                     individual_field = lookups["individual"]
                     obj = details
-                    for field in individual_field.split("__"):
-                        obj = getattr(obj, field, None)
-                        if obj is None:
-                            break
-                    if obj and hasattr(obj, "id"):
-                        individual_ids.add(obj.id)
+                    self._add_individual_ids(individual_field, individual_ids, obj)
 
                 if "golden_records_individual" in lookups:
                     individual_field = lookups["golden_records_individual"]
                     obj = details
-                    for field in individual_field.split("__"):
-                        obj = getattr(obj, field, None)
-                        if obj is None:
-                            break
-                    if obj and hasattr(obj, "id"):
-                        individual_ids.add(obj.id)
+                    self._add_individual_ids(individual_field, individual_ids, obj)
 
         if hasattr(ticket, "needs_adjudication_ticket_details") and ticket.needs_adjudication_ticket_details:
             individual_ids.update(
@@ -697,6 +687,14 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             return queryset.filter(id__in=individual_ids)
 
         return queryset.none()
+
+    def _add_individual_ids(self, individual_field, individual_ids, obj):
+        for field in individual_field.split("__"):
+            obj = getattr(obj, field, None)
+            if obj is None:
+                break
+        if obj and hasattr(obj, "id"):
+            individual_ids.add(obj.id)
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:

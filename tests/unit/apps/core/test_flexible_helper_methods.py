@@ -118,6 +118,7 @@ def test_assign_field_values_attribute_sets_expected_fields(flex_importer, surve
     flex_importer._assign_field_values(name_value, "name", "attribute", row, 61)
     flex_importer._assign_field_values(required_value, "required", "attribute", row, 61)
     flex_importer._assign_field_values(label_value, "label::English(EN)", "attribute", row, 61)
+    flex_importer._assign_field_values(label_value, "label:English(EN)", "attribute", row, 61)
 
     assert flex_importer.object_fields_to_create == {
         "type": "INTEGER",
