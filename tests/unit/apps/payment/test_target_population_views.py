@@ -12,6 +12,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    AreaFactory,
     BusinessAreaFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -310,7 +311,12 @@ def pending_payments_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
     )
 
-    household1 = HouseholdFactory(program=program, business_area=business_area, size=3)
+    household1 = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        size=3,
+        admin2=AreaFactory(name="Admin2 A"),
+    )
     PaymentFactory(
         household=household1,
         parent=target_population,
@@ -325,6 +331,7 @@ def pending_payments_context(
         business_area=business_area,
         unicef_id="HH-AAA-001",
         size=2,
+        admin2=AreaFactory(name="Admin2 B"),
     )
     household2.head_of_household.full_name = "Alice Smith"
     household2.head_of_household.save(update_fields=["full_name"])
@@ -342,6 +349,7 @@ def pending_payments_context(
         business_area=business_area,
         unicef_id="HH-ZZZ-001",
         size=5,
+        admin2=AreaFactory(name="Admin2 C"),
     )
     household3.head_of_household.full_name = "Zack Brown"
     household3.head_of_household.save(update_fields=["full_name"])
