@@ -586,9 +586,6 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
             role=ROLE_PRIMARY,
         )
 
-        # BankAccountInfoFactory(
-        #     individual=individuals_1[0],
-        # )
         household_2, individuals_2 = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.rdi_other,
@@ -626,7 +623,6 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
         assert Individual.pending_objects.count() == 0
         assert IndividualIdentity.pending_objects.count() == 0
         assert Document.pending_objects.count() == 0
-        # assert BankAccountInfo.pending_objects.count() == 0
         assert IndividualRoleInHousehold.pending_objects.count() == 0
         assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 0
 
@@ -673,10 +669,6 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
         assert Individual.pending_objects.filter(program=program_to_import_from_ids).count() == 4
         assert IndividualIdentity.pending_objects.filter(individual__program=program_to_import_from_ids).count() == 2
         assert Document.pending_objects.filter(program=program_to_import_from_ids).count() == 1
-        # assert (
-        #     BankAccountInfo.pending_objects.filter(individual__program=program_to_import_from_ids).count(),
-        #     1,
-        # )
         assert (
             IndividualRoleInHousehold.pending_objects.filter(household__program=program_to_import_from_ids).count() == 2
         )
@@ -769,10 +761,6 @@ class TestProgramPopulationToPendingObjects(BaseTestCase):
         assert Individual.pending_objects.count() == 0
         assert IndividualIdentity.pending_objects.count() == 0
         assert Document.pending_objects.count() == 0
-        # assert (
-        #     BankAccountInfo.pending_objects.count(),
-        #     0,
-        # )
         assert IndividualRoleInHousehold.pending_objects.count() == 0
         assert Account.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count() == 0
 

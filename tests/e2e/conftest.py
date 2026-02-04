@@ -75,12 +75,23 @@ from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.old_factories.account import RoleFactory, UserFactory
-from extras.test_utils.old_factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.old_factories.geo import (
+    generate_small_areas_for_afghanistan_only,
+)
 from extras.test_utils.old_factories.household import DocumentTypeFactory
 from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
-from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User
+from hope.models import (
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    DocumentType,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 HERE = Path(__file__).resolve().parent
 E2E_ROOT = HERE.parent
@@ -687,9 +698,15 @@ def create_super_user(business_area: BusinessArea) -> User:
     return user
 
 
+# Global variable to track the current test item
+_current_test_item = None
+
+
 # set up a hook to be able to check if a test has failed
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
+    global _current_test_item  # noqa PLW0603
+    _current_test_item = item
     outcome = yield
     report = outcome.get_result()
     setattr(item, "rep_" + report.when, report)
@@ -711,8 +728,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 def attach(data=None, path=None, name="attachment", mime_type=None):
     """Drop-in replacement for pytest_html_reporter's attach()"""
-    item = pytest._current_item
-    if not hasattr(item, "_html_extra_list"):
+    global _current_test_item  # noqa PLW0603
+    item = _current_test_item
+    if item is None or not hasattr(item, "_html_extra_list"):
         return
 
     extra_list = item._html_extra_list

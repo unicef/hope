@@ -281,13 +281,7 @@ class IndividualDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
-        if "phone_no" in only_approved_data:
-            only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
-
-        if "phone_no_alternative" in only_approved_data:
-            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
-                only_approved_data["phone_no_alternative"]
-            )
+        self._validate_phone_numbers(only_approved_data)
         # people update
         hh_fields = [
             "consent",
@@ -367,8 +361,8 @@ class IndividualDataUpdateService(DataChangeService):
             "business_area",
             user,
             program_qs,
-            old_individual,
-            new_individual,
+            old_object=old_individual,
+            new_object=new_individual,
         )
 
         update_es(individual)
@@ -379,4 +373,13 @@ class IndividualDataUpdateService(DataChangeService):
                     should_populate_index=True,
                     individual_id=str(new_individual.id),
                 )
+            )
+
+    def _validate_phone_numbers(self, only_approved_data):
+        if "phone_no" in only_approved_data:
+            only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
+
+        if "phone_no_alternative" in only_approved_data:
+            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
+                only_approved_data["phone_no_alternative"]
             )

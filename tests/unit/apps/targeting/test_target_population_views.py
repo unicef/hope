@@ -256,8 +256,7 @@ class TestTargetPopulationViews:
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert len(ctx.captured_queries) == 7
-
-            # assert etag_call_after_update != etag  # FIXME check and fix
+            # FIXME check and fix: assert etag_call_after_update != etag
 
         # Cached data again
         with CaptureQueriesContext(connection) as ctx:

@@ -48,8 +48,8 @@ class IndividualDeleteService(DataChangeService):
             "business_area",
             user,
             self.grievance_ticket.programs.all(),
-            old_individual_to_remove,
-            individual_to_remove,
+            old_object=old_individual_to_remove,
+            new_object=individual_to_remove,
         )
         if household_to_remove:
             household_to_remove.refresh_from_db()

@@ -609,6 +609,7 @@ def test_pvp_import_xlsx(
     )
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
+        assert response.status_code == status.HTTP_200_OK
         resp_data = response.json()
         assert "id" in resp_data
         assert len(resp_data["payment_verification_plans"]) == 1

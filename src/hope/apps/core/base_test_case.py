@@ -34,20 +34,22 @@ class BaseTestCase(TestCase):
         admin_area_limits.areas.set(areas)
 
     @classmethod
-    def create_partner_role_with_permissions(
+    def create_partner_role_with_permissions(  # pragma: no cover
         cls,
         partner: "Partner",
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        name: str | None = None,
-        whole_business_area_access: bool | None = False,
+        **kwargs,
     ) -> RoleAssignment:
         """Create Partner Role with permissions.
 
+        kwargs: can has "name" and/or "whole_business_area_access"
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
+        name = kwargs.get("name")
+        whole_business_area_access = kwargs.get("whole_business_area_access")
         permission_list = [perm.value for perm in permissions]
         name = name or f"Partner Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
@@ -64,20 +66,23 @@ class BaseTestCase(TestCase):
         return role_assignment
 
     @classmethod
-    def create_user_role_with_permissions(
+    def create_user_role_with_permissions(  # pragma: no cover
         cls,
         user: "User",
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        name: str | None = None,
-        whole_business_area_access: bool | None = False,
+        **kwargs,
     ) -> RoleAssignment:
         """Create User Role with related permissions.
 
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
+        name: Name of the User Role.
+        kwargs: can has 'name' and/or 'whole_business_area_access'.
         """
+        name: str | None = kwargs.get("name")
+        whole_business_area_access: bool | None = kwargs.get("whole_business_area_access")
         permission_list = [perm.value for perm in permissions]
         name = name or f"User Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})

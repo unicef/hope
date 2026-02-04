@@ -21,7 +21,7 @@ def import_program_population(
         copy_from_individuals=copy_from_individuals,
         copy_from_households=copy_from_households,
         program=import_to_program,
+        rdi=rdi,
         rdi_merge_status=MergeStatusModel.PENDING,
         create_collection=False,
-        rdi=rdi,
     ).copy_program_population()
