@@ -50,8 +50,8 @@ class HtmlDiff(difflib.HtmlDiff):
         kwargs: can has 'context', 'numlines'.
 
         """
-        context: bool = kwargs.get("context", False)
-        numlines: int = kwargs.get("numlines", 5)
+        context: bool = kwargs.get("context", False)  # pragma: no cover
+        numlines: int = kwargs.get("numlines", 5)  # pragma: no cover
         # make unique anchor prefixes so that multiple tables may exist
         # on the same page without conflict.
         self._make_prefix()

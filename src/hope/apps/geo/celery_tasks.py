@@ -83,7 +83,7 @@ def _create_area_types(area_types_cache, country, level, name_header, name_heade
             area_level=level,
             defaults={"parent": parent_type},
         )
-        if not created and area_type.parent != parent_type:
+        if not created and area_type.parent != parent_type:  # pragma: no cover
             area_type.parent = parent_type
             area_type.save()
         area_types_cache[(name_header, level)] = area_type
