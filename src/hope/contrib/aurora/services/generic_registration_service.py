@@ -318,18 +318,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     raise ValidationError("Head of Household already exist")
                 head = individual
 
-            for document_data in documents_data.values():
-                key = document_data.pop("key", None)  # skip documents' without key
-                if key:
-                    document_data["type"] = DocumentType.objects.get(key=key)
-                    document_data[INDIVIDUAL_FIELD] = individual
-                    document_data["program"] = individual.program
-                    document_data[COUNTRY] = str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk)
-                    if photo_base_64 := document_data.get("photo", None):
-                        document_data["photo"] = self._prepare_picture_from_base64(
-                            photo_base_64, document_data.get("document_number", key)
-                        )
-                    self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
+            self._create_documents(documents_data, individual, mapping)
 
             if account_data:
                 self.create_account(account_data, individual)
@@ -350,6 +339,20 @@ class GenericRegistrationService(BaseRegistrationService):
                 raise ValidationError("More than one individual found")
             head = pr_collector = individuals[0]
         return individuals, head, pr_collector, sec_collector
+
+    def _create_documents(self, documents_data: list[dict], individual: PendingIndividual, mapping: dict):
+        for document_data in documents_data.values():
+            key = document_data.pop("key", None)  # skip documents' without key
+            if key:
+                document_data["type"] = DocumentType.objects.get(key=key)
+                document_data[INDIVIDUAL_FIELD] = individual
+                document_data["program"] = individual.program
+                document_data[COUNTRY] = str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk)
+                if photo_base_64 := document_data.get("photo", None):
+                    document_data["photo"] = self._prepare_picture_from_base64(
+                        photo_base_64, document_data.get("document_number", key)
+                    )
+                self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         mapping = mergedicts(self.default_mapping, self.registration.mapping, [])

@@ -1,6 +1,6 @@
 import pytest
 
-from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.factories import CountryFactory
 from hope.apps.geo.celery_tasks import import_areas_from_csv_task
 from hope.models import Area, AreaType, Country
 
@@ -12,7 +12,7 @@ def country() -> Country:
     return CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLD", iso_num="999")
 
 
-def test_import_areas_from_cs(country: Country) -> None:
+def test_import_areas_from_csv(country: Country) -> None:
     """
     Test that the celery task correctly creates and updates AreaTypes and Areas,
     including their hierarchy.

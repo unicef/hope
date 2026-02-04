@@ -26,7 +26,6 @@ from unicef_security.graph import Synchronizer
 from hope import models
 from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
-from hope.admin.account_mixins import KoboAccessMixin
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import HopeModelAdminMixin
@@ -56,7 +55,6 @@ class LoadUsersForm(forms.Form):
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
-    enable_kobo = forms.BooleanField(required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.request = kwargs.pop("request", None)
@@ -213,7 +211,7 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -224,30 +222,55 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
         BusinessAreaFilter,
     ]
     list_display = UserAdminPlus.list_display[:3] + ["partner"] + UserAdminPlus.list_display[3:]
+    inlines = (RoleAssignmentInline,)
+    actions = [
+        "add_business_area_role",
+    ]
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
     fieldsets = (
+        (None, {"fields": (("username", "azure_id"))}),
         (
             _("Personal info"),
             {
                 "fields": (
-                    (
-                        "first_name",
-                        "last_name",
-                    ),
+                    ("first_name", "last_name"),
                     ("email", "display_name"),
                     ("job_title", "partner"),
                 )
             },
         ),
         (
-            _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "azure_id")},
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                ),
+            },
         ),
     )
-    inlines = (RoleAssignmentInline,)
-    actions = ["create_kobo_user_qs", "add_business_area_role"]
-    formfield_overrides = {
-        JSONField: {"widget": JSONEditor},
-    }
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "email",
+                    "partner",
+                ),
+            },
+        ),
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        return super().get_inline_instances(request, obj) if obj else []
 
     @button(permissions=is_root)
     def ad(self, request, pk):
@@ -285,12 +308,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
-    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
-        fieldsets = self.fieldsets
-        if request.user.is_superuser:
-            fieldsets += self.extra_fieldsets  # type: ignore
-        return fieldsets
-
     def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
@@ -327,8 +344,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
 
     def get_actions(self, request: HttpRequest) -> dict:
         actions = super().get_actions(request)
-        if not request.user.has_perm("account.can_create_kobo_user") and "create_kobo_user_qs" in actions:
-            del actions["create_kobo_user_qs"]
         if not request.user.has_perm("account.add_userrole") and "add_business_area_role" in actions:
             del actions["add_business_area_role"]
         return actions
@@ -363,18 +378,22 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                                     to_delete.delete()
                             else:
                                 raise ValueError("Bug found. {} not valid operation for add/rem role")
-                    if removed:
-                        msg = f"{removed} roles removed from {users} users"
-                    elif added:
-                        msg = f"{added} roles granted to {users} users"
-                    else:
-                        msg = f"{users} users processed no actions have been required"
+                    msg = self._get_msg(added, removed, users)
 
                     self.message_user(request, msg)
             return HttpResponseRedirect(request.get_full_path())
         ctx = self.get_common_context(request, title="Add Role", selection=queryset)
         ctx["form"] = AddRoleForm()
         return render(request, "admin/account/user/business_area_role.html", context=ctx)
+
+    def _get_msg(self, added, removed, users):
+        if removed:
+            msg = f"{removed} roles removed from {users} users"
+        elif added:
+            msg = f"{added} roles granted to {users} users"
+        else:
+            msg = f"{users} users processed no actions have been required"
+        return msg
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
@@ -392,7 +411,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                 try:
                     context["processed"] = True
                     csv_file = form.cleaned_data["file"]
-                    enable_kobo = form.cleaned_data["enable_kobo"]
                     partner = form.cleaned_data["partner"]
                     business_area = form.cleaned_data["business_area"]
                     role = form.cleaned_data["role"]
@@ -406,8 +424,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                         quoting=int(form.cleaned_data["quoting"]),
                         delimiter=form.cleaned_data["delimiter"],
                     )
-                    results = []
-                    context["results"] = results
+                    context["results"] = []
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
@@ -424,23 +441,16 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                                     "kobo": False,
                                     "error": "",
                                 }
-                                if "username" in row:
-                                    username = row["username"].strip()
-                                else:
-                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
-                                u, isnew = User.objects.get_or_create(
-                                    email=email,
-                                    partner=partner,
-                                    defaults={"username": username},
-                                )
+                                isnew, u = self._get_user(email, partner, row)
                                 if isnew:
+                                    user_info["is_new"] = True
                                     ur = u.role_assignments.create(business_area=business_area, role=role)
                                     self.log_addition(request, u, "User imported by CSV")
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
                                         IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        u.role_assignments.get_or_create(business_area=business_area, role=role)
+                                        ur, _ = u.role_assignments.get_or_create(business_area=business_area, role=role)
                                         self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:
                                         self.message_user(
@@ -448,9 +458,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
                                             f"Error on {u}: {e}",
                                             messages.ERROR,
                                         )
-
-                                if enable_kobo:
-                                    self._grant_kobo_accesss_to_user(u, sync=False)
 
                                 context["results"].append(user_info)
                         except Exception:
@@ -466,6 +473,18 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, UserAdminPlus, ADUSerMixin
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
+
+    def _get_user(self, email, partner, row):
+        if "username" in row:
+            username = row["username"].strip()
+        else:
+            username = row["email"].replace("@", "_").replace(".", "_").lower()
+        u, isnew = User.objects.get_or_create(
+            email=email,
+            partner=partner,
+            defaults={"username": username},
+        )
+        return isnew, u
 
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)

@@ -172,7 +172,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -454,7 +454,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -554,7 +554,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -1540,7 +1540,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(
+    def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
         business_area: BusinessArea,

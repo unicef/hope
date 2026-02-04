@@ -528,3 +528,20 @@ class TestUpdateIndividualDataService(TestCase):
         assert hh.admin3 is None
         assert hh.admin1 is not None
         assert hh.admin2.parent == hh.admin1
+
+    def test_update_phone_no_data(self) -> None:
+        self.ticket.individual_data_update_ticket_details.individual_data = {
+            "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
+            "phone_no_alternative": {
+                "approve_status": True,
+                "previous_value": "+485656561223",
+                "value": "+485544334455",
+            },
+        }
+        self.ticket.individual_data_update_ticket_details.save()
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        service.close(self.user)
+
+        self.individual.refresh_from_db()
+        assert self.individual.phone_no == "+485544332211"
+        assert self.individual.phone_no_alternative == "+485544334455"

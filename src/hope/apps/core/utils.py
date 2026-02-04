@@ -309,22 +309,26 @@ def to_dict(
 
                 for obj in objs:
                     instance_data_dict = {}
-                    for nested_field in nested_fields:
-                        attrs_to_get = nested_field.split(".")
-                        value = None
-                        for attr in attrs_to_get:
-                            if value:
-                                value = getattr(value, attr, "__EMPTY_VALUE__")
-                            else:
-                                value = getattr(obj, attr, "__EMPTY_VALUE__")
-                        if value != "__EMPTY_VALUE__":
-                            instance_data_dict[attrs_to_get[-1]] = value
+                    _process_nested_fields(instance_data_dict, nested_fields, obj)
                     if instance_data_dict and multi is True:
                         data[main_field_key].append(instance_data_dict)
                     elif multi is False:
                         data[main_field_key] = instance_data_dict
 
     return data
+
+
+def _process_nested_fields(instance_data_dict, nested_fields, obj):
+    for nested_field in nested_fields:
+        attrs_to_get = nested_field.split(".")
+        value = None
+        for attr in attrs_to_get:
+            if value:
+                value = getattr(value, attr, "__EMPTY_VALUE__")
+            else:
+                value = getattr(obj, attr, "__EMPTY_VALUE__")
+        if value != "__EMPTY_VALUE__":
+            instance_data_dict[attrs_to_get[-1]] = value
 
 
 def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
