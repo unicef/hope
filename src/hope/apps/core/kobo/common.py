@@ -54,7 +54,7 @@ def reduce_asset(asset: dict, *args: Any, **kwargs: Any) -> dict:
 
 def get_field_name(field_name: str) -> str:
     if "/" in field_name:
-        return field_name.split("/")[-1]
+        return field_name.rsplit("/", maxsplit=1)[-1]
     return field_name
 
 
