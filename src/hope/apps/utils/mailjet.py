@@ -25,7 +25,7 @@ class MailjetClient:
         self.text_body = text_body
         subject_prefix = settings.EMAIL_SUBJECT_PREFIX
         self.subject = f"[{subject_prefix}] {subject}" if subject_prefix else subject
-        self.recipients = settings.CATCH_ALL_EMAIL if settings.CATCH_ALL_EMAIL else recipients
+        self.recipients = settings.CATCH_ALL_EMAIL or recipients
         self.ccs = kwargs.get("ccs") or []
         self.variables = kwargs.get("variables")
         self.from_email = kwargs.get("from_email") or settings.DEFAULT_EMAIL

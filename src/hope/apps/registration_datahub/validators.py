@@ -1364,7 +1364,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # skip validation if skip_validate_pictures=True
                 return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
-            file_extension = value.split(".")[-1]
+            file_extension = value.rsplit(".", maxsplit=1)[-1]
 
             if file_extension.lower() not in allowed_extensions:
                 return f"Specified image {value} for field {field} is not a valid image file"
