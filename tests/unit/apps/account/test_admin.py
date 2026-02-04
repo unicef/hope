@@ -32,7 +32,7 @@ def get_mock_request(request_factory: RequestFactory, object_id: Any = None, use
     request = request_factory.get("/")
     request.resolver_match = MagicMock()
     request.resolver_match.kwargs = {"object_id": str(object_id) if object_id else None}
-    request.user = user if user else MagicMock()
+    request.user = user or MagicMock()
     if not user:
         request.user.can_add_business_area_to_partner = MagicMock(return_value=True)
     return request
