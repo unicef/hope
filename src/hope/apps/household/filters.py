@@ -50,7 +50,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
     if len(code) < 6:
         return code
 
-    code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+    code = code[5:].rsplit("/", maxsplit=1)[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
     if code.startswith("20223"):
         # month 3 day 25...31 id is 44...12067
         code = code[7:]
