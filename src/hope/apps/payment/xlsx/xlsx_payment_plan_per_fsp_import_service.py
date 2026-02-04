@@ -273,51 +273,17 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
-        if "delivery_date" in self.xlsx_headers:
-            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
-        else:
-            delivery_date = None
+        (
+            additional_collector_name,
+            additional_document_number,
+            additional_document_type,
+            delivery_date,
+            reason_for_unsuccessful_payment,
+            reference_id,
+            transaction_status_blockchain_link,
+        ) = self._get_values_for_update(row)
 
-        if "reference_id" in self.xlsx_headers:
-            reference_id = row[self.xlsx_headers.index("reference_id")].value
-        else:
-            reference_id = None
-
-        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
-            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
-        else:
-            reason_for_unsuccessful_payment = None
-
-        if "additional_collector_name" in self.xlsx_headers:
-            additional_collector_name = row[self.xlsx_headers.index("additional_collector_name")].value
-        else:
-            additional_collector_name = None
-
-        if "additional_document_type" in self.xlsx_headers:
-            additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
-        else:
-            additional_document_type = None
-
-        if "additional_document_number" in self.xlsx_headers:
-            additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
-        else:
-            additional_document_number = None
-
-        if "transaction_status_blockchain_link" in self.xlsx_headers:
-            transaction_status_blockchain_link = row[
-                self.xlsx_headers.index("transaction_status_blockchain_link")
-            ].value
-        else:
-            transaction_status_blockchain_link = None
-
-        if isinstance(delivery_date, str):
-            delivery_date = parse(delivery_date)
-
-        if delivery_date and delivery_date.tzinfo is None:
-            delivery_date = pytz.utc.localize(delivery_date)
-
-        if payment_delivery_date := payment.delivery_date:
-            payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
+        delivery_date, payment_delivery_date = self._set_payment_delivery_date(delivery_date, payment)
 
         # convert to date
         delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
@@ -387,3 +353,64 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     self.logger.info(f"Calculating counts for payment verification plan {payment_verification_plan.id}")
                     calculate_counts(payment_verification_plan)
                     payment_verification_plan.save()
+
+    def _set_payment_delivery_date(self, delivery_date, payment):
+        if isinstance(delivery_date, str):
+            delivery_date = parse(delivery_date)
+
+        if delivery_date and delivery_date.tzinfo is None:
+            delivery_date = pytz.utc.localize(delivery_date)
+
+        if payment_delivery_date := payment.delivery_date:
+            payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
+        return delivery_date, payment_delivery_date
+
+    def _get_values_for_update(self, row: Row):
+        if "delivery_date" in self.xlsx_headers:
+            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+        else:
+            delivery_date = None
+
+        if "reference_id" in self.xlsx_headers:
+            reference_id = row[self.xlsx_headers.index("reference_id")].value
+        else:
+            reference_id = None
+
+        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
+            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
+        else:
+            reason_for_unsuccessful_payment = None
+
+        if "additional_collector_name" in self.xlsx_headers:
+            additional_collector_name = row[self.xlsx_headers.index("additional_collector_name")].value
+        else:
+            additional_collector_name = None
+
+        if "transaction_status_blockchain_link" in self.xlsx_headers:
+            transaction_status_blockchain_link = row[
+                self.xlsx_headers.index("transaction_status_blockchain_link")
+            ].value
+        else:
+            transaction_status_blockchain_link = None
+        additional_document_number, additional_document_type = self._get_additional_doc_values(row)
+        return (
+            additional_collector_name,
+            additional_document_number,
+            additional_document_type,
+            delivery_date,
+            reason_for_unsuccessful_payment,
+            reference_id,
+            transaction_status_blockchain_link,
+        )
+
+    def _get_additional_doc_values(self, row: Row):
+        if "additional_document_type" in self.xlsx_headers:
+            additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
+        else:
+            additional_document_type = None
+
+        if "additional_document_number" in self.xlsx_headers:
+            additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
+        else:
+            additional_document_number = None
+        return additional_document_number, additional_document_type

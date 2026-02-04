@@ -147,8 +147,8 @@ class AddIndividualService(DataChangeService):
             "business_area",
             user,
             self.grievance_ticket.programs.all(),
-            None,
-            individual,
+            new_object=None,
+            old_object=individual,
         )
 
         update_es(individual)

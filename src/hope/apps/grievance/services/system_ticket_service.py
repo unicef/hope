@@ -34,6 +34,6 @@ def close_system_flagging_ticket_service(grievance_ticket: GrievanceTicket, user
         "business_area",
         user,
         grievance_ticket.programs.all(),
-        old_individual,
-        individual,
+        old_object=old_individual,
+        new_object=individual,
     )
