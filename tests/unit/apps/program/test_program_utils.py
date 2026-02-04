@@ -1,10 +1,11 @@
+"""Tests for program utility functions."""
+
 import hashlib
 import json
 from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
-from django.test import TestCase
 import pytest
 
 from extras.test_utils.old_factories.account import UserFactory
@@ -28,288 +29,407 @@ from hope.apps.program.utils import (
     generate_rdi_unique_name,
 )
 from hope.models import (
+    BusinessArea,
     Document,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Program,
     RegistrationDataImport,
+    User,
 )
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def afghanistan(db: Any) -> BusinessArea:
+    return create_afghanistan()
+
+
+@pytest.fixture
+def user(db: Any) -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def program1(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(name="Program 1", business_area=afghanistan)
+
+
+@pytest.fixture
+def program2(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(business_area=afghanistan)
+
+
+@pytest.fixture
+def household_original_already_enrolled(program1: Program) -> Household:
+    return HouseholdFactory(
+        program=program1,
+        head_of_household=IndividualFactory(household=None, program=program1),
+    )
+
+
+@pytest.fixture
+def household_already_enrolled(
+    program2: Program,
+    household_original_already_enrolled: Household,
+) -> Household:
+    individual_already_enrolled = IndividualFactory(household=None, program=program2)
+    household = HouseholdFactory(
+        program=program2,
+        head_of_household=individual_already_enrolled,
+        copied_from=household_original_already_enrolled,
+        unicef_id=household_original_already_enrolled.unicef_id,
+    )
+    individual_already_enrolled.household = household
+    individual_already_enrolled.save()
+    return household
+
+
+@pytest.fixture
+def individual_hoh(program1: Program) -> Individual:
+    return IndividualFactory(household=None, program=program1)
+
+
+@pytest.fixture
+def individual1(program1: Program) -> Individual:
+    ind = IndividualFactory(household=None, program=program1)
+    DocumentFactory(individual=ind)
+    IndividualIdentityFactory(individual=ind)
+    return ind
+
+
+@pytest.fixture
+def individual_2_original(program1: Program) -> Individual:
+    return IndividualFactory(household=None, program=program1)
+
+
+@pytest.fixture
+def individual_2_already_enrolled(program2: Program, individual_2_original: Individual) -> Individual:
+    individual = IndividualFactory(household=None, program=program2)
+    individual.copied_from = individual_2_original
+    individual.unicef_id = individual_2_original.unicef_id
+    individual.save()
+    DocumentFactory(individual=individual)
+    IndividualIdentityFactory(individual=individual)
+    return individual
+
+
+@pytest.fixture
+def household(
+    program1: Program,
+    individual_hoh: Individual,
+    individual1: Individual,
+    individual_2_original: Individual,
+) -> Household:
+    household = HouseholdFactory(
+        program=program1,
+        head_of_household=individual_hoh,
+    )
+    household.refresh_from_db()
+    household.individuals.set([individual1, individual_2_original])
+
+    individual_hoh.household = household
+    individual_hoh.save()
+
+    IndividualRoleInHouseholdFactory(
+        individual=individual_2_original,
+        household=household,
+        role=ROLE_ALTERNATE,
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=individual1,
+        household=household,
+        role=ROLE_PRIMARY,
+    )
+
+    return household
+
+
+@pytest.fixture
+def individual_hoh_e(program1: Program) -> Individual:
+    return IndividualFactory(household=None, program=program1)
+
+
+@pytest.fixture
+def household_external(program1: Program, individual_hoh_e: Individual) -> Household:
+    household = HouseholdFactory(
+        program=program1,
+        head_of_household=individual_hoh_e,
+    )
+    individual_hoh_e.household = household
+    individual_hoh_e.save()
+    return household
+
+
+@pytest.fixture
+def individual_external(program1: Program, household_external: Household) -> Individual:
+    ind = IndividualFactory(household=None, program=program1)
+    IndividualRoleInHouseholdFactory(
+        individual=ind,
+        household=household_external,
+        role=ROLE_PRIMARY,
+    )
+    return ind
+
+
+@pytest.fixture
+def enrollment_test_data(
+    user: User,
+    program1: Program,
+    program2: Program,
+    household_original_already_enrolled: Household,
+    household_already_enrolled: Household,
+    household: Household,
+    individual1: Individual,
+    individual_2_original: Individual,
+    individual_2_already_enrolled: Individual,
+    individual_hoh: Individual,
+    household_external: Household,
+    individual_external: Individual,
+    individual_hoh_e: Individual,
+) -> dict:
+    return {
+        "user": user,
+        "program1": program1,
+        "program2": program2,
+        "household_original_already_enrolled": household_original_already_enrolled,
+        "household_already_enrolled": household_already_enrolled,
+        "household": household,
+        "individual1": individual1,
+        "individual_2_original": individual_2_original,
+        "individual_2_already_enrolled": individual_2_already_enrolled,
+        "individual_hoh": individual_hoh,
+        "household_external": household_external,
+        "individual_external": individual_external,
+        "individual_hoh_e": individual_hoh_e,
+    }
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-class TestEnrolHouseholdToProgram(TestCase):
-    """Test enroll household to program."""
+def test_enroll_household_to_program_already_enrolled(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
 
-    def setUp(self) -> None:
-        create_afghanistan()
-        user = UserFactory()
-        self.str_user_id = str(user.pk)
-        self.program1 = ProgramFactory(name="Program 1")
-        self.program2 = ProgramFactory()
+    enroll_households_to_program(
+        Household.objects.filter(id=enrollment_test_data["household_already_enrolled"].id),
+        enrollment_test_data["program2"],
+        str(enrollment_test_data["user"].pk),
+    )
+    assert hh_count == Household.objects.count()
+    assert ind_count == Individual.objects.count()
 
-        # test for enrolment with existing repr
-        self.household_original_already_enrolled = HouseholdFactory(
-            program=self.program1,
-            head_of_household=IndividualFactory(household=None),
-        )
-        self.individual_already_enrolled = IndividualFactory(household=None)
-        self.household_already_enrolled = HouseholdFactory(
-            program=self.program2,
-            head_of_household=self.individual_already_enrolled,
-            copied_from=self.household_original_already_enrolled,
-            unicef_id=self.household_original_already_enrolled.unicef_id,
-        )
-        self.individual_already_enrolled.household = self.household_already_enrolled
-        self.individual_already_enrolled.save()
 
-        # test for enrolment with new repr creation
-        self.individual_hoh = IndividualFactory(household=None, program=self.program1)
-        self.individual1 = IndividualFactory(household=None, program=self.program1)
-        self.individual1_document = DocumentFactory(
-            individual=self.individual1,
-        )
-        self.individual1_identity = IndividualIdentityFactory(
-            individual=self.individual1,
-        )
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_original_household_to_program_representation_already_enrolled(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
 
-        self.individual_2_original = IndividualFactory(household=None, program=self.program1)
-        self.individual_2_already_enrolled = IndividualFactory(household=None, program=self.program2)
-        self.individual_2_already_enrolled.copied_from = self.individual_2_original
-        self.individual_2_already_enrolled.unicef_id = self.individual_2_original.unicef_id
-        self.individual_2_already_enrolled.save()
-        self.individual_2_already_enrolled_document = DocumentFactory(
-            individual=self.individual_2_already_enrolled,
-        )
-        self.individual_2_already_enrolled_identity = IndividualIdentityFactory(
-            individual=self.individual_2_already_enrolled,
-        )
+    enroll_households_to_program(
+        Household.objects.filter(id=enrollment_test_data["household_original_already_enrolled"].id),
+        enrollment_test_data["program2"],
+        str(enrollment_test_data["user"].pk),
+    )
+    assert hh_count == Household.objects.count()
+    assert ind_count == Individual.objects.count()
 
-        self.household = HouseholdFactory(
-            program=self.program1,
-            head_of_household=self.individual_hoh,
-        )
-        self.household.refresh_from_db()
-        self.original_household_id = self.household.id
-        self.household.individuals.set([self.individual1, self.individual_2_original])
 
-        self.individual_hoh.household = self.household
-        self.individual_hoh.save()
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_household_to_program(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
+    document_count = Document.objects.count()
+    identities_count = IndividualIdentity.objects.count()
+    roles_count = IndividualRoleInHousehold.objects.count()
+    original_household_id = enrollment_test_data["household"].id
 
-        self.role1 = IndividualRoleInHouseholdFactory(
-            individual=self.individual1,
-            household=self.household,
-            role=ROLE_PRIMARY,
-        )
+    enroll_households_to_program(
+        Household.objects.filter(id=enrollment_test_data["household"].id),
+        enrollment_test_data["program2"],
+        str(enrollment_test_data["user"].pk),
+    )
 
-        self.role2 = IndividualRoleInHouseholdFactory(
-            individual=self.individual_2_original,
-            household=self.household,
-            role=ROLE_ALTERNATE,
-        )
+    enrollment_test_data["individual_2_already_enrolled"].refresh_from_db()
+    # 1 new hh enrolled to program2
+    assert hh_count + 1 == Household.objects.count()
+    # 2 new individuals enrolled to program2, individual1 and individual_hoh, individual2 was already in program 2
+    assert ind_count + 2 == Individual.objects.count()
+    # 1 new object related to individual1 enrolled to program2
+    assert document_count + 1 == Document.objects.count()
+    assert identities_count + 1 == IndividualIdentity.objects.count()
+    assert roles_count + 2 == IndividualRoleInHousehold.objects.count()
 
-        # household with external collector - collector enrolled outside of household.individuals
-        self.individual_hoh_e = IndividualFactory(household=None, program=self.program1)
-        self.household_external = HouseholdFactory(
-            program=self.program1,
-            head_of_household=self.individual_hoh_e,
-        )
-        self.individual_hoh_e.household = self.household_external
-        self.individual_hoh_e.save()
+    original_household = Household.objects.get(id=original_household_id)
+    enrolled_household = original_household.copied_to.first()
 
-        self.individual_external = IndividualFactory(household=None, program=self.program1)
-        self.role_external = IndividualRoleInHouseholdFactory(
-            individual=self.individual_external,
-            household=self.household_external,
-            role=ROLE_PRIMARY,
-        )
+    assert enrollment_test_data["individual_2_already_enrolled"].household == enrolled_household
+    assert original_household.copied_to.count() == 1
+    assert enrolled_household.program == enrollment_test_data["program2"]
+    assert enrolled_household.unicef_id == original_household.unicef_id
+    assert (
+        enrolled_household.head_of_household
+        == enrollment_test_data["individual_hoh"].copied_to.filter(program=enrollment_test_data["program2"]).first()
+    )
+    assert enrolled_household.individuals.count() == original_household.individuals.count() == 3
+    assert enrolled_household.individuals.first().program == enrollment_test_data["program2"]
 
-    def test_enroll_household_to_program_already_enrolled(self) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
+    assert IndividualRoleInHousehold.objects.filter(
+        individual=enrollment_test_data["individual1"]
+        .copied_to.filter(program=enrollment_test_data["program2"])
+        .first(),
+        household=enrolled_household,
+        role=ROLE_PRIMARY,
+    ).first()
+    assert IndividualRoleInHousehold.objects.filter(
+        individual=enrollment_test_data["individual_2_original"]
+        .copied_to.filter(program=enrollment_test_data["program2"])
+        .first(),
+        household=enrolled_household,
+        role=ROLE_ALTERNATE,
+    ).first()
 
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household_already_enrolled.id),
-            self.program2,
-            self.str_user_id,
-        )
-        assert hh_count == Household.objects.count()
-        assert ind_count == Individual.objects.count()
 
-    def test_enroll_original_household_to_program_representation_already_enrolled(
-        self,
-    ) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_household_with_external_collector(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
+    roles_count = IndividualRoleInHousehold.objects.count()
 
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household_original_already_enrolled.id),
-            self.program2,
-            self.str_user_id,
-        )
-        assert hh_count == Household.objects.count()
-        assert ind_count == Individual.objects.count()
+    enroll_households_to_program(
+        Household.objects.filter(id=enrollment_test_data["household_external"].id),
+        enrollment_test_data["program2"],
+        str(enrollment_test_data["user"].pk),
+    )
+    hh = Household.objects.order_by("created_at").last()
+    assert hh_count + 1 == Household.objects.count()
+    # 2 new individuals enrolled - individual_external and individual_hoh
+    assert ind_count + 2 == Individual.objects.count()
+    assert roles_count + 1 == IndividualRoleInHousehold.objects.count()
 
-    def test_enroll_household_to_program(self) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
-        document_count = Document.objects.count()
-        identities_count = IndividualIdentity.objects.count()
-        roles_count = IndividualRoleInHousehold.objects.count()
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household.id),
-            self.program2,
-            self.str_user_id,
-        )
-
-        self.individual_2_already_enrolled.refresh_from_db()
-        # 1 new hh enrolled to program2
-        assert hh_count + 1 == Household.objects.count()
-        # 2 new individuals enrolled to program2, individual1 and individual_hoh, individual2 was already in program 2
-        assert ind_count + 2 == Individual.objects.count()
-        # 1 new object related to individual1 enrolled to program2
-        assert document_count + 1 == Document.objects.count()
-        assert identities_count + 1 == IndividualIdentity.objects.count()
-        assert roles_count + 2 == IndividualRoleInHousehold.objects.count()
-
-        original_household = Household.objects.get(id=self.original_household_id)
-        enrolled_household = original_household.copied_to.first()
-
-        assert self.individual_2_already_enrolled.household == enrolled_household
-        assert original_household.copied_to.count() == 1
-        assert enrolled_household.program == self.program2
-        assert enrolled_household.unicef_id == original_household.unicef_id
-        assert (
-            enrolled_household.head_of_household == self.individual_hoh.copied_to.filter(program=self.program2).first()
-        )
-        assert enrolled_household.individuals.count() == original_household.individuals.count() == 3
-        assert enrolled_household.individuals.first().program == self.program2
-
-        assert IndividualRoleInHousehold.objects.filter(
-            individual=self.individual1.copied_to.filter(program=self.program2).first(),
-            household=enrolled_household,
+    assert (
+        hh.head_of_household
+        == enrollment_test_data["individual_hoh_e"].copied_to.filter(program=enrollment_test_data["program2"]).first()
+    )
+    assert (
+        enrollment_test_data["individual_external"].copied_to.filter(program=enrollment_test_data["program2"]).first()
+        is not None
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(
+            individual=enrollment_test_data["individual_external"]
+            .copied_to.filter(program=enrollment_test_data["program2"])
+            .first(),
+            household=hh,
             role=ROLE_PRIMARY,
         ).first()
-        assert IndividualRoleInHousehold.objects.filter(
-            individual=self.individual_2_original.copied_to.filter(program=self.program2).first(),
-            household=enrolled_household,
-            role=ROLE_ALTERNATE,
-        ).first()
+        is not None
+    )
 
-    def test_enroll_household_with_external_collector(self) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
-        roles_count = IndividualRoleInHousehold.objects.count()
 
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household_external.id),
-            self.program2,
-            self.str_user_id,
-        )
-        hh = Household.objects.order_by("created_at").last()
-        assert hh_count + 1 == Household.objects.count()
-        # 2 new individuals enrolled - individual_external and individual_hoh
-        assert ind_count + 2 == Individual.objects.count()
-        assert roles_count + 1 == IndividualRoleInHousehold.objects.count()
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_household_with_head_of_household_already_copied(enrollment_test_data: dict) -> None:
+    head_of_household_already_enrolled_program1 = IndividualFactory(
+        household=None, program=enrollment_test_data["program1"]
+    )
+    head_of_household_already_enrolled_program1.refresh_from_db()
 
-        assert hh.head_of_household == self.individual_hoh_e.copied_to.filter(program=self.program2).first()
-        assert self.individual_external.copied_to.filter(program=self.program2).first() is not None
-        assert (
-            IndividualRoleInHousehold.objects.filter(
-                individual=self.individual_external.copied_to.filter(program=self.program2).first(),
-                household=hh,
-                role=ROLE_PRIMARY,
-            ).first()
-            is not None
-        )
+    head_of_household_already_enrolled_program2 = IndividualFactory(
+        household=None,
+        program=enrollment_test_data["program2"],
+        unicef_id=head_of_household_already_enrolled_program1.unicef_id,
+    )
 
-    def test_enroll_household_with_head_of_household_already_copied(self) -> None:
-        head_of_household_already_enrolled_program1 = IndividualFactory(household=None, program=self.program1)
-        head_of_household_already_enrolled_program1.refresh_from_db()
+    household_already_with_head_already_enrolled = HouseholdFactory(
+        program=enrollment_test_data["program1"],
+        head_of_household=head_of_household_already_enrolled_program1,
+        copied_from=None,
+    )
+    head_of_household_already_enrolled_program1.household = household_already_with_head_already_enrolled
+    head_of_household_already_enrolled_program1.save()
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
 
-        head_of_household_already_enrolled_program2 = IndividualFactory(
-            household=None,
-            program=self.program2,
-            unicef_id=head_of_household_already_enrolled_program1.unicef_id,
-        )
+    enroll_households_to_program(
+        Household.objects.filter(id=household_already_with_head_already_enrolled.id),
+        enrollment_test_data["program2"],
+        str(enrollment_test_data["user"].pk),
+    )
+    hh = Household.objects.order_by("created_at").last()
+    assert hh_count + 1 == Household.objects.count()
+    assert ind_count == Individual.objects.count()
 
-        household_already_with_head_already_enrolled = HouseholdFactory(
-            program=self.program1,
-            head_of_household=head_of_household_already_enrolled_program1,
-            copied_from=None,
-        )
-        head_of_household_already_enrolled_program1.household = household_already_with_head_already_enrolled
-        head_of_household_already_enrolled_program1.save()
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
+    assert hh.head_of_household == head_of_household_already_enrolled_program2
+    assert hh.program == enrollment_test_data["program2"]
 
-        enroll_households_to_program(
-            Household.objects.filter(id=household_already_with_head_already_enrolled.id),
-            self.program2,
-            self.str_user_id,
-        )
-        hh = Household.objects.order_by("created_at").last()
-        assert hh_count + 1 == Household.objects.count()
-        assert ind_count == Individual.objects.count()
 
-        assert hh.head_of_household == head_of_household_already_enrolled_program2
-        assert hh.program == self.program2
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
+    enroll_households_to_program_task(
+        [str(enrollment_test_data["household_already_enrolled"].id)],
+        str(enrollment_test_data["program2"].pk),
+        str(enrollment_test_data["user"].pk),
+    )
+    assert hh_count == Household.objects.count()
+    assert ind_count == Individual.objects.count()
 
-    @pytest.mark.elasticsearch
-    @pytest.mark.usefixtures("django_elasticsearch_setup")
-    def test_enroll_households_to_program_task(self) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
-        enroll_households_to_program_task(
-            [str(self.household_already_enrolled.id)],
-            str(self.program2.pk),
-            self.str_user_id,
-        )
-        assert hh_count == Household.objects.count()
-        assert ind_count == Individual.objects.count()
 
-    @pytest.mark.elasticsearch
-    @pytest.mark.usefixtures("django_elasticsearch_setup")
-    def test_enroll_households_to_program_task_already_running(self) -> None:
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_enroll_households_to_program_task_already_running(enrollment_test_data: dict) -> None:
+    hh_count = Household.objects.count()
+    ind_count = Individual.objects.count()
 
-        task_params = {
-            "task_name": "enroll_households_to_program_task",
-            "household_ids": [str(self.household.id)],
-            "program_for_enroll_id": str(self.program2.pk),
-        }
-        task_params_str = json.dumps(task_params, sort_keys=True)
-        cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
-        cache.set(cache_key, True, timeout=24 * 60 * 60)
+    task_params = {
+        "task_name": "enroll_households_to_program_task",
+        "household_ids": [str(enrollment_test_data["household"].id)],
+        "program_for_enroll_id": str(enrollment_test_data["program2"].pk),
+    }
+    task_params_str = json.dumps(task_params, sort_keys=True)
+    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+    cache.set(cache_key, True, timeout=24 * 60 * 60)
 
-        enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
+    enroll_households_to_program_task(
+        [str(enrollment_test_data["household"].id)],
+        str(enrollment_test_data["program2"].pk),
+        str(enrollment_test_data["user"].pk),
+    )
 
-        assert hh_count == Household.objects.count()
-        assert ind_count == Individual.objects.count()
+    assert hh_count == Household.objects.count()
+    assert ind_count == Individual.objects.count()
 
-        cache.delete(cache_key)
+    cache.delete(cache_key)
 
-        enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
+    enroll_households_to_program_task(
+        [str(enrollment_test_data["household"].id)],
+        str(enrollment_test_data["program2"].pk),
+        str(enrollment_test_data["user"].pk),
+    )
 
-        assert hh_count + 1 == Household.objects.count()
-        assert ind_count + 2 == Individual.objects.count()
+    assert hh_count + 1 == Household.objects.count()
+    assert ind_count + 2 == Individual.objects.count()
 
-    @patch("hope.apps.program.utils.randbelow")
-    def test_generate_rdi_unique_name_when_conflicts(self, mock_randbelow: Any) -> None:
-        mock_randbelow.side_effect = [1111, 5555]
-        RegistrationDataImportFactory(
-            business_area=self.program1.business_area,
-            name="RDI for enroll households to Programme: Program 1",
-        )
-        result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1 (2111)"
-        assert result == expected_name
 
-    @patch("hope.apps.program.utils.randbelow")
-    def test_generate_rdi_unique_name_no_conflicts(self, mock_randbelow: Any) -> None:
-        mock_randbelow.return_value = 3333
-        result = generate_rdi_unique_name(self.program1)
-        expected_name = "RDI for enroll households to Programme: Program 1"
-        assert result == expected_name
-        assert not RegistrationDataImport.objects.filter(name=expected_name).exists()
+@patch("hope.apps.program.utils.randbelow")
+def test_generate_rdi_unique_name_when_conflicts(mock_randbelow: Any, program1: Program) -> None:
+    mock_randbelow.side_effect = [1111, 5555]
+    RegistrationDataImportFactory(
+        business_area=program1.business_area,
+        name="RDI for enroll households to Programme: Program 1",
+    )
+    result = generate_rdi_unique_name(program1)
+    expected_name = "RDI for enroll households to Programme: Program 1 (2111)"
+    assert result == expected_name
+
+
+@patch("hope.apps.program.utils.randbelow")
+def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Program) -> None:
+    mock_randbelow.return_value = 3333
+    result = generate_rdi_unique_name(program1)
+    expected_name = "RDI for enroll households to Programme: Program 1"
+    assert result == expected_name
+    assert not RegistrationDataImport.objects.filter(name=expected_name).exists()
