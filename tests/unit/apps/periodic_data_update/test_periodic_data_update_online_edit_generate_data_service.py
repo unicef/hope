@@ -404,6 +404,40 @@ class TestPDUOnlineEditGenerateDataService(TestCase):
         assert queryset.count() == 1
         assert queryset.first() == individual2023
 
+    def test_get_individuals_queryset_registration_date_filter_none(self) -> None:
+        individual2023 = self.individuals[0]
+        individual2020 = self.individuals[1]
+        individual2023.first_registration_date = "2023-10-16"
+        individual2020.first_registration_date = "2020-10-16"
+        individual2023.save()
+        individual2020.save()
+        filters = {"registration_date": {"from": None, "to": None}}
+        service = PDUOnlineEditGenerateDataService(
+            program=self.program,
+            filters=filters,
+            rounds_data=self.rounds_data,
+        )
+        queryset = service._get_individuals_queryset()
+        assert queryset.count() == 2
+
+        filters = {"registration_date": {"from": "2023-10-16"}}
+        service = PDUOnlineEditGenerateDataService(
+            program=self.program,
+            filters=filters,
+            rounds_data=self.rounds_data,
+        )
+        queryset = service._get_individuals_queryset()
+        assert queryset.count() == 1
+
+        filters = {"registration_date": {"to": "2023-10-16"}}
+        service = PDUOnlineEditGenerateDataService(
+            program=self.program,
+            filters=filters,
+            rounds_data=self.rounds_data,
+        )
+        queryset = service._get_individuals_queryset()
+        assert queryset.count() == 2
+
     def test_get_individuals_queryset_admin_filter(self) -> None:
         area_type_level_1 = AreaTypeFactory(
             name="State1",

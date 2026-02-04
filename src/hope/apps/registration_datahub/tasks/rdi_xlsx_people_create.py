@@ -80,15 +80,16 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    def _create_hh_ind(
+    def _create_hh_ind(  # noqa: PLR0912
         self,
         obj_to_create: Any,
         row: Any,
         first_row: Any,
-        complex_fields: dict,
-        complex_types: dict,
-        sheet_title: str,
+        **kwargs: Any,
     ) -> None:
+        complex_fields: dict = kwargs.get("complex_fields", {})
+        complex_types: dict = kwargs.get("complex_types", {})
+        sheet_title: str = kwargs.get("sheet_title", "")
         registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
 
@@ -283,9 +284,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     obj_to_create,
                     row,
                     first_row,
-                    complex_fields,
-                    complex_types,
-                    sheet_title,
+                    complex_fields=complex_fields,
+                    complex_types=complex_types,
+                    sheet_title=sheet_title,
                 )
 
         PendingIndividual.objects.bulk_create(self.individuals)
@@ -350,6 +351,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "business_area",
                 None,
                 rdi_mis.program_id,
-                old_rdi_mis,
-                rdi_mis,
+                old_object=old_rdi_mis,
+                new_object=rdi_mis,
             )

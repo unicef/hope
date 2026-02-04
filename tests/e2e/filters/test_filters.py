@@ -23,7 +23,9 @@ from extras.test_utils.old_factories.payment import (
     PaymentVerificationSummaryFactory,
 )
 from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import (
     Area,
@@ -458,8 +460,10 @@ class TestSmokeFilters:
                 ],
                 id="Payment Module",
             ),
-            # TODO: uncomment after fix bug: 206395
-            # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
+            pytest.param(
+                ["Main Menu", "hh-filters-search", "HH-00-0000.1380"],
+                id="Programme Population",
+            ),
         ],
     )
     def test_filters_happy_path_search_filter(

@@ -292,14 +292,21 @@ def clear_cache_before_each_test() -> None:
     cache.clear()
 
 
-# @pytest.fixture(autouse=True)
-# def ensure_contenttypes_and_permissions(db):
-#     ContentType.objects.clear_cache()
-#     for app_config in apps.get_app_configs():
-#         create_permissions(app_config, verbosity=0)
+@pytest.fixture(autouse=True)
+def disable_activity_log(request, monkeypatch):
+    if request.node.get_closest_marker("enable_activity_log"):
+        yield  # do nothing, let real logging work
+        return
 
+    from hope.models import LogEntry
 
-# @pytest.fixture(scope="session", autouse=True)
-# def prevent_contenttype_flush(django_db_setup, django_db_blocker):
-#     with django_db_blocker.unblock():
-#         call_command("migrate", interactive=False, run_syncdb=True)
+    class DummyPrograms:
+        def add(self, *args, **kwargs):
+            pass
+
+    class DummyLog:
+        def __init__(self):
+            self.programs = DummyPrograms()
+
+    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
+    yield

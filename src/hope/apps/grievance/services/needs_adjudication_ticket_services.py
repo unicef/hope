@@ -124,15 +124,22 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = None,
-    possible_duplicates: list[Individual] | None = None,
-    registration_data_import: RegistrationDataImport | None = None,
-    is_multiple_duplicates_version: bool = False,
+    **kwargs,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
+    """Create GRV ticket with details.
+
+    kwargs: can has "dedup_engine_similarity_pair", "possible_duplicates",
+    "registration_data_import", "is_multiple_duplicates_version".
+    """
     from hope.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
+
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair = kwargs.get("dedup_engine_similarity_pair")
+    possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
+    registration_data_import: RegistrationDataImport = kwargs.get("registration_data_import")
+    is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None
@@ -321,8 +328,8 @@ def mark_as_duplicate_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_remove,
+        old_object=old_individual,
+        new_object=individual_to_remove,
     )
     individual_marked_as_duplicated.send(sender=Individual, instance=individual_to_remove)
     if household:
@@ -343,8 +350,8 @@ def mark_as_distinct_individual(
         "business_area",
         user,
         getattr(program, "pk", None),
-        old_individual,
-        individual_to_distinct,
+        old_object=old_individual,
+        new_object=individual_to_distinct,
     )
     individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
     if household := individual_to_distinct.household:

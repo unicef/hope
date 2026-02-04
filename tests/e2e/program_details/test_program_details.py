@@ -18,7 +18,9 @@ from extras.test_utils.old_factories.core import (
 from extras.test_utils.old_factories.household import create_household
 from extras.test_utils.old_factories.payment import PaymentPlanFactory
 from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.models import (
     Area,
     BeneficiaryGroup,
@@ -783,15 +785,6 @@ class TestProgrammeDetails:
             (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
         )
         page_programme_details.get_button_save().click()
-
-        # ToDo: Lack of information about wrong date 212579
-        # for _ in range(50):
-        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #             in page_programme_details.get_start_date_cycle_div().text):
-        #         break
-        #     sleep(0.1)
-        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #         in page_programme_details.get_start_date_cycle_div().text)
 
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(

@@ -315,6 +315,11 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
             )
 
         # Validate each field in pdu_fields
+        self._validate_all_fields(individual_data, pdu_fields_update)
+
+        return data
+
+    def _validate_all_fields(self, individual_data, pdu_fields_update):
         for field_name, field_data in pdu_fields_update.items():
             if not isinstance(field_data, dict):
                 raise serializers.ValidationError(f"Field data for '{field_name}' must be a dictionary")
@@ -357,18 +362,17 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
                     f"Field '{field_name}' expects a string value, got {type(field_value).__name__}"
                 )
             if subtype == PeriodicFieldData.DATE:
-                if not isinstance(field_value, str):
-                    raise serializers.ValidationError(
-                        f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"
-                    )
-                try:
-                    datetime.date.fromisoformat(field_value)
-                except (TypeError, ValueError):
-                    raise serializers.ValidationError(
-                        f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD"
-                    )
+                self._validate_pdu_date_type(field_name, field_value)
 
-        return data
+    def _validate_pdu_date_type(self, field_name, field_value: bool | int | float | str | Any):
+        if not isinstance(field_value, str):
+            raise serializers.ValidationError(
+                f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"
+            )
+        try:
+            datetime.date.fromisoformat(field_value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError(f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD")
 
 
 class PDUOnlineEditSendBackSerializer(serializers.Serializer):
