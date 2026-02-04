@@ -2,7 +2,7 @@
     "superuser": {
         "master": {
             "model": "account.user",
-            "pk": "0676f99d-0c44-4745-926a-48f0cdb85707",
+            "pk": "f3b477db-c727-4e83-a431-3d33a230c4e0",
             "fields": {
                 "password": "",
                 "last_login": null,
@@ -12,15 +12,15 @@
                 "last_name": "",
                 "is_staff": true,
                 "is_active": true,
-                "date_joined": "2026-02-03T12:13:09.029Z",
+                "date_joined": "2025-01-01T00:00:00Z",
                 "azure_id": null,
                 "display_name": "user_0",
                 "status": "INVITED",
-                "partner": 3,
+                "partner": 83,
                 "email": "user_0@example.com",
                 "custom_fields": {},
                 "job_title": "",
-                "last_modify_date": "2026-02-03T12:13:09.030Z",
+                "last_modify_date": "2025-01-01T00:00:00Z",
                 "groups": [],
                 "user_permissions": []
             }
@@ -28,7 +28,7 @@
         "deps": [
             {
                 "model": "account.partner",
-                "pk": 3,
+                "pk": 83,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

@@ -2,23 +2,23 @@
     "api_token": {
         "master": {
             "model": "api.apitoken",
-            "pk": 1,
+            "pk": 2,
             "fields": {
-                "user": "999a6e60-e54d-4c84-bad3-d5dfbb9ceffb",
-                "key": "7451af765f5b385db0ddfb86b576d238c0006154",
+                "user": "f2a1d752-f06a-493c-9391-920d5568e93b",
+                "key": "e16a696a12cdd80c51e63be260a6e8082c32b0db",
                 "grants": "[\"API_READ_ONLY\"]",
-                "valid_from": "2026-02-03",
+                "valid_from": "2025-01-01",
                 "valid_to": null,
                 "allowed_ips": null,
                 "valid_for": [
-                    "220441f7-8874-48a5-97f7-a331bb4b7062"
+                    "98c0d42f-e71c-4e40-8886-d11cebf8c289"
                 ]
             }
         },
         "deps": [
             {
                 "model": "account.user",
-                "pk": "999a6e60-e54d-4c84-bad3-d5dfbb9ceffb",
+                "pk": "f2a1d752-f06a-493c-9391-920d5568e93b",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -28,22 +28,22 @@
                     "last_name": "",
                     "is_staff": true,
                     "is_active": true,
-                    "date_joined": "2026-02-03T08:23:15.051Z",
+                    "date_joined": "2025-01-01T00:00:00Z",
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 3,
+                    "partner": 34,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
-                    "last_modify_date": "2026-02-03T08:23:15.067Z",
+                    "last_modify_date": "2025-01-01T00:00:00Z",
                     "groups": [],
                     "user_permissions": []
                 }
             },
             {
                 "model": "account.partner",
-                "pk": 3,
+                "pk": 34,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -57,10 +57,10 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "220441f7-8874-48a5-97f7-a331bb4b7062",
+                "pk": "98c0d42f-e71c-4e40-8886-d11cebf8c289",
                 "fields": {
-                    "created_at": "2026-02-03T08:23:15.074Z",
-                    "updated_at": "2026-02-03T08:23:15.074Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "code": "BA0000",
                     "slug": "business-area-0",
                     "name": "Business Area 0",

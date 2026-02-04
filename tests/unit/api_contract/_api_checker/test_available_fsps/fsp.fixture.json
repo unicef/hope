@@ -2,10 +2,10 @@
     "fsp": {
         "master": {
             "model": "payment.financialserviceprovider",
-            "pk": "60ac57ad-cfe7-4036-af09-9cdb6ae17bf5",
+            "pk": "1f14cbd5-b350-499e-ae6f-09929b794f2c",
             "fields": {
-                "created_at": "2026-02-04T08:07:50.505Z",
-                "updated_at": "2026-02-04T08:07:50.507Z",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "internal_data": {},
                 "created_by": null,
                 "name": "FSP 0",
@@ -15,20 +15,20 @@
                 "data_transfer_configuration": {},
                 "payment_gateway_id": null,
                 "allowed_business_areas": [
-                    "8c36a32a-755b-46f2-a204-d6d5104d862a"
+                    "eba374c8-af94-43f2-bc33-ecda36c7e5f5"
                 ],
                 "delivery_mechanisms": [
-                    "16026442-4892-4e32-8448-6c8447b47acd"
+                    "10070359-3843-48c2-869c-3376683c4017"
                 ]
             }
         },
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "8c36a32a-755b-46f2-a204-d6d5104d862a",
+                "pk": "eba374c8-af94-43f2-bc33-ecda36c7e5f5",
                 "fields": {
-                    "created_at": "2026-02-04T08:07:50.402Z",
-                    "updated_at": "2026-02-04T08:07:50.402Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "code": "BA0000",
                     "slug": "business-area-0",
                     "name": "Business Area 0",
@@ -66,10 +66,10 @@
             },
             {
                 "model": "payment.deliverymechanism",
-                "pk": "16026442-4892-4e32-8448-6c8447b47acd",
+                "pk": "10070359-3843-48c2-869c-3376683c4017",
                 "fields": {
-                    "created_at": "2026-02-04T08:07:50.502Z",
-                    "updated_at": "2026-02-04T08:07:50.502Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "payment_gateway_id": "dm-0",
                     "code": "DM0000",
                     "name": "Delivery Mechanism 0",

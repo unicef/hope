@@ -15,15 +15,15 @@
         "previous": null,
         "results": [
             {
-                "id": "4aeddcda-6214-4dcc-99c9-2df634b5aaa8",
+                "id": "413370ef-192d-49fc-9856-c136611546e1",
                 "name": "Country 0",
                 "short_name": "Country 0",
                 "iso_code2": "AA",
                 "iso_code3": "AAA",
                 "iso_num": "0000",
-                "valid_from": "2026-02-03T11:39:51Z",
+                "valid_from": "2025-01-01T00:00:00Z",
                 "valid_until": null,
-                "updated_at": "2026-02-03T11:39:51Z"
+                "updated_at": "2025-01-01T00:00:00Z"
             }
         ]
     },

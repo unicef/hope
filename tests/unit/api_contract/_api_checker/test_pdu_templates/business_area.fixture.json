@@ -2,14 +2,14 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "bacaf94e-bf88-4b1e-9a18-131aaa22b92a",
+            "pk": "e4ba6d71-2578-404e-902a-268f9877dc9c",
             "fields": {
-                "created_at": "2026-02-03T15:04:01.442Z",
-                "updated_at": "2026-02-03T15:04:01.442Z",
-                "code": "BA0004",
-                "slug": "business-area-4",
-                "name": "Business Area 4",
-                "long_name": "Business Area 4 Long Name",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "code": "BA0000",
+                "slug": "business-area-0",
+                "name": "Business Area 0",
+                "long_name": "Business Area 0 Long Name",
                 "parent": null,
                 "office_country": null,
                 "is_split": false,

@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "9f2efe6216afeb53c0381fc33e463d3c",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "700"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/ky0b/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "764eea20-ce5d-4485-9e0b-5866cc377111",
+                "unicef_id": "HH-25-0000.0001",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": "",
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "661715ee-22cd-43d8-83c5-70a2b658357b",
+                "program_name": "Program 0",
+                "program_slug": "ky0b"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

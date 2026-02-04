@@ -4,7 +4,7 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, POST, HEAD, OPTIONS",
-        "ETag": "74ce1774edc2753d122d25e6bc1ede2e",
+        "ETag": "a1780e82bb2d18fa23e3725d21d1769d",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
@@ -17,19 +17,19 @@
         "previous": null,
         "results": [
             {
-                "id": "686bc1de-0c37-4ddc-bf25-85f60ee98aca",
-                "programme_code": "NKQ5",
-                "slug": "nkq5",
+                "id": "113aaf47-3213-404d-b175-b28e9312237c",
+                "programme_code": "YZ3C",
+                "slug": "yz3c",
                 "name": "Program 0",
-                "start_date": "2026-02-03",
-                "end_date": "2027-02-03",
+                "start_date": "2025-01-01",
+                "end_date": "2026-01-01",
                 "budget": "1000000.00",
                 "frequency_of_payments": "ONE_OFF",
                 "sector": "MULTI_PURPOSE",
                 "cash_plus": false,
                 "population_goal": 1000,
                 "data_collecting_type": {
-                    "id": 1,
+                    "id": 7,
                     "label": "DCT 0",
                     "code": "dct_0",
                     "type": "STANDARD",
@@ -38,7 +38,7 @@
                     "household_filters_available": true
                 },
                 "beneficiary_group": {
-                    "id": "ae03b457-d6c4-476d-97ec-d601e5a2ef40",
+                    "id": "bf5d7dcc-8cee-400b-9398-330497bc5bec",
                     "name": "Group 0",
                     "group_label": "Household",
                     "group_label_plural": "Households",

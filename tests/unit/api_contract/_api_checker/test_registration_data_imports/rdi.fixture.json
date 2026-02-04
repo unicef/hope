@@ -2,18 +2,18 @@
     "rdi": {
         "master": {
             "model": "registration_data.registrationdataimport",
-            "pk": "a893e45a-d685-4af8-9761-44071c13649b",
+            "pk": "477f0eef-c3b6-4e1f-93ef-8132c33c3092",
             "fields": {
-                "created_at": "2026-02-03T13:36:55.824Z",
-                "updated_at": "2026-02-03T13:36:55.824Z",
-                "version": 1770124869139418,
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "version": 1735688653315200,
                 "name": "RDI 0",
                 "status": "MERGED",
                 "deduplication_engine_status": null,
-                "business_area": "a3f7e79b-97be-4dd9-a6ed-b10787513c10",
-                "program": "a55fadec-6ede-4a1b-93e4-b5a6a3c6e4af",
-                "import_date": "2026-02-03T13:36:55.824Z",
-                "imported_by": "25df8809-5a10-49cb-b660-d791db72e2b6",
+                "business_area": "6397d4ce-ca13-40bf-afb1-bbd4da348dbc",
+                "program": "b9c58c44-88b2-4306-99a4-7962a21bf706",
+                "import_date": "2025-01-01T00:00:00Z",
+                "imported_by": "17268f33-35c3-41c3-8848-c75cced5036c",
                 "data_source": "XLS",
                 "import_data": null,
                 "import_from_ids": null,
@@ -40,10 +40,10 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "a3f7e79b-97be-4dd9-a6ed-b10787513c10",
+                "pk": "6397d4ce-ca13-40bf-afb1-bbd4da348dbc",
                 "fields": {
-                    "created_at": "2026-02-03T13:36:55.709Z",
-                    "updated_at": "2026-02-03T13:36:55.709Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "code": "BA0000",
                     "slug": "business-area-0",
                     "name": "Business Area 0",
@@ -81,23 +81,23 @@
             },
             {
                 "model": "program.program",
-                "pk": "a55fadec-6ede-4a1b-93e4-b5a6a3c6e4af",
+                "pk": "b9c58c44-88b2-4306-99a4-7962a21bf706",
                 "fields": {
                     "is_removed": false,
-                    "created_at": "2026-02-03T13:36:55.741Z",
-                    "updated_at": "2026-02-03T13:36:55.741Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1770124869091881,
-                    "data_collecting_type": 1,
-                    "beneficiary_group": "d3761228-a682-4c31-a3b7-637b4cdad9b1",
-                    "business_area": "a3f7e79b-97be-4dd9-a6ed-b10787513c10",
+                    "version": 1735688653315201,
+                    "data_collecting_type": 2,
+                    "beneficiary_group": "a8579244-e555-48d2-ae20-745b503cefa4",
+                    "business_area": "6397d4ce-ca13-40bf-afb1-bbd4da348dbc",
                     "name": "Program 0",
-                    "programme_code": "J6JS",
+                    "programme_code": "VLQI",
                     "status": "ACTIVE",
-                    "slug": "j6js",
+                    "slug": "vlqi",
                     "description": "",
-                    "start_date": "2026-02-03",
-                    "end_date": "2027-02-03",
+                    "start_date": "2025-01-01",
+                    "end_date": "2026-01-01",
                     "sector": "MULTI_PURPOSE",
                     "budget": "1000000.00",
                     "frequency_of_payments": "ONE_OFF",
@@ -119,10 +119,10 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 1,
+                "pk": 2,
                 "fields": {
-                    "created": "2026-02-03T13:36:55.733Z",
-                    "modified": "2026-02-03T13:36:55.733Z",
+                    "created": "2025-01-01T00:00:00Z",
+                    "modified": "2025-01-01T00:00:00Z",
                     "code": "dct_0",
                     "label": "DCT 0",
                     "type": "STANDARD",
@@ -134,17 +134,17 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        1
+                        2
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "d3761228-a682-4c31-a3b7-637b4cdad9b1",
+                "pk": "a8579244-e555-48d2-ae20-745b503cefa4",
                 "fields": {
-                    "created_at": "2026-02-03T13:36:55.736Z",
-                    "updated_at": "2026-02-03T13:36:55.736Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "name": "Group 0",
                     "group_label": "Household",
                     "group_label_plural": "Households",
@@ -155,7 +155,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "25df8809-5a10-49cb-b660-d791db72e2b6",
+                "pk": "17268f33-35c3-41c3-8848-c75cced5036c",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -165,22 +165,22 @@
                     "last_name": "",
                     "is_staff": true,
                     "is_active": true,
-                    "date_joined": "2026-02-03T13:36:55.683Z",
+                    "date_joined": "2025-01-01T00:00:00Z",
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 3,
+                    "partner": 6,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
-                    "last_modify_date": "2026-02-03T13:36:55.822Z",
+                    "last_modify_date": "2025-01-01T00:00:00Z",
                     "groups": [],
                     "user_permissions": []
                 }
             },
             {
                 "model": "account.partner",
-                "pk": 3,
+                "pk": 6,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

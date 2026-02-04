@@ -2,10 +2,10 @@
     "sanction_list_individual": {
         "master": {
             "model": "sanction_list.sanctionlistindividual",
-            "pk": "f2961abb-e6f8-4d98-aa81-f215e82bfece",
+            "pk": "49495323-1e4b-4f5e-ab8b-6ebdcf01ef24",
             "fields": {
-                "created_at": "2026-02-03T15:03:59.666Z",
-                "updated_at": "2026-02-03T15:03:59.666Z",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "first_name": "First0",
                 "second_name": "",
                 "third_name": "",
@@ -34,8 +34,8 @@
                 "model": "sanction_list.sanctionlist",
                 "pk": 1,
                 "fields": {
-                    "created_at": "2026-02-03T15:03:59.665Z",
-                    "updated_at": "2026-02-03T15:03:59.665Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "name": "Sanction List 0",
                     "config": {},
                     "strategy": "hope.apps.sanction_list.strategies.un.UNSanctionList"

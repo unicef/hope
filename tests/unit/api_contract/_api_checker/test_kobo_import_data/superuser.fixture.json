@@ -2,7 +2,7 @@
     "superuser": {
         "master": {
             "model": "account.user",
-            "pk": "72261c30-7063-4385-bacf-620be46f7f12",
+            "pk": "a8b31c0e-4624-4a1b-b9c0-ed37fac6d070",
             "fields": {
                 "password": "",
                 "last_login": null,
@@ -12,7 +12,7 @@
                 "last_name": "",
                 "is_staff": true,
                 "is_active": true,
-                "date_joined": "2026-02-03T12:44:05.672Z",
+                "date_joined": "2025-01-01T00:00:00Z",
                 "azure_id": null,
                 "display_name": "user_0",
                 "status": "INVITED",
@@ -20,7 +20,7 @@
                 "email": "user_0@example.com",
                 "custom_fields": {},
                 "job_title": "",
-                "last_modify_date": "2026-02-03T12:44:05.673Z",
+                "last_modify_date": "2025-01-01T00:00:00Z",
                 "groups": [],
                 "user_permissions": []
             }

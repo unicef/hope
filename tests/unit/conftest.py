@@ -292,26 +292,6 @@ def clear_cache_before_each_test() -> None:
     cache.clear()
 
 
-@pytest.fixture(autouse=True)
-def disable_activity_log(request, monkeypatch):
-    if request.node.get_closest_marker("enable_activity_log"):
-        yield  # do nothing, let real logging work
-        return
-
-    from hope.models import LogEntry
-
-    class DummyPrograms:
-        def add(self, *args, **kwargs):
-            pass
-
-    class DummyLog:
-        def __init__(self):
-            self.programs = DummyPrograms()
-
-    monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
-    yield
-
-
 # @pytest.fixture(autouse=True)
 # def ensure_contenttypes_and_permissions(db):
 #     ContentType.objects.clear_cache()

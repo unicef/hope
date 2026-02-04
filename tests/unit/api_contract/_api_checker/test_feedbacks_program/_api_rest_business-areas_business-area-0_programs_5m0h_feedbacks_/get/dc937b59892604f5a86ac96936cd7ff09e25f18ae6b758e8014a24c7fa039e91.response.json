@@ -1,0 +1,37 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "590"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/5m0h/feedbacks/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "b273bb3f-eab8-40bc-9c56-02ac31beb0ac",
+                "unicef_id": "FED-25-0002",
+                "issue_type": "POSITIVE_FEEDBACK",
+                "household_unicef_id": null,
+                "household_id": null,
+                "individual_unicef_id": null,
+                "individual_id": null,
+                "linked_grievance_id": null,
+                "linked_grievance_unicef_id": null,
+                "linked_grievance_category": null,
+                "program_name": "Program 0",
+                "program_id": "0e3fcc9e-419b-4003-8bc3-5b96378c765d",
+                "created_by": " ",
+                "created_at": "2025-01-01T00:00:00Z",
+                "feedback_messages": []
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

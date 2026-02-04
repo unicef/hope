@@ -14,11 +14,11 @@
     },
     "data": [
         {
-            "id": "145b2749-a3c7-4dcf-adb8-b3be9dd76206",
+            "id": "8db538e4-ba8b-44c4-aa21-c7b60e171425",
             "name": "Area 0",
             "p_code": "PC000000",
-            "area_type": "5981001b-910c-47cc-a885-e99d18cd6e0f",
-            "updated_at": "2026-02-03T12:47:21Z"
+            "area_type": "d6efd089-a40d-42d7-b5b5-d6ce5a85e43a",
+            "updated_at": "2025-01-01T00:00:00Z"
         }
     ],
     "content_type": "application/json"

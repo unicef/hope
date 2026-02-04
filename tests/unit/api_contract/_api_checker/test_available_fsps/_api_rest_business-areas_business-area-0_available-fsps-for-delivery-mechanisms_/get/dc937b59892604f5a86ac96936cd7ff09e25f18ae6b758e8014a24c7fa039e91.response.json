@@ -3,7 +3,7 @@
     "headers": {
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
-        "Allow": "GET, OPTIONS",
+        "Allow": "OPTIONS, GET",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
@@ -13,7 +13,7 @@
     "data": [
         {
             "delivery_mechanism": {
-                "id": "16026442-4892-4e32-8448-6c8447b47acd",
+                "id": "10070359-3843-48c2-869c-3376683c4017",
                 "name": "Delivery Mechanism 0",
                 "code": "DM0000",
                 "is_active": true,
@@ -22,7 +22,7 @@
             },
             "fsps": [
                 {
-                    "id": "60ac57ad-cfe7-4036-af09-9cdb6ae17bf5",
+                    "id": "1f14cbd5-b350-499e-ae6f-09929b794f2c",
                     "name": "FSP 0"
                 }
             ]

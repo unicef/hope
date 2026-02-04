@@ -2,10 +2,10 @@
     "delivery_mechanism": {
         "master": {
             "model": "payment.deliverymechanism",
-            "pk": "16026442-4892-4e32-8448-6c8447b47acd",
+            "pk": "10070359-3843-48c2-869c-3376683c4017",
             "fields": {
-                "created_at": "2026-02-04T08:07:50.502Z",
-                "updated_at": "2026-02-04T08:07:50.502Z",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "payment_gateway_id": "dm-0",
                 "code": "DM0000",
                 "name": "Delivery Mechanism 0",

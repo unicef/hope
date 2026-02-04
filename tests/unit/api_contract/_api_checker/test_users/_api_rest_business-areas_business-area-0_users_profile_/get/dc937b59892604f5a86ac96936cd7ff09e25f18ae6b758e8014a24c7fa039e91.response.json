@@ -4,23 +4,23 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "W/\"profile:286710fb-2001-46a5-b444-40fc1d0bfb9f:1.1\"",
+        "ETag": "W/\"profile:701cfe7e-1dfd-4b9c-9e4e-f485da8beb67:1.1\"",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11955"
+        "Content-Length": "11956"
     },
     "data": {
-        "id": "286710fb-2001-46a5-b444-40fc1d0bfb9f",
+        "id": "701cfe7e-1dfd-4b9c-9e4e-f485da8beb67",
         "username": "user_0",
         "email": "user_0@example.com",
         "first_name": "",
         "last_name": "",
         "is_superuser": true,
         "partner": {
-            "id": 3,
+            "id": 78,
             "name": "Partner 0"
         },
         "user_roles": [
@@ -40,7 +40,7 @@
         "last_login": null,
         "business_areas": [
             {
-                "id": "49a5896c-6962-4a0b-a463-23d406eada15",
+                "id": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
                 "name": "Business Area 0",
                 "slug": "business-area-0",
                 "permissions": [

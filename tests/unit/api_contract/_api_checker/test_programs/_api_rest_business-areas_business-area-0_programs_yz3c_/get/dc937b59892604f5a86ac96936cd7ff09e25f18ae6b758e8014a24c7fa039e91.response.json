@@ -1,0 +1,73 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1341"
+    },
+    "data": {
+        "id": "113aaf47-3213-404d-b175-b28e9312237c",
+        "programme_code": "YZ3C",
+        "slug": "yz3c",
+        "name": "Program 0",
+        "start_date": "2025-01-01",
+        "end_date": "2026-01-01",
+        "budget": "1000000.00",
+        "frequency_of_payments": "ONE_OFF",
+        "sector": "MULTI_PURPOSE",
+        "cash_plus": false,
+        "population_goal": 1000,
+        "data_collecting_type": {
+            "id": 7,
+            "label": "DCT 0",
+            "code": "dct_0",
+            "type": "STANDARD",
+            "type_display": "Standard",
+            "individual_filters_available": false,
+            "household_filters_available": true
+        },
+        "beneficiary_group": {
+            "id": "bf5d7dcc-8cee-400b-9398-330497bc5bec",
+            "name": "Group 0",
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "master_detail": true
+        },
+        "status": "ACTIVE",
+        "pdu_fields": [],
+        "household_count": 0,
+        "admin_url": "/api/unicorn/program/program/113aaf47-3213-404d-b175-b28e9312237c/change/",
+        "description": "",
+        "administrative_areas_of_implementation": "",
+        "version": 1735688653315201,
+        "partners": [
+            {
+                "id": 2,
+                "name": "UNICEF HQ",
+                "area_access": "BUSINESS_AREA",
+                "areas": null
+            },
+            {
+                "id": 19,
+                "name": "UNICEF Partner for business-area-0",
+                "area_access": "BUSINESS_AREA",
+                "areas": null
+            }
+        ],
+        "partner_access": "SELECTED_PARTNERS_ACCESS",
+        "registration_imports_total_count": 0,
+        "can_import_rdi": true,
+        "target_populations_count": 0,
+        "screen_beneficiary": false,
+        "reconciliation_window_in_days": 0,
+        "send_reconciliation_window_expiry_notifications": false
+    },
+    "content_type": "application/json"
+}

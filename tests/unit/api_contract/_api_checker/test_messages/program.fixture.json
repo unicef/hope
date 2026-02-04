@@ -2,23 +2,23 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "92262dab-84ad-4ee9-b6f0-db3d18103d8d",
+            "pk": "8c7c8d8d-bdb6-4669-8f6f-e3c262675fff",
             "fields": {
                 "is_removed": false,
-                "created_at": "2026-02-03T13:38:52.382Z",
-                "updated_at": "2026-02-03T13:38:52.382Z",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1770124985697477,
-                "data_collecting_type": 1,
-                "beneficiary_group": "379aa469-b711-4333-8d53-721a2847e0f2",
-                "business_area": "55f2bbe3-1c14-4e82-b2af-c46f9b827099",
+                "version": 1735688653315200,
+                "data_collecting_type": 17,
+                "beneficiary_group": "469ef6f5-7482-4e80-a594-f1c34b33c158",
+                "business_area": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
                 "name": "Program 0",
-                "programme_code": "U66Y",
+                "programme_code": "D38A",
                 "status": "ACTIVE",
-                "slug": "u66y",
+                "slug": "d38a",
                 "description": "",
-                "start_date": "2026-02-03",
-                "end_date": "2027-02-03",
+                "start_date": "2025-01-01",
+                "end_date": "2026-01-01",
                 "sector": "MULTI_PURPOSE",
                 "budget": "1000000.00",
                 "frequency_of_payments": "ONE_OFF",
@@ -41,10 +41,10 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 1,
+                "pk": 17,
                 "fields": {
-                    "created": "2026-02-03T13:38:52.374Z",
-                    "modified": "2026-02-03T13:38:52.374Z",
+                    "created": "2025-01-01T00:00:00Z",
+                    "modified": "2025-01-01T00:00:00Z",
                     "code": "dct_0",
                     "label": "DCT 0",
                     "type": "STANDARD",
@@ -56,17 +56,17 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        1
+                        17
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "379aa469-b711-4333-8d53-721a2847e0f2",
+                "pk": "469ef6f5-7482-4e80-a594-f1c34b33c158",
                 "fields": {
-                    "created_at": "2026-02-03T13:38:52.377Z",
-                    "updated_at": "2026-02-03T13:38:52.377Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "name": "Group 0",
                     "group_label": "Household",
                     "group_label_plural": "Households",
@@ -77,10 +77,10 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "55f2bbe3-1c14-4e82-b2af-c46f9b827099",
+                "pk": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
                 "fields": {
-                    "created_at": "2026-02-03T13:38:52.349Z",
-                    "updated_at": "2026-02-03T13:38:52.349Z",
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
                     "code": "BA0000",
                     "slug": "business-area-0",
                     "name": "Business Area 0",

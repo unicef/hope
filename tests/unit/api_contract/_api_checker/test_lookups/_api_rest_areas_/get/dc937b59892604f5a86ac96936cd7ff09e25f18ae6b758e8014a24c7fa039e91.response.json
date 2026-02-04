@@ -15,15 +15,15 @@
         "previous": null,
         "results": [
             {
-                "id": "d1f85b26-46a3-4aea-ac6e-f5ba36f2281a",
-                "created_at": "2026-02-03T11:39:51Z",
-                "updated_at": "2026-02-03T11:39:51Z",
+                "id": "ce1bd34b-02eb-4d91-ab44-b5bc0981f824",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "original_id": null,
                 "name": "Area 0",
                 "p_code": "PC000000",
                 "longitude": null,
                 "latitude": null,
-                "valid_from": "2026-02-03T11:39:51Z",
+                "valid_from": "2025-01-01T00:00:00Z",
                 "valid_until": null,
                 "extras": {},
                 "lft": 1,
@@ -31,7 +31,7 @@
                 "tree_id": 1,
                 "level": 0,
                 "parent": null,
-                "area_type": "594de036-3f5f-410c-8b5c-fb2f4ab36ab6"
+                "area_type": "8af9edc5-e2c1-4fce-99e0-c7418720959f"
             }
         ]
     },

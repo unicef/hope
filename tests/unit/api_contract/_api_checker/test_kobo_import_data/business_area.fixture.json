@@ -2,10 +2,10 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "bb8c66b5-3989-4997-a8d8-ac59286cde0a",
+            "pk": "8fcab6d0-9804-4856-91bd-eee4360b3ddd",
             "fields": {
-                "created_at": "2026-02-03T12:44:05.699Z",
-                "updated_at": "2026-02-03T12:44:05.699Z",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
                 "code": "BA0000",
                 "slug": "business-area-0",
                 "name": "Business Area 0",
