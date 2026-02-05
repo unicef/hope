@@ -53,6 +53,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
                     "individual_questions/identification/bank_name_i_c": "Privat",
                     "individual_questions/identification/account_holder_name_i_c": "Name 123",
+                    "individual_questions/more_information/other_id_type_i_c": "test_type",
+                    "individual_questions/more_information/other_id_no_i_c": "number_123",
+                    "individual_questions/more_information/other_id_issuer_i_c": "AFG",
+                    "individual_questions/more_information/scope_id_no_i_c": "scope_123_number",
+                    "individual_questions/more_information/scope_id_issuer_i_c": "AFG",
                 }
             ],
             "wash_questions/score_bed": "5",
