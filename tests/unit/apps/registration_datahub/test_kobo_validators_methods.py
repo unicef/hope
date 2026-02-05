@@ -797,3 +797,44 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
         ]
         assert result == expected
+
+    def test_check_error_list_validate_everything(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+
+        alt_collector_counter = 2
+        head_of_hh_counter = 2
+        primary_collector_counter = 2
+
+        validator._process_error_msg(head_of_hh_counter, primary_collector_counter, alt_collector_counter)
+        expected_result = [
+            {
+                "header": "relationship_i_c",
+                "message": "Only one person can be a head of household",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a alternate collector",
+            },
+        ]
+        assert expected_result == validator.errors
+
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        alt_collector_counter = 0
+        head_of_hh_counter = 0
+        primary_collector_counter = 0
+        validator._process_error_msg(head_of_hh_counter, primary_collector_counter, alt_collector_counter)
+        expected_result = [
+            {
+                "header": "relationship_i_c",
+                "message": "Household has to have a head of household",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Household must have a primary collector",
+            },
+        ]
+        assert expected_result == validator.errors

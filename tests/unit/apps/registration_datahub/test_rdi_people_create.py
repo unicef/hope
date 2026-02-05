@@ -25,6 +25,7 @@ from hope.apps.household.const import (
 from hope.models import (
     Country as GeoCountry,
     DataCollectingType,
+    FlexibleAttribute,
     ImportData,
     PendingAccount,
     PendingHousehold,
@@ -88,6 +89,13 @@ class TestRdiXlsxPeople(TestCase):
             program=cls.program,
         )
         generate_delivery_mechanisms()
+        FlexibleAttribute.objects.create(
+            name="custom_field_i_f",
+            label={"English(EN)": "Custom Field"},
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            is_removed=False,
+        )
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
@@ -137,6 +145,8 @@ class TestRdiXlsxPeople(TestCase):
         alternate_role = roles.filter(role=ROLE_ALTERNATE).first()
         assert alternate_role.role == "ALTERNATE"
         assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
+        individual_1 = alternate_role.individual
+        assert individual_1.flex_fields["custom_field_i_f"] == "Aaaa"
 
         worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
         assert worker_individuals.count() == 2

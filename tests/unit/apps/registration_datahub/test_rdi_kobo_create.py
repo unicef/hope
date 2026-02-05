@@ -132,7 +132,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         assert households.count() == 1
         assert individuals.count() == 2
-        assert documents.count() == 3
+        assert documents.count() == 4
 
         individual = individuals.get(full_name="Test Testowski")
 

@@ -1267,6 +1267,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()
+        self.errors = []
 
     def get_combined_fields(self) -> dict[str, dict]:
         core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT)
@@ -1544,7 +1545,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
-            errors = []
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
@@ -1651,7 +1651,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 alternate_collector_counter,
                                 attachments,
                                 documents_numbers,
-                                errors,
                                 head_of_hh_counter,
                                 household_collectors_data=household_collectors_data,
                                 identities_numbers=identities_numbers,
@@ -1669,17 +1668,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 }
                                 for field in expected_i_fields
                             ]
-                            errors.extend(i_expected_field_errors)
+                            self.errors.extend(i_expected_field_errors)
 
                         self._process_error_msg(
-                            alternate_collector_counter, errors, head_of_hh_counter, primary_collector_counter
+                            head_of_hh_counter, primary_collector_counter, alternate_collector_counter
                         )
                     else:
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
-                            errors.append(error)
+                            self.errors.append(error)
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
-                    errors.append(collectors_error)
+                    self.errors.append(collectors_error)
                 hh_expected_field_errors = [
                     {
                         "header": field,
@@ -1687,18 +1686,18 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     }
                     for field in expected_hh_fields
                 ]
-                errors.extend(hh_expected_field_errors)
+                self.errors.extend(hh_expected_field_errors)
 
             document_errors = self.documents_validator(documents_numbers, is_xlsx=False)
             identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)
 
-            return [*errors, *document_errors, *identities_errors]
+            return [*self.errors, *document_errors, *identities_errors]
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
 
     def _create_individual(
-        self, alternate_collector_counter, attachments, documents_numbers, errors, head_of_hh_counter, **kwargs
+        self, alternate_collector_counter, attachments, documents_numbers, head_of_hh_counter, **kwargs
     ):
         household_collectors_data = kwargs.get("household_collectors_data")
         identities_numbers = kwargs.get("identities_numbers")
@@ -1747,7 +1746,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 skip_validate_pictures,
             )
             if error:
-                errors.append(error)
+                self.errors.append(error)
         return (
             alternate_collector_counter,
             current_individual_docs_and_identities,
@@ -1765,37 +1764,37 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 alternate_collector_counter += 1
         return alternate_collector_counter, primary_collector_counter
 
-    def _process_error_msg(self, alternate_collector_counter, errors, head_of_hh_counter, primary_collector_counter):
+    def _process_error_msg(self, head_of_hh_counter, primary_collector_counter, alternate_collector_counter):
         if head_of_hh_counter == 0:
-            errors.append(
+            self.errors.append(
                 {
                     "header": "relationship_i_c",
                     "message": "Household has to have a head of household",
                 }
             )
         if head_of_hh_counter > 1:
-            errors.append(
+            self.errors.append(
                 {
                     "header": "relationship_i_c",
                     "message": "Only one person can be a head of household",
                 }
             )
         if primary_collector_counter == 0:
-            errors.append(
+            self.errors.append(
                 {
                     "header": "role_i_c",
                     "message": "Household must have a primary collector",
                 }
             )
         if primary_collector_counter > 1:
-            errors.append(
+            self.errors.append(
                 {
                     "header": "role_i_c",
                     "message": "Only one person can be a primary collector",
                 }
             )
         if alternate_collector_counter > 1:
-            errors.append(
+            self.errors.append(
                 {
                     "header": "role_i_c",
                     "message": "Only one person can be a alternate collector",
