@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import responses
 
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.old_factories.geo import CountryFactory
 from hope.apps.sanction_list.celery_tasks import sync_sanction_list_task
 from hope.models import SanctionList, SanctionListIndividual
 

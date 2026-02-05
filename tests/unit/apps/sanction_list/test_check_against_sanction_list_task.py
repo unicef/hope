@@ -1,4 +1,5 @@
 import base64
+import datetime
 import io
 import json
 from typing import Any
@@ -14,10 +15,11 @@ from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
-from hope.models import UploadedXLSXFile
+from hope.models import SanctionListIndividualDateOfBirth, UploadedXLSXFile
 
 
 class TestSanctionList(TestCase):
@@ -111,3 +113,29 @@ class TestSanctionList(TestCase):
             data=expected_data,
             timeout=30,
         )
+
+    def test_join_names_and_birthday_db(self) -> None:
+        wb = Workbook()
+        ws = wb.active
+        individual = SanctionListIndividualFactory(
+            first_name="FirstName",
+            second_name="SecondName",
+            third_name="ThirdName",
+            fourth_name="FourthName",
+        )
+        SanctionListIndividualDateOfBirth.objects.create(
+            individual=individual,
+            date=datetime.date(year=1980, month=2, day=1),
+        )
+        SanctionListIndividualDateOfBirth.objects.create(
+            individual=individual,
+            date=datetime.date(year=1981, month=1, day=1),
+        )
+        results_dict = {2: individual}
+
+        task = CheckAgainstSanctionListTask()
+        task.join_names_and_birthday(ws, results_dict)
+
+        rows = list(ws.iter_rows(values_only=True))
+        assert rows[0][4] == "1980-02-01, 1981-01-01"
+        assert rows[0][5] == 2

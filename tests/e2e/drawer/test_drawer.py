@@ -8,8 +8,8 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.models import BeneficiaryGroup, DataCollectingType, Program
 
 pytestmark = pytest.mark.django_db()

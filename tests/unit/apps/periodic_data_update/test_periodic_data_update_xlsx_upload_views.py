@@ -11,21 +11,21 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
 )
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.periodic_data_update import (
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.periodic_data_update import (
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,

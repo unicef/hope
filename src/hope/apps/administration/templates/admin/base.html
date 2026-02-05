@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 
 {% block extrahead %}
-    {{ form.media }}
-    <script>
+ {{ form.media }}
+  <script>
    document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('header');
     if (!header) return;

@@ -9,16 +9,16 @@ from flags.models import FlagState
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import DataCollectingTypeFactory
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import DataCollectingTypeFactory
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
     ImportDataFactory,
     KoboImportDataFactory,
     RegistrationDataImportFactory,
 )
-from extras.test_utils.factories.sanction_list import SanctionListFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
 from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService

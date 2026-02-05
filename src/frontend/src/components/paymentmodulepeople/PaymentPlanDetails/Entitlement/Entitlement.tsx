@@ -33,7 +33,7 @@ import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages, formatFigure } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -406,7 +406,7 @@ export function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${paymentPlan.currency} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>

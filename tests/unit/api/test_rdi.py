@@ -5,9 +5,9 @@ from typing import Dict
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import (
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
 )
@@ -163,9 +163,15 @@ class PushToRDITests(HOPEApiTestCase):
                             {
                                 "type": "bank",
                                 "number": "123",
-                                # "financial_institution": self.fi.id,  # use generic financial institution
                                 "data": {"field_name": "field_value"},
-                            }
+                                "financial_institution": self.fi.id,
+                            },
+                            {
+                                "type": "bank",
+                                "number": "444",
+                                "data": {"field_name": "field_value"},
+                                # use Generic financial institution in not provided
+                            },
                         ],
                     },
                     {
@@ -196,12 +202,18 @@ class PushToRDITests(HOPEApiTestCase):
         assert hh.primary_collector.full_name == "Mary Primary #1"
         assert hh.head_of_household.full_name == "James Head #1"
         assert hh.head_of_household.photo is not None
-        account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
-        assert account is not None
-        assert account.account_type.key == "bank"
-        assert account.financial_institution.name == "Generic Bank"
-        assert account.number == "123"
-        assert account.data == {"field_name": "field_value"}
+        account_1 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").first()
+        account_2 = PendingAccount.objects.filter(individual=hh.head_of_household).order_by("number").last()
+        assert account_1 is not None
+        assert account_1.account_type.key == "bank"
+        assert account_1.financial_institution.name == "mbank"
+        assert account_1.number == "123"
+        assert account_1.data == {"field_name": "field_value"}
+        assert account_2 is not None
+        assert account_2.account_type.key == "bank"
+        assert account_2.financial_institution.name == "Generic Bank"
+        assert account_2.number == "444"
+        assert account_2.data == {"field_name": "field_value"}
 
         assert hh.primary_collector.program_id == self.program.id
         assert hh.head_of_household.program_id == self.program.id

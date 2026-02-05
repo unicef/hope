@@ -2,9 +2,9 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.models import PaymentPlan

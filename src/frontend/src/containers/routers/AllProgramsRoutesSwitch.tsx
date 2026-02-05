@@ -1,11 +1,11 @@
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { GrievanceRoutes } from './GrievanceRoutes';
-import { ProgramRoutes } from './ProgramRoutes';
 import { ManagerialConsolePage } from '@containers/pages/managerialConsole/ManagerialConsolePage';
-import { ReactElement } from 'react';
+import { ReactElement, Suspense } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 import CountrySearchPage from '@containers/pages/countrySearch/CountrySearchPage';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { LazyGrievanceRoutes, LazyProgramRoutes } from './lazyRoutes';
 
 export const AllProgramsRoutesSwitch = (): ReactElement => {
   const allProgramsRoutes = [
@@ -27,10 +27,10 @@ export const AllProgramsRoutesSwitch = (): ReactElement => {
   const routes = useRoutes(allProgramsRoutes);
 
   return (
-    <>
+    <Suspense fallback={<LoadingComponent />}>
       {routes}
-      <GrievanceRoutes />
-      <ProgramRoutes />
-    </>
+      <LazyGrievanceRoutes />
+      <LazyProgramRoutes />
+    </Suspense>
   );
 };

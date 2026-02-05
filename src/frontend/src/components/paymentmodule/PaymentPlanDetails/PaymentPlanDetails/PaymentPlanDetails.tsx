@@ -51,7 +51,7 @@ const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Programme')}>
-                  <BlackLink to={`/${baseUrl}/details/${program.id}`}>
+                  <BlackLink to={`/${baseUrl}/details/${program.slug}`}>
                     {program.name}
                   </BlackLink>
                 </LabelizedField>

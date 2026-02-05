@@ -28,9 +28,8 @@ from hope.admin.utils import (
 )
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
+from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
+from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.models import (
@@ -109,6 +108,76 @@ class BulkUploadIndividualsPhotosForm(forms.Form):
         return file
 
 
+class ProgramAdminForm(forms.ModelForm):
+    class Meta:
+        model = Program
+        fields = (
+            "data_collecting_type",
+            "beneficiary_group",
+            "business_area",
+            "admin_areas",
+            "name",
+            "programme_code",
+            "status",
+            "slug",
+            "description",
+            "start_date",
+            "end_date",
+            "sector",
+            "budget",
+            "frequency_of_payments",
+            "scope",
+            "partner_access",
+            "cash_plus",
+            "population_goal",
+            "administrative_areas_of_implementation",
+            "biometric_deduplication_enabled",
+            "collision_detector",
+            "is_visible",
+            "household_count",
+            "individual_count",
+            "is_removed",
+            "last_sync_at",
+            "version",
+            "sanction_lists",
+            "reconciliation_window_in_days",
+            "send_reconciliation_window_expiry_notifications",
+        )
+
+    def _handle_biometric_deduplication_set(self, action: str) -> None:
+        try:
+            service = BiometricDeduplicationService()
+            if action == "create":
+                service.create_deduplication_set(self.instance)
+                if self.instance.pk:
+                    service.mark_rdis_as_pending(self.instance)
+            elif action == "delete":
+                service.delete_deduplication_set(self.instance)
+        except (
+            DeduplicationEngineAPI.API_EXCEPTION_CLASS,
+            DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS,
+        ) as exc:
+            raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean()
+        if self.errors:
+            return cleaned_data
+
+        if "biometric_deduplication_enabled" in self.changed_data:
+            enable = cleaned_data.get("biometric_deduplication_enabled")
+            if self.instance.pk:
+                original_enabled = self.instance.biometric_deduplication_enabled
+                if enable is True and original_enabled is False:
+                    self._handle_biometric_deduplication_set("create")
+                elif enable is False and original_enabled is True:
+                    self._handle_biometric_deduplication_set("delete")
+            elif enable is True:
+                self._handle_biometric_deduplication_set("create")
+
+        return cleaned_data
+
+
 @admin.register(Program)
 class ProgramAdmin(
     SoftDeletableAdminMixin,
@@ -116,6 +185,7 @@ class ProgramAdmin(
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
 ):
+    form = ProgramAdminForm
     list_display = (
         "name",
         "programme_code",
@@ -153,18 +223,6 @@ class ProgramAdmin(
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
-
-    def save_model(self, request: HttpRequest, obj: Program, *args: Any) -> None:
-        if obj.pk:
-            original = Program.objects.get(pk=obj.pk)
-            if original.biometric_deduplication_enabled != obj.biometric_deduplication_enabled:
-                service = BiometricDeduplicationService()
-                if obj.biometric_deduplication_enabled:
-                    service.create_deduplication_set(obj)
-                    service.mark_rdis_as_pending(obj)
-                else:
-                    service.delete_deduplication_set(obj)
-        super().save_model(request, obj, *args)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
         return (

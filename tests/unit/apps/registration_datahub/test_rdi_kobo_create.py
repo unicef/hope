@@ -13,12 +13,12 @@ from django.test import TestCase
 from django_countries.fields import Country
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import IndividualFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import IndividualFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
@@ -587,9 +587,9 @@ class TestRdiKoboCreateTask(TestCase):
             head_of_households_mapping,
             household,
             households_to_create,
-            individuals_ids_hash_dict,
-            submission_meta_data,
-            1,
+            individuals_ids_hash_dict=individuals_ids_hash_dict,
+            submission_meta_data=submission_meta_data,
+            household_count=1,
         )
         hh = households_to_create[0]
 

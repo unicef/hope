@@ -8,7 +8,7 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
 import { ReactElement } from 'react';
 import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 import { Choice } from '@restgenerated/models/Choice';
@@ -116,7 +116,7 @@ export function PaymentPlansFilters({
           <NumberTextField
             id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
-            value={filter.totalEntitledQuantityUsdFrom}
+            value={formatFigure(filter.totalEntitledQuantityUsdFrom)}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
@@ -127,16 +127,15 @@ export function PaymentPlansFilters({
         <Grid size={3}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
-            value={filter.totalEntitledQuantityUsdTo}
+            value={formatFigure(filter.totalEntitledQuantityUsdTo)}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityUsdTo', e.target.value)
             }
             error={Boolean(
               filter.totalEntitledQuantityFrom &&
-                filter.totalEntitledQuantityTo &&
-                filter.totalEntitledQuantityFrom >
-                  filter.totalEntitledQuantityTo,
+              filter.totalEntitledQuantityTo &&
+              filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo,
             )}
             data-cy="filters-total-entitled-quantity-to"
           />

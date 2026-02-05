@@ -6,14 +6,14 @@ from django.test import TestCase
 import pytest
 from strategy_field.utils import fqn
 
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
@@ -34,7 +34,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
-    from extras.test_utils.factories.sanction_list import SanctionListFactory
+    from extras.test_utils.old_factories.sanction_list import SanctionListFactory
 
     return SanctionListFactory(strategy=fqn(UNSanctionList))
 
@@ -47,7 +47,7 @@ class TestSanctionListPreMerge(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        from extras.test_utils.factories.sanction_list import SanctionListFactory
+        from extras.test_utils.old_factories.sanction_list import SanctionListFactory
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         sanction_list = SanctionListFactory()

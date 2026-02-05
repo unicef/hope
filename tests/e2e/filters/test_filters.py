@@ -9,21 +9,23 @@ from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPag
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import (
     Area,
@@ -458,8 +460,10 @@ class TestSmokeFilters:
                 ],
                 id="Payment Module",
             ),
-            # TODO: uncomment after fix bug: 206395
-            # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
+            pytest.param(
+                ["Main Menu", "hh-filters-search", "HH-00-0000.1380"],
+                id="Programme Population",
+            ),
         ],
     )
     def test_filters_happy_path_search_filter(

@@ -1,142 +1,218 @@
+"""Tests for check_permissions function."""
+
+from typing import Any
+
 from django.contrib.auth.models import AnonymousUser
-from django.test import TestCase
+import pytest
 
-from extras.test_utils.factories.account import PartnerFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    BusinessAreaFactory,
+    PartnerFactory,
+    ProgramFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.models import BusinessArea, Program, Role, RoleAssignment, User
+from hope.models import Area, BusinessArea, Program, Role, User
+
+pytestmark = pytest.mark.django_db
 
 
-class TestCheckPermissions(TestCase):
-    user: User
-    business_area: BusinessArea
-    program: Program
-    role: Role
+@pytest.fixture
+def business_area(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="afghanistan",
+        code="0060",
+        name="Afghanistan",
+    )
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.user = UserFactory()
-        cls.business_area = create_afghanistan()
 
-        role_with_all_permissions = RoleFactory(name="Role with all permissions")
-        role_with_all_permissions.permissions = [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value]
-        role_with_all_permissions.save()
+@pytest.fixture
+def program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(status=Program.DRAFT, business_area=business_area)
 
-        cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
-        cls.role = RoleFactory(
-            name="POPULATION VIEW INDIVIDUALS DETAILS",
-            permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"],
-        )
-        cls.area = AreaFactory(name="POPULATION")
 
-    def test_user_is_not_authenticated(self) -> None:
-        user = AnonymousUser()
-        assert not check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS])
+@pytest.fixture
+def role(db: Any) -> Role:
+    return RoleFactory(
+        name="POPULATION VIEW INDIVIDUALS DETAILS",
+        permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"],
+    )
 
-    def test_business_area_is_invalid(self) -> None:
-        arguments = {"business_area": "invalid"}
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert not result
 
-    def test_user_is_unicef(self) -> None:
-        unicef = PartnerFactory(name="UNICEF")
-        partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
-        self.user.partner = partner
-        self.user.save()
+@pytest.fixture
+def area(db: Any) -> Area:
+    return AreaFactory(name="POPULATION")
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert result
 
-    def test_user_is_not_unicef_and_has_permission_in_different_program(self) -> None:
-        partner = PartnerFactory(name="Partner")
-        self.user.partner = partner
-        self.user.save()
+@pytest.fixture
+def user(db: Any) -> User:
+    return UserFactory()
 
-        RoleAssignment.objects.create(
-            user=self.user,
-            business_area=self.business_area,
-            role=self.role,
-            program=ProgramFactory(business_area=self.business_area),
-        )
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert not result
+@pytest.fixture
+def role_with_all_permissions(db: Any) -> Role:
+    role, created = Role.objects.get_or_create(
+        name="Role with all permissions",
+        subsystem="HOPE",
+        defaults={"permissions": [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value]},
+    )
+    if not created:
+        role.permissions = [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value]
+        role.save()
+    return role
 
-    def test_user_is_not_unicef_and_partner_has_permission_in_program(self) -> None:
-        partner = PartnerFactory(name="Partner")
-        partner.allowed_business_areas.add(self.business_area)
-        RoleAssignment.objects.create(
-            partner=partner,
-            business_area=self.business_area,
-            role=self.role,
-            program=self.program,
-        )
 
-        self.user.partner = partner
-        self.user.save()
+def test_user_is_not_authenticated():
+    user = AnonymousUser()
+    assert not check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS])
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert result
 
-    def test_user_is_not_unicef_and_user_has_permission_in_program(self) -> None:
-        partner = PartnerFactory(name="Partner")
-        self.user.partner = partner
-        self.user.save()
+def test_business_area_is_invalid(user: User):
+    arguments = {"business_area": "invalid"}
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert not result
 
-        RoleAssignment.objects.create(
-            user=self.user,
-            business_area=self.business_area,
-            role=self.role,
-            program=self.program,
-        )
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert result
+def test_user_is_unicef(user: User, business_area: BusinessArea, program: Program, role_with_all_permissions: Role):
+    unicef = PartnerFactory(name="UNICEF")
+    partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
+    user.partner = partner
+    user.save()
 
-    def test_user_is_not_unicef_and_partner_has_permission_in_whole_ba(self) -> None:
-        partner = PartnerFactory(name="Partner")
-        partner.allowed_business_areas.add(self.business_area)
-        RoleAssignment.objects.create(partner=partner, business_area=self.business_area, role=self.role)
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert result
 
-        self.user.partner = partner
-        self.user.save()
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert result
+def test_user_is_not_unicef_and_has_permission_in_different_program(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    role: Role,
+):
+    partner = PartnerFactory(name="Partner")
+    user.partner = partner
+    user.save()
 
-    def test_user_is_not_unicef_and_user_has_permission_in_whole_ba(self) -> None:
-        partner = PartnerFactory(name="Partner")
-        self.user.partner = partner
-        self.user.save()
+    RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        business_area=business_area,
+        role=role,
+        program=ProgramFactory(business_area=business_area),
+    )
 
-        RoleAssignment.objects.create(user=self.user, business_area=self.business_area, role=self.role)
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert not result
 
-        arguments = {
-            "business_area": self.business_area.slug,
-            "program": self.program.slug,
-        }
-        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        assert result
+
+def test_user_is_not_unicef_and_partner_has_permission_in_program(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    role: Role,
+):
+    partner = PartnerFactory(name="Partner")
+    RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        business_area=business_area,
+        role=role,
+        program=program,
+    )
+
+    user.partner = partner
+    user.save()
+
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert result
+
+
+def test_user_is_not_unicef_and_user_has_permission_in_program(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    role: Role,
+):
+    partner = PartnerFactory(name="Partner")
+    user.partner = partner
+    user.save()
+
+    RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        business_area=business_area,
+        role=role,
+        program=program,
+    )
+
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert result
+
+
+def test_user_is_not_unicef_and_partner_has_permission_in_whole_ba(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    role: Role,
+):
+    partner = PartnerFactory(name="Partner")
+    RoleAssignmentFactory(
+        user=None,
+        partner=partner,
+        business_area=business_area,
+        role=role,
+    )
+
+    user.partner = partner
+    user.save()
+
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert result
+
+
+def test_user_is_not_unicef_and_user_has_permission_in_whole_ba(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    role: Role,
+):
+    partner = PartnerFactory(name="Partner")
+    user.partner = partner
+    user.save()
+
+    RoleAssignmentFactory(
+        user=user,
+        partner=None,
+        business_area=business_area,
+        role=role,
+    )
+
+    arguments = {
+        "business_area": business_area.slug,
+        "program": program.slug,
+    }
+    result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
+    assert result

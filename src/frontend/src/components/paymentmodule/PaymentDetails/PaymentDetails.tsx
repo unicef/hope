@@ -14,6 +14,7 @@ import { Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
+  formatFigure,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -36,7 +37,7 @@ function PaymentDetails({
   canViewHouseholdDetails,
 }: PaymentDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
@@ -71,13 +72,13 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={formatFigure(payment.entitlementQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={formatFigure(payment.deliveredQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -100,15 +101,20 @@ function PaymentDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
+              label={t('Distribution Modality')}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Related Payment Id')}
-              value={payment.sourcePayment?.unicefId}
-            />
+            <LabelizedField label={t('Original Payment Plan ID')}>
+              {payment.parent && (
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/${payment.parent.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                >
+                  {payment.parent.unicefId}
+                </BlackLink>
+              )}
+            </LabelizedField>
           </Grid>
         </Grid>
       </ContainerColumnWithBorder>
