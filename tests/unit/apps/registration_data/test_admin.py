@@ -7,19 +7,6 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 import pytest
 
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import (
-    BusinessArea,
-    Document,
-    Household,
-    Individual,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    Program,
-    RegistrationDataImport,
-)
-from hope.models.utils import MergeStatusModel
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     DocumentFactory,
@@ -37,6 +24,19 @@ from hope.apps.grievance.models import (
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
+from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.models import (
+    BusinessArea,
+    Document,
+    Household,
+    Individual,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
