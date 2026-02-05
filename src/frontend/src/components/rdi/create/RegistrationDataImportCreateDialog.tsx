@@ -156,7 +156,12 @@ export const RegistrationDataImportCreateDialog = ({
               >
                 Excel
               </MenuItem>
-              <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
+              <MenuItem
+                data-cy="kobo-menu-item"
+                key="kobo"
+                value="kobo"
+                disabled={rdiImportXlsxDisabled}
+              >
                 Kobo
               </MenuItem>
               <MenuItem
