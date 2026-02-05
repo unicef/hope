@@ -17,6 +17,7 @@ import { DocumentSearchField } from '@core/DocumentSearchField';
 import { ReactElement } from 'react';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 
 interface IndividualsFilterProps {
   filter;
@@ -110,6 +111,17 @@ export function IndividualsFilter({
             </SelectFilter>
           </Grid>
         )}
+        <Grid size={{ xs: 3 }}>
+          <RdiAutocompleteRestFilter
+            filter={filter}
+            name="rdiId"
+            value={filter.rdiId}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
+          />
+        </Grid>
         {showAdminAreaFilter && (
           <Grid size={{ xs: 3 }}>
             <AdminAreaAutocomplete
