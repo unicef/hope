@@ -6,20 +6,20 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
     PartnerFactory,
+    PeriodicFieldDataFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-    create_ukraine,
-)
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import (
     Area,
@@ -38,7 +38,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -372,7 +372,7 @@ def test_create_program_with_invalid_data_collecting_type(
     # DCT limited to another BA
     dct_invalid.deprecated = False
     dct_invalid.save()
-    ukraine = create_ukraine()
+    ukraine = BusinessAreaFactory(name="Ukraine", slug="ukraine")
     dct_invalid.limit_to.add(ukraine)
     response_for_limited = authenticated_client.post(list_url, invalid_input_data)
     assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
@@ -521,7 +521,7 @@ def test_create_program_with_duplicate_name_different_business_area(
         whole_business_area_access=True,
     )
 
-    ukraine = create_ukraine()
+    ukraine = BusinessAreaFactory(name="Ukraine", slug="ukraine")
     ProgramFactory(
         business_area=ukraine,
         name="Same Program Name",
