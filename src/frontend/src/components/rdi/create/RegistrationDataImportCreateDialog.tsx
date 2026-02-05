@@ -42,7 +42,13 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export const RegistrationDataImportCreateDialog = (): ReactElement => {
+interface RegistrationDataImportCreateDialogProps {
+  rdiImportXlsxDisabled?: boolean;
+}
+
+export const RegistrationDataImportCreateDialog = ({
+  rdiImportXlsxDisabled,
+}: RegistrationDataImportCreateDialogProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -142,10 +148,20 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
               fullWidth
               data-cy="import-type-select"
             >
-              <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
+              <MenuItem
+                data-cy="excel-menu-item"
+                key="excel"
+                value="excel"
+                disabled={rdiImportXlsxDisabled}
+              >
                 Excel
               </MenuItem>
-              <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
+              <MenuItem
+                data-cy="kobo-menu-item"
+                key="kobo"
+                value="kobo"
+                disabled={rdiImportXlsxDisabled}
+              >
                 Kobo
               </MenuItem>
               <MenuItem

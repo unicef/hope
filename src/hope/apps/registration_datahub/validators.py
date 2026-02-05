@@ -466,43 +466,24 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-
-            choice_type = self.all_fields[header]["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if isinstance(value, str):
-                    return value.strip() in choices
-                if value not in choices:
-                    str_value = str(value)
-                    return str_value in choices
-                return False
-
-            if choice_type == TYPE_SELECT_MANY:
-                if isinstance(value, str):
-                    if "," in value:
-                        selected_choices = value.split(",")
-                    elif ";" in value:
-                        selected_choices = value.split(";")
-                    else:
-                        selected_choices = value.split(" ")
-                else:
-                    selected_choices = [value]
-
-                for unstrip_choice in selected_choices:
-                    if isinstance(unstrip_choice, str):
-                        choice = unstrip_choice.strip()
-                        if choice in choices or choice.upper() in choices:
-                            return True
-                    else:
-                        choice = unstrip_choice
-                    if choice in choices:
-                        return True
-                return False
+            handlers: dict[str, Callable[[Any, set], bool]] = {
+                TYPE_SELECT_ONE: self._validate_select_one_choice,
+                TYPE_SELECT_MANY: self._validate_select_many_choice,
+            }
+            if handler := handlers.get(self.all_fields[header]["type"]):
+                return handler(value, choices)
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
+        return str(value).strip() in choices
+
+    def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
+        selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
+        return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
@@ -1318,45 +1299,58 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def standard_type_validator(self, value: str, field: str, field_type: str) -> str | None:
         try:
             value_type_name = type(value).__name__
-
-            if field_type == "INTEGER":
-                try:
-                    int(value)
-                    return None
-                except (ValueError, TypeError):
-                    return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
-            elif field_type == "STRING":
-                # everything from Kobo is string so cannot really validate it
-                # only check phone number
-                if field.startswith("phone_no"):
-                    try:
-                        phonenumbers.parse(value, None)
-                    except (phonenumbers.NumberParseException, TypeError):
-                        return f"Invalid phone number {value} for field {field}"
+            handler = self._get_standard_type_handler(field_type)
+            if handler is None:
                 return None
 
-            elif field_type == "BOOL":
-                # Important! if value == 0 or 1 it's also evaluated to True
-                # checking for int values even tho Kobo returns everything as str
-                # to no not break import if they start returning integers
-                if value in (
-                    "True",
-                    "False",
-                    True,
-                    False,
-                    "0",
-                    "1",
-                    "TRUE",
-                    "FALSE",
-                    "true",
-                    "false",
-                ):
-                    return None
-                return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
+            return handler(value, field, value_type_name)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
         return None
+
+    def _get_standard_type_handler(self, field_type: str) -> Callable[[str, str, str], str | None] | None:
+        handlers: dict[str, Callable[[str, str, str], str | None]] = {
+            "INTEGER": self._validate_integer_type,
+            "STRING": self._validate_string_type,
+            "BOOL": self._validate_bool_type,
+        }
+        return handlers.get(field_type)
+
+    def _validate_integer_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        try:
+            int(value)
+            return None
+        except (ValueError, TypeError):
+            return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
+
+    def _validate_string_type(self, value: str, field: str, value_type_name: str) -> str | None:  # noqa: ARG002
+        # Everything from Kobo is string so cannot really validate it; only check phone number.
+        if field.startswith("phone_no"):
+            try:
+                phonenumbers.parse(value, None)
+            except (phonenumbers.NumberParseException, TypeError):
+                return f"Invalid phone number {value} for field {field}"
+        return None
+
+    def _validate_bool_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        # Important! if value == 0 or 1 it's also evaluated to True
+        # checking for int values even tho Kobo returns everything as str
+        allowed_values = {
+            "True",
+            "False",
+            True,
+            False,
+            "0",
+            "1",
+            "TRUE",
+            "FALSE",
+            "true",
+            "false",
+        }
+        if value in allowed_values:
+            return None
+        return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
 
     def image_validator(self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any) -> str | None:
         try:
@@ -1431,44 +1425,45 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if not value:
                 return message
 
-            found_field: dict = self.all_fields[field]
-            custom_validate_choices_method = found_field.get("custom_validate_choices")
-            choices = found_field["choices"]
-            choice_type = found_field["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(value) is True else message
-
-                is_in_choices = value in choices
-                if is_in_choices is False:
-                    # try uppercase version
-                    uppercase_value = value.upper()
-                    is_in_choices = uppercase_value in choices
-                return None if is_in_choices else message
-
-            if choice_type == TYPE_SELECT_MANY:
-                str_value = str(value)
-                if "," in str_value:
-                    selected_choices = str_value.split(",")
-                elif ";" in str_value:
-                    selected_choices = str_value.split(";")
-                else:
-                    selected_choices = str_value.split(" ")
-
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(str_value) is True else message
-
-                for unstrip_choice in selected_choices:
-                    choice = unstrip_choice.strip()
-                    if choice not in choices and choice.upper() not in choices:
-                        return message
+            found_field: dict[str, Any] = self.all_fields[field]
+            handler = self._get_choice_handler(found_field["type"])
+            if handler is None:
                 return None
 
-            return None
+            return handler(value, found_field, message)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _get_choice_handler(self, choice_type: str) -> Callable[[str, dict[str, Any], str], str | None] | None:
+        handlers: dict[str, Callable[[str, dict[str, Any], str], str | None]] = {
+            TYPE_SELECT_ONE: self._validate_select_one_choice,
+            TYPE_SELECT_MANY: self._validate_select_many_choice,
+        }
+        return handlers.get(choice_type)
+
+    def _validate_select_one_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(value) else message
+
+        choices = found_field["choices"]
+        normalized_value = value if value in choices else value.upper()
+        return None if normalized_value in choices else message
+
+    def _validate_select_many_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        str_value = str(value)
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(str_value) else message
+
+        choices = found_field["choices"]
+        for unstrip_choice in re.split(r"[,\s;]+", value.strip()):
+            choice = unstrip_choice.strip()
+            if choice in choices or choice.upper() in choices:
+                continue
+            return message
+        return None
 
     def _get_field_type_error(
         self,
