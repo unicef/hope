@@ -108,7 +108,6 @@ def test_get_registration_data_import_detail_with_permission(
         phone_no="+48 123456789",  # valid phone number
     )
 
-
     household = HouseholdFactory(
         program=program1,
         business_area=afghanistan,
