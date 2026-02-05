@@ -338,8 +338,40 @@ def test_get_data_from_payment_snapshot_roles_match(payment_with_snapshot_and_al
     assert result == ROLE_PRIMARY
 
 
+def test_get_data_from_payment_snapshot_roles_match_explicit():
+    household_data = {
+        "primary_collector": {"id": "collector-1"},
+        "roles": [{"role": ROLE_PRIMARY, "individual": {"id": "collector-1"}}],
+    }
+    core_field = {"lookup": "role", "snapshot_field": "roles__role"}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result == ROLE_PRIMARY
+
+
 def test_get_data_from_payment_snapshot_roles_no_lookup_id():
     household_data = {"roles": [{"role": ROLE_PRIMARY, "individual": {"id": "id-1"}}]}
+    core_field = {"lookup": "role", "snapshot_field": "roles__role"}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result is None
+
+
+def test_get_data_from_payment_snapshot_roles_mismatch():
+    household_data = {
+        "primary_collector": {"id": "id-1"},
+        "roles": [{"role": ROLE_ALTERNATE, "individual": {"id": "id-2"}}],
+    }
     core_field = {"lookup": "role", "snapshot_field": "roles__role"}
     result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
         household_data,
@@ -362,6 +394,25 @@ def test_get_data_from_payment_snapshot_primary_collector_id():
     )
 
     assert result == "ind-1"
+
+
+def test_get_data_from_payment_snapshot_documents_direct():
+    household_data = {
+        "primary_collector": {
+            "documents": [
+                {"type": "registration_token", "document_number": "REG-XYZ"},
+            ]
+        }
+    }
+    core_field = {"lookup": "document_number", "snapshot_field": "documents__registration_token__document_number"}
+    result = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        household_data,
+        core_field,
+        {},
+        {},
+    )
+
+    assert result == "REG-XYZ"
 
 
 def test_get_data_from_payment_snapshot_documents_found(
