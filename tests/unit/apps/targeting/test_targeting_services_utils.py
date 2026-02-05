@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
     get_existing_unicef_ids,

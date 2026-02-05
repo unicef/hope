@@ -7,22 +7,22 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
     FlexibleAttribute,

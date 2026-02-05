@@ -7,25 +7,24 @@ import pytest
 import requests
 from requests import HTTPError
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     EntitlementCardFactory,
-    create_household,
-)
-from extras.test_utils.factories.payment import (
+    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    UserFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.payment.celery_tasks import CheckRapidProVerificationTask
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models import Area, BusinessArea, PaymentVerification, PaymentVerificationPlan
+from hope.models import PaymentVerification, PaymentVerificationPlan
 
 START_UUID = "3d946aa7-af58-4838-8dfd-553786d9bb35"
 
@@ -92,20 +91,42 @@ ORIGINAL_RAPIDPRO_RUNS_RESPONSE: List[Dict] = [
 ]
 
 
-@pytest.fixture
-def rapidpro_task_setup():
-    """Setup for RapidPro verification task tests - creates 2 records."""
-    create_afghanistan()
-    payment_record_amount = 2
+def make_dummy_response(
+    status_code: int = 200,
+    payload: Optional[dict] = None,
+    raise_http_error: bool = False,
+) -> MagicMock:
+    response = MagicMock()
+    response.status_code = status_code
+    response._payload = payload or {}
+    response._raise_http_error = raise_http_error
+    response.ok = 200 <= status_code < 400
+    response.url = "http://example.com/"
 
+    def raise_for_status() -> None:
+        if response._raise_http_error:
+            raise requests.exceptions.HTTPError("boom", response=response)  # type: ignore
+
+    response.raise_for_status = raise_for_status
+    response.json = lambda: response._payload
+    return response
+
+
+@pytest.fixture
+def business_area() -> Any:
+    return BusinessAreaFactory(name="Afghanistan")
+
+
+@pytest.fixture
+def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
     user = UserFactory()
 
-    program = ProgramFactory(business_area=BusinessArea.objects.first())
-    program.admin_areas.set(Area.objects.order_by("?")[:3])
+    program = ProgramFactory(business_area=business_area)
+    cycle = ProgramCycleFactory(program=program, title="Cycle RapidPro")
 
     payment_plan = PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
-        business_area=BusinessArea.objects.first(),
+        program_cycle=cycle,
+        business_area=business_area,
         created_by=user,
     )
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
@@ -114,25 +135,25 @@ def rapidpro_task_setup():
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
         payment_plan=payment_plan,
     )
+
     individuals = []
-    for _ in range(payment_record_amount):
-        registration_data_import = RegistrationDataImportFactory(
-            imported_by=user, business_area=BusinessArea.objects.first()
+    for index in range(2):
+        registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+        household = HouseholdFactory(
+            business_area=business_area,
+            program=program,
+            registration_data_import=registration_data_import,
         )
-        household, indivs = create_household(
-            {
-                "registration_data_import": registration_data_import,
-                "admin2": Area.objects.order_by("?").first(),
-                "program": program,
-            },
-            {"registration_data_import": registration_data_import},
-        )
-        individuals.extend(indivs)
+        head = household.head_of_household
+        head.phone_no = f"+380 637 541 34{index}"
+        head.save(update_fields=["phone_no"])
+        individuals.append(head)
 
         payment = PaymentFactory(
             parent=payment_plan,
             household=household,
             head_of_household=household.head_of_household,
+            delivered_quantity=Decimal(200),
             delivered_quantity_usd=200,
             currency="PLN",
         )
@@ -151,262 +172,235 @@ def rapidpro_task_setup():
     }
 
 
-@pytest.mark.django_db
-class TestRapidProVerificationTask:
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_filtering_by_start_id(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification_obj = verification.payment_record_verifications.first()
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_filtering_by_start_id(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification_obj = verification.payment_record_verifications.first()
 
-        response = ORIGINAL_RAPIDPRO_RUNS_RESPONSE.copy()
-        response[0] = {**response[0], "contact": {**response[0]["contact"]}}
-        response[0]["contact"]["urn"] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
+    response = ORIGINAL_RAPIDPRO_RUNS_RESPONSE.copy()
+    response[0] = {**response[0], "contact": {**response[0]["contact"]}}
+    response[0]["contact"]["urn"] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
 
-        mock = MagicMock(return_value=response)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
-            api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-            mapped_dict = api.get_mapped_flow_runs([str(uuid.uuid4())])
-            assert mapped_dict == []
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_mapping(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification_obj = verification.payment_record_verifications.first()
-
-        response = ORIGINAL_RAPIDPRO_RUNS_RESPONSE.copy()
-        response[0] = {**response[0], "contact": {**response[0]["contact"]}}
-        response[0]["contact"]["urn"] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
-
-        mock = MagicMock(return_value=response)
-        with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
-            api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-            mapped_dict = api.get_mapped_flow_runs([START_UUID])
-            assert mapped_dict == [
-                {
-                    "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
-                    "received": True,
-                    "received_amount": Decimal(200),
-                }
-            ]
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_not_received(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification = verification.payment_record_verifications.order_by("?").first()
-        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
-
-        fake_data_to_return_from_rapid_pro_api = [
-            {
-                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
-                "received": False,
-            }
-        ]
-        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
-            payment_record_verification.payment.head_of_household.phone_no
-        )
-        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch(
-            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
-            mock,
-        ):
-            task = CheckRapidProVerificationTask()
-            task.execute()
-            mock.assert_called()
-            payment_record_verification.refresh_from_db()
-            assert payment_record_verification.status == PaymentVerification.STATUS_NOT_RECEIVED
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_received_with_issues(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification = verification.payment_record_verifications.order_by("?").first()
-        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
-        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
-            payment_record_verification.payment.head_of_household.phone_no
-        )
-        fake_data_to_return_from_rapid_pro_api = [
-            {
-                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
-                "received": True,
-                "received_amount": payment_record_verification.payment.delivered_quantity - 1,
-            }
-        ]
-        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch(
-            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
-            mock,
-        ):
-            task = CheckRapidProVerificationTask()
-            task.execute()
-            mock.assert_called()
-            payment_record_verification.refresh_from_db()
-            assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-            assert (
-                payment_record_verification.received_amount
-                == payment_record_verification.payment.delivered_quantity - 1
-            )
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_received(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification = verification.payment_record_verifications.order_by("?").first()
-        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
-        fake_data_to_return_from_rapid_pro_api = [
-            {
-                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
-                "received": True,
-                "received_amount": payment_record_verification.payment.delivered_quantity,
-            }
-        ]
-        assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no), (
-            payment_record_verification.payment.head_of_household.phone_no
-        )
-        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch(
-            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
-            mock,
-        ):
-            task = CheckRapidProVerificationTask()
-            task.execute()
-            mock.assert_called()
-            payment_record_verification.refresh_from_db()
-            assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED
-            assert payment_record_verification.received_amount == payment_record_verification.payment.delivered_quantity
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_wrong_phone_number(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
-        verification = rapidpro_task_setup["verification"]
-        payment_record_verification = verification.payment_record_verifications.order_by("?").first()
-        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
-        fake_data_to_return_from_rapid_pro_api = [
-            {
-                "phone_number": "123-not-really-a-phone-number",
-                "received": True,
-                "received_amount": payment_record_verification.payment.delivered_quantity,
-            }
-        ]
-        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch(
-            "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
-            mock,
-        ):
-            task = CheckRapidProVerificationTask()
-            task.execute()
-            mock.assert_called()
-
-            payment_record_verification.refresh_from_db()
-            # verification is still pending, so it was not considered within the verification plan
-            assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
-
-    def test_recalculating_validity_on_number_change(self, rapidpro_task_setup) -> None:
-        individuals = rapidpro_task_setup["individuals"]
-        ind = individuals[0]
-
-        first_phone = "+380 637 541 345"
-        ind.phone_no = first_phone
-        ind.save()
-        assert ind.phone_no_valid
-
-        second_phone = "+380 637 541 X"
-        ind.phone_no = second_phone
-        ind.save()
-
-        assert first_phone != second_phone
-        assert not ind.phone_no_valid
-
-    @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_requests(self, mock_parent_init: Any, rapidpro_task_setup) -> None:
-        mock_parent_init.return_value = None
+    mock = MagicMock(return_value=response)
+    with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
         api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-        api.url = ""
-        api._timeout = 10
+        mapped_dict = api.get_mapped_flow_runs([str(uuid.uuid4())])
+        assert mapped_dict == []
 
-        api._client = MagicMock()
 
-        class DummyResponse:
-            def __init__(
-                self, status_code: int = 200, payload: Optional[dict] = None, raise_http_error: bool = False
-            ) -> None:
-                self.status_code = status_code
-                self._payload = payload or {}
-                self._raise_http_error = raise_http_error
-                self.ok = 200 <= status_code < 400
-                self.url = "http://example.com/"
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_mapping(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification_obj = verification.payment_record_verifications.first()
 
-            def raise_for_status(self) -> None:
-                if self._raise_http_error:
-                    e = requests.exceptions.HTTPError("boom", response=self)  # type: ignore
-                    raise e
+    response = ORIGINAL_RAPIDPRO_RUNS_RESPONSE.copy()
+    response[0] = {**response[0], "contact": {**response[0]["contact"]}}
+    response[0]["contact"]["urn"] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
 
-            def json(self) -> dict:
-                return self._payload
-
-        api._client.get = MagicMock(
-            return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
-        )
-        assert api._handle_get_request("/endpoint") == {"a": 1}
-
-        api._client.get = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
-        with pytest.raises(HTTPError):
-            api._handle_get_request("/endpoint")
-
-        api._client.post = MagicMock(
-            return_value=DummyResponse(status_code=200, payload={"a": 1}, raise_http_error=False)
-        )
-        assert api._handle_post_request("/endpoint", {"b": 2}) == {"a": 1}
-
-        api._client.post = MagicMock(return_value=DummyResponse(status_code=400, raise_http_error=True))
-        with pytest.raises(HTTPError):
-            api._handle_post_request("/endpoint", {"b": 2})
-
-    def test_parse_json_urns_error(self, rapidpro_task_setup) -> None:
-        ba = BusinessArea.objects.get(slug="afghanistan")
-        ba.rapid_pro_payment_verification_token = "TEST_TOKEN"
-        ba.rapid_pro_host = "http://rapidpro.local"
-        ba.save(update_fields=["rapid_pro_payment_verification_token", "rapid_pro_host"])
-
-        with patch.object(requests.Session, "mount", autospec=True):
-            api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
-            assert api._parse_json_urns_error(None, []) is None
-
-            e = MagicMock()
-            e.response = MagicMock()
-            e.response.status_code = 400
-            e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
-
-            assert api._parse_json_urns_error(e, ["a", "b"]) == {
-                "phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]
+    mock = MagicMock(return_value=response)
+    with patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+        mapped_dict = api.get_mapped_flow_runs([START_UUID])
+        assert mapped_dict == [
+            {
+                "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
+                "received": True,
+                "received_amount": Decimal(200),
             }
-
-            assert api._parse_json_urns_error(e, []) == {"phone_numbers": []}
-
-            e.response.json.return_value = {"error": "error"}
-            assert api._parse_json_urns_error(e, ["a", "b"]) == {"error": {"error": "error"}}
-
-            e.response.json.side_effect = AttributeError("test")
-            assert api._parse_json_urns_error(e, ["a", "b"]) is None
+        ]
 
 
-class TestPhoneNumberVerification:
-    def test_phone_numbers(self) -> None:
-        assert not is_valid_phone_number("+40 032 215 789")
-        assert is_valid_phone_number("+48 632 215 789")
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_not_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification = verification.payment_record_verifications.order_by("?").first()
+    assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
 
-        assert is_valid_phone_number("+48 123 234 345")
-        assert not is_valid_phone_number("0048 123 234 345")
+    fake_data_to_return_from_rapid_pro_api = [
+        {
+            "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
+            "received": False,
+        }
+    ]
+    assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no)
+    mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+    with patch(
+        "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+        mock,
+    ):
+        task = CheckRapidProVerificationTask()
+        task.execute()
+        mock.assert_called()
+        payment_record_verification.refresh_from_db()
+        assert payment_record_verification.status == PaymentVerification.STATUS_NOT_RECEIVED
 
-        assert not is_valid_phone_number("(201) 555-0123")
-        assert is_valid_phone_number("+1 (201) 555-0123")
 
-        assert not is_valid_phone_number("123-not-really-a-phone-number")
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_received_with_issues(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification = verification.payment_record_verifications.order_by("?").first()
+    assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
+    assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no)
+    fake_data_to_return_from_rapid_pro_api = [
+        {
+            "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
+            "received": True,
+            "received_amount": payment_record_verification.payment.delivered_quantity - 1,
+        }
+    ]
+    mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+    with patch(
+        "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+        mock,
+    ):
+        task = CheckRapidProVerificationTask()
+        task.execute()
+        mock.assert_called()
+        payment_record_verification.refresh_from_db()
+        assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        assert payment_record_verification.received_amount == payment_record_verification.payment.delivered_quantity - 1
 
-        assert not is_valid_phone_number("+38063754115")
-        assert is_valid_phone_number("+380637541150")
-        assert is_valid_phone_number("+380 637 541 345")
-        assert is_valid_phone_number("+380 637 541 XXX")  # it's ok to have A-Z in number
-        assert not is_valid_phone_number("+380 23 234 345")
+
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification = verification.payment_record_verifications.order_by("?").first()
+    assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
+    fake_data_to_return_from_rapid_pro_api = [
+        {
+            "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
+            "received": True,
+            "received_amount": payment_record_verification.payment.delivered_quantity,
+        }
+    ]
+    assert is_valid_phone_number(payment_record_verification.payment.head_of_household.phone_no)
+    mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+    with patch(
+        "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+        mock,
+    ):
+        task = CheckRapidProVerificationTask()
+        task.execute()
+        mock.assert_called()
+        payment_record_verification.refresh_from_db()
+        assert payment_record_verification.status == PaymentVerification.STATUS_RECEIVED
+        assert payment_record_verification.received_amount == payment_record_verification.payment.delivered_quantity
+
+
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_wrong_phone_number(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    verification = rapidpro_task_setup["verification"]
+    payment_record_verification = verification.payment_record_verifications.order_by("?").first()
+    assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
+    fake_data_to_return_from_rapid_pro_api = [
+        {
+            "phone_number": "123-not-really-a-phone-number",
+            "received": True,
+            "received_amount": payment_record_verification.payment.delivered_quantity,
+        }
+    ]
+    mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+    with patch(
+        "hope.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+        mock,
+    ):
+        task = CheckRapidProVerificationTask()
+        task.execute()
+        mock.assert_called()
+
+        payment_record_verification.refresh_from_db()
+        assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
+
+
+def test_recalculating_validity_on_number_change(rapidpro_task_setup: dict[str, Any]) -> None:
+    individuals = rapidpro_task_setup["individuals"]
+    ind = individuals[0]
+
+    first_phone = "+380 637 541 345"
+    ind.phone_no = first_phone
+    ind.save(update_fields=["phone_no"])
+    assert ind.phone_no_valid
+
+    second_phone = "+380 637 541 X"
+    ind.phone_no = second_phone
+    ind.save(update_fields=["phone_no"])
+
+    assert first_phone != second_phone
+    assert not ind.phone_no_valid
+
+
+@patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
+def test_requests(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+    mock_parent_init.return_value = None
+    api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+    api.url = ""
+    api._timeout = 10
+
+    api._client = MagicMock()
+
+    api._client.get = MagicMock(return_value=make_dummy_response(status_code=200, payload={"a": 1}))
+    assert api._handle_get_request("/endpoint") == {"a": 1}
+
+    api._client.get = MagicMock(return_value=make_dummy_response(status_code=400, raise_http_error=True))
+    with pytest.raises(HTTPError):
+        api._handle_get_request("/endpoint")
+
+    api._client.post = MagicMock(return_value=make_dummy_response(status_code=200, payload={"a": 1}))
+    assert api._handle_post_request("/endpoint", {"b": 2}) == {"a": 1}
+
+    api._client.post = MagicMock(return_value=make_dummy_response(status_code=400, raise_http_error=True))
+    with pytest.raises(HTTPError):
+        api._handle_post_request("/endpoint", {"b": 2})
+
+
+def test_parse_json_urns_error(business_area: Any) -> None:
+    ba = business_area
+    ba.rapid_pro_payment_verification_token = "TEST_TOKEN"
+    ba.rapid_pro_host = "http://rapidpro.local"
+    ba.save(update_fields=["rapid_pro_payment_verification_token", "rapid_pro_host"])
+
+    with patch.object(requests.Session, "mount", autospec=True):
+        api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
+        assert api._parse_json_urns_error(None, []) is None
+
+        e = MagicMock()
+        e.response = MagicMock()
+        e.response.status_code = 400
+        e.response.json.return_value = {"urns": {0: "a", 1: "b"}}
+
+        assert api._parse_json_urns_error(e, ["a", "b"]) == {
+            "phone_numbers": ["a - phone number is incorrect", "b - phone number is incorrect"]
+        }
+
+        assert api._parse_json_urns_error(e, []) == {"phone_numbers": []}
+
+        e.response.json.return_value = {"error": "error"}
+        assert api._parse_json_urns_error(e, ["a", "b"]) == {"error": {"error": "error"}}
+
+        e.response.json.side_effect = AttributeError("test")
+        assert api._parse_json_urns_error(e, ["a", "b"]) is None
+
+
+def test_phone_numbers() -> None:
+    assert not is_valid_phone_number("+40 032 215 789")
+    assert is_valid_phone_number("+48 632 215 789")
+
+    assert is_valid_phone_number("+48 123 234 345")
+    assert not is_valid_phone_number("0048 123 234 345")
+
+    assert not is_valid_phone_number("(201) 555-0123")
+    assert is_valid_phone_number("+1 (201) 555-0123")
+
+    assert not is_valid_phone_number("123-not-really-a-phone-number")
+
+    assert not is_valid_phone_number("+38063754115")
+    assert is_valid_phone_number("+380637541150")
+    assert is_valid_phone_number("+380 637 541 345")
+    assert is_valid_phone_number("+380 637 541 XXX")
+    assert not is_valid_phone_number("+380 23 234 345")

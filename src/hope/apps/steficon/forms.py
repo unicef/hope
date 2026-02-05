@@ -1,13 +1,12 @@
 import csv
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import black
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import Error
-from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
@@ -19,8 +18,6 @@ from hope.models import PaymentPlan, Rule, RuleCommit
 if TYPE_CHECKING:
     from django.contrib.contenttypes.models import ContentType
 
-    if TYPE_CHECKING:
-        from django.db.models.fields import _ChoicesCallable
 
 logger = logging.getLogger(__name__)
 
@@ -112,17 +109,16 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
 class TPModelChoiceField(forms.ModelChoiceField):
     def __init__(
         self,
-        *,
         empty_label: str = "---------",
         required: bool = True,
         widget: Any | None = None,
         label: Any | None = None,
         initial: Any | None = None,
-        help_text: str = "",
-        to_field_name: str | None = None,
-        limit_choices_to: Union[Q | dict[str, Any], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
+        help_text: str = kwargs.get("help_text", "")
+        to_field_name = kwargs.get("to_field_name")
+        limit_choices_to = kwargs.get("limit_choices_to")
         queryset = PaymentPlan.objects.all()
         super().__init__(
             queryset,

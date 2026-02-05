@@ -3,9 +3,9 @@ from typing import Dict, Tuple
 
 from django.test import TestCase
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -778,8 +778,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "message": "Issuing country for birth_certificate_no_i_c is required, "
                 "when any document data are provided",
             },
-            # TODO: fix this? (rebase issue?)
-            # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
+            {
+                "header": "preferred_language_i_c",
+                "message": "Invalid choice test for field preferred_language_i_c",
+            },
             {
                 "header": "role_i_c",
                 "message": "Only one person can be a primary collector",

@@ -172,7 +172,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -351,6 +351,28 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
+    def list_of_integer_validator(self, values: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+        if not self.required_validator(values, header, *args, **kwargs):
+            return False
+        if values is None:
+            return True
+        # int like 23
+        if isinstance(values, int) and not isinstance(values, bool):
+            return True
+        # like '2;34;12'
+        if isinstance(values, str):
+            try:
+                # check if we can convert all strings into integer
+                [int(x.strip()) for x in values.split(";") if x.strip()]
+                return True
+            except (ValueError, TypeError):
+                return False
+            except Exception as e:  # pragma: no cover
+                logger.warning(e)
+                raise
+        else:
+            return False
+
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
@@ -432,7 +454,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -513,7 +535,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -533,7 +555,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "PHONE_NUMBER": self.phone_validator,
                 "GEOPOINT": self.geolocation_validator,
                 "IMAGE": self.image_validator,
-                "LIST_OF_IDS": self.integer_validator,
+                "LIST_OF_IDS": self.list_of_integer_validator,
             }
 
             invalid_rows = []
@@ -1095,7 +1117,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
-            pr_ids = [int(i) for i in primary_collector_ids if i is not None]
+            # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
+            pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
+            # convert [['1', '2'], ['3']] => [1, 2, 3]
+            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
+
             for index_id, relationship, pr_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
@@ -1332,7 +1358,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # skip validation if skip_validate_pictures=True
                 return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
-            file_extension = value.split(".")[-1]
+            file_extension = value.rsplit(".", maxsplit=1)[-1]
 
             if file_extension.lower() not in allowed_extensions:
                 return f"Specified image {value} for field {field} is not a valid image file"
@@ -1509,7 +1535,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(
+    def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
         business_area: BusinessArea,

@@ -10,18 +10,18 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.factories.account import (
+from extras.test_utils.old_factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
@@ -29,8 +29,9 @@ from extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from hope.apps.grievance.api.mixins import GrievanceMutationMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
@@ -673,3 +674,19 @@ class TestGrievanceUtils(TestCase):
         result = handle_photo(file, photoraw=None)
         assert result is not None
         assert result.endswith(".jpg")
+
+    def test_set_status_based_on_assigned_to(self):
+        mixin = GrievanceMutationMixin()
+        user = UserFactory()
+        BusinessAreaFactory()
+        grievance_ticket_1 = GrievanceTicketFactory(
+            created_by=user, status=GrievanceTicket.STATUS_NEW, assigned_to=None
+        )
+        grievance_ticket_2 = GrievanceTicketFactory(
+            created_by=user, status=GrievanceTicket.STATUS_ON_HOLD, assigned_to=user
+        )
+        mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_1, messages=[])
+        mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_2, messages=[])
+
+        assert grievance_ticket_1.status == GrievanceTicket.STATUS_ASSIGNED
+        assert grievance_ticket_2.status == GrievanceTicket.STATUS_IN_PROGRESS

@@ -1,3 +1,5 @@
+"""Tests for program finish API endpoint."""
+
 import datetime
 from typing import Any, Callable
 
@@ -5,187 +7,275 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan, Program, ProgramCycle
+from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
 
-class TestProgramFinish:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="Test Partner")
-        self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
+@pytest.fixture
+def afghanistan(db: Any) -> BusinessArea:
+    return create_afghanistan()
 
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="Test Program For Finish",
-            start_date=datetime.date(2031, 1, 1),
-            end_date=datetime.date(2033, 12, 31),
-        )
 
-        self.finish_url = reverse(
-            "api:programs:programs-finish",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "slug": self.program.slug,
-            },
-        )
+@pytest.fixture
+def partner(db: Any) -> Partner:
+    return PartnerFactory(name="Test Partner")
 
-        # There cannot be any active cycles for the program to finish
-        for cycle in self.program.cycles.filter(status=ProgramCycle.ACTIVE):
-            cycle.status = ProgramCycle.FINISHED
-            cycle.save()
 
-    @pytest.mark.parametrize(
-        ("permissions", "expected_status"),
-        [
-            ([Permissions.PROGRAMME_FINISH], status.HTTP_200_OK),
-            ([], status.HTTP_403_FORBIDDEN),
-            ([Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], status.HTTP_403_FORBIDDEN),
-        ],
+@pytest.fixture
+def user(partner: Partner) -> User:
+    return UserFactory(partner=partner)
+
+
+@pytest.fixture
+def program(afghanistan: BusinessArea) -> Program:
+    program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="Test Program For Finish",
+        start_date=datetime.date(2031, 1, 1),
+        end_date=datetime.date(2033, 12, 31),
     )
-    def test_finish_program_permissions(
-        self,
-        permissions: list,
-        expected_status: int,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
+    # There cannot be any active cycles for the program to finish
+    for cycle in program.cycles.filter(status=ProgramCycle.ACTIVE):
+        cycle.status = ProgramCycle.FINISHED
+        cycle.save()
+    return program
 
-        assert self.program.status == Program.ACTIVE
-        response = self.client.post(self.finish_url)
-        assert response.status_code == expected_status
 
-        self.program.refresh_from_db()
-        if expected_status == status.HTTP_200_OK:
-            assert self.program.status == Program.FINISHED
-            assert response.json() == {"message": "Program Finished."}
-        else:
-            assert self.program.status == Program.ACTIVE  # Status should not change if permission denied
+@pytest.fixture
+def finish_url(afghanistan: BusinessArea, program: Program) -> str:
+    return reverse(
+        "api:programs:programs-finish",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "slug": program.slug,
+        },
+    )
 
-    def test_finish_program_already_finished(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
 
-        self.program.status = Program.FINISHED
-        self.program.save()
+@pytest.fixture
+def authenticated_client(api_client: Callable, user: User) -> Any:
+    return api_client(user)
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Only active Program can be finished." in response.json()
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.FINISHED
+def test_finish_program_with_permission(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
 
-    def test_finish_program_invalid_status_draft(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
+    assert program.status == Program.ACTIVE
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_200_OK
 
-        self.program.status = Program.DRAFT
-        self.program.save()
+    program.refresh_from_db()
+    assert program.status == Program.FINISHED
+    assert response.json() == {"message": "Program Finished."}
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Only active Program can be finished." in response.json()
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.DRAFT
+@pytest.mark.parametrize(
+    "permissions",
+    [
+        [],
+        [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+    ],
+)
+def test_finish_program_without_permission(
+    permissions: list,
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, permissions, afghanistan, whole_business_area_access=True)
 
-    def test_finish_program_without_end_date(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
+    assert program.status == Program.ACTIVE
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
-        self.program.end_date = None
-        self.program.save()
+    program.refresh_from_db()
+    assert program.status == Program.ACTIVE
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Cannot finish programme without end date." in response.json()
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.ACTIVE
+def test_finish_program_already_finished(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
 
-    def test_finish_program_with_active_cycles(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
+    program.status = Program.FINISHED
+    program.save()
 
-        ProgramCycleFactory(program=self.program, status=ProgramCycle.ACTIVE)
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Only active Program can be finished." in response.json()
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Cannot finish Program with active cycles." in response.json()
+    program.refresh_from_db()
+    assert program.status == Program.FINISHED
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.ACTIVE
 
-    def test_finish_program_with_unreconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
+def test_finish_program_invalid_status_draft(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
 
-        PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.IN_REVIEW,
-        )
+    program.status = Program.DRAFT
+    program.save()
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "All Payment Plans and Follow-Up Payment Plans have to be Reconciled." in response.json()
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Only active Program can be finished." in response.json()
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.ACTIVE
+    program.refresh_from_db()
+    assert program.status == Program.DRAFT
 
-    def test_finish_program_with_reconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.PROGRAMME_FINISH],
-            self.afghanistan,
-            whole_business_area_access=True,
-        )
 
-        PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.ACCEPTED,
-        )
-        PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.FINISHED,
-        )
-        PaymentPlanFactory(
-            program_cycle=self.program.cycles.first(),
-            status=PaymentPlan.Status.TP_LOCKED,
-        )
+def test_finish_program_without_end_date(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
 
-        response = self.client.post(self.finish_url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {"message": "Program Finished."}
+    program.end_date = None
+    program.save()
 
-        self.program.refresh_from_db()
-        assert self.program.status == Program.FINISHED
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Cannot finish programme without end date." in response.json()
+
+    program.refresh_from_db()
+    assert program.status == Program.ACTIVE
+
+
+def test_finish_program_with_active_cycles(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    ProgramCycleFactory(program=program, status=ProgramCycle.ACTIVE)
+
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Cannot finish Program with active cycles." in response.json()
+
+    program.refresh_from_db()
+    assert program.status == Program.ACTIVE
+
+
+def test_finish_program_with_unreconciled_payment_plans(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        status=PaymentPlan.Status.IN_REVIEW,
+    )
+
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "All Payment Plans and Follow-Up Payment Plans have to be Reconciled." in response.json()
+
+    program.refresh_from_db()
+    assert program.status == Program.ACTIVE
+
+
+def test_finish_program_with_reconciled_payment_plans(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    finish_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_FINISH],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        status=PaymentPlan.Status.FINISHED,
+    )
+    PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        status=PaymentPlan.Status.TP_LOCKED,
+    )
+
+    response = authenticated_client.post(finish_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": "Program Finished."}
+
+    program.refresh_from_db()
+    assert program.status == Program.FINISHED

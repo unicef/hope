@@ -13,28 +13,30 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_with_individual_with_collectors,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.steficon import RuleCommitFactory, RuleFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
+from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
+from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.household.const import (
     HEARING,
     HOST,
@@ -497,12 +499,8 @@ class TestSmokeTargeting:
         assert "OPEN" in page_targeting_details.get_target_population_status().text
         assert "CREATED BY" in page_targeting_details.get_labelized_field_container_created_by().text
         page_targeting_details.get_label_created_by()
-        # assert "PROGRAMME POPULATION CLOSE DATE" in page_targeting_details.getLabelizedFieldContainerCloseDate().text
         assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
         assert "Test Programm" in page_targeting_details.get_label_programme().text
-        # assert "SEND BY" in page_targeting_details.getLabelizedFieldContainerSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendBy().text
-        # assert "-" in page_targeting_details.getLabelSendDate().text
         assert "5" in page_targeting_details.get_label_female_children().text
         assert "3" in page_targeting_details.get_label_male_children().text
         assert "2" in page_targeting_details.get_label_female_adults().text
@@ -956,7 +954,6 @@ class TestCreateTargeting:
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
         page_targeting_create.get_add_people_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
-        # page_targeting_create.select_listbox_element("Test String Attribute SW")  # not works
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys("Test String Attribute")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
@@ -1088,7 +1085,6 @@ class TestTargeting:
     ) -> None:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
-        # filters.selectFiltersSatus("TP_OPEN")
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_label_status()
         page_targeting_details.get_lock_button().click()
@@ -1144,20 +1140,14 @@ class TestTargeting:
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
         page_targeting_create.get_button_household_rule().send_keys(Keys.SPACE)
-        # page_targeting_create.getButtonHouseholdRule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
         page_targeting_create.select_listbox_element("What is the Household size?")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys("What is the Household size")
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ARROW_DOWN)
-        # page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_details.get_household_size_from().send_keys("0")
         page_targeting_details.get_household_size_to().send_keys("9")
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
-        # page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_details.clear_input(page_targeting_details.get_input_name())
         page_targeting_details.get_input_name().send_keys("New Test Data")
         page_targeting_details.get_input_name().send_keys(Keys.ENTER)
-        # page_targeting_create.get_button_save().click()
         page_targeting_details.get_button_edit()
         assert page_targeting_details.wait_for_text_title_page("New Test Data")
         assert "9" in page_targeting_details.get_criteria_container().text
@@ -1327,11 +1317,10 @@ class TestTargeting:
         page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
         page_targeting_create.click_button_target_population_create()
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list()
-        # ToDo: Add after merge to develop
-        # assert (
-        #     test_data["text"]
-        #     in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
-        # )
+        assert (
+            test_data["text"]
+            in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
+        )
         page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
             By.CSS_SELECTOR, page_targeting_details.icon_selected
         )

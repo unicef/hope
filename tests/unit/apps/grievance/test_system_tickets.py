@@ -1,11 +1,11 @@
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.system_ticket_service import (

@@ -543,7 +543,6 @@ def payment_plan_exclude_beneficiaries(
         is_social_worker_program = payment_plan.program_cycle.program.is_social_worker_program
         set_sentry_business_area_tag(payment_plan.business_area.name)
         pp_payment_items = payment_plan.payment_items.select_related("household")
-        payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg, info_msg = [], []
         filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
 
@@ -551,7 +550,7 @@ def payment_plan_exclude_beneficiaries(
             for unicef_id in excluding_hh_or_ind_ids:
                 if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
                     # add only notice for user and ignore this id
-                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}.")
+                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this Payment Plan.")
                     # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_or_ind_ids.remove(unicef_id)
 
@@ -560,7 +559,7 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.status == PaymentPlan.Status.LOCKED
                 and len(excluding_hh_or_ind_ids) >= pp_payment_items.count()
             ):
-                error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
+                error_msg.append("Households cannot be entirely excluded from the Payment Plan.")
 
             payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
                 **{f"{filter_key}__in": excluding_hh_or_ind_ids}
@@ -571,7 +570,7 @@ def payment_plan_exclude_beneficiaries(
             error_msg += [
                 (
                     f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) "
-                    f"with other {payment_plan_title}(s)."
+                    f"with other Payment Plan(s)."
                 )
                 for unicef_id in undo_exclude_hh_ids
                 if (
@@ -1036,7 +1035,7 @@ def periodic_send_payment_plan_reconciliation_overdue_emails(self: Any) -> None:
     try:
         PaymentPlanService.send_reconciliation_overdue_emails()
 
-    except Exception as e:  # pragma no cover
+    except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
 

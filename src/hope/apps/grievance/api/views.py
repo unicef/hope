@@ -9,9 +9,12 @@ from django.db.models import (
     CharField,
     Count,
     DateField,
+    Exists,
     F,
+    OuterRef,
     Q,
     QuerySet,
+    Subquery,
     Value,
     When,
 )
@@ -111,7 +114,15 @@ from hope.apps.grievance.utils import (
 from hope.apps.grievance.validators import DataChangeValidator
 from hope.apps.household.const import HEAD
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import FlexibleAttribute, Household, IndividualRoleInHousehold, log_create
+from hope.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+    Program,
+    log_create,
+)
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
@@ -308,6 +319,17 @@ class GrievanceTicketViewSet(
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related("programs", "programs__sanction_lists", *to_prefetch)
             .annotate(
+                has_social_worker_program_annotated=Exists(
+                    Program.objects.filter(
+                        grievance_tickets=OuterRef("pk"),
+                        data_collecting_type__type=DataCollectingType.Type.SOCIAL,
+                    )
+                ),
+                fallback_individual_unicef_id_annotated=Subquery(
+                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
+                        :1
+                    ]
+                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -315,7 +337,7 @@ class GrievanceTicketViewSet(
                     ),
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
-                )
+                ),
             )
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
@@ -504,6 +526,17 @@ class GrievanceTicketGlobalViewSet(
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related("programs", *to_prefetch)
             .annotate(
+                has_social_worker_program_annotated=Exists(
+                    Program.objects.filter(
+                        grievance_tickets=OuterRef("pk"),
+                        data_collecting_type__type=DataCollectingType.Type.SOCIAL,
+                    )
+                ),
+                fallback_individual_unicef_id_annotated=Subquery(
+                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
+                        :1
+                    ]
+                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -511,7 +544,7 @@ class GrievanceTicketGlobalViewSet(
                     ),
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
-                )
+                ),
             )
             .annotate(total_days=F("total__day"))
             .distinct()
@@ -610,9 +643,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.created_by == user,
             Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
             grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
+            owner_permission=Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            business_area=self.business_area,
+            program=grievance_ticket.programs.first(),
         ):
             update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
@@ -622,8 +655,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
@@ -723,8 +756,8 @@ class GrievanceTicketGlobalViewSet(
             "business_area",
             user,
             grievance_ticket.programs.all(),
-            old_grievance_ticket,
-            grievance_ticket,
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
         )
 
         GrievanceNotification.send_all_notifications(notifications)

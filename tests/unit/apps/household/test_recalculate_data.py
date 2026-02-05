@@ -5,10 +5,10 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import recalculate_population_fields_task
 from hope.apps.household.const import (
     AUNT_UNCLE,
@@ -69,7 +69,6 @@ class TestRecalculateData(TestCase):
         individuals_data = [
             {
                 "registration_data_import": registration_data_import,
-                # "age": 39,
                 "relationship": COUSIN,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1981-08-08", "%Y-%m-%d").date(),
@@ -100,7 +99,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 5,
                 "relationship": BROTHER_SISTER,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2015-07-29", "%Y-%m-%d").date(),
@@ -116,7 +114,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 11,
                 "relationship": AUNT_UNCLE,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2009-07-29", "%Y-%m-%d").date(),
@@ -299,7 +296,6 @@ class TestRecalculateData(TestCase):
         individuals_data = [
             {
                 "registration_data_import": registration_data_import,
-                # "age": 42,
                 "relationship": COUSIN,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1981-01-01", "%Y-%m-%d").date(),
@@ -309,7 +305,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 30,
                 "relationship": GRANDDAUGHTER_GRANDSON,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("1993-01-01", "%Y-%m-%d").date(),
@@ -319,7 +314,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 1,
                 "relationship": HEAD,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2022-01-01", "%Y-%m-%d").date(),
@@ -343,7 +337,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 14,
                 "relationship": AUNT_UNCLE,
                 "sex": FEMALE,
                 "birth_date": datetime.datetime.strptime("2009-01-01", "%Y-%m-%d").date(),
@@ -353,7 +346,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 3,
                 "relationship": NON_BENEFICIARY,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("2020-01-01", "%Y-%m-%d").date(),
@@ -363,7 +355,6 @@ class TestRecalculateData(TestCase):
             },
             {
                 "registration_data_import": registration_data_import,
-                # "age": 68,
                 "relationship": COUSIN,
                 "sex": MALE,
                 "birth_date": datetime.datetime.strptime("1955-01-01", "%Y-%m-%d").date(),

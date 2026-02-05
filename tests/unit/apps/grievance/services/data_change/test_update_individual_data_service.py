@@ -6,24 +6,24 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     AccountFactory,
     FinancialInstitutionFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
@@ -528,3 +528,20 @@ class TestUpdateIndividualDataService(TestCase):
         assert hh.admin3 is None
         assert hh.admin1 is not None
         assert hh.admin2.parent == hh.admin1
+
+    def test_update_phone_no_data(self) -> None:
+        self.ticket.individual_data_update_ticket_details.individual_data = {
+            "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
+            "phone_no_alternative": {
+                "approve_status": True,
+                "previous_value": "+485656561223",
+                "value": "+485544334455",
+            },
+        }
+        self.ticket.individual_data_update_ticket_details.save()
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        service.close(self.user)
+
+        self.individual.refresh_from_db()
+        assert self.individual.phone_no == "+485544332211"
+        assert self.individual.phone_no_alternative == "+485544334455"

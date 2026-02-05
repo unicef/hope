@@ -221,12 +221,16 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
         html_body: str | None = None,
         text_body: str | None = None,
         mailjet_template_id: int | None = None,
-        body_variables: dict[str, Any] | None = None,
-        from_email: str | None = None,
-        from_email_display: str | None = None,
-        ccs: list[str] | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Send email to this user via Mailjet."""
+        """Send email to this user via Mailjet.
+
+        kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
+        """
+        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        from_email: str | None = kwargs.get("from_email")
+        from_email_display: str | None = kwargs.get("from_email_display")
+        ccs: list[str] | None = kwargs.get("ccs")
         email = MailjetClient(
             recipients=[self.email],
             subject=subject,
@@ -245,9 +249,6 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
-            ("can_create_kobo_user", "Can create users in Kobo"),
-            ("can_import_from_kobo", "Can import and sync users from Kobo"),
-            ("can_upload_to_kobo", "Can upload CSV file to Kobo"),
             ("can_debug", "Can access debug information"),
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),

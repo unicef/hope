@@ -4,7 +4,7 @@ requires = [ "setuptools", "wheel" ]
 
 [project]
 name = "hope"
-version = "4.7.0"
+version = "4.8.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
@@ -23,7 +23,7 @@ dependencies = [
   "celery[redis]>=5.2.7,<6",
   "coreapi>=2.3.3,<3",
   "defusedxml>=0.7,<1",
-  "django>=5.2,<5.2.9",
+  "django>=5.2,<6",
   "django-admin-cursor-paginator>=0.1.3,<1",
   "django-admin-extra-buttons>=1.5.4,<3",
   "django-admin-sync>=0.7,<1",

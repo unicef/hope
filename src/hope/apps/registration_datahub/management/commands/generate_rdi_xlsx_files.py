@@ -8,6 +8,8 @@ from django.core.management import BaseCommand
 from django.db import transaction
 from faker import Faker
 import openpyxl
+from openpyxl.worksheet._write_only import WriteOnlyWorksheet
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.models import Area, AreaType, Country
 
@@ -192,16 +194,7 @@ def generate_rdi_xlsx_files(*args: Any, **options: Any) -> None:
         households.cell(row=1, column=index + 1).value = header
         households.cell(row=2, column=index + 1).value = "description"
     for count in range(amount):
-        for index, (key, (_, value)) in enumerate(get_household_header_mapping().items()):
-            if value is None:
-                continue
-            if key == "G":
-                to_write = seed  # address is seed (for targeting filter by address)
-            else:
-                to_write = value() if callable(value) else value
-            households.cell(row=3 + count, column=index + 1).value = to_write
-            if key == "A":
-                household_ids.append(to_write)
+        get_hh_ids(count, household_ids, households, seed)
 
     individuals = wb.create_sheet("Individuals")
     for index, (_, (header, _)) in enumerate(get_individual_header_mapping().items()):
@@ -220,6 +213,19 @@ def generate_rdi_xlsx_files(*args: Any, **options: Any) -> None:
             individuals.cell(row=3 + count, column=index + 1).value = to_write
 
     wb.save(filepath)
+
+
+def get_hh_ids(count: int, household_ids: list[Any], households: WriteOnlyWorksheet | Worksheet, seed: Any | None):
+    for index, (key, (_, value)) in enumerate(get_household_header_mapping().items()):
+        if value is None:
+            continue
+        if key == "G":
+            to_write = seed  # address is seed (for targeting filter by address)
+        else:
+            to_write = value() if callable(value) else value
+        households.cell(row=3 + count, column=index + 1).value = to_write
+        if key == "A":
+            household_ids.append(to_write)
 
 
 class Command(BaseCommand):

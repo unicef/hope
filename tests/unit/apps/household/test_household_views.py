@@ -10,36 +10,36 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.accountability import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.accountability import (
     CommunicationMessageFactory,
     SurveyFactory,
 )
-from extras.test_utils.factories.core import create_afghanistan, create_ukraine
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string

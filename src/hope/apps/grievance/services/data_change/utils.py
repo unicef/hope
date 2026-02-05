@@ -355,7 +355,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
                     "country": country,
                     "number": document_number,
                     "photo": default_storage.url(document_photo) if document_photo else None,
-                    "photoraw": document_photo if document_photo else None,
+                    "photoraw": document_photo or None,
                 },
                 "previous_value": {
                     "id": document_id,

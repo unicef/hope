@@ -587,12 +587,23 @@ export function formatCurrency(
   amount: number,
   onlyNumberValue = false,
 ): string {
-  const amountCleared = amount || 0;
-  return `${amountCleared.toLocaleString('en-US', {
-    currency: 'USD',
+  // If amount is null or undefined, return '-'
+  if (amount === null || amount === undefined) {
+    return '-';
+  }
+
+  // Use formatFigure for consistent formatting with 2 decimal places
+  const formatted = formatFigure(amount, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}${onlyNumberValue ? '' : ' USD'}`;
+  });
+
+  // If formatFigure returns '-' (for NaN or invalid values), return it as-is
+  if (formatted === '-') {
+    return '-';
+  }
+
+  return `${formatted}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
@@ -603,17 +614,31 @@ export function formatCurrencyWithSymbol(
   if (amount === null || amount === undefined) {
     return '-';
   }
-  const amountCleared = amount || 0;
-  if (currency === 'USDC') return `${amountCleared} ${currency}`;
+  // Handle 0 as a valid value
+  const amountCleared = amount === 0 ? 0 : amount || 0;
+
+  // Convert to number for processing
+  const numValue =
+    typeof amountCleared === 'string'
+      ? parseFloat(amountCleared)
+      : amountCleared;
+
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  if (currency === 'USDC') return `${formatFigure(numValue)} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(Number(amountCleared), true);
+  if (!currency) return formatCurrency(numValue, true);
+
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(Number(amountCleared));
+  }).format(numValue);
 }
 
 export function countPercentage(
@@ -637,6 +662,36 @@ export function formatThousands(value: string): string {
     return `${value.toString().slice(0, -3)}k`;
   }
   return value;
+}
+export function formatFigure(
+  value: number | string | null | undefined,
+  options?: {
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+  },
+): string {
+  // If value is null or undefined just show '-'
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
+    return '-';
+  }
+
+  const opts = {
+    minimumFractionDigits: options?.minimumFractionDigits ?? 0,
+    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
+  };
+
+  // Use Intl.NumberFormat to format number with proper punctuation (thousands separator and decimal point)
+  return new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: opts.minimumFractionDigits,
+    maximumFractionDigits: opts.maximumFractionDigits,
+  }).format(numValue);
 }
 
 export function paymentPlanStatusMapping(status): string {

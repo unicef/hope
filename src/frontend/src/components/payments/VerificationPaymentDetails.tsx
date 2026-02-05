@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
+  formatFigure,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
@@ -56,7 +57,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent.unicefId}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
         </Grid>
@@ -98,13 +99,13 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={formatFigure(payment.entitlementQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={formatFigure(payment.deliveredQuantity)}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>

@@ -6,13 +6,13 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import BusinessAreaFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,

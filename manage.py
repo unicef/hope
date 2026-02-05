@@ -15,15 +15,12 @@ def runserver_with_frontend(runserver_args: list[str]) -> None:
     processes: list[subprocess.Popen] = []
 
     try:
-        nvm_bin = os.environ.get("NVM_BIN")
-        node = str(Path(nvm_bin) / "node") if nvm_bin else "node"
+        bun_bin = shutil.which("bun")
+        if not bun_bin:
+            sys.exit("❌  Could not find 'bun' in PATH. Please install bun or add it to PATH.")
 
-        yarn_js = shutil.which("yarn")
-        if not yarn_js:
-            sys.exit("❌  Could not find 'yarn' in PATH. Please install yarn or add it to PATH.")
-
-        # frontend: yarn build-and-watch
-        processes.append(start(f"{node} {yarn_js} build-and-watch", cwd="src/frontend"))
+        # frontend: bun run build-and-watch
+        processes.append(start(f"{bun_bin} run build-and-watch", cwd="src/frontend"))
 
         # backend: call manage.py runserver with --classic to avoid recursion
         backend_cmd = f"{sys.executable} {Path(sys.argv[0])} runserver"
@@ -86,7 +83,7 @@ def main() -> None:
             execute_from_command_line(new_argv)
             return
 
-        # default: runserver + yarn build-and-watch
+        # default: runserver + bun run build-and-watch
         runserver_with_frontend(runserver_args)
         return
 

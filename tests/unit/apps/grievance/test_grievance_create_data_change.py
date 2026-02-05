@@ -1,22 +1,31 @@
 from datetime import date
 from typing import Any
 
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+)
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
 )
-from extras.test_utils.factories.payment import AccountFactory, FinancialInstitutionFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.payment import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+)
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
@@ -29,7 +38,14 @@ from hope.apps.household.const import (
     UNHCR,
     WIDOWED,
 )
-from hope.models import AccountType, BusinessArea, DocumentType, Partner, Program, country as geo_models
+from hope.models import (
+    AccountType,
+    BusinessArea,
+    DocumentType,
+    Partner,
+    Program,
+    country as geo_models,
+)
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -40,8 +56,20 @@ pytestmark = [
 class TestGrievanceCreateDataChangeAction:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        CountryFactory(
+            name="Afghanistan",
+            short_name="Afghanistan",
+            iso_code2="AF",
+            iso_code3="AFG",
+            iso_num="0004",
+        )
+        CountryFactory(
+            name="Poland",
+            short_name="Poland",
+            iso_code2="PL",
+            iso_code3="POL",
+            iso_num="0616",
+        )
         call_command("generatedocumenttypes")
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="TestPartner")
@@ -183,127 +211,98 @@ class TestGrievanceCreateDataChangeAction:
             kwargs={"business_area_slug": self.afghanistan.slug},
         )
 
+    def load_test_image(self):
+        file_path = f"{settings.TESTS_ROOT}/apps/core/test_files/erd arrows.jpg"
+        with open(file_path, "rb") as f:
+            return SimpleUploadedFile(
+                "erd arrows.jpg",
+                f.read(),
+                content_type="image/jpeg",
+            )
+
     def test_grievance_create_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-        input_data = {
-            "description": "Test",
-            "assigned_to": str(self.user.id),
-            "issue_type": 16,
-            "category": 2,
-            "consent": True,
-            "language": "PL",
-            "extras": {
-                "issue_type": {
-                    "add_individual_issue_type_extras": {
-                        "household": str(self.household_one.id),
-                        "individual_data": {
-                            "given_name": "Test",
-                            "full_name": "Test Test",
-                            "family_name": "Romaniak",
-                            "sex": "MALE",
-                            "birth_date": date(year=1980, month=2, day=1).isoformat(),
-                            "marital_status": SINGLE,
-                            "estimated_birth_date": False,
-                            "relationship": RELATIONSHIP_UNKNOWN,
-                            "role": None,
-                            "documents": [
-                                {
-                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-                                    "country": "POL",
-                                    "number": "123-123-UX-321",
-                                    "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
-                                }
-                            ],
-                            "identities": [
-                                {
-                                    "partner": UNHCR,
-                                    "country": "POL",
-                                    "number": "2222",
-                                }
-                            ],
-                            "payment_channels": [
-                                {
-                                    "type": "BANK_TRANSFER",
-                                    "bank_name": "privatbank",
-                                    "bank_account_number": 2356789789789789,
-                                    "account_holder_name": "Holder Name 132",
-                                    "bank_branch_name": "newName 123",
-                                },
-                            ],
-                        },
-                    }
-                }
+        extra_path = "extras.issue_type.add_individual_issue_type_extras."
+        response = self.api_client.post(
+            self.list_url,
+            {
+                "description": "Test",
+                "assigned_to": str(self.user.id),
+                "issue_type": 16,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                f"{extra_path}household": str(self.household_one.id),
+                f"{extra_path}individual_data.given_name": "Test",
+                f"{extra_path}individual_data.full_name": "Test Test",
+                f"{extra_path}individual_data.family_name": "Romaniak",
+                f"{extra_path}individual_data.sex": "MALE",
+                f"{extra_path}individual_data.birth_date": "1980-02-01",
+                f"{extra_path}individual_data.marital_status": SINGLE,
+                f"{extra_path}individual_data.estimated_birth_date": False,
+                f"{extra_path}individual_data.relationship": RELATIONSHIP_UNKNOWN,
+                f"{extra_path}individual_data.documents[0].key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+                    IDENTIFICATION_TYPE_NATIONAL_ID
+                ],
+                f"{extra_path}individual_data.documents[0].country": "POL",
+                f"{extra_path}individual_data.documents[0].number": "123-123-UX-321",
+                f"{extra_path}individual_data.documents[0].photo": self.load_test_image(),
             },
-        }
-        response = self.api_client.post(self.list_url, input_data, format="json")
+            format="multipart",
+        )
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]
+        assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photo"] is not None
+        assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photoraw"] is not None
 
-    # @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-        input_data = {
+        extra_path = "extras.issue_type.individual_data_update_issue_type_extras."
+        data = {
             "description": "Test",
             "assigned_to": str(self.user.id),
             "issue_type": 14,
             "category": 2,
             "consent": True,
             "language": "PL",
-            "extras": {
-                "issue_type": {
-                    "individual_data_update_issue_type_extras": {
-                        "individual": str(self.individuals[0].id),
-                        "individual_data": {
-                            "given_name": "Test",
-                            "full_name": "Test Test",
-                            "sex": "MALE",
-                            "birth_date": date(year=1980, month=2, day=1).isoformat(),
-                            "marital_status": SINGLE,
-                            "preferred_language": "pl-pl",
-                            "documents": [
-                                {
-                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-                                    "country": "POL",
-                                    "number": "321-321-XU-987",
-                                    "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
-                                }
-                            ],
-                            "documents_to_edit": [
-                                {
-                                    "id": str(self.national_id.id),
-                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-                                    "country": "POL",
-                                    "number": "321-321-XU-123",
-                                    "new_photo": None,
-                                    # "photo": SimpleUploadedFile(name="test.jpg", content=b""),
-                                }
-                            ],
-                            "identities": [
-                                {
-                                    "partner": UNHCR,
-                                    "country": "POL",
-                                    "number": "2222",
-                                }
-                            ],
-                            "identities_to_edit": [
-                                {
-                                    "id": str(self.identity.id),
-                                    "partner": UNHCR,
-                                    "country": "POL",
-                                    "number": "3333",
-                                }
-                            ],
-                            "disability": "disabled",
-                        },
-                    }
-                }
-            },
+            f"{extra_path}individual": str(self.individuals[0].id),
+            f"{extra_path}individual_data.given_name": "Test",
+            f"{extra_path}individual_data.full_name": "Test Test",
+            f"{extra_path}individual_data.sex": "MALE",
+            f"{extra_path}individual_data.birth_date": date(year=1980, month=2, day=1).isoformat(),
+            f"{extra_path}individual_data.marital_status": SINGLE,
+            f"{extra_path}individual_data.preferred_language": "pl-pl",
+            f"{extra_path}individual_data.documents[0].key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+                IDENTIFICATION_TYPE_NATIONAL_PASSPORT
+            ],
+            f"{extra_path}individual_data.documents[0].country": "POL",
+            f"{extra_path}individual_data.documents[0].number": "321-321-XU-987",
+            f"{extra_path}individual_data.documents[0].photo": self.load_test_image(),
+            f"{extra_path}individual_data.documents_to_edit[0].id": str(self.national_id.id),
+            f"{extra_path}individual_data.documents_to_edit[0].key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+                IDENTIFICATION_TYPE_NATIONAL_ID
+            ],
+            f"{extra_path}individual_data.documents_to_edit[0].country": "POL",
+            f"{extra_path}individual_data.documents_to_edit[0].number": "321-321-XU-123",
+            f"{extra_path}individual_data.documents_to_edit[0].new_photo": self.load_test_image(),
+            f"{extra_path}individual_data.identities[0].partner": UNHCR,
+            f"{extra_path}individual_data.identities[0].country": "POL",
+            f"{extra_path}individual_data.identities[0].number": "2222",
+            f"{extra_path}individual_data.identities_to_edit[0].id": str(self.identity.id),
+            f"{extra_path}individual_data.identities_to_edit[0].partner": UNHCR,
+            f"{extra_path}individual_data.identities_to_edit[0].country": "POL",
+            f"{extra_path}individual_data.identities_to_edit[0].number": "3333",
+            f"{extra_path}individual_data.disability": "disabled",
         }
-        response = self.api_client.post(self.list_url, input_data, format="json")
+        response = self.api_client.post(self.list_url, data, format="multipart")
+
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]
+        individual_data = response.data[0]["ticket_details"]["individual_data"]
+        assert individual_data["documents"][0]["value"]["photo"] is not None
+        assert individual_data["documents"][0]["value"]["photoraw"] is not None
+        assert individual_data["documents_to_edit"][0]["value"]["photo"] is not None
+        assert individual_data["documents_to_edit"][0]["value"]["photoraw"] is not None
 
     def test_create_payment_channel_for_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)

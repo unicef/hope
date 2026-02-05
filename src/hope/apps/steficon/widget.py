@@ -52,7 +52,7 @@ class PythonFormatterEditor(FormatterEditor):
 
 
 class ContentTypeChoiceField(forms.ModelChoiceField):
-    def __init__(
+    def __init__(  # noqa: PLR0913 – override of base method signature
         self,
         *,
         empty_label: str = "---------",

@@ -6,14 +6,14 @@ from django.conf import settings
 import openpyxl
 from parameterized import parameterized
 
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeFactory,
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import get_program_with_dct_type_and_name
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.field_attributes.core_fields_attributes import TYPE_SELECT_MANY, TYPE_SELECT_ONE
 from hope.apps.core.utils import SheetImageLoader
@@ -407,13 +407,12 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             (
                 wb["Individuals"],
                 [
-                    # TODO: fix this? (rebase issue?)
-                    # {
-                    #     "row_number": 4,
-                    #     "header": "preferred_language_i_c",
-                    #     "message": "Sheet: 'Individuals', Unexpected value:
-                    #     Test for type select one of field preferred_language_i_c",
-                    # },
+                    {
+                        "row_number": 4,
+                        "header": "preferred_language_i_c",
+                        "message": "Sheet: 'Individuals', Unexpected value: TestInvalid for "
+                        "type select one of field preferred_language_i_c",
+                    },
                     {
                         "row_number": 8,
                         "header": "relationship_i_c",
