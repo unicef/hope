@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1341"
+        "Content-Length": "1269"
     },
     "data": {
         "id": "113aaf47-3213-404d-b175-b28e9312237c",
@@ -49,13 +49,7 @@
         "version": 1735688653315201,
         "partners": [
             {
-                "id": 2,
-                "name": "UNICEF HQ",
-                "area_access": "BUSINESS_AREA",
-                "areas": null
-            },
-            {
-                "id": 19,
+                "id": 3,
                 "name": "UNICEF Partner for business-area-0",
                 "area_access": "BUSINESS_AREA",
                 "areas": null

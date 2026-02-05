@@ -49,15 +49,6 @@ class HopeRecorder(Recorder):
     def assert_payment_verification_plan_unicef_id(self, response, expected, path):
         pass
 
-    # M2M / reverse-FK fields that frozenfixture cannot round-trip reliably.
-    def assert_roles_in_household(self, response, expected, path):
-        value = response["roles_in_household"]
-        assert isinstance(value, list), f"{self.view}: `roles_in_household` is not a list: {value!r}"
-
-    def assert_partners(self, response, expected, path):
-        value = response["partners"]
-        assert isinstance(value, list), f"{self.view}: `partners` is not a list: {value!r}"
-
 
 class PostRecorder(HopeRecorder):
     """Recorder for POST endpoints where newly-created object IDs are non-deterministic."""

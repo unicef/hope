@@ -6,6 +6,7 @@ from unit.api_contract._helpers import HopeRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
+from extras.test_utils.factories.household import HouseholdFactory, IndividualRoleInHouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 
@@ -48,8 +49,23 @@ def payment_plan(request, db, business_area, program, superuser):
 
 
 @frozenfixture()
-def payment(request, db, payment_plan):
-    return PaymentFactory(parent=payment_plan)
+def household(request, db, business_area, program):
+    return HouseholdFactory(business_area=business_area, program=program, create_role=False)
+
+
+@frozenfixture()
+def household_role(request, db, household):
+    """IndividualRoleInHousehold - must be separate fixture for frozenfixture to serialize."""
+    return IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=household.head_of_household,
+        rdi_merge_status=household.rdi_merge_status,
+    )
+
+
+@frozenfixture()
+def payment(request, db, payment_plan, household, household_role):
+    return PaymentFactory(parent=payment_plan, household=household, collector=household.head_of_household)
 
 
 def test_list_payments(superuser, business_area, program, role_assignment, payment):
