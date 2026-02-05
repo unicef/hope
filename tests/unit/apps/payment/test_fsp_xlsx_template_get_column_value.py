@@ -68,6 +68,7 @@ def payment(payment_plan, household, fsp, delivery_mechanism):
         collector=household.head_of_household,
         financial_service_provider=fsp,
         delivery_type=delivery_mechanism,
+        delivered_quantity=16.69,
     )
 
 
