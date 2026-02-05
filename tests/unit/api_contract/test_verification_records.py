@@ -48,8 +48,8 @@ def role_assignment(request, db, superuser, business_area, role):
     return RoleAssignmentFactory(user=superuser, business_area=business_area, role=role)
 
 
-@pytest.fixture
-def payment_plan(db, business_area, program, superuser):
+@frozenfixture()
+def payment_plan(request, db, business_area, program, superuser):
     cycle = ProgramCycleFactory(program=program)
     return PaymentPlanFactory(
         business_area=business_area,
@@ -59,8 +59,16 @@ def payment_plan(db, business_area, program, superuser):
     )
 
 
-@pytest.fixture
-def payment_verification(db, payment_plan):
+@frozenfixture()
+def payment_verification_summary(request, db, payment_plan):
+    from hope.models.payment_verification_summary import PaymentVerificationSummary
+
+    summary, _ = PaymentVerificationSummary.objects.get_or_create(payment_plan=payment_plan)
+    return summary
+
+
+@frozenfixture()
+def payment_verification(request, db, payment_plan, payment_verification_summary):
     verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
     payment = PaymentFactory(parent=payment_plan)
     return PaymentVerificationFactory(
