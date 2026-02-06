@@ -18,11 +18,12 @@ from .core import (
     FileTempFactory,
     FlexibleAttributeChoiceFactory,
     FlexibleAttributeFactory,
+    FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     XLSXKoboTemplateFactory,
 )
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
-from .grievance import GrievanceTicketFactory, TicketSensitiveDetailsFactory
+from .grievance import GrievanceTicketFactory, TicketNeedsAdjudicationDetailsFactory, TicketSensitiveDetailsFactory
 from .household import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -73,7 +74,9 @@ __all__ = [
     "FeedbackMessageFactory",
     "FlexibleAttributeChoiceFactory",
     "FlexibleAttributeFactory",
+    "FlexibleAttributeForPDUFactory",
     "GrievanceTicketFactory",
+    "TicketNeedsAdjudicationDetailsFactory",
     "TicketSensitiveDetailsFactory",
     "DocumentFactory",
     "DocumentTypeFactory",

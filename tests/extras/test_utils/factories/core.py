@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
 from factory.django import DjangoModelFactory
 
+from hope.apps.periodic_data_update.utils import field_label_to_field_name
 from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
@@ -102,3 +103,15 @@ class FileTempFactory(DjangoModelFactory):
         model = FileTemp
 
     file = factory.LazyFunction(lambda: SimpleUploadedFile("test.txt", b"test"))
+
+
+class FlexibleAttributeForPDUFactory(DjangoModelFactory):
+    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    label = factory.Faker("word")
+    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
+    type = FlexibleAttribute.PDU
+    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
+    program = factory.SubFactory("extras.test_utils.factories.core.ProgramFactory")
+
+    class Meta:
+        model = FlexibleAttribute

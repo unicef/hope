@@ -3,7 +3,7 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.apps.grievance.models import GrievanceTicket, TicketSensitiveDetails
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, TicketSensitiveDetails
 
 from .core import BusinessAreaFactory
 
@@ -31,3 +31,13 @@ class TicketSensitiveDetailsFactory(DjangoModelFactory):
     household = None
     individual = None
     payment = None
+
+
+class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNeedsAdjudicationDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+    )
