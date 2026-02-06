@@ -2,6 +2,7 @@ import datetime
 from datetime import date
 from io import BytesIO
 from pathlib import Path
+import re
 from typing import Any
 from unittest import mock
 
@@ -11,6 +12,7 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
+import openpyxl
 from PIL import Image
 import pytest
 
@@ -629,3 +631,17 @@ class TestRdiXlsxCreateTask(TestCase):
             "card_expiry_date": "2016-06-27T00:00:00",
             "name_of_cardholder": "Name2",
         }
+
+    def test_get_obj_and_validate_sheet_title_sheet(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        wb = openpyxl.load_workbook(self.import_data.file, data_only=True)
+        obj_hh = task._get_obj_and_validate_sheet_title(self.registration_data_import, wb["Households"], "households")
+        assert obj_hh.func is PendingHousehold
+
+        obj_ind = task._get_obj_and_validate_sheet_title(
+            self.registration_data_import, wb["Individuals"], "individuals"
+        )
+        assert obj_ind.func is PendingIndividual
+
+        with pytest.raises(ValueError, match=re.escape("Unhandled sheet label ''Individuals''")):
+            task._get_obj_and_validate_sheet_title(self.registration_data_import, wb["Individuals"], "Invalid")

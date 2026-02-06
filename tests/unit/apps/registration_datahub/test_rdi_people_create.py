@@ -92,7 +92,7 @@ class TestRdiXlsxPeople(TestCase):
         FlexibleAttribute.objects.create(
             name="custom_field_i_f",
             label={"English(EN)": "Custom Field"},
-            type=FlexibleAttribute.STRING,
+            type=FlexibleAttribute.DECIMAL,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             is_removed=False,
         )
@@ -146,7 +146,7 @@ class TestRdiXlsxPeople(TestCase):
         assert alternate_role.role == "ALTERNATE"
         assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
         individual_1 = alternate_role.individual
-        assert individual_1.flex_fields["custom_field_i_f"] == "Aaaa"
+        assert individual_1.flex_fields["custom_field_i_f"] == 2.99
 
         worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
         assert worker_individuals.count() == 2
