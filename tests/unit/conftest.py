@@ -7,12 +7,8 @@ from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.management import create_permissions
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from django.core.management import call_command
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
@@ -69,7 +65,39 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
+def _patch_sync_apps_for_no_migrations() -> None:
+    """Patch Django's sync_apps to not skip apps without models_module.
+
+    This is needed for --no-migrations to work correctly when models are
+    defined in hope.models instead of hope.apps.*.models.
+
+    Django's sync_apps() skips apps where models_module is None, but our
+    models are in hope.models with app_label pointing to hope.apps.*.
+    """
+    from django.core.management.commands import migrate
+
+    original_sync_apps = migrate.Command.sync_apps
+
+    def patched_sync_apps(self, connection, app_labels):
+        # Import hope.models to register all models before sync
+        from django.apps import apps as django_apps
+
+        import hope.models
+
+        # Set models_module for hope.* apps that don't have their own models.py
+        for app_config in django_apps.get_app_configs():
+            if app_config.models_module is None and "hope" in app_config.name:
+                app_config.models_module = hope.models
+
+        return original_sync_apps(self, connection, app_labels)
+
+    migrate.Command.sync_apps = patched_sync_apps
+
+
 def pytest_configure(config: Config) -> None:
+    # Patch sync_apps before tests run
+    _patch_sync_apps_for_no_migrations()
+
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
@@ -86,6 +114,7 @@ def pytest_configure(config: Config) -> None:
             "TIMEOUT": 1800,
         }
     }
+    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
 
 
@@ -98,6 +127,32 @@ def pytest_unconfigure(config: Config) -> None:
 disabled_locally_test = pytest.mark.skip(
     reason="Elasticsearch error - to investigate",
 )
+
+
+@pytest.fixture
+def mock_elasticsearch(mocker: Any) -> None:
+    """Mock ES functions for tests that don't need actual ES.
+
+    Use this fixture instead of django_elasticsearch_setup for tests that
+    call ES functions but don't verify search/deduplication results.
+    """
+    # Mock ES utility functions
+    mocker.patch("hope.apps.utils.elasticsearch_utils.rebuild_search_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.populate_index")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids")
+    mocker.patch("hope.apps.utils.elasticsearch_utils.ensure_index_ready")
+    # Also patch at usage locations (for modules that use `from X import Y`)
+    mocker.patch(
+        "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
+    )
+    # Mock deduplication that uses ES
+    mocker.patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
+    mocker.patch(
+        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+    )
+    mocker.patch(
+        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+    )
 
 
 @pytest.fixture(scope="session")
@@ -255,16 +310,3 @@ def disable_activity_log(request, monkeypatch):
 
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
     yield
-
-
-@pytest.fixture(autouse=True)
-def ensure_contenttypes_and_permissions(db):
-    ContentType.objects.clear_cache()
-    for app_config in apps.get_app_configs():
-        create_permissions(app_config, verbosity=0)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def prevent_contenttype_flush(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command("migrate", interactive=False, run_syncdb=True)

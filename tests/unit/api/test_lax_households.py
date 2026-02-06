@@ -4,16 +4,15 @@ from pathlib import Path
 import tempfile
 from unittest.mock import patch
 
-from django.core.management import call_command
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import PendingIndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.household import PendingIndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.models import PendingHousehold, Program, RegistrationDataImport
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
@@ -26,10 +25,11 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
-        call_command("loadcountrycodes")
-
-        country = CountryFactory()
+        # Create only countries needed by test (AF, PK)
+        country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Pakistan", short_name="Pakistan", iso_code2="PK", iso_code3="PAK", iso_num="0586")
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)

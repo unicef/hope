@@ -4,26 +4,24 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django_countries.fields import Country
 import pytest
 
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory
+from extras.test_utils.old_factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Country as GeoCountry,
     DataCollectingType,
@@ -36,21 +34,32 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestRdiXlsxPeople(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test xlsx file (rdi_people_test.xlsx)
+        afghanistan = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="San Marino", short_name="San Marino", iso_code2="SM", iso_code3="SMR", iso_num="0674")
+        CountryFactory(name="Isle of Man", short_name="Isle of Man", iso_code2="IM", iso_code3="IMN", iso_num="0833")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        CountryFactory(
+            name="Saint Vincent", short_name="Saint Vincent", iso_code2="VC", iso_code3="VCT", iso_num="0670"
+        )
+        area_type_l1 = AreaTypeFactory(country=afghanistan, area_level=1)
+        area_type_l2 = AreaTypeFactory(country=afghanistan, area_level=2, parent=area_type_l1)
+
         PartnerFactory(name="UNHCR")
         content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         cls.business_area = create_afghanistan()
-        parent = AreaFactory(p_code="AF11", name="Name")
-        AreaFactory(p_code="AF1115", name="Name2", parent=parent)
+        parent = AreaFactory(p_code="AF11", name="Name", area_type=area_type_l1)
+        AreaFactory(p_code="AF1115", name="Name2", parent=parent, area_type=area_type_l2)
 
         from hope.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,
@@ -80,8 +89,6 @@ class TestRdiXlsxPeople(TestCase):
         )
         generate_delivery_mechanisms()
 
-        rebuild_search_index()
-
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
             self.registration_data_import.id,
@@ -92,8 +99,8 @@ class TestRdiXlsxPeople(TestCase):
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
 
-        assert households_count == 4
-        assert individuals_count == 4
+        assert households_count == 5
+        assert individuals_count == 5
 
         individual_data = {
             "full_name": "Derek Index4",

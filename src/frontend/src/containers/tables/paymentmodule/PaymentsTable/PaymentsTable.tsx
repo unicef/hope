@@ -43,10 +43,11 @@ const PaymentsTable = ({
 }: PaymentsTableProps): ReactElement => {
   const { baseUrl, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialFilter = {
     householdUnicefId: '',
+    individualUnicefId: '',
     collectorFullName: '',
     paymentUnicefId: '',
   };
@@ -72,6 +73,7 @@ const PaymentsTable = ({
       businessAreaSlug: businessArea,
       programSlug: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
+      individualUnicefId: appliedFilter.individualUnicefId || null,
       collectorFullName: appliedFilter.collectorFullName || null,
       paymentUnicefId: appliedFilter.paymentUnicefId || null,
     }),
@@ -79,6 +81,7 @@ const PaymentsTable = ({
       businessArea,
       programId,
       appliedFilter.householdUnicefId,
+      appliedFilter.individualUnicefId,
       appliedFilter.collectorFullName,
       appliedFilter.paymentUnicefId,
     ],
@@ -142,12 +145,19 @@ const PaymentsTable = ({
 
   const itemsCount = usePersistedCount(page, paymentsCount);
 
-  const replacements = {
-    household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
-    household__size: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
-  };
+  const replacements = isSocialDctType
+    ? {
+        individual__unicef_id: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.memberLabel} ${t('ID')}`,
+        household__size: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+      }
+    : {
+        household__unicef_id: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
+        household__size: (_beneficiaryGroup) =>
+          `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+      };
 
   const adjustedHeadCells = adjustHeadCells(
     headCells,

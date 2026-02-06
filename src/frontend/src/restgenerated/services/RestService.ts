@@ -7,6 +7,7 @@ import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { AreaList } from '../models/AreaList';
 import type { AreaTree } from '../models/AreaTree';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
+import type { BeneficiaryTicketCreate } from '../models/BeneficiaryTicketCreate';
 import type { Bulk } from '../models/Bulk';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
 import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
@@ -189,6 +190,27 @@ export class RestService {
                 'format': format,
                 'lang': lang,
             },
+        });
+    }
+    /**
+     * @returns BeneficiaryTicketCreate
+     * @throws ApiError
+     */
+    public static restBeneficiaryTicketsCreate({
+        businessArea,
+        requestBody,
+    }: {
+        businessArea: string,
+        requestBody: BeneficiaryTicketCreate,
+    }): CancelablePromise<BeneficiaryTicketCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/{business_area}/beneficiary-tickets/',
+            path: {
+                'business_area': businessArea,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -1236,6 +1258,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsList({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -1276,6 +1299,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -1292,8 +1316,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -1422,6 +1447,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -1471,6 +1497,7 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug,
         formData,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -1512,6 +1539,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         formData: CreateGrievanceTicket,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -1528,8 +1556,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -1658,6 +1687,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -2014,6 +2044,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -2052,6 +2083,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -2068,8 +2100,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2190,6 +2223,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -2236,6 +2270,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -2276,6 +2311,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -2292,8 +2328,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2422,6 +2459,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -2470,6 +2508,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -2510,6 +2549,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -2526,8 +2566,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2656,6 +2697,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -2705,6 +2747,7 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
         businessAreaSlug,
         formData,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -2746,6 +2789,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         formData: BulkGrievanceTicketsAddNote,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -2762,8 +2806,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -2892,6 +2937,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -2943,6 +2989,7 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate({
         businessAreaSlug,
         formData,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -2984,6 +3031,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         formData: BulkUpdateGrievanceTicketsAssignees,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3000,8 +3048,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3130,6 +3179,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -3181,6 +3231,7 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate({
         businessAreaSlug,
         formData,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -3222,6 +3273,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         formData: BulkUpdateGrievanceTicketsPriority,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3238,8 +3290,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3368,6 +3421,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -3419,6 +3473,7 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate({
         businessAreaSlug,
         formData,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -3460,6 +3515,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         formData: BulkUpdateGrievanceTicketsUrgency,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3476,8 +3532,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3606,6 +3663,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -3674,6 +3732,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsCountRetrieve({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         area,
@@ -3712,6 +3771,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3728,8 +3788,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -3850,6 +3911,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'area': area,
@@ -3913,6 +3975,7 @@ export class RestService {
      */
     public static restBusinessAreasHouseholdsList({
         businessAreaSlug,
+        activeProgramsOnly,
         address,
         admin1,
         admin2,
@@ -3952,6 +4015,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -4060,6 +4124,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'address': address,
                 'admin1': admin1,
                 'admin2': admin2,
@@ -4123,6 +4188,7 @@ export class RestService {
      */
     public static restBusinessAreasHouseholdsCountRetrieve({
         businessAreaSlug,
+        activeProgramsOnly,
         address,
         admin1,
         admin2,
@@ -4160,6 +4226,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         address?: string,
         admin1?: string,
         admin2?: string,
@@ -4260,6 +4327,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'address': address,
                 'admin1': admin1,
                 'admin2': admin2,
@@ -4330,6 +4398,7 @@ export class RestService {
      */
     public static restBusinessAreasIndividualsList({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         ageMax,
@@ -4360,6 +4429,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         ageMax?: string,
@@ -4455,6 +4525,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'age_max': ageMax,
@@ -4509,6 +4580,7 @@ export class RestService {
      */
     public static restBusinessAreasIndividualsCountRetrieve({
         businessAreaSlug,
+        activeProgramsOnly,
         admin1,
         admin2,
         ageMax,
@@ -4537,6 +4609,7 @@ export class RestService {
         withdrawn,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         admin1?: string,
         admin2?: string,
         ageMax?: string,
@@ -4624,6 +4697,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'admin1': admin1,
                 'admin2': admin2,
                 'age_max': ageMax,
@@ -4686,6 +4760,7 @@ export class RestService {
      */
     public static restBusinessAreasPaymentPlansList({
         businessAreaSlug,
+        activeProgramsOnly,
         deliveryMechanism,
         endDate,
         fsp,
@@ -4711,6 +4786,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -4785,6 +4861,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
@@ -4818,6 +4895,7 @@ export class RestService {
      */
     public static restBusinessAreasPaymentPlansCountRetrieve({
         businessAreaSlug,
+        activeProgramsOnly,
         deliveryMechanism,
         endDate,
         fsp,
@@ -4841,6 +4919,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         deliveryMechanism?: Array<string>,
         endDate?: string,
         fsp?: string,
@@ -4907,6 +4986,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
                 'fsp': fsp,
@@ -4938,12 +5018,14 @@ export class RestService {
      */
     public static restBusinessAreasPaymentsList({
         businessAreaSlug,
+        activeProgramsOnly,
         limit,
         officeSearch,
         offset,
         ordering,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -4965,6 +5047,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'limit': limit,
                 'office_search': officeSearch,
                 'offset': offset,
@@ -4997,10 +5080,12 @@ export class RestService {
      */
     public static restBusinessAreasPaymentsCountRetrieve({
         businessAreaSlug,
+        activeProgramsOnly,
         officeSearch,
         ordering,
     }: {
         businessAreaSlug: string,
+        activeProgramsOnly?: boolean,
         officeSearch?: string,
         /**
          * Which field to use when ordering the results.
@@ -5014,6 +5099,7 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'active_programs_only': activeProgramsOnly,
                 'office_search': officeSearch,
                 'ordering': ordering,
             },
@@ -6192,8 +6278,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -6424,8 +6511,9 @@ export class RestService {
          * * `7` - Positive Feedback
          * * `6` - Referral
          * * `3` - Sensitive Grievance
+         * * `10` - Beneficiary
          */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        category?: 1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
         createdAtAfter?: string,
         createdAtBefore?: string,
         createdBy?: string,
@@ -9043,6 +9131,7 @@ export class RestService {
         programSlug,
         collectorFullName,
         householdUnicefId,
+        individualUnicefId,
         limit,
         offset,
         paymentUnicefId,
@@ -9052,6 +9141,7 @@ export class RestService {
         programSlug: string,
         collectorFullName?: string,
         householdUnicefId?: string,
+        individualUnicefId?: string,
         /**
          * Number of results to return per page.
          */
@@ -9073,6 +9163,7 @@ export class RestService {
             query: {
                 'collector_full_name': collectorFullName,
                 'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
                 'limit': limit,
                 'offset': offset,
                 'payment_unicef_id': paymentUnicefId,
@@ -9171,6 +9262,7 @@ export class RestService {
         programSlug,
         collectorFullName,
         householdUnicefId,
+        individualUnicefId,
         paymentUnicefId,
     }: {
         businessAreaSlug: string,
@@ -9178,6 +9270,7 @@ export class RestService {
         programSlug: string,
         collectorFullName?: string,
         householdUnicefId?: string,
+        individualUnicefId?: string,
         paymentUnicefId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -9191,6 +9284,7 @@ export class RestService {
             query: {
                 'collector_full_name': collectorFullName,
                 'household_unicef_id': householdUnicefId,
+                'individual_unicef_id': individualUnicefId,
                 'payment_unicef_id': paymentUnicefId,
             },
         });

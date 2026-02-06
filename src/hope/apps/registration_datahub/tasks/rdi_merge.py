@@ -210,7 +210,8 @@ class RdiMergeTask:
                         f" Recalculated population fields for {len(households_to_merge_ids)}"
                         f" households"
                     )
-                    self._create_kobo_submissions(households, obj_hct, registration_data_import_id)
+                    kobo_submissions = self._create_kobo_submissions(households, obj_hct)
+                    logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
                     logger.info(
                         f"RDI:{registration_data_import_id}"
                         f" Populated index for {len(households_to_merge_ids)} households"
@@ -267,8 +268,8 @@ class RdiMergeTask:
                         "business_area",
                         None,
                         obj_hct.program_id,
-                        old_obj_hct,
-                        obj_hct,
+                        old_object=old_obj_hct,
+                        new_object=obj_hct,
                     )
 
             except Exception:
@@ -286,6 +287,25 @@ class RdiMergeTask:
         except Exception as e:
             logger.warning(e)
             raise
+
+    def _create_kobo_submissions(self, households: QuerySet[Any, Any], obj_hct: RegistrationDataImport) -> list[Any]:
+        kobo_submissions = []
+        for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
+            kobo_submission_uuid = household.kobo_submission_uuid
+            kobo_asset_id = household.detail_id
+            kobo_submission_time = household.kobo_submission_time
+            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
+                submission = KoboImportedSubmission(
+                    kobo_submission_uuid=kobo_submission_uuid,
+                    kobo_asset_id=kobo_asset_id,
+                    kobo_submission_time=kobo_submission_time,
+                    registration_data_import=obj_hct,
+                    imported_household=household,
+                )
+                kobo_submissions.append(submission)
+        if kobo_submissions:
+            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
+        return kobo_submissions
 
     def _update_household_collections(self, households: QuerySet[Household], rdi: RegistrationDataImport) -> None:
         households_to_update = []

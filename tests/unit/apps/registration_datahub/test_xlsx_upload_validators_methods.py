@@ -3,21 +3,25 @@ from typing import Tuple
 from unittest import mock
 
 from django.conf import settings
-from django.core.management import call_command
 import openpyxl
 from parameterized import parameterized
 
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
+    FlexibleAttributeFactory,
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
-from extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from extras.test_utils.factories.payment import generate_delivery_mechanisms
-from extras.test_utils.factories.program import get_program_with_dct_type_and_name
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
+from extras.test_utils.old_factories.program import get_program_with_dct_type_and_name
 from hope.apps.core.base_test_case import BaseTestCase
+from hope.apps.core.field_attributes.core_fields_attributes import TYPE_SELECT_MANY, TYPE_SELECT_ONE
 from hope.apps.core.utils import SheetImageLoader
-from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
-from hope.models import DataCollectingType, PeriodicFieldData
+from hope.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
+)
+from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
 
 
 class TestXLSXValidatorsMethods(BaseTestCase):
@@ -28,14 +32,22 @@ class TestXLSXValidatorsMethods(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
-        call_command("loadflexfieldsattributes")
         generate_delivery_mechanisms()
 
         cls.business_area = create_afghanistan()
         cls.program = get_program_with_dct_type_and_name()
         cls.social_worker_program = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
-        cls.country = CountryFactory()
+        # Create countries needed for xlsx validation (AFG, IMN, POL, PSE, SMR, VCT)
+        cls.country = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
+        CountryFactory(name="Isle of Man", short_name="Isle of Man", iso_code2="IM", iso_code3="IMN", iso_num="0833")
+        CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
+        CountryFactory(name="Palestine", short_name="Palestine", iso_code2="PS", iso_code3="PSE", iso_num="0275")
+        CountryFactory(name="San Marino", short_name="San Marino", iso_code2="SM", iso_code3="SMR", iso_num="0674")
+        CountryFactory(
+            name="Saint Vincent", short_name="Saint Vincent", iso_code2="VC", iso_code3="VCT", iso_num="0670"
+        )
         cls.business_area.countries.add(cls.country)
         AreaFactory(p_code="AF29")
         AreaFactory(p_code="AF2401")
@@ -46,6 +58,12 @@ class TestXLSXValidatorsMethods(BaseTestCase):
         AreaFactory(p_code="AF0201")
         AreaFactory(p_code="AF11")
         AreaFactory(p_code="AF1115")
+        # Create flex field for validation test (assistance_type_h_f as SELECT_MANY with no choices)
+        FlexibleAttributeFactory(
+            name="assistance_type_h_f",
+            type=FlexibleAttribute.SELECT_MANY,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        )
 
     def test_string_validator(self) -> None:
         validator = UploadXLSXInstanceValidator(self.program)
@@ -165,12 +183,20 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             assert not upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c")
 
     def test_choice_validator(self) -> None:
-        test_correct_values = (("REFUGEE", "residence_status_h_c"),)
+        test_correct_values = (
+            ("REFUGEE", "residence_status_h_c"),
+            ("GOVERNMENT_PARTNER,UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER, UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER;UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER; UNICEF", "consent_sharing_h_c"),
+            ("GOVERNMENT_PARTNER UNICEF", "consent_sharing_h_c"),
+        )
         test_incorrect_values = (
             ("YES", "work_status"),
             ("OTHER", "work_status"),
             ("Hearing Problems", "disability"),
-            ("Option 37", "assistance_type_h_f"),
+            ("Wrong Option", "assistance_type_h_f"),
+            ("YES", "consent_h_c"),
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_correct_values:
@@ -179,6 +205,55 @@ class TestXLSXValidatorsMethods(BaseTestCase):
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_incorrect_values:
             assert not upload_xlsx_instance_validator.choice_validator(value, header)
+
+    def test_import_choice_validator_empty_value_returns_message(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {"field_one": {"type": TYPE_SELECT_ONE, "choices": ["A"]}}
+
+        assert validator.choice_validator("", "field_one") == "Invalid choice  for field field_one"
+
+    def test_import_choice_validator_handler_none_returns_none(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {"field_one": {"type": "UNKNOWN", "choices": ["A"]}}
+
+        assert validator.choice_validator("A", "field_one") is None
+
+    def test_import_choice_validator_custom_select_one(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_one": {
+                "type": TYPE_SELECT_ONE,
+                "choices": ["YES", "NO"],
+                "custom_validate_choices": lambda v: v == "YES",
+            }
+        }
+
+        assert validator.choice_validator("YES", "field_one") is None
+        assert validator.choice_validator("NO", "field_one") == "Invalid choice NO for field field_one"
+
+    def test_import_choice_validator_custom_select_many(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_many": {
+                "type": TYPE_SELECT_MANY,
+                "choices": ["A", "B"],
+                "custom_validate_choices": lambda v: v == "A",
+            }
+        }
+
+        assert validator.choice_validator("A", "field_many") is None
+        assert validator.choice_validator("B", "field_many") == "Invalid choice B for field field_many"
+
+    def test_import_choice_validator_select_many_invalid_choice(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+        validator.all_fields = {
+            "field_many": {
+                "type": TYPE_SELECT_MANY,
+                "choices": ["A", "B"],
+            }
+        }
+
+        assert validator.choice_validator("C", "field_many") == "Invalid choice C for field field_many"
 
     def test_rows_validator_too_many_head_of_households(self) -> None:
         wb = openpyxl.load_workbook(
@@ -332,13 +407,12 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             (
                 wb["Individuals"],
                 [
-                    # TODO: fix this? (rebase issue?)
-                    # {
-                    #     "row_number": 4,
-                    #     "header": "preferred_language_i_c",
-                    #     "message": "Sheet: 'Individuals', Unexpected value:
-                    #     Test for type select one of field preferred_language_i_c",
-                    # },
+                    {
+                        "row_number": 4,
+                        "header": "preferred_language_i_c",
+                        "message": "Sheet: 'Individuals', Unexpected value: TestInvalid for "
+                        "type select one of field preferred_language_i_c",
+                    },
                     {
                         "row_number": 8,
                         "header": "relationship_i_c",

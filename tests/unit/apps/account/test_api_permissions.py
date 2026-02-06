@@ -1,11 +1,17 @@
+"""Tests for BaseRestPermission class."""
+
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from rest_framework.exceptions import PermissionDenied
 
-from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories import UserFactory
 from hope.apps.account.api.permissions import BaseRestPermission
 from hope.apps.account.permissions import Permissions
+from hope.models import User
+
+pytestmark = pytest.mark.django_db
 
 
 class DummyView:
@@ -23,27 +29,47 @@ class DummyRequest:
         self.query_params = {}
 
 
-class TestBaseRestPermission:
-    @patch("hope.apps.account.api.permissions.check_permissions", return_value=False)
-    def test_permission_denied_includes_required_permissions(self, mock_check_permissions):
-        user = UserFactory()
-        perms = [Permissions.PM_VIEW_LIST, Permissions.PM_CREATE]
-        view = DummyView(perms)
-        request = DummyRequest(user)
+@pytest.fixture
+def user(db: Any) -> User:
+    return UserFactory()
 
-        with pytest.raises(PermissionDenied) as excinfo:
-            BaseRestPermission().has_permission(request, view)
 
-        assert mock_check_permissions.called
-        detail = excinfo.value.detail
-        assert detail["required_permissions"] == [p.value for p in perms]
-        assert detail["detail"] == "You do not have permission to perform this action."
+@pytest.fixture
+def dummy_view_with_permissions() -> DummyView:
+    perms = [Permissions.PM_VIEW_LIST, Permissions.PM_CREATE]
+    return DummyView(perms)
 
-    @patch("hope.apps.account.api.permissions.check_permissions", return_value=True)
-    def test_permission_allowed(self, mock_check_permissions):
-        user = UserFactory()
-        view = DummyView([Permissions.PM_VIEW_LIST])
-        request = DummyRequest(user)
 
-        assert BaseRestPermission().has_permission(request, view) is True
-        assert mock_check_permissions.called
+@pytest.fixture
+def dummy_view_single_permission() -> DummyView:
+    return DummyView([Permissions.PM_VIEW_LIST])
+
+
+@pytest.fixture
+def dummy_request(user: User) -> DummyRequest:
+    return DummyRequest(user)
+
+
+@patch("hope.apps.account.api.permissions.check_permissions", return_value=False)
+def test_permission_denied_includes_required_permissions(
+    mock_check_permissions, user: User, dummy_view_with_permissions: DummyView, dummy_request: DummyRequest
+):
+    perms = [Permissions.PM_VIEW_LIST, Permissions.PM_CREATE]
+
+    with pytest.raises(PermissionDenied) as excinfo:
+        BaseRestPermission().has_permission(dummy_request, dummy_view_with_permissions)
+
+    assert mock_check_permissions.called
+    detail = excinfo.value.detail
+    assert detail["required_permissions"] == [p.value for p in perms]
+    assert detail["detail"] == "You do not have permission to perform this action."
+
+
+@patch("hope.apps.account.api.permissions.check_permissions", return_value=True)
+def test_permission_allowed(
+    mock_check_permissions, user: User, dummy_view_single_permission: DummyView, dummy_request: DummyRequest
+):
+    result = BaseRestPermission().has_permission(dummy_request, dummy_view_single_permission)
+
+    assert result is True
+    assert mock_check_permissions.called

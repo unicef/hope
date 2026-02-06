@@ -1,7 +1,6 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from constance.test import override_config
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -13,15 +12,15 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
     create_ukraine,
 )
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
@@ -29,14 +28,14 @@ from extras.test_utils.factories.grievance import (
     TicketPaymentVerificationDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -45,9 +44,9 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
@@ -932,7 +931,7 @@ class TestIndividualDetail:
             "pdu_field_2": {"4": {"collection_date": "2021-01-01", "value": "Value D"}},
         }
 
-        assert data["documents"] == [
+        expected_documents = [
             {
                 "id": str(self.national_id.id),
                 "type": {
@@ -1024,6 +1023,7 @@ class TestIndividualDetail:
                 "photo": self.tax_id.photo.url,
             },
         ]
+        assert sorted(data["documents"], key=lambda x: x["id"]) == sorted(expected_documents, key=lambda x: x["id"])
         assert data["identities"] == [
             {
                 "id": self.identity.id,
@@ -1432,7 +1432,7 @@ class TestIndividualChoices:
         }
 
 
-@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("mock_elasticsearch")
 class TestIndividualFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -1673,7 +1673,103 @@ class TestIndividualFilter:
             individual2_data={"deduplication_golden_record_status": DUPLICATE},
         )
 
-    @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
+    def test_filter_by_age(self) -> None:
+        individual_age_5, individual_age_10 = self._create_test_individuals(
+            individual1_data={"birth_date": "2014-10-10"},
+            individual2_data={"birth_date": "2009-10-10"},
+        )
+        individual_age_15, individual_age_20 = self._create_test_individuals(
+            individual1_data={"birth_date": "2004-10-10"},
+            individual2_data={"birth_date": "1999-10-10"},
+        )
+        with freezegun.freeze_time("2019-11-10"):
+            response_min = self.api_client.get(self.list_url, {"age_min": 8})
+            assert response_min.status_code == status.HTTP_200_OK
+            response_data_min = response_min.json()["results"]
+            assert len(response_data_min) == 3
+            individuals_ids_min = [individual["id"] for individual in response_data_min]
+            assert str(individual_age_10.id) in individuals_ids_min
+            assert str(individual_age_15.id) in individuals_ids_min
+            assert str(individual_age_20.id) in individuals_ids_min
+            assert str(individual_age_5.id) not in individuals_ids_min
+
+            response_max = self.api_client.get(self.list_url, {"age_max": 12})
+            assert response_max.status_code == status.HTTP_200_OK
+            response_data_max = response_max.json()["results"]
+            assert len(response_data_max) == 2
+            individuals_ids_max = [individual["id"] for individual in response_data_max]
+            assert str(individual_age_5.id) in individuals_ids_max
+            assert str(individual_age_10.id) in individuals_ids_max
+            assert str(individual_age_15.id) not in individuals_ids_max
+            assert str(individual_age_20.id) not in individuals_ids_max
+
+            response_min_max = self.api_client.get(
+                self.list_url,
+                {"age_min": 8, "age_max": 12},
+            )
+            assert response_min_max.status_code == status.HTTP_200_OK
+            response_data_min_max = response_min_max.json()["results"]
+            assert len(response_data_min_max) == 1
+            individuals_ids_min_max = [individual["id"] for individual in response_data_min_max]
+            assert str(individual_age_10.id) in individuals_ids_min_max
+            assert str(individual_age_5.id) not in individuals_ids_min_max
+            assert str(individual_age_15.id) not in individuals_ids_min_max
+            assert str(individual_age_20.id) not in individuals_ids_min_max
+
+
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+class TestIndividualFilterSearch:
+    """Tests for ES-based search functionality. These tests need actual Elasticsearch."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.list_url = reverse(
+            "api:households:individuals-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program.slug,
+            },
+        )
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+    def _create_test_individuals(
+        self,
+        individual1_data: Optional[dict] = None,
+        individual2_data: Optional[dict] = None,
+        household1_data: Optional[dict] = None,
+        household2_data: Optional[dict] = None,
+    ) -> Tuple[Individual, Individual]:
+        if individual1_data is None:
+            individual1_data = {}
+        if individual2_data is None:
+            individual2_data = {}
+        if household1_data is None:
+            household1_data = {}
+        if household2_data is None:
+            household2_data = {}
+
+        household1, (individual1,) = create_household_and_individuals(
+            household_data={"program": self.program, **household1_data},
+            individuals_data=[individual1_data],
+        )
+        household2, (individual2,) = create_household_and_individuals(
+            household_data={"program": self.program, **household2_data},
+            individuals_data=[individual2_data],
+        )
+
+        return individual1, individual2
+
     @pytest.mark.parametrize(
         (
             "filters",
@@ -1748,49 +1844,6 @@ class TestIndividualFilter:
 
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individual2.id)
-
-    def test_filter_by_age(self) -> None:
-        individual_age_5, individual_age_10 = self._create_test_individuals(
-            individual1_data={"birth_date": "2014-10-10"},
-            individual2_data={"birth_date": "2009-10-10"},
-        )
-        individual_age_15, individual_age_20 = self._create_test_individuals(
-            individual1_data={"birth_date": "2004-10-10"},
-            individual2_data={"birth_date": "1999-10-10"},
-        )
-        with freezegun.freeze_time("2019-11-10"):
-            response_min = self.api_client.get(self.list_url, {"age_min": 8})
-            assert response_min.status_code == status.HTTP_200_OK
-            response_data_min = response_min.json()["results"]
-            assert len(response_data_min) == 3
-            individuals_ids_min = [individual["id"] for individual in response_data_min]
-            assert str(individual_age_10.id) in individuals_ids_min
-            assert str(individual_age_15.id) in individuals_ids_min
-            assert str(individual_age_20.id) in individuals_ids_min
-            assert str(individual_age_5.id) not in individuals_ids_min
-
-            response_max = self.api_client.get(self.list_url, {"age_max": 12})
-            assert response_max.status_code == status.HTTP_200_OK
-            response_data_max = response_max.json()["results"]
-            assert len(response_data_max) == 2
-            individuals_ids_max = [individual["id"] for individual in response_data_max]
-            assert str(individual_age_5.id) in individuals_ids_max
-            assert str(individual_age_10.id) in individuals_ids_max
-            assert str(individual_age_15.id) not in individuals_ids_max
-            assert str(individual_age_20.id) not in individuals_ids_max
-
-            response_min_max = self.api_client.get(
-                self.list_url,
-                {"age_min": 8, "age_max": 12},
-            )
-            assert response_min_max.status_code == status.HTTP_200_OK
-            response_data_min_max = response_min_max.json()["results"]
-            assert len(response_data_min_max) == 1
-            individuals_ids_min_max = [individual["id"] for individual in response_data_min_max]
-            assert str(individual_age_10.id) in individuals_ids_min_max
-            assert str(individual_age_5.id) not in individuals_ids_min_max
-            assert str(individual_age_15.id) not in individuals_ids_min_max
-            assert str(individual_age_20.id) not in individuals_ids_min_max
 
 
 class TestIndividualOfficeSearch:
@@ -2182,3 +2235,168 @@ class TestIndividualOfficeSearch:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == str(self.individuals5[0].id)
+
+    def test_search_by_phone_number(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with phone number
+        self.individuals1[0].phone_no = "+1234567890"
+        self.individuals1[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+1234567890"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals1[0].id)
+
+    def test_search_by_phone_number_alternative(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with alternative phone number
+        self.individuals2[0].phone_no_alternative = "+9876543210"
+        self.individuals2[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+9876543210"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals2[0].id)
+
+    def test_search_by_full_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with specific name
+        self.individuals1[0].full_name = "John Smith Doe"
+        self.individuals1[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "John Smith Doe"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals1[0].id)
+
+    def test_search_by_given_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with specific given name
+        self.individuals2[0].given_name = "UniqueAlice"
+        self.individuals2[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "UniqueAlice"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals2[0].id)
+
+    def test_search_by_family_name(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        # Update individual with specific family name
+        self.individuals3[0].family_name = "UniqueWilliams"
+        self.individuals3[0].save()
+
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "UniqueWilliams"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals3[0].id)
+
+    def test_search_with_active_programs_filter(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        finished_program = ProgramFactory(business_area=self.afghanistan, status=Program.FINISHED)
+        finished_household, finished_individuals = create_household_and_individuals(
+            household_data={
+                "program": finished_program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}],
+        )
+
+        # Set same phone number for both active and finished program individuals
+        self.individuals1[0].phone_no = "+5551112222"
+        self.individuals1[0].save()
+
+        finished_individuals[0].phone_no = "+5551112222"
+        finished_individuals[0].save()
+
+        # First, search WITHOUT active_programs filter - should return both individuals
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551112222", "active_programs_only": "false"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        result_ids = [result["id"] for result in response.data["results"]]
+        assert str(self.individuals1[0].id) in result_ids
+        assert str(finished_individuals[0].id) in result_ids
+
+        # Now search WITH active_programs_only filter - should only return active program individual
+        response = self.api_client.get(
+            reverse(
+                self.global_url_name,
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {"office_search": "+5551112222", "active_programs_only": "true"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == str(self.individuals1[0].id)

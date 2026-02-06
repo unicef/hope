@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AreaList } from './AreaList';
-import type { CategoryD86Enum } from './CategoryD86Enum';
+import type { CategoryD54Enum } from './CategoryD54Enum';
 import type { GrievanceTicketStatusEnum } from './GrievanceTicketStatusEnum';
 import type { HouseholdForTicket } from './HouseholdForTicket';
 import type { IndividualSimple } from './IndividualSimple';
@@ -22,16 +22,16 @@ export type GrievanceTicketDetail = {
     admin?: string;
     admin2: AreaList;
     assignedTo: User;
-    createdBy: User;
     /**
      * Date this ticket was most recently changed.
      */
     userModified?: string | null;
-    category: CategoryD86Enum;
+    category: CategoryD54Enum;
     issueType?: number | null;
     priority?: PriorityEnum;
     urgency?: UrgencyEnum;
     readonly createdAt: string;
+    createdBy: User;
     readonly updatedAt: string;
     readonly totalDays: number | null;
     readonly targetId: string;

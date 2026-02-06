@@ -2,17 +2,16 @@ import datetime
 from typing import Any, Dict, List
 
 from dateutil.relativedelta import relativedelta
-from django.core.management import call_command
 from flaky import flaky
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import FlexibleAttributeFactory, create_afghanistan
+from extras.test_utils.old_factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.models import (
     BusinessArea,
@@ -38,7 +37,18 @@ class TestTargetingCriteriaQuery(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
+        from hope.models import FlexibleAttribute
+
+        FlexibleAttributeFactory(
+            name="unaccompanied_child_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            type=FlexibleAttribute.STRING,
+        )
+        FlexibleAttributeFactory(
+            name="treatment_facility_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            type=FlexibleAttribute.SELECT_MANY,
+        )
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.first()
@@ -157,7 +167,6 @@ class TestTargetingCriteriaIndividualRules(BaseTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.first()

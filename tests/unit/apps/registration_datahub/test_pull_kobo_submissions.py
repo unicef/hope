@@ -6,14 +6,14 @@ from unittest import mock
 from django.conf import settings
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
 from hope.models import KoboImportData
 
-pytestmark = pytest.mark.django_db(databases=(("default",)), transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPullKoboSubmissions:

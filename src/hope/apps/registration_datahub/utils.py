@@ -59,7 +59,7 @@ def combine_collections(a: dict, b: dict, path: list | None = None, update: bool
 
 
 def find_attachment_in_kobo(attachments: list[dict], value: str) -> dict | None:
-    file_extension = value.split(".")[-1]
+    file_extension = value.rsplit(".", maxsplit=1)[-1]
     filename = re.escape(".".join(value.split(".")[:-1]))
     regex_name = re.compile(f"{filename}(_\\w+)?\\.{file_extension}")
     for attachment in attachments:

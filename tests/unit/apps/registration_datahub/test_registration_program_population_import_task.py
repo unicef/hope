@@ -4,18 +4,18 @@ from unittest.mock import patch
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.account import PartnerFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import PartnerFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.program import ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.const import (
     HEAD,
     MALE,
@@ -24,7 +24,6 @@ from hope.apps.household.const import (
 from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import (
     Document,
     Household,
@@ -34,10 +33,9 @@ from hope.models import (
     RegistrationDataImport,
 )
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestRegistrationProgramPopulationImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -102,8 +100,6 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             partner=PartnerFactory(),
         )
 
-        rebuild_search_index()
-
     def _run_task(self, rdi_id: Optional[str] = None) -> None:
         registration_program_population_import_task(
             rdi_id or str(self.registration_data_import.id),
@@ -133,6 +129,8 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         assert rdi_status == self.registration_data_import.status
 
     def test_registration_program_population_import_task(self) -> None:
+        self.afghanistan.postpone_deduplication = True
+        self.afghanistan.save()
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
         self.registration_data_import.save()
 
@@ -178,6 +176,19 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
 
         self.registration_data_import.refresh_from_db()
         assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
+
+    @patch("hope.apps.registration_datahub.tasks.rdi_program_population_create.DeduplicateTask")
+    def test_registration_program_population_import_with_deduplication(self, mock_dedupe_task: Any) -> None:
+        self.afghanistan.postpone_deduplication = False
+        self.afghanistan.save()
+        self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        self.registration_data_import.save()
+
+        self._run_task()
+
+        self.registration_data_import.refresh_from_db()
+        mock_dedupe_task.assert_called_once()
+        mock_dedupe_task.return_value.deduplicate_pending_individuals.assert_called_once()
 
     @patch("hope.apps.registration_datahub.celery_tasks.locked_cache")
     def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:

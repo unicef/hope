@@ -24,9 +24,9 @@ from hope.apps.household.const import (
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
 from hope.apps.registration_datahub.utils import post_process_dedupe_results
 from hope.apps.utils.elasticsearch_utils import (
+    ensure_index_ready,
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
-    wait_until_es_healthy,
 )
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import (
@@ -102,7 +102,7 @@ class DeduplicateTask:
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
-        wait_until_es_healthy()
+        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
         rdi_id = individuals.first().registration_data_import_id
         log.info(f"RDI:{rdi_id} Deduplicating individuals against population")
         all_duplicates = []
@@ -153,7 +153,7 @@ class DeduplicateTask:
         log.info(f"RDI:{rdi_id} Updated all individuals with deduplication results")
 
     def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
-        wait_until_es_healthy()
+        ensure_index_ready(get_individual_doc(self.business_area.slug)._index._name)
 
         to_bulk_update_results = []
         all_duplicates = []
@@ -287,8 +287,9 @@ class DeduplicateTask:
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
         pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
 
-        wait_until_es_healthy()
-        populate_index(pending_individuals, get_individual_doc(self.business_area.slug))
+        doc = get_individual_doc(self.business_area.slug)
+        populate_index(pending_individuals, doc)
+        ensure_index_ready(doc._index._name)
 
         individuals_count = pending_individuals.count()
         allowed_duplicates_in_batch = round(
@@ -318,10 +319,7 @@ class DeduplicateTask:
             pending_individual.deduplication_batch_results = pending_deduplication_result.results_data
             post_process_dedupe_results(pending_individual)
 
-            if pending_deduplication_result.results_data["duplicates"]:
-                pending_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
-            else:
-                pending_individual.deduplication_batch_status = UNIQUE_IN_BATCH
+            self._set_deduplication_batch_status(pending_deduplication_result, pending_individual)
             duplicates_in_batch.update(pending_deduplication_result.duplicates)
             possible_duplicates_in_batch.update(pending_deduplication_result.possible_duplicates)
 
@@ -386,18 +384,59 @@ class DeduplicateTask:
                 deduplication_golden_record_status=NOT_PROCESSED,
             )
         else:
-            self._finalize_successful_deduplication(
-                registration_data_import,
-                duplicates_in_batch,
-                possible_duplicates_in_batch,
-                duplicates_in_population,
-                possible_duplicates_in_population,
+            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
+                id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
+            ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
+            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
+                id__in=duplicates_in_population.union(possible_duplicates_in_population)
+            ).update(deduplication_golden_record_status=UNIQUE)
+            old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
+            registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.batch_duplicates = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_batch_status=DUPLICATE_IN_BATCH,
+            ).count()
+            registration_data_import.batch_possible_duplicates = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_batch_status=SIMILAR_IN_BATCH,
+            ).count()
+            registration_data_import.batch_unique = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_batch_status=UNIQUE_IN_BATCH,
+            ).count()
+            registration_data_import.golden_record_duplicates = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_golden_record_status=DUPLICATE,
+            ).count()
+            registration_data_import.golden_record_possible_duplicates = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_golden_record_status=NEEDS_ADJUDICATION,
+            ).count()
+            registration_data_import.golden_record_unique = PendingIndividual.objects.filter(
+                registration_data_import_id=registration_data_import.id,
+                deduplication_golden_record_status=UNIQUE,
+            ).count()
+            registration_data_import.error_message = ""
+            registration_data_import.save()
+            log_create(
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                None,
+                registration_data_import.program_id,
+                old_object=old_rdi,
+                new_object=registration_data_import,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
             list(pending_individuals.values_list("id", flat=True)),
             get_individual_doc(self.business_area.slug),
         )
+
+    def _set_deduplication_batch_status(self, pending_deduplication_result, pending_individual):
+        if pending_deduplication_result.results_data["duplicates"]:
+            pending_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
+        else:
+            pending_individual.deduplication_batch_status = UNIQUE_IN_BATCH
 
     def _prepare_fields(
         self,
@@ -714,8 +753,8 @@ class DeduplicateTask:
             "business_area",
             None,
             registration_data_import.program_id,
-            old_rdi,
-            registration_data_import,
+            old_object=old_rdi,
+            new_object=registration_data_import,
         )
 
 
@@ -723,31 +762,10 @@ class HardDocumentDeduplication:
     def _get_program_ids(
         self,
         new_documents: QuerySet[Document],
-        registration_data_import: RegistrationDataImport | None,
-        program: Program | None,
-    ) -> list[str]:
-        if program:
-            return [str(program.id)]
-        elif registration_data_import and registration_data_import.program_id:
-            return [str(registration_data_import.program_id)]
-        else:
-            program_ids = list(
-                set(
-                    new_documents.filter(individual__program__isnull=False).values_list(
-                        "individual__program_id", flat=True
-                    )
-                )
-            )
-            return [str(program_id) for program_id in program_ids]
-
-    @transaction.atomic
-    def deduplicate(
-        self,
-        new_documents: QuerySet[Document],
         registration_data_import: RegistrationDataImport | None = None,
         program: Program | None = None,
     ) -> None:
-        program_ids = self._get_program_ids(new_documents, registration_data_import, program)
+        program_ids = self._get_program_ids(new_documents, program, registration_data_import)
 
         for program_id in program_ids:
             program_q = Q(individual__program=program_id)
@@ -794,68 +812,17 @@ class HardDocumentDeduplication:
             ticket_data_dict = {}
             possible_duplicates_individuals_id_set = set()
 
-            for new_document in documents_to_dedup:
-                new_document_signature = self._generate_signature(new_document)
-
-                individual_document_duplicates_count = new_document_signatures_in_batch_per_individual_dict.get(
-                    str(new_document.individual_id), []
-                ).count(new_document_signature)
-
-                is_duplicated_document_number_for_individual: bool = individual_document_duplicates_count > 1
-
-                if new_document_signature in all_matching_number_documents_signatures:
-                    new_document.status = Document.STATUS_NEED_INVESTIGATION
-                    ticket_data = ticket_data_dict.get(
-                        new_document_signature,
-                        {
-                            "original": all_matching_number_documents_dict[new_document_signature],
-                            "possible_duplicates": set(),
-                        },
-                    )
-                    ticket_data["possible_duplicates"].add(new_document)
-                    ticket_data_dict[new_document_signature] = ticket_data
-                    possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-
-                elif new_document_signatures_duplicated_in_batch.count(new_document_signature) > 1:
-                    if is_duplicated_document_number_for_individual:
-                        # do not create ticket for the same Individual with the same doc number
-                        if new_document.type.valid_for_deduplication:
-                            new_document.status = Document.STATUS_INVALID
-                        elif (
-                            new_documents.filter(
-                                id__in=[d.id for d in documents_to_dedup],
-                                document_number=new_document.document_number,
-                                type=new_document.type,
-                                individual=new_document.individual,
-                            )
-                            .exclude(id=new_document.id)
-                            .exists()
-                        ):
-                            # same document number/type/individual_id exists in batch
-                            new_document.status = Document.STATUS_INVALID
-                        else:
-                            new_document.status = Document.STATUS_VALID
-                        new_document_signatures_in_batch_per_individual_dict[str(new_document.individual_id)].remove(
-                            new_document_signature
-                        )
-                        new_document_signatures_duplicated_in_batch.remove(new_document_signature)
-                    elif new_document_signature not in already_processed_signatures:
-                        # first occurrence of new document is considered valid, duplicated are added in next iterations
-                        new_document.status = Document.STATUS_VALID
-                        ticket_data_dict[new_document_signature] = {
-                            "original": new_document,
-                            "possible_duplicates": set(),
-                        }
-                        already_processed_signatures.add(new_document_signature)
-                    else:
-                        new_document.status = Document.STATUS_NEED_INVESTIGATION
-                        ticket_data_dict[new_document_signature]["possible_duplicates"].add(new_document)
-                        possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-
-                else:
-                    # not a duplicate
-                    new_document.status = Document.STATUS_VALID
-                    already_processed_signatures.add(new_document_signature)
+            self._deduplication_documents(
+                all_matching_number_documents_dict,
+                all_matching_number_documents_signatures,
+                already_processed_signatures,
+                documents_to_dedup,
+                new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
+                new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
+                new_documents=new_documents,
+                possible_duplicates_individuals_id_set=possible_duplicates_individuals_id_set,
+                ticket_data_dict=ticket_data_dict,
+            )
 
             try:
                 Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
@@ -957,6 +924,108 @@ class HardDocumentDeduplication:
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
         for created_ticket in created_tickets:
             created_ticket.populate_cross_area_flag()
+
+    def _deduplication_documents(
+        self,
+        all_matching_number_documents_dict,
+        all_matching_number_documents_signatures,
+        already_processed_signatures,
+        documents_to_dedup,
+        **kwargs,
+    ):
+        new_document_signatures_duplicated_in_batch: list[Any] = kwargs.get(
+            "new_document_signatures_duplicated_in_batch"
+        )
+        new_document_signatures_in_batch_per_individual_dict: defaultdict[Any, list] = kwargs.get(
+            "new_document_signatures_in_batch_per_individual_dict"
+        )
+        new_documents: QuerySet[Document, Document] = kwargs.get("new_documents")
+        possible_duplicates_individuals_id_set: set[Any] = kwargs.get("possible_duplicates_individuals_id_set")
+        ticket_data_dict: dict[Any, Any] = kwargs.get("ticket_data_dict")
+        for new_document in documents_to_dedup:
+            new_document_signature = self._generate_signature(new_document)
+
+            individual_document_duplicates_count = new_document_signatures_in_batch_per_individual_dict.get(
+                str(new_document.individual_id), []
+            ).count(new_document_signature)
+
+            is_duplicated_document_number_for_individual: bool = individual_document_duplicates_count > 1
+
+            if new_document_signature in all_matching_number_documents_signatures:
+                new_document.status = Document.STATUS_NEED_INVESTIGATION
+                ticket_data = ticket_data_dict.get(
+                    new_document_signature,
+                    {
+                        "original": all_matching_number_documents_dict[new_document_signature],
+                        "possible_duplicates": set(),
+                    },
+                )
+                ticket_data["possible_duplicates"].add(new_document)
+                ticket_data_dict[new_document_signature] = ticket_data
+                possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
+
+            elif new_document_signatures_duplicated_in_batch.count(new_document_signature) > 1:
+                if is_duplicated_document_number_for_individual:
+                    # do not create ticket for the same Individual with the same doc number
+                    if new_document.type.valid_for_deduplication:
+                        new_document.status = Document.STATUS_INVALID
+                    elif (
+                        new_documents.filter(
+                            id__in=[d.id for d in documents_to_dedup],
+                            document_number=new_document.document_number,
+                            type=new_document.type,
+                            individual=new_document.individual,
+                        )
+                        .exclude(id=new_document.id)
+                        .exists()
+                    ):
+                        # same document number/type/individual_id exists in batch
+                        new_document.status = Document.STATUS_INVALID
+                    else:
+                        new_document.status = Document.STATUS_VALID
+                    new_document_signatures_in_batch_per_individual_dict[str(new_document.individual_id)].remove(
+                        new_document_signature
+                    )
+                    new_document_signatures_duplicated_in_batch.remove(new_document_signature)
+                elif new_document_signature not in already_processed_signatures:
+                    # first occurrence of new document is considered valid, duplicated are added in next iterations
+                    new_document.status = Document.STATUS_VALID
+                    ticket_data_dict[new_document_signature] = {
+                        "original": new_document,
+                        "possible_duplicates": set(),
+                    }
+                    already_processed_signatures.add(new_document_signature)
+                else:
+                    new_document.status = Document.STATUS_NEED_INVESTIGATION
+                    ticket_data_dict[new_document_signature]["possible_duplicates"].add(new_document)
+                    possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
+
+            else:
+                # not a duplicate
+                new_document.status = Document.STATUS_VALID
+                already_processed_signatures.add(new_document_signature)
+
+    def _get_program_ids(
+        self,
+        new_documents: QuerySet[Document, Document],
+        program: Program | None,
+        registration_data_import: RegistrationDataImport | None,
+    ) -> list[str]:
+        if program:
+            program_ids = [str(program.id)]
+        elif registration_data_import and registration_data_import.program_id:
+            program_ids = [str(registration_data_import.program_id)]
+        else:
+            # can remove filter after refactoring Individual.program null=False
+            program_ids = list(
+                set(
+                    new_documents.filter(individual__program__isnull=False).values_list(
+                        "individual__program_id", flat=True
+                    )
+                )
+            )
+            program_ids = [str(program_id) for program_id in program_ids]
+        return program_ids
 
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:

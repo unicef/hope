@@ -441,8 +441,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 collection_date = self._handle_date_field(collection_date_cell)
             PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
 
-    def _build_complex_fields_config(self) -> tuple[dict[str, dict[str, Callable]], dict[str, Callable]]:
-        """Build complex fields configuration for individuals and households."""
+    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:  # noqa: PLR0912
         complex_fields: dict[str, dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -795,8 +794,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     "business_area",
                     None,
                     rdi_mis.program_id,
-                    old_rdi_mis,
-                    rdi_mis,
+                    old_object=old_rdi_mis,
+                    new_object=rdi_mis,
                 )
         except Exception:  # pragma: no cover
             # print stack trace

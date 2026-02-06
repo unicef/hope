@@ -295,25 +295,19 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment_id is None:
             return  # safety check
         payment = self.payments_dict[payment_id]
-        self.logger.info(f"Importing row for payment {payment_id}")
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
-        delivery_date = self._get_optional_cell_value(row, "delivery_date")
-        reference_id = self._get_optional_cell_value(row, "reference_id")
-        reason_for_unsuccessful_payment = self._get_optional_cell_value(row, "reason_for_unsuccessful_payment")
-        additional_collector_name = self._get_optional_cell_value(row, "additional_collector_name")
-        additional_document_type = self._get_optional_cell_value(row, "additional_document_type")
-        additional_document_number = self._get_optional_cell_value(row, "additional_document_number")
-        transaction_status_blockchain_link = self._get_optional_cell_value(row, "transaction_status_blockchain_link")
+        (
+            additional_collector_name,
+            additional_document_number,
+            additional_document_type,
+            delivery_date,
+            reason_for_unsuccessful_payment,
+            reference_id,
+            transaction_status_blockchain_link,
+        ) = self._get_values_for_update(row)
 
-        if isinstance(delivery_date, str):
-            delivery_date = parse(delivery_date)
-
-        if delivery_date and delivery_date.tzinfo is None:
-            delivery_date = pytz.utc.localize(delivery_date)
-
-        if payment_delivery_date := payment.delivery_date:
-            payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
+        delivery_date, payment_delivery_date = self._set_payment_delivery_date(delivery_date, payment)
 
         # convert to date
         delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
@@ -365,4 +359,82 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.transaction_status_blockchain_link = transaction_status_blockchain_link
 
                 self.payments_to_save.append(payment)
-                self._update_payment_verification(payment, delivered_quantity)
+                # update PaymentVerification status
+                payment_verification = payment.payment_verifications.first()
+                if payment_verification and payment_verification.status != PaymentVerification.STATUS_PENDING:
+                    if payment_verification.received_amount == delivered_quantity:
+                        pv_status = PaymentVerification.STATUS_RECEIVED
+                    elif delivered_quantity == 0 or delivered_quantity is None:
+                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
+                    else:
+                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+
+                    payment_verification.status = pv_status
+                    payment_verification.status_date = timezone.now()
+                    self.payment_verifications_to_save.append(payment_verification)
+
+                    payment_verification_plan = payment_verification.payment_verification_plan
+                    self.logger.info(f"Calculating counts for payment verification plan {payment_verification_plan.id}")
+                    calculate_counts(payment_verification_plan)
+                    payment_verification_plan.save()
+
+    def _set_payment_delivery_date(self, delivery_date, payment):
+        if isinstance(delivery_date, str):
+            delivery_date = parse(delivery_date)
+
+        if delivery_date and delivery_date.tzinfo is None:
+            delivery_date = pytz.utc.localize(delivery_date)
+
+        if payment_delivery_date := payment.delivery_date:
+            payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
+        return delivery_date, payment_delivery_date
+
+    def _get_values_for_update(self, row: Row):
+        if "delivery_date" in self.xlsx_headers:
+            delivery_date = row[self.xlsx_headers.index("delivery_date")].value
+        else:
+            delivery_date = None
+
+        if "reference_id" in self.xlsx_headers:
+            reference_id = row[self.xlsx_headers.index("reference_id")].value
+        else:
+            reference_id = None
+
+        if "reason_for_unsuccessful_payment" in self.xlsx_headers:
+            reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
+        else:
+            reason_for_unsuccessful_payment = None
+
+        if "additional_collector_name" in self.xlsx_headers:
+            additional_collector_name = row[self.xlsx_headers.index("additional_collector_name")].value
+        else:
+            additional_collector_name = None
+
+        if "transaction_status_blockchain_link" in self.xlsx_headers:
+            transaction_status_blockchain_link = row[
+                self.xlsx_headers.index("transaction_status_blockchain_link")
+            ].value
+        else:
+            transaction_status_blockchain_link = None
+        additional_document_number, additional_document_type = self._get_additional_doc_values(row)
+        return (
+            additional_collector_name,
+            additional_document_number,
+            additional_document_type,
+            delivery_date,
+            reason_for_unsuccessful_payment,
+            reference_id,
+            transaction_status_blockchain_link,
+        )
+
+    def _get_additional_doc_values(self, row: Row):
+        if "additional_document_type" in self.xlsx_headers:
+            additional_document_type = row[self.xlsx_headers.index("additional_document_type")].value
+        else:
+            additional_document_type = None
+
+        if "additional_document_number" in self.xlsx_headers:
+            additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
+        else:
+            additional_document_number = None
+        return additional_document_number, additional_document_type

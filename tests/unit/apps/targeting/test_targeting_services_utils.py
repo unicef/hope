@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.targeting.services.utils import (
     from_input_to_targeting_criteria,
     get_existing_unicef_ids,
@@ -42,13 +42,13 @@ class TestPaymentPlanModel(TestCase):
         assert ids_1 == f"{self.hh1}"
 
         ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", Household, self.program)
-        assert ids_2 == f"{self.hh1}, {self.hh2}"
+        assert sorted(ids_2.split(", ")) == sorted([str(self.hh1), str(self.hh2)])
 
         ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", Individual, self.program)
         assert ids_3 == f"{self.ind1}"
 
         ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", Individual, self.program)
-        assert ids_4 == f"{self.ind1}, {self.ind2}"
+        assert sorted(ids_4.split(", ")) == sorted([str(self.ind1), str(self.ind2)])
 
     def test_from_input_to_targeting_criteria(self) -> None:
         assert TargetingCriteriaRule.objects.count() == 0

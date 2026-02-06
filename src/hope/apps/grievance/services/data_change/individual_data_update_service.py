@@ -334,11 +334,37 @@ class IndividualDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
-        for field, valid_field in [("phone_no", "phone_no_valid"), ("phone_no_alternative", "phone_no_alternative_valid")]:
-            if field in only_approved_data:
-                only_approved_data[valid_field] = is_valid_phone_number(only_approved_data[field])
-        if household:
-            self._update_household_fields(household, only_approved_data)
+        self._validate_phone_numbers(only_approved_data)
+        # people update
+        hh_fields = [
+            "consent",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "currency",
+            "unhcr_id",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "registration_method",
+            "admin_area_title",
+        ]
+        # move HH fields from only_approved_data into hh_approved_data
+        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
+        if hh_approved_data:
+            if hh_country_origin := hh_approved_data.get("country_origin"):
+                hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
+            if hh_country := hh_approved_data.get("country"):
+                hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
+            admin_area_title = hh_approved_data.pop("admin_area_title", None)
+            # people update HH
+            Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
+            updated_household = Household.objects.get(id=household.id)
+            if admin_area_title:
+                area = Area.objects.filter(p_code=admin_area_title).first()
+                updated_household.set_admin_areas(area)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
@@ -382,8 +408,8 @@ class IndividualDataUpdateService(DataChangeService):
             "business_area",
             user,
             program_qs,
-            old_individual,
-            new_individual,
+            old_object=old_individual,
+            new_object=new_individual,
         )
 
         update_es(individual)
@@ -394,4 +420,13 @@ class IndividualDataUpdateService(DataChangeService):
                     should_populate_index=True,
                     individual_id=str(new_individual.id),
                 )
+            )
+
+    def _validate_phone_numbers(self, only_approved_data):
+        if "phone_no" in only_approved_data:
+            only_approved_data["phone_no_valid"] = is_valid_phone_number(only_approved_data["phone_no"])
+
+        if "phone_no_alternative" in only_approved_data:
+            only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
+                only_approved_data["phone_no_alternative"]
             )

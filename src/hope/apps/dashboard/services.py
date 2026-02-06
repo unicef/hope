@@ -11,6 +11,7 @@ from typing import (
 )
 from uuid import UUID
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, DecimalField, F, Q, Value
@@ -168,7 +169,7 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_base_payment_queryset(cls, business_area: BusinessArea | None = None) -> models.QuerySet:
         qs = (
-            Payment.objects.using("read_only")
+            Payment.objects.using(settings.DASHBOARD_DB)
             .select_related(
                 "business_area",
                 "household",
@@ -292,7 +293,7 @@ class DashboardCacheBase(Protocol):
                 continue
 
             households_qs = (
-                Household.objects.using("read_only")
+                Household.objects.using(settings.DASHBOARD_DB)
                 .filter(id__in=batch_ids)
                 .select_related("admin1", "admin_area", "business_area", "program", "program__data_collecting_type")
                 .annotate(
@@ -494,7 +495,7 @@ class DashboardDataCache(DashboardCacheBase):
                 years_to_refresh = None
 
         try:
-            business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+            business_area = BusinessArea.objects.using(settings.DASHBOARD_DB).get(slug=business_area_slug)
         except BusinessArea.DoesNotExist:
             cls.store_data(business_area_slug, [])
             return []
@@ -503,10 +504,9 @@ class DashboardDataCache(DashboardCacheBase):
 
         if is_partial_refresh_attempt and years_to_refresh:
             date_field_expr: F | Coalesce = Coalesce("delivery_date", "entitlement_date", "status_date")
-            if base_payments_qs.exists():
-                base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
-                    _temp_refresh_year__in=years_to_refresh
-                )
+            base_payments_qs = cls._annotate_refresh_year_for_payments(
+                base_payments_qs, date_field_expr, years_to_refresh
+            )
 
         household_ids: set[UUID] = {
             hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
@@ -589,9 +589,49 @@ class DashboardDataCache(DashboardCacheBase):
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
             current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
-            cls._process_household_in_country_payment(payment, household_map, current_summary)
+            household_id = payment.get("household_id_val")
+            cls._summary_count(current_summary, household_id, household_map, payment)
 
-        newly_processed_result_list = cls._build_country_summary_results(summary)
+        newly_processed_result_list = []
+        for (
+            year,
+            month,
+            admin1,
+            program,
+            sector,
+            fsp,
+            delivery_type,
+            status,
+            currency,
+        ), totals in summary.items():
+            month_name = "Unknown"
+            if month and 1 <= month <= 12:
+                month_name = calendar.month_name[month]
+
+            newly_processed_result_list.append(
+                {
+                    "year": year,
+                    "month": month_name,
+                    "admin1": admin1,
+                    "program": program,
+                    "sector": sector,
+                    "fsp": fsp,
+                    "delivery_types": delivery_type,
+                    "status": status,
+                    "currency": currency,
+                    "total_delivered_quantity_usd": totals["total_usd"],
+                    "total_delivered_quantity": totals["total_quantity"],
+                    "payments": totals["total_payments"],
+                    "households": len(totals["_seen_households"]),
+                    "individuals": totals["individuals"],
+                    "children_counts": int(round(totals["children_counts"])),
+                    "pwd_counts": totals["pwd_counts"],
+                    "reconciled": totals["reconciled_count"],
+                    "finished_payment_plans": totals["finished_payment_plans"],
+                    "total_payment_plans": totals["total_payment_plans"],
+                    "total_planned_usd": totals["planned_sum_for_group"],
+                }
+            )
 
         final_result_list = newly_processed_result_list
         if is_partial_refresh_attempt:
@@ -603,6 +643,36 @@ class DashboardDataCache(DashboardCacheBase):
         )
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
+
+    @classmethod
+    def _annotate_refresh_year_for_payments(cls, base_payments_qs, date_field_expr, years_to_refresh):
+        if base_payments_qs.exists():
+            base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
+                _temp_refresh_year__in=years_to_refresh
+            )
+        return base_payments_qs
+
+    @classmethod
+    def _summary_count(cls, current_summary, household_id, household_map, payment):
+        if household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]:
+            h_data = household_map.get(household_id, {})
+            current_summary["individuals"] += int(h_data.get("size", 0))
+
+            children_count = h_data.get("children_count")
+            is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
+
+            if not is_sw_program:
+                if children_count is None:
+                    payment_year = payment.get("year")
+                    country_name = h_data.get("country", "Unknown Country")
+                    if payment_year:
+                        fertility_rate = get_fertility_rate(country_name, payment_year)
+                        current_summary["children_counts"] += fertility_rate
+                else:
+                    current_summary["children_counts"] += children_count
+
+            current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+            current_summary["_seen_households"].add(household_id)
 
 
 class DashboardGlobalDataCache(DashboardCacheBase):
@@ -757,40 +827,36 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             summary_for_year: defaultdict[tuple, GlobalSummaryDict] = defaultdict(cls._create_empty_summary)
 
             for payment in payment_data_iter:
-                key = (
-                    payment.get("year"),
-                    payment.get("business_area_name", "Unknown Country"),
-                    payment.get("region_name", "Unknown Region"),
-                    payment.get("sector_name", "Unknown Sector"),
-                    payment.get("delivery_type_name", "Unknown Delivery Type"),
-                    payment.get("payment_status", "Unknown Status"),
+                cls._process_payment_data_iter(household_map, payment, plan_counts, summary_for_year)
+
+            for (
+                year_val_from_key,
+                country,
+                region,
+                sector,
+                delivery_type,
+                status,
+            ), totals in summary_for_year.items():
+                all_newly_processed_data.append(
+                    {
+                        "year": year_val_from_key,
+                        "country": country,
+                        "region": region,
+                        "sector": sector,
+                        "delivery_types": delivery_type,
+                        "status": status,
+                        "total_delivered_quantity_usd": totals["total_usd"],
+                        "payments": totals["total_payments"],
+                        "households": len(totals["_seen_households"]),
+                        "individuals": totals["individuals"],
+                        "children_counts": int(round(totals["children_counts"])),
+                        "pwd_counts": totals["pwd_counts"],
+                        "reconciled": totals["reconciled_count"],
+                        "finished_payment_plans": totals["finished_payment_plans"],
+                        "total_payment_plans": totals["total_payment_plans"],
+                        "total_planned_usd": totals["planned_sum_for_group"],
+                    }
                 )
-                current_summary = summary_for_year[key]
-
-                plan_key_values = [
-                    payment.get("year"),
-                    payment.get("business_area_name", "Unknown Country"),
-                    payment.get("region_name", "Unknown Region"),
-                    payment.get("sector_name", "Unknown Sector"),
-                    payment.get("delivery_type_name", "Unknown Delivery Type"),
-                    payment.get("payment_status", "Unknown Status"),
-                ]
-                plan_key = tuple(plan_key_values)
-
-                if current_summary["total_payments"] == 0:
-                    current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-                    current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
-
-                current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
-                current_summary["total_payments"] += 1
-                current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
-                current_summary["planned_sum_for_group"] += float(
-                    payment.get("total_planned_usd_for_this_payment") or 0.0
-                )
-
-                cls._process_household_in_payment(payment, household_map, current_summary)
-
-            all_newly_processed_data.extend(cls._build_summary_results(summary_for_year))
 
         if is_explicit_partial_refresh:
             final_data_to_cache = all_newly_processed_data + data_from_cache_for_other_years
@@ -803,3 +869,55 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         )
         cls.store_data(identifier, serialized_data)
         return serialized_data
+
+    @classmethod
+    def _process_payment_data_iter(cls, household_map, payment, plan_counts, summary_for_year):
+        key = (
+            payment.get("year"),
+            payment.get("business_area_name", "Unknown Country"),
+            payment.get("region_name", "Unknown Region"),
+            payment.get("sector_name", "Unknown Sector"),
+            payment.get("delivery_type_name", "Unknown Delivery Type"),
+            payment.get("payment_status", "Unknown Status"),
+        )
+        current_summary = summary_for_year[key]
+
+        plan_key_values = [
+            payment.get("year"),
+            payment.get("business_area_name", "Unknown Country"),
+            payment.get("region_name", "Unknown Region"),
+            payment.get("sector_name", "Unknown Sector"),
+            payment.get("delivery_type_name", "Unknown Delivery Type"),
+            payment.get("payment_status", "Unknown Status"),
+        ]
+        plan_key = tuple(plan_key_values)
+
+        if current_summary["total_payments"] == 0:
+            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+
+        current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
+        current_summary["total_payments"] += 1
+        current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+        current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
+
+        household_id = payment.get("household_id_val")
+        if household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]:
+            h_data = household_map.get(household_id, {})
+            current_summary["individuals"] += int(h_data.get("size", 0))
+
+            children_count = h_data.get("children_count")
+            is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
+
+            if not is_sw_program:
+                if children_count is None:
+                    payment_year = payment.get("year")
+                    country_name = h_data.get("country", "Unknown Country")
+                    if payment_year:
+                        fertility_rate = get_fertility_rate(country_name, payment_year)
+                        current_summary["children_counts"] += fertility_rate
+                else:
+                    current_summary["children_counts"] += children_count
+
+            current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+            current_summary["_seen_households"].add(household_id)

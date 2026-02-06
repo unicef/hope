@@ -1,25 +1,24 @@
-from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
 )
-from hope.models import BusinessArea, Country, Document, DocumentType, Household
+from hope.models import BusinessArea, Document, DocumentType, Household
 from hope.models.utils import MergeStatusModel
 
 
@@ -155,9 +154,10 @@ class TestDocument(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadcountries")
+        afghanistan = CountryFactory(
+            name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"
+        )
         cls.business_area = create_afghanistan()
-        afghanistan = Country.objects.get(name="Afghanistan")
         _, (individual,) = create_household(household_args={"size": 1, "business_area": cls.business_area})
 
         cls.country = afghanistan

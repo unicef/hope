@@ -1,50 +1,48 @@
 from typing import Any
 
 from django.core.files.base import ContentFile
-from django.core.management import call_command
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
     create_needs_adjudication_tickets_for_biometrics,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, Individual
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
-pytestmark = pytest.mark.django_db()
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.django_db(),
+]
 
 
-@pytest.mark.elasticsearch
-class TestCreateNeedsAdjudicationTickets(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
+class TestCreateNeedsAdjudicationTickets:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        self.user = UserFactory.create()
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         program = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-        cls.household = HouseholdFactory.build(
+        self.household = HouseholdFactory.build(
             size=2,
             program=program,
         )
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = program
-        cls.household.registration_data_import.save()
-        cls.individuals_to_create = [
+        self.household.household_collection.save()
+        self.household.registration_data_import.imported_by.save()
+        self.household.registration_data_import.program = program
+        self.household.registration_data_import.save()
+        self.individuals_to_create = [
             {
                 "full_name": "test name",
                 "given_name": "test",
@@ -67,13 +65,11 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
             },
         ]
         individuals = [
-            IndividualFactory(household=cls.household, program=program, **individual)
-            for individual in cls.individuals_to_create
+            IndividualFactory(household=self.household, program=program, **individual)
+            for individual in self.individuals_to_create
         ]
-        cls.household.head_of_household = individuals[0]
-        cls.household.save()
-
-        rebuild_search_index()
+        self.household.head_of_household = individuals[0]
+        self.household.save()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
         assert Individual.objects.count() == 2
@@ -127,11 +123,10 @@ class TestCreateNeedsAdjudicationTickets(BaseTestCase):
         assert GrievanceTicket.objects.all().count() == 1
 
 
-@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTicketsBiometrics:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        call_command("loadcountries")
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.business_area = create_afghanistan()
         self.business_area.biometric_deduplication_threshold = 44.44
         self.business_area.save()

@@ -11,14 +11,16 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.core import (
     DataCollectingTypeFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.old_factories.registration_data import (
+    RegistrationDataImportFactory,
+)
 from hope.models import (
     Area,
     BeneficiaryGroup,
@@ -784,15 +786,6 @@ class TestProgrammeDetails:
         )
         page_programme_details.get_button_save().click()
 
-        # ToDo: Lack of information about wrong date 212579
-        # for _ in range(50):
-        #     if ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #             in page_programme_details.get_start_date_cycle_div().text):
-        #         break
-        #     sleep(0.1)
-        # assert ("Programme Cycles' timeframes must not overlap with the provided start date."
-        #         in page_programme_details.get_start_date_cycle_div().text)
-
         page_programme_details.get_start_date_cycle().click()
         page_programme_details.get_start_date_cycle().send_keys(
             (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
@@ -850,6 +843,6 @@ class TestProgrammeDetails:
     ) -> None:
         page_programme_details.select_global_program_filter("Active Programme")
         assert "ACTIVE" in page_programme_details.get_program_status().text
-        assert "1234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
-        assert "1184.98" in page_programme_details.get_program_cycle_total_undelivered_quantity_usd()[0].text
+        assert "1,234.99" in page_programme_details.get_program_cycle_total_entitled_quantity_usd()[0].text
+        assert "1,184.98" in page_programme_details.get_program_cycle_total_undelivered_quantity_usd()[0].text
         assert "50.01" in page_programme_details.get_program_cycle_total_delivered_quantity_usd()[0].text

@@ -3,7 +3,7 @@ from contextlib import suppress
 from datetime import date, datetime
 import io
 from itertools import permutations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import dateutil.parser
 from django.conf import settings
@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
@@ -136,7 +137,30 @@ class CheckAgainstSanctionListTask:
         html_body = render_to_string("sanction_list/check_results.html", context)
         subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
-        base64_encoded_content = self._create_results_attachment(results_dict)
+        attachment_wb = Workbook()
+        attachment_ws = attachment_wb.active
+        attachment_ws.title = "Sanction List Check Results"
+
+        header_row_names = (
+            "FIRST NAME",
+            "SECOND NAME",
+            "THIRD NAME",
+            "FOURTH NAME",
+            "DATE OF BIRTH",
+            "ORIGINAL FILE ROW NUMBER",
+        )
+        attachment_ws.append(header_row_names)
+
+        self.join_names_and_birthday(attachment_ws, results_dict)
+        for i in range(1, len(header_row_names) + 1):
+            attachment_ws.column_dimensions[get_column_letter(i)].width = 30
+
+        buffer = io.BytesIO()
+        attachment_wb.save(buffer)
+        buffer.seek(0)
+
+        attachment_content = buffer.getvalue()
+        base64_encoded_content = base64.b64encode(attachment_content).decode("utf-8")
 
         email = MailjetClient(
             subject=subject,
@@ -151,3 +175,16 @@ class CheckAgainstSanctionListTask:
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         email.send_email()
+
+    def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]):
+        for row_number, individual in results_dict.items():
+            attachment_ws.append(
+                (
+                    individual.first_name,
+                    individual.second_name,
+                    individual.third_name,
+                    individual.fourth_name,
+                    ", ".join(d.strftime("%Y-%m-%d") for d in individual.dates_of_birth.values_list("date", flat=True)),
+                    row_number,
+                )
+            )

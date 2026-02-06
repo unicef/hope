@@ -236,9 +236,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     head_of_households_mapping,
                     household,
                     households_to_create,
-                    individuals_ids_hash_dict,
-                    submission_meta_data,
-                    household_count,
+                    individuals_ids_hash_dict=individuals_ids_hash_dict,
+                    submission_meta_data=submission_meta_data,
+                    household_count=household_count,
                 )
             self.bulk_creates(head_of_households_mapping, households_to_create)
             head_of_households_mapping = {}
@@ -259,8 +259,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             "business_area",
             None,
             self.registration_data_import.program_id,
-            self.registration_data_import,
-            rdi_mis,
+            old_object=self.registration_data_import,
+            new_object=rdi_mis,
         )
         if not self.business_area.postpone_deduplication:
             DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_pending_individuals(
@@ -282,106 +282,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
         )
 
-    def _process_doc_identity_field(
-        self, i_field: str, i_value: Any, current_individual_docs_and_identities: dict, individual_obj: PendingIndividual
-    ) -> None:
-        key = (
-            i_field.replace("_photo_i_c", "")
-            .replace("_no_i_c", "")
-            .replace("_issuer_i_c", "")
-            .replace("_i_c", "")
-        )
-        if i_field.endswith("_type_i_c"):
-            value_key = "name"
-        elif i_field.endswith("_photo_i_c"):
-            value_key = "photo"
-        elif i_field.endswith("_issuer_i_c"):
-            value_key = "issuing_country"
-        else:
-            value_key = "number"
-        current_individual_docs_and_identities[key][value_key] = i_value
-        current_individual_docs_and_identities[key]["individual"] = individual_obj
-
-    def _finalize_household(
-        self,
-        household_obj: PendingHousehold,
-        registration_date: Any,
-        households_to_create: list,
-        current_individuals: list,
-        individuals_to_create_list: list,
-        documents_and_identities_to_create: list,
-    ) -> None:
-        household_obj.first_registration_date = registration_date
-        household_obj.last_registration_date = registration_date
-        household_obj.registration_data_import = self.registration_data_import
-        household_obj.program = self.registration_data_import.program
-        household_obj.business_area = self.business_area
-        household_obj.set_admin_areas(save=False)
-        households_to_create.append(household_obj)
-        for ind in current_individuals:
-            ind.first_registration_date = registration_date
-            ind.last_registration_date = registration_date
-            ind.detail_id = household_obj.detail_id
-        PendingIndividual.objects.bulk_create(individuals_to_create_list)
-        self._handle_documents_and_identities(documents_and_identities_to_create)
-
-    def _finalize_individual(
-        self,
-        individual_obj: PendingIndividual,
-        household_obj: PendingHousehold,
-        only_collector_flag: bool,
-        role: str | None,
-        head_of_households_mapping: dict,
-        individuals_ids_hash_dict: dict,
-        collectors_to_create: dict,
-        individuals_to_create_list: list,
-        current_individuals: list,
-        current_individual_docs_and_identities: dict,
-        documents_and_identities_to_create: list,
-    ) -> None:
-        individual_obj.last_registration_date = individual_obj.first_registration_date
-        individual_obj.registration_data_import = self.registration_data_import
-        individual_obj.program = self.registration_data_import.program
-        individual_obj.business_area = self.business_area
-        individual_obj.age_at_registration = calculate_age_at_registration(
-            self.registration_data_import.created_at,
-            str(individual_obj.birth_date),
-        )
-        populate_pdu_with_null_values(
-            self.registration_data_import.program,
-            individual_obj.flex_fields,
-        )
-
-        if individual_obj.relationship == HEAD:
-            head_of_households_mapping[household_obj] = individual_obj
-
-        individual_obj.household = household_obj if only_collector_flag is False else None
-        individuals_ids_hash_dict[individual_obj.get_hash_key] = individual_obj.id
-
-        if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
-            role_obj = PendingIndividualRoleInHousehold(
-                individual_id=individual_obj.pk,
-                household_id=household_obj.pk,
-                role=role,
-            )
-            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
-        if individual_obj.household is None:
-            individual_obj.relationship = NON_BENEFICIARY
-
-        individuals_to_create_list.append(individual_obj)
-        current_individuals.append(individual_obj)
-        documents_and_identities_to_create.append(current_individual_docs_and_identities)
-
-    def handle_household(
+    def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        individuals_ids_hash_dict: dict,
-        submission_meta_data: dict,
-        household_count: int,
+        **kwargs,
     ) -> None:
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
+        submission_meta_data: dict = kwargs.get("submission_meta_data")
+        household_count: int = kwargs.get("household_count")
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")

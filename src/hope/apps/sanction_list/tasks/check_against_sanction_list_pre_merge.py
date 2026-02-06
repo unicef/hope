@@ -226,4 +226,15 @@ def check_against_sanction_list_pre_merge(
         )
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
-    _save_tickets_and_notify(tickets_to_create, tickets_programs, ticket_details_to_create)
+    GrievanceTicket.objects.bulk_create(tickets_to_create)
+    GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
+    GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+    send_ticket_notifications(tickets_to_create)
+    TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)
+
+
+def send_ticket_notifications(tickets_to_create: list[Any]) -> None:
+    for ticket in tickets_to_create:
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+        )

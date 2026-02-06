@@ -6,14 +6,17 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.periodic_data_update import PDUOnlineEditFactory, PDUOnlineEditSentBackCommentFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.periodic_data_update import (
+    PDUOnlineEditFactory,
+    PDUOnlineEditSentBackCommentFactory,
+)
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import PDUOnlineEdit, Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestPDUOnlineEditDetail:

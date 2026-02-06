@@ -6,35 +6,33 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.grievance import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.grievance import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     AccountFactory,
     FinancialInstitutionFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import AccountType, Country, Document
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestUpdateIndividualDataService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -69,7 +67,6 @@ class TestUpdateIndividualDataService(TestCase):
         )
 
         cls.ticket = ticket_details.ticket
-        rebuild_search_index()
 
     def test_add_document_of_same_type_not_unique_per_individual_valid(self) -> None:
         DocumentFactory(
@@ -389,8 +386,8 @@ class TestUpdateIndividualDataService(TestCase):
         assert document_to_edit.document_number == "111111"
 
     def test_edit_account(self) -> None:
-        fi1 = FinancialInstitutionFactory(id="6")
-        fi2 = FinancialInstitutionFactory(id="7")
+        fi1 = FinancialInstitutionFactory()
+        fi2 = FinancialInstitutionFactory()
         account = AccountFactory(
             id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
             individual=self.individual,
@@ -531,3 +528,20 @@ class TestUpdateIndividualDataService(TestCase):
         assert hh.admin3 is None
         assert hh.admin1 is not None
         assert hh.admin2.parent == hh.admin1
+
+    def test_update_phone_no_data(self) -> None:
+        self.ticket.individual_data_update_ticket_details.individual_data = {
+            "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
+            "phone_no_alternative": {
+                "approve_status": True,
+                "previous_value": "+485656561223",
+                "value": "+485544334455",
+            },
+        }
+        self.ticket.individual_data_update_ticket_details.save()
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        service.close(self.user)
+
+        self.individual.refresh_from_db()
+        assert self.individual.phone_no == "+485544332211"
+        assert self.individual.phone_no_alternative == "+485544334455"

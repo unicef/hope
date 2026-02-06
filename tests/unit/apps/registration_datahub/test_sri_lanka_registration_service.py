@@ -1,17 +1,16 @@
 import datetime
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -36,7 +35,6 @@ from hope.models import (
 class TestSriLankaRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
-        call_command("init_geo_fixtures")
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -51,7 +49,9 @@ class TestSriLankaRegistrationService(TestCase):
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
 
-        country = geo_models.Country.objects.create(name="Sri Lanka")
+        country = geo_models.Country.objects.create(
+            name="Sri Lanka", short_name="Sri Lanka", iso_code2="LK", iso_code3="LKA", iso_num="0144"
+        )
 
         area_type1 = AreaType.objects.create(country=country, name="admin1")
         area_type2 = AreaType.objects.create(country=country, name="admin2")

@@ -2,14 +2,17 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, RoleFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.contrib.aurora.caches import (
     OrganizationListVersionsKeyBit,
     ProjectListVersionsKeyBit,
@@ -17,25 +20,28 @@ from hope.contrib.aurora.caches import (
 )
 from hope.contrib.aurora.models import Organization, Project, Registration
 from hope.models.utils import Grant
-from unit.api.base import HOPEApiTestCase, token_grant_permission
+from unit.api.base import token_grant_permission
+from unit.api.factories import APITokenFactory
+
+pytestmark = pytest.mark.django_db
 
 
-class ProjectListViewTests(HOPEApiTestCase):
-    databases = {"default"}
-    user_permissions = []
+class TestProjectListView:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
+        self.user = UserFactory()
+        self.business_area = BusinessAreaFactory(name="Afghanistan")
+        self.role = RoleFactory(subsystem="API", name="test_role", permissions=[])
+        self.user.role_assignments.create(role=self.role, business_area=self.business_area)
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
+        self.token = APITokenFactory(user=self.user, grants=[])
+        self.token.valid_for.set([self.business_area])
 
-    def setUp(self) -> None:
-        super().setUp()
-        self.program = ProgramFactory(
-            name="Test Program 123",
-        )
-        self.other_program = ProgramFactory(
-            name="Other program",
-        )
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
+
+        self.program = ProgramFactory(name="Test Program 123")
+        self.other_program = ProgramFactory(name="Other program")
         self.organization = OrganizationFactory(
             name="Test Organization",
             slug="test_organization",
@@ -68,7 +74,6 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.url_project = reverse("api:project-list")
         self.url_registration = reverse("api:registration-list")
 
-    # Organization
     def test_organization_list_no_permission(self) -> None:
         response = self.client.get(self.url_organization)
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -92,13 +97,11 @@ class ProjectListViewTests(HOPEApiTestCase):
         )
         assert cache.get(cache_key)
         assert len(queries) > 0
-        # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_organization)
         assert resp_2.status_code == 200
         assert len(queries2) < len(queries)
 
-    # Project
     def test_project_list_no_permission(self) -> None:
         response = self.client.get(self.url_project)
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -110,7 +113,6 @@ class ProjectListViewTests(HOPEApiTestCase):
                 response = self.client.get(self.url_project)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 2
-        # check first
         project = response.data["results"][0]
         assert project["name"] == "Test Project 1"
         assert project["aurora_id"] == 111
@@ -124,7 +126,6 @@ class ProjectListViewTests(HOPEApiTestCase):
         )
         assert cache.get(cache_key) is not None
         assert len(queries) > 0
-        # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_project)
         assert resp_2.status_code == 200
@@ -152,7 +153,6 @@ class ProjectListViewTests(HOPEApiTestCase):
         assert project["hope_id"] == str(self.other_program.pk)
         assert project["organization"] == self.organization_2.slug
 
-    # Registration
     def test_registration_list_no_permission(self) -> None:
         response = self.client.get(self.url_registration)
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -171,7 +171,6 @@ class ProjectListViewTests(HOPEApiTestCase):
         )
         assert cache.get(cache_key) is not None
         assert len(queries) > 0
-        # second call
         with CaptureQueriesContext(connection) as queries2:
             resp_2 = self.client.get(self.url_registration)
         assert resp_2.status_code == 200

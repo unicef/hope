@@ -2,19 +2,18 @@ import datetime
 import json
 from typing import Union
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_TAX_ID,
@@ -26,7 +25,6 @@ from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
 from hope.models import (
-    Country,
     DataCollectingType,
     DocumentType,
     PendingDocument,
@@ -41,11 +39,11 @@ class TestGenericRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        call_command("init_geo_fixtures")
+        # Create only countries needed by test
+        ukr = CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
-        ukr = Country.objects.get(name="Ukraine")
 
         cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
         cls.data_collecting_type.limit_to.add(cls.business_area)

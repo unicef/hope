@@ -172,7 +172,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -351,6 +351,28 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
+    def list_of_integer_validator(self, values: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+        if not self.required_validator(values, header, *args, **kwargs):
+            return False
+        if values is None:
+            return True
+        # int like 23
+        if isinstance(values, int) and not isinstance(values, bool):
+            return True
+        # like '2;34;12'
+        if isinstance(values, str):
+            try:
+                # check if we can convert all strings into integer
+                [int(x.strip()) for x in values.split(";") if x.strip()]
+                return True
+            except (ValueError, TypeError):
+                return False
+            except Exception as e:  # pragma: no cover
+                logger.warning(e)
+                raise
+        else:
+            return False
+
     def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
@@ -432,7 +454,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -444,43 +466,24 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-
-            choice_type = self.all_fields[header]["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if isinstance(value, str):
-                    return value.strip() in choices
-                if value not in choices:
-                    str_value = str(value)
-                    return str_value in choices
-                return False
-
-            if choice_type == TYPE_SELECT_MANY:
-                if isinstance(value, str):
-                    if "," in value:
-                        selected_choices = value.split(",")
-                    elif ";" in value:
-                        selected_choices = value.split(";")
-                    else:
-                        selected_choices = value.split(" ")
-                else:
-                    selected_choices = [value]
-
-                for unstrip_choice in selected_choices:
-                    if isinstance(unstrip_choice, str):
-                        choice = unstrip_choice.strip()
-                        if choice in choices or choice.upper() in choices:
-                            return True
-                    else:
-                        choice = unstrip_choice
-                    if choice in choices:
-                        return True
-                return False
+            handlers: dict[str, Callable[[Any, set], bool]] = {
+                TYPE_SELECT_ONE: self._validate_select_one_choice,
+                TYPE_SELECT_MANY: self._validate_select_many_choice,
+            }
+            if handler := handlers.get(self.all_fields[header]["type"]):
+                return handler(value, choices)
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
+        return str(value).strip() in choices
+
+    def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
+        selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
+        return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
@@ -532,174 +535,29 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def _init_doc_identity_dicts(self) -> tuple[dict, dict]:
-        identities_numbers = {
-            "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "scope_id_no_i_c": {"partner": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
-        }
-        documents_numbers: dict[str, dict[str, Any]] = {
-            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "national_id_no_i_c": {"type": "NATIONAL_ID", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "national_passport_no_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "tax_id_no_i_c": {"type": "TAX_ID", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": [], "issuing_countries": []},
-            "other_id_no_i_c": {},
-        }
-        return identities_numbers, documents_numbers
-
-    def _process_document_number(
-        self, header_value_doc: str, value: Any, documents_numbers: dict, identities_numbers: dict
-    ) -> None:
-        if header_value_doc in documents_numbers:
-            if header_value_doc == "other_id_type_i_c":
-                documents_numbers["other_id_type_i_c"]["names"].append(value)
-            elif header_value_doc == "other_id_no_i_c":
-                documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
-            else:
-                documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
-
-        if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-            document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
-            documents_dict = documents_numbers
-            if document_key in identities_numbers:
-                documents_dict = identities_numbers
-            if document_key:
-                documents_dict[document_key]["issuing_countries"].append(value)
-
-        if header_value_doc in identities_numbers:
-            identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
-
-    ADMIN_COLUMNS_PEOPLE = ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c")
-    ADMIN_COLUMNS_HH = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
-    ADMIN_COLUMNS_ALL = ADMIN_COLUMNS_PEOPLE + ADMIN_COLUMNS_HH
-
-    def _get_validator_switch_dict(self) -> dict[str, Callable]:
-        return {
-            "ID": self.not_empty_validator,
-            "STRING": self.string_validator,
-            "INTEGER": self.integer_validator,
-            "DECIMAL": self.float_validator,
-            "BOOL": self.bool_validator,
-            "DATE": self.date_validator,
-            "DATETIME": self.date_validator,
-            "SELECT_ONE": self.choice_validator,
-            "SELECT_MANY": self.choice_validator,
-            "PHONE_NUMBER": self.phone_validator,
-            "GEOPOINT": self.geolocation_validator,
-            "IMAGE": self.image_validator,
-            "LIST_OF_IDS": self.integer_validator,
-        }
-
-    def _find_header_column_indices(self, first_row: Any) -> tuple[int | None, int | None]:
-        household_id_col_idx = None
-        relationship_col_idx = None
-        for idx, header_cell in enumerate(first_row):
-            if header_cell.value == "household_id":
-                household_id_col_idx = idx
-            elif header_cell.value == "relationship_i_c":
-                relationship_col_idx = idx
-        return household_id_col_idx, relationship_col_idx
-
-    def _validate_admin_column(
-        self, header_value: str, cell_value: Any, row_number: int, admin_area_code_tuples: list
-    ) -> dict | None:
-        if header_value not in self.ADMIN_COLUMNS_ALL:
-            return None
-        if cell_value:
-            admin_area_code_tuples.append((row_number, header_value, cell_value))
-        elif not cell_value and header_value not in ("admin3_h_c", "pp_admin3_i_c"):
-            return {
-                "row_number": row_number,
-                "header": header_value,
-                "message": f"{header_value.capitalize()} field cannot be null",
-            }
-        return None
-
-    def _validate_field_type(
-        self, value: Any, header_value: str, cell: Any, field_type: str, sheet_title: str,
-        switch_dict: dict, household_id_can_be_empty: bool
-    ) -> dict | None:
-        fn: Callable = switch_dict[field_type]
-        if (
-            fn(value, header_value, cell) is False
-            and household_id_can_be_empty is False
-            and header_value not in self.ADMIN_COLUMNS_ALL
-        ):
-            message = (
-                f"Sheet: {sheet_title!r}, Unexpected value: "
-                f"{value} for type {field_type.replace('_', ' ').lower()} of field {header_value}"
-            )
-            return {"row_number": cell.row, "header": header_value, "message": message}
-        return None
-
-    def _validate_head_of_household(self) -> list[dict]:
-        invalid_rows = []
-        for household_id, count in self.head_of_household_count.items():
-            if count == 0:
-                message = f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
-                invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
-            elif count > 1:
-                message = f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
-                invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
-        return invalid_rows
-
-    def _process_row_household_data(
-        self, row: tuple, household_id_col_idx: int | None, relationship_col_idx: int | None, sheet_title: str
-    ) -> Any:
-        """Extract household_id from row and update head of household tracking."""
-        current_household_id = None
-        if household_id_col_idx is not None:
-            household_id_cell = row[household_id_col_idx]
-            if value := household_id_cell.value:
-                if isinstance(value, float) and value.is_integer():
-                    value = int(value)
-                current_household_id = value
-                if sheet_title == "Households":
-                    self.household_ids.append(current_household_id)
-                    self.head_of_household_count[current_household_id] = 0
-
-        if relationship_col_idx is not None and current_household_id is not None:
-            relationship_cell = row[relationship_col_idx]
-            if relationship_cell.value == "HEAD":
-                self.head_of_household_count[current_household_id] += 1
-
-        return current_household_id
-
-    def _validate_row_household_reference(self, current_household_id: Any, row_number: int) -> dict | None:
-        """Check if individual's household exists."""
-        if current_household_id and current_household_id not in self.household_ids:
-            message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
-            return {"row_number": row_number, "header": "relationship_i_c", "message": message}
-        return None
-
-    def _accumulate_doc_identity_validation_data(
-        self, row: tuple, identities_numbers: dict, documents_numbers: dict
-    ) -> None:
-        """Add validation data entry for each document/identity type."""
-        for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
-            documents_or_identity_dict = (
-                identities_numbers if header_value_doc in identities_numbers else documents_numbers
-            )
-            documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
-
-    def _run_document_identity_validation(
-        self, sheet_title: str, documents_numbers: dict, identities_numbers: dict
-    ) -> tuple[list, list]:
-        """Run document and identity validation for Individuals/People sheets."""
-        if sheet_title in ["Individuals", "People"]:
-            return self.documents_validator(documents_numbers), self.identity_validator(identities_numbers)
-        return [], []
-
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
         try:
             first_row = sheet[1]
             combined_fields = {
                 **self.combined_fields[sheet.title.lower()],
             }
 
-            switch_dict = self._get_validator_switch_dict()
+            switch_dict: dict[str, Callable] = {
+                "ID": self.not_empty_validator,
+                "STRING": self.string_validator,
+                "INTEGER": self.integer_validator,
+                "DECIMAL": self.float_validator,
+                "BOOL": self.bool_validator,
+                "DATE": self.date_validator,
+                "DATETIME": self.date_validator,
+                "SELECT_ONE": self.choice_validator,
+                "SELECT_MANY": self.choice_validator,
+                "PHONE_NUMBER": self.phone_validator,
+                "GEOPOINT": self.geolocation_validator,
+                "IMAGE": self.image_validator,
+                "LIST_OF_IDS": self.list_of_integer_validator,
+            }
+
             invalid_rows = []
             household_id_col_idx, relationship_col_idx = self._find_header_column_indices(first_row)
             identities_numbers, documents_numbers = self._init_doc_identity_dicts()
@@ -1093,7 +951,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             values_only=True,
                         )
                     )[0]
-            pr_ids = [int(i) for i in primary_collector_ids if i is not None]
+            # convert ["('1", '4', '5', '6', "7','2',None)] => [['1', '2'], ['3']]
+            pr_ids = [collectors_str_ids_to_list(i) for i in primary_collector_ids if i is not None]
+            # convert [['1', '2'], ['3']] => [1, 2, 3]
+            pr_ids = [int(x) for sublist in pr_ids for x in sublist]
+
             for index_id, relationship, pr_col in itertools.zip_longest(
                 index_ids, relationship_column, primary_collector_ids, fillvalue=None
             ):
@@ -1271,45 +1133,58 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def standard_type_validator(self, value: str, field: str, field_type: str) -> str | None:
         try:
             value_type_name = type(value).__name__
-
-            if field_type == "INTEGER":
-                try:
-                    int(value)
-                    return None
-                except (ValueError, TypeError):
-                    return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
-            elif field_type == "STRING":
-                # everything from Kobo is string so cannot really validate it
-                # only check phone number
-                if field.startswith("phone_no"):
-                    try:
-                        phonenumbers.parse(value, None)
-                    except (phonenumbers.NumberParseException, TypeError):
-                        return f"Invalid phone number {value} for field {field}"
+            handler = self._get_standard_type_handler(field_type)
+            if handler is None:
                 return None
 
-            elif field_type == "BOOL":
-                # Important! if value == 0 or 1 it's also evaluated to True
-                # checking for int values even tho Kobo returns everything as str
-                # to no not break import if they start returning integers
-                if value in (
-                    "True",
-                    "False",
-                    True,
-                    False,
-                    "0",
-                    "1",
-                    "TRUE",
-                    "FALSE",
-                    "true",
-                    "false",
-                ):
-                    return None
-                return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
+            return handler(value, field, value_type_name)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
         return None
+
+    def _get_standard_type_handler(self, field_type: str) -> Callable[[str, str, str], str | None] | None:
+        handlers: dict[str, Callable[[str, str, str], str | None]] = {
+            "INTEGER": self._validate_integer_type,
+            "STRING": self._validate_string_type,
+            "BOOL": self._validate_bool_type,
+        }
+        return handlers.get(field_type)
+
+    def _validate_integer_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        try:
+            int(value)
+            return None
+        except (ValueError, TypeError):
+            return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
+
+    def _validate_string_type(self, value: str, field: str, value_type_name: str) -> str | None:  # noqa: ARG002
+        # Everything from Kobo is string so cannot really validate it; only check phone number.
+        if field.startswith("phone_no"):
+            try:
+                phonenumbers.parse(value, None)
+            except (phonenumbers.NumberParseException, TypeError):
+                return f"Invalid phone number {value} for field {field}"
+        return None
+
+    def _validate_bool_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        # Important! if value == 0 or 1 it's also evaluated to True
+        # checking for int values even tho Kobo returns everything as str
+        allowed_values = {
+            "True",
+            "False",
+            True,
+            False,
+            "0",
+            "1",
+            "TRUE",
+            "FALSE",
+            "true",
+            "false",
+        }
+        if value in allowed_values:
+            return None
+        return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
 
     def image_validator(self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any) -> str | None:
         try:
@@ -1317,7 +1192,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # skip validation if skip_validate_pictures=True
                 return None
             allowed_extensions = django_core_validators.get_available_image_extensions()
-            file_extension = value.split(".")[-1]
+            file_extension = value.rsplit(".", maxsplit=1)[-1]
 
             if file_extension.lower() not in allowed_extensions:
                 return f"Specified image {value} for field {field} is not a valid image file"
@@ -1384,44 +1259,45 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if not value:
                 return message
 
-            found_field: dict = self.all_fields[field]
-            custom_validate_choices_method = found_field.get("custom_validate_choices")
-            choices = found_field["choices"]
-            choice_type = found_field["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(value) is True else message
-
-                is_in_choices = value in choices
-                if is_in_choices is False:
-                    # try uppercase version
-                    uppercase_value = value.upper()
-                    is_in_choices = uppercase_value in choices
-                return None if is_in_choices else message
-
-            if choice_type == TYPE_SELECT_MANY:
-                str_value = str(value)
-                if "," in str_value:
-                    selected_choices = str_value.split(",")
-                elif ";" in str_value:
-                    selected_choices = str_value.split(";")
-                else:
-                    selected_choices = str_value.split(" ")
-
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(str_value) is True else message
-
-                for unstrip_choice in selected_choices:
-                    choice = unstrip_choice.strip()
-                    if choice not in choices and choice.upper() not in choices:
-                        return message
+            found_field: dict[str, Any] = self.all_fields[field]
+            handler = self._get_choice_handler(found_field["type"])
+            if handler is None:
                 return None
 
-            return None
+            return handler(value, found_field, message)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _get_choice_handler(self, choice_type: str) -> Callable[[str, dict[str, Any], str], str | None] | None:
+        handlers: dict[str, Callable[[str, dict[str, Any], str], str | None]] = {
+            TYPE_SELECT_ONE: self._validate_select_one_choice,
+            TYPE_SELECT_MANY: self._validate_select_many_choice,
+        }
+        return handlers.get(choice_type)
+
+    def _validate_select_one_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(value) else message
+
+        choices = found_field["choices"]
+        normalized_value = value if value in choices else value.upper()
+        return None if normalized_value in choices else message
+
+    def _validate_select_many_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        str_value = str(value)
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(str_value) else message
+
+        choices = found_field["choices"]
+        for unstrip_choice in re.split(r"[,\s;]+", value.strip()):
+            choice = unstrip_choice.strip()
+            if choice in choices or choice.upper() in choices:
+                continue
+            return message
+        return None
 
     def _get_field_type_error(
         self,
@@ -1493,119 +1369,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def _init_kobo_doc_identity_dicts(self) -> tuple[dict, dict]:
-        """Initialize document and identity dicts for Kobo validation."""
-        identities_numbers = {
-            "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "scope_id_no_i_c": {"partner": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
-        }
-        documents_numbers: dict[str, dict[str, Any]] = {
-            "birth_certificate_no_i_c": {
-                "type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "drivers_license_no_i_c": {
-                "type": "DRIVERS_LICENSE", "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "electoral_card_no_i_c": {
-                "type": "ELECTORAL_CARD", "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "national_id_no_i_c": {
-                "type": "NATIONAL_ID", "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "national_passport_no_i_c": {
-                "type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "tax_id_no_i_c": {"type": "TAX_ID", "validation_data": [], "numbers": [], "issuing_countries": []},
-            "other_id_type_i_c": {
-                "type": "OTHER", "names": [], "validation_data": [], "numbers": [], "issuing_countries": []
-            },
-            "other_id_no_i_c": {},
-        }
-        return identities_numbers, documents_numbers
-
-    def _build_saved_submissions_lookup(
-        self, reduced_submissions: Sequence, business_area: "BusinessArea"
-    ) -> dict[str, list[str]]:
-        """Build a lookup dict mapping submission UUIDs to their timestamps."""
-        kobo_asset_id = reduced_submissions[0]["_xform_id_string"] if len(reduced_submissions) > 0 else None
-        all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
-        if business_area.get_sys_option("ignore_amended_kobo_submissions"):
-            all_saved_submissions = all_saved_submissions.filter(amended=False)
-        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
-
-        result: dict[str, list[str]] = {}
-        for submission in all_saved_submissions:
-            item = result.get(str(submission["kobo_submission_uuid"]), [])
-            item.append(submission["kobo_submission_time"].isoformat())
-            result[str(submission["kobo_submission_uuid"])] = item
-        return result
-
-    def _validate_household_roles(
-        self, head_of_hh_counter: int, primary_collector_counter: int, alternate_collector_counter: int
-    ) -> list[dict]:
-        """Validate head of household and collector role counts."""
-        errors = []
-        if head_of_hh_counter == 0:
-            errors.append({"header": "relationship_i_c", "message": "Household has to have a head of household"})
-        if head_of_hh_counter > 1:
-            errors.append({"header": "relationship_i_c", "message": "Only one person can be a head of household"})
-        if primary_collector_counter == 0:
-            errors.append({"header": "role_i_c", "message": "Household must have a primary collector"})
-        if primary_collector_counter > 1:
-            errors.append({"header": "role_i_c", "message": "Only one person can be a primary collector"})
-        if alternate_collector_counter > 1:
-            errors.append({"header": "role_i_c", "message": "Only one person can be a alternate collector"})
-        return errors
-
-    def _process_individual_doc_identity_kobo(
-        self, i_field: str, i_value: Any, documents_numbers: dict, identities_numbers: dict
-    ) -> None:
-        """Process document/identity fields for Kobo validation."""
-        if i_field in documents_numbers:
-            if i_field == "other_id_type_i_c":
-                documents_numbers["other_id_type_i_c"]["names"].append(i_value)
-            elif i_field == "other_id_no_i_c":
-                documents_numbers["other_id_type_i_c"]["validation_data"].append({"value": i_value})
-                documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
-            else:
-                documents_numbers[i_field]["validation_data"].append({"value": i_value})
-                documents_numbers[i_field]["numbers"].append(i_value)
-        if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-            document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
-            documents_dict: dict[str, dict[str, Any]] = documents_numbers
-            if document_key in identities_numbers:
-                documents_dict = identities_numbers
-            documents_dict[document_key]["issuing_countries"].append(i_value)
-        if i_field in identities_numbers:
-            identities_numbers[i_field]["numbers"].append(i_value)
-            identities_numbers[i_field]["validation_data"].append({"value": i_value})
-
-    def _count_individual_roles(
-        self, i_field: str, i_value: Any, head_of_hh_counter: int,
-        primary_collector_counter: int, alternate_collector_counter: int
-    ) -> tuple[int, int, int]:
-        """Count head of household and collector roles from individual field."""
-        if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
-            head_of_hh_counter += 1
-        if i_field == "role_i_c":
-            role = i_value.upper()
-            if role == ROLE_PRIMARY:
-                primary_collector_counter += 1
-            elif role == ROLE_ALTERNATE:
-                alternate_collector_counter += 1
-        return head_of_hh_counter, primary_collector_counter, alternate_collector_counter
-
-    def _is_duplicate_submission(
-        self, household: dict, all_saved_submissions_dict: dict, household_hash_list: list[str]
-    ) -> tuple[bool, str]:
-        """Check if submission is duplicate or already exists. Returns (is_duplicate, hash)."""
-        household_uuid = str(household.get("_uuid"))
-        household_hash = calculate_hash_for_kobo_submission(household)
-        submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(household_uuid, [])
-        submission_duplicate = household_hash in household_hash_list
-        return (submission_exists or submission_duplicate), household_hash
-
-    def validate_everything(
+    def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
         business_area: BusinessArea,

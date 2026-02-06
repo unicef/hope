@@ -8,6 +8,7 @@ import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
 import {
+  formatFigure,
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
@@ -16,6 +17,8 @@ import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
+import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -93,7 +96,9 @@ function RegistrationDetails({
                 label={t('Total Number of Registered People')}
                 dataCy="individuals"
               >
-                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfIndividuals)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -110,7 +115,9 @@ function RegistrationDetails({
                 label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                 dataCy="households"
               >
-                <BigValue>{registration?.numberOfHouseholds}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfHouseholds)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -120,7 +127,9 @@ function RegistrationDetails({
                 label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
                 dataCy="individuals"
               >
-                <BigValue>{registration?.numberOfIndividuals}</BigValue>
+                <BigValue>
+                  {formatFigure(registration?.numberOfIndividuals)}
+                </BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -134,7 +143,7 @@ function RegistrationDetails({
                   dataCy="registered-individuals"
                 >
                   <BigValue>
-                    {registration?.numberOfRegisteredIndividuals}
+                    {formatFigure(registration?.numberOfRegisteredIndividuals)}
                   </BigValue>
                 </LabelizedField>
               </BigValueContainer>
@@ -144,6 +153,12 @@ function RegistrationDetails({
       </Grid>
     );
   }
+  const showRegularDeduplicationResult =
+    registration.status !== RegistrationDataImportStatusEnum.DEDUPLICATION;
+  const showBiometricDeduplicationResult =
+    registration.biometricDeduplicationEnabled &&
+    registration.deduplicationEngineStatus ===
+      DeduplicationEngineStatusEnum.FINISHED;
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -216,22 +231,45 @@ function RegistrationDetails({
             </Grid>
           </Grid>
           {numbersComponent}
-          {registration.status === 'DEDUPLICATION_FAILED' ? null : (
+          {registration.status ===
+            RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
+          (!showRegularDeduplicationResult &&
+            !showBiometricDeduplicationResult) ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
-                  <Grid size={{ xs: 4 }}>
-                    <BoldGrey>{t('Biographical')}</BoldGrey>
-                  </Grid>
-                  {registration.biometricDeduplicationEnabled && (
+                  {showRegularDeduplicationResult && (
+                    <Grid size={{ xs: 4 }}>
+                      <BoldGrey>{t('Biographical')}</BoldGrey>
+                    </Grid>
+                  )}
+                  {showBiometricDeduplicationResult && (
                     <Grid size={{ xs: 4 }}>
                       <BoldGrey>{t('Biometrics')}</BoldGrey>
                     </Grid>
                   )}
                 </Grid>
-                <DedupeBox label="Within Batch" options={withinBatchOptions} />
-                <DedupeBox label="In Population" options={populationOptions} />
+                <DedupeBox
+                  showRegularDeduplicationResult={
+                    showRegularDeduplicationResult
+                  }
+                  showBiometricDeduplicationResult={
+                    showBiometricDeduplicationResult
+                  }
+                  label="Within Batch"
+                  options={withinBatchOptions}
+                />
+                <DedupeBox
+                  showRegularDeduplicationResult={
+                    showRegularDeduplicationResult
+                  }
+                  showBiometricDeduplicationResult={
+                    showBiometricDeduplicationResult
+                  }
+                  label="In Population"
+                  options={populationOptions}
+                />
               </Grid>
             </Grid>
           )}

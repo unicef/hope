@@ -1,19 +1,19 @@
-from django.core.management import call_command
 from django.test import TestCase
 import pytest
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
+    FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import create_household_and_individuals
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.household import create_household_and_individuals
+from extras.test_utils.old_factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.const import (
     FEMALE,
     MALE,
@@ -34,7 +34,11 @@ class TestIndividualBlockFilter(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
+        FlexibleAttributeFactory(
+            name="muac_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            type=FlexibleAttribute.DECIMAL,
+        )
         generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()

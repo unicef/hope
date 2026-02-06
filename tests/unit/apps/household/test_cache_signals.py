@@ -1,19 +1,19 @@
 from django.core.cache import cache
 import pytest
 
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.household import (
     HouseholdFactory,
     IndividualFactory,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.api.caches import (
     get_household_list_program_key,
     get_individual_list_program_key,
 )
 from hope.models import Household, Individual
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db
 
 
 class TestHouseholdCacheSignals:
@@ -42,6 +42,8 @@ class TestHouseholdCacheSignals:
         assert new_version > initial_version
 
     def test_household_bulk_update_increments_cache(self):
+        from django.test import TestCase
+
         business_area = create_afghanistan()
         program = ProgramFactory(business_area=business_area)
         households = [HouseholdFactory(program=program, size=1) for _ in range(3)]
@@ -52,7 +54,8 @@ class TestHouseholdCacheSignals:
         for household in households:
             household.size = 5
 
-        Household.objects.bulk_update(households, ["size"])
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            Household.objects.bulk_update(households, ["size"])
 
         new_version = get_household_list_program_key(program.id)
         assert new_version > initial_version

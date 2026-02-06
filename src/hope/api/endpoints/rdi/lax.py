@@ -564,12 +564,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                         data.pop("consent_sign", None),
                         self.selected_rdi.program.programme_code,
                     )
-                    country_code = data.pop("country", None)
-                    if country_code:
-                        country_codes.add(country_code)
-                    country_origin_code = data.pop("country_origin", None)
-                    if country_origin_code:
-                        country_codes.add(country_origin_code)
+                    country_code, country_origin_code = self._process_country_codes(country_codes, data)
 
                     data["flex_fields"] = populate_pdu_with_null_values(
                         self.selected_rdi.program, data.get("flex_fields")
@@ -627,7 +622,11 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
 
             PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
 
-            total_accepted = self._create_household_roles(valid_payloads, results)
+            roles_to_create: list[IndividualRoleInHousehold] = []
+            total_accepted = self._process_valid_payloads(results, roles_to_create, total_accepted, valid_payloads)
+
+            if roles_to_create:
+                IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
         except Exception as e:
             for file_field in saved_file_fields:
                 with contextlib.suppress(Exception):
@@ -644,3 +643,40 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    def _process_valid_payloads(self, results, roles_to_create, total_accepted, valid_payloads):
+        for payload in valid_payloads:
+            primary = payload["primary"]
+            alternate = payload["alternate"]
+
+            if payload["members"]:
+                PendingIndividual.objects.filter(
+                    registration_data_import=self.selected_rdi,
+                    program=self.selected_rdi.program,
+                    unicef_id__in=payload["members"],
+                ).update(household=payload["instance"])
+
+            roles_to_create.append(
+                IndividualRoleInHousehold(individual=primary, household=payload["instance"], role=ROLE_PRIMARY)
+            )
+            if alternate:
+                roles_to_create.append(
+                    IndividualRoleInHousehold(
+                        individual=alternate,
+                        household=payload["instance"],
+                        role=ROLE_ALTERNATE,
+                    )
+                )
+
+            total_accepted += 1
+            results.append({"pk": payload["instance"].pk})  # noqa
+        return total_accepted
+
+    def _process_country_codes(self, country_codes, data):
+        country_code = data.pop("country", None)
+        if country_code:
+            country_codes.add(country_code)
+        country_origin_code = data.pop("country_origin", None)
+        if country_origin_code:
+            country_codes.add(country_origin_code)
+        return country_code, country_origin_code

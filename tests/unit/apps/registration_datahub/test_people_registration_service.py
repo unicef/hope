@@ -2,19 +2,18 @@ import datetime
 import json
 from typing import Union
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
-from extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.factories.aurora import (
+from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
+from extras.test_utils.old_factories.aurora import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.geo import AreaFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.people_registration_service import (
@@ -35,7 +34,8 @@ class TestPeopleRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        call_command("init_geo_fixtures")
+        # Create Ukraine country for country_origin lookup
+        CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
         admin1 = AreaFactory(p_code="UA07", name="Name1")
         admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
         AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)

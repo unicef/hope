@@ -152,8 +152,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -177,18 +177,33 @@ class RegistrationDataImportViewSet(
             logger.warning(msg)
             raise ValidationError(msg)
 
+        individuals_to_remove = list(
+            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        )
         Household.all_objects.filter(registration_data_import=rdi).delete()
 
         rdi.erased = True
         rdi.save()
+
+        remove_elasticsearch_documents_by_matching_ids(
+            individuals_to_remove,
+            get_individual_doc(rdi.business_area.slug),
+        )
+
+        if rdi.program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().report_individuals_status(
+                rdi.program,
+                [str(_id) for _id in individuals_to_remove],
+                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
+            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -234,8 +249,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -265,8 +280,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -318,8 +333,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             self.program.id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
@@ -412,8 +427,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(
@@ -493,8 +508,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(

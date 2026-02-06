@@ -1,11 +1,10 @@
 import datetime
 
-from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -14,8 +13,8 @@ from extras.test_utils.factories.household import (
     PendingIndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     HEAD,
@@ -33,7 +32,6 @@ class TestDetails(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init_geo_fixtures")
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)

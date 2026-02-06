@@ -238,7 +238,9 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
+        self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update(
+            conflicted=True
+        )
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -536,21 +538,16 @@ class PaymentPlanService:
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
 
-        if any([excluded_ids, exclusion_reason, rules]) and not self.payment_plan.is_population_open():
-            raise ValidationError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
-
-        if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
-            raise ValidationError(
-                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
-            )
-
-        if any(
-            [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
-        ) and self.payment_plan.status not in [
-            PaymentPlan.Status.OPEN,
-            PaymentPlan.Status.DRAFT,
-        ]:
-            raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+        self._validate_pp_status(
+            dispersion_end_date,
+            dispersion_start_date,
+            excluded_ids,
+            exclusion_reason,
+            input_data,
+            rules=rules,
+            vulnerability_score_max=vulnerability_score_max,
+            vulnerability_score_min=vulnerability_score_min,
+        )
 
     def _update_currency(self, new_currency: str) -> bool:
         if new_currency and new_currency != self.payment_plan.currency:
@@ -636,16 +633,7 @@ class PaymentPlanService:
         delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if name:
-            if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
-                raise ValidationError("Name can be changed only within Open status")
-            name = name.strip()
-
-            if (
-                PaymentPlan.objects.filter(name=name, program_cycle__program=program, is_removed=False)
-                .exclude(id=self.payment_plan.pk)
-                .exists()
-            ):
-                raise ValidationError(f"Name '{name}' and program '{program.name}' already exists.")
+            name = self._validate_pp_name(name, program)
             self.payment_plan.name = name
 
         if self.payment_plan.is_follow_up:
@@ -653,11 +641,7 @@ class PaymentPlanService:
             # remove not editable fields
             input_data.pop("currency", None)
 
-        if program_cycle_id := input_data.get("program_cycle_id"):
-            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
-            if program_cycle.status == ProgramCycle.FINISHED:
-                raise ValidationError("Not possible to assign Finished Program Cycle")
-            self.payment_plan.program_cycle = program_cycle
+        self._set_program_cycle(input_data)
 
         if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
             vulnerability_filter = True
@@ -666,18 +650,17 @@ class PaymentPlanService:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
-        if self._update_targeting_criteria(input_data, rules, excluded_ids, exclusion_reason, program):
+        if rules and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+            targeting_criteria_input = {"rules": input_data["rules"]}
+            self._set_additional_flags_for_tp(input_data, targeting_criteria_input)
             should_rebuild_list = True
 
-        if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
-            self.payment_plan.dispersion_start_date = dispersion_start_date
+        self._set_dispersion_dates(dispersion_end_date, dispersion_start_date)
 
-        if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
-            if dispersion_end_date <= timezone.now().date():
-                raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-            self.payment_plan.dispersion_end_date = dispersion_end_date
-
-        if self._update_currency(input_data.get("currency")):
+        new_currency = input_data.get("currency")
+        if new_currency and new_currency != self.payment_plan.currency:
+            self._validate_transfer_to_digital_wallet_and_usdc(new_currency)
+            self.payment_plan.currency = new_currency
             should_update_money_stats = True
 
         if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
@@ -695,6 +678,84 @@ class PaymentPlanService:
             )
         )
         return self.payment_plan
+
+    def _set_program_cycle(self, input_data: dict):
+        if program_cycle_id := input_data.get("program_cycle_id"):
+            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            self._validate_pp_cycle(program_cycle)
+            self.payment_plan.program_cycle = program_cycle
+
+    def _set_dispersion_dates(self, dispersion_end_date, dispersion_start_date: Any | None):
+        if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
+            self.payment_plan.dispersion_start_date = dispersion_start_date
+
+        if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
+            self._validate_dispersion_end_date(dispersion_end_date)
+            self.payment_plan.dispersion_end_date = dispersion_end_date
+
+    def _validate_pp_status(
+        self, dispersion_end_date, dispersion_start_date, excluded_ids, exclusion_reason, input_data, **kwargs
+    ):
+        rules = kwargs.get("rules")
+        vulnerability_score_max = kwargs.get("vulnerability_score_max")
+        vulnerability_score_min = kwargs.get("vulnerability_score_min")
+        if any([excluded_ids, exclusion_reason, rules]) and not self.payment_plan.is_population_open():
+            raise ValidationError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
+
+        if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
+            raise ValidationError(
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
+            )
+
+        if any(
+            [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
+        ) and self.payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.DRAFT,
+        ]:
+            raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+
+    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency):
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        if (
+            new_currency == USDC and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
+        ) or (
+            new_currency != USDC and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
+        ):
+            raise ValidationError(
+                "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+            )
+
+    def _validate_dispersion_end_date(self, dispersion_end_date):
+        if dispersion_end_date <= timezone.now().date():
+            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+
+    def _set_additional_flags_for_tp(self, input_data, targeting_criteria_input):
+        if "flag_exclude_if_on_sanction_list" in input_data:
+            targeting_criteria_input["flag_exclude_if_on_sanction_list"] = input_data[
+                "flag_exclude_if_on_sanction_list"
+            ]
+        if "flag_exclude_if_active_adjudication_ticket" in input_data:
+            targeting_criteria_input["flag_exclude_if_active_adjudication_ticket"] = input_data[
+                "flag_exclude_if_active_adjudication_ticket"
+            ]
+
+    def _validate_pp_cycle(self, program_cycle: ProgramCycle):
+        if program_cycle.status == ProgramCycle.FINISHED:
+            raise ValidationError("Not possible to assign Finished Program Cycle")
+
+    def _validate_pp_name(self, name, program):
+        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+            raise ValidationError("Name can be changed only within Open status")
+        name = name.strip()
+
+        if (
+            PaymentPlan.objects.filter(name=name, program_cycle__program=program, is_removed=False)
+            .exclude(id=self.payment_plan.pk)
+            .exists()
+        ):
+            raise ValidationError(f"Name '{name}' and program '{program.name}' already exists.")
+        return name
 
     def delete(self) -> PaymentPlan:
         if self.payment_plan.status not in [
@@ -850,14 +911,7 @@ class PaymentPlanService:
             raise ValidationError("No payments to split")
 
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
-            if not chunks_no:
-                raise ValidationError("Payments Number is required for split by records")
-
-            if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
-                raise ValidationError(
-                    f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} "
-                    f"and total number of payments"
-                )
+            self._validate_split_by_record(chunks_no, payments_count)
             payments_chunks = list(chunks(payments.order_by("unicef_id"), chunks_no))
 
         elif split_type in [
@@ -911,6 +965,16 @@ class PaymentPlanService:
                 payment_plan_splits_to_create[i].split_payment_items.set(chunk)
 
         return self.payment_plan
+
+    def _validate_split_by_record(self, chunks_no, payments_count: int):
+        if not chunks_no:
+            raise ValidationError("Payments Number is required for split by records")
+
+        if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
+            raise ValidationError(
+                f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} "
+                f"and total number of payments"
+            )
 
     def full_rebuild(self) -> None:
         payment_plan: PaymentPlan = self.payment_plan

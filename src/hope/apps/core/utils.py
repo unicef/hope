@@ -21,7 +21,6 @@ from typing import (
 )
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
@@ -310,22 +309,26 @@ def to_dict(
 
                 for obj in objs:
                     instance_data_dict = {}
-                    for nested_field in nested_fields:
-                        attrs_to_get = nested_field.split(".")
-                        value = None
-                        for attr in attrs_to_get:
-                            if value:
-                                value = getattr(value, attr, "__EMPTY_VALUE__")
-                            else:
-                                value = getattr(obj, attr, "__EMPTY_VALUE__")
-                        if value != "__EMPTY_VALUE__":
-                            instance_data_dict[attrs_to_get[-1]] = value
+                    _process_nested_fields(instance_data_dict, nested_fields, obj)
                     if instance_data_dict and multi is True:
                         data[main_field_key].append(instance_data_dict)
                     elif multi is False:
                         data[main_field_key] = instance_data_dict
 
     return data
+
+
+def _process_nested_fields(instance_data_dict, nested_fields, obj):
+    for nested_field in nested_fields:
+        attrs_to_get = nested_field.split(".")
+        value = None
+        for attr in attrs_to_get:
+            if value:
+                value = getattr(value, attr, "__EMPTY_VALUE__")
+            else:
+                value = getattr(obj, attr, "__EMPTY_VALUE__")
+        if value != "__EMPTY_VALUE__":
+            instance_data_dict[attrs_to_get[-1]] = value
 
 
 def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
@@ -402,16 +405,6 @@ class CustomOrderingFilter(OrderingFilter):
         return OrderedDict([(f, f) if isinstance(f, str | Lower) else f for f in new_fields])
 
 
-def is_valid_uuid(uuid_str: str) -> bool:
-    from uuid import UUID
-
-    try:
-        UUID(uuid_str, version=4)
-        return True
-    except ValueError:
-        return False
-
-
 def to_snake_case(camel_case_string: str) -> str:
     if "_" in camel_case_string:
         return camel_case_string
@@ -427,68 +420,6 @@ def check_concurrency_version_in_mutation(version: int | None, target: Any) -> N
 
     if version != target.version:
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
-
-
-def update_labels_mapping(csv_file: str) -> None:
-    """WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py.
-
-    IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
-
-    csv_file: path to csv file, 2 columns needed (field name, english label)
-    """
-    import csv
-    import json
-    import re
-
-    from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
-    from hope.apps.core.field_attributes.fields_types import Scope
-
-    with open(csv_file, newline="") as csv_file_ptr:
-        reader = csv.reader(csv_file_ptr)
-        next(reader, None)
-        fields_mapping = dict(reader)
-
-    labels_mapping = {
-        core_field_data["xlsx_field"]: {
-            "old": core_field_data["label"],
-            "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
-        }
-        for core_field_data in FieldFactory.from_scope(Scope.GLOBAL)
-        if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
-    }
-
-    file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
-    with open(file_path) as f:
-        content = f.read()
-        new_content = content
-        for core_field, labels in labels_mapping.items():
-            old_label = (
-                json.dumps(labels["old"])
-                .replace("\\", r"\\")
-                .replace('"', r"\"")
-                .replace("(", r"\(")
-                .replace(")", r"\)")
-                .replace("[", r"\[")
-                .replace("]", r"\]")
-                .replace("?", r"\?")
-                .replace("*", r"\*")
-                .replace("$", r"\$")
-                .replace("^", r"\^")
-                .replace(".", r"\.")
-            )
-            new_label = json.dumps(labels["new"])
-            new_content = re.sub(
-                rf"(\"label\": )({old_label}),([\S\s]*?)(\"xlsx_field\": \"{core_field}\",)",
-                rf"\1{new_label},\3\4",
-                new_content,
-                flags=re.MULTILINE,
-            )
-
-    with open(file_path, "r+") as f:
-        f.truncate(0)
-
-    with open(file_path, "w") as f:
-        print(new_content, file=f, end="")
 
 
 def rows_iterator(sheet: "Worksheet") -> Generator:
@@ -524,20 +455,6 @@ def chart_get_filtered_qs(
     return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
 
 
-def parse_list_values_to_int(list_to_parse: list) -> list[int]:
-    return [int(x or 0) for x in list_to_parse]
-
-
-def sum_lists_with_values(qs_values: Iterable, list_len: int) -> list[int]:
-    data = [0] * list_len
-    for values in qs_values:
-        parsed_values = parse_list_values_to_int(values)
-        for i, value in enumerate(parsed_values):
-            data[i] += value
-
-    return data
-
-
 def chart_create_filter_query(
     filters: dict,
     program_id_path: str = "id",
@@ -552,22 +469,6 @@ def chart_create_filter_query(
                 f"{administrative_area_path}__id": administrative_area,
             }
         )
-    return filter_query
-
-
-def chart_create_filter_query_for_payment_verification_gfk(
-    filters: dict,
-    program_id_path: str = "id",
-    administrative_area_path: str = "admin_areas",
-) -> Q:
-    filter_query = Q()
-    if program := filters.get("program"):
-        for path in program_id_path.split(","):
-            filter_query |= Q(**{path: program})
-
-    if administrative_area := filters.get("administrative_area"):
-        for path in administrative_area_path.split(","):
-            filter_query |= Q(Q(**{f"{path}__id": administrative_area}) & Q(**{f"{path}__area_type__area_level": 2}))
     return filter_query
 
 
@@ -597,17 +498,6 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
             flex_fields_with_str_choices[flex_field_name] = default_storage.url(value) if value else ""
 
     return flex_fields_with_str_choices
-
-
-def get_model_choices_fields(model: type, excluded: list | None = None) -> list[str]:
-    if excluded is None:
-        excluded = []
-
-    return [
-        field.name
-        for field in model._meta.get_fields()
-        if getattr(field, "choices", None) and field.name not in excluded
-    ]
 
 
 class SheetImageLoader:
@@ -640,17 +530,6 @@ class SheetImageLoader:
             raise ValueError(f"Cell {cell} doesn't contain an image")
         image = io.BytesIO(self._images[cell]())
         return Image.open(image)
-
-
-def fix_flex_type_fields(items: Any, flex_fields: dict) -> list[dict]:
-    for item in items:
-        for key, value in item.flex_fields.items():
-            if key in flex_fields:
-                if value is not None and value != "":
-                    item.flex_fields[key] = float(value)
-                else:
-                    item.flex_fields[key] = None
-    return items
 
 
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
@@ -695,28 +574,6 @@ def save_data_in_cache(
             return cache_data
         cache.set(cache_key, cache_data, timeout=timeout)
     return cache_data
-
-
-def clear_cache_for_dashboard_totals() -> None:
-    keys = (
-        "resolve_section_households_reached",
-        "resolve_section_individuals_reached",
-        "resolve_section_child_reached",
-        "resolve_chart_volume_by_delivery_mechanism",
-        "resolve_chart_payment",
-        "resolve_chart_programmes_by_sector",
-        "resolve_section_total_transferred",
-        "resolve_chart_payment_verification",
-        "resolve_table_total_cash_transferred_by_administrative_area",
-        "resolve_chart_individuals_reached_by_age_and_gender",
-        "resolve_chart_individuals_with_disability_reached_by_age",
-        "resolve_chart_total_transferred_by_month",
-    )
-    # we need skip remove cache for test and because LocMemCache don't have .keys()
-    if hasattr(cache, "keys"):
-        all_cache_keys = cache.keys("*")
-        for k in [key for key in all_cache_keys if key.startswith(keys)]:
-            cache.delete(k)
 
 
 def clear_cache_for_key(key: str) -> None:

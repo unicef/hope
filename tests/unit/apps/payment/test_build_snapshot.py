@@ -1,146 +1,133 @@
-from datetime import datetime
+import pytest
 
-from django.test import TestCase
-from freezegun import freeze_time
-
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import (
+from extras.test_utils.factories import (
     AccountFactory,
+    AccountTypeFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
 )
-from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.services import payment_household_snapshot_service
-from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
-from hope.models import AccountType, DeliveryMechanism, FinancialServiceProvider, IndividualRoleInHousehold
-from hope.models.utils import MergeStatusModel
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.models import MergeStatusModel
+
+pytestmark = pytest.mark.django_db
 
 
-class TestBuildSnapshot(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.fsp = FinancialServiceProviderFactory(
-            name="Test FSP 1",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-            vision_vendor_number=123456789,
-        )
-        generate_delivery_mechanisms()
-        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+@pytest.fixture
+def account_type():
+    return AccountTypeFactory(key="bank", label="Bank")
 
-        with freeze_time("2020-10-10"):
-            program = RealProgramFactory()
-            program_cycle = program.cycles.first()
-            cls.pp = PaymentPlanFactory(
-                program_cycle=program_cycle,
-                is_follow_up=False,
-            )
-            cls.pp.unicef_id = "PP-01"
-            cls.pp.save()
 
-            cls.hoh1 = IndividualFactory(household=None)
-            cls.hoh2 = IndividualFactory(household=None)
-            cls.hh1 = HouseholdFactory(head_of_household=cls.hoh1)
-            cls.hh2 = HouseholdFactory(head_of_household=cls.hoh2)
-            cls.primary_role = IndividualRoleInHousehold.objects.create(
-                household=cls.hh1,
-                individual=cls.hoh1,
-                role=ROLE_PRIMARY,
-                rdi_merge_status=MergeStatusModel.MERGED,
-            )
-            cls.hoh1.household = cls.hh1
-            cls.hoh1.save()
-            AccountFactory(
-                individual=cls.hoh1,
-                account_type=AccountType.objects.get(key="bank"),
-                number="123",
-                data={
-                    "expiry_date": "2022-01-01",
-                    "name_of_cardholder": "Marek",
-                },
-            )
-            cls.p1 = PaymentFactory(
-                parent=cls.pp,
-                conflicted=False,
-                household=cls.hh1,
-                head_of_household=cls.hoh1,
-                entitlement_quantity=100.00,
-                entitlement_quantity_usd=200.00,
-                delivered_quantity=50.00,
-                delivered_quantity_usd=100.00,
-                currency="PLN",
-                financial_service_provider=cls.fsp,
-                delivery_type=cls.dm_atm_card,
-            )
-            cls.p2 = PaymentFactory(
-                parent=cls.pp,
-                conflicted=False,
-                household=cls.hh2,
-                head_of_household=cls.hoh2,
-                entitlement_quantity=100.00,
-                entitlement_quantity_usd=200.00,
-                delivered_quantity=50.00,
-                delivered_quantity_usd=100.00,
-                currency="PLN",
-                financial_service_provider=cls.fsp,
-                delivery_type=cls.dm_atm_card,
-            )
+@pytest.fixture
+def delivery_mechanism(account_type):
+    return DeliveryMechanismFactory(code="atm_card", name="ATM Card", account_type=account_type)
 
-    def test_build_snapshot(self) -> None:
-        create_payment_plan_snapshot_data(self.pp)
-        self.p1.refresh_from_db()
-        self.p2.refresh_from_db()
-        assert self.p1.household_snapshot is not None
-        assert self.p2.household_snapshot is not None
-        assert str(self.p1.household_snapshot.snapshot_data["id"]) == str(self.hh1.id)
-        assert str(self.p2.household_snapshot.snapshot_data["id"]) == str(self.hh2.id)
-        assert len(self.p1.household_snapshot.snapshot_data["individuals"]) == self.hh1.individuals.count()
-        assert len(self.p2.household_snapshot.snapshot_data["individuals"]) == self.hh2.individuals.count()
-        assert self.p1.household_snapshot.snapshot_data["primary_collector"] is not None
-        assert self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}) == {
-            "expiry_date": "2022-01-01",
-            "number": "123",
+
+@pytest.fixture
+def financial_service_provider():
+    return FinancialServiceProviderFactory()
+
+
+@pytest.fixture
+def payment_plan():
+    return PaymentPlanFactory()
+
+
+@pytest.fixture
+def household_one():
+    return HouseholdFactory()
+
+
+@pytest.fixture
+def household_two():
+    return HouseholdFactory()
+
+
+@pytest.fixture
+def account(account_type, household_one):
+    return AccountFactory(
+        individual=household_one.head_of_household,
+        account_type=account_type,
+        number="123",
+        data={
+            "test": "value",
             "name_of_cardholder": "Marek",
-            "financial_institution_name": "",
-            "financial_institution_pk": "",
-        }
+        },
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
 
-    def test_batching(self) -> None:
-        program = RealProgramFactory()
-        program_cycle = program.cycles.first()
-        pp = PaymentPlanFactory(
-            program_cycle=program_cycle,
-            dispersion_start_date=datetime(2020, 8, 10),
-            dispersion_end_date=datetime(2020, 12, 10),
-            is_follow_up=False,
-        )
-        pp.unicef_id = "PP-02"
-        pp.save()
-        number_of_payments = 20
-        payment_household_snapshot_service.page_size = 2
-        for _ in range(number_of_payments):
-            hoh1 = IndividualFactory(household=None)
-            hh1 = HouseholdFactory(head_of_household=hoh1)
-            PaymentFactory(
-                parent=pp,
-                conflicted=False,
-                household=hh1,
-                head_of_household=hoh1,
-                entitlement_quantity=100.00,
-                entitlement_quantity_usd=200.00,
-                delivered_quantity=50.00,
-                delivered_quantity_usd=100.00,
-                financial_service_provider=None,
-                currency="PLN",
-            )
-        assert pp.payment_items.count() == number_of_payments
-        create_payment_plan_snapshot_data(pp)
-        assert pp.payment_items.filter(household_snapshot__isnull=False).count() == number_of_payments
+
+@pytest.fixture
+def payments(
+    account,
+    payment_plan,
+    household_one,
+    household_two,
+    delivery_mechanism,
+    financial_service_provider,
+):
+    return [
+        PaymentFactory(
+            parent=payment_plan,
+            household=household_one,
+            head_of_household=household_one.head_of_household,
+            collector=household_one.head_of_household,
+            financial_service_provider=financial_service_provider,
+            delivery_type=delivery_mechanism,
+        ),
+        PaymentFactory(
+            parent=payment_plan,
+            household=household_two,
+            head_of_household=household_two.head_of_household,
+            collector=household_two.head_of_household,
+            financial_service_provider=financial_service_provider,
+            delivery_type=delivery_mechanism,
+        ),
+    ]
+
+
+@pytest.fixture
+def batch_payment_plan():
+    return PaymentPlanFactory()
+
+
+@pytest.fixture
+def batch_payments(batch_payment_plan):
+    return [PaymentFactory(parent=batch_payment_plan) for _ in range(20)]
+
+
+def test_build_snapshot(payment_plan, payments, household_one, household_two) -> None:
+    create_payment_plan_snapshot_data(payment_plan)
+
+    payment_one, payment_two = payments
+
+    payment_one.refresh_from_db()
+    payment_two.refresh_from_db()
+
+    assert payment_one.household_snapshot is not None
+    assert payment_two.household_snapshot is not None
+    assert str(payment_one.household_snapshot.snapshot_data["id"]) == str(household_one.id)
+    assert str(payment_two.household_snapshot.snapshot_data["id"]) == str(household_two.id)
+    assert len(payment_one.household_snapshot.snapshot_data["individuals"]) == household_one.individuals.count()
+    assert len(payment_two.household_snapshot.snapshot_data["individuals"]) == household_two.individuals.count()
+    assert payment_one.household_snapshot.snapshot_data["primary_collector"] is not None
+    assert payment_one.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}) == {
+        "test": "value",
+        "number": "123",
+        "name_of_cardholder": "Marek",
+        "financial_institution_name": "",
+        "financial_institution_pk": "",
+    }
+
+
+def test_batching(batch_payment_plan, batch_payments, monkeypatch) -> None:
+    monkeypatch.setattr(payment_household_snapshot_service, "page_size", 2)
+
+    assert batch_payment_plan.payment_items.count() == len(batch_payments)
+
+    create_payment_plan_snapshot_data(batch_payment_plan)
+
+    assert batch_payment_plan.payment_items.filter(household_snapshot__isnull=False).count() == len(batch_payments)

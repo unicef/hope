@@ -129,10 +129,7 @@ class FlexibleAttributeImporter:
 
         # Handle JSON fields (like label::English(EN))
         if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
-            if "::" in header_name:
-                label, language = header_name.split("::")
-            else:
-                label, language = header_name.split(":")
+            label, language = self._get_label_language(header_name)
             if label in model_fields:
                 cleared_value = strip_tags(str(value)).replace("#", "").strip() if value else ""
 
@@ -141,19 +138,7 @@ class FlexibleAttributeImporter:
                     cell_name = str(row[1].value) if row[1].value else ""
                     is_index_field = cell_name.endswith("_index")
 
-                    if object_type_to_add == "attribute":
-                        field_suffix = cell_name[-4:]
-                        is_empty_and_not_index_field = not value and not is_index_field
-                        is_core_or_flex_field = (
-                            field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
-                        )
-                        if is_empty_and_not_index_field and is_core_or_flex_field:
-                            logger.warning(f"Survey Sheet: Row {row_number}: English label cannot be empty")
-                            raise ValidationError(f"Survey Sheet: Row {row_number}: English label cannot be empty")
-
-                    if object_type_to_add == "choice" and not value:
-                        logger.warning(f"Choices Sheet: Row {row_number}: English label cannot be empty")
-                        raise ValidationError(f"Choices Sheet: Row {row_number}: English label cannot be empty")
+                    self._validate_object_type_to_add(cell_name, is_index_field, object_type_to_add, row_number, value)
 
                 self.json_fields_to_create[label].update({language: cleared_value if value else ""})
             return
@@ -166,28 +151,14 @@ class FlexibleAttributeImporter:
         # Handle normal fields
         if header_name in model_fields:
             if header_name == "type":
-                if not value:
-                    logger.warning(f"Survey Sheet: Row {row_number}: Type is required")
-                    raise ValidationError(f"Survey Sheet: Row {row_number}: Type is required")
-
-                choice_key = str(value).split(" ")[0]
-                if choice_key == "calculate":
-                    self.object_fields_to_create["type"] = "calculate"
-                elif choice_key in self.TYPE_CHOICE_MAP:
-                    self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
+                self._validate_type(row_number, value)
             else:
                 is_attribute_name_empty = header_name == "name" and value in (None, "")
                 is_choice_list_name_empty = (
                     header_name == "list_name" and object_type_to_add == "choice"
                 ) and not value
 
-                if is_attribute_name_empty:
-                    logger.warning(f"Survey Sheet: Row {row_number}: Name is required")
-                    raise ValidationError(f"Survey Sheet: Row {row_number}: Name is required")
-
-                if is_choice_list_name_empty:
-                    logger.warning(f"Survey Sheet: Row {row_number}: List Name is required")
-                    raise ValidationError(f"Survey Sheet: Row {row_number}: List Name is required")
+                self._validate_empty_name(is_attribute_name_empty, is_choice_list_name_empty, row_number)
 
                 self.object_fields_to_create[header_name] = str(value) if value else ""
 
@@ -217,6 +188,46 @@ class FlexibleAttributeImporter:
         self.current_group_tree.append(group)
         FlexibleAttributeGroup.objects.rebuild()
         return group
+
+    def _validate_empty_name(self, is_attribute_name_empty, is_choice_list_name_empty, row_number):
+        if is_attribute_name_empty:
+            logger.warning(f"Survey Sheet: Row {row_number}: Name is required")
+            raise ValidationError(f"Survey Sheet: Row {row_number}: Name is required")
+
+        if is_choice_list_name_empty:
+            logger.warning(f"Survey Sheet: Row {row_number}: List Name is required")
+            raise ValidationError(f"Survey Sheet: Row {row_number}: List Name is required")
+
+    def _validate_type(self, row_number, value):
+        if not value:
+            logger.warning(f"Survey Sheet: Row {row_number}: Type is required")
+            raise ValidationError(f"Survey Sheet: Row {row_number}: Type is required")
+
+        choice_key = str(value).split(" ")[0]
+        if choice_key == "calculate":
+            self.object_fields_to_create["type"] = "calculate"
+        elif choice_key in self.TYPE_CHOICE_MAP:
+            self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
+
+    def _get_label_language(self, header_name: str) -> tuple[str, str]:
+        if "::" in header_name:
+            label, language = header_name.split("::")
+        else:
+            label, language = header_name.split(":")
+        return label, language
+
+    def _validate_object_type_to_add(self, cell_name, is_index_field, object_type_to_add, row_number, value):
+        if object_type_to_add == "attribute":
+            field_suffix = cell_name[-4:]
+            is_empty_and_not_index_field = not value and not is_index_field
+            is_core_or_flex_field = field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
+            if is_empty_and_not_index_field and is_core_or_flex_field:
+                logger.warning(f"Survey Sheet: Row {row_number}: English label cannot be empty")
+                raise ValidationError(f"Survey Sheet: Row {row_number}: English label cannot be empty")
+
+        if object_type_to_add == "choice" and not value:
+            logger.warning(f"Choices Sheet: Row {row_number}: English label cannot be empty")
+            raise ValidationError(f"Choices Sheet: Row {row_number}: English label cannot be empty")
 
     def _can_add_row(self, row: Row) -> bool:
         cell_0 = str(row[0].value) if row[0].value is not None else ""
@@ -387,11 +398,7 @@ class FlexibleAttributeImporter:
                 ).first()
 
                 if obj:
-                    if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
-                        logger.warning(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")
-                        raise ValidationError(
-                            f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!"
-                        )
+                    self._validate_type_of_attribute(obj, row_number)
                     obj.type = self.object_fields_to_create["type"]
                     obj.name = self.object_fields_to_create["name"]
                     obj.required = self.object_fields_to_create["required"]
@@ -409,9 +416,7 @@ class FlexibleAttributeImporter:
                         **self.json_fields_to_create,
                     )
 
-                if choice_name:
-                    choices = FlexibleAttributeChoice.objects.filter(list_name=choice_name)
-                    field.choices.set(choices)
+                self._set_choices(choice_name, field)
 
                 all_attrs.append(field)
 
@@ -423,6 +428,16 @@ class FlexibleAttributeImporter:
         attrs_to_delete = set(attrs_from_db).difference(all_attrs)
         for attr in attrs_to_delete:
             attr.delete()
+
+    def _set_choices(self, choice_name, field):
+        if choice_name:
+            choices = FlexibleAttributeChoice.objects.filter(list_name=choice_name)
+            field.choices.set(choices)
+
+    def _validate_type_of_attribute(self, obj, row_number):
+        if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
+            logger.warning(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")
+            raise ValidationError(f"Survey Sheet: Row {row_number}: Type of the attribute cannot be changed!")
 
     # Variables initialized for model creation
     current_group_tree = None

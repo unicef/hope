@@ -1,15 +1,5 @@
-import Grid from '@mui/material/Grid';
-import { Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Overview } from '@components/payments/Overview';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { useBusinessArea } from '@hooks/useBusinessArea';
-import {
-  formatCurrencyWithSymbol,
-  paymentStatusDisplayMap,
-  paymentStatusToColor,
-  verificationRecordsStatusToColor,
-  safeStringify,
-} from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
@@ -18,9 +8,19 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
-import { Overview } from '@components/payments/Overview';
+import {
+  formatCurrencyWithSymbol,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
+  safeStringify,
+  verificationRecordsStatusToColor,
+  formatFigure,
+} from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentDetailsProps {
   payment: PaymentDetail;
@@ -32,9 +32,8 @@ export function PaymentDetails({
   payment,
   canViewActivityLog,
 }: PaymentDetailsProps): ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
   let paymentVerification: PaymentDetail['verification'] = null;
   if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
@@ -67,13 +66,21 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={payment.entitlementQuantity}
+              value={
+                payment.entitlementQuantity != null
+                  ? formatFigure(payment.entitlementQuantity)
+                  : payment.entitlementQuantity
+              }
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={payment.deliveredQuantity}
+              value={
+                payment.deliveredQuantity != null
+                  ? formatFigure(payment.deliveredQuantity)
+                  : payment.deliveredQuantity
+              }
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -96,15 +103,20 @@ export function PaymentDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('DISTRIBUTION MODALITY')}
-              value={payment.parent?.unicefId}
+              label={t('Distribution Modality')}
+              value={payment.parent?.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Related Payment Id')}
-              value={payment.sourcePayment?.unicefId}
-            />
+            <LabelizedField label={t('Original Payment Plan ID')}>
+              {payment.parent && (
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/${payment.parent.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                >
+                  {payment.parent.unicefId}
+                </BlackLink>
+              )}
+            </LabelizedField>
           </Grid>
         </Grid>
       </ContainerColumnWithBorder>

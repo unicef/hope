@@ -13,9 +13,7 @@ from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceDocument, GrievanceTicket, TicketNote
 from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
-    IndividualSmallSerializer,
 )
 from hope.apps.household.const import ROLE_CHOICE
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
@@ -112,38 +110,40 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
     programs = serializers.SerializerMethodField()
-    household = HouseholdSimpleSerializer(source="ticket_details.household", allow_null=True)
-    individual = IndividualSmallSerializer(source="ticket_details.individual", allow_null=True)
+    household_id = serializers.CharField(source="ticket_details.household.id", default="")
+    household_unicef_id = serializers.CharField(source="ticket_details.household.unicef_id", default="")
+    individual_id = serializers.CharField(source="ticket_details.individual.id", default="")
+    individual_unicef_id = serializers.CharField(source="ticket_details.individual.unicef_id", default="")
     admin = serializers.CharField(source="admin2.name", default="")
-    admin2 = AreaListSerializer()
     assigned_to = UserSerializer()
-    created_by = UserSerializer()
     related_tickets = serializers.SerializerMethodField()
     total_days = serializers.SerializerMethodField()
+    created_by = UserSerializer()
+    target_id = serializers.SerializerMethodField()
 
     class Meta:
         model = GrievanceTicket
         fields = (
             "id",
+            "admin",
             "unicef_id",
             "status",
-            "programs",
-            "household",
-            "individual",
-            "admin",
-            "admin2",
+            "household_unicef_id",
+            "individual_unicef_id",
+            "individual_id",
+            "household_id",
             "assigned_to",
-            "created_by",
             "user_modified",
             "category",
             "issue_type",
             "priority",
             "urgency",
             "created_at",
-            "updated_at",
+            "created_by",
             "total_days",
-            "target_id",
             "related_tickets",
+            "programs",
+            "target_id",
         )
 
     def get_programs(self, obj: GrievanceTicket) -> dict:
@@ -154,6 +154,18 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
+
+    def get_target_id(self, obj: GrievanceTicket) -> str:
+        # qs annotated values in the list view
+        if getattr(obj, "has_social_worker_program_annotated", None):
+            ticket_details = obj.ticket_details
+            if ticket_details and getattr(ticket_details, "individual", None):
+                return ticket_details.individual.unicef_id if ticket_details.individual else ""
+            if fallback_individual_unicef_id := getattr(obj, "fallback_individual_unicef_id_annotated", None):
+                return fallback_individual_unicef_id
+            return ""
+
+        return obj.household_unicef_id or ""
 
 
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
@@ -167,9 +179,35 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     ticket_notes = TicketNoteSerializer(many=True)
     ticket_details = serializers.SerializerMethodField()
     household = HouseholdForTicketSerializer(source="ticket_details.household", allow_null=True)
+    admin = serializers.CharField(source="admin2.name", default="")
+    admin2 = AreaListSerializer()
+    total_days = serializers.SerializerMethodField()
+    programs = serializers.SerializerMethodField()
+    created_by = UserSerializer()
+    target_id = serializers.SerializerMethodField()
 
     class Meta(GrievanceTicketListSerializer.Meta):
-        fields = GrievanceTicketListSerializer.Meta.fields + (  # type: ignore
+        fields = (
+            "id",
+            "unicef_id",
+            "status",
+            "programs",
+            "household",
+            "individual",
+            "admin",
+            "admin2",
+            "assigned_to",
+            "user_modified",
+            "category",
+            "issue_type",
+            "priority",
+            "urgency",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "total_days",
+            "target_id",
+            "related_tickets",
             "admin_url",
             "consent",
             "partner",
@@ -185,6 +223,12 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "ticket_notes",
             "ticket_details",
         )
+
+    def get_total_days(self, obj: GrievanceTicket) -> int | None:
+        return getattr(obj, "total_days", None)
+
+    def get_target_id(self, obj: GrievanceTicket) -> str:
+        return obj.target_id
 
     def get_payment_record(self, obj: GrievanceTicket) -> dict | None:
         payment_verification = getattr(obj.ticket_details, "payment_verification", None)
@@ -207,6 +251,9 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         ticket_details = obj.ticket_details
         serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(type(ticket_details))
         return serializer(ticket_details, context=self.context).data if serializer else None
+
+    def get_programs(self, obj: GrievanceTicket) -> dict:
+        return ProgramSmallSerializer(obj.programs, many=True).data
 
 
 class GrievanceChoicesSerializer(serializers.Serializer):
@@ -252,8 +299,8 @@ class IndividualDocumentSerializer(serializers.Serializer):
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
-    photo = serializers.FileField(use_url=False, required=False, allow_null=True)
-    photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
+    new_photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
+    photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
 
 
 class EditIndividualDocumentSerializer(serializers.Serializer):
@@ -261,8 +308,8 @@ class EditIndividualDocumentSerializer(serializers.Serializer):
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
-    photo = serializers.FileField(use_url=False, required=False, allow_null=True)
-    photoraw = serializers.FileField(use_url=False, required=False, allow_null=True)
+    photo = serializers.CharField(required=False, read_only=True, allow_null=True)
+    new_photo = serializers.ImageField(required=False, write_only=True, allow_null=True)
 
 
 class IndividualIdentityGTSerializer(serializers.Serializer):

@@ -5,29 +5,27 @@ from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.grievance import TicketAddIndividualDetailsFactory
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.old_factories.grievance import TicketAddIndividualDetailsFactory
+from extras.test_utils.old_factories.household import (
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
     create_household,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.grievance.services.data_change.add_individual_service import (
     AddIndividualService,
 )
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
 from hope.apps.household.const import SINGLE
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Document, Individual, IndividualIdentity
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
-@pytest.mark.elasticsearch
 class TestAddIndividualService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -53,8 +51,6 @@ class TestAddIndividualService(TestCase):
 
         cls.household = household
         cls.ticket = ticket
-
-        rebuild_search_index()
 
     def test_increase_household_size_on_close_ticket(self) -> None:
         self.household.size = 3

@@ -1,16 +1,15 @@
 from typing import Any
 
-from django.core.management import call_command
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import create_afghanistan
-from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
-from extras.test_utils.factories.household import create_household
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
+from extras.test_utils.old_factories.core import create_afghanistan
+from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.old_factories.household import create_household
+from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Program, country as geo_models
@@ -21,8 +20,8 @@ pytestmark = pytest.mark.django_db()
 class TestGrievanceCreateSensitiveTicket:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
+        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
         self.business_area = create_afghanistan()
-        call_command("loadcountries")
         partner = PartnerFactory(name="Partner")
         self.user = UserFactory.create(partner=partner)
         self.api_client = api_client(self.user)

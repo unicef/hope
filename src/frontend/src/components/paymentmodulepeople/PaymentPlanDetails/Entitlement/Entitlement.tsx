@@ -19,6 +19,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -32,7 +33,7 @@ import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages, formatFigure } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -238,15 +239,34 @@ export function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData?.results?.map((each, index) => (
-                    <MenuItem
-                      data-cy={`select-option-${index}`}
-                      key={each.id}
-                      value={each.id}
-                    >
-                      {each.name}
-                    </MenuItem>
-                  ))}
+                  {steficonData?.results?.map((each, index) => {
+                    const hasDescription = Boolean(each?.description);
+
+                    return (
+                      <MenuItem
+                        data-cy={`select-option-${index}`}
+                        key={each.id}
+                        value={each.id}
+                      >
+                        {hasDescription ? (
+                          <Tooltip
+                            title={each.description}
+                            placement="right"
+                            arrow
+                          >
+                            <Box
+                              component="span"
+                              sx={{ display: 'block', width: '100%' }}
+                            >
+                              {each.name}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          each.name
+                        )}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             </Grid>
@@ -386,7 +406,7 @@ export function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${paymentPlan.currency} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>

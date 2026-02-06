@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 import logging
 from typing import Any
-from uuid import UUID
 
 from constance import config
 from django.conf import settings
@@ -38,6 +37,8 @@ class RapidProAPI:
     MODE_VERIFICATION = "verification"
     MODE_MESSAGE = "message"
     MODE_SURVEY = "survey"
+
+    MAX_URNS_PER_REQUEST = 100  # RapidPro API limit: https://app.rapidpro.io/api/v2/flow_starts
 
     mode_to_token_dict = {
         MODE_VERIFICATION: "rapid_pro_payment_verification_token",
@@ -114,11 +115,11 @@ class RapidProAPI:
     def start_flow(
         self, flow_uuid: str, phone_numbers: list[str]
     ) -> tuple[list[RapidProFlowResponse], Exception | None]:
-        array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
-
         all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
-        by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
+        by_limit = [
+            all_urns[i : i + self.MAX_URNS_PER_REQUEST] for i in range(0, len(all_urns), self.MAX_URNS_PER_REQUEST)
+        ]
 
         def _start_flow(data: dict) -> dict:
             try:
@@ -217,44 +218,11 @@ class RapidProAPI:
             logger.warning(e)
             return str(e), None
 
-    def test_connection_flow_run(
-        self, flow_uuid: UUID, phone_number: str, timestamp: Any | None = None
-    ) -> tuple[None, dict[str, object | Any]] | tuple[str, None]:
-        try:
-            # getting start flow that was initiated during test, should be the most recent one with matching flow uuid
-            flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")
-            flow_start = [
-                flow_start for flow_start in flow_starts["results"] if flow_start["flow"]["uuid"] == flow_uuid
-            ]
-            flow_start_status = None
-            if flow_start:
-                flow_start_status = flow_start[0]["status"]
-
-            # get the flow run for the specified phone number
-            flow_runs_url = f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}"
-            if timestamp:
-                flow_runs_url += f"&after={timestamp}"
-            flow_runs = self._get_paginated_results(flow_runs_url)
-            results_for_contact = [
-                flow_run
-                for flow_run in flow_runs
-                if flow_run.get("contact", {}).get("urn", "") == f"tel:{phone_number}"
-            ]
-            # format results for template
-            responded = [result["values"] for result in results_for_contact if result["responded"]]
-            not_responded_count = len([result for result in results_for_contact if not result["responded"]])
-            return None, {
-                "responded": responded,
-                "not_responded": not_responded_count,
-                "flow_start_status": flow_start_status,
-            }
-        except requests.exceptions.HTTPError as e:
-            logger.warning(e)
-            return str(e), None
-
     def broadcast_message(self, phone_numbers: list[str], message: str) -> None:
-        batch_size = 100
-        batched_phone_numbers = [phone_numbers[i : i + batch_size] for i in range(0, len(phone_numbers), batch_size)]
+        batched_phone_numbers = [
+            phone_numbers[i : i + self.MAX_URNS_PER_REQUEST]
+            for i in range(0, len(phone_numbers), self.MAX_URNS_PER_REQUEST)
+        ]
         for batch in batched_phone_numbers:
             self._broadcast_message_batch(batch, message)
 

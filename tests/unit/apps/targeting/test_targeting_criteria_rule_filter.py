@@ -1,30 +1,31 @@
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import (
+from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.old_factories.core import (
+    FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
-from extras.test_utils.factories.household import (
+from extras.test_utils.old_factories.household import (
     create_household,
     create_household_and_individuals,
 )
-from extras.test_utils.factories.payment import (
+from extras.test_utils.old_factories.payment import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
+    FlexibleAttribute,
     Household,
     Individual,
     PeriodicFieldData,
@@ -341,7 +342,26 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
+        FlexibleAttributeFactory(
+            name="total_households_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            type=FlexibleAttribute.INTEGER,
+        )
+        FlexibleAttributeFactory(
+            name="treatment_facility_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            type=FlexibleAttribute.SELECT_MANY,
+        )
+        FlexibleAttributeFactory(
+            name="other_treatment_facility_h_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            type=FlexibleAttribute.STRING,
+        )
+        FlexibleAttributeFactory(
+            name="muac_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            type=FlexibleAttribute.DECIMAL,
+        )
         business_area = create_afghanistan()
         (household, individuals) = create_household(
             {
@@ -443,7 +463,6 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("loadflexfieldsattributes")
         business_area = create_afghanistan()
         cls.user = UserFactory()
         cls.program = ProgramFactory(name="Test Program for PDU Flex Rule Filter", business_area=business_area)

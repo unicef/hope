@@ -247,9 +247,6 @@ class Permissions(Enum):
     # Geo
     GEO_VIEW_LIST = auto()
 
-    # Django Admin
-    CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
-
     # Country Search
     SEARCH_BUSINESS_AREAS = auto()
 
@@ -332,7 +329,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
-def check_creator_or_owner_permission(
+def check_creator_or_owner_permission(  # noqa: PLR0913 – intentional design by author
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
     general_permission: Permissions,
     is_creator: bool,
@@ -358,10 +355,12 @@ def has_creator_or_owner_permission(
     is_creator: bool,
     creator_permission: Permissions,
     is_owner: bool,
-    owner_permission: Permissions,
-    business_area: "BusinessArea",
-    program: Optional["Program"],
+    **kwargs,
 ) -> bool:
+    """Kwargs - can have 'owner_permission', 'business_area', 'program'."""
+    owner_permission: Permissions = kwargs.get("owner_permission")
+    business_area: "BusinessArea" = kwargs.get("business_area")
+    program: "Program" | None = kwargs.get("program")
     scope = program or business_area
     return user.is_authenticated and (
         user.has_perm(general_permission.value, scope)
