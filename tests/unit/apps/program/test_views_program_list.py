@@ -11,19 +11,15 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
-    create_afghanistan,
-    create_ukraine,
-)
-from extras.test_utils.old_factories.household import (
     HouseholdFactory,
-)
-from extras.test_utils.old_factories.program import (
-    BeneficiaryGroupFactory,
+    PartnerFactory,
     ProgramFactory,
+    UserFactory,
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import (
@@ -39,7 +35,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -74,7 +70,7 @@ def pdu_field_other(db: Any) -> FlexibleAttribute:
 
 @pytest.fixture
 def ukraine(db: Any) -> BusinessArea:
-    return create_ukraine()
+    return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture
@@ -202,7 +198,7 @@ def test_program_list_with_permissions(
     assert program_data1["name"] == program.name
     assert program_data1["start_date"] == program.start_date.strftime("%Y-%m-%d")
     assert program_data1["end_date"] == program.end_date.strftime("%Y-%m-%d")
-    assert program_data1["budget"] == str(program.budget)
+    assert program_data1["budget"] == f"{program.budget:.2f}"
     assert program_data1["frequency_of_payments"] == program.frequency_of_payments
     assert program_data1["sector"] == program.sector
     assert program_data1["cash_plus"] == program.cash_plus

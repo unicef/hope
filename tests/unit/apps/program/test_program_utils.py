@@ -8,17 +8,17 @@ from unittest.mock import patch
 from django.core.cache import cache
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
@@ -45,7 +45,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def program1(afghanistan: BusinessArea) -> Program:
 
 @pytest.fixture
 def program2(afghanistan: BusinessArea) -> Program:
-    return ProgramFactory(business_area=afghanistan)
+    return ProgramFactory(name="Program 2", business_area=afghanistan)
 
 
 @pytest.fixture
@@ -139,11 +139,12 @@ def household(
         household=household,
         role=ROLE_ALTERNATE,
     )
-    IndividualRoleInHouseholdFactory(
-        individual=individual1,
+    primary_role = IndividualRoleInHousehold.objects.get(
         household=household,
         role=ROLE_PRIMARY,
     )
+    primary_role.individual = individual1
+    primary_role.save()
 
     return household
 
@@ -167,11 +168,12 @@ def household_external(program1: Program, individual_hoh_e: Individual) -> House
 @pytest.fixture
 def individual_external(program1: Program, household_external: Household) -> Individual:
     ind = IndividualFactory(household=None, program=program1)
-    IndividualRoleInHouseholdFactory(
-        individual=ind,
+    primary_role = IndividualRoleInHousehold.objects.get(
         household=household_external,
         role=ROLE_PRIMARY,
     )
+    primary_role.individual = ind
+    primary_role.save()
     return ind
 
 

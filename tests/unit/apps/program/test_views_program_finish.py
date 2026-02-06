@@ -7,10 +7,14 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
 
@@ -19,7 +23,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -232,8 +236,13 @@ def test_finish_program_with_unreconciled_payment_plans(
         whole_business_area_access=True,
     )
 
+    program_cycle = ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.FINISHED,
+    )
+
     PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
         status=PaymentPlan.Status.IN_REVIEW,
     )
 
@@ -260,16 +269,21 @@ def test_finish_program_with_reconciled_payment_plans(
         whole_business_area_access=True,
     )
 
+    program_cycle = ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.FINISHED,
+    )
+
     PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
         status=PaymentPlan.Status.ACCEPTED,
     )
     PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
         status=PaymentPlan.Status.FINISHED,
     )
     PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
         status=PaymentPlan.Status.TP_LOCKED,
     )
 
