@@ -495,7 +495,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 household_id_col_idx = None
                 relationship_col_idx = None
-                household_id = self._process_household_id__and_relationship_column(
+                household_id = self._process_household_id_and_relationship_column(
                     first_row,
                     household_id_col_idx,
                     households_to_update,
@@ -600,7 +600,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         self._create_objects_and_save(households_to_update, rdi, sheet_title)
 
-    def _process_household_id__and_relationship_column(
+    def _process_household_id_and_relationship_column(
         self, first_row, household_id_col_idx, households_to_update, obj_to_create, relationship_col_idx, **kwargs
     ):
         row = kwargs["row"]

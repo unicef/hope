@@ -3,8 +3,10 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 import re
+from types import SimpleNamespace
 from typing import Any
 from unittest import mock
+from unittest.mock import patch
 
 from django.conf import settings
 from django.core.files import File
@@ -24,6 +26,7 @@ from extras.test_utils.old_factories.core import (
 from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.old_factories.household import (
     IndividualFactory,
+    PendingHouseholdFactory,
     PendingIndividualFactory,
 )
 from extras.test_utils.old_factories.payment import generate_delivery_mechanisms
@@ -645,3 +648,85 @@ class TestRdiXlsxCreateTask(TestCase):
 
         with pytest.raises(ValueError, match=re.escape("Unhandled sheet label ''Individuals''")):
             task._get_obj_and_validate_sheet_title(self.registration_data_import, wb["Individuals"], "Invalid")
+
+    def test_set_relationship_col_if_no_value_or_no_hh(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.households = {"fake_id_123": PendingHousehold}
+        households_to_update = []
+
+        # value None in cell
+        task._set_relationship_col("123_id", households_to_update, PendingIndividual, SimpleNamespace(value=None))
+        assert len(households_to_update) == 0
+
+        # value in cell not string
+        task._set_relationship_col("hh_id", households_to_update, PendingIndividual, SimpleNamespace(value=777))
+        assert len(households_to_update) == 0
+
+        # value in cell not HEAD
+        task._set_relationship_col("hh_id", households_to_update, PendingIndividual, SimpleNamespace(value="not_HEAD"))
+        assert len(households_to_update) == 0
+
+        # value no HH in self.households or wrong household_id arg
+        task._set_relationship_col(
+            "wrong_123_id", households_to_update, PendingIndividual, SimpleNamespace(value="HEAD")
+        )
+        assert len(households_to_update) == 0
+
+        # everything is perfect, got HH for update household.head_of_household value
+        task._set_relationship_col(
+            "fake_id_123", households_to_update, PendingIndividual, SimpleNamespace(value="HEAD")
+        )
+        assert len(households_to_update) == 1
+
+    def test_set_household_id_cell_if_no_value_or_wrong_value(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.households = {"fake_id_777": PendingHouseholdFactory()}
+
+        # value in the cell is None
+        hh_id = task._set_household_id_cell("hh_id", SimpleNamespace(value=None), PendingHousehold, "sheet_title")
+        assert hh_id == "hh_id"
+
+        # value in the cell is float and is_integer()
+        hh_id = task._set_household_id_cell("hh_id", SimpleNamespace(value=1.0), PendingHousehold, "sheet_title")
+        assert hh_id == "1"
+
+        # value in the cell is real HH id so set PendingIndividual.household
+        obj_to_create = PendingIndividualFactory(household=None)
+        assert obj_to_create.household is None
+        hh_id = task._set_household_id_cell("hh_id", SimpleNamespace(value="fake_id_777"), obj_to_create, "individuals")
+        assert hh_id == "fake_id_777"
+        assert obj_to_create.household is not None
+
+    def test_exception_with_cell_processing(self) -> None:
+        task = self.RdiXlsxCreateTask()
+
+        class BrokenHeaderCell:
+            def __repr__(self):
+                return "<BrokenHeaderCell>"
+
+            @property
+            def value(self):
+                raise ValueError("boomXD")
+
+        wb = openpyxl.load_workbook(self.import_data.file, data_only=True)
+        sheet = wb["Households"]
+
+        real_first_row = list(sheet[1])
+        real_first_row[0] = BrokenHeaderCell()  # break first header
+
+        original_getitem = sheet.__getitem__
+
+        def fake_getitem(idx):
+            if idx == 1:
+                return tuple(real_first_row)
+            return original_getitem(idx)
+
+        with patch.object(sheet, "__getitem__", side_effect=fake_getitem):
+            with pytest.raises(
+                Exception,
+                match=re.escape(
+                    "Error processing cell <Cell 'Households'.A1> with `<Cell 'Households'.A3>`: "
+                    "TypeError('NoneType' object is not iterable)"
+                ),
+            ):
+                task._create_objects(sheet, self.registration_data_import)

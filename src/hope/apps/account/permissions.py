@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
+    from hope.apps.grievance.models import GrievanceTicket
     from hope.models import BusinessArea, Program, User
 
 logger = logging.getLogger(__name__)
@@ -331,16 +332,30 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
 def check_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
-    general_permission: Permissions,
-    is_creator: bool,
-    creator_permission: Permissions,
-    is_owner: bool,
-    **kwargs: Any,
+    permission_list: list[Permissions],
+    business_area: "BusinessArea",
+    grievance_ticket: "GrievanceTicket",
 ) -> None:
-    """Kwargs: 'owner_permission', 'business_area', 'program'."""
-    owner_permission: Permissions = kwargs.get("owner_permission")
-    business_area: "BusinessArea" = kwargs.get("business_area")
-    program: "Program" | None = kwargs.get("program")
+    """Check Grievance Ticket permissions.
+
+    Args:
+        user: request user.
+        permission_list: list of permissions first General then Creator Permission and last Owner Permission.
+        business_area: business area to check permissions.
+        grievance_ticket: Grievance Ticket to check permissions.
+
+    Raises:
+        PermissionDenied
+    Returns: None.
+
+    """
+    is_creator: bool = grievance_ticket.created_by == user
+    is_owner: bool = grievance_ticket.assigned_to == user
+    general_permission = permission_list[0]
+    owner_permission: Permissions = permission_list[1]
+    creator_permission: Permissions = permission_list[2]
+    program: Program | None = grievance_ticket.programs.first()
+
     scope = program or business_area
     required_permissions = [general_permission.value]
     if is_creator:
@@ -353,16 +368,27 @@ def check_creator_or_owner_permission(
 
 def has_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
-    general_permission: Permissions,
-    is_creator: bool,
-    creator_permission: Permissions,
-    is_owner: bool,
-    **kwargs,
+    permission_list: list[Permissions],
+    business_area: "BusinessArea",
+    obj_to_check: "GrievanceTicket",
 ) -> bool:
-    """Kwargs - can have 'owner_permission', 'business_area', 'program'."""
-    owner_permission: Permissions = kwargs.get("owner_permission")
-    business_area: "BusinessArea" = kwargs.get("business_area")
-    program: "Program" | None = kwargs.get("program")
+    """Check if user has Creator or Owner permissions.
+
+    Args:
+        user: request user.
+        permission_list: list of permissions first General then Creator Permission and last Owner Permission.
+        business_area: business area to check permissions.
+        obj_to_check: Object to check permissions Grievance Ticket.
+    Returns: boolean.
+
+    """
+    is_creator: bool = obj_to_check.created_by == user
+    is_owner: bool = obj_to_check.assigned_to == user
+    general_permission = permission_list[0]
+    owner_permission: Permissions = permission_list[1]
+    creator_permission: Permissions = permission_list[2]
+    program: Program | None = obj_to_check.programs.first()
+
     scope = program or business_area
     return user.is_authenticated and (
         user.has_perm(general_permission.value, scope)
