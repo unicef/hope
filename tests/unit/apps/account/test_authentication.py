@@ -130,9 +130,7 @@ def test_social_details_keeps_email_none_when_user_data_empty(
 
 
 @patch("hope.apps.account.authentication.social_auth.social_details")
-def test_social_details_adds_idp_from_response(
-    mock_social_auth_details: MagicMock, mock_backend: MagicMock
-) -> None:
+def test_social_details_adds_idp_from_response(mock_social_auth_details: MagicMock, mock_backend: MagicMock) -> None:
     mock_social_auth_details.return_value = {"details": {"email": "test@example.com"}}
     response = {"idp": "azure-ad"}
 
