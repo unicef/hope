@@ -2,276 +2,325 @@ from typing import Any
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
-from django.test import TestCase
+import pytest
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     DocumentFactory,
-    create_household_and_individuals,
+    GrievanceTicketFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.admin.household import HouseholdWithdrawFromListMixin
-from hope.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails,
-)
+from hope.apps.grievance.models import GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails
 from hope.apps.household.services.household_withdraw import HouseholdWithdraw
 from hope.models import Document
 
+pytestmark = pytest.mark.django_db
 
-class TestHouseholdWithdrawFromListMixin(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=business_area, status="ACTIVE")
-        cls.program_other = ProgramFactory(business_area=business_area)
-        cls.household_unicef_id = "HH-20-0192.6628"
-        cls.household2_unicef_id = "HH-20-0192.6629"
-        cls.household, cls.individuals = create_household_and_individuals(
-            household_data={
-                "business_area": business_area,
-                "program": cls.program,
-                "unicef_id": cls.household_unicef_id,
-            },
-            individuals_data=[{}],
-        )
-        cls.household2, cls.individuals2 = create_household_and_individuals(
-            household_data={
-                "business_area": business_area,
-                "program": cls.program,
-                "unicef_id": cls.household2_unicef_id,
-            },
-            individuals_data=[{}, {}],
-        )
 
-        (
-            cls.household_other_program,
-            cls.individuals_other_program,
-        ) = create_household_and_individuals(
-            household_data={
-                "business_area": business_area,
-                "program": cls.program_other,
-                "unicef_id": cls.household_unicef_id,
-            },
-            individuals_data=[{}],
-        )
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
-        cls.document = DocumentFactory(
-            individual=cls.individuals[0],
-            program=cls.program,
-        )
 
-        cls.grievance_ticket = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS)
-        cls.ticket_complaint_details = TicketComplaintDetails.objects.create(
-            ticket=cls.grievance_ticket,
-            household=cls.household,
-        )
-        cls.grievance_ticket2 = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS)
-        cls.ticket_individual_data_update = TicketIndividualDataUpdateDetails.objects.create(
-            ticket=cls.grievance_ticket2,
-            individual=cls.individuals[0],
-        )
-        cls.grievance_ticket_household2 = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS)
-        cls.ticket_complaint_details_household2 = TicketComplaintDetails.objects.create(
-            ticket=cls.grievance_ticket_household2,
-            household=cls.household2,
-        )
+@pytest.fixture
+def programs(business_area):
+    return {
+        "program": ProgramFactory(business_area=business_area, status="ACTIVE"),
+        "program_other": ProgramFactory(business_area=business_area),
+    }
 
-        cls.program.household_count = 2
-        cls.program.individual_count = 3
-        cls.program.save()
 
-    def _request_with_post_method_and_session_ba(self) -> HttpRequest:
-        request = HttpRequest()
-        request.method = "POST"
-        middleware = SessionMiddleware(lambda req: None)  # type: ignore
-        middleware.process_request(request)
-        request.session.save()
-        request.session["business_area"] = str(self.program.business_area.pk)
-        return request
+@pytest.fixture
+def households_context(programs, business_area):
+    program = programs["program"]
+    program_other = programs["program_other"]
+    household_unicef_id = "HH-20-0192.6628"
+    household2_unicef_id = "HH-20-0192.6629"
 
-    def test_households_withdraw_from_list(self) -> None:
-        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
-            return {}
+    household = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        create_role=False,
+    )
+    household.unicef_id = household_unicef_id
+    household.save(update_fields=["unicef_id"])
+    individual = IndividualFactory(household=household, business_area=business_area, program=program)
+    household.head_of_household = individual
+    household.save(update_fields=["head_of_household"])
 
-        def mock_message_user(*args: Any, **kwargs: Any) -> None:
-            pass
+    household2 = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        create_role=False,
+    )
+    household2.unicef_id = household2_unicef_id
+    household2.save(update_fields=["unicef_id"])
+    individuals2 = [
+        IndividualFactory(household=household2, business_area=business_area, program=program),
+        IndividualFactory(household=household2, business_area=business_area, program=program),
+    ]
+    household2.head_of_household = individuals2[0]
+    household2.save(update_fields=["head_of_household"])
 
-        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
-        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+    household_other_program = HouseholdFactory(
+        business_area=business_area,
+        program=program_other,
+        create_role=False,
+    )
+    household_other_program.unicef_id = household_unicef_id
+    household_other_program.save(update_fields=["unicef_id"])
+    individual_other_program = IndividualFactory(
+        household=household_other_program,
+        business_area=business_area,
+        program=program_other,
+    )
+    household_other_program.head_of_household = individual_other_program
+    household_other_program.save(update_fields=["head_of_household"])
 
-        request = self._request_with_post_method_and_session_ba()
-        tag = "Some tag reason"
-        request.POST = {  # type: ignore
-            "step": "3",
-            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
-            "tag": tag,
-            "program": str(self.program.id),
-            "business_area": self.program.business_area,
-        }
+    document = DocumentFactory(
+        individual=individual,
+        program=program,
+    )
 
-        with self.assertNumQueries(28):
-            HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+    grievance_ticket = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area)
+    ticket_complaint_details = TicketComplaintDetails.objects.create(
+        ticket=grievance_ticket,
+        household=household,
+    )
+    grievance_ticket2 = GrievanceTicketFactory(status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area)
+    ticket_individual_data_update = TicketIndividualDataUpdateDetails.objects.create(
+        ticket=grievance_ticket2,
+        individual=individual,
+    )
+    grievance_ticket_household2 = GrievanceTicketFactory(
+        status=GrievanceTicket.STATUS_IN_PROGRESS, business_area=business_area
+    )
+    ticket_complaint_details_household2 = TicketComplaintDetails.objects.create(
+        ticket=grievance_ticket_household2,
+        household=household2,
+    )
 
-        self.household.refresh_from_db()
-        self.household_other_program.refresh_from_db()
-        self.household2.refresh_from_db()
-        self.individuals_other_program[0].refresh_from_db()
-        self.individuals[0].refresh_from_db()
-        self.individuals2[0].refresh_from_db()
-        self.individuals2[1].refresh_from_db()
-        self.document.refresh_from_db()
-        self.grievance_ticket.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        self.grievance_ticket_household2.refresh_from_db()
+    program.household_count = 2
+    program.individual_count = 3
+    program.save(update_fields=["household_count", "individual_count"])
 
-        assert self.household.withdrawn is True
-        assert self.household.withdrawn_date is not None
-        assert self.household.internal_data["withdrawn_tag"] == tag
-        assert self.individuals[0].withdrawn is True
-        assert self.individuals[0].withdrawn_date is not None
-        assert self.document.status == Document.STATUS_INVALID
-        assert self.grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
-        assert self.grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
-        assert self.grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED
-        assert self.grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+    return {
+        "program": program,
+        "program_other": program_other,
+        "household": household,
+        "household2": household2,
+        "household_other_program": household_other_program,
+        "individual": individual,
+        "individuals2": individuals2,
+        "individual_other_program": individual_other_program,
+        "document": document,
+        "grievance_ticket": grievance_ticket,
+        "grievance_ticket2": grievance_ticket2,
+        "grievance_ticket_household2": grievance_ticket_household2,
+        "ticket_complaint_details": ticket_complaint_details,
+        "ticket_individual_data_update": ticket_individual_data_update,
+        "ticket_complaint_details_household2": ticket_complaint_details_household2,
+    }
 
-        assert self.household2.withdrawn is True
-        assert self.household2.withdrawn_date is not None
-        assert self.household2.internal_data["withdrawn_tag"] == tag
-        assert self.individuals2[0].withdrawn is True
-        assert self.individuals2[0].withdrawn_date is not None
-        assert self.individuals2[1].withdrawn is True
-        assert self.individuals2[1].withdrawn_date is not None
-        assert self.grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
-        assert self.grievance_ticket_household2.extras["status_before_withdrawn"] == str(
-            GrievanceTicket.STATUS_IN_PROGRESS
-        )
 
-        # household from another program is not withdrawn
-        assert self.household_other_program.withdrawn is False
-        assert self.individuals_other_program[0].withdrawn is False
+@pytest.fixture
+def post_request(programs):
+    request = HttpRequest()
+    request.method = "POST"
+    middleware = SessionMiddleware(lambda req: None)  # type: ignore
+    middleware.process_request(request)
+    request.session.save()
+    request.session["business_area"] = str(programs["program"].business_area.pk)
+    return request
 
-        # check ability to revert this action
-        service = HouseholdWithdraw(self.household)
-        service.unwithdraw()
-        service.change_tickets_status([self.ticket_complaint_details, self.ticket_individual_data_update])
-        self.household.refresh_from_db()
-        self.individuals[0].refresh_from_db()
-        self.grievance_ticket.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        assert self.household.withdrawn is False
-        assert self.household.withdrawn_date is None
-        assert self.individuals[0].withdrawn is False
-        assert self.individuals[0].withdrawn_date is None
-        assert self.grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-        assert self.grievance_ticket.extras.get("status_before_withdrawn") == ""
-        assert self.grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS
-        assert self.grievance_ticket2.extras.get("status_before_withdrawn") == ""
 
-    def test_split_list_of_ids(self) -> None:
-        assert HouseholdWithdrawFromListMixin.split_list_of_ids(
-            "HH-1, HH-2/HH-3|HH-4 new line HH-5        HH-6",
-        ) == ["HH-1", "HH-2", "HH-3", "HH-4", "HH-5", "HH-6"]
+@pytest.fixture
+def mixin_mocks(monkeypatch):
+    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "get_common_context", lambda *a, **k: {})
+    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "message_user", lambda *a, **k: None)
 
-    def test_get_and_set_context_data(self) -> None:
-        request = self._request_with_post_method_and_session_ba()
-        household_list = f"{self.household.unicef_id}"
-        tag = "Some tag reason"
-        request.POST = {  # type: ignore
-            "household_list": household_list,
-            "tag": tag,
-            "program": str(self.program.id),
-            "business_area": str(self.program.business_area.pk),
-        }
-        context = {}
-        HouseholdWithdrawFromListMixin.get_and_set_context_data(request, context)
-        assert context["program"] == str(self.program.id)
-        assert context["household_list"] == household_list
-        assert context["tag"] == tag
-        assert context["business_area"] == str(self.program.business_area.pk)
 
-    def test_get_request(self) -> None:
-        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
-            return {}
+def test_households_withdraw_from_list(
+    households_context,
+    post_request,
+    mixin_mocks,
+    django_assert_num_queries,
+) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household2 = households_context["household2"]
+    household_other_program = households_context["household_other_program"]
+    individual = households_context["individual"]
+    individuals2 = households_context["individuals2"]
+    individual_other_program = households_context["individual_other_program"]
+    document = households_context["document"]
+    grievance_ticket = households_context["grievance_ticket"]
+    grievance_ticket2 = households_context["grievance_ticket2"]
+    grievance_ticket_household2 = households_context["grievance_ticket_household2"]
+    ticket_complaint_details = households_context["ticket_complaint_details"]
+    ticket_individual_data_update = households_context["ticket_individual_data_update"]
 
-        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+    tag = "Some tag reason"
+    post_request.POST = {  # type: ignore
+        "step": "3",
+        "household_list": f"{household.unicef_id}, {household2.unicef_id}",
+        "tag": tag,
+        "program": str(program.id),
+        "business_area": program.business_area,
+    }
 
-        request = HttpRequest()
-        request.method = "GET"
-        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
-        assert resp.status_code == 200
+    with django_assert_num_queries(28):
+        HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
-    def test_post_households_withdraw_from_list_step_0(self) -> None:
-        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
-            return {}
+    household.refresh_from_db()
+    household_other_program.refresh_from_db()
+    household2.refresh_from_db()
+    individual_other_program.refresh_from_db()
+    individual.refresh_from_db()
+    individuals2[0].refresh_from_db()
+    individuals2[1].refresh_from_db()
+    document.refresh_from_db()
+    grievance_ticket.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+    grievance_ticket_household2.refresh_from_db()
 
-        def mock_message_user(*args: Any, **kwargs: Any) -> None:
-            pass
+    assert household.withdrawn is True
+    assert household.withdrawn_date is not None
+    assert household.internal_data["withdrawn_tag"] == tag
+    assert individual.withdrawn is True
+    assert individual.withdrawn_date is not None
+    assert document.status == Document.STATUS_INVALID
+    assert grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
+    assert grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
 
-        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
-        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+    assert household2.withdrawn is True
+    assert household2.withdrawn_date is not None
+    assert household2.internal_data["withdrawn_tag"] == tag
+    assert individuals2[0].withdrawn is True
+    assert individuals2[0].withdrawn_date is not None
+    assert individuals2[1].withdrawn is True
+    assert individuals2[1].withdrawn_date is not None
+    assert grievance_ticket_household2.status == GrievanceTicket.STATUS_CLOSED
+    assert grievance_ticket_household2.extras["status_before_withdrawn"] == str(GrievanceTicket.STATUS_IN_PROGRESS)
 
-        request = self._request_with_post_method_and_session_ba()
-        request.POST = {  # type: ignore
-            "step": "0",
-            "business_area": self.program.business_area,
-        }
+    assert household_other_program.withdrawn is False
+    assert individual_other_program.withdrawn is False
 
-        with self.assertNumQueries(0):
-            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+    service = HouseholdWithdraw(household)
+    service.unwithdraw()
+    service.change_tickets_status([ticket_complaint_details, ticket_individual_data_update])
+    household.refresh_from_db()
+    individual.refresh_from_db()
+    grievance_ticket.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+    assert household.withdrawn is False
+    assert household.withdrawn_date is None
+    assert individual.withdrawn is False
+    assert individual.withdrawn_date is None
+    assert grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+    assert grievance_ticket.extras.get("status_before_withdrawn") == ""
+    assert grievance_ticket2.status == GrievanceTicket.STATUS_IN_PROGRESS
+    assert grievance_ticket2.extras.get("status_before_withdrawn") == ""
 
-        assert resp.status_code == 200
 
-    def test_post_households_withdraw_from_list_step_1(self) -> None:
-        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
-            return {}
+def test_split_list_of_ids() -> None:
+    assert HouseholdWithdrawFromListMixin.split_list_of_ids(
+        "HH-1, HH-2/HH-3|HH-4 new line HH-5        HH-6",
+    ) == ["HH-1", "HH-2", "HH-3", "HH-4", "HH-5", "HH-6"]
 
-        def mock_message_user(*args: Any, **kwargs: Any) -> None:
-            pass
 
-        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
-        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+def test_get_and_set_context_data(households_context, post_request) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household_list = f"{household.unicef_id}"
+    tag = "Some tag reason"
+    post_request.POST = {  # type: ignore
+        "household_list": household_list,
+        "tag": tag,
+        "program": str(program.id),
+        "business_area": str(program.business_area.pk),
+    }
+    context: dict[str, Any] = {}
+    HouseholdWithdrawFromListMixin.get_and_set_context_data(post_request, context)
+    assert context["program"] == str(program.id)
+    assert context["household_list"] == household_list
+    assert context["tag"] == tag
+    assert context["business_area"] == str(program.business_area.pk)
 
-        request = self._request_with_post_method_and_session_ba()
-        tag = "Some tag reason"
-        request.POST = {  # type: ignore
-            "step": "1",
-            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
-            "tag": tag,
-            "program": str(self.program.id),
-            "business_area": self.program.business_area,
-        }
 
-        with self.assertNumQueries(0):
-            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+def test_get_request(mixin_mocks) -> None:
+    request = HttpRequest()
+    request.method = "GET"
+    resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+    assert resp.status_code == 200
 
-        assert resp.status_code == 200
 
-    def test_post_households_withdraw_from_list_step_2(self) -> None:
-        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
-            return {}
+def test_post_households_withdraw_from_list_step_0(
+    households_context,
+    post_request,
+    mixin_mocks,
+    django_assert_num_queries,
+) -> None:
+    program = households_context["program"]
+    post_request.POST = {  # type: ignore
+        "step": "0",
+        "business_area": program.business_area,
+    }
 
-        def mock_message_user(*args: Any, **kwargs: Any) -> None:
-            pass
+    with django_assert_num_queries(0):
+        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
 
-        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
-        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+    assert resp.status_code == 200
 
-        request = self._request_with_post_method_and_session_ba()
-        tag = "Some tag reason"
-        request.POST = {  # type: ignore
-            "step": "2",
-            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
-            "tag": tag,
-            "program": str(self.program.id),
-            "business_area": self.program.business_area,
-        }
 
-        with self.assertNumQueries(3):
-            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+def test_post_households_withdraw_from_list_step_1(
+    households_context,
+    post_request,
+    mixin_mocks,
+    django_assert_num_queries,
+) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household2 = households_context["household2"]
+    tag = "Some tag reason"
+    post_request.POST = {  # type: ignore
+        "step": "1",
+        "household_list": f"{household.unicef_id}, {household2.unicef_id}",
+        "tag": tag,
+        "program": str(program.id),
+        "business_area": program.business_area,
+    }
 
-        assert resp.status_code == 200
+    with django_assert_num_queries(0):
+        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+
+    assert resp.status_code == 200
+
+
+def test_post_households_withdraw_from_list_step_2(
+    households_context,
+    post_request,
+    mixin_mocks,
+    django_assert_num_queries,
+) -> None:
+    program = households_context["program"]
+    household = households_context["household"]
+    household2 = households_context["household2"]
+    tag = "Some tag reason"
+    post_request.POST = {  # type: ignore
+        "step": "2",
+        "household_list": f"{household.unicef_id}, {household2.unicef_id}",
+        "tag": tag,
+        "program": str(program.id),
+        "business_area": program.business_area,
+    }
+
+    with django_assert_num_queries(3):
+        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=post_request)
+
+    assert resp.status_code == 200

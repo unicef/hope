@@ -14,6 +14,7 @@ from hope.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     PeriodicFieldData,
+    StorageFile,
     XLSXKoboTemplate,
 )
 
@@ -102,3 +103,11 @@ class FileTempFactory(DjangoModelFactory):
         model = FileTemp
 
     file = factory.LazyFunction(lambda: SimpleUploadedFile("test.txt", b"test"))
+
+
+class StorageFileFactory(DjangoModelFactory):
+    class Meta:
+        model = StorageFile
+
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    file = factory.LazyFunction(lambda: SimpleUploadedFile("storage.txt", b"test"))
