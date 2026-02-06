@@ -69,18 +69,14 @@ class Importer:
     def __init__(
         self,
         registration_data_import: RegistrationDataImport,
-        households_data,
-        individuals_data,
-        documents_data,
-        accounts_data,
-        identities_data,
+        **kwargs,
     ):
         self.registration_data_import = registration_data_import
-        self.households_data = households_data
-        self.individuals_data = individuals_data
-        self.documents_data = documents_data
-        self.accounts_data = accounts_data
-        self.identities_data = identities_data
+        self.households_data = kwargs.get("households_data", [])
+        self.individuals_data = kwargs.get("individuals_data", [])
+        self.documents_data = kwargs.get("documents_data", [])
+        self.accounts_data = kwargs.get("accounts_data", [])
+        self.identities_data = kwargs.get("identities_data", [])
         self.households_to_create = []
         self.individuals_to_create = []
         self.documents_to_create = []

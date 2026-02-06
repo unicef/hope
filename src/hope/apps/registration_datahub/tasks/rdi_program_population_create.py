@@ -47,6 +47,6 @@ class RdiProgramPopulationCreateTask:
                 "business_area",
                 None,
                 registration_data_import.program_id,
-                old_rdi_mis,
-                registration_data_import,
+                old_object=old_rdi_mis,
+                new_object=registration_data_import,
             )

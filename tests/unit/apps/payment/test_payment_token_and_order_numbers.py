@@ -1,74 +1,120 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
 import pytest
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    CountryFactory,
+    HouseholdFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
-from hope.models import Country, Household, Payment, PaymentPlan
+from hope.models import Payment, PaymentPlan
+
+pytestmark = pytest.mark.django_db
 
 
-class TestPaymentTokenAndOrderNumbers(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        business_area = create_afghanistan()
-        country_origin = Country.objects.filter(iso_code2="UA").first()
+@pytest.fixture
+def business_area() -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
 
-        for n in range(1, 3):
-            create_household(
-                {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin},
-            )
-        program = ProgramFactory(business_area=business_area)
 
-        cls.payment_plan = PaymentPlanFactory(
-            program_cycle=program.cycles.first(),
-            status=PaymentPlan.Status.ACCEPTED,
+@pytest.fixture
+def country_origin() -> Any:
+    return CountryFactory(
+        name="Ukraine",
+        short_name="Ukraine",
+        iso_code2="UA",
+        iso_code3="UKR",
+        iso_num="0804",
+    )
+
+
+@pytest.fixture
+def program(business_area: Any) -> Any:
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def program_cycle(program: Any) -> Any:
+    return ProgramCycleFactory(program=program, title="Cycle Token")
+
+
+@pytest.fixture
+def payment_plan(business_area: Any, program_cycle: Any) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=program_cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def households(program: Any, business_area: Any, country_origin: Any) -> list[Any]:
+    return [
+        HouseholdFactory(
+            size=1,
+            address="Lorem Ipsum 1",
+            country_origin=country_origin,
+            program=program,
             business_area=business_area,
+        ),
+        HouseholdFactory(
+            size=2,
+            address="Lorem Ipsum 2",
+            country_origin=country_origin,
+            program=program,
+            business_area=business_area,
+        ),
+    ]
+
+
+@pytest.fixture
+def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> list[Any]:
+    return [
+        PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            program=program,
+            currency="PLN",
         )
-        program.households.set(Household.objects.all())
-        for household in program.households.all():
-            PaymentFactory(
-                parent=cls.payment_plan,
-                household=household,
-                program=program,
-                currency="PLN",
-            )
+        for household in households
+    ]
 
-    def test_payments_created_payments(self) -> None:
-        assert self.payment_plan.eligible_payments.count() == 2
 
-        for payment in self.payment_plan.eligible_payments.all():
-            assert payment.order_number is None
-            assert payment.token_number is None
+def test_generate_token_and_order_numbers_for_payments(
+    payment_plan: PaymentPlan, program: Any, payments: list[Payment]
+) -> None:
+    service = XlsxPaymentPlanExportPerFspService(payment_plan, None)
+    service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), program)
+    payment = payment_plan.eligible_payments.first()
+    assert len(str(payment.order_number)) == 9
+    assert len(str(payment.token_number)) == 7
 
-    def test_generate_token_and_order_numbers_for_payments(self) -> None:
-        service = XlsxPaymentPlanExportPerFspService(self.payment_plan, None)
-        service.generate_token_and_order_numbers(self.payment_plan.eligible_payments.all(), self.payment_plan.program)
-        payment = self.payment_plan.eligible_payments.first()
-        assert len(str(payment.order_number)) == 9
-        assert len(str(payment.token_number)) == 7
 
-    def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
-        with pytest.raises(ValidationError):
-            payment_token_and_order_number_validator(1111111)
+def test_validation_token_must_not_has_the_same_digit_more_than_three_times() -> None:
+    with pytest.raises(ValidationError):
+        payment_token_and_order_number_validator(1111111)
 
-    def test_validation_save_payment_with_exists_token_or_order_number(self) -> None:
-        payment_1 = Payment.objects.first()
-        payment_2 = Payment.objects.last()
 
-        token_number = 1112223
-        order_number = 111222333
+def test_validation_save_payment_with_exists_token_or_order_number(payments: list[Payment]) -> None:
+    payment_1 = payments[0]
+    payment_2 = payments[1]
 
-        payment_1.token_number = token_number
-        payment_1.order_number = order_number
-        payment_1.save()
+    token_number = 1112223
+    order_number = 111222333
 
-        payment_2.token_number = token_number
-        payment_2.order_number = order_number
-        with pytest.raises(IntegrityError):
-            payment_2.save(update_fields=["order_number", "token_number"])
+    payment_1.token_number = token_number
+    payment_1.order_number = order_number
+    payment_1.save()
+
+    payment_2.token_number = token_number
+    payment_2.order_number = order_number
+    with pytest.raises(IntegrityError):
+        payment_2.save(update_fields=["order_number", "token_number"])

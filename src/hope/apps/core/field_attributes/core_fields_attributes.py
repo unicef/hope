@@ -2219,7 +2219,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Languages.get_choices(),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "preferred_language",
+        "xlsx_field": "preferred_language_i_c",
         "scope": [
             Scope.XLSX,
             Scope.INDIVIDUAL_UPDATE,

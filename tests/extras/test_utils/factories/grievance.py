@@ -3,9 +3,16 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, TicketSensitiveDetails
+from hope.apps.grievance.models import (
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketSensitiveDetails,
+)
 
 from .core import BusinessAreaFactory
+from .household import IndividualFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
@@ -31,6 +38,31 @@ class TicketSensitiveDetailsFactory(DjangoModelFactory):
     household = None
     individual = None
     payment = None
+
+
+class TicketComplaintDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketComplaintDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+    )
+    household = None
+    individual = None
+
+
+class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketIndividualDataUpdateDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):

@@ -2,7 +2,6 @@ from datetime import date, timedelta
 import logging
 from typing import Any
 
-from constance import config
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.utils import timezone
@@ -34,7 +33,7 @@ from hope.apps.household.const import (
     STATUS_WITHDRAWN,
 )
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.models import DocumentType, Household, Individual, Payment, Program
+from hope.models import Household, Individual, Payment, Program
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
     if len(code) < 6:
         return code
 
-    code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+    code = code[5:].rsplit("/", maxsplit=1)[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
     if code.startswith("20223"):
         # month 3 day 25...31 id is 44...12067
         code = code[7:]
@@ -203,54 +202,14 @@ class HouseholdFilter(UpdatedAtFilter):
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
+        return self._search_es(qs, value)
+
+    def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
         try:
-            if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
-                return self._search_es(qs, value)
-            return self._search_db(qs, value)  # pragma: no cover
-        except SearchError:  # pragma: no cover
-            return qs.none()
-
-    def _search_db(self, qs: QuerySet[Household], value: str) -> QuerySet[Household]:  # pragma: no cover
-        # TODO: to remove
-        search = value.strip()
-        search_type = self.data.get("search_type")
-
-        if search_type == "household_id":
-            return qs.filter(unicef_id__icontains=search)
-        if search_type == "individual_id":
-            return qs.filter(head_of_household__unicef_id__icontains=search)
-        if search_type == "full_name":
-            return qs.filter(head_of_household__full_name__icontains=search)
-        if search_type == "phone_no":
-            return qs.filter(
-                Q(head_of_household__phone_no__icontains=search)
-                | Q(head_of_household__phone_no_alternative__icontains=search)
-            )
-        if search_type == "detail_id":
-            try:
-                int(search)
-            except ValueError:
-                raise SearchError("The search value for a given search type should be a number")
-            return qs.filter(detail_id__istartswith=search)
-        if search_type == "kobo_asset_id":
-            inner_query = Q()
-            split_values_list = search.split(" ")
-            for split_value in split_values_list:
-                striped_value = split_value.strip(",")
-                if striped_value.startswith(("HOPE-", "KOBO-")):
-                    _value = _prepare_kobo_asset_id_value(search)
-                    # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
-                    # will filter by '111222' like 111222 is ID
-                    inner_query |= Q(kobo_asset_id__endswith=_value)
-                else:
-                    inner_query = Q(kobo_asset_id__endswith=search)
-            return qs.filter(inner_query)
-        if DocumentType.objects.filter(key=search_type).exists():
-            return qs.filter(
-                head_of_household__documents__type__key=search_type,
-                head_of_household__documents__document_number__icontains=search,
-            )
-        raise SearchError(f"Invalid search key '{search_type}'")
+            int(search)
+        except ValueError:
+            raise SearchError("The search value for a given search type should be a number")
+        return qs.filter(detail_id__istartswith=search)
 
     def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
@@ -412,37 +371,7 @@ class IndividualFilter(UpdatedAtFilter):
         }
 
     def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        try:
-            if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
-                return self._search_es(qs, value)
-            return self._search_db(qs, value)
-        except SearchError:
-            return qs.none()
-
-    def _search_db(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:  # pragma: no cover
-        # TODO: to remove
-        search_type = self.data.get("search_type")
-        search = value.strip()
-        if search_type == "individual_id":
-            return qs.filter(unicef_id__icontains=search)
-        if search_type == "household_id":
-            return qs.filter(household__unicef_id__icontains=search)
-        if search_type == "full_name":
-            return qs.filter(full_name__icontains=search)
-        if search_type == "phone_no":
-            return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
-        if search_type == "detail_id":
-            try:
-                int(search)
-            except ValueError:
-                raise SearchError("The search value for a given search type should be a number")
-            return qs.filter(detail_id__icontains=search)
-        if DocumentType.objects.filter(key=search_type).exists():
-            return qs.filter(
-                documents__type__key=search_type,
-                documents__document_number__icontains=search,
-            )
-        raise SearchError(f"Invalid search key '{search_type}'")
+        return self._search_es(qs, value)
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
         return qs
@@ -665,22 +594,12 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
                 if "individual" in lookups:
                     individual_field = lookups["individual"]
                     obj = details
-                    for field in individual_field.split("__"):
-                        obj = getattr(obj, field, None)
-                        if obj is None:
-                            break
-                    if obj and hasattr(obj, "id"):
-                        individual_ids.add(obj.id)
+                    self._add_individual_ids(individual_field, individual_ids, obj)
 
                 if "golden_records_individual" in lookups:
                     individual_field = lookups["golden_records_individual"]
                     obj = details
-                    for field in individual_field.split("__"):
-                        obj = getattr(obj, field, None)
-                        if obj is None:
-                            break
-                    if obj and hasattr(obj, "id"):
-                        individual_ids.add(obj.id)
+                    self._add_individual_ids(individual_field, individual_ids, obj)
 
         if hasattr(ticket, "needs_adjudication_ticket_details") and ticket.needs_adjudication_ticket_details:
             individual_ids.update(
@@ -697,6 +616,14 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             return queryset.filter(id__in=individual_ids)
 
         return queryset.none()
+
+    def _add_individual_ids(self, individual_field, individual_ids, obj):
+        for field in individual_field.split("__"):
+            obj = getattr(obj, field, None)
+            if obj is None:
+                break
+        if obj and hasattr(obj, "id"):
+            individual_ids.add(obj.id)
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:

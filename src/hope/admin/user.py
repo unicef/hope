@@ -378,18 +378,22 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
                                     to_delete.delete()
                             else:
                                 raise ValueError("Bug found. {} not valid operation for add/rem role")
-                    if removed:
-                        msg = f"{removed} roles removed from {users} users"
-                    elif added:
-                        msg = f"{added} roles granted to {users} users"
-                    else:
-                        msg = f"{users} users processed no actions have been required"
+                    msg = self._get_msg(added, removed, users)
 
                     self.message_user(request, msg)
             return HttpResponseRedirect(request.get_full_path())
         ctx = self.get_common_context(request, title="Add Role", selection=queryset)
         ctx["form"] = AddRoleForm()
         return render(request, "admin/account/user/business_area_role.html", context=ctx)
+
+    def _get_msg(self, added, removed, users):
+        if removed:
+            msg = f"{removed} roles removed from {users} users"
+        elif added:
+            msg = f"{added} roles granted to {users} users"
+        else:
+            msg = f"{users} users processed no actions have been required"
+        return msg
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
@@ -437,15 +441,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
                                     "kobo": False,
                                     "error": "",
                                 }
-                                if "username" in row:
-                                    username = row["username"].strip()
-                                else:
-                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
-                                u, isnew = User.objects.get_or_create(
-                                    email=email,
-                                    partner=partner,
-                                    defaults={"username": username},
-                                )
+                                isnew, u = self._get_user(email, partner, row)
                                 if isnew:
                                     user_info["is_new"] = True
                                     ur = u.role_assignments.create(business_area=business_area, role=role)
@@ -477,6 +473,18 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
+
+    def _get_user(self, email, partner, row):
+        if "username" in row:
+            username = row["username"].strip()
+        else:
+            username = row["email"].replace("@", "_").replace(".", "_").lower()
+        u, isnew = User.objects.get_or_create(
+            email=email,
+            partner=partner,
+            defaults={"username": username},
+        )
+        return isnew, u
 
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)

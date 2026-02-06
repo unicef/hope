@@ -1,5 +1,7 @@
 """Core-related factories."""
 
+from typing import Any
+
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
@@ -78,6 +80,24 @@ class FlexibleAttributeFactory(DjangoModelFactory):
     type = FlexibleAttribute.STRING
     associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
     label = factory.LazyFunction(lambda: {"English(EN)": "Flex Field"})
+
+
+class FlexibleAttributeForPDUFactory(DjangoModelFactory):
+    class Meta:
+        model = FlexibleAttribute
+
+    type = FlexibleAttribute.PDU
+    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    label = factory.Sequence(lambda n: f"pdu_attr_{n}")
+    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
+    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
+    program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
+
+    @classmethod
+    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
+        label = kwargs.pop("label", None)
+        kwargs["label"] = {"English(EN)": label}
+        return super()._create(target_class, *args, **kwargs)
 
 
 class FlexibleAttributeChoiceFactory(DjangoModelFactory):

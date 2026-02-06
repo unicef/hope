@@ -587,9 +587,9 @@ class TestRdiKoboCreateTask(TestCase):
             head_of_households_mapping,
             household,
             households_to_create,
-            individuals_ids_hash_dict,
-            submission_meta_data,
-            1,
+            individuals_ids_hash_dict=individuals_ids_hash_dict,
+            submission_meta_data=submission_meta_data,
+            household_count=1,
         )
         hh = households_to_create[0]
 
