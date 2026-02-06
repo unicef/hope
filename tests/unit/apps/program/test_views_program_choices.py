@@ -6,8 +6,11 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan, create_ukraine
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.models import BusinessArea, DataCollectingType, Partner, PeriodicFieldData, Program, ProgramCycle, User
@@ -17,12 +20,12 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
 def ukraine(db: Any) -> BusinessArea:
-    return create_ukraine()
+    return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture
