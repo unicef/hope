@@ -139,8 +139,8 @@ def post_request(programs):
 
 @pytest.fixture
 def mixin_mocks(monkeypatch):
-    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "get_common_context", lambda *a, **k: {})
-    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "message_user", lambda *a, **k: None)
+    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "get_common_context", lambda *a, **k: {}, raising=False)
+    monkeypatch.setattr(HouseholdWithdrawFromListMixin, "message_user", lambda *a, **k: None, raising=False)
 
 
 def test_households_withdraw_from_list(
