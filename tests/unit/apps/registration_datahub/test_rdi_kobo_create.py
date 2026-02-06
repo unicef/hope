@@ -575,12 +575,6 @@ class TestRdiKoboCreateTask(TestCase):
             "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
             "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "_submission_time": "2022-02-22T12:22:22",
-            "individual_questions": [
-                {
-                    "individual_questions/role_i_c": "primary",
-                    "individual_questions/age": "65",
-                }
-            ],
         }
         submission_meta_data = {
             "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
