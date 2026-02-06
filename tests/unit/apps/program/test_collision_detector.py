@@ -1,8 +1,11 @@
 import pytest
 
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+)
 from hope.apps.household.const import (
     FEMALE,
     MALE,
@@ -39,7 +42,7 @@ def germany() -> Country:
 
 @pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
-    business_area = create_afghanistan()
+    business_area = BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
     business_area.countries.add(poland, germany)
 
     return ProgramFactory(

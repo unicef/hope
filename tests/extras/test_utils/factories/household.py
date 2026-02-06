@@ -13,6 +13,7 @@ from hope.models import (
     EntitlementCard,
     Household,
     Individual,
+    IndividualIdentity,
     IndividualRoleInHousehold,
     MergeStatusModel,
     RegistrationDataImport,
@@ -118,6 +119,7 @@ class IndividualRoleInHouseholdFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class EntitlementCardFactory(DjangoModelFactory):
@@ -148,3 +150,13 @@ class DocumentFactory(DjangoModelFactory):
     program = factory.SelfAttribute("individual.program")
     document_number = factory.Sequence(lambda n: f"DOC-{n}")
     type = factory.SubFactory(DocumentTypeFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
+
+
+class IndividualIdentityFactory(DjangoModelFactory):
+    class Meta:
+        model = IndividualIdentity
+
+    individual = factory.SubFactory(IndividualFactory)
+    number = factory.Sequence(lambda n: f"ID-{n}")
+    rdi_merge_status = MergeStatusModel.MERGED

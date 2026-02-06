@@ -7,21 +7,22 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PartnerFactory,
+    PeriodicFieldDataFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-    create_ukraine,
-)
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import (
     AdminAreaLimitedTo,
@@ -41,12 +42,12 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
 def ukraine(db: Any) -> BusinessArea:
-    return create_ukraine()
+    return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture

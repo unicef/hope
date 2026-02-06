@@ -6,19 +6,20 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
     AdminAreaLimitedToFactory,
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    FlexibleAttributeForPDUFactory,
     PartnerFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import (
-    FlexibleAttributeForPDUFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import (
     Area,
@@ -36,7 +37,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -224,7 +225,7 @@ def test_program_detail(
     assert response_data["name"] == program.name
     assert response_data["start_date"] == program.start_date.strftime("%Y-%m-%d")
     assert response_data["end_date"] == program.end_date.strftime("%Y-%m-%d")
-    assert response_data["budget"] == str(program.budget)
+    assert response_data["budget"] == f"{program.budget:.2f}"
     assert response_data["frequency_of_payments"] == program.frequency_of_payments
     assert response_data["sector"] == program.sector
     assert response_data["cash_plus"] == program.cash_plus

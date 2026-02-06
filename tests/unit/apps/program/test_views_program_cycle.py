@@ -11,14 +11,14 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,
@@ -32,7 +32,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -54,12 +54,13 @@ def program(afghanistan: BusinessArea) -> Program:
         end_date="2099-12-31",
         frequency_of_payments=Program.REGULAR,
     )
-    cycle = program.cycles.first()
-    cycle.title = "Default"
-    cycle.status = ProgramCycle.ACTIVE
-    cycle.start_date = "2023-01-02"
-    cycle.end_date = "2023-01-10"
-    cycle.save()
+    ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.ACTIVE,
+        title="Default",
+        start_date="2023-01-02",
+        end_date="2023-01-10",
+    )
     return program
 
 
@@ -1153,11 +1154,8 @@ def test_update_serializer_validate_end_date(
 def test_viewset_delete_non_active_program() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(
-        status=Program.DRAFT,
-        cycle__status=ProgramCycle.DRAFT,
-    )
-    cycle = program.cycles.first()
+    program = ProgramFactory(status=Program.DRAFT)
+    cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
     assert context.value.detail[0] == "Only Programme Cycle for Active Programme can be deleted."  # type: ignore
@@ -1166,11 +1164,8 @@ def test_viewset_delete_non_active_program() -> None:
 def test_viewset_delete_non_draft_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        cycle__status=ProgramCycle.ACTIVE,
-    )
-    cycle = program.cycles.first()
+    program = ProgramFactory(status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program, status=ProgramCycle.ACTIVE)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
     assert context.value.detail[0] == "Only Draft Programme Cycle can be deleted."  # type: ignore
@@ -1179,11 +1174,8 @@ def test_viewset_delete_non_draft_cycle() -> None:
 def test_viewset_delete_last_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        cycle__status=ProgramCycle.DRAFT,
-    )
-    cycle = program.cycles.first()
+    program = ProgramFactory(status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
     assert context.value.detail[0] == "Don't allow to delete last Cycle."  # type: ignore
