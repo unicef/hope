@@ -5,27 +5,25 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PartnerFactory,
+    PeriodicFieldDataFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-    create_afghanistan,
-    create_ukraine,
-)
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.program import (
-    BeneficiaryGroupFactory,
-    ProgramCycleFactory,
-    ProgramFactory,
-)
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import (
     Area,
@@ -37,7 +35,6 @@ from hope.models import (
     Partner,
     PeriodicFieldData,
     Program,
-    ProgramCycle,
     User,
 )
 
@@ -46,12 +43,12 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan() -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
 def ukraine() -> BusinessArea:
-    return create_ukraine()
+    return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture
@@ -634,7 +631,7 @@ def test_update_data_collecting_type_invalid(
     # DCT limited to another BA
     dct_invalid.deprecated = False
     dct_invalid.save()
-    ukraine = create_ukraine()
+    ukraine = BusinessAreaFactory(name="Ukraine", slug="ukraine")
     dct_invalid.limit_to.add(ukraine)
     response_for_limited = authenticated_client.put(update_url, payload)
     assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
@@ -869,9 +866,11 @@ def test_update_start_and_end_dates(
         whole_business_area_access=True,
     )
 
-    program_cycle = ProgramCycle.objects.filter(program=program).first()
-    program_cycle.start_date = "2030-06-01"
-    program_cycle.end_date = "2030-06-20"
+    ProgramCycleFactory(
+        program=program,
+        start_date="2030-06-01",
+        end_date="2030-06-20",
+    )
 
     payload = {
         **base_payload_for_update_without_changes,
@@ -939,10 +938,11 @@ def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(
         whole_business_area_access=True,
     )
 
-    program_cycle = ProgramCycle.objects.filter(program=program).first()
-    program_cycle.start_date = "2030-06-01"
-    program_cycle.end_date = "2030-06-20"
-    program_cycle.save()
+    ProgramCycleFactory(
+        program=program,
+        start_date="2030-06-01",
+        end_date="2030-06-20",
+    )
     ProgramCycleFactory(program=program, start_date="2032-01-01", end_date="2033-12-31")
 
     payload = {
@@ -976,10 +976,11 @@ def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(
         whole_business_area_access=True,
     )
 
-    program_cycle = ProgramCycle.objects.filter(program=program).first()
-    program_cycle.start_date = "2030-06-01"
-    program_cycle.end_date = "2030-06-20"
-    program_cycle.save()
+    ProgramCycleFactory(
+        program=program,
+        start_date="2030-06-01",
+        end_date="2030-06-20",
+    )
     ProgramCycleFactory(program=program, start_date="2032-01-01", end_date="2033-12-31")
 
     payload = {

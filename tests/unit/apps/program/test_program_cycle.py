@@ -9,10 +9,13 @@ from django.utils.dateparse import parse_date
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+    UserFactory,
+)
 from hope.models import BusinessArea, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
@@ -20,7 +23,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -30,15 +33,20 @@ def user(db: Any) -> User:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    return ProgramFactory(
+    program = ProgramFactory(
         status=Program.DRAFT,
         business_area=afghanistan,
         start_date="2020-01-01",
         end_date="2099-12-31",
-        cycle__title="Default Cycle 001",
-        cycle__start_date="2020-01-01",
-        cycle__end_date="2020-01-02",
     )
+    # Create default cycle for the program
+    ProgramCycleFactory(
+        program=program,
+        title="Default Cycle 001",
+        start_date="2020-01-01",
+        end_date="2020-01-02",
+    )
+    return program
 
 
 @pytest.fixture

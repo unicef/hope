@@ -7,9 +7,11 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
+from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
+    BusinessAreaFactory,
+    UserFactory,
+)
 from hope.models import BeneficiaryGroup, BusinessArea, User
 
 pytestmark = pytest.mark.django_db
@@ -17,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture

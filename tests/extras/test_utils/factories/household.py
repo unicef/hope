@@ -135,6 +135,7 @@ class IndividualRoleInHouseholdFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class EntitlementCardFactory(DjangoModelFactory):
@@ -165,6 +166,7 @@ class DocumentFactory(DjangoModelFactory):
     program = factory.SelfAttribute("individual.program")
     document_number = factory.Sequence(lambda n: f"DOC-{n}")
     type = factory.SubFactory(DocumentTypeFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class IndividualIdentityFactory(DjangoModelFactory):
@@ -174,6 +176,7 @@ class IndividualIdentityFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     number = factory.Sequence(lambda n: f"ID-{n}")
     country = factory.SubFactory("extras.test_utils.factories.geo.CountryFactory")
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class PendingHouseholdFactory(DjangoModelFactory):
