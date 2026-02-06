@@ -754,6 +754,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.VALID_JSON, business_area, True)
         assert result == []
 
+        business_area.custom_fields = {"hope": {"ignore_amended_kobo_submissions": True}}
+        business_area.save()
         result = validator.validate_everything(self.VALID_JSON, business_area, False)
         assert result == []
 

@@ -349,11 +349,11 @@ def check_creator_or_owner_permission(
     Returns: None.
 
     """
-    is_creator: bool = grievance_ticket.created_by == user
-    is_owner: bool = grievance_ticket.assigned_to == user
+    is_creator: bool = grievance_ticket.created_by == user if grievance_ticket.created_by else False
+    is_owner: bool = grievance_ticket.assigned_to == user if grievance_ticket.assigned_to else False
     general_permission = permission_list[0]
-    owner_permission: Permissions = permission_list[1]
-    creator_permission: Permissions = permission_list[2]
+    creator_permission: Permissions = permission_list[1]
+    owner_permission: Permissions = permission_list[2]
     program: Program | None = grievance_ticket.programs.first()
 
     scope = program or business_area
@@ -385,8 +385,8 @@ def has_creator_or_owner_permission(
     is_creator: bool = obj_to_check.created_by == user
     is_owner: bool = obj_to_check.assigned_to == user
     general_permission = permission_list[0]
-    owner_permission: Permissions = permission_list[1]
-    creator_permission: Permissions = permission_list[2]
+    creator_permission: Permissions = permission_list[1]
+    owner_permission: Permissions = permission_list[2]
     program: Program | None = obj_to_check.programs.first()
 
     scope = program or business_area
