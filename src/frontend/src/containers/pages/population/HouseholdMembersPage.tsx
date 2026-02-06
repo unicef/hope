@@ -53,6 +53,7 @@ export const HouseholdMembersPage = (): ReactElement => {
     status: '',
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
+    rdiId: '',
   };
 
   const [filter, setFilter] = useState(

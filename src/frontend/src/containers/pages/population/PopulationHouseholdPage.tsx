@@ -43,6 +43,7 @@ function PopulationHouseholdPage(): ReactElement {
     householdSizeMax: '',
     orderBy: 'unicef_id',
     withdrawn: '',
+    rdiId: '',
   };
 
   const [filter, setFilter] = useState(
