@@ -11,6 +11,7 @@ from hope.apps.grievance.models import (
 )
 
 from .core import BusinessAreaFactory
+from .household import IndividualFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
@@ -60,4 +61,4 @@ class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
-    individual = None
+    individual = factory.SubFactory(IndividualFactory)
