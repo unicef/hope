@@ -308,10 +308,6 @@ class Payment(
         household = self.household
         prefetched = getattr(household, "prefetched_individuals", None)
         if prefetched is not None:
-            head_id = household.head_of_household_id
-            for ind in prefetched:
-                if ind.pk == head_id:
-                    return ind
             return prefetched[0] if prefetched else None
         return household.individuals.select_related().first()
 
