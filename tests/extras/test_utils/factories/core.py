@@ -123,15 +123,3 @@ class FileTempFactory(DjangoModelFactory):
         model = FileTemp
 
     file = factory.LazyFunction(lambda: SimpleUploadedFile("test.txt", b"test"))
-
-
-class FlexibleAttributeForPDUFactory(DjangoModelFactory):
-    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-    label = factory.Faker("word")
-    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
-    type = FlexibleAttribute.PDU
-    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
-    program = factory.SubFactory("extras.test_utils.factories.core.ProgramFactory")
-
-    class Meta:
-        model = FlexibleAttribute

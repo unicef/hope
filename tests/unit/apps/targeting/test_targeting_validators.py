@@ -106,6 +106,7 @@ def test_validate_accepts_valid_household_and_individual_ids(
     household,
     individual,
 ):
+    # no issues should pass validation
     TargetingCriteriaInputValidator.validate(
         {
             "rules": [
@@ -151,7 +152,7 @@ def test_validate_rejects_nonexistent_household(program_standard):
         match="The given households do not exist in the current program",
     ):
         TargetingCriteriaInputValidator.validate(
-            {"rules": [{"household_ids": "HH-666", "individual_ids": ""}]},
+            {"rules": [{"household_ids": "HH-777", "individual_ids": ""}]},
             program_standard,
         )
 
@@ -162,7 +163,7 @@ def test_validate_rejects_nonexistent_individual(program_standard):
         match="The given individuals do not exist in the current program",
     ):
         TargetingCriteriaInputValidator.validate(
-            {"rules": [{"household_ids": "", "individual_ids": "IND-666"}]},
+            {"rules": [{"household_ids": "", "individual_ids": "IND-777"}]},
             program_standard,
         )
 

@@ -48,7 +48,7 @@ def api_request_factory() -> APIRequestFactory:
     return APIRequestFactory()
 
 
-def test_serialize_not_flex_field_household_filter_arrange_act_assert(
+def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
     rule: TargetingCriteriaRule,
     payment_plan: Any,
 ) -> None:
@@ -91,7 +91,7 @@ def test_serialize_not_flex_field_household_filter_arrange_act_assert(
     }
 
 
-def test_serialize_not_flex_field_individual_filter_arrange_act_assert(
+def test_targeting_criteria_serializer_for_not_flex_field_on_ind(
     rule: TargetingCriteriaRule,
     payment_plan: Any,
 ) -> None:
@@ -138,7 +138,7 @@ def test_serialize_not_flex_field_individual_filter_arrange_act_assert(
     }
 
 
-def test_serialize_flex_field_household_arrange_act_assert(
+def test_targeting_criteria_serializer_for_flex_field_on_hh(
     rule: TargetingCriteriaRule,
 ) -> None:
     flex_field = FlexibleAttributeFactory(
@@ -146,6 +146,7 @@ def test_serialize_flex_field_household_arrange_act_assert(
         label={"English(EN)": "Test Flex"},
         associated_with=0,  # "Household"
     )
+    # households_filters_blocks
     TargetingCriteriaRuleFilter.objects.create(
         comparison_method="EQUALS",
         arguments=["test_value"],
@@ -156,9 +157,16 @@ def test_serialize_flex_field_household_arrange_act_assert(
 
     data = TargetingCriteriaRuleSerializer(instance=rule).data
 
+    assert data["household_ids"] == ""
+    assert data["individual_ids"] == ""
+    assert data["individuals_filters_blocks"] == []
+    assert data["households_filters_blocks"][0]["comparison_method"] == "EQUALS"
+    assert data["households_filters_blocks"][0]["flex_field_classification"] == "FLEX_FIELD_BASIC"
+    assert data["households_filters_blocks"][0]["field_name"] == "flex_field"
+    assert data["households_filters_blocks"][0]["arguments"] == ["test_value"]
+
     hh_block = data["households_filters_blocks"][0]
     field_attribute = hh_block["field_attribute"]
-
     assert field_attribute == {
         "id": str(flex_field.id),
         "type": flex_field.type,
@@ -173,7 +181,7 @@ def test_serialize_flex_field_household_arrange_act_assert(
     }
 
 
-def test_serialize_flex_field_individual_arrange_act_assert(
+def test_targeting_criteria_serializer_for_flex_field_on_ind(
     rule: TargetingCriteriaRule,
 ) -> None:
     flex_field = FlexibleAttributeFactory(
@@ -190,6 +198,10 @@ def test_serialize_flex_field_individual_arrange_act_assert(
         individuals_filters_block=ind_block,
     )
     data = TargetingCriteriaRuleSerializer(instance=rule).data
+    assert data["household_ids"] == ""
+    assert data["individual_ids"] == ""
+    assert data["households_filters_blocks"] == []
+    assert not data["individuals_filters_blocks"][0]["target_only_hoh"]
 
     ind_filter = data["individuals_filters_blocks"][0]["individual_block_filters"][0]
     field_attribute = ind_filter["field_attribute"]
@@ -208,7 +220,7 @@ def test_serialize_flex_field_individual_arrange_act_assert(
     }
 
 
-def test_serialize_pdu_flex_field_arrange_act_assert(
+def test_targeting_criteria_serializer_for_pdu_flex_field(
     rule: TargetingCriteriaRule,
     business_area: Any,
     api_request_factory: APIRequestFactory,
@@ -222,7 +234,7 @@ def test_serialize_pdu_flex_field_arrange_act_assert(
     pdu_field = FlexibleAttributeForPDUFactory(
         name="pdu_field",
         program=program,
-        label={"English(EN)": "PDU Field"},
+        label="PDU Field",
         pdu_data=pdu_data,
     )
     ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
@@ -244,13 +256,16 @@ def test_serialize_pdu_flex_field_arrange_act_assert(
     }
 
     data = TargetingCriteriaRuleSerializer(instance=rule, context={"request": request}).data
+    assert data["household_ids"] == ""
+    assert data["individual_ids"] == ""
+    assert data["households_filters_blocks"] == []
     field_attribute = data["individuals_filters_blocks"][0]["individual_block_filters"][0]["field_attribute"]
 
     assert field_attribute == {
         "id": str(pdu_field.id),
         "type": pdu_field.type,
         "name": pdu_field.name,
-        "labels": [{"language": "English(EN)", "label": "PDU Field"}],
+        "labels": [{"label": "PDU Field", "language": "English(EN)"}],
         "label_en": "PDU Field",
         "hint": "{}",
         "choices": [],

@@ -27,8 +27,8 @@ from .grievance import (
     GrievanceTicketFactory,
     TicketComplaintDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
-    TicketSensitiveDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
+    TicketSensitiveDetailsFactory,
 )
 from .household import (
     DocumentFactory,
