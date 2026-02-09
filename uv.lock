@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.13.*"
 
 [[package]]
@@ -1366,6 +1366,20 @@ wheels = [
 ]
 
 [[package]]
+name = "drf-api-checker"
+version = "0.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "djangorestframework" },
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9d/04/e7e5c6d2cb5b64a99e459ca509df3da79f205e682e806b5af079f607775e/drf_api_checker-0.13.tar.gz", hash = "sha256:c14dcbf7913f413283c3073646b1dab6fb54d87db8ba454f7f35c71d1f3d849a", size = 9090, upload-time = "2025-06-04T12:24:56.738Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/98/a8441446d699d46d547dc078a47159c6902876f121f351118bc973b5e85f/drf_api_checker-0.13-py3-none-any.whl", hash = "sha256:7014fd52db0bc7bfb55d57799d218ee2b02e00794098a15ffd63525c8792f1f3", size = 12435, upload-time = "2025-06-04T12:24:55.783Z" },
+]
+
+[[package]]
 name = "drf-extensions"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1906,6 +1920,7 @@ dev = [
     { name = "django-stubs-ext" },
     { name = "django-webtest" },
     { name = "djangorestframework-stubs" },
+    { name = "drf-api-checker" },
     { name = "faker" },
     { name = "flake8" },
     { name = "flake8-absolute-import" },
@@ -2088,6 +2103,7 @@ dev = [
     { name = "django-stubs-ext", specifier = ">=0.7" },
     { name = "django-webtest", specifier = ">=1.9.10" },
     { name = "djangorestframework-stubs", specifier = ">=1.7" },
+    { name = "drf-api-checker", specifier = ">=0.13" },
     { name = "faker", specifier = ">=17" },
     { name = "flake8", specifier = ">=6" },
     { name = "flake8-absolute-import", specifier = ">=1.0.0.1" },

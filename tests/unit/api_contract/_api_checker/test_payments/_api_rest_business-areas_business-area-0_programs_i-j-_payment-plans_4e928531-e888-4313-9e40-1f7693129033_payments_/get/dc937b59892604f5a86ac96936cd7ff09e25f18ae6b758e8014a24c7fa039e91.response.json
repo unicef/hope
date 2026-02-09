@@ -1,0 +1,67 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1490"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/i-j-/payment-plans/4e928531-e888-4313-9e40-1f7693129033/payments/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "b225191b-fefc-4d5a-8bf6-9c09e55fb8b1",
+                "unicef_id": "RCPT-BA0000-25-0.000.001",
+                "parent_id": "4e928531-e888-4313-9e40-1f7693129033",
+                "parent_unicef_id": "PP-BA0000-25-00000001",
+                "household_id": "9fc83a38-2e13-4da5-a733-21c1f73ae4aa",
+                "household_unicef_id": "HH-25-0000.0001",
+                "household_size": null,
+                "household_admin2": "",
+                "household_status": "ACTIVE",
+                "hoh_phone_no": "None",
+                "hoh_phone_no_alternative": "None",
+                "snapshot_collector_full_name": null,
+                "snapshot_alternate_collector_full_name": null,
+                "snapshot_alternate_collector_id": null,
+                "fsp_name": "",
+                "entitlement_quantity": null,
+                "entitlement_quantity_usd": null,
+                "delivered_quantity": null,
+                "delivered_quantity_usd": null,
+                "delivery_date": null,
+                "delivery_type": null,
+                "status": "Pending",
+                "status_display": "Pending",
+                "currency": "PLN",
+                "fsp_auth_code": "",
+                "hoh_id": null,
+                "hoh_unicef_id": null,
+                "hoh_full_name": null,
+                "collector_id": "1b8aa55f-507d-4406-941e-39d156f2f949",
+                "collector_phone_no": "",
+                "collector_phone_no_alt": "",
+                "verification": {
+                    "received_amount": null,
+                    "status": null,
+                    "payment_verification_plan_unicef_id": "",
+                    "verification_channel": "",
+                    "version": null
+                },
+                "payment_plan_hard_conflicted": false,
+                "payment_plan_hard_conflicted_data": [],
+                "payment_plan_soft_conflicted": false,
+                "payment_plan_soft_conflicted_data": [],
+                "people_individual": null,
+                "program_name": "Program 0",
+                "program_slug": "i-j-"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
