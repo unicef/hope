@@ -349,8 +349,8 @@ def check_creator_or_owner_permission(
     Returns: None.
 
     """
-    is_creator: bool = bool(grievance_ticket.created_by == user) if grievance_ticket.created_by else False
-    is_owner: bool = bool(grievance_ticket.assigned_to == user) if grievance_ticket.assigned_to else False
+    is_creator: bool = getattr(grievance_ticket, "created_by", None) == user
+    is_owner: bool = getattr(grievance_ticket, "assigned_to", None) == user
     general_permission = permission_list[0]
     creator_permission: Permissions = permission_list[1]
     owner_permission: Permissions = permission_list[2]
@@ -382,8 +382,8 @@ def has_creator_or_owner_permission(
     Returns: boolean.
 
     """
-    is_creator: bool = bool(obj_to_check.created_by == user) if obj_to_check.created_by else False
-    is_owner: bool = bool(obj_to_check.assigned_to == user) if obj_to_check.assigned_to else False
+    is_creator: bool = getattr(obj_to_check, "created_by", None) == user
+    is_owner: bool = getattr(obj_to_check, "assigned_to", None) == user
     general_permission = permission_list[0]
     creator_permission: Permissions = permission_list[1]
     owner_permission: Permissions = permission_list[2]
