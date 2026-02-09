@@ -34,5 +34,6 @@ class ProgramCycleFactory(DjangoModelFactory):
         model = ProgramCycle
 
     program = factory.SubFactory(ProgramFactory)
+    title = factory.Sequence(lambda n: f"Programme Cycle {n}")
     start_date = factory.LazyFunction(date.today)
     status = ProgramCycle.ACTIVE

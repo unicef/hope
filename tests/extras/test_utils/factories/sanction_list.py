@@ -1,4 +1,4 @@
-"""Sanction list factories."""
+"""Sanction list related factories."""
 
 import factory
 from factory.django import DjangoModelFactory
