@@ -72,4 +72,6 @@ class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
     )
+    golden_records_individual = factory.SubFactory(IndividualFactory)
