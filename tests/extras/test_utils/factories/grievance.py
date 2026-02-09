@@ -18,6 +18,7 @@ from hope.models import PaymentVerification
 
 from .core import BusinessAreaFactory
 from .household import IndividualFactory
+from .sanction_list import SanctionListIndividualFactory
 
 
 class GrievanceTicketFactory(DjangoModelFactory):
@@ -73,6 +74,7 @@ class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
     )
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
@@ -93,7 +95,10 @@ class TicketSystemFlaggingDetailsFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        issue_type=None,
     )
+    golden_records_individual = factory.SubFactory(IndividualFactory)
+    sanction_list_individual = factory.SubFactory(SanctionListIndividualFactory)
 
 
 class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
@@ -103,14 +108,18 @@ class TicketNeedsAdjudicationDetailsFactory(DjangoModelFactory):
     ticket = factory.SubFactory(
         GrievanceTicketFactory,
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
     )
+    golden_records_individual = factory.SubFactory(IndividualFactory)
 
 
 class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketPaymentVerificationDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION, issue_type=None
+    )
     payment_verification_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
 
