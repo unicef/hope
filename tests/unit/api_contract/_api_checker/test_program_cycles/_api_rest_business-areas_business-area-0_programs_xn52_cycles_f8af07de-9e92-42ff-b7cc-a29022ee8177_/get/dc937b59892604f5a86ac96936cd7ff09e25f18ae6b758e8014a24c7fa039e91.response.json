@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "516"
+    },
+    "data": {
+        "id": "f8af07de-9e92-42ff-b7cc-a29022ee8177",
+        "title": "Default Programme Cycle",
+        "status": "Active",
+        "start_date": "2025-01-01",
+        "end_date": null,
+        "program_start_date": "2025-01-01",
+        "program_end_date": "2026-01-01",
+        "created_at": "2025-01-01T00:00:00Z",
+        "total_entitled_quantity_usd": "0",
+        "total_undelivered_quantity_usd": "0",
+        "total_delivered_quantity_usd": "0",
+        "frequency_of_payments": "One-off",
+        "created_by": " ",
+        "admin_url": "/api/unicorn/program/programcycle/f8af07de-9e92-42ff-b7cc-a29022ee8177/change/",
+        "can_remove_cycle": false
+    },
+    "content_type": "application/json"
+}

@@ -98,37 +98,42 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel, CeleryEnabledModel):
         status_create = self.get_celery_status(task_name="generate_edit_data")
         status_merge = self.get_celery_status(task_name="merge")
 
-        if self.status in [
+        terminal_statuses = {
             self.Status.NEW,
             self.Status.READY,
             self.Status.APPROVED,
             self.Status.MERGED,
             self.Status.FAILED_CREATE,
             self.Status.FAILED_MERGE,
-        ] or self.CELERY_STATUS_SUCCESS in [status_create, status_merge]:
+        }
+
+        if self.status in terminal_statuses or self.CELERY_STATUS_SUCCESS in [status_create, status_merge]:
             return self.status
 
-        if status_create in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RETRY]:
-            return self.Status.PENDING_CREATE
-        if status_create == self.CELERY_STATUS_STARTED:
-            return self.Status.CREATING
-        if status_create == self.CELERY_STATUS_FAILURE:
-            return self.Status.FAILED_CREATE
-        if status_create == self.CELERY_STATUS_NOT_SCHEDULED:
-            return self.Status.NOT_SCHEDULED_CREATE
-        if status_create in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
-            return self.Status.CANCELED_CREATE
+        create_map = {
+            self.CELERY_STATUS_RECEIVED: self.Status.PENDING_CREATE,
+            self.CELERY_STATUS_RETRY: self.Status.PENDING_CREATE,
+            self.CELERY_STATUS_STARTED: self.Status.CREATING,
+            self.CELERY_STATUS_FAILURE: self.Status.FAILED_CREATE,
+            self.CELERY_STATUS_NOT_SCHEDULED: self.Status.NOT_SCHEDULED_CREATE,
+            self.CELERY_STATUS_REVOKED: self.Status.CANCELED_CREATE,
+            self.CELERY_STATUS_CANCELED: self.Status.CANCELED_CREATE,
+        }
 
-        if status_merge in [self.CELERY_STATUS_RECEIVED, self.CELERY_STATUS_RECEIVED]:
-            return self.Status.PENDING_MERGE
-        if status_merge == self.CELERY_STATUS_STARTED:
-            return self.Status.MERGING
-        if status_merge == self.CELERY_STATUS_FAILURE:
-            return self.Status.FAILED_MERGE
-        if status_merge == self.CELERY_STATUS_NOT_SCHEDULED:
-            return self.Status.NOT_SCHEDULED_MERGE
-        if status_merge in [self.CELERY_STATUS_REVOKED, self.CELERY_STATUS_CANCELED]:
-            return self.Status.CANCELED_MERGE
+        merge_map = {
+            self.CELERY_STATUS_RECEIVED: self.Status.PENDING_MERGE,
+            self.CELERY_STATUS_RETRY: self.Status.PENDING_MERGE,
+            self.CELERY_STATUS_STARTED: self.Status.MERGING,
+            self.CELERY_STATUS_FAILURE: self.Status.FAILED_MERGE,
+            self.CELERY_STATUS_NOT_SCHEDULED: self.Status.NOT_SCHEDULED_MERGE,
+            self.CELERY_STATUS_REVOKED: self.Status.CANCELED_MERGE,
+            self.CELERY_STATUS_CANCELED: self.Status.CANCELED_MERGE,
+        }
+
+        if status_create in create_map:
+            return create_map[status_create]
+        if status_merge in merge_map:
+            return merge_map[status_merge]
 
         return self.status
 

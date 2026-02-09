@@ -1,0 +1,23 @@
+{
+    "import_data": {
+        "master": {
+            "model": "registration_data.importdata",
+            "pk": "8ffa43ff-5562-4c38-bd17-3f09dc531048",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "status": "PENDING",
+                "business_area_slug": "business-area-0",
+                "data_type": "XLSX",
+                "file": "test_data_hUvriLB.xlsx",
+                "number_of_households": null,
+                "number_of_individuals": null,
+                "error": "",
+                "validation_errors": "",
+                "delivery_mechanisms_validation_errors": "",
+                "created_by_id": null
+            }
+        },
+        "deps": []
+    }
+}

@@ -2,7 +2,6 @@ from datetime import datetime
 import json
 from typing import Any, Dict, Optional, Tuple
 
-from constance.test import override_config
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -42,6 +41,7 @@ from extras.test_utils.old_factories.program import ProgramCycleFactory, Program
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string
 from hope.apps.grievance.models import GrievanceTicket, TicketDeleteHouseholdDetails, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
@@ -52,6 +52,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hope.apps.household.filters import HouseholdFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import DocumentType, FlexibleAttribute, Household, Payment, Program
 from hope.models.utils import MergeStatusModel
@@ -2168,7 +2169,6 @@ class TestHouseholdFilterSearch:
         )
         return household1, household2
 
-    @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
     @pytest.mark.parametrize(
         ("filters", "household1_data", "household2_data", "hoh_1_data", "hoh_2_data"),
         [
@@ -2243,3 +2243,20 @@ class TestHouseholdFilterSearch:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(household1.id)
+
+    def test_filter_detail_id_requires_numeric(self) -> None:
+        household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
+
+        with pytest.raises(SearchError):
+            household_filter._filter_detail_id(Household.objects.all(), "abc123")
+
+    def test_filter_detail_id_filters_queryset(self) -> None:
+        household1, _ = self._create_test_households(
+            household1_data={"detail_id": "12345"},
+            household2_data={"detail_id": "67890"},
+        )
+        household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
+
+        result_qs = household_filter._filter_detail_id(Household.objects.all(), "123")
+
+        assert list(result_qs.values_list("id", flat=True)) == [household1.id]

@@ -2,10 +2,15 @@ from typing import Any
 
 import pytest
 
-from extras.test_utils.old_factories.account import PartnerFactory, RoleFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    PartnerFactory,
+    ProgramFactory,
+    RoleFactory,
+)
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
@@ -23,7 +28,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def business_area(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture

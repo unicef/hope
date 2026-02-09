@@ -11,6 +11,7 @@ import { Grid, MenuItem } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -105,6 +106,17 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
+        <Grid size={{ xs: 3 }}>
+          <RdiAutocompleteRestFilter
+            filter={filter}
+            name="rdiId"
+            value={filter.rdiId}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
+          />
+        </Grid>
         <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
