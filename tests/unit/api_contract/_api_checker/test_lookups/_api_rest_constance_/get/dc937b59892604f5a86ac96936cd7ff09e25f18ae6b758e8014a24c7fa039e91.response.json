@@ -1,0 +1,18 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "38"
+    },
+    "data": {
+        "API_TTL": 604800,
+        "BANNER_MESSAGE": ""
+    },
+    "content_type": "application/json"
+}

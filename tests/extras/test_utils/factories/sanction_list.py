@@ -3,8 +3,7 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import SanctionList
-from hope.models.sanction_list_individual import SanctionListIndividual
+from hope.models import SanctionList, SanctionListIndividual
 
 
 class SanctionListFactory(DjangoModelFactory):
@@ -20,10 +19,10 @@ class SanctionListIndividualFactory(DjangoModelFactory):
     class Meta:
         model = SanctionListIndividual
 
-    first_name = factory.Sequence(lambda n: f"First {n}")
-    full_name = factory.LazyAttribute(lambda obj: f"{obj.first_name} Test")
-    list_type = "UN"
-    reference_number = factory.Sequence(lambda n: f"REF-{n}")
+    sanction_list = factory.SubFactory(SanctionListFactory)
     data_id = factory.Sequence(lambda n: n + 1)
     version_num = 1
-    sanction_list = factory.SubFactory(SanctionListFactory)
+    first_name = factory.Sequence(lambda n: f"First{n}")
+    full_name = factory.Sequence(lambda n: f"First{n} Last{n}")
+    reference_number = factory.Sequence(lambda n: f"REF-{n}")
+    list_type = factory.Sequence(lambda n: f"Type {n}")

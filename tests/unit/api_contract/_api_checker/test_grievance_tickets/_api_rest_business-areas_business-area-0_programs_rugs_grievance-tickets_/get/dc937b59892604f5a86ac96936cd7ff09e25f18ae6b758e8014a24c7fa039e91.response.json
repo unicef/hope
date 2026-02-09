@@ -1,0 +1,65 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "0a27991759c38da9c33f640df1b1497f",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "932"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/rugs/grievance-tickets/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "5bf2b7e4-ce8b-417e-b2f3-0cb041f40fdb",
+                "admin": "",
+                "unicef_id": "GRV-0000001",
+                "status": 1,
+                "household_unicef_id": "",
+                "individual_unicef_id": "",
+                "individual_id": "",
+                "household_id": "",
+                "assigned_to": {
+                    "id": "102782d8-ef45-472d-bee9-18cc807899b6",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "user_modified": null,
+                "category": 2,
+                "issue_type": 16,
+                "priority": 0,
+                "urgency": 0,
+                "created_at": "2025-01-01T00:00:00Z",
+                "created_by": {
+                    "id": "102782d8-ef45-472d-bee9-18cc807899b6",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "total_days": 0,
+                "related_tickets": [],
+                "programs": [
+                    {
+                        "id": "e9ab7d1d-4f5e-4775-9e9c-24ab9f3d93a4",
+                        "programme_code": "RUGS",
+                        "slug": "rugs",
+                        "name": "Program 0",
+                        "status": "ACTIVE",
+                        "screen_beneficiary": false
+                    }
+                ],
+                "target_id": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
