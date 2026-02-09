@@ -1,0 +1,50 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "b14e97f30ad1228808a4c88e968e6da8",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "798"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/ujik/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "7fa62ed7-1feb-4153-9942-4a90f9af694a",
+                "unicef_id": "PP-BA0000-25-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2025-01-01",
+                "dispersion_end_date": "2025-01-31",
+                "is_follow_up": false,
+                "follow_ups": [],
+                "created_by": " ",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "program": {
+                    "id": "36cf1da3-ac38-499d-8275-37304d73ddd4",
+                    "programme_code": "UJIK",
+                    "slug": "ujik",
+                    "name": "Program 0",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

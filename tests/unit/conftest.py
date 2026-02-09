@@ -308,5 +308,8 @@ def disable_activity_log(request, monkeypatch):
         def __init__(self):
             self.programs = DummyPrograms()
 
+        def save(self, *args, **kwargs):
+            pass
+
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
     yield
