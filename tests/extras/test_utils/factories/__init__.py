@@ -8,6 +8,7 @@ from .account import (
     UserFactory,
 )
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
+from .activity_log import LogEntryFactory
 from .api import APITokenFactory
 from .changelog import ChangelogFactory
 from .core import (
@@ -60,9 +61,10 @@ from .payment import (
     WesternUnionInvoiceFactory,
     WesternUnionPaymentPlanReportFactory,
 )
+from .periodic_data_update import PDUOnlineEditFactory, PDUXlsxTemplateFactory, PDUXlsxUploadFactory
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
-from .sanction_list import SanctionListFactory
+from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
 from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
@@ -125,8 +127,13 @@ __all__ = [
     "RoleFactory",
     "RuleCommitFactory",
     "RuleFactory",
+    "LogEntryFactory",
+    "PDUOnlineEditFactory",
+    "PDUXlsxTemplateFactory",
+    "PDUXlsxUploadFactory",
     "SanctionListFactory",
     "TargetingCriteriaRuleFilterFactory",
+    "SanctionListIndividualFactory",
     "TargetingCriteriaRuleFactory",
     "SurveyFactory",
     "UserFactory",
