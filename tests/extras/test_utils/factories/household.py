@@ -49,6 +49,19 @@ class IndividualFactory(DjangoModelFactory):
     )
 
 
+class PendingIndividualFactory(IndividualFactory):
+    class Meta:
+        model = PendingIndividual
+
+    rdi_merge_status = MergeStatusModel.PENDING
+    registration_data_import = factory.SubFactory(
+        RegistrationDataImportFactory,
+        business_area=factory.SelfAttribute("..business_area"),
+        program=factory.SelfAttribute("..program"),
+        status=RegistrationDataImport.IN_REVIEW,
+    )
+
+
 class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
@@ -112,6 +125,13 @@ class HouseholdFactory(DjangoModelFactory):
         )
 
 
+class PendingHouseholdFactory(HouseholdFactory):
+    class Meta:
+        model = PendingHousehold
+
+    rdi_merge_status = MergeStatusModel.PENDING
+
+
 class HouseholdCollectionFactory(DjangoModelFactory):
     class Meta:
         model = HouseholdCollection
@@ -169,6 +189,14 @@ class DocumentFactory(DjangoModelFactory):
     rdi_merge_status = MergeStatusModel.MERGED
 
 
+class PendingDocumentFactory(DocumentFactory):
+    class Meta:
+        model = PendingDocument
+
+    individual = factory.SubFactory(PendingIndividualFactory)
+    rdi_merge_status = MergeStatusModel.PENDING
+
+
 class IndividualIdentityFactory(DjangoModelFactory):
     class Meta:
         model = IndividualIdentity
@@ -177,81 +205,6 @@ class IndividualIdentityFactory(DjangoModelFactory):
     number = factory.Sequence(lambda n: f"ID-{n}")
     country = factory.SubFactory("extras.test_utils.factories.geo.CountryFactory")
     rdi_merge_status = MergeStatusModel.MERGED
-
-
-class PendingHouseholdFactory(DjangoModelFactory):
-    class Meta:
-        model = PendingHousehold
-
-    first_registration_date = factory.LazyFunction(timezone.now)
-    last_registration_date = factory.LazyFunction(timezone.now)
-    rdi_merge_status = MergeStatusModel.PENDING
-    business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
-
-    @factory.post_generation
-    def head_of_household(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            self.head_of_household = extracted
-            individual = extracted
-            if individual.household_id != self.pk:
-                individual.household = self
-                individual.save(update_fields=["household"])
-            self.save()
-            return
-
-        rdi = self.registration_data_import
-        if rdi is None:
-            rdi = RegistrationDataImportFactory(
-                business_area=self.business_area,
-                program=self.program,
-                status=RegistrationDataImport.IN_REVIEW,
-            )
-            self.registration_data_import = rdi
-
-        individual = PendingIndividualFactory(
-            household=self,
-            business_area=self.business_area,
-            program=self.program,
-            registration_data_import=rdi,
-            rdi_merge_status=self.rdi_merge_status,
-        )
-        self.head_of_household = individual
-        self.save()
-
-
-class PendingIndividualFactory(DjangoModelFactory):
-    class Meta:
-        model = PendingIndividual
-
-    full_name = factory.Sequence(lambda n: f"Pending Person {n}")
-    sex = "MALE"
-    birth_date = date(1990, 1, 1)
-    first_registration_date = factory.LazyFunction(date.today)
-    last_registration_date = factory.LazyFunction(date.today)
-    rdi_merge_status = MergeStatusModel.PENDING
-    business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
-    registration_data_import = factory.SubFactory(
-        RegistrationDataImportFactory,
-        business_area=factory.SelfAttribute("..business_area"),
-        program=factory.SelfAttribute("..program"),
-        status=RegistrationDataImport.IN_REVIEW,
-    )
-
-
-class PendingDocumentFactory(DjangoModelFactory):
-    class Meta:
-        model = PendingDocument
-
-    individual = factory.SubFactory(PendingIndividualFactory)
-    program = factory.SelfAttribute("individual.program")
-    document_number = factory.Sequence(lambda n: f"P-DOC-{n}")
-    type = factory.SubFactory(DocumentTypeFactory)
-    rdi_merge_status = MergeStatusModel.PENDING
 
 
 class XlsxUpdateFileFactory(DjangoModelFactory):
