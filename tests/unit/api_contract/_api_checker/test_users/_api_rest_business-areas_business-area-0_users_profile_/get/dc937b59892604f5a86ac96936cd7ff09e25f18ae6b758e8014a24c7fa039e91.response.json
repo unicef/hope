@@ -27,7 +27,7 @@
             {
                 "role": {
                     "name": "Role 0",
-                    "subsystem": "HOPE",
+                    
                     "is_visible_on_ui": true,
                     "is_available_for_partner": true
                 },

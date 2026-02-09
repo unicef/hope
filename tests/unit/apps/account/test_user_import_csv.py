@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Any
 
-from django.conf import settings
 from django.urls import reverse
 from django_webtest import WebTest
 import pytest
@@ -64,39 +63,6 @@ def test_import_csv_creates_user(
     role_no_access: Role,
     incompatible_roles_setup: None,
 ):
-    url = reverse("admin:account_user_import_csv")
-
-    res = django_app.get(url, user=superuser_staff)
-    form = res.forms["load_users"]
-    form["file"] = (
-        "users.csv",
-        (Path(__file__).parent / "users.csv").read_bytes(),
-    )
-    form["business_area"] = business_area_afghanistan.id
-    form["partner"] = partner_1.id
-    form["role"] = role_no_access.id
-    res = form.submit()
-
-    assert res.status_code == 200
-    user = User.objects.filter(email="test@example.com", partner=partner_1).first()
-    assert user, "User not found"
-
-
-@responses.activate
-def test_import_csv_with_kobo_creates_user_with_kobo_username(
-    django_app: WebTest,
-    superuser_staff: User,
-    business_area_afghanistan: BusinessArea,
-    partner_1: Partner,
-    role_no_access: Role,
-    incompatible_roles_setup: None,
-):
-    responses.add(
-        responses.POST,
-        f"{settings.KOBO_URL}/authorized_application/users/",
-        json={},
-        status=201,
-    )
     url = reverse("admin:account_user_import_csv")
 
     res = django_app.get(url, user=superuser_staff)

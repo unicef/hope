@@ -41,7 +41,6 @@ class HOPEApiTestCase(APITestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
         cls.role = RoleFactory(
-            subsystem="API",
             name="c",
             permissions=[p.name for p in cls.user_permissions],
         )

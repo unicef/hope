@@ -47,7 +47,7 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = ("name", "subsystem", "is_visible_on_ui", "is_available_for_partner")
+        fields = ("name", "is_visible_on_ui", "is_available_for_partner")
 
 
 class RoleAssignmentSerializer(serializers.ModelSerializer):
@@ -212,9 +212,7 @@ class UserChoicesSerializer(serializers.Serializer):
     partner_choices_temp = serializers.SerializerMethodField()
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [
-            {"name": role.name, "value": role.id, "subsystem": role.subsystem} for role in Role.objects.order_by("name")
-        ]
+        return [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")]
 
     def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
