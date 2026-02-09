@@ -631,7 +631,6 @@ class TestProgrammeDetails:
         with pytest.raises(IndexError):
             assert page_programme_details.get_delete_programme_cycle()[2]
 
-    @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
         self,
         standard_program_with_draft_programme_cycle: Program,
