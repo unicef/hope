@@ -458,9 +458,7 @@ def test_get_duplicates_for_rdi_against_population(biometric_deduplication_conte
 
     duplicates = service.get_duplicates_for_rdi_against_population(rdi1, rdi_merged=False)
     assert len(duplicates) == 2
-    assert list(
-        duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
-    ) == [
+    assert list(duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")) == [
         {
             "individual1": ind1.id,
             "individual2": ind5.id,
@@ -526,9 +524,7 @@ def test_get_duplicates_for_merged_rdi_against_population(biometric_deduplicatio
     duplicates = service.get_duplicates_for_rdi_against_population(rdi2, rdi_merged=True)
 
     assert len(duplicates) == 3
-    assert list(
-        duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
-    ) == [
+    assert list(duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")) == [
         {
             "individual1": ind1.id,
             "individual2": ind3.id,
@@ -607,9 +603,7 @@ def test_get_duplicates_for_rdi_against_batch(biometric_deduplication_context: d
     duplicates = service.get_duplicates_for_rdi_against_batch(rdi1)
 
     assert len(duplicates) == 1
-    assert list(
-        duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
-    ) == [
+    assert list(duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")) == [
         {
             "individual1": ind1.id,
             "individual2": ind2.id,
@@ -643,7 +637,7 @@ def test_create_grievance_tickets_for_duplicates(
 
 
 def test_fetch_biometric_deduplication_results_and_process_success(
-    biometric_deduplication_context: dict[str, object]
+    biometric_deduplication_context: dict[str, object],
 ) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
@@ -688,7 +682,7 @@ def test_fetch_biometric_deduplication_results_and_process_success(
 
 
 def test_fetch_biometric_deduplication_results_and_process_error(
-    biometric_deduplication_context: dict[str, object]
+    biometric_deduplication_context: dict[str, object],
 ) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
@@ -704,14 +698,12 @@ def test_fetch_biometric_deduplication_results_and_process_error(
 
 
 def test_fetch_biometric_deduplication_results_and_process_dedup_engine_error(
-    biometric_deduplication_context: dict[str, object]
+    biometric_deduplication_context: dict[str, object],
 ) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
 
-    service.get_deduplication_set = mock.Mock(
-        return_value=DeduplicationSetData(state="Failed", error="Dedup Error")
-    )
+    service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Failed", error="Dedup Error"))
     service.mark_rdis_as_error = mock.Mock()
 
     service.fetch_biometric_deduplication_results_and_process(program)
@@ -925,9 +917,7 @@ def test_update_rdis_deduplication_statistics(biometric_deduplication_context: d
     assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
 
-@patch(
-    "hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate"
-)
+@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_report_false_positive_duplicate(
     mock_report_false_positive_duplicate: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -942,9 +932,7 @@ def test_report_false_positive_duplicate(
 
 
 @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
-def test_report_withdrawn(
-    mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]
-) -> None:
+def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
     service.report_individuals_status(program, ["abc"], "refused")
