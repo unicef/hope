@@ -351,9 +351,7 @@ def check_creator_or_owner_permission(
     """
     is_creator: bool = getattr(grievance_ticket, "created_by", None) == user
     is_owner: bool = getattr(grievance_ticket, "assigned_to", None) == user
-    general_permission = permission_list[0]
-    creator_permission: Permissions = permission_list[1]
-    owner_permission: Permissions = permission_list[2]
+    general_permission, creator_permission, owner_permission = permission_list
     program: Program | None = grievance_ticket.programs.first()
 
     scope = program or business_area
@@ -384,9 +382,7 @@ def has_creator_or_owner_permission(
     """
     is_creator: bool = getattr(obj_to_check, "created_by", None) == user
     is_owner: bool = getattr(obj_to_check, "assigned_to", None) == user
-    general_permission = permission_list[0]
-    creator_permission: Permissions = permission_list[1]
-    owner_permission: Permissions = permission_list[2]
+    general_permission, creator_permission, owner_permission = permission_list
     program: Program | None = obj_to_check.programs.first()
 
     scope = program or business_area
