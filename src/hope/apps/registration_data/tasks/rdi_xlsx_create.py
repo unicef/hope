@@ -26,9 +26,9 @@ from hope.apps.periodic_data_update.service.periodic_data_update_import_service 
     PDUXlsxImportService,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
-from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_data.tasks.rdi_base_create import RdiBaseCreateTask
+from hope.apps.registration_data.utils import collectors_str_ids_to_list
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import (

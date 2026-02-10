@@ -17,7 +17,7 @@ from extras.test_utils.old_factories.program import get_program_with_dct_type_an
 from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.core.field_attributes.core_fields_attributes import TYPE_SELECT_MANY, TYPE_SELECT_ONE
 from hope.apps.core.utils import SheetImageLoader
-from hope.apps.registration_datahub.validators import (
+from hope.apps.registration_data.validators import (
     KoboProjectImportDataInstanceValidator,
     UploadXLSXInstanceValidator,
 )
@@ -27,7 +27,7 @@ from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
 class TestXLSXValidatorsMethods(BaseTestCase):
     databases = {"default"}
 
-    FILES_DIR_PATH = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file"
+    FILES_DIR_PATH = f"{settings.TESTS_ROOT}/apps/registration_data/test_file"
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -579,7 +579,7 @@ class TestXLSXValidatorsMethods(BaseTestCase):
 
     def test_required_validator(self) -> None:
         with mock.patch(
-            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
             return_value={"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
@@ -587,7 +587,7 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             assert result
 
         with mock.patch(
-            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
             return_value={"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
@@ -595,7 +595,7 @@ class TestXLSXValidatorsMethods(BaseTestCase):
             assert not result
 
         with mock.patch(
-            "hope.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
+            "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
             return_value={"test": {"required": False}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)

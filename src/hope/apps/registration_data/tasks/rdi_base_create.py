@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
-from hope.apps.registration_datahub.value_caster import (
+from hope.apps.registration_data.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
     DecimalValueCaster,

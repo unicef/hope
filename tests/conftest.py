@@ -59,7 +59,7 @@ def pytest_configure(config: Config) -> None:
                 "level": "CRITICAL",
                 "propagate": True,
             },
-            "hope.apps.registration_datahub.tasks.deduplicate": {
+            "hope.apps.registration_data.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
                 "propagate": True,

@@ -3,7 +3,7 @@ import time
 
 from django.test import TestCase
 
-from hope.apps.registration_datahub.celery_tasks import locked_cache
+from hope.apps.registration_data.celery_tasks import locked_cache
 
 
 class DummyClass:

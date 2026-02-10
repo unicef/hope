@@ -22,7 +22,7 @@ from hope.apps.household.const import (
     UNIQUE_IN_BATCH,
 )
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from hope.apps.registration_datahub.utils import post_process_dedupe_results
+from hope.apps.registration_data.utils import post_process_dedupe_results
 from hope.apps.utils.elasticsearch_utils import (
     ensure_index_ready,
     populate_index,

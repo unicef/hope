@@ -4,7 +4,7 @@ import operator
 from django.db import transaction
 import openpyxl
 
-from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hope.apps.registration_data.validators import UploadXLSXInstanceValidator
 from hope.models import ImportData, Program
 
 

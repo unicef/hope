@@ -28,8 +28,8 @@ from hope.admin.utils import (
 )
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.models import (

@@ -21,7 +21,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.registration_datahub.tasks.import_program_population import (
+from hope.apps.registration_data.tasks.import_program_population import (
     import_program_population,
 )
 from hope.models import (

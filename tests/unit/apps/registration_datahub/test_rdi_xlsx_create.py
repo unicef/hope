@@ -52,7 +52,7 @@ pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 
 
 def create_document_image() -> File:
-    content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/image.png").read_bytes()
     return File(BytesIO(content), name="image.png")
 
 
@@ -98,15 +98,13 @@ class TestRdiXlsxCreateTask(TestCase):
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             label={"English(EN)": "value"},
         )
-        content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
-        ).read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/new_reg_data_import.xlsx").read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = create_afghanistan()
         parent = AreaFactory(p_code="AF11", name="Name", area_type=area_type_l1)
         AreaFactory(p_code="AF1115", name="Name2", parent=parent, area_type=area_type_l2)
 
-        from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
+        from hope.apps.registration_data.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -247,7 +245,7 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_execute_with_flex_field_and_pdu(self) -> None:
         content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import_flex_field.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_data/test_file/new_reg_data_import_flex_field.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import_flex_field.xlsx")
 
@@ -403,11 +401,11 @@ class TestRdiXlsxCreateTask(TestCase):
         assert task.documents == expected
 
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_xlsx_create.SheetImageLoader",
+        "hope.apps.registration_data.tasks.rdi_xlsx_create.SheetImageLoader",
         ImageLoaderMock,
     )
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
+        "hope.apps.registration_data.tasks.rdi_xlsx_create.timezone.now",
         return_value=parse_datetime("2020-06-22 12:00:00-0000"),
     )
     def test_handle_document_photo_fields(self, mock_now) -> None:

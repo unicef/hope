@@ -13,7 +13,6 @@ from extras.test_utils.old_factories.household import (
 )
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import (
-    RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
 from hope.models import Household, Individual, IndividualIdentity, Program, RegistrationDataImport
@@ -105,26 +104,3 @@ class TestRegistrationDataModels(TestCase):
         self.registration_data_import.bulk_update_household_size()
         self.imported_household.refresh_from_db(fields=["size"])
         assert self.imported_household.size == 1
-
-
-class TestRegistrationDataImportDatahub(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.name = "RDI datahub name"
-        cls.business_area_slug = "RDI business_area slug"
-        cls.rdi_datahub = RegistrationDataImportDatahubFactory(
-            name=cls.name,
-            business_area_slug=cls.business_area_slug,
-        )
-        cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.rdi = RegistrationDataImportFactory(
-            program=cls.program,
-        )
-
-    def test_str(self) -> None:
-        assert str(self.rdi_datahub) == self.rdi_datahub.name
-
-    def test_business_area(self) -> None:
-        assert self.rdi_datahub.business_area == self.business_area_slug

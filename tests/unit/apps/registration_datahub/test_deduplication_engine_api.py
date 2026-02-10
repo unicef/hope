@@ -9,7 +9,7 @@ from constance.test import override_config
 from django.test import TestCase
 import pytest
 
-from hope.apps.registration_datahub.apis.deduplication_engine import (
+from hope.apps.registration_data.api.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
@@ -30,7 +30,7 @@ def mock_deduplication_engine_env_vars() -> None:
 
 
 class DeduplicationEngineApiTest(TestCase):
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._delete")
     def test_delete_deduplication_set(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
@@ -40,7 +40,7 @@ class DeduplicationEngineApiTest(TestCase):
 
         mock_delete.assert_called_once_with("deduplication_sets/slug/")
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_create_deduplication_set(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
@@ -53,7 +53,7 @@ class DeduplicationEngineApiTest(TestCase):
         api.create_deduplication_set(deduplication_set)
         mock_post.assert_called_once_with("deduplication_sets/", dataclasses.asdict(deduplication_set))
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_deduplication_set(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         get_mock.return_value = {}, 200
@@ -63,7 +63,7 @@ class DeduplicationEngineApiTest(TestCase):
         get_mock.assert_called_once_with("deduplication_sets/slug/")
 
     @override_config(DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE=1)
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         images = [
@@ -89,7 +89,7 @@ class DeduplicationEngineApiTest(TestCase):
             ]
         )
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_bulk_upload_images_json_parsing_error(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         images = [
@@ -101,7 +101,7 @@ class DeduplicationEngineApiTest(TestCase):
         mock_post.return_value = {}, 200
         assert api.bulk_upload_images("slug", images) == []
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._delete")
     def test_bulk_delete_images(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         mock_delete.return_value = {}, 200
@@ -110,7 +110,7 @@ class DeduplicationEngineApiTest(TestCase):
 
         mock_delete.assert_called_once_with("deduplication_sets/slug/images_bulk/")
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_duplicates(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         get_mock.return_value = {"results": []}, 200
@@ -118,7 +118,7 @@ class DeduplicationEngineApiTest(TestCase):
         api.get_duplicates("slug", [])
         get_mock.assert_called_once_with("deduplication_sets/slug/duplicates/", {"reference_pk": ""})
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._get")
     def test_get_duplicates_paginated(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
@@ -134,7 +134,7 @@ class DeduplicationEngineApiTest(TestCase):
         get_mock.assert_any_call("deduplication_sets/x/duplicates/?page=2", None)
         assert get_mock.call_count == 2
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_process_deduplication(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         post_mock.return_value = {}, 200
@@ -146,7 +146,7 @@ class DeduplicationEngineApiTest(TestCase):
             validate_response=False,
         )
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_report_false_positive_duplicate(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         post_mock.return_value = {}, 200
@@ -164,7 +164,7 @@ class DeduplicationEngineApiTest(TestCase):
             },
         )
 
-    @patch("hope.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI._post")
     def test_report_refused_individuals(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         post_mock.return_value = {}, 200

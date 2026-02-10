@@ -12,7 +12,7 @@ from hope.apps.household.const import (
     UNIQUE,
     UNIQUE_IN_BATCH,
 )
-from hope.apps.registration_datahub.apis.deduplication_engine import (
+from hope.apps.registration_data.api.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,

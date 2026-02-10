@@ -7,17 +7,17 @@ from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.registration_datahub.exceptions import (
+from hope.apps.registration_data.exceptions import (
     AlreadyRunningError,
     WrongStatusError,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
-from hope.apps.registration_datahub.tasks.rdi_program_population_create import (
+from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
+from hope.apps.registration_data.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
 )
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
-from hope.models import BusinessArea, Document, Household, Program, RegistrationDataImport
+from hope.models import BusinessArea, Document, Program, RegistrationDataImport
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -70,10 +70,10 @@ def registration_xlsx_import_task(
     program_id: "UUID",
 ) -> bool:
     try:
-        from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
+        from hope.apps.registration_data.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
-        from hope.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+        from hope.apps.registration_data.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,
         )
         from hope.models import Program
@@ -175,7 +175,7 @@ def registration_kobo_import_task(
     program_id: "UUID",
 ) -> None:
     try:
-        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_data.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
         from hope.models import BusinessArea
@@ -201,7 +201,7 @@ def registration_kobo_import_task(
 @sentry_tags
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
-        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_data.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
         from hope.models import BusinessArea
@@ -230,7 +230,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 @sentry_tags
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
-        from hope.apps.registration_datahub.tasks.rdi_xlsx_create import (
+        from hope.apps.registration_data.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
         from hope.models import BusinessArea
@@ -264,7 +264,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
         if not locked:
             return True  # pragma: no cover
         try:
-            from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+            from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
             from hope.models import RegistrationDataImport
 
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -295,7 +295,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+        from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         program_id = rdi_obj.program.id
@@ -318,7 +318,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
-    from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
+    from hope.apps.registration_data.tasks.pull_kobo_submissions import (
         PullKoboSubmissions,
     )
 
@@ -335,7 +335,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
 @log_start_and_end
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
-    from hope.apps.registration_datahub.tasks.validate_xlsx_import import (
+    from hope.apps.registration_data.tasks.validate_xlsx_import import (
         ValidateXlsxImport,
     )
     from hope.models import ImportData, Program
@@ -417,51 +417,11 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = N
             raise self.retry(exc=e)
 
 
-@app.task
-@sentry_tags
-@log_start_and_end
-def remove_old_rdi_links_task(page_count: int = 100) -> None:
-    """Remove linked RDI objects for households and related objects (individuals, documents etc.)."""
-    from datetime import timedelta
-
-    from constance import config
-
-    days = config.REMOVE_RDI_LINKS_TIMEDELTA
-    try:
-        # Get datahub_ids older than 3 months which have status other than MERGED
-        unmerged_rdi_ids = list(
-            RegistrationDataImport.objects.filter(
-                created_at__lte=timezone.now() - timedelta(days=days),
-                status__in=[
-                    RegistrationDataImport.IN_REVIEW,
-                    RegistrationDataImport.DEDUPLICATION_FAILED,
-                    RegistrationDataImport.IMPORT_ERROR,
-                    RegistrationDataImport.MERGE_ERROR,
-                ],
-            ).values_list("id", flat=True)
-        )
-
-        i, count = 0, len(unmerged_rdi_ids) // page_count
-        while i <= count:
-            logger.info(f"Page {i}/{count} processing...")
-            rdi_ids_page = unmerged_rdi_ids[i * page_count : (i + 1) * page_count]
-
-            Household.all_objects.filter(registration_data_import_id__in=rdi_ids_page).delete()
-
-            RegistrationDataImport.objects.filter(id__in=rdi_ids_page).update(erased=True)
-            i += 1
-
-        logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
-    except Exception as e:  # noqa pragma: no cover
-        logger.warning(f"Removing old RDI objects failed: {e}")
-        raise
-
-
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
 @log_start_and_end
 def deduplication_engine_process(self: Any, program_id: str) -> None:
-    from hope.apps.registration_datahub.services.biometric_deduplication import (
+    from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
 
@@ -480,7 +440,7 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def fetch_biometric_deduplication_results_and_process(self: Any, program_id: str) -> None:
-    from hope.apps.registration_datahub.services.biometric_deduplication import (
+    from hope.apps.registration_data.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
 

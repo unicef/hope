@@ -15,7 +15,7 @@ from hope.apps.household.const import (
     WIFE_HUSBAND,
 )
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 from hope.apps.utils.elasticsearch_utils import populate_index, rebuild_search_index
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, BusinessArea, ImportData, Individual, PendingIndividual

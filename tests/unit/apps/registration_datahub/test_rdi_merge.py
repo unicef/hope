@@ -31,7 +31,7 @@ from hope.apps.household.const import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
 )
-from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import (
     Household,
     Individual,
@@ -329,7 +329,7 @@ class TestRdiMergeTask(TestCase):
         assert household_data == expected
 
     @freeze_time("2022-01-01")
-    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_data.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -360,7 +360,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.reset_mock()
 
     @freeze_time("2022-01-01")
-    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_data.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -387,7 +387,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.assert_not_called()
 
     @freeze_time("2022-01-01")
-    @patch("hope.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
+    @patch("hope.apps.registration_data.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -512,13 +512,13 @@ class TestRdiMergeTask(TestCase):
         },
     )
     @mock.patch(
-        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_individuals_status"
+        "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_individuals_status"
     )
     @mock.patch(
-        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+        "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
     )
     @mock.patch(
-        "hope.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
+        "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
     )
     def test_merge_biometric_deduplication_enabled(
         self,

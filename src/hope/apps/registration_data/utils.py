@@ -151,3 +151,13 @@ def get_rdi_program_population(
 
     individuals = individuals.order_by("first_registration_date")
     return households, individuals
+
+
+def collectors_str_ids_to_list(values: Any) -> None | list[str]:
+    if values is None:
+        return None
+
+    if isinstance(values, float) and values.is_integer():
+        temp_value = int(values)
+        return [str(temp_value)]
+    return str(values).strip(";").replace(" ", "").split(";")

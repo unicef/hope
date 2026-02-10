@@ -24,9 +24,9 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hope.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
-from hope.apps.registration_datahub.utils import (
+from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_data.tasks.rdi_base_create import RdiBaseCreateTask
+from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
     find_attachment_in_kobo,
 )

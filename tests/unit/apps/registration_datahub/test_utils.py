@@ -6,13 +6,13 @@ from django.test import TestCase
 
 from extras.test_utils.old_factories.core import create_afghanistan
 from extras.test_utils.old_factories.program import ProgramFactory
-from hope.apps.registration_datahub.utils import calculate_hash_for_kobo_submission
-from hope.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hope.apps.registration_data.utils import calculate_hash_for_kobo_submission
+from hope.apps.registration_data.validators import UploadXLSXInstanceValidator
 
 
 class TestRdiUtils(TestCase):
     def test_calculate_hash_for_kobo_submission(self) -> None:
-        test_file_dir = Path(settings.TESTS_ROOT) / "apps/registration_datahub/test_file"
+        test_file_dir = Path(settings.TESTS_ROOT) / "apps/registration_data/test_file"
 
         with (
             open(test_file_dir / "test_calculate_hash_for_kobo_submission1.json") as f1,

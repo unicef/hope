@@ -202,7 +202,7 @@ def test_merge_rdi_with_collision(
     """
     # Enable collision detection in the program
     from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
-    from hope.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+    from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 
     program.collision_detector = IdentificationKeyCollisionDetector
     program.save()

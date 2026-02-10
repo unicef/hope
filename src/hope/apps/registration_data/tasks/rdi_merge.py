@@ -19,12 +19,12 @@ from hope.apps.household.const import (
     NEEDS_ADJUDICATION,
 )
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.registration_datahub.celery_tasks import deduplicate_documents
-from hope.apps.registration_datahub.services.biometric_deduplication import (
+from hope.apps.registration_data.celery_tasks import deduplicate_documents
+from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
-from hope.apps.registration_datahub.signals import rdi_merged
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_data.signals import rdi_merged
+from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     check_against_sanction_list_pre_merge,
 )

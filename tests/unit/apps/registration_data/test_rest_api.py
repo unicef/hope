@@ -21,7 +21,7 @@ from extras.test_utils.old_factories.registration_data import (
 from extras.test_utils.old_factories.sanction_list import SanctionListFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     DataCollectingType,
     Household,
@@ -68,7 +68,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         cls.client = APIClient()
 
-    @patch("hope.apps.registration_datahub.celery_tasks.deduplication_engine_process.delay")
+    @patch("hope.apps.registration_data.celery_tasks.deduplication_engine_process.delay")
     def test_run_deduplication(self, mock_deduplication_engine_process: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         url = reverse(
@@ -94,7 +94,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert resp.json() == ["Biometric deduplication is not enabled for this program"]
 
-    @patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
+    @patch("hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         url = reverse(
@@ -215,7 +215,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert "admin_url" in response.data
         assert response.data["admin_url"]
 
-    @patch("hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_task.delay")
     def test_merge_rdi(self, mock_merge_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         rdi = RegistrationDataImportFactory(
@@ -355,7 +355,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         },
     )
     @patch(
-        "hope.apps.registration_datahub.services"
+        "hope.apps.registration_data.services"
         ".biometric_deduplication"
         ".BiometricDeduplicationService"
         ".report_individuals_status"
@@ -452,7 +452,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
-    @patch("hope.apps.registration_datahub.celery_tasks.rdi_deduplication_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.rdi_deduplication_task.delay")
     def test_deduplicate_rdi(self, mock_deduplicate_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         rdi = RegistrationDataImportFactory(
@@ -506,7 +506,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert isinstance(response.data, list)
         assert all("name" in c and "value" in c for c in response.data)
 
-    @patch("hope.apps.registration_datahub.celery_tasks.validate_xlsx_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.validate_xlsx_import_task.delay")
     def test_upload_xlsx_file(self, mock_validate_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         url = reverse(
@@ -545,7 +545,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert call_args[0] == import_data.id
         assert call_args[1] == str(self.program.id)
 
-    @patch("hope.apps.registration_datahub.celery_tasks.pull_kobo_submissions_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.pull_kobo_submissions_task.delay")
     def test_save_kobo_import_data(self, mock_pull_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         url = reverse(
@@ -587,7 +587,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert call_args[0] == kobo_import_data.id
         assert call_args[1] == str(self.program.id)
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
     def test_registration_xlsx_import(self, mock_import_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
 
@@ -708,7 +708,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "In order to perform this action, program status must not be finished." in response.data
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_kobo_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_task.delay")
     def test_registration_kobo_import(self, mock_import_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
 
@@ -936,7 +936,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_rdi_social_worker_program_with_household_ids(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1016,7 +1016,7 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         assert response.data["number_of_individuals"] == 2
         mock_registration_task.assert_called_once()
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_rdi_social_worker_program_with_individual_ids(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1220,7 +1220,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_200_OK
 
     @patch(
-        "hope.apps.registration_datahub.services"
+        "hope.apps.registration_data.services"
         ".biometric_deduplication"
         ".BiometricDeduplicationService"
         ".report_individuals_status"
@@ -1255,7 +1255,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         response = self.client.post(url, {"reason": "Test reason"}, format="json")
         assert response.status_code == status.HTTP_200_OK
 
-    @patch("hope.apps.registration_datahub.celery_tasks.rdi_deduplication_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.rdi_deduplication_task.delay")
     def test_permission_checks_deduplicate(self, mock_dedup_task: Mock) -> None:
         """Test that deduplicate endpoint requires RDI_RERUN_DEDUPE permission."""
         self.client.force_authenticate(user=self.user)
@@ -1306,7 +1306,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert isinstance(response.data, list)
         assert all("name" in c and "value" in c for c in response.data)
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         # Grant permission for create
@@ -1364,7 +1364,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert "id" in response.data
         mock_registration_task.assert_called_once()
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_with_ids_filter(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         # Grant permission for create
@@ -1421,7 +1421,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.data["number_of_individuals"] == 2
         mock_registration_task.assert_called_once()
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_invalid_bg(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1462,7 +1462,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot import data from a program with a different Beneficiary Group." in response.data
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_invalid_dct(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1503,7 +1503,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot import data from a program with not compatible data collecting type." in response.data
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_program_finished(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1544,7 +1544,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "In order to perform this action, program status must not be finished." in response.data
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_cannot_check_against_sanction_list(
         self, mock_registration_task: Mock
     ) -> None:
@@ -1587,7 +1587,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot check against sanction list." in response.data
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_0_objects(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         role, _ = Role.objects.update_or_create(
@@ -1797,7 +1797,7 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
-    @patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    @patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:
         self.client.force_authenticate(user=self.user)
         # Create a source program to import from, matching beneficiary group and data collecting type

@@ -43,7 +43,7 @@ pytestmark = pytest.mark.usefixtures("mock_elasticsearch")
 class TestRdiKoboCreateTask(TestCase):
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
-        return BytesIO(Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes())
+        return BytesIO(Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/image.png").read_bytes())
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -55,7 +55,7 @@ class TestRdiKoboCreateTask(TestCase):
         CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
         CountryFactory(name="Nigeria", short_name="Nigeria", iso_code2="NG", iso_code3="NGA", iso_num="0566")
         create_afghanistan()
-        from hope.apps.registration_datahub.tasks.rdi_kobo_create import (
+        from hope.apps.registration_data.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -67,7 +67,7 @@ class TestRdiKoboCreateTask(TestCase):
             document_types.append(DocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
-        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/kobo_submissions.json").read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
         cls.import_data = ImportData.objects.create(
             file=file,
@@ -76,7 +76,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions_collectors.json"
+            f"{settings.TESTS_ROOT}/apps/registration_data/test_file/kobo_submissions_collectors.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions_collectors.json")
         cls.import_data_collectors = ImportData.objects.create(
@@ -106,7 +106,7 @@ class TestRdiKoboCreateTask(TestCase):
         generate_delivery_mechanisms()
 
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self) -> None:
@@ -175,7 +175,7 @@ class TestRdiKoboCreateTask(TestCase):
         assert dmd.individual.full_name == "Tesa Testowski"
 
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self) -> None:
@@ -215,7 +215,7 @@ class TestRdiKoboCreateTask(TestCase):
         assert list(second_household_collectors) == [("Test Testowski", "PRIMARY")]
 
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self) -> None:
@@ -316,7 +316,7 @@ class TestRdiKoboCreateTask(TestCase):
         assert result is False
 
     @mock.patch(
-        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self) -> None:
@@ -539,7 +539,7 @@ class TestRdiKoboCreateTask(TestCase):
             result.append(copy)
 
         with open(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/big_json.json",
+            f"{settings.TESTS_ROOT}/apps/registration_data/test_file/big_json.json",
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))

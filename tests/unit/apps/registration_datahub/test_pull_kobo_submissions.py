@@ -8,7 +8,7 @@ import pytest
 
 from extras.test_utils.old_factories.core import create_afghanistan
 from extras.test_utils.old_factories.program import ProgramFactory
-from hope.apps.registration_datahub.tasks.pull_kobo_submissions import (
+from hope.apps.registration_data.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
 from hope.models import KoboImportData
@@ -35,11 +35,11 @@ class TestPullKoboSubmissions:
         program = ProgramFactory()
 
         content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions_collectors.json"
+            f"{settings.TESTS_ROOT}/apps/registration_data/test_file/kobo_submissions_collectors.json"
         ).read_text()
         content = json.loads(content)
         with mock.patch(
-            "hope.apps.registration_datahub.tasks.pull_kobo_submissions.KoboAPI.get_project_submissions",
+            "hope.apps.registration_data.tasks.pull_kobo_submissions.KoboAPI.get_project_submissions",
             return_value=content,
         ):
             service = PullKoboSubmissions()

@@ -7,7 +7,7 @@ from extras.test_utils.old_factories.household import create_household_and_indiv
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
-from hope.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
 from hope.models import Country, Household, PendingIndividual, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db

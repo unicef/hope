@@ -1,6 +1,6 @@
 import pytest
 
-from hope.apps.registration_datahub.value_caster import SelectOneValueCaster
+from hope.apps.registration_data.value_caster import SelectOneValueCaster
 
 
 class TestSelectOneValueCaster:

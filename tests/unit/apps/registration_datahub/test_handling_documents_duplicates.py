@@ -21,7 +21,7 @@ from hope.apps.household.const import (
     SON_DAUGHTER,
     WIFE_HUSBAND,
 )
-from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
+from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.models import BusinessArea, Document, DocumentType, country as geo_models
 from hope.models.utils import MergeStatusModel
 

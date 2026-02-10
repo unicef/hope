@@ -55,13 +55,13 @@ class TestRdiXlsxPeople(TestCase):
         area_type_l2 = AreaTypeFactory(country=afghanistan, area_level=2, parent=area_type_l1)
 
         PartnerFactory(name="UNHCR")
-        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         cls.business_area = create_afghanistan()
         parent = AreaFactory(p_code="AF11", name="Name", area_type=area_type_l1)
         AreaFactory(p_code="AF1115", name="Name2", parent=parent, area_type=area_type_l2)
 
-        from hope.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+        from hope.apps.registration_data.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,
         )
 

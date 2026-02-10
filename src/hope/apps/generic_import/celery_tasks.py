@@ -5,8 +5,8 @@ from hope.apps.generic_import.generic_upload_service.importer import Importer, f
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
-from hope.apps.registration_datahub.celery_tasks import locked_cache
-from hope.apps.registration_datahub.exceptions import AlreadyRunningError
+from hope.apps.registration_data.celery_tasks import locked_cache
+from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 

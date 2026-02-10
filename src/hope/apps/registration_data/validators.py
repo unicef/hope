@@ -38,9 +38,9 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-from hope.apps.registration_datahub.utils import (
+from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
+    collectors_str_ids_to_list,
     find_attachment_in_kobo,
 )
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program

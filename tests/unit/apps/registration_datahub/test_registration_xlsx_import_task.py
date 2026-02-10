@@ -9,7 +9,7 @@ import pytest
 from extras.test_utils.old_factories.account import BusinessAreaFactory
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
-from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+from hope.apps.registration_data.celery_tasks import registration_xlsx_import_task
 from hope.models import RegistrationDataImport
 
 
@@ -21,7 +21,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         cls.program = ProgramFactory()
 
     @patch(
-        "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+        "hope.apps.registration_data.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
         return_value=None,
     )
     def test_task_start_importing(self, mock_execute: Any) -> None:
@@ -47,7 +47,7 @@ class TestRegistrationXlsxImportTask(TestCase):
         def _mock(*args: Any, **kwargs: Any) -> Any:
             yield False
 
-        with patch("hope.apps.registration_datahub.celery_tasks.locked_cache", new=_mock):
+        with patch("hope.apps.registration_data.celery_tasks.locked_cache", new=_mock):
             self._run_task(rdi.id)
 
         rdi.refresh_from_db()
@@ -60,7 +60,7 @@ class TestRegistrationXlsxImportTask(TestCase):
             raise Exception("something went wrong")
 
         with patch(
-            "hope.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+            "hope.apps.registration_data.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
             new=_mock,
         ):
             with pytest.raises(Exception, match="something went wrong"):
