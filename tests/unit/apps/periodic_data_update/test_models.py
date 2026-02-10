@@ -132,6 +132,6 @@ def test_flexible_attribute_label_update_without_english_en_key() -> None:
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         label={"English(EN)": "value"},
     )
+    flexible_attribute.label = {"wrong": "value"}
     with pytest.raises(ValidationError, match='The "English\\(EN\\)" key is required in the label.'):
-        flexible_attribute.label = {"wrong": "value"}
         flexible_attribute.save()
