@@ -303,6 +303,7 @@ def test_list_target_populations_caching(
         response = api_client_for_user.get(list_url)
         assert response.status_code == status.HTTP_200_OK
         assert len(ctx.captured_queries) == 12
+        assert etag != response.headers["etag"]
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
