@@ -1,9 +1,17 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { getApiErrorMessages } from '@utils/utils';
 import { Publish } from '@mui/icons-material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -16,11 +24,6 @@ import { LoadingButton } from '@core/LoadingButton';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 interface ImportXlsxPaymentPlanPaymentListProps {
   paymentPlan: PaymentPlanDetail;
@@ -145,10 +148,7 @@ export function ImportXlsxPaymentPlanPaymentList({
               }}
             />
             {fileToImport && xlsxError ? (
-              <Error data-cy="error-list">
-                <p>Errors</p>
-                <p>{xlsxError}</p>
-              </Error>
+              <XlsxErrorsDisplay errors={xlsxError} data-cy="error-list" />
             ) : null}
           </>
           <DialogActions>

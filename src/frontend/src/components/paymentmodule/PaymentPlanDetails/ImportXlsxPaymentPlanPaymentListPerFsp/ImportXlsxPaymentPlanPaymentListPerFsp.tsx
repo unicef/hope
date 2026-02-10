@@ -5,7 +5,14 @@ import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActi
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
@@ -13,15 +20,11 @@ import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { getApiErrorMessages } from '@utils/utils';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 const UploadIcon = styled(Publish)`
   color: #043f91;
@@ -154,10 +157,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               }}
             />
             {fileToImport && xlsxError ? (
-              <Error data-cy="error-list">
-                <p>Errors</p>
-                <p>{xlsxError}</p>
-              </Error>
+              <XlsxErrorsDisplay errors={xlsxError} data-cy="error-list" />
             ) : null}
           </>
           <DialogActions>

@@ -1,8 +1,16 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -12,11 +20,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
 import { getApiErrorMessages } from '@utils/utils';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 const StyledButton = styled(Button)`
   width: 150px;
@@ -123,10 +126,7 @@ export const ImportXlsx = ({
               }}
             />
             {fileToImport && xlsxError ? (
-              <Error>
-                <p>Errors</p>
-                <p>{xlsxError}</p>
-              </Error>
+              <XlsxErrorsDisplay errors={xlsxError} />
             ) : null}
           </>
           <DialogActions>
