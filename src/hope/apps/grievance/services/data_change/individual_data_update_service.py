@@ -335,36 +335,7 @@ class IndividualDataUpdateService(DataChangeService):
         new_individual = Individual.objects.select_for_update().get(id=individual.id)
 
         self._validate_phone_numbers(only_approved_data)
-        # people update
-        hh_fields = [
-            "consent",
-            "residence_status",
-            "country_origin",
-            "country",
-            "address",
-            "village",
-            "currency",
-            "unhcr_id",
-            "name_enumerator",
-            "org_enumerator",
-            "org_name_enumerator",
-            "registration_method",
-            "admin_area_title",
-        ]
-        # move HH fields from only_approved_data into hh_approved_data
-        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
-        if hh_approved_data:
-            if hh_country_origin := hh_approved_data.get("country_origin"):
-                hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
-            if hh_country := hh_approved_data.get("country"):
-                hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
-            admin_area_title = hh_approved_data.pop("admin_area_title", None)
-            # people update HH
-            Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
-            updated_household = Household.objects.get(id=household.id)
-            if admin_area_title:
-                area = Area.objects.filter(p_code=admin_area_title).first()
-                updated_household.set_admin_areas(area)
+        self._update_household_fields(household, only_approved_data)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(

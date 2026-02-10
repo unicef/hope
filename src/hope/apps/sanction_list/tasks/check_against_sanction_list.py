@@ -137,30 +137,7 @@ class CheckAgainstSanctionListTask:
         html_body = render_to_string("sanction_list/check_results.html", context)
         subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
-        attachment_wb = Workbook()
-        attachment_ws = attachment_wb.active
-        attachment_ws.title = "Sanction List Check Results"
-
-        header_row_names = (
-            "FIRST NAME",
-            "SECOND NAME",
-            "THIRD NAME",
-            "FOURTH NAME",
-            "DATE OF BIRTH",
-            "ORIGINAL FILE ROW NUMBER",
-        )
-        attachment_ws.append(header_row_names)
-
-        self.join_names_and_birthday(attachment_ws, results_dict)
-        for i in range(1, len(header_row_names) + 1):
-            attachment_ws.column_dimensions[get_column_letter(i)].width = 30
-
-        buffer = io.BytesIO()
-        attachment_wb.save(buffer)
-        buffer.seek(0)
-
-        attachment_content = buffer.getvalue()
-        base64_encoded_content = base64.b64encode(attachment_content).decode("utf-8")
+        base64_encoded_content = self._create_results_attachment(results_dict)
 
         email = MailjetClient(
             subject=subject,
