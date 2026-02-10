@@ -1,4 +1,5 @@
 import pytest
+
 from extras.test_utils.old_factories.account import UserFactory
 from extras.test_utils.old_factories.core import (
     FlexibleAttributeFactory,
@@ -8,7 +9,7 @@ from extras.test_utils.old_factories.core import (
 )
 from extras.test_utils.old_factories.household import create_household_and_individuals
 from extras.test_utils.old_factories.payment import PaymentPlanFactory, generate_delivery_mechanisms
-from extras.test_utils.old_factories.program import ProgramFactory, ProgramCycleFactory
+from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
@@ -79,9 +80,7 @@ def test_all_individuals_male_filter(user, program_cycle, households_individuals
     queryset = Household.objects.all()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
     tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(
-        targeting_criteria_rule=tcr, target_only_hoh=False
-    )
+    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
     TargetingIndividualBlockRuleFilter.objects.create(
         individuals_filters_block=block,
         comparison_method="EQUALS",
@@ -104,9 +103,7 @@ def test_all_individuals_filter_on_mixins(user, program_cycle, households_indivi
     pp = PaymentPlanFactory()
     tcr = TargetingCriteriaRule.objects.create(payment_plan=pp)
     pp.rules.set([tcr])
-    block = TargetingIndividualRuleFilterBlock.objects.create(
-        targeting_criteria_rule=tcr, target_only_hoh=False
-    )
+    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
     TargetingIndividualBlockRuleFilter.objects.create(
         comparison_method="EQUALS",
         field_name="marital_status",
@@ -244,7 +241,9 @@ def test_filter_on_pdu_flex_field_no_round_number(user, program_cycle, program):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
     tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    pdu_data = PeriodicFieldDataFactory(subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"])
+    pdu_data = PeriodicFieldDataFactory(
+        subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
+    )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
     queryset = Household.objects.all()
     TargetingIndividualBlockRuleFilter.objects.create(
@@ -262,7 +261,9 @@ def test_filter_on_pdu_flex_field_incorrect_round_number(user, program_cycle, pr
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
     tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    pdu_data = PeriodicFieldDataFactory(subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"])
+    pdu_data = PeriodicFieldDataFactory(
+        subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
+    )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
 
     queryset = Household.objects.all()
@@ -286,7 +287,9 @@ def test_filter_on_pdu_flex_field(user, program_cycle, households_individuals, p
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
     tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    pdu_data = PeriodicFieldDataFactory(subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"])
+    pdu_data = PeriodicFieldDataFactory(
+        subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
+    )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
     queryset = Household.objects.all()
     TargetingIndividualBlockRuleFilter.objects.create(
@@ -300,7 +303,9 @@ def test_filter_on_pdu_flex_field(user, program_cycle, households_individuals, p
 
     households_individuals["ind1"].flex_fields = {"pdu_field_1": {"1": {"value": None}, "2": {"value": None}}}
     households_individuals["ind1"].save()
-    households_individuals["ind2"].flex_fields = {"pdu_field_1": {"1": {"value": 1, "collection_date": "2021-01-01"}, "2": {"value": None}}}
+    households_individuals["ind2"].flex_fields = {
+        "pdu_field_1": {"1": {"value": 1, "collection_date": "2021-01-01"}, "2": {"value": None}}
+    }
     households_individuals["ind2"].save()
 
     # Before value
@@ -340,5 +345,7 @@ def test_exclude_by_ids(user, program_cycle, program, households_individuals):
 
     assert payment_plan.is_social_worker_program
     basic_query_2 = payment_plan.get_basic_query()
-    assert str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', " \
+    assert (
+        str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('individuals__unicef_id__in', "
         f"['{households_individuals['hh1'].unicef_id}', '{households_individuals['hh2'].unicef_id}']))))"
+    )

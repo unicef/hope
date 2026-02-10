@@ -1,10 +1,10 @@
 import json
-import pytest
-import freezegun
 
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+import freezegun
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -12,8 +12,9 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
     ProgramFactory,
-    UserFactory, ProgramCycleFactory,
+    UserFactory,
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import PaymentPlan
@@ -149,9 +150,7 @@ def test_list_target_populations_permission(
 
     if access_to_program:
         create_user_role_with_permissions(user, permissions, business_area, program1)
-        create_partner_role_with_permissions(
-            partner, partner_permissions, business_area, program1
-        )
+        create_partner_role_with_permissions(partner, partner_permissions, business_area, program1)
     else:
         create_partner_role_with_permissions(partner, partner_permissions, business_area)
 
@@ -234,9 +233,7 @@ def test_list_target_populations_filter(
         program1,
     )
 
-    response = api_client_for_user.get(
-        list_url, {"status": PaymentPlan.Status.TP_OPEN}
-    )
+    response = api_client_for_user.get(list_url, {"status": PaymentPlan.Status.TP_OPEN})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 1
 
