@@ -613,13 +613,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_UPDATE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+                Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
@@ -639,13 +639,13 @@ class GrievanceTicketGlobalViewSet(
         }
         if has_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            owner_permission=Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-            business_area=self.business_area,
-            program=grievance_ticket.programs.first(),
+            [
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            ],
+            self.business_area,
+            grievance_ticket,
         ):
             update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
@@ -694,13 +694,9 @@ class GrievanceTicketGlobalViewSet(
         ):
             check_creator_or_owner_permission(
                 user,
-                permissions_to_use[0],
-                grievance_ticket.created_by == user,
-                permissions_to_use[1],
-                grievance_ticket.assigned_to == user,
-                permissions_to_use[2],
+                permissions_to_use,
                 grievance_ticket.business_area,
-                grievance_ticket.programs.first(),
+                grievance_ticket,
             )
 
         if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
@@ -779,13 +775,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_ADD_NOTE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_ADD_NOTE,
+                Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+                Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         description = input_data["description"]
@@ -818,13 +814,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         self.verify_approve_data(individual_approve_data)
@@ -890,13 +886,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         self.verify_approve_data(household_approve_data)
@@ -958,24 +954,24 @@ class GrievanceTicketGlobalViewSet(
         ):
             check_creator_or_owner_permission(
                 user,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-                grievance_ticket.created_by == user,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-                grievance_ticket.assigned_to == user,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+                [
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+                ],
                 self.business_area,
-                grievance_ticket.programs.first(),
+                grievance_ticket,
             )
         else:
             check_creator_or_owner_permission(
                 user,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-                grievance_ticket.created_by == user,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-                grievance_ticket.assigned_to == user,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+                [
+                    Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                    Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                    Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+                ],
                 self.business_area,
-                grievance_ticket.programs.first(),
+                grievance_ticket,
             )
 
         ticket_details = grievance_ticket.ticket_details
@@ -1004,13 +1000,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         ticket_details = grievance_ticket.ticket_details
@@ -1057,13 +1053,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         duplicate_individuals = serializer.validated_data.get("duplicate_individual_ids", [])
@@ -1138,13 +1134,13 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
         check_creator_or_owner_permission(
             user,
-            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+            [
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+            ],
             self.business_area,
-            grievance_ticket.programs.first(),
+            grievance_ticket,
         )
 
         if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
