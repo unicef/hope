@@ -157,6 +157,7 @@ export function ImportXlsxPaymentPlanPaymentList({
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setXlsxError(null);
               }}
             >
               CANCEL

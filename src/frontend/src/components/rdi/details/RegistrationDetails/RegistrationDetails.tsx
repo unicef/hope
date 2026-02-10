@@ -153,7 +153,7 @@ function RegistrationDetails({
       </Grid>
     );
   }
-  const showRegularDeduplicationResult =
+  const showBiographicalDeduplicationResult =
     registration.status !== RegistrationDataImportStatusEnum.DEDUPLICATION;
   const showBiometricDeduplicationResult =
     registration.biometricDeduplicationEnabled &&
@@ -233,13 +233,13 @@ function RegistrationDetails({
           {numbersComponent}
           {registration.status ===
             RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
-          (!showRegularDeduplicationResult &&
+          (!showBiographicalDeduplicationResult &&
             !showBiometricDeduplicationResult) ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
-                  {showRegularDeduplicationResult && (
+                  {showBiographicalDeduplicationResult && (
                     <Grid size={{ xs: 4 }}>
                       <BoldGrey>{t('Biographical')}</BoldGrey>
                     </Grid>
@@ -251,8 +251,8 @@ function RegistrationDetails({
                   )}
                 </Grid>
                 <DedupeBox
-                  showRegularDeduplicationResult={
-                    showRegularDeduplicationResult
+                  showBiographicalDeduplicationResult={
+                    showBiographicalDeduplicationResult
                   }
                   showBiometricDeduplicationResult={
                     showBiometricDeduplicationResult
@@ -261,8 +261,8 @@ function RegistrationDetails({
                   options={withinBatchOptions}
                 />
                 <DedupeBox
-                  showRegularDeduplicationResult={
-                    showRegularDeduplicationResult
+                  showBiographicalDeduplicationResult={
+                    showBiographicalDeduplicationResult
                   }
                   showBiometricDeduplicationResult={
                     showBiometricDeduplicationResult
