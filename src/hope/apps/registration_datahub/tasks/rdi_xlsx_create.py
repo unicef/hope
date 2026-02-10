@@ -441,7 +441,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 collection_date = self._handle_date_field(collection_date_cell)
             PDUXlsxImportService.set_round_value(individual, flexible_attribute.name, 1, value, collection_date)
 
-    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:  # noqa: PLR0912
+    def _build_complex_fields_config(self) -> tuple[dict, dict]:  # noqa: PLR0912
         complex_fields: dict[str, dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -483,16 +483,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         }
         return complex_fields, complex_types
 
-    def _create_pending_object_factory(
-        self, sheet_title: str, rdi: RegistrationDataImport
-    ) -> Callable:
+    def _create_pending_object_factory(self, sheet_title: str, rdi: RegistrationDataImport) -> Callable:
         """Create a partial factory for PendingHousehold or PendingIndividual."""
         if sheet_title == "households":
             return partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
-        elif sheet_title == "individuals":
+        if sheet_title == "individuals":
             return partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
-        else:
-            raise ValueError(f"Unhandled sheet label '{sheet_title!r}'")
+        raise ValueError(f"Unhandled sheet label '{sheet_title!r}'")
 
     def _find_header_indices(self, first_row: Any) -> tuple[int | None, int | None]:
         """Find household_id and relationship column indices."""
@@ -521,8 +518,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return household_id
 
     def _handle_head_of_household_relationship(
-        self, row: tuple, relationship_col_idx: int | None, household_id: str | None,
-        obj_to_create: Any, households_to_update: list
+        self,
+        row: tuple,
+        relationship_col_idx: int | None,
+        household_id: str | None,
+        obj_to_create: Any,
+        households_to_update: list,
     ) -> None:
         """Handle HEAD relationship and link household to head of household."""
         if relationship_col_idx is not None and household_id is not None:
@@ -537,8 +538,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         households_to_update.append(household)
 
     def _finalize_row_object(
-        self, obj_to_create: Any, row: tuple, first_row: Any, sheet_title: str,
-        household_id: str | None, rdi: RegistrationDataImport
+        self,
+        obj_to_create: Any,
+        row: tuple,
+        first_row: Any,
+        sheet_title: str,
+        household_id: str | None,
+        rdi: RegistrationDataImport,
     ) -> None:
         """Finalize the created object with common fields and sheet-specific processing."""
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
@@ -586,13 +592,18 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         is_not_required_and_empty = not current_field.get("required") and cell_value is None and is_not_image
         if header in excluded:
             return True
-        if is_not_required_and_empty:
-            return True
-        return False
+        return is_not_required_and_empty
 
     def _process_complex_field(
-        self, header: str, cell_value: Any, cell: Any, obj_to_create: Any,
-        complex_fields: dict, sheet_title: str, current_field: dict, combined_fields: dict
+        self,
+        header: str,
+        cell_value: Any,
+        cell: Any,
+        obj_to_create: Any,
+        complex_fields: dict,
+        sheet_title: str,
+        current_field: dict,
+        combined_fields: dict,
     ) -> bool:
         """Process complex field and set attribute. Returns True if field was processed."""
         if header not in complex_fields[sheet_title]:
@@ -624,6 +635,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             obj_to_create.flex_fields["enumerator_id"] = cell.value
         if header in ("country_h_c", "country_origin_h_c"):
             from hope.models import Country as GeoCountry
+
             setattr(obj_to_create, combined_fields[header]["name"], GeoCountry.objects.get(iso_code3=value))
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
             setattr(obj_to_create, combined_fields[header]["name"], Area.objects.get(p_code=value))
@@ -631,9 +643,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             setattr(obj_to_create, combined_fields[header]["name"], value)
         return True
 
-    def _process_lookup_field(
-        self, header: str, cell_value: Any, obj_to_create: Any, combined_fields: dict
-    ) -> bool:
+    def _process_lookup_field(self, header: str, cell_value: Any, obj_to_create: Any, combined_fields: dict) -> bool:
         """Process lookup field and set attribute. Returns True if field was processed."""
         if not hasattr(obj_to_create, combined_fields[header]["lookup"]) or header == "household_id":
             return False
@@ -644,8 +654,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return True
 
     def _process_flex_field(
-        self, header: str, cell_value: Any, cell: Any, obj_to_create: Any,
-        sheet_title: str, current_field: dict, complex_types: dict
+        self,
+        header: str,
+        cell_value: Any,
+        cell: Any,
+        obj_to_create: Any,
+        sheet_title: str,
+        current_field: dict,
+        complex_types: dict,
     ) -> bool:
         """Process flex field and set attribute. Returns True if field was processed."""
         if header not in self.FLEX_FIELDS[sheet_title]:
@@ -712,8 +728,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             continue
 
                         if self._process_complex_field(
-                            header, cell_value, cell, obj_to_create,
-                            complex_fields, sheet_title, current_field, combined_fields
+                            header,
+                            cell_value,
+                            cell,
+                            obj_to_create,
+                            complex_fields,
+                            sheet_title,
+                            current_field,
+                            combined_fields,
                         ):
                             continue
                         if self._process_regular_field(header, cell_value, cell, obj_to_create, combined_fields):

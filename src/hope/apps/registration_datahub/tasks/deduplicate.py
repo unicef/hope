@@ -358,7 +358,7 @@ class DeduplicateTask:
                 allowed_duplicates_in_population,
                 individuals_count,
                 self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE,
-                "batch",  # Note: original message said "batch" for population check
+                "population",
             )
             if error_msg:
                 self._set_error_message_and_status(registration_data_import, error_msg)
@@ -759,7 +759,8 @@ class DeduplicateTask:
 
 
 class HardDocumentDeduplication:
-    def _get_program_ids(
+    @transaction.atomic
+    def deduplicate(
         self,
         new_documents: QuerySet[Document],
         registration_data_import: RegistrationDataImport | None = None,
@@ -921,6 +922,7 @@ class HardDocumentDeduplication:
         duplicates_models_to_create_flat = list(
             itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
         )
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa: N806
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
         for created_ticket in created_tickets:
             created_ticket.populate_cross_area_flag()

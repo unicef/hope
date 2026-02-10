@@ -549,49 +549,6 @@ class PaymentPlanService:
             vulnerability_score_min=vulnerability_score_min,
         )
 
-    def _update_currency(self, new_currency: str) -> bool:
-        if new_currency and new_currency != self.payment_plan.currency:
-            delivery_mechanism = self.payment_plan.delivery_mechanism
-            if (
-                new_currency == USDC
-                and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
-            ) or (
-                new_currency != USDC
-                and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
-            ):
-                raise ValidationError(
-                    "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
-                )
-            self.payment_plan.currency = new_currency
-            Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
-            return True
-        return False
-
-    def _update_targeting_criteria(
-        self, input_data: dict, rules: list | None, excluded_ids: list | None, exclusion_reason: str | None, program: Any
-    ) -> bool:
-        should_rebuild = False
-        if rules and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
-            targeting_criteria_input = {"rules": input_data["rules"]}
-            if "flag_exclude_if_on_sanction_list" in input_data:
-                targeting_criteria_input["flag_exclude_if_on_sanction_list"] = input_data[
-                    "flag_exclude_if_on_sanction_list"
-                ]
-            if "flag_exclude_if_active_adjudication_ticket" in input_data:
-                targeting_criteria_input["flag_exclude_if_active_adjudication_ticket"] = input_data[
-                    "flag_exclude_if_active_adjudication_ticket"
-                ]
-            should_rebuild = True
-            self.payment_plan.rules.all().delete()
-            self.create_targeting_criteria(targeting_criteria_input, program)
-        if excluded_ids != self.payment_plan.excluded_ids:
-            should_rebuild = True
-            self.payment_plan.excluded_ids = excluded_ids
-        if exclusion_reason != self.payment_plan.exclusion_reason:
-            should_rebuild = True
-            self.payment_plan.exclusion_reason = exclusion_reason
-        return should_rebuild
-
     def _update_fsp_and_delivery_mechanism(self, fsp_id: str | None, delivery_mechanism_code: str | None) -> bool:
         if not self.payment_plan.is_population_open():
             return False
@@ -624,8 +581,6 @@ class PaymentPlanService:
         name = input_data.get("name")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
         vulnerability_score_max = input_data.get("vulnerability_score_max")
-        excluded_ids = input_data.get("excluded_ids")
-        exclusion_reason = input_data.get("exclusion_reason")
         rules = input_data.get("rules")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
@@ -654,6 +609,17 @@ class PaymentPlanService:
             targeting_criteria_input = {"rules": input_data["rules"]}
             self._set_additional_flags_for_tp(input_data, targeting_criteria_input)
             should_rebuild_list = True
+            self.payment_plan.rules.all().delete()
+            self.create_targeting_criteria(targeting_criteria_input, program)
+
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
+        if excluded_ids != self.payment_plan.excluded_ids:
+            should_rebuild_list = True
+            self.payment_plan.excluded_ids = excluded_ids
+        if exclusion_reason != self.payment_plan.exclusion_reason:
+            should_rebuild_list = True
+            self.payment_plan.exclusion_reason = exclusion_reason
 
         self._set_dispersion_dates(dispersion_end_date, dispersion_start_date)
 
@@ -662,6 +628,7 @@ class PaymentPlanService:
             self._validate_transfer_to_digital_wallet_and_usdc(new_currency)
             self.payment_plan.currency = new_currency
             should_update_money_stats = True
+            Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
         if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
             should_rebuild_list = True

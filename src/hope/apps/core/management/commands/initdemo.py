@@ -225,7 +225,7 @@ class Command(BaseCommand):
         self.stdout.write("Flushing databases...")
         call_command("flush", "--noinput")
 
-        user = self._setup_base_fixtures()
+        self._setup_base_fixtures()
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
 
         # Create role for WFP and UNHCR in Afghanistan
@@ -255,12 +255,18 @@ class Command(BaseCommand):
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")
         tester_list_env = os.getenv("INITDEMO_TESTER_LIST")
         email_list = (
-            options["email_list"].split(",") if options.get("email_list")
-            else email_list_env.split(",") if email_list_env else []
+            options["email_list"].split(",")
+            if options.get("email_list")
+            else email_list_env.split(",")
+            if email_list_env
+            else []
         )
         tester_list = (
-            options["tester_list"].split(",") if options.get("tester_list")
-            else tester_list_env.split(",") if tester_list_env else []
+            options["tester_list"].split(",")
+            if options.get("tester_list")
+            else tester_list_env.split(",")
+            if tester_list_env
+            else []
         )
         self._create_users_from_email_lists(email_list, tester_list, role_with_all_perms)
 

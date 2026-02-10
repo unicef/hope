@@ -394,9 +394,7 @@ class ProgramAdmin(
         return TemplateResponse(request, "admin/program/program/bulk_upload_individuals_photos.html", context)
 
 
-def _collect_zip_entries(
-    data: bytes, job: "AsyncJob"
-) -> tuple[list[tuple[str, str, str]], set[str], list[str]]:
+def _collect_zip_entries(data: bytes, job: "AsyncJob") -> tuple[list[tuple[str, str, str]], set[str], list[str]]:
     entries: list[tuple[str, str, str]] = []
     individual_unicef_ids: set[str] = set()
     invalid_filenames: list[str] = []

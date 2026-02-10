@@ -400,11 +400,11 @@ class DashboardDataCache(DashboardCacheBase):
         }
 
     @classmethod
-    def _process_household_in_country_payment(
-        cls, payment: dict, household_map: dict, current_summary: dict
-    ) -> None:
+    def _process_household_in_country_payment(cls, payment: dict, household_map: dict, current_summary: dict) -> None:
         household_id = payment.get("household_id_val")
-        if not (household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]):
+        if not (
+            household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]
+        ):
             return
 
         h_data = household_map.get(household_id, {})
@@ -705,11 +705,11 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         }
 
     @classmethod
-    def _process_household_in_payment(
-        cls, payment: dict, household_map: dict, current_summary: dict
-    ) -> None:
+    def _process_household_in_payment(cls, payment: dict, household_map: dict, current_summary: dict) -> None:
         household_id = payment.get("household_id_val")
-        if not (household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]):
+        if not (
+            household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]
+        ):
             return
 
         h_data = household_map.get(household_id, {})

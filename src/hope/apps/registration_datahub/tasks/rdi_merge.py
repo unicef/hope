@@ -53,9 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    def _process_collisions(
-        self, obj_hct: RegistrationDataImport, household_ids: list
-    ) -> tuple[list, list]:
+    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
         household_ids_to_exclude = []
         for ids in chunks(household_ids, 1000):
             households_chunks = PendingHousehold.objects.filter(id__in=ids)
@@ -91,9 +89,7 @@ class RdiMergeTask:
             KoboImportedSubmission.objects.bulk_create(kobo_submissions)
         logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
 
-    def _update_merge_statuses(
-        self, households_to_merge_ids: list, individuals_to_merge_ids: list
-    ) -> None:
+    def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
         dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids)
         PendingAccount.validate_uniqueness(dmds)
         dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
@@ -126,9 +122,7 @@ class RdiMergeTask:
                 ):
                     cache.delete(key)
 
-    def _run_biometric_deduplication(
-        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
-    ) -> None:
+    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
         if obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
             dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
@@ -173,7 +167,9 @@ class RdiMergeTask:
             registration_data_import=obj_hct,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
-        logger.info(f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication")
+        logger.info(
+            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+        )
 
     def execute(self, registration_data_import_id: str) -> None:
         try:

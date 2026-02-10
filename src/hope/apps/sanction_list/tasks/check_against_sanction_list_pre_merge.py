@@ -119,8 +119,8 @@ def _save_tickets_and_notify(
     ticket_details_to_create: list[TicketSystemFlaggingDetails],
 ) -> None:
     GrievanceTicket.objects.bulk_create(tickets_to_create)
-    GrievanceTicketProgramThrough = GrievanceTicket.programs.through
-    GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+    grievance_ticket_program_through = GrievanceTicket.programs.through
+    grievance_ticket_program_through.objects.bulk_create(tickets_programs)
     for ticket in tickets_to_create:
         GrievanceNotification.send_all_notifications(
             GrievanceNotification.prepare_notification_for_ticket_creation(ticket)

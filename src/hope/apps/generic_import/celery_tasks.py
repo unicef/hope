@@ -1,7 +1,7 @@
 from sentry_sdk import capture_exception
 
 from hope.apps.core.celery import app
-from hope.apps.generic_import.generic_upload_service.importer import Importer, format_validation_errors
+from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
@@ -46,8 +46,7 @@ def _handle_import_success(import_data, rdi, logger) -> None:
     rdi.save(update_fields=["status", "number_of_households", "number_of_individuals"])
 
     logger.info(
-        f"Import {rdi.id} completed successfully: "
-        f"{households_count} households, {individuals_count} individuals"
+        f"Import {rdi.id} completed successfully: {households_count} households, {individuals_count} individuals"
     )
 
 

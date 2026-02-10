@@ -593,7 +593,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     household_id_can_be_empty = header.value == "household_id" and sheet.title != "Households"
 
-                    admin_error = self._validate_admin_column(header.value, cell.value, row_number, admin_area_code_tuples)
+                    admin_error = self._validate_admin_column(
+                        header.value, cell.value, row_number, admin_area_code_tuples
+                    )
                     if admin_error:
                         invalid_rows.append(admin_error)
 
@@ -630,6 +632,242 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _find_header_column_indices(self, first_row: tuple) -> tuple[int | None, int | None]:
+        household_id_col_idx = None
+        relationship_col_idx = None
+        for idx, header_cell in enumerate(first_row):
+            if header_cell.value == "household_id":
+                household_id_col_idx = idx
+            elif header_cell.value == "relationship_i_c":
+                relationship_col_idx = idx
+        return household_id_col_idx, relationship_col_idx
+
+    def _init_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, Any]]]:
+        identities_numbers = {
+            "unhcr_id_no_i_c": {
+                "partner": "UNHCR",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "scope_id_no_i_c": {
+                "partner": "WFP",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+        }
+        documents_numbers: dict[str, dict[str, Any]] = {
+            "birth_certificate_no_i_c": {
+                "type": "BIRTH_CERTIFICATE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "drivers_license_no_i_c": {
+                "type": "DRIVERS_LICENSE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "electoral_card_no_i_c": {
+                "type": "ELECTORAL_CARD",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_id_no_i_c": {
+                "type": "NATIONAL_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_passport_no_i_c": {
+                "type": "NATIONAL_PASSPORT",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "tax_id_no_i_c": {
+                "type": "TAX_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_type_i_c": {
+                "type": "OTHER",
+                "names": [],
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_no_i_c": {},
+        }
+        return identities_numbers, documents_numbers
+
+    def _process_row_household_data(
+        self, row: tuple, hh_id_col_idx: int | None, rel_col_idx: int | None, sheet_title: str
+    ) -> Any:
+        current_household_id = None
+        if hh_id_col_idx is not None:
+            household_id_cell = row[hh_id_col_idx]
+            if value := household_id_cell.value:
+                if isinstance(value, float) and value.is_integer():
+                    value = int(value)
+                current_household_id = value
+                if sheet_title == "Households":
+                    self.household_ids.append(current_household_id)
+                    self.head_of_household_count[current_household_id] = 0
+
+        if rel_col_idx is not None and current_household_id is not None:
+            relationship_cell = row[rel_col_idx]
+            if relationship_cell.value == "HEAD":
+                self.head_of_household_count[current_household_id] += 1
+
+        return current_household_id
+
+    def _validate_admin_column(
+        self, header_value: str, cell_value: Any, row_number: int, admin_area_code_tuples: list
+    ) -> dict | None:
+        people_admin_columns = (
+            "pp_admin1_i_c",
+            "pp_admin2_i_c",
+            "pp_admin3_i_c",
+        )
+        hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
+        admin_columns_all = people_admin_columns + hh_admin_columns
+        if header_value in admin_columns_all:
+            if cell_value:
+                admin_area_code_tuples.append((row_number, header_value, cell_value))
+            # admin3 is not required for now
+            elif not cell_value and header_value not in (
+                "admin3_h_c",
+                "pp_admin3_i_c",
+            ):
+                return {
+                    "row_number": row_number,
+                    "header": header_value,
+                    "message": f"{header_value.capitalize()} field cannot be null",
+                }
+        return None
+
+    def _validate_field_type(
+        self,
+        value: Any,
+        header_value: str,
+        cell: Cell,
+        field_type: str,
+        sheet_title: str,
+        switch_dict: dict[str, Callable],
+        household_id_can_be_empty: bool,
+    ) -> dict | None:
+        people_admin_columns = (
+            "pp_admin1_i_c",
+            "pp_admin2_i_c",
+            "pp_admin3_i_c",
+        )
+        hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
+        admin_columns_all = people_admin_columns + hh_admin_columns
+        fn: Callable = switch_dict[field_type]
+
+        if (
+            fn(value, header_value, cell) is False
+            and household_id_can_be_empty is False
+            and header_value not in admin_columns_all
+        ):
+            message = (
+                f"Sheet: {sheet_title!r}, Unexpected value: "
+                f"{value} for type "
+                f"{field_type.replace('_', ' ').lower()} "
+                f"of field {header_value}"
+            )
+            return {
+                "row_number": cell.row,
+                "header": header_value,
+                "message": message,
+            }
+        return None
+
+    def _process_document_number(
+        self,
+        header_value_doc: str,
+        value: Any,
+        documents_numbers: dict[str, dict[str, Any]],
+        identities_numbers: dict,
+    ) -> None:
+        if header_value_doc in documents_numbers:
+            if header_value_doc == "other_id_type_i_c":
+                documents_numbers["other_id_type_i_c"]["names"].append(value)
+            elif header_value_doc == "other_id_no_i_c":
+                documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
+            else:
+                documents_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
+
+        if header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+            document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header_value_doc)
+            documents_dict = documents_numbers
+            if document_key in identities_numbers:
+                documents_dict = identities_numbers
+            if document_key:
+                documents_dict[document_key]["issuing_countries"].append(value)
+
+        if header_value_doc in identities_numbers:
+            identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
+
+    def _validate_row_household_reference(self, current_household_id: Any, row_number: int) -> dict | None:
+        if current_household_id and current_household_id not in self.household_ids:
+            message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
+            return {
+                "row_number": row_number,
+                "header": "relationship_i_c",
+                "message": message,
+            }
+        return None
+
+    def _accumulate_doc_identity_validation_data(
+        self, row: tuple, identities_numbers: dict, documents_numbers: dict[str, dict[str, Any]]
+    ) -> None:
+        for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
+            documents_or_identity_dict = (
+                identities_numbers if header_value_doc in identities_numbers else documents_numbers
+            )
+            documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
+
+    def _validate_head_of_household(self) -> list[dict[str, Any]]:
+        invalid_rows = []
+        for household_id, count in self.head_of_household_count.items():
+            if count == 0:
+                message = f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+            elif count > 1:
+                message = (
+                    f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
+                )
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+        return invalid_rows
+
+    def _run_document_identity_validation(
+        self, sheet_title: str, documents_numbers: dict[str, dict[str, Any]], identities_numbers: dict
+    ) -> tuple[list, list]:
+        invalid_doc_rows = []
+        invalid_ident_rows = []
+        if sheet_title in ["Individuals", "People"]:
+            invalid_doc_rows = self.documents_validator(documents_numbers)
+            invalid_ident_rows = self.identity_validator(identities_numbers)
+        return invalid_doc_rows, invalid_ident_rows
 
     def validate_admin_areas(
         self,
@@ -1369,6 +1607,178 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
+    def _init_kobo_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, Any]]]:
+        identities_numbers = {
+            "unhcr_id_no_i_c": {
+                "partner": "UNHCR",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "scope_id_no_i_c": {
+                "partner": "WFP",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+        }
+        documents_numbers: dict[str, dict[str, Any]] = {
+            "birth_certificate_no_i_c": {
+                "type": "BIRTH_CERTIFICATE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "drivers_license_no_i_c": {
+                "type": "DRIVERS_LICENSE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "electoral_card_no_i_c": {
+                "type": "ELECTORAL_CARD",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_id_no_i_c": {
+                "type": "NATIONAL_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_passport_no_i_c": {
+                "type": "NATIONAL_PASSPORT",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "tax_id_no_i_c": {
+                "type": "TAX_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_type_i_c": {
+                "type": "OTHER",
+                "names": [],
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_no_i_c": {},
+        }
+        return identities_numbers, documents_numbers
+
+    def _build_saved_submissions_lookup(
+        self, reduced_submissions: Sequence, business_area: BusinessArea
+    ) -> dict[str, list[str]]:
+        kobo_asset_id = None
+        if len(reduced_submissions) > 0:
+            kobo_asset_id = reduced_submissions[0]["_xform_id_string"]
+        all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
+        if business_area.get_sys_option("ignore_amended_kobo_submissions"):
+            all_saved_submissions = all_saved_submissions.filter(amended=False)
+        all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
+
+        all_saved_submissions_dict: dict[str, list[str]] = {}
+        for submission in all_saved_submissions:
+            item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])
+            item.append(submission["kobo_submission_time"].isoformat())
+            all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
+        return all_saved_submissions_dict
+
+    def _is_duplicate_submission(
+        self,
+        household: dict[str, Any],
+        all_saved_submissions_dict: dict[str, list[str]],
+        household_hash_list: list[str],
+    ) -> tuple[bool, str]:
+        household_uuid = str(household.get("_uuid"))
+        household_hash = calculate_hash_for_kobo_submission(household)
+        submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(household_uuid, [])
+        submission_duplicate = household_hash in household_hash_list
+        return (submission_exists or submission_duplicate), household_hash
+
+    def _process_individual_doc_identity_kobo(
+        self,
+        i_field: str,
+        i_value: Any,
+        documents_numbers: dict[str, dict[str, Any]],
+        identities_numbers: dict,
+    ) -> None:
+        if i_field in documents_numbers:
+            if i_field == "other_id_type_i_c":
+                documents_numbers["other_id_type_i_c"]["names"].append(i_value)
+            elif i_field == "other_id_no_i_c":
+                documents_numbers["other_id_type_i_c"]["validation_data"].append({"value": i_value})
+                documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
+            else:
+                documents_numbers[i_field]["validation_data"].append({"value": i_value})
+                documents_numbers[i_field]["numbers"].append(i_value)
+        if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+            document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
+            documents_dict: dict[str, dict[str, Any]] = documents_numbers
+            if document_key in identities_numbers:
+                documents_dict = identities_numbers
+            documents_dict[document_key]["issuing_countries"].append(i_value)
+
+        if i_field in identities_numbers:
+            identities_numbers[i_field]["numbers"].append(i_value)
+            identities_numbers[i_field]["validation_data"].append({"value": i_value})
+
+    def _count_individual_roles(
+        self, i_field: str, i_value: Any, head_ctr: int, primary_ctr: int, alternate_ctr: int
+    ) -> tuple[int, int, int]:
+        if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
+            head_ctr += 1
+        if i_field == "role_i_c":
+            role = i_value.upper()
+            if role == ROLE_PRIMARY:
+                primary_ctr += 1
+            elif role == ROLE_ALTERNATE:
+                alternate_ctr += 1
+        return head_ctr, primary_ctr, alternate_ctr
+
+    def _validate_household_roles(self, head_ctr: int, primary_ctr: int, alternate_ctr: int) -> list[dict[str, str]]:
+        errors: list[dict[str, str]] = []
+        if head_ctr == 0:
+            errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Household has to have a head of household",
+                }
+            )
+        if head_ctr > 1:
+            errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Only one person can be a head of household",
+                }
+            )
+        if primary_ctr == 0:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Household must have a primary collector",
+                }
+            )
+        if primary_ctr > 1:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a primary collector",
+                }
+            )
+        if alternate_ctr > 1:
+            errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a alternate collector",
+                }
+            )
+        return errors
+
     def validate_everything(  # noqa: PLR0912
         self,
         submissions: list,
@@ -1418,8 +1828,11 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 )
                                 head_of_hh_counter, primary_collector_counter, alternate_collector_counter = (
                                     self._count_individual_roles(
-                                        i_field, i_value, head_of_hh_counter,
-                                        primary_collector_counter, alternate_collector_counter
+                                        i_field,
+                                        i_value,
+                                        head_of_hh_counter,
+                                        primary_collector_counter,
+                                        alternate_collector_counter,
                                     )
                                 )
                                 expected_i_fields.discard(i_field)
@@ -1443,9 +1856,11 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                             ]
                             errors.extend(i_expected_field_errors)
 
-                        errors.extend(self._validate_household_roles(
-                            head_of_hh_counter, primary_collector_counter, alternate_collector_counter
-                        ))
+                        errors.extend(
+                            self._validate_household_roles(
+                                head_of_hh_counter, primary_collector_counter, alternate_collector_counter
+                            )
+                        )
                     else:
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:

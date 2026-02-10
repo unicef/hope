@@ -421,17 +421,9 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
             "kobo": False,
             "error": "",
         }
-        if "username" in row:
-            username = row["username"].strip()
-        else:
-            username = row["email"].replace("@", "_").replace(".", "_").lower()
-
-        u, isnew = User.objects.get_or_create(
-            email=email,
-            partner=partner,
-            defaults={"username": username},
-        )
+        isnew, u = self._get_user(email, partner, row)
         if isnew:
+            user_info["is_new"] = True
             ur = u.role_assignments.create(business_area=business_area, role=role)
             self.log_addition(request, u, "User imported by CSV")
             self.log_addition(request, ur, "User Role added")
@@ -448,6 +440,18 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
 
         return user_info
 
+    def _parse_csv_file(self, form) -> csv.DictReader:
+        csv_file = form.cleaned_data["file"]
+        if csv_file.multiple_chunks():
+            raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+        data_set = csv_file.read().decode("utf-8-sig").splitlines()
+        return csv.DictReader(
+            data_set,
+            quotechar=form.cleaned_data["quotechar"],
+            quoting=int(form.cleaned_data["quoting"]),
+            delimiter=form.cleaned_data["delimiter"],
+        )
+
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
@@ -461,58 +465,19 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
             if form.is_valid():
                 try:
                     context["processed"] = True
-                    csv_file = form.cleaned_data["file"]
                     partner = form.cleaned_data["partner"]
                     business_area = form.cleaned_data["business_area"]
                     role = form.cleaned_data["role"]
-
-                    if csv_file.multiple_chunks():
-                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
-                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(
-                        data_set,
-                        quotechar=form.cleaned_data["quotechar"],
-                        quoting=int(form.cleaned_data["quoting"]),
-                        delimiter=form.cleaned_data["delimiter"],
-                    )
+                    reader = self._parse_csv_file(form)
                     context["results"] = []
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
-                        try:
-                            for row in reader:
-                                try:
-                                    email = row["email"].strip()
-                                except KeyError as e:
-                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
-
-                                user_info = {
-                                    "email": email,
-                                    "is_new": False,
-                                    "kobo": False,
-                                    "error": "",
-                                }
-                                isnew, u = self._get_user(email, partner, row)
-                                if isnew:
-                                    user_info["is_new"] = True
-                                    ur = u.role_assignments.create(business_area=business_area, role=role)
-                                    self.log_addition(request, u, "User imported by CSV")
-                                    self.log_addition(request, ur, "User Role added")
-                                else:  # check role validity
-                                    try:
-                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        ur, _ = u.role_assignments.get_or_create(business_area=business_area, role=role)
-                                        self.log_addition(request, ur, "User Role added")
-                                    except ValidationError as e:
-                                        self.message_user(
-                                            request,
-                                            f"Error on {u}: {e}",
-                                            messages.ERROR,
-                                        )
-
-                                context["results"].append(user_info)
-                        except Exception:
-                            raise
+                        for row in reader:
+                            user_info = self._process_csv_row(
+                                request, row, partner, business_area, role, enable_kobo=False
+                            )
+                            context["results"].append(user_info)
                 except (csv.Error, HTTPError, Error) as e:
                     logger.warning(e)
                     context["form"] = form

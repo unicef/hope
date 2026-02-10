@@ -80,6 +80,87 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
+    def _handle_flex_field_value(
+        self,
+        obj_to_create: Any,
+        header: str,
+        cell_value: Any,
+        cell: Any,
+        sheet_title: str,
+        complex_types: dict,
+        current_field: dict,
+    ) -> None:
+        value = self._cast_value(cell_value, header)
+        type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
+        if type_name in complex_types:
+            fn_flex: Callable = complex_types[type_name]
+            value = fn_flex(
+                value=cell_value,
+                cell=cell,
+                header=header,
+                is_flex_field=True,
+                is_field_required=current_field.get("required", False),
+            )
+        if value is not None:
+            obj_to_create.flex_fields[header] = value
+
+    def _set_model_field_value(
+        self,
+        obj_to_create: Any,
+        header: str,
+        field_name: str,
+        cell: Any,
+        value: Any,
+    ) -> None:
+        if header in (
+            "pp_admin1_i_c",
+            "pp_admin2_i_c",
+            "pp_admin3_i_c",
+            "pp_admin4_i_c",
+        ):
+            setattr(
+                obj_to_create,
+                field_name,
+                Area.objects.get(p_code=cell.value),
+            )
+        elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
+            setattr(
+                obj_to_create,
+                field_name,
+                GeoCountry.objects.get(iso_code3=cell.value),
+            )
+        else:
+            setattr(
+                obj_to_create,
+                field_name,
+                value,
+            )
+
+    def _finalize_hh_ind_object(
+        self,
+        obj_to_create: Any,
+        sheet_title: str,
+        registration_data_import: RegistrationDataImport,
+    ) -> None:
+        if sheet_title == "households":
+            obj_to_create.set_admin_areas()
+            obj_to_create.save()
+            self.households[self.index_id] = obj_to_create
+        else:
+            obj_to_create = self._validate_birth_date(obj_to_create)
+            obj_to_create.age_at_registration = calculate_age_at_registration(
+                registration_data_import.created_at, str(obj_to_create.birth_date)
+            )
+            populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
+
+            household = self.households[self.index_id]
+            if household is not None:
+                obj_to_create.household = self.households[self.index_id]
+                household.head_of_household = obj_to_create
+                self.households_to_update.append(household)
+
+            self.individuals.append(obj_to_create)
+
     def _create_hh_ind(  # noqa: PLR0912
         self,
         obj_to_create: Any,

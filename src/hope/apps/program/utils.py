@@ -492,9 +492,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                _prepare_and_save_household_copy(
-                    household, program, rdi, individuals_dict, individuals_to_exclude_dict
-                )
+                _prepare_and_save_household_copy(household, program, rdi, individuals_dict, individuals_to_exclude_dict)
                 entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
