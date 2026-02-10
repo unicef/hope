@@ -27,6 +27,7 @@ class ProgramFactory(DjangoModelFactory):
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
+    biometric_deduplication_enabled = False
 
 
 class ProgramCycleFactory(DjangoModelFactory):
