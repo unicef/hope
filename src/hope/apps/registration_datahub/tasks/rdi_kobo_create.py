@@ -370,6 +370,47 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         PendingIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_documents_and_identities(documents_and_identities_to_create)
 
+    def _process_individual_fields(
+        self,
+        individual: dict,
+        individual_obj: PendingIndividual,
+        household_obj: PendingHousehold,
+        current_individual_docs_and_identities: dict,
+        household_count: int,
+        ind_count: int,
+    ) -> tuple[bool, str | None]:
+        only_collector_flag = False
+        role = None
+        for i_field, i_value in individual.items():
+            if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
+                self._process_doc_identity_field(
+                    i_field, i_value, current_individual_docs_and_identities, individual_obj
+                )
+            elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
+                only_collector_flag = True
+            elif i_field == "role_i_c":
+                role = i_value.upper()
+            elif i_field.endswith(("_h_c", "_h_f")):
+                try:
+                    self._cast_and_assign(i_value, i_field, household_obj)
+                except (Error, ValidationError, ValueError, TypeError) as e:
+                    logger.warning(e)
+                    self._handle_exception("Household", i_field, e)
+            elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
+                self._handle_account_fields(
+                    i_value,
+                    i_field,
+                    int(f"{household_count}{ind_count}"),
+                    individual_obj,
+                )
+            else:
+                try:
+                    self._cast_and_assign(i_value, i_field, individual_obj)
+                except (Error, ValidationError, ValueError, TypeError) as e:
+                    logger.warning(e)
+                    self._handle_exception("Individual", i_field, e)
+        return only_collector_flag, role
+
     def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
@@ -395,36 +436,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     ind_count += 1
                     current_individual_docs_and_identities = defaultdict(dict)
                     individual_obj = PendingIndividual()
-                    only_collector_flag = False
-                    role = None
-                    for i_field, i_value in individual.items():
-                        if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
-                            self._process_doc_identity_field(
-                                i_field, i_value, current_individual_docs_and_identities, individual_obj
-                            )
-                        elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
-                            only_collector_flag = True
-                        elif i_field == "role_i_c":
-                            role = i_value.upper()
-                        elif i_field.endswith(("_h_c", "_h_f")):
-                            try:
-                                self._cast_and_assign(i_value, i_field, household_obj)
-                            except (Error, ValidationError, ValueError, TypeError) as e:
-                                logger.warning(e)
-                                self._handle_exception("Household", i_field, e)
-                        elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_account_fields(
-                                i_value,
-                                i_field,
-                                int(f"{household_count}{ind_count}"),
-                                individual_obj,
-                            )
-                        else:
-                            try:
-                                self._cast_and_assign(i_value, i_field, individual_obj)
-                            except (Error, ValidationError, ValueError, TypeError) as e:
-                                logger.warning(e)
-                                self._handle_exception("Individual", i_field, e)
+                    only_collector_flag, role = self._process_individual_fields(
+                        individual,
+                        individual_obj,
+                        household_obj,
+                        current_individual_docs_and_identities,
+                        household_count,
+                        ind_count,
+                    )
                     self._finalize_individual(
                         individual_obj,
                         household_obj,

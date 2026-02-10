@@ -384,47 +384,12 @@ class DeduplicateTask:
                 deduplication_golden_record_status=NOT_PROCESSED,
             )
         else:
-            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
-                id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
-            ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
-            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
-                id__in=duplicates_in_population.union(possible_duplicates_in_population)
-            ).update(deduplication_golden_record_status=UNIQUE)
-            old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
-            registration_data_import.status = RegistrationDataImport.IN_REVIEW
-            registration_data_import.batch_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=DUPLICATE_IN_BATCH,
-            ).count()
-            registration_data_import.batch_possible_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=SIMILAR_IN_BATCH,
-            ).count()
-            registration_data_import.batch_unique = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=UNIQUE_IN_BATCH,
-            ).count()
-            registration_data_import.golden_record_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=DUPLICATE,
-            ).count()
-            registration_data_import.golden_record_possible_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=NEEDS_ADJUDICATION,
-            ).count()
-            registration_data_import.golden_record_unique = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=UNIQUE,
-            ).count()
-            registration_data_import.error_message = ""
-            registration_data_import.save()
-            log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
-                "business_area",
-                None,
-                registration_data_import.program_id,
-                old_object=old_rdi,
-                new_object=registration_data_import,
+            self._finalize_successful_deduplication(
+                registration_data_import,
+                duplicates_in_batch,
+                possible_duplicates_in_batch,
+                duplicates_in_population,
+                possible_duplicates_in_population,
             )
 
         remove_elasticsearch_documents_by_matching_ids(

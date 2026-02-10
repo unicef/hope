@@ -592,46 +592,7 @@ class DashboardDataCache(DashboardCacheBase):
             household_id = payment.get("household_id_val")
             cls._summary_count(current_summary, household_id, household_map, payment)
 
-        newly_processed_result_list = []
-        for (
-            year,
-            month,
-            admin1,
-            program,
-            sector,
-            fsp,
-            delivery_type,
-            status,
-            currency,
-        ), totals in summary.items():
-            month_name = "Unknown"
-            if month and 1 <= month <= 12:
-                month_name = calendar.month_name[month]
-
-            newly_processed_result_list.append(
-                {
-                    "year": year,
-                    "month": month_name,
-                    "admin1": admin1,
-                    "program": program,
-                    "sector": sector,
-                    "fsp": fsp,
-                    "delivery_types": delivery_type,
-                    "status": status,
-                    "currency": currency,
-                    "total_delivered_quantity_usd": totals["total_usd"],
-                    "total_delivered_quantity": totals["total_quantity"],
-                    "payments": totals["total_payments"],
-                    "households": len(totals["_seen_households"]),
-                    "individuals": totals["individuals"],
-                    "children_counts": int(round(totals["children_counts"])),
-                    "pwd_counts": totals["pwd_counts"],
-                    "reconciled": totals["reconciled_count"],
-                    "finished_payment_plans": totals["finished_payment_plans"],
-                    "total_payment_plans": totals["total_payment_plans"],
-                    "total_planned_usd": totals["planned_sum_for_group"],
-                }
-            )
+        newly_processed_result_list = cls._build_country_summary_results(summary)
 
         final_result_list = newly_processed_result_list
         if is_partial_refresh_attempt:
