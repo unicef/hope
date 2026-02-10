@@ -65,7 +65,7 @@ def biometric_deduplication_context() -> dict[str, object]:
     }
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set")
 def test_create_deduplication_set(
     mock_create_deduplication_set: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -88,7 +88,7 @@ def test_create_deduplication_set(
     )
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
 def test_get_deduplication_set_results(
     mock_get_duplicates: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -98,7 +98,7 @@ def test_get_deduplication_set_results(
     mock_get_duplicates.assert_called_once_with(program.unicef_id, ["1", "2"])
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
 def test_get_deduplication_set(
     mock_get_deduplication_set: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -113,7 +113,7 @@ def test_get_deduplication_set(
     mock_get_deduplication_set.assert_called_once_with(program.unicef_id)
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
 def test_upload_individuals_success(
     mock_bulk_upload_images: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -149,7 +149,7 @@ def test_upload_individuals_success(
     assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
 def test_upload_individuals_failure(
     mock_bulk_upload_images: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -200,7 +200,7 @@ def test_upload_individuals_no_individuals(biometric_deduplication_context: dict
     assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
 def test_process_deduplication_set(
     mock_process_deduplication: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -233,7 +233,7 @@ def test_process_deduplication_set(
     assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_ERROR
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.delete_deduplication_set")
 def test_delete_deduplication_set(
     mock_delete_deduplication_set: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -243,8 +243,8 @@ def test_delete_deduplication_set(
     mock_delete_deduplication_set.assert_called_once_with(program.unicef_id)
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.process_deduplication")
 def test_upload_and_process_deduplication_set(
     mock_process_deduplication: mock.Mock,
     mock_bulk_upload_images: mock.Mock,
@@ -917,7 +917,7 @@ def test_update_rdis_deduplication_statistics(biometric_deduplication_context: d
     assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_report_false_positive_duplicate(
     mock_report_false_positive_duplicate: mock.Mock, biometric_deduplication_context: dict[str, object]
 ) -> None:
@@ -931,7 +931,7 @@ def test_report_false_positive_duplicate(
     )
 
 
-@patch("hope.apps.registration_data.apis.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_individuals_status")
 def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()

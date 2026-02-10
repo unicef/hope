@@ -10,6 +10,7 @@ from .account import (
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .activity_log import LogEntryFactory
 from .api import APITokenFactory
+from .aurora import OrganizationFactory, ProjectFactory, RegistrationFactory
 from .changelog import ChangelogFactory
 from .core import (
     BeneficiaryGroupFactory,
@@ -145,6 +146,9 @@ __all__ = [
     "PeriodicFieldDataFactory",
     "ProgramCycleFactory",
     "ProgramFactory",
+    "ProjectFactory",
+    "OrganizationFactory",
+    "RegistrationFactory",
     "RegistrationDataImportFactory",
     "KoboImportDataFactory",
     "RoleAssignmentFactory",

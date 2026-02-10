@@ -39,7 +39,7 @@ def pytest_configure(config: Config) -> None:
     settings.LOGGING["loggers"].update(
         {
             "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-            "registration_datahub.tasks.deduplicate": {
+            "registration_data.tasks.deduplicate": {
                 "handlers": ["default"],
                 "level": "INFO",
                 "propagate": True,
