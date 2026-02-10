@@ -37,14 +37,14 @@ export interface OptionType {
 export interface DedupeBoxProps {
   label: string;
   options: OptionType[];
-  showRegularDeduplicationResult: boolean;
+  showBiographicalDeduplicationResult: boolean;
   showBiometricDeduplicationResult: boolean;
 }
 
 export const DedupeBox = ({
   label,
   options,
-  showRegularDeduplicationResult,
+  showBiographicalDeduplicationResult,
   showBiometricDeduplicationResult,
 }: DedupeBoxProps): ReactElement => {
   return (
@@ -60,7 +60,7 @@ export const DedupeBox = ({
         <Grid size={12}>
           <Grid container direction="column">
             {options.map((option) => {
-              const regularData = option.options?.[0];
+              const biographicalData = option.options?.[0];
               const biometricData = option.options?.[1];
 
               return (
@@ -72,33 +72,47 @@ export const DedupeBox = ({
                       </Small>
                     </BoldGrey>
                   </Grid>
-                  {showRegularDeduplicationResult && regularData && (
+                  {biographicalData && (
                     <Grid size={4} container spacing={4}>
                       <Grid size={6}>
                         <Bold data-cy={`percentage-${option.name}`}>
-                          {regularData.percentage.toFixed(2)}%
+                          {showBiographicalDeduplicationResult
+                            ? biographicalData.percentage.toFixed(2)
+                            : 0}
+                          %
                         </Bold>
                       </Grid>
                       <Grid size={6}>
                         <Box ml={2}>
                           <BoldGrey data-cy={`value-${option.name}`}>
-                            ({regularData.count})
+                            (
+                            {showBiographicalDeduplicationResult
+                              ? biographicalData.count
+                              : 0}
+                            )
                           </BoldGrey>
                         </Box>
                       </Grid>
                     </Grid>
                   )}
-                  {showBiometricDeduplicationResult && biometricData && (
+                  {biometricData && (
                     <Grid size={4} container spacing={4}>
                       <Grid size={6}>
                         <Bold data-cy={`percentage-${option.name}-biometric`}>
-                          {biometricData.percentage.toFixed(2)}%
+                          {showBiometricDeduplicationResult
+                            ? biometricData.percentage.toFixed(2)
+                            : 0}
+                          %
                         </Bold>
                       </Grid>
                       <Grid size={6}>
                         <Box ml={2}>
                           <BoldGrey data-cy={`value-${option.name}-biometric`}>
-                            ({biometricData.count})
+                            (
+                            {showBiometricDeduplicationResult
+                              ? biometricData.count
+                              : 0}
+                            )
                           </BoldGrey>
                         </Box>
                       </Grid>
