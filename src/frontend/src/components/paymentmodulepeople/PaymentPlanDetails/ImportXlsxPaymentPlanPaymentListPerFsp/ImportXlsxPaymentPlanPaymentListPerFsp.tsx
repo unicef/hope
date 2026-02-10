@@ -166,6 +166,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setXlsxError(null);
               }}
             >
               CANCEL
