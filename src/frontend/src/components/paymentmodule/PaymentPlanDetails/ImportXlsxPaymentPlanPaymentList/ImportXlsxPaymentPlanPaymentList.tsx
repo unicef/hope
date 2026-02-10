@@ -1,29 +1,21 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  Typography,
-} from '@mui/material';
-import { getApiErrorMessages } from '@utils/utils';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
-import { RestService } from '@restgenerated/services/RestService';
-import { DropzoneField } from '@core/DropzoneField';
 import { useProgramContext } from '../../../../programContext';
-import { LoadingButton } from '@core/LoadingButton';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface ImportXlsxPaymentPlanPaymentListProps {
   paymentPlan: PaymentPlanDetail;
