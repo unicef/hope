@@ -60,7 +60,12 @@ from .payment import (
     WesternUnionInvoiceFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from .periodic_data_update import PDUOnlineEditFactory, PDUXlsxTemplateFactory, PDUXlsxUploadFactory
+from .periodic_data_update import (
+    PDUOnlineEditFactory,
+    PDUOnlineEditSentBackCommentFactory,
+    PDUXlsxTemplateFactory,
+    PDUXlsxUploadFactory,
+)
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
@@ -127,6 +132,7 @@ __all__ = [
     "RuleFactory",
     "LogEntryFactory",
     "PDUOnlineEditFactory",
+    "PDUOnlineEditSentBackCommentFactory",
     "PDUXlsxTemplateFactory",
     "PDUXlsxUploadFactory",
     "SanctionListFactory",
