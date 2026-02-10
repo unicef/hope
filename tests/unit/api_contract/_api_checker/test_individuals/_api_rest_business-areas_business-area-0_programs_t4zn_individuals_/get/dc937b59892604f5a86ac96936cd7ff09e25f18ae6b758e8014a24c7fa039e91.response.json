@@ -1,0 +1,53 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "b6a6c75cf5f491e48b2177af52dd0d0f",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1130"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/t4zn/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "3c65955d-a16d-47f5-8c16-e79b487104b7",
+                "unicef_id": "IND-25-0000.0009",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 35,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in batch",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "270eda9c-6b54-443e-8603-b79783e1339a",
+                    "name": "Program 0",
+                    "slug": "t4zn"
+                },
+                "last_registration_date": "2025-01-01",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -14,15 +14,16 @@ from django.test import RequestFactory
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    IndividualFactory,
     PartnerFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory
-from extras.test_utils.old_factories.household import IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.admin.program import ProgramAdmin, ProgramAdminForm, bulk_upload_individuals_photos_action
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.models import (
@@ -58,7 +59,7 @@ def user(db: Any) -> User:
 
 @pytest.fixture
 def business_area(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
@@ -303,7 +304,7 @@ def test_form_new_program_biometric_enabled_calls_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
-    programme_code = ProgramFactory.generate_programme_code(program)
+    programme_code = program.generate_programme_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",
@@ -327,7 +328,7 @@ def test_form_new_program_biometric_disabled_does_not_call_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    programme_code = ProgramFactory.generate_programme_code(program)
+    programme_code = program.generate_programme_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",

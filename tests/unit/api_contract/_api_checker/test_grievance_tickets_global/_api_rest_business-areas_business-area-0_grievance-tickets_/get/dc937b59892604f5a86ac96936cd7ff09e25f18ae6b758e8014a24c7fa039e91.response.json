@@ -1,0 +1,54 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "771"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/grievance-tickets/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "6ec138f0-666f-4d5a-9e9e-897b63529e88",
+                "admin": "",
+                "unicef_id": "GRV-0000002",
+                "status": 1,
+                "household_unicef_id": "",
+                "individual_unicef_id": "",
+                "individual_id": "",
+                "household_id": "",
+                "assigned_to": {
+                    "id": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "user_modified": null,
+                "category": 2,
+                "issue_type": 16,
+                "priority": 0,
+                "urgency": 0,
+                "created_at": "2025-01-01T00:00:00Z",
+                "created_by": {
+                    "id": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "total_days": 0,
+                "related_tickets": [],
+                "programs": [],
+                "target_id": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
