@@ -400,33 +400,6 @@ class DashboardDataCache(DashboardCacheBase):
         }
 
     @classmethod
-    def _process_household_in_country_payment(cls, payment: dict, household_map: dict, current_summary: dict) -> None:
-        household_id = payment.get("household_id_val")
-        if not (
-            household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]
-        ):
-            return
-
-        h_data = household_map.get(household_id, {})
-        current_summary["individuals"] += int(h_data.get("size", 0))
-
-        children_count = h_data.get("children_count")
-        is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
-
-        if not is_sw_program:
-            if children_count is None:
-                payment_year = payment.get("year")
-                country_name = h_data.get("country", "Unknown Country")
-                if payment_year:
-                    fertility_rate = get_fertility_rate(country_name, payment_year)
-                    current_summary["children_counts"] += fertility_rate
-            else:
-                current_summary["children_counts"] += children_count
-
-        current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
-        current_summary["_seen_households"].add(household_id)
-
-    @classmethod
     def _get_cached_data_for_other_years(
         cls, identifier: str, years_to_refresh: list[int]
     ) -> tuple[list[dict[str, Any]], bool]:
@@ -664,33 +637,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             "planned_sum_for_group": 0.0,
             "_seen_households": set(),
         }
-
-    @classmethod
-    def _process_household_in_payment(cls, payment: dict, household_map: dict, current_summary: dict) -> None:
-        household_id = payment.get("household_id_val")
-        if not (
-            household_id and isinstance(household_id, UUID) and household_id not in current_summary["_seen_households"]
-        ):
-            return
-
-        h_data = household_map.get(household_id, {})
-        current_summary["individuals"] += int(h_data.get("size", 0))
-
-        children_count = h_data.get("children_count")
-        is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
-
-        if not is_sw_program:
-            if children_count is None:
-                payment_year = payment.get("year")
-                country_name = h_data.get("country", "Unknown Country")
-                if payment_year:
-                    fertility_rate = get_fertility_rate(country_name, payment_year)
-                    current_summary["children_counts"] += fertility_rate
-            else:
-                current_summary["children_counts"] += children_count
-
-        current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
-        current_summary["_seen_households"].add(household_id)
 
     @classmethod
     def _build_summary_results(cls, summary_for_year: dict) -> list[dict[str, Any]]:
