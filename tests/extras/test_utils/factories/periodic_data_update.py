@@ -1,9 +1,11 @@
 """Periodic data update factories."""
 
+from typing import Any, List
+
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
+from hope.models import PDUOnlineEdit, PDUOnlineEditSentBackComment, PDUXlsxTemplate, PDUXlsxUpload
 
 from .account import UserFactory
 from .core import BusinessAreaFactory
@@ -54,3 +56,21 @@ class PDUOnlineEditFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory)
     number_of_records = 10
     edit_data = {}
+
+    @factory.post_generation
+    def authorized_users(self, create: bool, extracted: List[Any], **kwargs: Any):
+        if not create:
+            return
+
+        if extracted:
+            for user in extracted:
+                self.authorized_users.add(user)
+
+
+class PDUOnlineEditSentBackCommentFactory(DjangoModelFactory):
+    class Meta:
+        model = PDUOnlineEditSentBackComment
+
+    comment = factory.Sequence(lambda n: f"Sent Back Comment {n}")
+    created_by = factory.SubFactory(UserFactory)
+    pdu_online_edit = factory.SubFactory(PDUOnlineEditFactory)
