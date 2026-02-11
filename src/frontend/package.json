@@ -100,7 +100,7 @@
     "@typescript-eslint/parser": "8.55.0",
     "braces": "3.0.3",
     "esbuild": "0.27.3",
-    "eslint": "10.0.0",
+    "eslint": "^9.39.2",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
