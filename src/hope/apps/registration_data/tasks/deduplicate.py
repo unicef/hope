@@ -6,7 +6,7 @@ from typing import Any, Iterable
 
 from constance import config
 from django.db import transaction
-from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
+from django.db.models import Case, CharField, F, Prefetch, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
@@ -34,7 +34,9 @@ from hope.models import (
     Document,
     Household,
     Individual,
+    PendingDocument,
     PendingIndividual,
+    PendingIndividualIdentity,
     Program,
     RegistrationDataImport,
     log_create,
@@ -211,7 +213,21 @@ class DeduplicateTask:
         ]
 
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
-        pending_individuals = PendingIndividual.objects.filter(registration_data_import=registration_data_import)
+        pending_individuals = (
+            PendingIndividual.objects.filter(registration_data_import=registration_data_import)
+            .select_related(
+                "business_area",
+                "program",
+                "registration_data_import",
+                "household",
+                "household__admin1",
+                "household__admin2",
+            )
+            .prefetch_related(
+                Prefetch("documents", queryset=PendingDocument.objects.all()),
+                Prefetch("identities", queryset=PendingIndividualIdentity.objects.all()),
+            )
+        )
 
         doc = get_individual_doc(self.business_area.slug)
         populate_index(pending_individuals, doc)

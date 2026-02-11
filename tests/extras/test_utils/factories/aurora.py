@@ -1,9 +1,10 @@
 """Aurora-related factories."""
 
+from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.contrib.aurora.models import Organization, Project, Registration
+from hope.contrib.aurora.models import Organization, Project, Record, Registration
 
 
 class OrganizationFactory(DjangoModelFactory):
@@ -35,3 +36,14 @@ class RegistrationFactory(DjangoModelFactory):
     slug = factory.Sequence(lambda n: f"registration-{n}")
     project = factory.SubFactory(ProjectFactory)
     rdi_parser = None
+
+
+class RecordFactory(DjangoModelFactory):
+    class Meta:
+        model = Record
+
+    registration = factory.Sequence(lambda n: n + 1)
+    timestamp = factory.LazyFunction(timezone.now)
+    source_id = factory.Sequence(lambda n: n + 1)
+    status = Record.STATUS_TO_IMPORT
+    files = b"file"
