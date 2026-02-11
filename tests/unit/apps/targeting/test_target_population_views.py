@@ -298,11 +298,14 @@ def test_list_target_populations_caching(
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
+        etag_call_after_update = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
         assert len(ctx.captured_queries) == 12
-        assert etag != response.headers["etag"]
+        assert etag != etag_call_after_update
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
+        etag_call_after_update_second_call = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
         assert len(ctx.captured_queries) == 7
+        assert etag_call_after_update == etag_call_after_update_second_call
