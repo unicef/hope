@@ -133,6 +133,7 @@ class ProgramAdminForm(forms.ModelForm):
             "administrative_areas_of_implementation",
             "biometric_deduplication_enabled",
             "collision_detector",
+            "identification_key_individual_label",
             "is_visible",
             "household_count",
             "individual_count",
