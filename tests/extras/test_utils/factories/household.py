@@ -12,10 +12,17 @@ from hope.models import (
     DocumentType,
     EntitlementCard,
     Household,
+    HouseholdCollection,
     Individual,
+    IndividualCollection,
+    IndividualIdentity,
     IndividualRoleInHousehold,
     MergeStatusModel,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
     RegistrationDataImport,
+    XlsxUpdateFile,
 )
 
 from .core import BusinessAreaFactory
@@ -39,6 +46,19 @@ class IndividualFactory(DjangoModelFactory):
         RegistrationDataImportFactory,
         business_area=factory.SelfAttribute("..business_area"),
         program=factory.SelfAttribute("..program"),
+    )
+
+
+class PendingIndividualFactory(IndividualFactory):
+    class Meta:
+        model = PendingIndividual
+
+    rdi_merge_status = MergeStatusModel.PENDING
+    registration_data_import = factory.SubFactory(
+        RegistrationDataImportFactory,
+        business_area=factory.SelfAttribute("..business_area"),
+        program=factory.SelfAttribute("..program"),
+        status=RegistrationDataImport.IN_REVIEW,
     )
 
 
@@ -105,6 +125,23 @@ class HouseholdFactory(DjangoModelFactory):
         )
 
 
+class PendingHouseholdFactory(HouseholdFactory):
+    class Meta:
+        model = PendingHousehold
+
+    rdi_merge_status = MergeStatusModel.PENDING
+
+
+class HouseholdCollectionFactory(DjangoModelFactory):
+    class Meta:
+        model = HouseholdCollection
+
+
+class IndividualCollectionFactory(DjangoModelFactory):
+    class Meta:
+        model = IndividualCollection
+
+
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = IndividualRoleInHousehold
@@ -118,6 +155,7 @@ class IndividualRoleInHouseholdFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class EntitlementCardFactory(DjangoModelFactory):
@@ -148,3 +186,31 @@ class DocumentFactory(DjangoModelFactory):
     program = factory.SelfAttribute("individual.program")
     document_number = factory.Sequence(lambda n: f"DOC-{n}")
     type = factory.SubFactory(DocumentTypeFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
+
+
+class PendingDocumentFactory(DocumentFactory):
+    class Meta:
+        model = PendingDocument
+
+    individual = factory.SubFactory(PendingIndividualFactory)
+    rdi_merge_status = MergeStatusModel.PENDING
+
+
+class IndividualIdentityFactory(DjangoModelFactory):
+    class Meta:
+        model = IndividualIdentity
+
+    individual = factory.SubFactory(IndividualFactory)
+    number = factory.Sequence(lambda n: f"ID-{n}")
+    country = factory.SubFactory("extras.test_utils.factories.geo.CountryFactory")
+    rdi_merge_status = MergeStatusModel.MERGED
+
+
+class XlsxUpdateFileFactory(DjangoModelFactory):
+    class Meta:
+        model = XlsxUpdateFile
+
+    file = factory.django.FileField(filename="update.xlsx")
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    xlsx_match_columns = factory.LazyFunction(list)

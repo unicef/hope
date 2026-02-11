@@ -280,8 +280,8 @@ class DeduplicateTask:
             "business_area",
             None,
             registration_data_import.program_id,
-            old_rdi,
-            registration_data_import,
+            old_object=old_rdi,
+            new_object=registration_data_import,
         )
 
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:

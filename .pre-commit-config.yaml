@@ -3,9 +3,9 @@ repos:
         rev: v5.0.0
         hooks:
             -   id: end-of-file-fixer
-                exclude: ^(src/frontend/|src/hope/apps/web/static/web/)
+                exclude: ^(src/frontend/|src/hope/apps/web/static/web/|tests/unit/api_contract/_api_checker/)
             -   id: trailing-whitespace
-                exclude: ^(src/frontend/|src/hope/apps/web/static/web/)
+                exclude: ^(src/frontend/|src/hope/apps/web/static/web/|tests/unit/api_contract/_api_checker/)
     -   repo: https://github.com/python-jsonschema/check-jsonschema
         rev: 0.33.2
         hooks:

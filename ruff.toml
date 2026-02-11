@@ -1,6 +1,6 @@
 target-version = "py313"
 line-length = 120
-exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
+exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py", "tests/unit/api_contract/_api_checker"]
 
 [lint]
 select = [

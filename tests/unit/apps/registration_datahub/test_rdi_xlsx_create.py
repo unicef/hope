@@ -2,8 +2,10 @@ import datetime
 from datetime import date
 from io import BytesIO
 from pathlib import Path
+import re
 from typing import Any
 from unittest import mock
+from unittest.mock import patch
 
 from django.conf import settings
 from django.core.files import File
@@ -11,6 +13,7 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
+import openpyxl
 from PIL import Image
 import pytest
 
@@ -629,3 +632,48 @@ class TestRdiXlsxCreateTask(TestCase):
             "card_expiry_date": "2016-06-27T00:00:00",
             "name_of_cardholder": "Name2",
         }
+
+    def test_create_pending_object_factory(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        obj_hh = task._create_pending_object_factory("households", self.registration_data_import)
+        assert obj_hh.func is PendingHousehold
+
+        obj_ind = task._create_pending_object_factory("individuals", self.registration_data_import)
+        assert obj_ind.func is PendingIndividual
+
+        with pytest.raises(ValueError, match="Unhandled sheet label"):
+            task._create_pending_object_factory("Invalid", self.registration_data_import)
+
+    def test_exception_with_cell_processing(self) -> None:
+        task = self.RdiXlsxCreateTask()
+
+        class BrokenHeaderCell:
+            def __repr__(self):
+                return "<BrokenHeaderCell>"
+
+            @property
+            def value(self):
+                raise ValueError("boomXD")
+
+        wb = openpyxl.load_workbook(self.import_data.file, data_only=True)
+        sheet = wb["Households"]
+
+        real_first_row = list(sheet[1])
+        real_first_row[0] = BrokenHeaderCell()  # break first header
+
+        original_getitem = sheet.__getitem__
+
+        def fake_getitem(idx):
+            if idx == 1:
+                return tuple(real_first_row)
+            return original_getitem(idx)
+
+        with patch.object(sheet, "__getitem__", side_effect=fake_getitem):
+            with pytest.raises(
+                Exception,
+                match=re.escape(
+                    "Error processing cell <Cell 'Households'.A1> with `<Cell 'Households'.A3>`: "
+                    "TypeError('NoneType' object is not iterable)"
+                ),
+            ):
+                task._create_objects(sheet, self.registration_data_import)

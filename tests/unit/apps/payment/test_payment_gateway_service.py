@@ -1263,9 +1263,9 @@ def test_add_missing_records_to_payment_instructions(
     change_payment_instruction_status_mock: Any,
     payment_gateway_setup: dict,
 ) -> None:
-    payments = payment_gateway_setup["payments"]
     payment_plan = payment_gateway_setup["payment_plan"]
-    split_2 = payment_gateway_setup["splits"][1]
+    # Fetch payments in the same order as eligible_payments.all() to match production iteration order
+    payments = list(payment_plan.eligible_payments.all())
 
     get_record_mock.side_effect = [
         PaymentRecordData(
@@ -1304,8 +1304,9 @@ def test_add_missing_records_to_payment_instructions(
             pg_service.api.add_records_to_payment_instruction.call_args[0][0],
             pg_service.api.add_records_to_payment_instruction.call_args[0][1],
         )
-        assert called_payments == list(Payment.objects.filter(pk=payments[1].pk))
-        assert called_split == split_2.pk
+        missing_payment = payments[1]  # second in DB order — got None from side_effect
+        assert called_payments == list(Payment.objects.filter(pk=missing_payment.pk))
+        assert called_split == missing_payment.parent_split_id
 
 
 def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: dict) -> None:

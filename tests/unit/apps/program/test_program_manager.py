@@ -1,11 +1,13 @@
-"""Tests for Program manager get_by_unicef_id method."""
+"""Tests for program manager functionality."""
 
 from typing import Any
 
 import pytest
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    ProgramFactory,
+)
 from hope.models import BusinessArea, Program
 
 pytestmark = pytest.mark.django_db
@@ -13,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
-    return create_afghanistan()
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 def test_get_by_unicef_id_returns_program(afghanistan: BusinessArea) -> None:

@@ -53,6 +53,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
                     "individual_questions/identification/bank_name_i_c": "Privat",
                     "individual_questions/identification/account_holder_name_i_c": "Name 123",
+                    "individual_questions/more_information/other_id_type_i_c": "test_type",
+                    "individual_questions/more_information/other_id_no_i_c": "number_123",
+                    "individual_questions/more_information/other_id_issuer_i_c": "AFG",
+                    "individual_questions/more_information/scope_id_no_i_c": "scope_123_number",
+                    "individual_questions/more_information/scope_id_issuer_i_c": "AFG",
                 }
             ],
             "wash_questions/score_bed": "5",
@@ -749,6 +754,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.VALID_JSON, business_area, True)
         assert result == []
 
+        business_area.custom_fields = {"hope": {"ignore_amended_kobo_submissions": True}}
+        business_area.save()
         result = validator.validate_everything(self.VALID_JSON, business_area, False)
         assert result == []
 
@@ -792,3 +799,47 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
         ]
         assert result == expected
+
+    def test_check_error_list_validate_everything(self) -> None:
+        validator = KoboProjectImportDataInstanceValidator(self.program)
+
+        alt_collector_counter = 2
+        head_of_hh_counter = 2
+        primary_collector_counter = 2
+
+        result = validator._validate_household_roles(
+            head_of_hh_counter, primary_collector_counter, alt_collector_counter
+        )
+        expected_result = [
+            {
+                "header": "relationship_i_c",
+                "message": "Only one person can be a head of household",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a alternate collector",
+            },
+        ]
+        assert expected_result == result
+
+        alt_collector_counter = 0
+        head_of_hh_counter = 0
+        primary_collector_counter = 0
+        result = validator._validate_household_roles(
+            head_of_hh_counter, primary_collector_counter, alt_collector_counter
+        )
+        expected_result = [
+            {
+                "header": "relationship_i_c",
+                "message": "Household has to have a head of household",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Household must have a primary collector",
+            },
+        ]
+        assert expected_result == result
