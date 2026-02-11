@@ -84,14 +84,7 @@ def households_with_individuals(business_area):
         sex="MALE",
         marital_status="MARRIED",
         birth_date=datetime.date.today() - relativedelta(years=20, days=5),
-        observed_disability=[
-            "SEEING",
-            "HEARING",
-            "WALKING",
-            "MEMORY",
-            "SELF_CARE",
-            "COMMUNICATING",
-        ],
+        observed_disability=["HEARING"],
     )
     hh1 = HouseholdFactory(business_area=business_area, head_of_household=ind_1, size=1)
     ind_1.household = hh1
@@ -122,11 +115,11 @@ def households_with_individuals(business_area):
 def apply_individual_rules(payment_plan):
     def _apply(filters: list[dict]):
         rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan, household_ids="", individual_ids="")
-        block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
-        for f in filters:
+        ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
+        for filter_ in filters:
             TargetingIndividualBlockRuleFilter.objects.create(
-                individuals_filters_block=block,
-                **f,
+                individuals_filters_block=ind_block,
+                **filter_,
             )
         return payment_plan
 
@@ -209,18 +202,18 @@ def test_marital_status(households_with_individuals, apply_individual_rules):
     assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
 
-# def test_observed_disability(households_with_individuals, apply_individual_rules):
-#     plan = apply_individual_rules(
-#         [
-#             {
-#                 "comparison_method": "CONTAINS",
-#                 "arguments": ["SEEING"],
-#                 "field_name": "observed_disability",
-#                 "flex_field_classification": "NOT_FLEX_FIELD",
-#             }
-#         ]
-#     )
-#     assert Household.objects.filter(plan.get_query()).distinct().count() == 1
+def test_observed_disability(households_with_individuals, apply_individual_rules):
+    plan = apply_individual_rules(
+        [
+            {
+                "comparison_method": "CONTAINS",
+                "arguments": ["HEARING"],
+                "field_name": "observed_disability",
+                "flex_field_classification": "NOT_FLEX_FIELD",
+            }
+        ]
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
 
 @pytest.mark.parametrize(
