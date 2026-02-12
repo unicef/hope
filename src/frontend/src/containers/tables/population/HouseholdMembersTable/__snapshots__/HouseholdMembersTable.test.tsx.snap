@@ -3,17 +3,17 @@
 exports[`HouseholdMembersTable > should handle empty household members list 1`] = `
 <div>
   <div
-    class="sc-eDWCs hkpEEg"
+    class="sc-fbJfz guQftz"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bqWxrD jWKauK css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-brKeYM efUpcd css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root sc-fEXmlO css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-fGFwA-d css-70zvr5-MuiTableContainer-root"
       >
         <div
-          class="sc-bjfHbH lerEIb MuiBox-root css-0"
+          class="sc-blLsxE kCIRhk MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -26,11 +26,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
             </h6>
           </div>
           <div
-            class="sc-bjfHbH lerEIb MuiBox-root css-1ruxp1v"
+            class="sc-blLsxE kCIRhk MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-ksBlki sc-idXgbs kzavYT ihHfig css-14k3lwa-MuiTable-root"
+          class="MuiTable-root sc-ktEKTR sc-ieZDjf fxDSkH jijVLW css-14k3lwa-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -43,7 +43,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -54,7 +54,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual
@@ -65,7 +65,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Status
@@ -76,7 +76,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -87,7 +87,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -98,7 +98,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Gender
@@ -110,11 +110,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -124,11 +124,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -138,11 +138,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -152,11 +152,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -166,11 +166,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -190,17 +190,17 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
 exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1`] = `
 <div>
   <div
-    class="sc-eDWCs hkpEEg"
+    class="sc-fbJfz guQftz"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bqWxrD jWKauK css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-brKeYM efUpcd css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root sc-fEXmlO css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-fGFwA-d css-70zvr5-MuiTableContainer-root"
       >
         <div
-          class="sc-bjfHbH lerEIb MuiBox-root css-0"
+          class="sc-blLsxE kCIRhk MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -213,11 +213,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
             </h6>
           </div>
           <div
-            class="sc-bjfHbH lerEIb MuiBox-root css-1ruxp1v"
+            class="sc-blLsxE kCIRhk MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-ksBlki sc-idXgbs kzavYT ihHfig css-14k3lwa-MuiTable-root"
+          class="MuiTable-root sc-ktEKTR sc-ieZDjf fxDSkH jijVLW css-14k3lwa-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -230,7 +230,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -241,7 +241,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual
@@ -252,7 +252,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Status
@@ -263,7 +263,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -274,7 +274,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -285,7 +285,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Gender
@@ -297,11 +297,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -311,11 +311,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -325,11 +325,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -339,11 +339,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -353,11 +353,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -377,17 +377,17 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
 exports[`HouseholdMembersTable > should render multiple household members with different relationships 1`] = `
 <div>
   <div
-    class="sc-eDWCs hkpEEg"
+    class="sc-fbJfz guQftz"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-bqWxrD jWKauK css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-brKeYM efUpcd css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root sc-fEXmlO css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-fGFwA-d css-70zvr5-MuiTableContainer-root"
       >
         <div
-          class="sc-bjfHbH lerEIb MuiBox-root css-0"
+          class="sc-blLsxE kCIRhk MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -400,11 +400,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
             </h6>
           </div>
           <div
-            class="sc-bjfHbH lerEIb MuiBox-root css-1ruxp1v"
+            class="sc-blLsxE kCIRhk MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-ksBlki sc-idXgbs kzavYT ihHfig css-14k3lwa-MuiTable-root"
+          class="MuiTable-root sc-ktEKTR sc-ieZDjf fxDSkH jijVLW css-14k3lwa-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -417,7 +417,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -428,7 +428,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Individual
@@ -439,7 +439,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Status
@@ -450,7 +450,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -461,7 +461,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -472,7 +472,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
                 scope="col"
               >
                 <span
-                  class="sc-csuSiJ hRMcvR"
+                  class="sc-csCMJq dHXptK"
                   data-cy="table-label"
                 >
                   Gender
@@ -484,11 +484,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -498,11 +498,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -512,11 +512,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -526,11 +526,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -540,11 +540,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-hBxehJ ivlanp css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root sc-hAtEya cVMMRn css-1o8lslm-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fnGiBs hfPAoh css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-fmSAUj krObPD css-1dc80h3-MuiTableCell-root"
                 colspan="6"
               >
                 <span
