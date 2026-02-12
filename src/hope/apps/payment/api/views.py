@@ -91,6 +91,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -806,7 +807,9 @@ class PaymentPlanViewSet(
             serializer.validated_data.get("exclusion_reason", ""),
         )
 
-        payment_plan.background_action_status_excluding_beneficiaries()
+        flow = PaymentPlanFlow(payment_plan)
+
+        flow.background_action_status_excluding_beneficiaries()
         payment_plan.exclude_household_error = ""
         payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
@@ -923,7 +926,9 @@ class PaymentPlanViewSet(
                 old_payment_plan = copy_model_object(payment_plan)
                 if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
                     raise ValidationError("Rule Engine run in progress")
-                payment_plan.background_action_status_steficon_run()
+                flow = PaymentPlanFlow(payment_plan)
+
+                flow.background_action_status_steficon_run()
                 payment_plan.save()
                 transaction.on_commit(
                     lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
@@ -1005,7 +1010,8 @@ class PaymentPlanViewSet(
             old_payment_plan = copy_model_object(payment_plan)
             if old_payment_plan.imported_file:
                 old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
-            payment_plan.background_action_status_xlsx_importing_entitlements()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
