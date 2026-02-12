@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.core.files import File
+from django.core.files.storage import default_storage
 from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
@@ -64,6 +65,7 @@ class IndividualsBulkStaging:
     doc_country_codes: set[str] = field(default_factory=set)
     doc_type_keys: set[str] = field(default_factory=set)
     saved_file_fields: list = field(default_factory=list)
+    saved_image_paths: list[str] = field(default_factory=list)
 
 
 class DocumentSerializerLax(serializers.ModelSerializer):
@@ -161,6 +163,13 @@ class HandleFlexFieldsMixin:
                 FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
             }
 
+    def _ensure_image_flex_fields_cache(self) -> None:
+        if not hasattr(self, "image_flex_fields_cache"):
+            self.image_flex_fields_cache = {
+                FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL: None,
+                FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD: None,
+            }
+
     def get_registered_flex_fields(self, associated_with: int) -> set[str]:
         self._ensure_flex_fields_cache()
         if self.registered_flex_fields_cache[associated_with] is None:
@@ -172,6 +181,19 @@ class HandleFlexFieldsMixin:
                 name.removesuffix(self.suffix_mapping[associated_with]) for name in flex_fields
             }
         return self.registered_flex_fields_cache[associated_with]
+
+    def get_image_flex_fields(self, associated_with: int) -> set[str]:
+        self._ensure_image_flex_fields_cache()
+        if self.image_flex_fields_cache[associated_with] is None:
+            flex_fields = FlexibleAttribute.objects.filter(
+                associated_with=associated_with,
+                type=FlexibleAttribute.IMAGE,
+                is_removed=False,
+            ).values_list("name", flat=True)
+            self.image_flex_fields_cache[associated_with] = {
+                name.removesuffix(self.suffix_mapping[associated_with]) for name in flex_fields
+            }
+        return self.image_flex_fields_cache[associated_with]
 
     def get_matching_flex_fields(self, flex_field_candidates: set, associated_with: int) -> set[str]:
         registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
@@ -205,6 +227,33 @@ class HandleFlexFieldsMixin:
             raw_data=raw_data,
             reserved_fields=reserved_fields,
         )
+
+    def process_image_flex_fields(
+        self, flex_fields: dict | None, associated_with: int, file_prefix: str = ""
+    ) -> list[str]:
+        """Process IMAGE type flex fields: convert base64 to storage path.
+
+        Returns list of saved file paths for cleanup on error.
+        """
+        if not flex_fields:
+            return []
+
+        image_field_names = self.get_image_flex_fields(associated_with)
+        saved_paths = []
+
+        for field_name in image_field_names:
+            if field_name in flex_fields and flex_fields[field_name]:
+                value = flex_fields[field_name]
+                if isinstance(value, str):
+                    photo_file = self.get_photo(value, file_prefix)
+                    if photo_file:
+                        saved_path = default_storage.save(photo_file.name, photo_file)
+                        flex_fields[field_name] = saved_path
+                        saved_paths.append(saved_path)
+                    else:
+                        flex_fields[field_name] = None
+
+        return saved_paths
 
 
 class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
@@ -279,6 +328,12 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         validated_data["flex_fields"] = populate_pdu_with_null_values(
             self.selected_rdi.program, validated_data.get("flex_fields")
         )
+        saved_image_paths = self.process_image_flex_fields(
+            validated_data.get("flex_fields"),
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            self.selected_rdi.program.programme_code,
+        )
+        self.staging.saved_image_paths.extend(saved_image_paths)
 
         ind = PendingIndividual(
             household=None,
@@ -425,6 +480,9 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             for field_file in self.staging.saved_file_fields:
                 with contextlib.suppress(Exception):
                     field_file.delete(save=False)
+            for image_path in self.staging.saved_image_paths:
+                with contextlib.suppress(Exception):
+                    default_storage.delete(image_path)
             raise e
 
         return Response(response_payload, status=status.HTTP_201_CREATED)
@@ -512,6 +570,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
         valid_payloads = []
         country_codes = set()
         saved_file_fields = []
+        saved_image_paths = []
         try:
             for household_data in request.data:
                 total_households += 1
@@ -533,6 +592,13 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
 
                     data["flex_fields"] = populate_pdu_with_null_values(
                         self.selected_rdi.program, data.get("flex_fields")
+                    )
+                    saved_image_paths.extend(
+                        self.process_image_flex_fields(
+                            data.get("flex_fields"),
+                            FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+                            self.selected_rdi.program.programme_code,
+                        )
                     )
 
                     household_instance = PendingHousehold(
@@ -596,6 +662,9 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
             for file_field in saved_file_fields:
                 with contextlib.suppress(Exception):
                     file_field.delete(save=False)
+            for image_path in saved_image_paths:
+                with contextlib.suppress(Exception):
+                    default_storage.delete(image_path)
             raise e
 
         return Response(

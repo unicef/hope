@@ -1,6 +1,12 @@
+import base64
+import contextlib
+from pathlib import Path
+
+from django.core.files.storage import default_storage
 from django.test import TestCase
 
 from hope.api.endpoints.rdi.lax import HandleFlexFieldsMixin
+from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.models import FlexibleAttribute
 
 
@@ -135,3 +141,126 @@ class TestHandleFlexFieldsMixin(TestCase):
         self.mixin.handle_individual_flex_fields(raw_data)
 
         assert raw_data["flex_fields"] == {}
+
+
+class ImageFlexFieldMixin(HandleFlexFieldsMixin, PhotoMixin):
+    pass
+
+
+class TestImageFlexFieldsProcessing(TestCase):
+    databases = {"default"}
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        image = Path(__file__).parent / "logo.png"
+        cls.base64_encoded_data = base64.b64encode(image.read_bytes()).decode("utf-8")
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.mixin = ImageFlexFieldMixin()
+        self.saved_paths: list[str] = []
+
+        self.image_flex = FlexibleAttribute.objects.create(
+            name="custom_image_i_f",
+            label={"English(EN)": "Custom Image"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            is_removed=False,
+        )
+
+        self.string_flex = FlexibleAttribute.objects.create(
+            name="custom_string_i_f",
+            label={"English(EN)": "Custom String"},
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            is_removed=False,
+        )
+
+        self.household_image_flex = FlexibleAttribute.objects.create(
+            name="household_image_h_f",
+            label={"English(EN)": "Household Image"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            is_removed=False,
+        )
+
+    def tearDown(self) -> None:
+        for path in self.saved_paths:
+            with contextlib.suppress(Exception):
+                default_storage.delete(path)
+        super().tearDown()
+
+    def test_get_image_flex_fields_individual(self) -> None:
+        image_fields = self.mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+
+        assert "custom_image" in image_fields
+        assert "custom_string" not in image_fields
+
+    def test_get_image_flex_fields_household(self) -> None:
+        image_fields = self.mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+
+        assert "household_image" in image_fields
+        assert "custom_image" not in image_fields
+
+    def test_process_image_flex_fields_saves_file_and_updates_value(self) -> None:
+        flex_fields = {
+            "custom_image": self.base64_encoded_data,
+            "custom_string": "some text",
+        }
+
+        saved_paths = self.mixin.process_image_flex_fields(
+            flex_fields,
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            "test_prefix",
+        )
+        self.saved_paths.extend(saved_paths)
+
+        assert len(saved_paths) == 1
+        assert flex_fields["custom_image"] == saved_paths[0]
+        assert not flex_fields["custom_image"].startswith(self.base64_encoded_data[:20])
+        assert default_storage.exists(saved_paths[0])
+        assert flex_fields["custom_string"] == "some text"
+
+    def test_process_image_flex_fields_empty_value_skipped(self) -> None:
+        flex_fields = {
+            "custom_image": "",
+            "custom_string": "some text",
+        }
+
+        saved_paths = self.mixin.process_image_flex_fields(
+            flex_fields,
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            "test_prefix",
+        )
+
+        assert len(saved_paths) == 0
+        assert flex_fields["custom_image"] == ""
+
+    def test_process_image_flex_fields_none_flex_fields(self) -> None:
+        saved_paths = self.mixin.process_image_flex_fields(
+            None,
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            "test_prefix",
+        )
+
+        assert saved_paths == []
+
+    def test_cleanup_deletes_saved_files(self) -> None:
+        flex_fields = {
+            "custom_image": self.base64_encoded_data,
+        }
+
+        saved_paths = self.mixin.process_image_flex_fields(
+            flex_fields,
+            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            "test_prefix",
+        )
+
+        assert len(saved_paths) == 1
+        assert default_storage.exists(saved_paths[0])
+
+        for path in saved_paths:
+            default_storage.delete(path)
+
+        assert not default_storage.exists(saved_paths[0])

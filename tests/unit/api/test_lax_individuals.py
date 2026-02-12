@@ -5,6 +5,7 @@ import tempfile
 from typing import Any
 from unittest.mock import patch
 
+from django.core.files.storage import default_storage
 from django.test import testcases
 from django.test.utils import override_settings
 import pytest
@@ -19,7 +20,15 @@ from extras.test_utils.old_factories.registration_data import RegistrationDataIm
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NOT_DISABLED
-from hope.models import AccountType, PendingAccount, PendingDocument, PendingIndividual, Program, RegistrationDataImport
+from hope.models import (
+    AccountType,
+    FlexibleAttribute,
+    PendingAccount,
+    PendingDocument,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
@@ -403,6 +412,35 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+    def test_individual_with_image_flex_field(self) -> None:
+        FlexibleAttribute.objects.create(
+            name="individual_photo_i_f",
+            label={"English(EN)": "Individual Photo"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            is_removed=False,
+        )
+
+        individual_data = {
+            "individual_id": "IND_FLEX_IMG",
+            "full_name": "Flex Image Test",
+            "given_name": "Flex",
+            "family_name": "Test",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "individual_photo": self.base64_encoded_data,
+        }
+
+        response = self.client.post(self.url, [individual_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["accepted"] == 1
+
+        individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+        assert "individual_photo" in individual.flex_fields
+        assert not individual.flex_fields["individual_photo"].startswith(self.base64_encoded_data[:20])
+        assert default_storage.exists(individual.flex_fields["individual_photo"])
 
 
 class TestIndividualSerializer(testcases.TestCase):

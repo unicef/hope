@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 from unittest.mock import patch
 
+from django.core.files.storage import default_storage
 from django.test.utils import override_settings
 import pytest
 from rest_framework import status
@@ -13,7 +14,7 @@ from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, Co
 from extras.test_utils.old_factories.household import PendingIndividualFactory
 from extras.test_utils.old_factories.program import ProgramFactory
 from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
-from hope.models import PendingHousehold, Program, RegistrationDataImport
+from hope.models import FlexibleAttribute, PendingHousehold, Program, RegistrationDataImport
 from hope.models.utils import Grant
 from unit.api.base import HOPEApiTestCase
 
@@ -306,3 +307,34 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
                 for root, _, files in os.walk(media_root):
                     leftover_files.extend(os.path.join(root, f) for f in files)
                 assert leftover_files == []
+
+    def test_household_with_image_flex_field(self) -> None:
+        FlexibleAttribute.objects.create(
+            name="household_photo_h_f",
+            label={"English(EN)": "Household Photo"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            is_removed=False,
+        )
+
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF"],
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [self.head_of_household.unicef_id],
+            "household_photo": self.base64_encoded_data,
+        }
+
+        response = self.client.post(self.url, [household_data], format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["accepted"] == 1
+
+        household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+        assert "household_photo" in household.flex_fields
+        assert not household.flex_fields["household_photo"].startswith(self.base64_encoded_data[:20])
+        assert default_storage.exists(household.flex_fields["household_photo"])
