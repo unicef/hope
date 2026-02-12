@@ -338,3 +338,46 @@ class CreateLaxHouseholdsTests(HOPEApiTestCase):
         assert "household_photo" in household.flex_fields
         assert not household.flex_fields["household_photo"].startswith(self.base64_encoded_data[:20])
         assert default_storage.exists(household.flex_fields["household_photo"])
+
+    def test_image_flex_field_cleanup_on_failure(self) -> None:
+        FlexibleAttribute.objects.create(
+            name="household_photo_h_f",
+            label={"English(EN)": "Household Photo"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            is_removed=False,
+        )
+
+        household_data = {
+            "country": "AF",
+            "country_origin": "AF",
+            "size": 1,
+            "consent_sharing": ["UNICEF"],
+            "village": "Test Village",
+            "head_of_household": self.head_of_household.unicef_id,
+            "primary_collector": self.primary_collector.unicef_id,
+            "members": [self.head_of_household.unicef_id],
+            "household_photo": self.base64_encoded_data,
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args, **kwargs):
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for image flex field cleanup test")
+
+                with patch(
+                    "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
+                    side_effect=fail_after_files_exist,
+                ):
+                    with pytest.raises(RuntimeError):
+                        self.client.post(self.url, [household_data], format="json")
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []

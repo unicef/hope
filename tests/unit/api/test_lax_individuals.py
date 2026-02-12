@@ -442,6 +442,47 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert not individual.flex_fields["individual_photo"].startswith(self.base64_encoded_data[:20])
         assert default_storage.exists(individual.flex_fields["individual_photo"])
 
+    def test_image_flex_field_cleanup_on_failure(self) -> None:
+        FlexibleAttribute.objects.create(
+            name="individual_photo_i_f",
+            label={"English(EN)": "Individual Photo"},
+            type=FlexibleAttribute.IMAGE,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            is_removed=False,
+        )
+
+        individual_data = {
+            "individual_id": "IND_FLEX_CLEANUP",
+            "full_name": "Flex Cleanup Test",
+            "given_name": "Flex",
+            "family_name": "Cleanup",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "individual_photo": self.base64_encoded_data,
+        }
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+
+                def fail_after_files_exist(*args, **kwargs):
+                    pre_cleanup_files = []
+                    for root, _, files in os.walk(media_root):
+                        pre_cleanup_files.extend(os.path.join(root, f) for f in files)
+                    assert len(pre_cleanup_files) > 0
+                    raise RuntimeError("forced failure for image flex field cleanup test")
+
+                with patch(
+                    "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
+                    side_effect=fail_after_files_exist,
+                ):
+                    with pytest.raises(RuntimeError):
+                        self.client.post(self.url, [individual_data], format="json")
+
+                leftover_files = []
+                for root, _, files in os.walk(media_root):
+                    leftover_files.extend(os.path.join(root, f) for f in files)
+                assert leftover_files == []
+
 
 class TestIndividualSerializer(testcases.TestCase):
     @classmethod

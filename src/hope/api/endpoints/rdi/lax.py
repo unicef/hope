@@ -250,8 +250,6 @@ class HandleFlexFieldsMixin:
                         saved_path = default_storage.save(photo_file.name, photo_file)
                         flex_fields[field_name] = saved_path
                         saved_paths.append(saved_path)
-                    else:
-                        flex_fields[field_name] = None
 
         return saved_paths
 
