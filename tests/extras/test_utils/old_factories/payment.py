@@ -33,6 +33,7 @@ from extras.test_utils.old_factories.targeting import (
     TargetingCriteriaRuleFilterFactory,
 )
 from hope.apps.core.currencies import CURRENCY_CHOICES
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
 from hope.models import (
@@ -471,7 +472,8 @@ def generate_reconciled_payment_plan() -> None:
         delivery_mechanism=dm_cash,
     )[0]
     # update status
-    payment_plan.status_finished()
+    flow = PaymentPlanFlow(payment_plan)
+    flow.status_finished()
     payment_plan.save()
 
     create_payment_verification_plan_with_status(

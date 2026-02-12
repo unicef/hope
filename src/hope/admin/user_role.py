@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.combo import AllValuesComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
@@ -97,7 +96,6 @@ class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         ("business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
-        ("role__subsystem", AllValuesComboFilter),
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -118,7 +116,6 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         ("business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
-        ("role__subsystem", AllValuesComboFilter),
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

@@ -34,6 +34,7 @@ from extras.test_utils.old_factories.payment import (
 from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.old_factories.steficon import RuleCommitFactory, RuleFactory
 from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.models import (
     BeneficiaryGroup,
     DataCollectingType,
@@ -232,7 +233,8 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     payment_plan.update_population_count_fields()
     payment_plan.update_money_fields()
 
-    payment_plan.status_open()
+    flow = PaymentPlanFlow(payment_plan)
+    flow.status_open()
     payment_plan.save(update_fields=("status",))
 
     PaymentPlanFactory(

@@ -32,6 +32,7 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_PRIMARY
 from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
@@ -124,7 +125,8 @@ def payment_plan(program_cycle, business_area, fsp, delivery_mechanisms):
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanisms["cash"],
     )
-    payment_plan.status_lock()
+    flow = PaymentPlanFlow(payment_plan)
+    flow.status_lock()
     payment_plan.save()
     return payment_plan
 

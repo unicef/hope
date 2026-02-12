@@ -39,7 +39,6 @@ def user() -> User:
 @pytest.fixture
 def role() -> Role:
     return RoleFactory(
-        subsystem="API",
         name="GenericImportRole",
         permissions=[Grant.API_GENERIC_IMPORT.name, Permissions.GENERIC_IMPORT_DATA.name],
     )
