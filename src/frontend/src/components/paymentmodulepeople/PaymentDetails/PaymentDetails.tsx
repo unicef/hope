@@ -18,6 +18,7 @@ import {
   safeStringify,
   verificationRecordsStatusToColor,
   formatFigure,
+  formatNormalCaseValue,
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -203,12 +204,15 @@ export function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Extras')}
-              value={payment.extras ? safeStringify(payment.extras) : '-'}
-            />
-          </Grid>
+          {payment.extras &&
+            Object.entries(payment.extras).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
