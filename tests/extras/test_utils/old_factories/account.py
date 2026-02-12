@@ -62,12 +62,11 @@ class UserFactory(DjangoModelFactory):
 
 
 class RoleFactory(DjangoModelFactory):
-    subsystem = "HOPE"
     name = factory.Sequence(lambda o: f"name{o}")
 
     class Meta:
         model = Role
-        django_get_or_create = ("name", "subsystem")
+        django_get_or_create = ("name",)
 
 
 class RoleAssignmentFactory(DjangoModelFactory):

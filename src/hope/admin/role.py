@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 class RoleResource(resources.ModelResource):
     class Meta:
         model = Role
-        fields = ("name", "subsystem", "permissions")
-        import_id_fields = ("name", "subsystem")
+        fields = ("name", "permissions")
+        import_id_fields = ("name",)
 
 
 class UnrelatedForeignKeysCollector(ForeignKeysCollector):
@@ -43,10 +43,10 @@ class UnrelatedForeignKeysProtocol(LoadDumpProtocol):
 
 @admin.register(Role)
 class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
-    list_display = ("name", "subsystem")
+    list_display = ("name", "is_visible_on_ui", "is_available_for_partner")
     search_fields = ("name",)
     form = RoleAdminForm
-    list_filter = (PermissionFilter, "subsystem")
+    list_filter = (PermissionFilter,)
     resource_class = RoleResource
     change_list_template = "admin/account/role/change_list.html"
     protocol_class = UnrelatedForeignKeysProtocol
@@ -62,7 +62,7 @@ class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted(str(x.value) for x in Permissions)
-        roles = Role.objects.order_by("name").filter(subsystem="HOPE")
+        roles = Role.objects.order_by("name")
         for perm in perms:
             granted_to_roles = []
             for role in roles:

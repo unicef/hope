@@ -29,7 +29,6 @@ pytestmark = pytest.mark.django_db
 def get_role_data(role: Role) -> dict:
     return {
         "name": role.name,
-        "subsystem": role.subsystem,
         "is_visible_on_ui": role.is_visible_on_ui,
         "is_available_for_partner": role.is_available_for_partner,
     }

@@ -160,11 +160,17 @@ export const handleApiResponse = async (apiCall) => {
     return response;
   } catch (error: any) {
     console.error('API call failed:', error.message || error);
-    throw new Error(`API call failed: ${error.message || 'Unknown error'}`);
+    const err = new Error(
+      `API call failed: ${error.message || 'Unknown error'}`,
+    );
+    (err as any).cause = error;
+    throw err;
   }
 };
 
 export const handleMutationError = (error: any, action: string): never => {
   const errorMessage = error?.message || 'An unknown error occurred';
-  throw new Error(`Failed to ${action}: ${errorMessage}`);
+  const err = new Error(`Failed to ${action}: ${errorMessage}`);
+  (err as any).cause = error;
+  throw err;
 };
