@@ -227,7 +227,7 @@ def superuser():
 
 @pytest.fixture
 def role():
-    return RoleFactory(name="Test Role", subsystem="HOPE")
+    return RoleFactory(name="Test Role")
 
 
 @pytest.fixture

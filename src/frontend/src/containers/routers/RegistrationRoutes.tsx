@@ -10,7 +10,7 @@ import { useProgramContext } from 'src/programContext';
 export const RegistrationRoutes = (): ReactElement => {
   const { isSocialDctType } = useProgramContext();
 
-  let children = [];
+  let children;
 
   if (isSocialDctType) {
     children = [
