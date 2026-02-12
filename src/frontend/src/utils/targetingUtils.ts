@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 
-// validationHelpers.ts
+const hasValue = (value): boolean =>
+  value !== null && value !== undefined && value !== '';
 
 export const filterNullOrNoSelections = (filter): boolean =>
   !filter.isNull &&
@@ -285,10 +286,10 @@ export function formatCriteriaFilters(filters) {
       case 'DECIMAL':
       case 'INTEGER':
       case 'DATE':
-        if (each.value.from && each.value.to) {
+        if (hasValue(each.value.from) && hasValue(each.value.to)) {
           comparisonMethod = 'RANGE';
           values = [each.value.from, each.value.to];
-        } else if (each.value.from && !each.value.to) {
+        } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
           comparisonMethod = 'GREATER_THAN';
           values = [each.value.from];
         } else {
@@ -320,10 +321,10 @@ export function formatCriteriaFilters(filters) {
           case 'DECIMAL':
           case 'INTEGER':
           case 'DATE':
-            if (each.value.from && each.value.to) {
+            if (hasValue(each.value.from) && hasValue(each.value.to)) {
               comparisonMethod = 'RANGE';
               values = [each.value.from, each.value.to];
-            } else if (each.value.from && !each.value.to) {
+            } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
               comparisonMethod = 'GREATER_THAN';
               values = [each.value.from];
             } else {
@@ -385,7 +386,7 @@ interface Result {
 }
 
 function mapFilterToVariable(filter: Filter): Result {
-  let preparedArguments = [];
+  let preparedArguments;
   if (filter?.associatedWith === 'Account') {
     preparedArguments = filter.isNull ? [null] : filter.arguments;
   } else {

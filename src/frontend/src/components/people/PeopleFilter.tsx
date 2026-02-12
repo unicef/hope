@@ -16,6 +16,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 
 interface PeopleFilterProps {
   filter;
@@ -134,6 +135,17 @@ export function PeopleFilter({
             </SelectFilter>
           </Grid>
         )}
+        <Grid size={{ xs: 3 }}>
+          <RdiAutocompleteRestFilter
+            filter={filter}
+            name="rdiId"
+            value={filter.rdiId}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
+          />
+        </Grid>
         {showAdminAreaFilter && (
           <>
             <Grid size={{ xs: 2 }}>

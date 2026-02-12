@@ -1,6 +1,7 @@
 from io import BytesIO
 import json
 from pathlib import Path
+import re
 import secrets
 from typing import Any, Dict
 from unittest import mock
@@ -132,7 +133,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         assert households.count() == 1
         assert individuals.count() == 2
-        assert documents.count() == 3
+        assert documents.count() == 4
 
         individual = individuals.get(full_name="Test Testowski")
 
@@ -597,3 +598,43 @@ class TestRdiKoboCreateTask(TestCase):
         assert hh.detail_id == "kobo_asset_id_string_OR_detail_id"
         assert hh.kobo_submission_time.isoformat() == "2022-02-22T12:22:22"
         assert hh.kobo_submission_uuid == "5b6f30ee-010b-4bd5-a510-e78f062af155"
+
+    def test_process_individual_try_except(self) -> None:
+        households_to_create = []
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (
+            {},
+            {},
+            {},
+        )
+        submission_meta_data = {"kobo_submission_uuid": "1b6f30ee-010b-4bd5-a510-e78f062af234"}
+        household = {"individual_questions": [{"birth_date_i_c": "true"}]}
+
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+
+        with pytest.raises(
+            Exception,
+            match=re.escape(
+                "Error processing Individual: field `birth_date_i_c` ParserError(Unknown string format: true)"
+            ),
+        ):
+            task.handle_household(
+                collectors_to_create,
+                head_of_households_mapping,
+                household,
+                households_to_create,
+                individuals_ids_hash_dict=individuals_ids_hash_dict,
+                submission_meta_data=submission_meta_data,
+                household_count=1,
+            )
+
+        household["individual_questions"] = [{"f_6_11_disability_h_c": "true"}]
+        with pytest.raises(Exception, match=re.escape("Error processing Household: field `f_6_11_disability_h_c`")):
+            task.handle_household(
+                collectors_to_create,
+                head_of_households_mapping,
+                household,
+                households_to_create,
+                individuals_ids_hash_dict=individuals_ids_hash_dict,
+                submission_meta_data=submission_meta_data,
+                household_count=1,
+            )

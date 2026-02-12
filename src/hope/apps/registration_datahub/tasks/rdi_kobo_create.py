@@ -64,7 +64,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> None:
         document_keys = DocumentType.objects.values_list("key", flat=True)
         self.DOCS_AND_IDENTITIES_FIELDS = [
-            f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
+            f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c", "type_i_c"]
         ]
         self.registration_data_import = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
@@ -282,7 +282,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
         )
 
-    def handle_household(  # noqa: PLR0912
+    def handle_household(
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,
@@ -310,46 +310,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     only_collector_flag = False
                     role = None
                     for i_field, i_value in individual.items():
-                        if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
-                            key = (
-                                i_field.replace("_photo_i_c", "")
-                                .replace("_no_i_c", "")
-                                .replace("_issuer_i_c", "")
-                                .replace("_i_c", "")
-                            )
-                            if i_field.endswith("_type_i_c"):
-                                value_key = "name"
-                            elif i_field.endswith("_photo_i_c"):
-                                value_key = "photo"
-                            elif i_field.endswith("_issuer_i_c"):
-                                value_key = "issuing_country"
-                            else:
-                                value_key = "number"
-                            current_individual_docs_and_identities[key][value_key] = i_value
-                            current_individual_docs_and_identities[key]["individual"] = individual_obj
-                        elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
-                            only_collector_flag = True
-                        elif i_field == "role_i_c":
-                            role = i_value.upper()
-                        elif i_field.endswith(("_h_c", "_h_f")):
-                            try:
-                                self._cast_and_assign(i_value, i_field, household_obj)
-                            except (Error, ValidationError, ValueError, TypeError) as e:
-                                logger.warning(e)
-                                self._handle_exception("Household", i_field, e)
-                        elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_account_fields(
-                                i_value,
-                                i_field,
-                                int(f"{household_count}{ind_count}"),
-                                individual_obj,
-                            )
-                        else:
-                            try:
-                                self._cast_and_assign(i_value, i_field, individual_obj)
-                            except (Error, ValidationError, ValueError, TypeError) as e:
-                                logger.warning(e)
-                                self._handle_exception("Individual", i_field, e)
+                        only_collector_flag, role = self._process_individual(
+                            current_individual_docs_and_identities,
+                            household_count,
+                            household_obj,
+                            i_field,
+                            i_value,
+                            ind_count=ind_count,
+                            individual_obj=individual_obj,
+                            only_collector_flag=only_collector_flag,
+                            role=role,
+                        )
                     individual_obj.last_registration_date = individual_obj.first_registration_date
                     individual_obj.registration_data_import = self.registration_data_import
                     individual_obj.program = self.registration_data_import.program
@@ -401,12 +372,65 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.business_area = self.business_area
         household_obj.set_admin_areas(save=False)
         households_to_create.append(household_obj)
+        self._set_registration_date_and_detail_id(current_individuals, household_obj, registration_date)
+        PendingIndividual.objects.bulk_create(individuals_to_create_list)
+        self._handle_documents_and_identities(documents_and_identities_to_create)
+
+    def _set_registration_date_and_detail_id(self, current_individuals, household_obj, registration_date):
         for ind in current_individuals:
             ind.first_registration_date = registration_date
             ind.last_registration_date = registration_date
             ind.detail_id = household_obj.detail_id
-        PendingIndividual.objects.bulk_create(individuals_to_create_list)
-        self._handle_documents_and_identities(documents_and_identities_to_create)
+
+    def _process_individual(
+        self, current_individual_docs_and_identities, household_count, household_obj, i_field, i_value, **kwargs
+    ):
+        ind_count = kwargs["ind_count"]
+        individual_obj = kwargs["individual_obj"]
+        only_collector_flag = kwargs["only_collector_flag"]
+        role = kwargs["role"]
+        if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
+            key = (
+                i_field.replace("_photo_i_c", "")
+                .replace("_no_i_c", "")
+                .replace("_issuer_i_c", "")
+                .replace("_type_i_c", "")
+                .replace("_i_c", "")
+            )
+            if i_field.endswith("_type_i_c"):
+                value_key = "name"
+            elif i_field.endswith("_photo_i_c"):
+                value_key = "photo"
+            elif i_field.endswith("_issuer_i_c"):
+                value_key = "issuing_country"
+            else:
+                value_key = "number"
+            current_individual_docs_and_identities[key][value_key] = i_value
+            current_individual_docs_and_identities[key]["individual"] = individual_obj
+        elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
+            only_collector_flag = True
+        elif i_field == "role_i_c":
+            role = i_value.upper()
+        elif i_field.endswith(("_h_c", "_h_f")):
+            try:
+                self._cast_and_assign(i_value, i_field, household_obj)
+            except (Error, ValidationError, ValueError, TypeError) as e:
+                logger.warning(e)
+                self._handle_exception("Household", i_field, e)
+        elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
+            self._handle_account_fields(
+                i_value,
+                i_field,
+                int(f"{household_count}{ind_count}"),
+                individual_obj,
+            )
+        else:
+            try:
+                self._cast_and_assign(i_value, i_field, individual_obj)
+            except (Error, ValidationError, ValueError, TypeError) as e:
+                logger.warning(e)
+                self._handle_exception("Individual", i_field, e)
+        return only_collector_flag, role
 
     def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:
         logger.warning(e)

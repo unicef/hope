@@ -67,7 +67,10 @@
                 "individual_questions/is_only_collector": "NO",
                 "individual_questions/account__mobile__service_provider_code_i_c": "ABC",
                 "individual_questions/account__mobile__delivery_phone_number_i_c": "+48880110456",
-                "individual_questions/account__mobile__provider_i_c": "SIGMA"
+                "individual_questions/account__mobile__provider_i_c": "SIGMA",
+                "individual_questions/total_expense_h_f": "999",
+                "individual_questions/other_id_photo_i_c": "no_photo",
+                "individual_questions/other_id_type_i_c": "other"
             }
         ],
         "wash_questions/score_bed": "5",

@@ -1,6 +1,6 @@
 target-version = "py313"
 line-length = 120
-exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py"]
+exclude = ["src/frontend", "src/hope/one_time_scripts", "manage.py", "tests/unit/api_contract/_api_checker"]
 
 [lint]
 select = [
@@ -64,7 +64,8 @@ ignore = [
     "SIM108", # Use ternary operator instead of...
     "PLR2004", # Magic value used in comparison
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
-
+    "PLR0912", # too many branches
+    "PLR0913",  # too many arguments
     "PLR0911",  # too many returns
     "PLR0915",  # too many statements
     "C901",  # too complex

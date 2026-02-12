@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -637,7 +638,8 @@ class PaymentGatewayService:
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
-                    payment_plan.status_finished()
+                    flow = PaymentPlanFlow(payment_plan)
+                    flow.status_finished()
                     payment_plan.save()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
@@ -658,7 +660,8 @@ class PaymentGatewayService:
             )
 
             if payment_plan.is_reconciled:
-                payment_plan.status_finished()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.status_finished()
                 payment_plan.save()
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
@@ -688,7 +691,8 @@ class PaymentGatewayService:
                 )
 
         if payment_plan.is_reconciled:
-            payment_plan.status_finished()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_finished()
             payment_plan.save()
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(

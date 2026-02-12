@@ -172,7 +172,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -454,7 +454,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -466,43 +466,24 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-
-            choice_type = self.all_fields[header]["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if isinstance(value, str):
-                    return value.strip() in choices
-                if value not in choices:
-                    str_value = str(value)
-                    return str_value in choices
-                return False
-
-            if choice_type == TYPE_SELECT_MANY:
-                if isinstance(value, str):
-                    if "," in value:
-                        selected_choices = value.split(",")
-                    elif ";" in value:
-                        selected_choices = value.split(";")
-                    else:
-                        selected_choices = value.split(" ")
-                else:
-                    selected_choices = [value]
-
-                for unstrip_choice in selected_choices:
-                    if isinstance(unstrip_choice, str):
-                        choice = unstrip_choice.strip()
-                        if choice in choices or choice.upper() in choices:
-                            return True
-                    else:
-                        choice = unstrip_choice
-                    if choice in choices:
-                        return True
-                return False
+            handlers: dict[str, Callable[[Any, set], bool]] = {
+                TYPE_SELECT_ONE: self._validate_select_one_choice,
+                TYPE_SELECT_MANY: self._validate_select_many_choice,
+            }
+            if handler := handlers.get(self.all_fields[header]["type"]):
+                return handler(value, choices)
 
             return False
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
+        return str(value).strip() in choices
+
+    def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
+        selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
+        return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
     def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
@@ -554,7 +535,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -1286,6 +1267,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()
+        self.errors = []
 
     def get_combined_fields(self) -> dict[str, dict]:
         core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT)
@@ -1318,45 +1300,58 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def standard_type_validator(self, value: str, field: str, field_type: str) -> str | None:
         try:
             value_type_name = type(value).__name__
-
-            if field_type == "INTEGER":
-                try:
-                    int(value)
-                    return None
-                except (ValueError, TypeError):
-                    return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
-            elif field_type == "STRING":
-                # everything from Kobo is string so cannot really validate it
-                # only check phone number
-                if field.startswith("phone_no"):
-                    try:
-                        phonenumbers.parse(value, None)
-                    except (phonenumbers.NumberParseException, TypeError):
-                        return f"Invalid phone number {value} for field {field}"
+            handler = self._get_standard_type_handler(field_type)
+            if handler is None:
                 return None
 
-            elif field_type == "BOOL":
-                # Important! if value == 0 or 1 it's also evaluated to True
-                # checking for int values even tho Kobo returns everything as str
-                # to no not break import if they start returning integers
-                if value in (
-                    "True",
-                    "False",
-                    True,
-                    False,
-                    "0",
-                    "1",
-                    "TRUE",
-                    "FALSE",
-                    "true",
-                    "false",
-                ):
-                    return None
-                return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
+            return handler(value, field, value_type_name)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
         return None
+
+    def _get_standard_type_handler(self, field_type: str) -> Callable[[str, str, str], str | None] | None:
+        handlers: dict[str, Callable[[str, str, str], str | None]] = {
+            "INTEGER": self._validate_integer_type,
+            "STRING": self._validate_string_type,
+            "BOOL": self._validate_bool_type,
+        }
+        return handlers.get(field_type)
+
+    def _validate_integer_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        try:
+            int(value)
+            return None
+        except (ValueError, TypeError):
+            return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
+
+    def _validate_string_type(self, value: str, field: str, value_type_name: str) -> str | None:  # noqa: ARG002
+        # Everything from Kobo is string so cannot really validate it; only check phone number.
+        if field.startswith("phone_no"):
+            try:
+                phonenumbers.parse(value, None)
+            except (phonenumbers.NumberParseException, TypeError):
+                return f"Invalid phone number {value} for field {field}"
+        return None
+
+    def _validate_bool_type(self, value: str, field: str, value_type_name: str) -> str | None:
+        # Important! if value == 0 or 1 it's also evaluated to True
+        # checking for int values even tho Kobo returns everything as str
+        allowed_values = {
+            "True",
+            "False",
+            True,
+            False,
+            "0",
+            "1",
+            "TRUE",
+            "FALSE",
+            "true",
+            "false",
+        }
+        if value in allowed_values:
+            return None
+        return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
 
     def image_validator(self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any) -> str | None:
         try:
@@ -1431,44 +1426,45 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if not value:
                 return message
 
-            found_field: dict = self.all_fields[field]
-            custom_validate_choices_method = found_field.get("custom_validate_choices")
-            choices = found_field["choices"]
-            choice_type = found_field["type"]
-
-            if choice_type == TYPE_SELECT_ONE:
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(value) is True else message
-
-                is_in_choices = value in choices
-                if is_in_choices is False:
-                    # try uppercase version
-                    uppercase_value = value.upper()
-                    is_in_choices = uppercase_value in choices
-                return None if is_in_choices else message
-
-            if choice_type == TYPE_SELECT_MANY:
-                str_value = str(value)
-                if "," in str_value:
-                    selected_choices = str_value.split(",")
-                elif ";" in str_value:
-                    selected_choices = str_value.split(";")
-                else:
-                    selected_choices = str_value.split(" ")
-
-                if custom_validate_choices_method is not None:
-                    return None if custom_validate_choices_method(str_value) is True else message
-
-                for unstrip_choice in selected_choices:
-                    choice = unstrip_choice.strip()
-                    if choice not in choices and choice.upper() not in choices:
-                        return message
+            found_field: dict[str, Any] = self.all_fields[field]
+            handler = self._get_choice_handler(found_field["type"])
+            if handler is None:
                 return None
 
-            return None
+            return handler(value, found_field, message)
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _get_choice_handler(self, choice_type: str) -> Callable[[str, dict[str, Any], str], str | None] | None:
+        handlers: dict[str, Callable[[str, dict[str, Any], str], str | None]] = {
+            TYPE_SELECT_ONE: self._validate_select_one_choice,
+            TYPE_SELECT_MANY: self._validate_select_many_choice,
+        }
+        return handlers.get(choice_type)
+
+    def _validate_select_one_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(value) else message
+
+        choices = found_field["choices"]
+        normalized_value = value if value in choices else value.upper()
+        return None if normalized_value in choices else message
+
+    def _validate_select_many_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+        str_value = str(value)
+        custom_validate = found_field.get("custom_validate_choices")
+        if custom_validate is not None:
+            return None if custom_validate(str_value) else message
+
+        choices = found_field["choices"]
+        for unstrip_choice in re.split(r"[,\s;]+", value.strip()):
+            choice = unstrip_choice.strip()
+            if choice in choices or choice.upper() in choices:
+                continue
+            return message
+        return None
 
     def _get_field_type_error(
         self,
@@ -1540,7 +1536,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def validate_everything(  # noqa: PLR0912
+    def validate_everything(
         self,
         submissions: list,
         business_area: BusinessArea,
@@ -1549,10 +1545,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
-            errors = []
-            # have fun debugging this ;_;
-            # thx
-            # thx again
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
@@ -1615,11 +1607,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 "other_id_no_i_c": {},
             }
             kobo_asset_id = None
-            if len(reduced_submissions) > 0:
-                kobo_asset_id = reduced_submissions[0]["_xform_id_string"]
-            all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
-            if business_area.get_sys_option("ignore_amended_kobo_submissions"):
-                all_saved_submissions = all_saved_submissions.filter(amended=False)
+            all_saved_submissions = self._check_kobo_submissions(business_area, kobo_asset_id, reduced_submissions)
             all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
 
             all_saved_submissions_dict = {}
@@ -1653,54 +1641,23 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                         individual: dict
                         for individual in hh_value:
-                            if individual.get("role_i_c") in ["primary", "alternate"]:
-                                household_collectors_data.append(individual)
-                            expected_i_fields = {
-                                *self.expected_individuals_fields,
-                            }
-                            current_individual_docs_and_identities = defaultdict(dict)
-                            i_field: str
-                            for i_field, i_value in individual.items():
-                                if i_field in documents_numbers:
-                                    if i_field == "other_id_type_i_c":
-                                        documents_numbers["other_id_type_i_c"]["names"].append(i_value)
-                                    elif i_field == "other_id_no_i_c":
-                                        documents_numbers["other_id_type_i_c"]["validation_data"].append(
-                                            {"value": i_value}
-                                        )
-                                        documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
-                                    else:
-                                        documents_numbers[i_field]["validation_data"].append({"value": i_value})
-                                        documents_numbers[i_field]["numbers"].append(i_value)
-                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
-                                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
-                                    documents_dict: dict[str, dict[str, Any]] = documents_numbers
-                                    if document_key in identities_numbers:
-                                        documents_dict = identities_numbers
-                                    documents_dict[document_key]["issuing_countries"].append(i_value)
-
-                                if i_field in identities_numbers:
-                                    identities_numbers[i_field]["numbers"].append(i_value)
-                                    identities_numbers[i_field]["validation_data"].append({"value": i_value})
-
-                                if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
-                                    head_of_hh_counter += 1
-                                if i_field == "role_i_c":
-                                    role = i_value.upper()
-                                    if role == ROLE_PRIMARY:
-                                        primary_collector_counter += 1
-                                    elif role == ROLE_ALTERNATE:
-                                        alternate_collector_counter += 1
-
-                                expected_i_fields.discard(i_field)
-                                error = self._get_field_type_error(
-                                    i_field,
-                                    i_value,
-                                    attachments,
-                                    skip_validate_pictures,
-                                )
-                                if error:
-                                    errors.append(error)
+                            (
+                                alternate_collector_counter,
+                                current_individual_docs_and_identities,
+                                expected_i_fields,
+                                head_of_hh_counter,
+                                primary_collector_counter,
+                            ) = self._create_individual(
+                                alternate_collector_counter,
+                                attachments,
+                                documents_numbers,
+                                head_of_hh_counter,
+                                household_collectors_data=household_collectors_data,
+                                identities_numbers=identities_numbers,
+                                individual=individual,
+                                primary_collector_counter=primary_collector_counter,
+                                skip_validate_pictures=skip_validate_pictures,
+                            )
 
                             docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 
@@ -1711,49 +1668,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 }
                                 for field in expected_i_fields
                             ]
-                            errors.extend(i_expected_field_errors)
+                            self.errors.extend(i_expected_field_errors)
 
-                        if head_of_hh_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": "Household has to have a head of household",
-                                }
-                            )
-                        if head_of_hh_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": "Only one person can be a head of household",
-                                }
-                            )
-                        if primary_collector_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Household must have a primary collector",
-                                }
-                            )
-                        if primary_collector_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Only one person can be a primary collector",
-                                }
-                            )
-                        if alternate_collector_counter > 1:
-                            errors.append(
-                                {
-                                    "header": "role_i_c",
-                                    "message": "Only one person can be a alternate collector",
-                                }
-                            )
+                        self._process_error_msg(
+                            head_of_hh_counter, primary_collector_counter, alternate_collector_counter
+                        )
                     else:
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
-                            errors.append(error)
+                            self.errors.append(error)
                 if collectors_error := self.validate_collectors_unique(household_collectors_data):
-                    errors.append(collectors_error)
+                    self.errors.append(collectors_error)
                 hh_expected_field_errors = [
                     {
                         "header": field,
@@ -1761,12 +1686,125 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     }
                     for field in expected_hh_fields
                 ]
-                errors.extend(hh_expected_field_errors)
+                self.errors.extend(hh_expected_field_errors)
 
             document_errors = self.documents_validator(documents_numbers, is_xlsx=False)
             identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)
 
-            return [*errors, *document_errors, *identities_errors]
+            return [*self.errors, *document_errors, *identities_errors]
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
+
+    def _create_individual(
+        self, alternate_collector_counter, attachments, documents_numbers, head_of_hh_counter, **kwargs
+    ):
+        household_collectors_data = kwargs.get("household_collectors_data")
+        identities_numbers = kwargs.get("identities_numbers")
+        individual = kwargs.get("individual")
+        primary_collector_counter = kwargs.get("primary_collector_counter")
+        skip_validate_pictures = kwargs.get("skip_validate_pictures")
+        if individual.get("role_i_c") in ["primary", "alternate"]:
+            household_collectors_data.append(individual)
+        expected_i_fields = {
+            *self.expected_individuals_fields,
+        }
+        current_individual_docs_and_identities = defaultdict(dict)
+        i_field: str
+        for i_field, i_value in individual.items():
+            if i_field in documents_numbers:
+                if i_field == "other_id_type_i_c":
+                    documents_numbers["other_id_type_i_c"]["names"].append(i_value)
+                elif i_field == "other_id_no_i_c":
+                    documents_numbers["other_id_type_i_c"]["validation_data"].append({"value": i_value})
+                    documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
+                else:
+                    documents_numbers[i_field]["validation_data"].append({"value": i_value})
+                    documents_numbers[i_field]["numbers"].append(i_value)
+            if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
+                document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
+                documents_dict: dict[str, dict[str, Any]] = documents_numbers
+                if document_key in identities_numbers:
+                    documents_dict = identities_numbers
+                documents_dict[document_key]["issuing_countries"].append(i_value)
+
+            if i_field in identities_numbers:
+                identities_numbers[i_field]["numbers"].append(i_value)
+                identities_numbers[i_field]["validation_data"].append({"value": i_value})
+
+            if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
+                head_of_hh_counter += 1
+            alternate_collector_counter, primary_collector_counter = self._process_role_field(
+                alternate_collector_counter, i_field, i_value, primary_collector_counter
+            )
+
+            expected_i_fields.discard(i_field)
+            error = self._get_field_type_error(
+                i_field,
+                i_value,
+                attachments,
+                skip_validate_pictures,
+            )
+            if error:
+                self.errors.append(error)
+        return (
+            alternate_collector_counter,
+            current_individual_docs_and_identities,
+            expected_i_fields,
+            head_of_hh_counter,
+            primary_collector_counter,
+        )
+
+    def _process_role_field(self, alternate_collector_counter, i_field, i_value, primary_collector_counter):
+        if i_field == "role_i_c":
+            role = i_value.upper()
+            if role == ROLE_PRIMARY:
+                primary_collector_counter += 1
+            elif role == ROLE_ALTERNATE:
+                alternate_collector_counter += 1
+        return alternate_collector_counter, primary_collector_counter
+
+    def _process_error_msg(self, head_of_hh_counter, primary_collector_counter, alternate_collector_counter):
+        if head_of_hh_counter == 0:
+            self.errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Household has to have a head of household",
+                }
+            )
+        if head_of_hh_counter > 1:
+            self.errors.append(
+                {
+                    "header": "relationship_i_c",
+                    "message": "Only one person can be a head of household",
+                }
+            )
+        if primary_collector_counter == 0:
+            self.errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Household must have a primary collector",
+                }
+            )
+        if primary_collector_counter > 1:
+            self.errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a primary collector",
+                }
+            )
+        if alternate_collector_counter > 1:
+            self.errors.append(
+                {
+                    "header": "role_i_c",
+                    "message": "Only one person can be a alternate collector",
+                }
+            )
+
+    def _check_kobo_submissions(self, business_area, kobo_asset_id, reduced_submissions):
+        if len(reduced_submissions) > 0:
+            kobo_asset_id = reduced_submissions[0]["_xform_id_string"]
+        all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
+        if business_area.get_sys_option("ignore_amended_kobo_submissions"):
+            all_saved_submissions = all_saved_submissions.filter(amended=False)
+        return all_saved_submissions

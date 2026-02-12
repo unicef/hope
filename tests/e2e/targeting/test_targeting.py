@@ -1457,7 +1457,7 @@ class TestTargeting:
         page_targeting_create.get_input_name().send_keys("Target Population for Females Age 0 - 5")
         page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
         page_targeting_create.click_button_target_population_create()
-        assert "Females Age 0 - 5: 11" in page_targeting_create.get_criteria_container().text
+        assert "Females Age 0 - 5: 0 - 11" in page_targeting_create.get_criteria_container().text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_parametrized_rules_filters_and_or(
