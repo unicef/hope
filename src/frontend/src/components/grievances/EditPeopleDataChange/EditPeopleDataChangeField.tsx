@@ -1,18 +1,17 @@
-import { Grid } from '@mui/material';
-import { Field } from 'formik';
-import { useLocation } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { Grid } from '@mui/material';
+import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { Field } from 'formik';
+import { ReactElement } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
-import { ReactElement } from 'react';
-import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
-import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface EditPeopleDataChangeFieldProps {
   field: {
@@ -59,10 +58,6 @@ export const EditPeopleDataChangeField = ({
       };
       break;
     case 'SELECT_ONE':
-      fieldProps = {
-        choices: field.choices,
-        component: FormikAutocomplete,
-      };
       if (field.name === 'admin_area_title') {
         fieldProps = {
           component: FormikAsyncAutocomplete,

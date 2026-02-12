@@ -121,7 +121,7 @@ def test_unicef_partner_hq_has_permission_from_user_and_role_with_all_permission
 
     # Create "Role with all permissions" - UNICEF HQ gets these automatically
     role_with_all_permissions, created = Role.objects.get_or_create(
-        name="Role with all permissions", subsystem="HOPE", defaults={"permissions": []}
+        name="Role with all permissions", defaults={"permissions": []}
     )
     permissions = [
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,

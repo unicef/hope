@@ -1,148 +1,189 @@
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import (
+import pytest
+
+from extras.test_utils.factories import (
+    AccountFactory,
+    AccountTypeFactory,
+    BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
-    create_household_and_individuals,
-)
-from extras.test_utils.old_factories.payment import (
-    AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    generate_delivery_mechanisms,
+    ProgramCycleFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
+    TargetingCriteriaRuleFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.core.base_test_case import BaseTestCase
 from hope.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
-from hope.models import AccountType, PaymentPlan
+from hope.models import PaymentPlan, Program
+
+pytestmark = pytest.mark.django_db
 
 
-class TestXlsxExportTargetingService(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.business_area = create_afghanistan()
-        cls.user = UserFactory()
-        cls.payment_plan = PaymentPlanFactory(
-            business_area=cls.business_area,
-            status=PaymentPlan.Status.TP_OPEN,
-            created_by=cls.user,
-        )
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(slug="afghanistan")
 
-    def test_add_version(self) -> None:
-        service = XlsxExportTargetingService(self.payment_plan)
-        service._create_workbook()
-        service._add_version()
-        assert (
-            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES].value
-            == XlsxExportTargetingService.VERSION_CELL_NAME
-        )
-        assert (
-            service.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES].value
-            == XlsxExportTargetingService.VERSION
-        )
 
-    def test_add_standard_columns_headers(self) -> None:
-        service = XlsxExportTargetingService(self.payment_plan)
-        service._create_workbook()
-        service._add_standard_columns_headers()
-        headers = [cell.value for cell in service.ws_individuals[1]]
-        assert headers == [
-            "Household unicef_id",
-            "unicef_id",
-            "Linked Households",
-            "Accounts information",
-        ]
+@pytest.fixture
+def user():
+    return UserFactory()
 
-    def test_export_service_households_property(self) -> None:
-        program = self.payment_plan.program_cycle.program
-        hh1 = HouseholdFactory(
-            business_area=self.business_area,
-            program=program,
-            head_of_household=IndividualFactory(household=None),
-        )
-        hh2 = HouseholdFactory(
-            business_area=self.business_area,
-            program=program,
-            head_of_household=IndividualFactory(household=None),
-        )
-        p1 = PaymentFactory(
-            parent=self.payment_plan,
-            vulnerability_score=11,
-            household=hh1,
-        )
-        p2 = PaymentFactory(
-            parent=self.payment_plan,
-            vulnerability_score=99,
-            household=hh2,
-        )
-        TargetingCriteriaRuleFactory(
-            household_ids=f"{p1.household.unicef_id}, {p2.household.unicef_id}",
-            payment_plan=self.payment_plan,
-        )
 
-        service = XlsxExportTargetingService(self.payment_plan)
-        assert len(service.households) == 2
+@pytest.fixture
+def program(business_area):
+    program = ProgramFactory(
+        business_area=business_area,
+        name="Program Active",
+        status=Program.ACTIVE,
+    )
+    ProgramCycleFactory(program=program)
+    return program
 
-        self.payment_plan.status = PaymentPlan.Status.LOCKED
-        self.payment_plan.vulnerability_score_min = 10
-        self.payment_plan.vulnerability_score_max = 12
-        self.payment_plan.save()
 
-        service = XlsxExportTargetingService(self.payment_plan)
-        assert len(service.households) == 1
-        assert service.households.first().unicef_id == p1.household.unicef_id
+@pytest.fixture
+def registration_data_import(business_area, program):
+    return RegistrationDataImportFactory(business_area=business_area, program=program)
 
-    def test_accounts_info(self) -> None:
-        generate_delivery_mechanisms()
-        service = XlsxExportTargetingService(self.payment_plan)
 
-        _, individuals = create_household_and_individuals(
-            household_data={
-                "business_area": self.business_area,
-                "program": self.payment_plan.program_cycle.program,
-            },
-            individuals_data=[
-                {
-                    "full_name": "Benjamin Butler",
-                    "given_name": "Benjamin",
-                    "family_name": "Butler",
-                    "phone_no": "(953)682-4596",
-                    "birth_date": "1943-07-30",
-                    "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
-                    "business_area": self.business_area,
-                },
-            ],
-        )
-        individual = individuals[0]
-        AccountFactory(
-            individual=individual,
-            account_type=AccountType.objects.get(key="bank"),
-            data={
-                "card_number": "123",
-                "card_expiry_date": "2022-01-01",
-                "name_of_cardholder": "Marek",
-            },
-            number="123",
-        )
-        AccountFactory(
-            individual=individual,
-            account_type=AccountType.objects.get(key="mobile"),
-            data={
-                "service_provider_code": "ABC",
-                "delivery_phone_number": "123456789",
-                "provider": "Provider",
-            },
-            number="321",
-        )
+@pytest.fixture
+def payment_plan(program, user):
+    return PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        business_area=program.business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        created_by=user,
+    )
 
-        assert (
-            service._accounts_info(individual) == "{'card_number': '123', 'card_expiry_date': '2022-01-01',"
-            " 'name_of_cardholder': 'Marek', 'number': '123',"
-            " 'financial_institution_name': '', 'financial_institution_pk': ''}, "
-            "{'provider': 'Provider', 'delivery_phone_number': '123456789', "
-            "'service_provider_code': 'ABC', 'number': '321',"
-            " 'financial_institution_name': '', 'financial_institution_pk': ''}"
-        )
+
+@pytest.fixture
+def service(payment_plan):
+    return XlsxExportTargetingService(payment_plan)
+
+
+@pytest.fixture
+def payment_1(payment_plan, registration_data_import):
+    program = payment_plan.program
+    individual = IndividualFactory(program=program, registration_data_import=registration_data_import, household=None)
+    hh1 = HouseholdFactory(
+        business_area=payment_plan.business_area,
+        program=program,
+        head_of_household=individual,
+        registration_data_import=registration_data_import,
+        size=2,
+    )
+    return PaymentFactory(parent=payment_plan, household=hh1, vulnerability_score=11)
+
+
+@pytest.fixture
+def payment_2(payment_plan, registration_data_import):
+    program = payment_plan.program
+    individual = IndividualFactory(program=program, registration_data_import=registration_data_import, household=None)
+    hh2 = HouseholdFactory(
+        business_area=payment_plan.business_area,
+        program=program,
+        head_of_household=individual,
+        registration_data_import=registration_data_import,
+        size=2,
+    )
+    return PaymentFactory(parent=payment_plan, household=hh2, vulnerability_score=99)
+
+
+@pytest.fixture
+def individual_with_accounts(program, business_area):
+    household = HouseholdFactory(business_area=business_area, program=program)
+    individual = IndividualFactory(
+        household=household,
+        program=program,
+        full_name="Benjamin Butler",
+        given_name="Benjamin",
+        family_name="Butler",
+    )
+    bank_type = AccountTypeFactory(key="bank")
+    mobile_type = AccountTypeFactory(key="mobile")
+    AccountFactory(
+        individual=individual,
+        account_type=bank_type,
+        number="123",
+        data={
+            "card_number": "123",
+            "card_expiry_date": "2022-01-01",
+            "name_of_cardholder": "Marek",
+        },
+    )
+    AccountFactory(
+        individual=individual,
+        account_type=mobile_type,
+        number="321",
+        data={
+            "service_provider_code": "ABC",
+            "delivery_phone_number": "123456789",
+            "provider": "Provider",
+        },
+    )
+    return individual
+
+
+def test_add_version_sets_version_cells(service):
+    service._create_workbook()
+    service._add_version()
+
+    assert (
+        service.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES].value
+        == XlsxExportTargetingService.VERSION_CELL_NAME
+    )
+    assert (
+        service.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES].value == XlsxExportTargetingService.VERSION
+    )
+
+
+def test_add_standard_columns_headers_creates_expected_headers(service):
+    service._create_workbook()
+    service._add_standard_columns_headers()
+    headers = [cell.value for cell in service.ws_individuals[1]]
+
+    assert headers == [
+        "Household unicef_id",
+        "unicef_id",
+        "Linked Households",
+        "Accounts information",
+    ]
+
+
+def test_households_returns_all_when_plan_open(payment_plan, business_area, payment_1, payment_2):
+    TargetingCriteriaRuleFactory(
+        payment_plan=payment_plan,
+        household_ids=f"{payment_1.household.unicef_id}, {payment_2.household.unicef_id}",
+    )
+    service = XlsxExportTargetingService(payment_plan)
+    assert service.households.count() == 2
+
+
+def test_households_respects_vulnerability_score_when_plan_locked(payment_plan, business_area, payment_1, payment_2):
+    TargetingCriteriaRuleFactory(
+        payment_plan=payment_plan,
+        household_ids=f"{payment_1.household.unicef_id}, {payment_2.household.unicef_id}",
+    )
+    payment_plan.status = PaymentPlan.Status.LOCKED
+    payment_plan.vulnerability_score_min = 10
+    payment_plan.vulnerability_score_max = 12
+    payment_plan.save()
+
+    service = XlsxExportTargetingService(payment_plan)
+    assert payment_plan.status == PaymentPlan.Status.LOCKED
+    assert service.households.count() == 1
+    assert service.households.first().unicef_id == payment_1.household.unicef_id
+
+
+def test_accounts_info_returns_serialized_accounts(payment_plan, business_area, individual_with_accounts):
+    service = XlsxExportTargetingService(payment_plan)
+    assert service._accounts_info(individual_with_accounts) == (
+        "{'card_number': '123', 'card_expiry_date': '2022-01-01', "
+        "'name_of_cardholder': 'Marek', 'number': '123', "
+        "'financial_institution_name': '', 'financial_institution_pk': ''}, "
+        "{'provider': 'Provider', 'delivery_phone_number': '123456789', "
+        "'service_provider_code': 'ABC', 'number': '321', "
+        "'financial_institution_name': '', 'financial_institution_pk': ''}"
+    )
