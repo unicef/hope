@@ -13,7 +13,6 @@ def partner_unicef(db):
 def role_for_unicef_partners(db):
     return RoleFactory(
         name="Role for UNICEF Partners",
-        subsystem="HOPE",
         is_visible_on_ui=False,
         is_available_for_partner=False,
     )

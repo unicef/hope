@@ -82,7 +82,6 @@ def notification_setup(
 
     role_for_unicef_partners, _ = Role.objects.update_or_create(
         name="Role for UNICEF Partners",
-        subsystem=Role.HOPE,
         defaults={"permissions": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value]},
     )
     RoleAssignment.objects.get_or_create(
@@ -102,7 +101,6 @@ def notification_setup(
     else:
         role_all, _ = Role.objects.update_or_create(
             name="Role with all permissions",
-            subsystem=Role.HOPE,
             defaults={"permissions": action_permission_values},
         )
         RoleAssignment.objects.update_or_create(

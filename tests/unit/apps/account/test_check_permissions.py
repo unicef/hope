@@ -56,7 +56,6 @@ def user(db: Any) -> User:
 def role_with_all_permissions(db: Any) -> Role:
     role, created = Role.objects.get_or_create(
         name="Role with all permissions",
-        subsystem="HOPE",
         defaults={"permissions": [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value]},
     )
     if not created:
