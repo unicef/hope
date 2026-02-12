@@ -66,6 +66,10 @@ class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
 
+    class Params:
+        # create HH without head_of_household
+        without_hoh = factory.Trait(head_of_household=None)
+
     first_registration_date = factory.LazyFunction(timezone.now)
     last_registration_date = factory.LazyFunction(timezone.now)
     rdi_merge_status = MergeStatusModel.MERGED

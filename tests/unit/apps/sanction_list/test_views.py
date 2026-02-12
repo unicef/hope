@@ -81,11 +81,7 @@ def url_check(business_area):
 
 @pytest.fixture
 def sanction_file():
-    file = BytesIO(
-        Path(
-            f"{settings.TESTS_ROOT}/apps/sanction_list/test_files/TestSanctionList.xlsx"
-        ).read_bytes()
-    )
+    file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/sanction_list/test_files/TestSanctionList.xlsx").read_bytes())
     file.name = "unordered_columns_1.xlsx"
     return file
 
@@ -112,7 +108,6 @@ def test_get_sanction_list(
     assert response.status_code == expected_status
 
     if expected_status == status.HTTP_200_OK:
-
         resp_data = response.json()
         assert len(resp_data["results"]) == 1
         individual = resp_data["results"][0]

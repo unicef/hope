@@ -82,10 +82,7 @@ def test_sanction_list_email(
     base64_encoded_content = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     original_file_name = "test.xlsx"
-    subject = (
-        f"Sanction List Check - file: {original_file_name}, "
-        f"date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
-    )
+    subject = f"Sanction List Check - file: {original_file_name}, date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
 
     context = {
         "results": {},
