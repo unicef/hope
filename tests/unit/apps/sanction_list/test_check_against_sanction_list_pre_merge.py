@@ -94,10 +94,17 @@ def household_with_individuals(program, registration_data_import, business_area)
         program=program,
         registration_data_import=registration_data_import,
         business_area=business_area,
-        without_hoh=True,
     )
+    # update Head_of_household data >> # DUPLICATE Ind
+    ind_1 = household.head_of_household
+    ind_1.given_name = "Alias"
+    ind_1.family_name = "Name2"
+    ind_1.full_name = "Alias Name2"
+    ind_1.middle_name = ""
+    ind_1.birth_date = "1922-04-11"
+    ind_1.save()
     individuals_data = [
-        ("Alias", "Alias Name2", "", "Name2", "1922-04-11"),  # DUPLICATE
+        # other Individuals
         ("Choo", "Choo Ryoong", "", "Ryong", "1960-04-04"),
         ("Tescik", "Tescik Testowski", "", "Testowski", "1996-12-12"),
         ("Tessta", "Tessta Testowski", "", "Testowski", "1997-07-07"),  # DUPLICATE
