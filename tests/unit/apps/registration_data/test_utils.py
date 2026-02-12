@@ -6,7 +6,7 @@ import pytest
 
 from extras.test_utils.factories.core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.registration_data.utils import calculate_hash_for_kobo_submission
+from hope.apps.registration_data.utils import calculate_hash_for_kobo_submission, collectors_str_ids_to_list
 from hope.apps.registration_data.validators import UploadXLSXInstanceValidator
 from hope.models import DataCollectingType
 
@@ -74,3 +74,17 @@ def test_list_of_integer_validator_for_required_primary_collector_id(
 ) -> None:
     validator = UploadXLSXInstanceValidator(program=social_program)
     assert validator.list_of_integer_validator(None, "pp_index_id") is False
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (1.0, ["1"]),
+        (1.5, ["1.5"]),
+        (2, ["2"]),
+        ("3;4", ["3", "4"]),
+        (None, None),
+    ],
+)
+def test_collectors_str_ids_to_list(value: Any, expected: Any) -> None:
+    assert collectors_str_ids_to_list(value) == expected
