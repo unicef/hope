@@ -500,41 +500,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
 class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     """API to import households with selected RDI."""
 
-    def _create_household_roles(self, valid_payloads: list, results: list) -> int:
-        total_accepted = 0
-        roles_to_create: list[IndividualRoleInHousehold] = []
-
-        for payload in valid_payloads:
-            primary = payload["primary"]
-            alternate = payload["alternate"]
-
-            if payload["members"]:
-                PendingIndividual.objects.filter(
-                    registration_data_import=self.selected_rdi,
-                    program=self.selected_rdi.program,
-                    unicef_id__in=payload["members"],
-                ).update(household=payload["instance"])
-
-            roles_to_create.append(
-                IndividualRoleInHousehold(individual=primary, household=payload["instance"], role=ROLE_PRIMARY)
-            )
-            if alternate:
-                roles_to_create.append(
-                    IndividualRoleInHousehold(
-                        individual=alternate,
-                        household=payload["instance"],
-                        role=ROLE_ALTERNATE,
-                    )
-                )
-
-            total_accepted += 1
-            results.append({"pk": payload["instance"].pk})
-
-        if roles_to_create:
-            IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
-
-        return total_accepted
-
     @extend_schema(request=HouseholdSerializer(many=True))
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:

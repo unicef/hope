@@ -68,27 +68,6 @@ class RdiMergeTask:
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
         return households_to_merge_ids, household_ids_to_exclude
 
-    def _create_kobo_submissions(
-        self, households: Any, obj_hct: RegistrationDataImport, registration_data_import_id: str
-    ) -> None:
-        kobo_submissions = []
-        for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
-            kobo_submission_uuid = household.kobo_submission_uuid
-            kobo_asset_id = household.detail_id
-            kobo_submission_time = household.kobo_submission_time
-            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                submission = KoboImportedSubmission(
-                    kobo_submission_uuid=kobo_submission_uuid,
-                    kobo_asset_id=kobo_asset_id,
-                    kobo_submission_time=kobo_submission_time,
-                    registration_data_import=obj_hct,
-                    imported_household=household,
-                )
-                kobo_submissions.append(submission)
-        if kobo_submissions:
-            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
-        logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
-
     def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
         dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids)
         PendingAccount.validate_uniqueness(dmds)
