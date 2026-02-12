@@ -1,15 +1,20 @@
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentPlanFactory,
     PeriodicFieldDataFactory,
-    create_afghanistan,
+    ProgramCycleFactory,
+    ProgramFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.payment import PaymentPlanFactory, generate_delivery_mechanisms
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
@@ -17,9 +22,6 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     PeriodicFieldData,
-    TargetingCriteriaRule,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
 )
 
 pytestmark = pytest.mark.django_db
@@ -27,7 +29,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def business_area():
-    return create_afghanistan()
+    return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
@@ -50,44 +52,34 @@ def program_cycle(program):
 @pytest.fixture
 def households_individuals(business_area, program):
     # HH 1: 1 individual
-    hh1, inds1 = create_household_and_individuals(
-        {"business_area": business_area, "program": program},
-        [{"sex": MALE, "marital_status": "MARRIED"}],
-    )
+    hh1 = HouseholdFactory(business_area=business_area, program=program, size=1)
+    ind1 = hh1.head_of_household
+    ind1.sex = MALE
+    ind1.marital_status = "MARRIED"
+    ind1.save()
+
     # HH 2: 2 individuals
-    hh2, inds2 = create_household_and_individuals(
-        {"business_area": business_area, "program": program},
-        [
-            {"sex": MALE, "marital_status": "SINGLE"},
-            {"sex": FEMALE, "marital_status": "MARRIED"},
-        ],
-    )
-
-    return {"hh1": hh1, "hh2": hh2, "ind1": inds1[0], "ind2": inds2[0]}
-
-
-@pytest.fixture(autouse=True)
-def flex_attrs():
-    FlexibleAttributeFactory(
-        name="muac_i_f",
-        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        type=FlexibleAttribute.DECIMAL,
-    )
-    generate_delivery_mechanisms()
+    hh2 = HouseholdFactory(business_area=business_area, program=program, size=2)
+    ind2 = hh2.head_of_household
+    ind2.sex = MALE
+    ind2.marital_status = "SINGLE"
+    ind2.save()
+    IndividualFactory(household=hh2, sex=FEMALE, marital_status="MARRIED", program=program, business_area=business_area)
+    return {"hh1": hh1, "hh2": hh2, "ind1": ind1, "ind2": ind2}
 
 
 def test_all_individuals_male_filter(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    TargetingIndividualBlockRuleFilter.objects.create(
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="EQUALS",
         field_name="marital_status",
         arguments=["MARRIED"],
     )
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="EQUALS",
         field_name="sex",
@@ -101,16 +93,16 @@ def test_all_individuals_male_filter(user, program_cycle, households_individuals
 def test_all_individuals_filter_on_mixins(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
     pp = PaymentPlanFactory()
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=pp)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=pp)
     pp.rules.set([tcr])
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    TargetingIndividualBlockRuleFilter.objects.create(
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
+    TargetingIndividualBlockRuleFilterFactory(
         comparison_method="EQUALS",
         field_name="marital_status",
         arguments=["MARRIED"],
         individuals_filters_block=block,
     )
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         comparison_method="EQUALS",
         field_name="sex",
         arguments=[MALE],
@@ -127,31 +119,31 @@ def test_all_individuals_filter_on_mixins(user, program_cycle, households_indivi
 def test_two_separate_blocks_on_mixins(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
     pp = PaymentPlanFactory()
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=pp)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=pp)
     pp.rules.set([tcr])
 
-    block1 = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    TargetingIndividualBlockRuleFilter.objects.create(
+    block1 = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block1,
         comparison_method="EQUALS",
         field_name="marital_status",
         arguments=["MARRIED"],
     )
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block1,
         comparison_method="EQUALS",
         field_name="sex",
         arguments=[FEMALE],
     )
 
-    block2 = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    TargetingIndividualBlockRuleFilter.objects.create(
+    block2 = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block2,
         comparison_method="EQUALS",
         field_name="marital_status",
         arguments=["SINGLE"],
     )
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block2,
         comparison_method="EQUALS",
         field_name="sex",
@@ -166,11 +158,10 @@ def test_two_separate_blocks_on_mixins(user, program_cycle, households_individua
 
 def test_filter_on_flex_field_not_exist(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     queryset = Household.objects.all()
-
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="CONTAINS",
         field_name="flex_field_2",
@@ -187,22 +178,23 @@ def test_filter_on_flex_field_not_exist(user, program_cycle):
 
 def test_filter_on_flex_field(user, program_cycle, households_individuals):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
-    FlexibleAttribute.objects.create(
+    FlexibleAttributeFactory(
         name="flex_field_1",
         type=FlexibleAttribute.STRING,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         label={"English(EN)": "value"},
+        program=None,
     )
-    queryset = Household.objects.all()
-    TargetingIndividualBlockRuleFilter.objects.create(
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="CONTAINS",
         field_name="flex_field_1",
         arguments=["Average"],
         flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
     )
+    queryset = Household.objects.all()
 
     # Before value
     queryset_before = queryset.filter(payment_plan.get_query())
@@ -218,11 +210,11 @@ def test_filter_on_flex_field(user, program_cycle, households_individuals):
 
 def test_filter_on_pdu_flex_field_not_exist(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     queryset = Household.objects.all()
 
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="RANGE",
         field_name="pdu_field_1",
@@ -239,14 +231,14 @@ def test_filter_on_pdu_flex_field_not_exist(user, program_cycle):
 
 def test_filter_on_pdu_flex_field_no_round_number(user, program_cycle, program):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
     )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
     queryset = Household.objects.all()
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="RANGE",
         field_name="pdu_field_1",
@@ -259,15 +251,15 @@ def test_filter_on_pdu_flex_field_no_round_number(user, program_cycle, program):
 
 def test_filter_on_pdu_flex_field_incorrect_round_number(user, program_cycle, program):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
     )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
 
     queryset = Household.objects.all()
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="RANGE",
         field_name="pdu_field_1",
@@ -285,14 +277,14 @@ def test_filter_on_pdu_flex_field_incorrect_round_number(user, program_cycle, pr
 
 def test_filter_on_pdu_flex_field(user, program_cycle, households_individuals, program):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-    block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
+    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
     )
     FlexibleAttributeForPDUFactory(program=program, label="PDU Field 1", pdu_data=pdu_data)
     queryset = Household.objects.all()
-    TargetingIndividualBlockRuleFilter.objects.create(
+    TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
         comparison_method="RANGE",
         field_name="pdu_field_1",

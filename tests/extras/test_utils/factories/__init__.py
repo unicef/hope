@@ -83,7 +83,12 @@ from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
-from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from .targeting import (
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
+)
 from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -107,6 +112,8 @@ __all__ = [
     "FlexibleAttributeForPDUFactory",
     "GrievanceTicketFactory",
     "GrievanceComplaintTicketWithoutExtrasFactory",
+    "TargetingIndividualRuleFilterBlockFactory",
+    "TargetingIndividualBlockRuleFilterFactory",
     "TicketDeleteHouseholdDetailsFactory",
     "TicketDeleteIndividualDetailsFactory",
     "TicketComplaintDetailsFactory",
