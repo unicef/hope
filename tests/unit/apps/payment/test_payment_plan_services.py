@@ -5,6 +5,7 @@ from unittest import mock
 from unittest.mock import patch
 
 from aniso8601 import parse_date
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
@@ -744,6 +745,41 @@ def test_send_to_payment_gateway(
         pps.user = mock.MagicMock(pk="123")
         pps.send_to_payment_gateway()
         assert mock_task.call_count == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx.delay")
+def test_import_xlsx_per_fsp(
+    mock_task: Any,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    pp = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle,
+        background_action_status=None,
+    )
+
+    mock_file = SimpleUploadedFile(
+        "test.xlsx",
+        b"test file content",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    service = PaymentPlanService(pp)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        result = service.import_xlsx_per_fsp(user, mock_file)
+
+    assert mock_task.call_count == 1
+
+    pp.refresh_from_db()
+    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    assert pp.reconciliation_import_file is not None
+    assert result == pp
 
 
 @freeze_time("2020-10-10")
