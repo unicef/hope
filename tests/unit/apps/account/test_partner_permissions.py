@@ -116,7 +116,6 @@ def user_role_assignment(business_area: BusinessArea, other_user: User, role_cre
 def role_with_all_permissions(db: Any) -> Role:
     role, created = Role.objects.get_or_create(
         name="Role with all permissions",
-        subsystem="HOPE",
         defaults={"permissions": ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]},
     )
     if not created:

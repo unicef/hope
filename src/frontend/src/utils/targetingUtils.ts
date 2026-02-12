@@ -386,7 +386,7 @@ interface Result {
 }
 
 function mapFilterToVariable(filter: Filter): Result {
-  let preparedArguments = [];
+  let preparedArguments;
   if (filter?.associatedWith === 'Account') {
     preparedArguments = filter.isNull ? [null] : filter.arguments;
   } else {

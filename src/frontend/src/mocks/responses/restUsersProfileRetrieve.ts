@@ -682,7 +682,6 @@ export const restUsersProfileRetrieve = {
       created_at: '2022-03-30T09:05:24.418000Z',
       updated_at: '2022-03-30T09:05:24.418000Z',
       name: 'Basic User',
-      subsystem: 'HOPE',
       permissions: ['DASHBOARD_VIEW_COUNTRY'],
       is_visible_on_ui: true,
       is_available_for_partner: true,
@@ -691,7 +690,6 @@ export const restUsersProfileRetrieve = {
       created_at: '2022-03-30T09:05:24.480000Z',
       updated_at: '2025-03-10T07:32:37.397885Z',
       name: 'Role with all permissions',
-      subsystem: 'HOPE',
       permissions: [
         'RDI_VIEW_LIST',
         'RDI_VIEW_DETAILS',
@@ -864,7 +862,6 @@ export const restUsersProfileRetrieve = {
       created_at: '2022-03-30T09:05:24.480000Z',
       updated_at: '2025-03-10T07:32:37.397885Z',
       name: 'Role with all permissions',
-      subsystem: 'HOPE',
       permissions: [
         'RDI_VIEW_LIST',
         'RDI_VIEW_DETAILS',

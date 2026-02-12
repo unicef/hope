@@ -1,22 +1,18 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { DropzoneField } from '@core/DropzoneField';
-import { LoadingButton } from '@core/LoadingButton';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
-import { getApiErrorMessages } from '@utils/utils';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 const StyledButton = styled(Button)`
   width: 150px;
@@ -123,10 +119,7 @@ export const ImportXlsx = ({
               }}
             />
             {fileToImport && xlsxError ? (
-              <Error>
-                <p>Errors</p>
-                <p>{xlsxError}</p>
-              </Error>
+              <XlsxErrorsDisplay errors={xlsxError} />
             ) : null}
           </>
           <DialogActions>

@@ -27,7 +27,6 @@ class RoleAdminForm(forms.ModelForm):
         model = Role
         fields = (
             "name",
-            "subsystem",
             "permissions",
             "is_visible_on_ui",
             "is_available_for_partner",

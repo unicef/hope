@@ -73,12 +73,17 @@ from .payment import (
     WesternUnionInvoiceFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from .periodic_data_update import PDUOnlineEditFactory, PDUXlsxTemplateFactory, PDUXlsxUploadFactory
+from .periodic_data_update import (
+    PDUOnlineEditFactory,
+    PDUOnlineEditSentBackCommentFactory,
+    PDUXlsxTemplateFactory,
+    PDUXlsxUploadFactory,
+)
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
-from .targeting import TargetingCriteriaRuleFactory
+from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -153,9 +158,11 @@ __all__ = [
     "RuleFactory",
     "LogEntryFactory",
     "PDUOnlineEditFactory",
+    "PDUOnlineEditSentBackCommentFactory",
     "PDUXlsxTemplateFactory",
     "PDUXlsxUploadFactory",
     "SanctionListFactory",
+    "TargetingCriteriaRuleFilterFactory",
     "SanctionListIndividualFactory",
     "TargetingCriteriaRuleFactory",
     "SurveyFactory",

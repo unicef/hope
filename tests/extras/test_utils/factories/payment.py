@@ -17,6 +17,7 @@ from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
+    MergeStatusModel,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -92,6 +93,7 @@ class AccountFactory(DjangoModelFactory):
     data = factory.LazyFunction(dict)
     individual = factory.SubFactory(IndividualFactory)
     account_type = factory.SubFactory(AccountTypeFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class PaymentFactory(DjangoModelFactory):
