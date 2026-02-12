@@ -400,7 +400,6 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 file_temp_obj.file.save(zip_file_name, File(tmp_zip))
                 self.payment_plan.export_file_per_fsp = file_temp_obj
                 flow = PaymentPlanFlow(self.payment_plan)
-
                 flow.background_action_status_none()
                 self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
 

@@ -808,7 +808,6 @@ class PaymentPlanViewSet(
         )
 
         flow = PaymentPlanFlow(payment_plan)
-
         flow.background_action_status_excluding_beneficiaries()
         payment_plan.exclude_household_error = ""
         payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
@@ -927,7 +926,6 @@ class PaymentPlanViewSet(
                 if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
                     raise ValidationError("Rule Engine run in progress")
                 flow = PaymentPlanFlow(payment_plan)
-
                 flow.background_action_status_steficon_run()
                 payment_plan.save()
                 transaction.on_commit(

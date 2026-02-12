@@ -1,25 +1,15 @@
-from typing import TYPE_CHECKING
-
 from django.utils import timezone
 from viewflow import fsm
 
-if TYPE_CHECKING:
-    from hope.models.payment_plan import PaymentPlan
-
-
-def _get_payment_plan_model():
-    """Lazy import to avoid circular dependencies."""
-    from hope.models.payment_plan import PaymentPlan
-
-    return PaymentPlan
+from hope.models.payment_plan import PaymentPlan
 
 
 class PaymentPlanFlow:
-    status = fsm.State(lambda: _get_payment_plan_model().Status)
+    status = fsm.State(PaymentPlan.Status)
 
-    background_action_status = fsm.State(lambda: _get_payment_plan_model().BackgroundActionStatus)
+    background_action_status = fsm.State(PaymentPlan.BackgroundActionStatus)
 
-    build_status = fsm.State(lambda: _get_payment_plan_model().BuildStatus)
+    build_status = fsm.State(PaymentPlan.BuildStatus)
 
     def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
@@ -49,8 +39,8 @@ class PaymentPlanFlow:
         return self.payment_plan.build_status
 
     @background_action_status.transition(
-        source=[None] + list(_get_payment_plan_model().BACKGROUND_ACTION_ERROR_STATES),
-        target=_get_payment_plan_model().BackgroundActionStatus.XLSX_EXPORTING,
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -65,10 +55,10 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[
-            _get_payment_plan_model().BackgroundActionStatus.XLSX_EXPORTING,
-            _get_payment_plan_model().BackgroundActionStatus.XLSX_EXPORT_ERROR,
+            PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+            PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -82,8 +72,8 @@ class PaymentPlanFlow:
         pass
 
     @background_action_status.transition(
-        source=[None] + list(_get_payment_plan_model().BACKGROUND_ACTION_ERROR_STATES),
-        target=_get_payment_plan_model().BackgroundActionStatus.RULE_ENGINE_RUN,
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED],
     )
     def background_action_status_steficon_run(self):
@@ -91,26 +81,26 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[
-            _get_payment_plan_model().BackgroundActionStatus.RULE_ENGINE_RUN,
-            _get_payment_plan_model().BackgroundActionStatus.RULE_ENGINE_ERROR,
+            PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
+            PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.RULE_ENGINE_ERROR,
+        target=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED],
     )
     def background_action_status_steficon_error(self):
         pass
 
     @background_action_status.transition(
-        source=[None] + list(_get_payment_plan_model().BACKGROUND_ACTION_ERROR_STATES),
-        target=_get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED],
     )
     def background_action_status_xlsx_importing_entitlements(self):
         pass
 
     @background_action_status.transition(
-        source=[None] + list(_get_payment_plan_model().BACKGROUND_ACTION_ERROR_STATES),
-        target=_get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -125,11 +115,11 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[
-            _get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
-            _get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-            _get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORT_ERROR,
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -142,18 +132,16 @@ class PaymentPlanFlow:
     def background_action_status_xlsx_import_error(self):
         pass
 
-    @background_action_status.transition(
-        source=[None] + list(_get_payment_plan_model().BackgroundActionStatus), target=None
-    )
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
     def background_action_status_none(self):
         self.payment_plan.background_action_status = None
 
     @background_action_status.transition(
         source=[
             None,
-            _get_payment_plan_model().BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+        target=PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -167,10 +155,10 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[
-            _get_payment_plan_model().BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
-            _get_payment_plan_model().BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        target=PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -185,9 +173,9 @@ class PaymentPlanFlow:
     @background_action_status.transition(
         source=[
             None,
-            _get_payment_plan_model().BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+            PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+        target=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.ACCEPTED],
     )
     def background_action_status_send_to_payment_gateway(self):
@@ -195,10 +183,10 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[
-            _get_payment_plan_model().BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
-            _get_payment_plan_model().BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+            PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+            PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         ],
-        target=_get_payment_plan_model().BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        target=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.ACCEPTED],
     )
     def background_action_status_send_to_payment_gateway_error(self):
@@ -206,8 +194,8 @@ class PaymentPlanFlow:
 
     # Build Status Transitions
     @build_status.transition(
-        source=[None] + list(_get_payment_plan_model().BuildStatus),
-        target=_get_payment_plan_model().BuildStatus.BUILD_STATUS_PENDING,
+        source=[None] + list(PaymentPlan.BuildStatus),
+        target=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -225,11 +213,11 @@ class PaymentPlanFlow:
 
     @build_status.transition(
         source=[
-            _get_payment_plan_model().BuildStatus.BUILD_STATUS_PENDING,
-            _get_payment_plan_model().BuildStatus.BUILD_STATUS_FAILED,
-            _get_payment_plan_model().BuildStatus.BUILD_STATUS_OK,
+            PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+            PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
+            PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         ],
-        target=_get_payment_plan_model().BuildStatus.BUILD_STATUS_BUILDING,
+        target=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -246,8 +234,8 @@ class PaymentPlanFlow:
         self.payment_plan.built_at = timezone.now()
 
     @build_status.transition(
-        source=_get_payment_plan_model().BuildStatus.BUILD_STATUS_BUILDING,
-        target=_get_payment_plan_model().BuildStatus.BUILD_STATUS_FAILED,
+        source=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
+        target=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -263,8 +251,8 @@ class PaymentPlanFlow:
         self.payment_plan.built_at = timezone.now()
 
     @build_status.transition(
-        source=_get_payment_plan_model().BuildStatus.BUILD_STATUS_BUILDING,
-        target=_get_payment_plan_model().BuildStatus.BUILD_STATUS_OK,
+        source=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
+        target=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         conditions=[
             lambda obj: obj.payment_plan.status
             in [
@@ -281,49 +269,49 @@ class PaymentPlanFlow:
 
     # Status Transitions
     @status.transition(
-        source=_get_payment_plan_model().Status.TP_OPEN,
-        target=_get_payment_plan_model().Status.TP_LOCKED,
+        source=PaymentPlan.Status.TP_OPEN,
+        target=PaymentPlan.Status.TP_LOCKED,
     )
     def status_tp_lock(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
         source=[
-            _get_payment_plan_model().Status.TP_LOCKED,
-            _get_payment_plan_model().Status.TP_STEFICON_COMPLETED,
-            _get_payment_plan_model().Status.TP_STEFICON_ERROR,
+            PaymentPlan.Status.TP_LOCKED,
+            PaymentPlan.Status.TP_STEFICON_COMPLETED,
+            PaymentPlan.Status.TP_STEFICON_ERROR,
         ],
-        target=_get_payment_plan_model().Status.TP_OPEN,
+        target=PaymentPlan.Status.TP_OPEN,
     )
     def status_tp_open(self):
         self.payment_plan.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.OPEN,
-        target=_get_payment_plan_model().Status.LOCKED,
+        source=PaymentPlan.Status.OPEN,
+        target=PaymentPlan.Status.LOCKED,
     )
     def status_lock(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.LOCKED,
-        target=_get_payment_plan_model().Status.OPEN,
+        source=PaymentPlan.Status.LOCKED,
+        target=PaymentPlan.Status.OPEN,
     )
     def status_unlock(self):
         self.background_action_status_none()
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.LOCKED_FSP,
-        target=_get_payment_plan_model().Status.LOCKED,
+        source=PaymentPlan.Status.LOCKED_FSP,
+        target=PaymentPlan.Status.LOCKED,
     )
     def status_unlock_fsp(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.LOCKED,
-        target=_get_payment_plan_model().Status.LOCKED_FSP,
+        source=PaymentPlan.Status.LOCKED,
+        target=PaymentPlan.Status.LOCKED_FSP,
     )
     def status_lock_fsp(self):
         self.background_action_status_none()
@@ -331,39 +319,39 @@ class PaymentPlanFlow:
 
     @status.transition(
         source=[
-            _get_payment_plan_model().Status.IN_APPROVAL,
-            _get_payment_plan_model().Status.IN_AUTHORIZATION,
-            _get_payment_plan_model().Status.IN_REVIEW,
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
         ],
-        target=_get_payment_plan_model().Status.LOCKED_FSP,
+        target=PaymentPlan.Status.LOCKED_FSP,
     )
     def status_reject(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.LOCKED_FSP,
-        target=_get_payment_plan_model().Status.IN_APPROVAL,
+        source=PaymentPlan.Status.LOCKED_FSP,
+        target=PaymentPlan.Status.IN_APPROVAL,
     )
     def status_send_to_approval(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.IN_APPROVAL,
-        target=_get_payment_plan_model().Status.IN_AUTHORIZATION,
+        source=PaymentPlan.Status.IN_APPROVAL,
+        target=PaymentPlan.Status.IN_AUTHORIZATION,
     )
     def status_approve(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.IN_AUTHORIZATION,
-        target=_get_payment_plan_model().Status.IN_REVIEW,
+        source=PaymentPlan.Status.IN_AUTHORIZATION,
+        target=PaymentPlan.Status.IN_REVIEW,
     )
     def status_authorize(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.IN_REVIEW,
-        target=_get_payment_plan_model().Status.ACCEPTED,
+        source=PaymentPlan.Status.IN_REVIEW,
+        target=PaymentPlan.Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self):
         from hope.models.payment_verification_summary import PaymentVerificationSummary
@@ -375,58 +363,58 @@ class PaymentPlanFlow:
 
     @status.transition(
         source=[
-            _get_payment_plan_model().Status.ACCEPTED,
-            _get_payment_plan_model().Status.FINISHED,
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
         ],
-        target=_get_payment_plan_model().Status.FINISHED,
+        target=PaymentPlan.Status.FINISHED,
     )
     def status_finished(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.FINISHED,
-        target=_get_payment_plan_model().Status.CLOSED,
+        source=PaymentPlan.Status.FINISHED,
+        target=PaymentPlan.Status.CLOSED,
     )
     def status_close(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
         source=[
-            _get_payment_plan_model().Status.TP_LOCKED,
-            _get_payment_plan_model().Status.TP_STEFICON_COMPLETED,
-            _get_payment_plan_model().Status.TP_STEFICON_ERROR,
-            _get_payment_plan_model().Status.OPEN,
+            PaymentPlan.Status.TP_LOCKED,
+            PaymentPlan.Status.TP_STEFICON_COMPLETED,
+            PaymentPlan.Status.TP_STEFICON_ERROR,
+            PaymentPlan.Status.OPEN,
         ],
-        target=_get_payment_plan_model().Status.DRAFT,
+        target=PaymentPlan.Status.DRAFT,
     )
     def status_draft(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.DRAFT,
-        target=_get_payment_plan_model().Status.OPEN,
+        source=PaymentPlan.Status.DRAFT,
+        target=PaymentPlan.Status.OPEN,
     )
     def status_open(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
         source=[
-            _get_payment_plan_model().Status.OPEN,
-            _get_payment_plan_model().Status.LOCKED,
-            _get_payment_plan_model().Status.LOCKED_FSP,
-            _get_payment_plan_model().Status.IN_APPROVAL,
-            _get_payment_plan_model().Status.IN_AUTHORIZATION,
-            _get_payment_plan_model().Status.IN_REVIEW,
-            _get_payment_plan_model().Status.ACCEPTED,
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+            PaymentPlan.Status.LOCKED_FSP,
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+            PaymentPlan.Status.ACCEPTED,
         ],
-        target=_get_payment_plan_model().Status.ABORTED,
+        target=PaymentPlan.Status.ABORTED,
     )
     def status_abort(self):
         self.payment_plan.status_date = timezone.now()
 
     @status.transition(
-        source=_get_payment_plan_model().Status.ABORTED,
-        target=_get_payment_plan_model().Status.OPEN,
+        source=PaymentPlan.Status.ABORTED,
+        target=PaymentPlan.Status.OPEN,
     )
     def status_reactivate_abort(self):
         self.payment_plan.status_date = timezone.now()
