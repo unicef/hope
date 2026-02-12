@@ -306,6 +306,11 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={individual.identificationKeyLabel}>
+            {individual?.identificationKey}
+          </LabelizedField>
+        </Grid>
         <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
