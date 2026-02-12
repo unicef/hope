@@ -203,6 +203,12 @@ export function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField
+              label={t('Extras')}
+              value={payment.extras ? safeStringify(payment.extras) : '-'}
+            />
+          </Grid>
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
