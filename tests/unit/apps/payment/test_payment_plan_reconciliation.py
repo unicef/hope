@@ -22,7 +22,13 @@ from extras.test_utils.factories import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hope.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan, User
+from hope.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    User,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -84,6 +90,25 @@ def payment_verification_plan(payment_plan_finished: PaymentPlan) -> PaymentVeri
     return PaymentVerificationPlanFactory(
         payment_plan=payment_plan_finished,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
+    )
+
+
+@pytest.fixture
+def payment_for_extras(
+    payment_plan_finished: PaymentPlan,
+    base_context: dict[str, Any],
+) -> Payment:
+    household = HouseholdFactory(
+        business_area=base_context["business_area"],
+        program=base_context["program"],
+        registration_data_import=base_context["registration_data_import"],
+    )
+    return PaymentFactory(
+        parent=payment_plan_finished,
+        household=household,
+        collector=household.head_of_household,
+        entitlement_quantity=Decimal(500),
+        delivered_quantity=Decimal(400),
     )
 
 
@@ -290,3 +315,81 @@ def test_import_row_updates_payment_and_verification_status(
     assert payment_1.additional_collector_name == "Additional Collector"
     assert payment_1.additional_document_type == "Additional Document Type"
     assert payment_1.additional_document_number == "Additional Document Number"
+
+
+def test_import_row_saves_extra_columns_to_extras(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1", "custom_field_2"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    import_service._import_row(
+        [Row(str(payment.id)), Row(450), Row("abc"), Row(42)],
+        1,
+    )
+    payment.save()
+    payment.refresh_from_db()
+
+    assert payment.extras == {"custom_field_1": "abc", "custom_field_2": 42}
+
+
+def test_import_row_empty_extras_stays_empty_dict(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    import_service._import_row(
+        [Row(str(payment.id)), Row(450), Row(None)],
+        1,
+    )
+    payment.save()
+    payment.refresh_from_db()
+
+    assert payment.extras == {}
+
+
+def test_validate_extras_sets_is_updated_when_extras_change(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row(str(payment.pk)), Row(500), Row("new_value")]
+
+    assert import_service.is_updated is False
+    import_service._validate_extras(row)
+    assert import_service.is_updated is True
+
+
+def test_known_columns_not_in_extras(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "currency", "fsp_name", "custom_extra"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row(str(payment.pk)), Row(450), Row("USD"), Row("Bank"), Row("extra_val")]
+
+    extras = import_service._get_extras_for_row(row)
+
+    assert extras == {"custom_extra": "extra_val"}

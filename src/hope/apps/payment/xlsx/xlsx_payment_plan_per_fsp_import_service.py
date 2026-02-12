@@ -21,7 +21,7 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import Payment, PaymentVerification
+from hope.models import FinancialServiceProviderXlsxTemplate, Payment, PaymentVerification
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
+    KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
 
     class XlsxPaymentPlanImportPerFspServiceError(Exception):
         pass
@@ -188,6 +189,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             if reference_id != payment.transaction_reference_id:
                 self.is_updated = True
 
+    def _validate_extras(self, row: Row) -> None:
+        payment_id = row[self.xlsx_headers.index("payment_id")].value
+        payment = self.payments_dict.get(payment_id)
+        if payment is None:
+            return
+
+        new_extras = self._get_extras_for_row(row)
+        if new_extras != (payment.extras or {}):
+            self.is_updated = True
+
     def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
@@ -198,6 +209,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._validate_delivery_date(row)
             self._validate_reason_for_unsuccessful_payment(row)
             self._validate_reference_id(row)
+            self._validate_extras(row)
 
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
@@ -242,6 +254,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "additional_document_type",
                 "additional_document_number",
                 "transaction_status_blockchain_link",
+                "extras",
             ),
             batch_size=500,
         )
@@ -283,6 +296,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             transaction_status_blockchain_link,
         ) = self._get_values_for_update(row)
 
+        new_extras = self._get_extras_for_row(row)
+
         delivery_date, payment_delivery_date = self._set_payment_delivery_date(delivery_date, payment)
 
         # convert to date
@@ -312,6 +327,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 or (additional_document_number != payment.additional_document_number)
                 or (reference_id != payment.transaction_reference_id)
                 or (transaction_status_blockchain_link != payment.transaction_status_blockchain_link)
+                or (new_extras != (payment.extras or {}))
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
@@ -333,6 +349,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.additional_document_number = additional_document_number
                 payment.transaction_reference_id = reference_id
                 payment.transaction_status_blockchain_link = transaction_status_blockchain_link
+                payment.extras = new_extras
 
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
@@ -414,3 +431,20 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         else:
             additional_document_number = None
         return additional_document_number, additional_document_type
+
+    def _get_extras_for_row(self, row: Row) -> dict:
+        extras: dict[str, object] = {}
+        for idx, header in enumerate(self.xlsx_headers):
+            if header in self.KNOWN_COLUMNS:
+                continue
+            value = row[idx].value
+            if value is None or value == "":
+                continue
+            if isinstance(value, Decimal):
+                value = float(value)
+            elif isinstance(value, datetime.datetime):
+                value = value.isoformat()
+            elif not isinstance(value, int | float | bool):
+                value = str(value)
+            extras[header] = value
+        return extras
