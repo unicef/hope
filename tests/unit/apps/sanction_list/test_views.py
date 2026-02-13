@@ -12,7 +12,7 @@ from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
 from extras.test_utils.old_factories.core import create_afghanistan
 from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_datahub.validators import XlsxError
+from hope.apps.registration_data.validators import XlsxError
 from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
