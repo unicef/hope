@@ -4,6 +4,8 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
+from extras.test_utils.factories import RegistrationDataImportFactory
+from hope.apps.household.const import HEAD
 from hope.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
 pytestmark = pytest.mark.django_db
@@ -12,6 +14,11 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def task():
     return RdiXlsxCreateTask()
+
+
+@pytest.fixture
+def rdi():
+    return RegistrationDataImportFactory()
 
 
 def _make_header_cells(names: list[str]) -> list:
@@ -163,26 +170,19 @@ def test_process_regular_field_none_value_returns_true(task):
     obj = MagicMock()
     obj.some_attr = "old"
     combined_fields = {"some_field": {"name": "some_attr"}}
-    with patch.object(task, "_cast_value", return_value=None):
-        result = task._process_regular_field("some_field", None, MagicMock(), obj, combined_fields)
+    result = task._process_regular_field("some_field", None, MagicMock(), obj, combined_fields)
     assert result is True
 
 
 # --- _create_pending_object_factory ---
 
 
-def test_create_pending_object_factory_households(task):
-    from extras.test_utils.factories import RegistrationDataImportFactory
-
-    rdi = RegistrationDataImportFactory()
+def test_create_pending_object_factory_households(task, rdi):
     factory = task._create_pending_object_factory("households", rdi)
     assert callable(factory)
 
 
-def test_create_pending_object_factory_individuals(task):
-    from extras.test_utils.factories import RegistrationDataImportFactory
-
-    rdi = RegistrationDataImportFactory()
+def test_create_pending_object_factory_individuals(task, rdi):
     factory = task._create_pending_object_factory("individuals", rdi)
     assert callable(factory)
 
@@ -191,3 +191,193 @@ def test_create_pending_object_factory_invalid_raises(task):
     rdi = MagicMock()
     with pytest.raises(ValueError, match="Unhandled sheet label"):
         task._create_pending_object_factory("invalid_sheet", rdi)
+
+
+# --- _extract_household_id_from_row ---
+
+
+def test_extract_household_id_from_row_none_idx_returns_none(task):
+    row = _make_header_cells(["some_value"])
+    obj_to_create = MagicMock()
+    result = task._extract_household_id_from_row(row, None, "households", obj_to_create)
+    assert result is None
+
+
+def test_extract_household_id_from_row_string_value(task):
+    cell = MagicMock()
+    cell.value = "HH-ABC"
+    row = (cell,)
+    obj_to_create = MagicMock()
+    result = task._extract_household_id_from_row(row, 0, "households", obj_to_create)
+    assert result == "HH-ABC"
+
+
+def test_extract_household_id_from_row_float_to_int(task):
+    cell = MagicMock()
+    cell.value = 1.0
+    row = (cell,)
+    obj_to_create = MagicMock()
+    result = task._extract_household_id_from_row(row, 0, "households", obj_to_create)
+    assert result == "1"
+
+
+def test_extract_household_id_from_row_individuals_sets_household(task):
+    mock_household = MagicMock()
+    task.households = {"1": mock_household}
+    cell = MagicMock()
+    cell.value = 1.0
+    row = (cell,)
+    obj_to_create = MagicMock()
+    result = task._extract_household_id_from_row(row, 0, "individuals", obj_to_create)
+    assert result == "1"
+    assert obj_to_create.household == mock_household
+
+
+# --- _handle_head_of_household_relationship ---
+
+
+def test_handle_head_of_household_sets_head(task):
+    mock_household = MagicMock()
+    task.households = {"1": mock_household}
+    rel_cell = MagicMock()
+    rel_cell.value = HEAD
+    row = (MagicMock(), rel_cell)
+    obj_to_create = MagicMock()
+    households_to_update = []
+    task._handle_head_of_household_relationship(row, 1, "1", obj_to_create, households_to_update)
+    assert mock_household.head_of_household == obj_to_create
+    assert mock_household in households_to_update
+
+
+def test_handle_head_of_household_no_rel_col_noop(task):
+    mock_household = MagicMock()
+    task.households = {"1": mock_household}
+    row = (MagicMock(),)
+    obj_to_create = MagicMock()
+    households_to_update = []
+    task._handle_head_of_household_relationship(row, None, "1", obj_to_create, households_to_update)
+    assert households_to_update == []
+
+
+def test_handle_head_of_household_non_head_noop(task):
+    mock_household = MagicMock()
+    task.households = {"1": mock_household}
+    rel_cell = MagicMock()
+    rel_cell.value = "WIFE"
+    row = (MagicMock(), rel_cell)
+    obj_to_create = MagicMock()
+    households_to_update = []
+    task._handle_head_of_household_relationship(row, 1, "1", obj_to_create, households_to_update)
+    assert households_to_update == []
+
+
+# --- _process_lookup_field ---
+
+
+def test_process_lookup_field_sets_value(task):
+    obj_to_create = MagicMock()
+    obj_to_create.some_lookup = "old"
+    combined_fields = {"some_header": {"lookup": "some_lookup"}}
+    task.COMBINED_FIELDS["some_header"] = {"type": "STRING"}
+    result = task._process_lookup_field("some_header", "raw", obj_to_create, combined_fields)
+    assert result is True
+    assert obj_to_create.some_lookup == "raw"
+
+
+def test_process_lookup_field_household_id_returns_false(task):
+    obj_to_create = MagicMock()
+    combined_fields = {"household_id": {"lookup": "household"}}
+    result = task._process_lookup_field("household_id", "val", obj_to_create, combined_fields)
+    assert result is False
+
+
+def test_process_lookup_field_empty_value_returns_true(task):
+    obj_to_create = MagicMock()
+    obj_to_create.some_lookup = "old"
+    combined_fields = {"some_header": {"lookup": "some_lookup"}}
+    result = task._process_lookup_field("some_header", None, obj_to_create, combined_fields)
+    assert result is True
+    # value should not have been changed since cast returned None
+    assert obj_to_create.some_lookup == "old"
+
+
+# --- _process_flex_field ---
+
+
+def test_process_flex_field_not_in_flex_fields(task):
+    task.FLEX_FIELDS = {"individuals": {}}
+    obj_to_create = MagicMock()
+    obj_to_create.flex_fields = {}
+    result = task._process_flex_field("unknown_header", "val", MagicMock(), obj_to_create, "individuals", {}, {})
+    assert result is False
+
+
+def test_process_flex_field_simple_type(task):
+    task.FLEX_FIELDS = {"individuals": {"flex_header": {"type": "STRING"}}}
+    task.COMBINED_FIELDS["flex_header"] = {"type": "STRING"}
+    obj_to_create = MagicMock()
+    obj_to_create.flex_fields = {}
+    result = task._process_flex_field("flex_header", "raw", MagicMock(), obj_to_create, "individuals", {}, {})
+    assert result is True
+    assert obj_to_create.flex_fields["flex_header"] == "raw"
+
+
+def test_process_flex_field_complex_type_calls_handler(task):
+    task.FLEX_FIELDS = {"individuals": {"flex_header": {"type": "IMAGE"}}}
+    task.COMBINED_FIELDS["flex_header"] = {"type": "STRING"}
+    handler = MagicMock(return_value="image_path")
+    complex_types = {"IMAGE": handler}
+    obj_to_create = MagicMock()
+    obj_to_create.flex_fields = {}
+    cell = MagicMock()
+    current_field = {"required": True}
+    result = task._process_flex_field(
+        "flex_header", "raw", cell, obj_to_create, "individuals", current_field, complex_types
+    )
+    assert result is True
+    handler.assert_called_once_with(
+        value="raw", cell=cell, header="flex_header", is_flex_field=True, is_field_required=True
+    )
+    assert obj_to_create.flex_fields["flex_header"] == "image_path"
+
+
+def test_process_flex_field_none_value_not_set(task):
+    task.FLEX_FIELDS = {"individuals": {"flex_header": {"type": "STRING"}}}
+    obj_to_create = MagicMock()
+    obj_to_create.flex_fields = {}
+    result = task._process_flex_field("flex_header", None, MagicMock(), obj_to_create, "individuals", {}, {})
+    assert result is True
+    assert "flex_header" not in obj_to_create.flex_fields
+
+
+# --- _build_complex_fields_config ---
+
+
+def test_build_complex_fields_config_returns_two_dicts(task):
+    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
+        mock_dt_objects.all.return_value = []
+        complex_fields, complex_types = task._build_complex_fields_config()
+    assert isinstance(complex_fields, dict)
+    assert isinstance(complex_types, dict)
+
+
+def test_build_complex_fields_config_has_expected_individual_keys(task):
+    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
+        mock_dt_objects.all.return_value = []
+        complex_fields, _ = task._build_complex_fields_config()
+    individuals_keys = complex_fields["individuals"]
+    assert "photo_i_c" in individuals_keys
+    assert "primary_collector_id" in individuals_keys
+    assert "alternate_collector_id" in individuals_keys
+    assert "unhcr_id_no_i_c" in individuals_keys
+    assert "scope_id_no_i_c" in individuals_keys
+
+
+def test_build_complex_fields_config_complex_types_has_expected_keys(task):
+    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
+        mock_dt_objects.all.return_value = []
+        _, complex_types = task._build_complex_fields_config()
+    assert "GEOPOINT" in complex_types
+    assert "IMAGE" in complex_types
+    assert "DECIMAL" in complex_types
+    assert "BOOL" in complex_types

@@ -76,10 +76,12 @@ def test_init_doc_identity_dicts_identities_keys():
 def test_init_doc_identity_dicts_identities_have_empty_lists():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     identities, _ = UploadXLSXInstanceValidator._init_doc_identity_dicts(validator)
-    for value in identities.values():
-        assert value["validation_data"] == []
-        assert value["numbers"] == []
-        assert value["issuing_countries"] == []
+    assert identities["unhcr_id_no_i_c"]["validation_data"] == []
+    assert identities["unhcr_id_no_i_c"]["numbers"] == []
+    assert identities["unhcr_id_no_i_c"]["issuing_countries"] == []
+    assert identities["scope_id_no_i_c"]["validation_data"] == []
+    assert identities["scope_id_no_i_c"]["numbers"] == []
+    assert identities["scope_id_no_i_c"]["issuing_countries"] == []
 
 
 def test_init_doc_identity_dicts_documents_keys():
@@ -307,3 +309,194 @@ def test_validate_household_roles_exactly_one_of_each():
     validator = MagicMock(spec=KoboProjectImportDataInstanceValidator)
     result = KoboProjectImportDataInstanceValidator._validate_household_roles(validator, 1, 1, 1)
     assert result == []
+
+
+# --- _process_row_household_data ---
+
+
+def test_process_row_household_data_no_hh_idx():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = []
+    validator.head_of_household_count = defaultdict(int)
+    row = _make_header_cells(["some_value"])
+    result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, None, None, "Individuals")
+    assert result is None
+
+
+def test_process_row_household_data_households_sheet():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = []
+    validator.head_of_household_count = defaultdict(int)
+    cell = MagicMock()
+    cell.value = "HH1"
+    row = (cell,)
+    result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, 0, None, "Households")
+    assert result == "HH1"
+    assert "HH1" in validator.household_ids
+    assert validator.head_of_household_count["HH1"] == 0
+
+
+def test_process_row_household_data_head_increments():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = []
+    validator.head_of_household_count = defaultdict(int)
+    hh_cell = MagicMock()
+    hh_cell.value = "HH1"
+    rel_cell = MagicMock()
+    rel_cell.value = "HEAD"
+    row = (hh_cell, rel_cell)
+    result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, 0, 1, "Individuals")
+    assert result == "HH1"
+    assert validator.head_of_household_count["HH1"] == 1
+
+
+def test_process_row_household_data_float_to_int():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = []
+    validator.head_of_household_count = defaultdict(int)
+    cell = MagicMock()
+    cell.value = 1.0
+    row = (cell,)
+    result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, 0, None, "Households")
+    assert result == 1
+    assert isinstance(result, int)
+    assert 1 in validator.household_ids
+
+
+# --- _validate_field_type ---
+
+
+def test_validate_field_type_valid():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    fn = MagicMock(return_value=True)
+    switch_dict = {"STRING": fn}
+    cell = MagicMock()
+    cell.row = 3
+    result = UploadXLSXInstanceValidator._validate_field_type(
+        validator, "some_value", "name_field", cell, "STRING", "Individuals", switch_dict, False
+    )
+    assert result is None
+
+
+def test_validate_field_type_invalid():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    fn = MagicMock(return_value=False)
+    switch_dict = {"STRING": fn}
+    cell = MagicMock()
+    cell.row = 5
+    result = UploadXLSXInstanceValidator._validate_field_type(
+        validator, "bad_value", "name_field", cell, "STRING", "Individuals", switch_dict, False
+    )
+    assert result is not None
+    assert result["row_number"] == 5
+    assert result["header"] == "name_field"
+    assert "Unexpected value" in result["message"]
+
+
+def test_validate_field_type_admin_column_skipped():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    fn = MagicMock(return_value=False)
+    switch_dict = {"STRING": fn}
+    cell = MagicMock()
+    cell.row = 3
+    # admin1_h_c is in admin_columns_all, so even with fn returning False, no error is returned
+    result = UploadXLSXInstanceValidator._validate_field_type(
+        validator, "bad_value", "admin1_h_c", cell, "STRING", "Households", switch_dict, False
+    )
+    assert result is None
+
+
+# --- _validate_row_household_reference ---
+
+
+def test_validate_row_household_reference_missing():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = ["HH1", "HH2"]
+    result = UploadXLSXInstanceValidator._validate_row_household_reference(validator, "HH999", 10)
+    assert result is not None
+    assert result["row_number"] == 10
+    assert result["header"] == "relationship_i_c"
+    assert "no household" in result["message"].lower() or "There is no household" in result["message"]
+
+
+def test_validate_row_household_reference_exists():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = ["HH1", "HH2"]
+    result = UploadXLSXInstanceValidator._validate_row_household_reference(validator, "HH1", 10)
+    assert result is None
+
+
+# --- _run_document_identity_validation ---
+
+
+def test_run_doc_identity_validation_individuals_calls_validators():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.documents_validator = MagicMock(return_value=[{"error": "doc_error"}])
+    validator.identity_validator = MagicMock(return_value=[{"error": "ident_error"}])
+    docs = {"some_doc": {}}
+    idents = {"some_ident": {}}
+    invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
+        validator, "Individuals", docs, idents
+    )
+    validator.documents_validator.assert_called_once_with(docs)
+    validator.identity_validator.assert_called_once_with(idents)
+    assert invalid_doc_rows == [{"error": "doc_error"}]
+    assert invalid_ident_rows == [{"error": "ident_error"}]
+
+
+def test_run_doc_identity_validation_households_returns_empty():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.documents_validator = MagicMock()
+    validator.identity_validator = MagicMock()
+    invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
+        validator, "Households", {}, {}
+    )
+    validator.documents_validator.assert_not_called()
+    validator.identity_validator.assert_not_called()
+    assert invalid_doc_rows == []
+    assert invalid_ident_rows == []
+
+
+# --- _accumulate_doc_identity_validation_data ---
+
+
+def test_accumulate_data_adds_to_lists():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    # Use the real DOCUMENTS_ISSUING_COUNTRIES_MAPPING from ImportDataInstanceValidator
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+
+    # Build identities_numbers and documents_numbers with empty validation_data lists
+    # The mapping values are the keys we need in these dicts
+    identities_numbers = {
+        "unhcr_id_no_i_c": {"validation_data": []},
+        "scope_id_no_i_c": {"validation_data": []},
+    }
+    documents_numbers = {
+        "birth_certificate_no_i_c": {"validation_data": []},
+        "drivers_license_no_i_c": {"validation_data": []},
+        "electoral_card_no_i_c": {"validation_data": []},
+        "national_id_no_i_c": {"validation_data": []},
+        "national_passport_no_i_c": {"validation_data": []},
+        "tax_id_no_i_c": {"validation_data": []},
+        "other_id_type_i_c": {"validation_data": []},
+    }
+
+    # Create a mock row where row[0].row returns a row number
+    first_cell = MagicMock()
+    first_cell.row = 7
+    row = (first_cell,)
+
+    UploadXLSXInstanceValidator._accumulate_doc_identity_validation_data(
+        validator, row, identities_numbers, documents_numbers
+    )
+
+    # Each value in the mapping should have had a validation_data entry appended
+    assert {"row_number": 7} in identities_numbers["unhcr_id_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in identities_numbers["scope_id_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["birth_certificate_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["drivers_license_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["electoral_card_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["national_id_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["national_passport_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["tax_id_no_i_c"]["validation_data"]
+    assert {"row_number": 7} in documents_numbers["other_id_type_i_c"]["validation_data"]
