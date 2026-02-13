@@ -213,8 +213,10 @@ class TestSmokeGrievanceDashboard:
         from selenium.webdriver.support.ui import WebDriverWait
 
         def closed_ticket_count_is_one(driver):
-            text = page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated().text
-            return "1" in text
+            element = (
+                page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated()
+            )
+            return "1" in element.text
 
         WebDriverWait(page_grievance_dashboard.driver, 10).until(closed_ticket_count_is_one)
 
