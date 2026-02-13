@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 import factory
 import pytest
 from pytz import utc
-from selenium.common import NoSuchElementException, StaleElementReferenceException
+from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
@@ -999,14 +999,7 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
-        # Retry logic to handle stale element
-        for attempt in range(5):
-            try:
-                assert "New Target Population" in page_targeting_create.get_page_header_title().text
-                break
-            except StaleElementReferenceException:
-                if attempt == 4:
-                    raise
+        assert "New Target Population" in page_targeting_create.get_page_header_title().text
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
