@@ -1475,6 +1475,11 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
 
+class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
+    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2)
+    version = serializers.IntegerField(required=False)
+
+
 class FspChoiceSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 
