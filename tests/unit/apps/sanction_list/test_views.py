@@ -10,7 +10,7 @@ from rest_framework import status
 
 from extras.test_utils.factories import BusinessAreaFactory, PartnerFactory, SanctionListIndividualFactory, UserFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_datahub.validators import XlsxError
+from hope.apps.registration_data.validators import XlsxError
 from hope.apps.sanction_list.api.views import SanctionListIndividualViewSet
 
 pytestmark = pytest.mark.django_db
