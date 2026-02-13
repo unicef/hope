@@ -14,7 +14,7 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.registration_datahub.validators import XlsxError, XLSXValidator
+from hope.apps.registration_data.validators import XlsxError, XLSXValidator
 from hope.apps.sanction_list.api.serializers import (
     CheckAgainstSanctionListCreateSerializer,
     CheckAgainstSanctionListSerializer,
