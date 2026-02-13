@@ -3,8 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.old_factories.household import HouseholdFactory
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, UserFactory
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
 from hope.config import settings
