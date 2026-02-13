@@ -68,7 +68,7 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_datahub.services.biometric_deduplication import (
+from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
 from hope.models import (

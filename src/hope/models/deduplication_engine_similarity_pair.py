@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 from django.db import models, transaction
 from django.db.models import QuerySet
 
-from hope.apps.registration_datahub.apis.deduplication_engine import SimilarityPair
+from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
 from hope.models.individual import Individual
 from hope.models.registration_data_import import logger
 

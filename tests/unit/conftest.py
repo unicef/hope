@@ -146,12 +146,12 @@ def mock_elasticsearch(mocker: Any) -> None:
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
     )
     # Mock deduplication that uses ES
-    mocker.patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
+    mocker.patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
     mocker.patch(
-        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
     )
     mocker.patch(
-        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
 
 
