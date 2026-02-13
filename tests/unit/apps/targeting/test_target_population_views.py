@@ -108,32 +108,21 @@ def list_url(business_area, programs):
 
 
 @pytest.mark.parametrize(
-    ("permissions", "partner_permissions", "access_to_program", "expected_status"),
+    ("permissions", "partner_permissions", "expected_status"),
     [
-        ([], [], True, status.HTTP_403_FORBIDDEN),
-        ([Permissions.TARGETING_VIEW_LIST], [], True, status.HTTP_200_OK),
-        ([], [Permissions.TARGETING_VIEW_LIST], True, status.HTTP_200_OK),
+        ([], [], status.HTTP_403_FORBIDDEN),
+        ([Permissions.TARGETING_VIEW_LIST], [], status.HTTP_200_OK),
+        ([], [Permissions.TARGETING_VIEW_LIST], status.HTTP_200_OK),
         (
             [Permissions.TARGETING_VIEW_LIST],
             [Permissions.TARGETING_VIEW_LIST],
-            True,
             status.HTTP_200_OK,
-        ),
-        ([], [], False, status.HTTP_403_FORBIDDEN),
-        ([Permissions.TARGETING_VIEW_LIST], [], False, status.HTTP_403_FORBIDDEN),
-        ([], [Permissions.TARGETING_VIEW_LIST], False, status.HTTP_403_FORBIDDEN),
-        (
-            [Permissions.TARGETING_VIEW_LIST],
-            [Permissions.TARGETING_VIEW_LIST],
-            False,
-            status.HTTP_403_FORBIDDEN,
         ),
     ],
 )
-def test_list_target_populations_permission(
+def test_list_target_populations_permission_with_access_to_program(
     permissions,
     partner_permissions,
-    access_to_program,
     expected_status,
     api_client_for_user,
     user,
@@ -147,12 +136,43 @@ def test_list_target_populations_permission(
     program1, _ = programs
 
     create_user_role_with_permissions(user, permissions, business_area)
+    create_user_role_with_permissions(user, permissions, business_area, program1)
+    create_partner_role_with_permissions(partner, partner_permissions, business_area, program1)
 
-    if access_to_program:
-        create_user_role_with_permissions(user, permissions, business_area, program1)
-        create_partner_role_with_permissions(partner, partner_permissions, business_area, program1)
-    else:
-        create_partner_role_with_permissions(partner, partner_permissions, business_area)
+    response = api_client_for_user.get(list_url)
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "partner_permissions", "expected_status"),
+    [
+        ([], [], status.HTTP_403_FORBIDDEN),
+        ([Permissions.TARGETING_VIEW_LIST], [], status.HTTP_403_FORBIDDEN),
+        ([], [Permissions.TARGETING_VIEW_LIST], status.HTTP_403_FORBIDDEN),
+        (
+            [Permissions.TARGETING_VIEW_LIST],
+            [Permissions.TARGETING_VIEW_LIST],
+            status.HTTP_403_FORBIDDEN,
+        ),
+    ],
+)
+def test_list_target_populations_permission_without_access_to_program(
+    permissions,
+    partner_permissions,
+    expected_status,
+    api_client_for_user,
+    user,
+    partner,
+    business_area,
+    programs,
+    list_url,
+    create_user_role_with_permissions,
+    create_partner_role_with_permissions,
+):
+    program1, _ = programs
+
+    create_user_role_with_permissions(user, permissions, business_area)
+    create_partner_role_with_permissions(partner, partner_permissions, business_area)
 
     response = api_client_for_user.get(list_url)
     assert response.status_code == expected_status
