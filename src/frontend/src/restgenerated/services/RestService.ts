@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
+import type { ApplyFlatAmountEntitlement } from '../models/ApplyFlatAmountEntitlement';
 import type { AreaList } from '../models/AreaList';
 import type { AreaTree } from '../models/AreaTree';
 import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
@@ -9680,6 +9681,36 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
+        });
+    }
+    /**
+     * @returns ApplyFlatAmountEntitlement
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        formData,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        formData: ApplyFlatAmountEntitlement,
+    }): CancelablePromise<ApplyFlatAmountEntitlement> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-flat-amount/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**

@@ -17,14 +17,18 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography,
+  TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -32,9 +36,6 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -110,6 +111,11 @@ function Entitlement({
       ? String(paymentPlan.steficonRule.rule.id)
       : '',
   );
+  const [flatAmount, setFlatAmount] = useState<string>(
+    (paymentPlan as any).flatAmountValue
+      ? String((paymentPlan as any).flatAmountValue)
+      : '',
+  );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
     useMutation({
@@ -137,6 +143,41 @@ function Entitlement({
         queryClient.invalidateQueries({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         });
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
+
+  const { mutateAsync: applyFlatAmount, isPending: loadingSetFlatAmount } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        formData,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        formData: any;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            formData,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(
+          t('Flat amount is being applied, please wait until completed'),
+        );
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
+        setFlatAmount('');
       },
       onError: (error: any) => {
         showApiErrorMessages(error, showMessage);
@@ -220,15 +261,19 @@ function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid container alignItems="center">
+          <Grid container spacing={2} alignItems="center">
             <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
-                <Box mb={1}>
-                  <InputLabel>{t('Entitlement Formula')}</InputLabel>
+                <Box>
+                  <InputLabel size="small" htmlFor="entitlement-formula">
+                    {t('Entitlement Formula')}
+                  </InputLabel>
                 </Box>
                 <Select
+                  id="entitlement-formula"
                   size="small"
                   disabled={shouldDisableEntitlementSelect}
+                  label={t('Entitlement Formula')}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: 'bottom',
@@ -273,10 +318,11 @@ function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 1 }}>
+            <Grid size={{ xs: 2 }}>
               <Button
                 variant="contained"
                 color="primary"
+                sx={{ ml: 1 }}
                 disabled={
                   loadingSetSteficonRule ||
                   !steficonRuleValue ||
@@ -312,6 +358,70 @@ function Entitlement({
               </Button>
             </Grid>
           </Grid>
+          <Box display="flex" alignItems="center">
+            <OrDivider />
+            <DividerLabel>Or</DividerLabel>
+            <OrDivider />
+          </Box>
+          <Box mt={3} mb={3}>
+            <Typography variant="h6" gutterBottom>
+              {t('Fixed Amount')}
+            </Typography>
+            <GreyText>{t('Entitlement Quantity')}</GreyText>
+            <Grid container spacing={2} alignItems="center">
+              <Grid size={{ xs: 10 }}>
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  label={t('Enter amount')}
+                  disabled={shouldDisableEntitlementSelect}
+                  value={flatAmount}
+                  onChange={(e) => setFlatAmount(e.target.value)}
+                  placeholder={t('Enter amount')}
+                  data-cy="input-flat-amount"
+                />
+              </Grid>
+              <Grid size={{ xs: 2 }}>
+                <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  loading={loadingSetFlatAmount}
+                  sx={{ ml: 1 }}
+                  disabled={
+                    loadingSetFlatAmount ||
+                    !flatAmount ||
+                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                    paymentPlan.backgroundActionStatus ===
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                    !isActiveProgram
+                  }
+                  data-cy="button-apply-flat-amount"
+                  onClick={async () => {
+                    try {
+                      await applyFlatAmount({
+                        programSlug: programId,
+                        businessAreaSlug: businessArea,
+                        id: paymentPlan.id,
+                        formData: {
+                          flatAmountValue: flatAmount,
+                          version: paymentPlan.version,
+                        },
+                      });
+                    } catch (e) {
+                      showApiErrorMessages(e, showMessage);
+                    }
+                  }}
+                >
+                  {t('Apply')}
+                </LoadingButton>
+              </Grid>
+            </Grid>
+            <GreyTextSmall>
+              {t('Set the same amount for all payment records')}
+            </GreyTextSmall>
+          </Box>
           <Box display="flex" alignItems="center">
             <OrDivider />
             <DividerLabel>Or</DividerLabel>

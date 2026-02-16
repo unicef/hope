@@ -1,11 +1,10 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
@@ -18,13 +17,18 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography,
+  TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
+import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -32,8 +36,6 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
-import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { showApiErrorMessages, formatFigure } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -94,7 +96,7 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export function Entitlement({
+function Entitlement({
   paymentPlan,
   permissions,
 }: EntitlementProps): ReactElement {
@@ -107,6 +109,11 @@ export function Entitlement({
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.rule?.id
       ? String(paymentPlan.steficonRule.rule.id)
+      : '',
+  );
+  const [flatAmount, setFlatAmount] = useState<string>(
+    (paymentPlan as any).flatAmountValue
+      ? String((paymentPlan as any).flatAmountValue)
       : '',
   );
 
@@ -137,8 +144,43 @@ export function Entitlement({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         });
       },
-      onError: (e) => {
-        showApiErrorMessages(e, showMessage);
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
+
+  const { mutateAsync: applyFlatAmount, isPending: loadingSetFlatAmount } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        formData,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        formData: any;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            formData,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(
+          t('Flat amount is being applied, please wait until completed'),
+        );
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
+        setFlatAmount('');
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
       },
     });
 
@@ -171,11 +213,14 @@ export function Entitlement({
           programSlug,
         },
       ),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
     },
-    onError: (e) => {
-      showApiErrorMessages(e, showMessage);
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -216,15 +261,19 @@ export function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid container alignItems="center">
+          <Grid container spacing={2} alignItems="center">
             <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
-                <Box mb={1}>
-                  <InputLabel>{t('Entitlement Formula')}</InputLabel>
+                <Box>
+                  <InputLabel size="small" htmlFor="entitlement-formula">
+                    {t('Entitlement Formula')}
+                  </InputLabel>
                 </Box>
                 <Select
+                  id="entitlement-formula"
                   size="small"
                   disabled={shouldDisableEntitlementSelect}
+                  label={t('Entitlement Formula')}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: 'bottom',
@@ -241,7 +290,6 @@ export function Entitlement({
                 >
                   {steficonData?.results?.map((each, index) => {
                     const hasDescription = Boolean(each?.description);
-
                     return (
                       <MenuItem
                         data-cy={`select-option-${index}`}
@@ -270,44 +318,110 @@ export function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid>
-              <Box ml={2}>
-                <Button
+            <Grid size={{ xs: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ ml: 1 }}
+                disabled={
+                  loadingSetSteficonRule ||
+                  !steficonRuleValue ||
+                  paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                  paymentPlan.backgroundActionStatus ===
+                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                  !isActiveProgram
+                }
+                data-cy="button-apply-steficon"
+                data-perm={
+                  PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS
+                }
+                onClick={async () => {
+                  try {
+                    await setSteficonRule({
+                      programSlug: programId,
+                      businessAreaSlug: businessArea,
+                      id: paymentPlan.id,
+                      requestBody: {
+                        engineFormulaRuleId: steficonRuleValue,
+                        version: paymentPlan.version,
+                      },
+                    });
+                    showMessage(
+                      t('Formula is executing, please wait until completed'),
+                    );
+                  } catch (e) {
+                    showApiErrorMessages(e, showMessage);
+                  }
+                }}
+              >
+                {t('Apply')}
+              </Button>
+            </Grid>
+          </Grid>
+          <Box display="flex" alignItems="center">
+            <OrDivider />
+            <DividerLabel>Or</DividerLabel>
+            <OrDivider />
+          </Box>
+          <Box mt={3} mb={3}>
+            <Typography variant="h6" gutterBottom>
+              {t('Fixed Amount')}
+            </Typography>
+            <GreyText>{t('Entitlement Quantity')}</GreyText>
+            <Grid container spacing={2} alignItems="center">
+              <Grid size={{ xs: 10 }}>
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  label={t('Enter amount')}
+                  disabled={shouldDisableEntitlementSelect}
+                  value={flatAmount}
+                  onChange={(e) => setFlatAmount(e.target.value)}
+                  placeholder={t('Enter amount')}
+                  data-cy="input-flat-amount"
+                />
+              </Grid>
+              <Grid size={{ xs: 2 }}>
+                <LoadingButton
                   variant="contained"
                   color="primary"
+                  loading={loadingSetFlatAmount}
+                  sx={{ ml: 1 }}
                   disabled={
-                    loadingSetSteficonRule ||
-                    !steficonRuleValue ||
+                    loadingSetFlatAmount ||
+                    !flatAmount ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
                       BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
-                  data-cy="button-apply-steficon"
+                  data-cy="button-apply-flat-amount"
                   onClick={async () => {
                     try {
-                      await setSteficonRule({
+                      await applyFlatAmount({
                         programSlug: programId,
                         businessAreaSlug: businessArea,
                         id: paymentPlan.id,
-                        requestBody: {
-                          engineFormulaRuleId: steficonRuleValue,
+                        formData: {
+                          flatAmountValue: flatAmount,
                           version: paymentPlan.version,
                         },
                       });
-                      showMessage(
-                        t('Formula is executing, please wait until completed'),
-                      );
                     } catch (e) {
                       showApiErrorMessages(e, showMessage);
                     }
                   }}
                 >
                   {t('Apply')}
-                </Button>
-              </Box>
+                </LoadingButton>
+              </Grid>
             </Grid>
-          </Grid>
+            <GreyTextSmall>
+              {t('Set the same amount for all payment records')}
+            </GreyTextSmall>
+          </Box>
           <Box display="flex" alignItems="center">
             <OrDivider />
             <DividerLabel>Or</DividerLabel>
@@ -384,7 +498,7 @@ export function Entitlement({
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.importedFileName ? (
+                    {paymentPlan?.importedFileDate ? (
                       <UniversalMoment>
                         {paymentPlan?.importedFileDate}
                       </UniversalMoment>
@@ -415,3 +529,5 @@ export function Entitlement({
     </Box>
   );
 }
+
+export default withErrorBoundary(Entitlement, 'Entitlement');
