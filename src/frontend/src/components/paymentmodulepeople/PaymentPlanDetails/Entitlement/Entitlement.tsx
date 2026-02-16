@@ -112,9 +112,7 @@ function Entitlement({
       : '',
   );
   const [flatAmount, setFlatAmount] = useState<string>(
-    (paymentPlan as any).flatAmountValue
-      ? String((paymentPlan as any).flatAmountValue)
-      : '',
+    paymentPlan.flatAmountValue ? paymentPlan.flatAmountValue : '',
   );
 
   const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
@@ -155,19 +153,19 @@ function Entitlement({
         businessAreaSlug,
         id,
         programSlug,
-        formData,
+        requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
         programSlug: string;
-        formData: any;
+        requestBody: any;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate(
           {
             businessAreaSlug,
             id,
             programSlug,
-            formData,
+            requestBody,
           },
         ),
       onSuccess: () => {
@@ -399,7 +397,7 @@ function Entitlement({
                         programSlug: programId,
                         businessAreaSlug: businessArea,
                         id: paymentPlan.id,
-                        formData: {
+                        requestBody: {
                           flatAmountValue: flatAmount,
                           version: paymentPlan.version,
                         },

@@ -9684,14 +9684,14 @@ export class RestService {
         });
     }
     /**
-     * @returns ApplyFlatAmountEntitlement
+     * @returns PaymentPlanDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate({
         businessAreaSlug,
         id,
         programSlug,
-        formData,
+        requestBody,
     }: {
         businessAreaSlug: string,
         /**
@@ -9699,8 +9699,8 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        formData: ApplyFlatAmountEntitlement,
-    }): CancelablePromise<ApplyFlatAmountEntitlement> {
+        requestBody: ApplyFlatAmountEntitlement,
+    }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-flat-amount/',
@@ -9709,8 +9709,8 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
-            formData: formData,
-            mediaType: 'multipart/form-data',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
