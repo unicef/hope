@@ -18,6 +18,7 @@ from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
@@ -123,7 +124,8 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 # regenerate always xlsx
                 service = XlsxPaymentPlanExportService(payment_plan)
                 service.save_xlsx_file(user)
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.save()
 
                 if payment_plan.business_area.enable_email_notification:
@@ -134,7 +136,8 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
             try:
                 raise self.retry(exc=e)
             except MaxRetriesExceededError:
-                payment_plan.background_action_status_xlsx_export_error()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_xlsx_export_error()
                 payment_plan.save(update_fields=["background_action_status", "updated_at"])
                 raise
 
@@ -195,7 +198,8 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 try:
                     raise self.retry(exc=e)
                 except MaxRetriesExceededError:
-                    payment_plan.background_action_status_xlsx_export_error()
+                    flow = PaymentPlanFlow(payment_plan)
+                    flow.background_action_status_xlsx_export_error()
                     payment_plan.save(update_fields=["background_action_status", "updated_at"])
                     raise
 
@@ -252,7 +256,8 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
             with transaction.atomic():
                 service.import_payment_list()
                 payment_plan.imported_file_date = timezone.now()
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.remove_export_files()
                 payment_plan.save()
                 payment_plan.update_money_fields()
@@ -261,7 +266,8 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
             payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("PaymentPlan Error import from xlsx")
-            payment_plan.background_action_status_xlsx_import_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
             payment_plan.save()
             raise self.retry(exc=e)
 
@@ -287,11 +293,12 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
             with transaction.atomic():
                 service.import_payment_list()
                 payment_plan.remove_export_files()
-                payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
                 payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
-                    payment_plan.status_finished()
+                    flow.status_finished()
 
                 payment_plan.save()
 
@@ -305,7 +312,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 
         except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
-            payment_plan.background_action_status_xlsx_import_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
             payment_plan.save()
             raise self.retry(exc=e)
 
@@ -329,7 +337,8 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     rule: RuleCommit | None = engine_rule.latest
     if not rule:
         logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
-        payment_plan.background_action_status_steficon_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
         payment_plan.save(update_fields=["background_action_status"])
         return
 
@@ -380,7 +389,8 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 )
 
             payment_plan.steficon_applied_date = now
-            payment_plan.background_action_status_none()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_none()
             with disable_concurrency(payment_plan):
                 payment_plan.remove_export_files()
                 payment_plan.remove_imported_file()
@@ -392,7 +402,8 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 
     except Exception as e:
         logger.exception("PaymentPlan Run Engine Rule Error")
-        payment_plan.background_action_status_steficon_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
         payment_plan.save()
         raise self.retry(exc=e)
 
@@ -479,16 +490,18 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
             return False
         with transaction.atomic():
-            payment_plan.build_status_building()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_building()
             payment_plan.save(update_fields=("build_status", "built_at"))
             set_sentry_business_area_tag(payment_plan.business_area.name)
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
-            payment_plan.build_status_ok()
+            flow.build_status_ok()
             payment_plan.save(update_fields=("build_status", "built_at"))
     except Exception as e:
-        payment_plan.build_status_failed()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_failed()
         payment_plan.save(update_fields=("build_status", "built_at"))
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -591,7 +604,8 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.exclusion_reason = exclusion_reason
 
             if error_msg:
-                payment_plan.background_action_status_exclude_beneficiaries_error()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_exclude_beneficiaries_error()
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
                 payment_plan.save(
                     update_fields=[
@@ -612,7 +626,8 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
 
-            payment_plan.background_action_status_none()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_none()
             payment_plan.exclude_household_error = str(info_msg or "")
             payment_plan.save(
                 update_fields=[
@@ -625,7 +640,8 @@ def payment_plan_exclude_beneficiaries(
             payment_plan.program_cycle.save()
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
-            payment_plan.background_action_status_exclude_beneficiaries_error()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
@@ -729,18 +745,20 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
         set_sentry_business_area_tag(payment_plan.business_area.name)
         user = User.objects.get(pk=user_id)
 
-        payment_plan.background_action_status_send_to_payment_gateway()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_send_to_payment_gateway()
         payment_plan.save(update_fields=["background_action_status"])
 
         PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
         PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
 
-        payment_plan.background_action_status_none()
+        flow.background_action_status_none()
         payment_plan.save(update_fields=["background_action_status"])
     except Exception:
         msg = "Error while sending to Payment Gateway"
         logger.exception(msg)
-        payment_plan.background_action_status_send_to_payment_gateway_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_send_to_payment_gateway_error()
         payment_plan.save(update_fields=["background_action_status"])
 
 
@@ -812,7 +830,8 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     rule: RuleCommit | None = engine_rule.latest
     if not rule:
         logger.error("PaymentPlan Run Engine Rule Error no RuleCommit")
-        payment_plan.background_action_status_steficon_error()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_steficon_error()
         payment_plan.save(update_fields=["background_action_status"])
         return
 
@@ -873,13 +892,15 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status_building()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
         payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
                 payment_plan.update_money_fields()
-                payment_plan.build_status_ok()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
@@ -900,18 +921,21 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str, update_money_fiel
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status_building()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
         payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 PaymentPlanService(payment_plan).full_rebuild()
-                payment_plan.build_status_ok()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
                 if update_money_fields:
                     payment_plan.update_money_fields()
         except Exception as e:
             logger.exception(e)
-            payment_plan.build_status_failed()
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
 
