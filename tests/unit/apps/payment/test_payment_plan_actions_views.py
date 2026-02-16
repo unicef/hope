@@ -95,6 +95,9 @@ def payment_plan_actions_context(
         "url_unlock_fsp": reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs),
         "url_export_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-export-xlsx", kwargs=url_kwargs),
         "url_import_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-import-xlsx", kwargs=url_kwargs),
+        "url_import_entitlement_flat_amount": reverse(
+            "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
+        ),
         "url_send_for_approval": reverse("api:payments:payment-plans-send-for-approval", kwargs=url_kwargs),
         "url_approval_process_reject": reverse("api:payments:payment-plans-reject", kwargs=url_kwargs),
         "url_approval_process_approve": reverse("api:payments:payment-plans-approve", kwargs=url_kwargs),
@@ -600,10 +603,78 @@ def test_pp_entitlement_import_xlsx(
     )
 
     assert response.status_code == status.HTTP_200_OK
-    if response.status_code == status.HTTP_200_OK:
-        pp = response.json()
-        assert pp["background_action_status"] == "XLSX_IMPORTING_ENTITLEMENTS"
-        assert pp["imported_file_name"].startswith("pp_entitlement_valid") is True
+    pp = response.json()
+    assert pp["background_action_status"] == "XLSX_IMPORTING_ENTITLEMENTS"
+    assert pp["imported_file_name"].startswith("pp_entitlement_valid") is True
+
+
+def test_pp_entitlement_flat_value_invalid_status(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.OPEN
+    payment_plan_actions_context["pp"].save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_import_entitlement_flat_amount"],
+        {"flat_amount_value": "111"},
+        format="json",
+    )
+    assert status.HTTP_400_BAD_REQUEST
+    assert "User can only set entitlements for LOCKED Payment Plan" in response.data
+
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
+    payment_plan_actions_context[
+        "pp"
+    ].background_action_status = PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS
+    payment_plan_actions_context["pp"].save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_import_entitlement_flat_amount"],
+        {"flat_amount_value": "222"},
+        format="json",
+    )
+    assert status.HTTP_400_BAD_REQUEST
+    assert "Import in progress" in response.data
+
+
+@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+def test_pp_entitlement_import_flat_value(
+    mock_exchange_rate: Any,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
+    payment_plan_actions_context["pp"].background_action_status = None
+    payment_plan_actions_context["pp"].save()
+    payment_1 = PaymentFactory(
+        parent=payment_plan_actions_context["pp"],
+        status=Payment.STATUS_PENDING,
+        currency="PLN",
+    )
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_import_entitlement_flat_amount"],
+        {"flat_amount_value": "25.11"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    pp = response.json()
+    assert pp["background_action_status"] == "IMPORTING_ENTITLEMENTS"
+    assert pp["flat_amount_value"] == "25.11"
 
 
 def test_pp_entitlement_import_xlsx_status_invalid(

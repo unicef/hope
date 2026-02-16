@@ -1051,7 +1051,7 @@ class PaymentPlanViewSet(
         )
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("User can only set entitlements for LOCKED Payment Plan")
-        if payment_plan.background_action_status is None:
+        if payment_plan.background_action_status is not None:
             raise ValidationError("Import in progress")
 
         if serializer.is_valid():
