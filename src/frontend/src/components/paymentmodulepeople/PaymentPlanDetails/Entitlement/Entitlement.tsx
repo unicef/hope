@@ -1,10 +1,11 @@
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
@@ -17,18 +18,14 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
-  Tooltip,
   Typography,
+  Tooltip,
+  TextField,
 } from '@mui/material';
-import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -36,6 +33,8 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import { showApiErrorMessages, formatFigure } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -96,7 +95,7 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-function Entitlement({
+export function Entitlement({
   paymentPlan,
   permissions,
 }: EntitlementProps): ReactElement {
@@ -144,8 +143,8 @@ function Entitlement({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         });
       },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
+      onError: (e) => {
+        showApiErrorMessages(e, showMessage);
       },
     });
 
@@ -213,14 +212,11 @@ function Entitlement({
           programSlug,
         },
       ),
-    onSuccess: async () => {
+    onSuccess: () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
-      await queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
-      });
     },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
+    onError: (e) => {
+      showApiErrorMessages(e, showMessage);
     },
   });
 
@@ -261,7 +257,7 @@ function Entitlement({
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid container spacing={2} alignItems="center">
+          <Grid container alignItems="center">
             <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box>
@@ -273,7 +269,6 @@ function Entitlement({
                   id="entitlement-formula"
                   size="small"
                   disabled={shouldDisableEntitlementSelect}
-                  label={t('Entitlement Formula')}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: 'bottom',
@@ -290,6 +285,7 @@ function Entitlement({
                 >
                   {steficonData?.results?.map((each, index) => {
                     const hasDescription = Boolean(each?.description);
+
                     return (
                       <MenuItem
                         data-cy={`select-option-${index}`}
@@ -318,44 +314,42 @@ function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ ml: 1 }}
-                disabled={
-                  loadingSetSteficonRule ||
-                  !steficonRuleValue ||
-                  paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
-                  paymentPlan.backgroundActionStatus ===
-                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
-                  !isActiveProgram
-                }
-                data-cy="button-apply-steficon"
-                data-perm={
-                  PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS
-                }
-                onClick={async () => {
-                  try {
-                    await setSteficonRule({
-                      programSlug: programId,
-                      businessAreaSlug: businessArea,
-                      id: paymentPlan.id,
-                      requestBody: {
-                        engineFormulaRuleId: steficonRuleValue,
-                        version: paymentPlan.version,
-                      },
-                    });
-                    showMessage(
-                      t('Formula is executing, please wait until completed'),
-                    );
-                  } catch (e) {
-                    showApiErrorMessages(e, showMessage);
+            <Grid>
+              <Box ml={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={
+                    loadingSetSteficonRule ||
+                    !steficonRuleValue ||
+                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
+                    paymentPlan.backgroundActionStatus ===
+                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                    !isActiveProgram
                   }
-                }}
-              >
-                {t('Apply')}
-              </Button>
+                  data-cy="button-apply-steficon"
+                  onClick={async () => {
+                    try {
+                      await setSteficonRule({
+                        programSlug: programId,
+                        businessAreaSlug: businessArea,
+                        id: paymentPlan.id,
+                        requestBody: {
+                          engineFormulaRuleId: steficonRuleValue,
+                          version: paymentPlan.version,
+                        },
+                      });
+                      showMessage(
+                        t('Formula is executing, please wait until completed'),
+                      );
+                    } catch (e) {
+                      showApiErrorMessages(e, showMessage);
+                    }
+                  }}
+                >
+                  {t('Apply')}
+                </Button>
+              </Box>
             </Grid>
           </Grid>
           <Box display="flex" alignItems="center">
@@ -498,7 +492,7 @@ function Entitlement({
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.importedFileDate ? (
+                    {paymentPlan?.importedFileName ? (
                       <UniversalMoment>
                         {paymentPlan?.importedFileDate}
                       </UniversalMoment>
@@ -529,5 +523,3 @@ function Entitlement({
     </Box>
   );
 }
-
-export default withErrorBoundary(Entitlement, 'Entitlement');
