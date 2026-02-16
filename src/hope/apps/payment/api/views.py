@@ -52,6 +52,7 @@ from hope.apps.payment.api.filters import (
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
@@ -81,7 +82,7 @@ from hope.apps.payment.api.serializers import (
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
-    XlsxErrorSerializer, ApplyFlatAmountEntitlementSerializer,
+    XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
@@ -89,7 +90,8 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
-    payment_plan_full_rebuild, payment_plan_set_entitlement_flat_amount,
+    payment_plan_full_rebuild,
+    payment_plan_set_entitlement_flat_amount,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -688,7 +690,8 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
-        "entitlement_flat_amount": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],  # TODO: waiting for answer
+        "entitlement_flat_amount": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+                                    Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
         "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -1029,11 +1032,14 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=ApplyFlatAmountEntitlementSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
     @action(
         detail=True,
         methods=["post"],
         url_path="entitlement-flat-amount",
-        parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
     def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1056,14 +1062,15 @@ class PaymentPlanViewSet(
             flow.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
             payment_plan.refresh_from_db(fields=["background_action_status"])
-            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id, flat_amount_value))
+            transaction.on_commit(
+                lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id, flat_amount_value)
+            )
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     @action(
         detail=True,

@@ -1,6 +1,6 @@
 import datetime
-import logging
 from decimal import Decimal
+import logging
 from typing import Any
 
 from celery.exceptions import MaxRetriesExceededError
@@ -276,10 +276,11 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
         logger.exception("PaymentPlan Unexpected Error import from xlsx")
         raise self.retry(exc=e)
 
+
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str, flat_amount_value, Decimal) -> None:
+def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str, flat_amount_value, decimal) -> None:
     try:
         from hope.models import PaymentPlan
 

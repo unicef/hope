@@ -182,6 +182,10 @@ class PaymentPlan(
             "XLSX_IMPORTING_ENTITLEMENTS",
             "Importing Entitlements XLSX file",
         )
+        IMPORTING_ENTITLEMENTS = (
+            "IMPORTING_ENTITLEMENTS",
+            "Importing Entitlements flat amount",
+        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -381,6 +385,9 @@ class PaymentPlan(
         blank=True,
         help_text="Reason for aborting",
     )
+    flat_amount_value = models.DecimalField(
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True,
+    help_text="Apply a fixed amount of entitlement for all payment records within a payment plan")
     # System fields
     status = models.CharField(
         max_length=50,

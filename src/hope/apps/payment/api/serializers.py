@@ -686,6 +686,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payment_verification_plans",
             "admin_url",
             "abort_comment",
+            "flat_amount_value",
         )
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
