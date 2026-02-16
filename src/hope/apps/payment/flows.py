@@ -100,6 +100,14 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
+        conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED],
+    )
+    def background_action_status_importing_entitlements(self):
+        pass
+
+    @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: obj.payment_plan.status

@@ -280,7 +280,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str, flat_amount_value, decimal) -> None:
+def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
     try:
         from hope.models import PaymentPlan
 
@@ -289,6 +289,7 @@ def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str, fl
         try:
             with transaction.atomic():
                 exchange_rate = payment_plan.get_exchange_rate()
+                flat_amount_value = payment_plan.flat_amount_value
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=flat_amount_value,
                     currency=payment_plan.currency,
@@ -313,7 +314,6 @@ def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str, fl
             logger.exception("PaymentPlan Error set entitlement flat amount")
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_xlsx_import_error()
-            # TODO: fix add new status?? FIX ME
             payment_plan.save()
             raise self.retry(exc=e)
 

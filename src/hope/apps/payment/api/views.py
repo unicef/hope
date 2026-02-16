@@ -690,8 +690,10 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
-        "entitlement_flat_amount": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
-                                    Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+        "entitlement_flat_amount": [
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+        ],
         "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -1058,13 +1060,11 @@ class PaymentPlanViewSet(
                 check_concurrency_version_in_mutation(version, payment_plan)
             # PaymentPlan entitlement
             flow = PaymentPlanFlow(payment_plan)
-            # TODO: add new background_action_status??
-            flow.background_action_status_xlsx_importing_entitlements()
+            flow.background_action_status_importing_entitlements()
+            payment_plan.flat_amount_value = flat_amount_value
             payment_plan.save()
-            payment_plan.refresh_from_db(fields=["background_action_status"])
-            transaction.on_commit(
-                lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id, flat_amount_value)
-            )
+            payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,

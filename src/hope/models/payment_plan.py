@@ -98,6 +98,7 @@ class PaymentPlan(
             "excluded_ids",
             "abort_comment",
             "reconciliation_import_file",
+            "flat_amount_value",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -386,8 +387,13 @@ class PaymentPlan(
         help_text="Reason for aborting",
     )
     flat_amount_value = models.DecimalField(
-        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True,
-    help_text="Apply a fixed amount of entitlement for all payment records within a payment plan")
+        decimal_places=2,
+        max_digits=15,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
+        help_text="Apply a fixed amount of entitlement for all payment records within a payment plan",
+    )
     # System fields
     status = models.CharField(
         max_length=50,
