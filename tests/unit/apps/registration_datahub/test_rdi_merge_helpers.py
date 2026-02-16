@@ -207,3 +207,32 @@ def test_run_deduplication_calls_dedup_and_creates_tickets(
     assert second_call[0][2] == rdi.business_area
     assert second_call[1]["registration_data_import"] == rdi
     assert second_call[1]["issue_type"] == GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY
+
+
+# --- _create_kobo_submissions ---
+
+
+@pytest.fixture
+def pending_household_with_kobo(rdi: RegistrationDataImport) -> PendingHousehold:
+    import datetime
+
+    return PendingHouseholdFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=rdi.business_area,
+        kobo_submission_uuid=uuid.uuid4(),
+        detail_id="asset123",
+        kobo_submission_time=datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc),
+    )
+
+
+def test_create_kobo_submissions_with_valid_kobo_data(
+    rdi: RegistrationDataImport, pending_household_with_kobo: PendingHousehold
+):
+    from hope.models import KoboImportedSubmission
+
+    task = RdiMergeTask()
+    households = PendingHousehold.objects.filter(id=pending_household_with_kobo.id)
+    result = task._create_kobo_submissions(households, rdi)
+    assert len(result) == 1
+    assert KoboImportedSubmission.objects.filter(registration_data_import=rdi).exists()

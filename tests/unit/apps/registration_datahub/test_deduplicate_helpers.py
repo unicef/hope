@@ -262,3 +262,112 @@ def test_build_document_signatures_duplicates():
     assert per_individual_dict[str(individual_id_1)] == [expected_sig]
     assert per_individual_dict[str(individual_id_2)] == [expected_sig]
     assert duplicated == [expected_sig, expected_sig]
+
+
+# --- HardDocumentDeduplication._get_existing_duplicates_through ---
+
+
+@pytest.fixture
+def grievance_individual_1(rdi, business_area):
+    return PendingIndividualFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def grievance_individual_2(rdi, business_area):
+    return PendingIndividualFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def ticket_with_possible_duplicate(grievance_individual_1, grievance_individual_2, business_area, rdi):
+    from extras.test_utils.factories import GrievanceTicketFactory, TicketNeedsAdjudicationDetailsFactory
+    from hope.apps.grievance.models import GrievanceTicket
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+    )
+    ticket.programs.add(rdi.program)
+    details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=ticket,
+        golden_records_individual=grievance_individual_1,
+    )
+    details.possible_duplicates.add(grievance_individual_2)
+    return details
+
+
+def test_get_existing_duplicates_through_returns_dict(
+    task, ticket_with_possible_duplicate, grievance_individual_1, grievance_individual_2
+):
+    result = HardDocumentDeduplication()._get_existing_duplicates_through({grievance_individual_2.id})
+    assert len(result) == 1
+    details_id = str(ticket_with_possible_duplicate.id)
+    assert str(grievance_individual_2.id) in result[details_id]
+    assert str(grievance_individual_1.id) in result[details_id]
+
+
+def test_get_existing_duplicates_through_empty_set(task):
+    result = HardDocumentDeduplication()._get_existing_duplicates_through(set())
+    assert result == {}
+
+
+# --- HardDocumentDeduplication._create_deduplication_tickets ---
+
+
+@pytest.fixture
+def grievance_household(rdi, business_area):
+    return PendingHouseholdFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def grievance_individual_with_household_1(rdi, business_area, grievance_household):
+    return PendingIndividualFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=business_area,
+        household=grievance_household,
+    )
+
+
+@pytest.fixture
+def grievance_individual_with_household_2(rdi, business_area, grievance_household):
+    return PendingIndividualFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=business_area,
+        household=grievance_household,
+    )
+
+
+def test_create_deduplication_tickets_creates_ticket(
+    task, rdi, grievance_individual_with_household_1, grievance_individual_with_household_2
+):
+    from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+
+    doc1 = MagicMock()
+    doc1.individual = grievance_individual_with_household_1
+    doc2 = MagicMock()
+    doc2.individual = grievance_individual_with_household_2
+    ticket_data_dict = {
+        "sig1": {"original": doc1, "possible_duplicates": [doc2]},
+    }
+    dedup = HardDocumentDeduplication()
+    dedup._create_deduplication_tickets(ticket_data_dict, {}, rdi)
+    assert GrievanceTicket.objects.filter(
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+    ).exists()
+    assert TicketNeedsAdjudicationDetails.objects.filter(
+        golden_records_individual=grievance_individual_with_household_1,
+    ).exists()

@@ -460,6 +460,12 @@ def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Pr
             "simple error without detail keyword",
             "simple error without detail keyword",
         ),
+        (
+            "HH-004",
+            'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
+            " but no key-value pairs here",
+            'unique_if_not_removed_and_valid_for_representations" but no key-value pairs here',
+        ),
     ],
 )
 def test_format_integrity_error(household_unicef_id: str, error_message: str, expected_substring: str) -> None:

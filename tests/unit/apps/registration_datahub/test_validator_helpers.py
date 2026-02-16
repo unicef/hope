@@ -500,3 +500,124 @@ def test_accumulate_data_adds_to_lists():
     assert {"row_number": 7} in documents_numbers["national_passport_no_i_c"]["validation_data"]
     assert {"row_number": 7} in documents_numbers["tax_id_no_i_c"]["validation_data"]
     assert {"row_number": 7} in documents_numbers["other_id_type_i_c"]["validation_data"]
+
+
+# --- _process_document_number ---
+
+
+def test_process_document_number_regular_doc_appends_number():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {
+        "birth_certificate_no_i_c": {"numbers": [], "names": [], "issuing_countries": []},
+    }
+    identities_numbers = {}
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "birth_certificate_no_i_c", "DOC-123", documents_numbers, identities_numbers
+    )
+    assert "DOC-123" in documents_numbers["birth_certificate_no_i_c"]["numbers"]
+
+
+def test_process_document_number_other_id_type_appends_name():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {
+        "other_id_type_i_c": {"numbers": [], "names": [], "issuing_countries": []},
+    }
+    identities_numbers = {}
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "other_id_type_i_c", "Custom ID", documents_numbers, identities_numbers
+    )
+    assert "Custom ID" in documents_numbers["other_id_type_i_c"]["names"]
+
+
+def test_process_document_number_other_id_no_appends_to_other_id_type_numbers():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {
+        "other_id_type_i_c": {"numbers": [], "names": [], "issuing_countries": []},
+        "other_id_no_i_c": {},
+    }
+    identities_numbers = {}
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "other_id_no_i_c", "99", documents_numbers, identities_numbers
+    )
+    assert "99" in documents_numbers["other_id_type_i_c"]["numbers"]
+
+
+def test_process_document_number_issuing_country_in_documents():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {
+        "birth_certificate_no_i_c": {"numbers": [], "names": [], "issuing_countries": []},
+    }
+    identities_numbers = {}
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "birth_certificate_issuer_i_c", "AFG", documents_numbers, identities_numbers
+    )
+    assert "AFG" in documents_numbers["birth_certificate_no_i_c"]["issuing_countries"]
+
+
+def test_process_document_number_issuing_country_in_identities():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {}
+    identities_numbers = {
+        "unhcr_id_no_i_c": {"numbers": [], "issuing_countries": []},
+    }
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "unhcr_id_issuer_i_c", "SYR", documents_numbers, identities_numbers
+    )
+    assert "SYR" in identities_numbers["unhcr_id_no_i_c"]["issuing_countries"]
+
+
+def test_process_document_number_identity_appends_number():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {}
+    identities_numbers = {
+        "unhcr_id_no_i_c": {"numbers": [], "issuing_countries": []},
+    }
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "unhcr_id_no_i_c", "UNHCR-001", documents_numbers, identities_numbers
+    )
+    assert "UNHCR-001" in identities_numbers["unhcr_id_no_i_c"]["numbers"]
+
+
+def test_process_document_number_none_value_appends_none():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {
+        "birth_certificate_no_i_c": {"numbers": [], "names": [], "issuing_countries": []},
+    }
+    identities_numbers = {}
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "birth_certificate_no_i_c", None, documents_numbers, identities_numbers
+    )
+    assert None in documents_numbers["birth_certificate_no_i_c"]["numbers"]
+
+
+def test_process_document_number_not_in_any_dict():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING = UploadXLSXInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+    documents_numbers = {}
+    identities_numbers = {}
+    # Should not raise — just a no-op
+    UploadXLSXInstanceValidator._process_document_number(
+        validator, "unknown_field", "value", documents_numbers, identities_numbers
+    )
+
+
+# --- _validate_field_type (household_id_can_be_empty=True) ---
+
+
+def test_validate_field_type_invalid_but_household_id_can_be_empty():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    fn = MagicMock(return_value=False)
+    switch_dict = {"STRING": fn}
+    cell = MagicMock()
+    cell.row = 5
+    result = UploadXLSXInstanceValidator._validate_field_type(
+        validator, "bad_value", "name_field", cell, "STRING", "Individuals", switch_dict, True
+    )
+    assert result is None

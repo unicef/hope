@@ -354,17 +354,13 @@ def test_process_flex_field_none_value_not_set(task):
 
 
 def test_build_complex_fields_config_returns_two_dicts(task):
-    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
-        mock_dt_objects.all.return_value = []
-        complex_fields, complex_types = task._build_complex_fields_config()
+    complex_fields, complex_types = task._build_complex_fields_config()
     assert isinstance(complex_fields, dict)
     assert isinstance(complex_types, dict)
 
 
 def test_build_complex_fields_config_has_expected_individual_keys(task):
-    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
-        mock_dt_objects.all.return_value = []
-        complex_fields, _ = task._build_complex_fields_config()
+    complex_fields, _ = task._build_complex_fields_config()
     individuals_keys = complex_fields["individuals"]
     assert "photo_i_c" in individuals_keys
     assert "primary_collector_id" in individuals_keys
@@ -374,10 +370,100 @@ def test_build_complex_fields_config_has_expected_individual_keys(task):
 
 
 def test_build_complex_fields_config_complex_types_has_expected_keys(task):
-    with patch("hope.models.DocumentType.objects") as mock_dt_objects:
-        mock_dt_objects.all.return_value = []
-        _, complex_types = task._build_complex_fields_config()
+    _, complex_types = task._build_complex_fields_config()
     assert "GEOPOINT" in complex_types
     assert "IMAGE" in complex_types
     assert "DECIMAL" in complex_types
     assert "BOOL" in complex_types
+
+
+def test_build_complex_fields_config_with_document_types(task):
+    from extras.test_utils.factories import DocumentTypeFactory
+
+    DocumentTypeFactory(key="birth_certificate")
+    complex_fields, _ = task._build_complex_fields_config()
+    individuals_keys = complex_fields["individuals"]
+    assert "birth_certificate_i_c" in individuals_keys
+    assert "birth_certificate_no_i_c" in individuals_keys
+    assert "birth_certificate_photo_i_c" in individuals_keys
+    assert "birth_certificate_issuer_i_c" in individuals_keys
+
+
+def test_process_regular_field_country_header(task):
+    from extras.test_utils.factories import CountryFactory
+
+    country = CountryFactory(iso_code3="AFG", name="Afghanistan")
+    obj = MagicMock()
+    obj.flex_fields = {}
+    obj.country = None
+    combined_fields = {"country_h_c": {"name": "country"}}
+    task.COMBINED_FIELDS["country_h_c"] = {"type": "STRING"}
+    cell = MagicMock()
+    cell.value = "AFG"
+    result = task._process_regular_field("country_h_c", "AFG", cell, obj, combined_fields)
+    assert result is True
+    assert obj.country == country
+
+
+def test_process_regular_field_admin_header(task):
+    from extras.test_utils.factories import AreaFactory, AreaTypeFactory, CountryFactory
+
+    country = CountryFactory(iso_code3="AFG", name="Afghanistan")
+    area_type = AreaTypeFactory(country=country, area_level=1)
+    area = AreaFactory(area_type=area_type, p_code="AF01", name="Kabul")
+    obj = MagicMock()
+    obj.admin1 = None
+    combined_fields = {"admin1_h_c": {"name": "admin1"}}
+    task.COMBINED_FIELDS["admin1_h_c"] = {"type": "STRING"}
+    cell = MagicMock()
+    cell.value = "AF01"
+    result = task._process_regular_field("admin1_h_c", "AF01", cell, obj, combined_fields)
+    assert result is True
+    assert obj.admin1 == area
+
+
+def test_process_regular_field_org_enumerator(task):
+    obj = MagicMock()
+    obj.flex_fields = {}
+    obj.org_enumerator = None
+    combined_fields = {"org_enumerator_h_c": {"name": "org_enumerator"}}
+    task.COMBINED_FIELDS["org_enumerator_h_c"] = {"type": "STRING"}
+    cell = MagicMock()
+    cell.value = "ENUM-001"
+    result = task._process_regular_field("org_enumerator_h_c", "ENUM-001", cell, obj, combined_fields)
+    assert result is True
+    assert obj.flex_fields["enumerator_id"] == "ENUM-001"
+
+
+def test_process_complex_field_households_sheet(task):
+    handler = MagicMock(return_value="processed")
+    obj = MagicMock()
+    cell = MagicMock()
+    cell.row = 5
+    complex_fields = {"households": {"hh_field": handler}}
+    combined_fields = {"hh_field": {"name": "hh_attr"}}
+    result = task._process_complex_field(
+        "hh_field", "raw", cell, obj, complex_fields, "households", {"required": True}, combined_fields
+    )
+    assert result is True
+    handler.assert_called_once_with(
+        value="raw",
+        cell=cell,
+        header="hh_field",
+        row_num=5,
+        individual=None,
+        household=obj,
+        is_field_required=True,
+    )
+    assert obj.hh_attr == "processed"
+
+
+def test_handle_head_of_household_household_not_found(task):
+    task.households = {}
+    rel_cell = MagicMock()
+    rel_cell.value = HEAD
+    row = (MagicMock(), rel_cell)
+    obj = MagicMock()
+    households_to_update = []
+    task._handle_head_of_household_relationship(row, 1, "missing_id", obj, households_to_update)
+    assert households_to_update == []
