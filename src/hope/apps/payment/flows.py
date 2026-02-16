@@ -124,6 +124,7 @@ class PaymentPlanFlow:
     @background_action_status.transition(
         source=[
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+            PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],

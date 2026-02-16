@@ -32,6 +32,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_full_rebuild,
     payment_plan_rebuild_stats,
+    payment_plan_set_entitlement_flat_amount,
     periodic_send_payment_plan_reconciliation_overdue_emails,
     periodic_sync_payment_plan_invoices_western_union_ftp,
     prepare_payment_plan_task,
@@ -45,6 +46,7 @@ from hope.apps.payment.celery_tasks import (
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     FileTemp,
+    Payment,
     PaymentPlan,
     Rule,
 )
@@ -829,3 +831,82 @@ def test_send_qcf_report_email_notifications_retries_on_exception(
         send_qcf_report_email_notifications(qcf_report_id=qcf_report.id)
     mock_logger_exception.assert_called_once()
     mock_retry.assert_called_once()
+
+
+@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
+@patch("hope.models.payment_plan.PaymentPlan.remove_export_files")
+def test_payment_plan_set_entitlement_flat_amount_task(
+    mock_remove_export_files: Mock,
+    mock_update_money_fields: Mock,
+    user,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
+        flat_amount_value=1.22,
+    )
+    payment_plan.refresh_from_db()
+    payment_1 = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_PENDING,
+        currency="PLN",
+        entitlement_quantity_usd=None,
+        entitlement_date=None,
+    )
+
+    payment_plan_set_entitlement_flat_amount(str(payment_plan.pk))
+
+    payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
+    payment_1.refresh_from_db()
+    assert payment_plan.background_action_status is None
+
+    mock_remove_export_files.assert_called_once()
+    mock_update_money_fields.assert_called_once()
+    assert payment_1.entitlement_quantity == Decimal("1.22")
+    assert payment_1.entitlement_quantity_usd is not None
+    assert payment_1.entitlement_date is not None
+
+
+@patch("hope.apps.payment.celery_tasks.logger")
+@patch("hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount.retry")
+def test_payment_plan_set_entitlement_flat_amount_invalid_pp_id_error(
+    mock_retry: Mock,
+    mock_logger: Mock,
+) -> None:
+    mock_retry.side_effect = Retry("retry")
+
+    with pytest.raises(Retry):
+        payment_plan_set_entitlement_flat_amount("invalid_pp_id")
+
+    mock_logger.exception.assert_called_once_with("PaymentPlan Unexpected Error from set entitlement flat amount")
+    mock_retry.assert_called_once()
+    error = mock_retry.call_args.kwargs.get("exc")
+    assert error is not None
+    assert str(error) == str(["\u201cinvalid_pp_id\u201d is not a valid UUID."])
+
+
+@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.apps.payment.celery_tasks.logger")
+@patch("hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount.retry")
+def test_payment_plan_set_entitlement_flat_amount_error_get_exchange_rate(
+    mock_retry: Mock,
+    mock_logger: Mock,
+    mock_payment_plan_get_exchange_rate: Mock,
+    user,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
+        flat_amount_value=1.12,
+    )
+    mock_retry.side_effect = Retry("retry")
+    mock_payment_plan_get_exchange_rate.side_effect = Exception("exchange error")
+
+    with pytest.raises(Retry):
+        payment_plan_set_entitlement_flat_amount(str(payment_plan.pk))
+
+    payment_plan.refresh_from_db(fields=["background_action_status"])
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+
+    mock_logger.exception.assert_any_call("PaymentPlan Error set entitlement flat amount")
+    mock_logger.exception.assert_any_call("PaymentPlan Unexpected Error from set entitlement flat amount")

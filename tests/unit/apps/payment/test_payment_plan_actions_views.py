@@ -659,18 +659,25 @@ def test_pp_entitlement_import_flat_value(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].background_action_status = None
     payment_plan_actions_context["pp"].save()
-    payment_1 = PaymentFactory(
+    PaymentFactory(
         parent=payment_plan_actions_context["pp"],
         status=Payment.STATUS_PENDING,
         currency="PLN",
     )
+    # check serializer validation
+    response400 = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_import_entitlement_flat_amount"],
+        {"version": payment_plan_actions_context["pp"].version},
+        format="json",
+    )
+    assert response400.status_code == status.HTTP_400_BAD_REQUEST
+    assert "flat_amount_value" in response400.data
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_import_entitlement_flat_amount"],
-        {"flat_amount_value": "25.11"},
+        {"flat_amount_value": "25.11", "version": payment_plan_actions_context["pp"].version},
         format="json",
     )
-
     assert response.status_code == status.HTTP_200_OK
     pp = response.json()
     assert pp["background_action_status"] == "IMPORTING_ENTITLEMENTS"
