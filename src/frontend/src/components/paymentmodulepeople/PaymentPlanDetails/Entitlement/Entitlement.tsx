@@ -1,3 +1,4 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
@@ -95,7 +96,7 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export function Entitlement({
+function Entitlement({
   paymentPlan,
   permissions,
 }: EntitlementProps): ReactElement {
@@ -523,3 +524,5 @@ export function Entitlement({
     </Box>
   );
 }
+
+export default withErrorBoundary(Entitlement, 'Entitlement');
