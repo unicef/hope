@@ -8,19 +8,19 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1620"
+        "Content-Length": "1490"
     },
     "data": {
-        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/8v1s/payment-verifications/fbf31563-5b00-4406-a67d-8e9e7505f894/verifications/?limit=50&offset=50",
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/c6r4/payment-plans/911e9fb2-a41a-4d07-97c2-29722c9d749a/payments/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "e81045a9-83c3-4a8a-ab3f-9a6847e22508",
+                "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
                 "unicef_id": "RCPT-BA0000-25-0.000.001",
-                "parent_id": "fbf31563-5b00-4406-a67d-8e9e7505f894",
+                "parent_id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
                 "parent_unicef_id": "PP-BA0000-25-00000001",
-                "household_id": "0191a8d4-e597-4ef6-acf3-9c018e262463",
-                "household_unicef_id": "HH-25-0000.0001",
+                "household_id": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
+                "household_unicef_id": "HH-25-0000.0003",
                 "household_size": null,
                 "household_admin2": "",
                 "household_status": "ACTIVE",
@@ -43,18 +43,15 @@
                 "hoh_id": null,
                 "hoh_unicef_id": null,
                 "hoh_full_name": null,
-                "collector_id": "c56c866d-d5d8-4459-b6d6-718186e8e19a",
+                "collector_id": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
                 "collector_phone_no": "",
                 "collector_phone_no_alt": "",
                 "verification": {
-                    "id": "e9fab010-99a0-4c5e-87e6-aa953126fc97",
                     "received_amount": null,
-                    "status": "PENDING",
-                    "payment_verification_plan_unicef_id": "PVP-2",
-                    "verification_channel": "MANUAL",
-                    "admin_url": null,
-                    "version": 1735688653315201,
-                    "is_manually_editable": true
+                    "status": null,
+                    "payment_verification_plan_unicef_id": "",
+                    "verification_channel": "",
+                    "version": null
                 },
                 "payment_plan_hard_conflicted": false,
                 "payment_plan_hard_conflicted_data": [],
@@ -62,7 +59,7 @@
                 "payment_plan_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
-                "program_slug": "8v1s"
+                "program_slug": "c6r4"
             }
         ]
     },

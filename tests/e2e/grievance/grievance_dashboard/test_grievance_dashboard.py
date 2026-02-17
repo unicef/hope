@@ -209,6 +209,17 @@ class TestSmokeGrievanceDashboard:
         page_grievance_tickets.wait_for_text("Closed", page_grievance_tickets.status_container)
         page_grievance_tickets.get_nav_grievance().click()
         page_grievance_dashboard.get_nav_grievance_dashboard().click()
+
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        def closed_ticket_count_is_one(driver):
+            element = (
+                page_grievance_dashboard.get_labelized_field_container_total_number_of_closed_tickets_user_generated()
+            )
+            return "1" in element.text
+
+        WebDriverWait(page_grievance_dashboard.driver, 10).until(closed_ticket_count_is_one)
+
         assert "3" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
             "1"
