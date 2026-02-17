@@ -6,6 +6,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.db.utils import IntegrityError
 import pytest
 
 from extras.test_utils.factories import (
@@ -25,6 +26,9 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.program.utils import (
+    _create_enrollment_rdi,
+    _format_integrity_error,
+    _prepare_and_save_household_copy,
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
@@ -435,3 +439,86 @@ def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Pr
     expected_name = "RDI for enroll households to Programme: Program 1"
     assert result == expected_name
     assert not RegistrationDataImport.objects.filter(name=expected_name).exists()
+
+
+@pytest.mark.parametrize(
+    ("household_unicef_id", "error_message", "expected_substring"),
+    [
+        (
+            "HH-001",
+            'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
+            " DETAIL: Key (document_number, country_id)=(123, AF) already exists.",
+            "Document already exists: 123",
+        ),
+        (
+            "HH-002",
+            "some error message DETAIL: more info here",
+            "some error message",
+        ),
+        (
+            "HH-003",
+            "simple error without detail keyword",
+            "simple error without detail keyword",
+        ),
+        (
+            "HH-004",
+            'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
+            " but no key-value pairs here",
+            'unique_if_not_removed_and_valid_for_representations" but no key-value pairs here',
+        ),
+    ],
+)
+def test_format_integrity_error(household_unicef_id: str, error_message: str, expected_substring: str) -> None:
+    error = IntegrityError(error_message)
+    result = _format_integrity_error(household_unicef_id, error)
+    assert result.startswith(f"{household_unicef_id}: ")
+    assert expected_substring in result
+
+
+def test_create_enrollment_rdi_returns_merged_rdi(program1: Program, user: User) -> None:
+    rdi = _create_enrollment_rdi(program1, str(user.pk))
+    assert rdi.status == RegistrationDataImport.MERGED
+    assert rdi.data_source == RegistrationDataImport.ENROLL_FROM_PROGRAM
+    assert rdi.program == program1
+    assert rdi.business_area == program1.business_area
+    assert rdi.deduplication_engine_status is None
+
+
+def test_create_enrollment_rdi_biometric_sets_dedup_pending(afghanistan: BusinessArea, user: User) -> None:
+    program = ProgramFactory(business_area=afghanistan, biometric_deduplication_enabled=True)
+    rdi = _create_enrollment_rdi(program, str(user.pk))
+    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_prepare_and_save_household_copy_head_in_individuals_dict(
+    program2: Program, household: Household, individual_hoh: Individual
+) -> None:
+    rdi = RegistrationDataImportFactory(business_area=program2.business_area, program=program2)
+    new_individual = IndividualFactory(household=None, program=program2)
+    individuals_dict = {individual_hoh.unicef_id: new_individual}
+
+    original_id = household.id
+    _prepare_and_save_household_copy(household, program2, rdi, individuals_dict, {})
+
+    assert household.pk != original_id
+    assert household.copied_from_id == original_id
+    assert household.program == program2
+    assert household.head_of_household == new_individual
+    assert household.total_cash_received is None
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_prepare_and_save_household_copy_head_in_exclude_dict(
+    program2: Program, household: Household, individual_hoh: Individual
+) -> None:
+    rdi = RegistrationDataImportFactory(business_area=program2.business_area, program=program2)
+    target_individual = IndividualFactory(household=None, program=program2)
+    individuals_to_exclude_dict = {str(individual_hoh.unicef_id): target_individual.id}
+
+    original_id = household.id
+    _prepare_and_save_household_copy(household, program2, rdi, {}, individuals_to_exclude_dict)
+
+    assert household.pk != original_id
+    assert household.copied_from_id == original_id
+    assert household.head_of_household_id == target_individual.id
