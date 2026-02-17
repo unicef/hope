@@ -15,6 +15,7 @@ import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   formatFigure,
+  formatNormalCaseValue,
   getPhoneNoLabel,
   paymentStatusDisplayMap,
   paymentStatusToColor,
@@ -261,6 +262,15 @@ function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
+          {payment.extras &&
+            Object.entries(payment.extras).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>

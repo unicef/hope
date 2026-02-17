@@ -53,6 +53,103 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
+    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
+        household_ids_to_exclude = []
+        for ids in chunks(household_ids, 1000):
+            households_chunks = PendingHousehold.objects.filter(id__in=ids)
+            for household in households_chunks:
+                collided_id = obj_hct.program.collision_detector.detect_collision(household)
+                if not collided_id:
+                    continue
+                household_ids_to_exclude.append(household.id)
+                obj_hct.program.collision_detector.update_household(household)
+                updated_household = Household.objects.get(id=collided_id)
+                updated_household.extra_rdis.add(obj_hct)
+        households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
+        return households_to_merge_ids, household_ids_to_exclude
+
+    def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
+        dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids)
+        PendingAccount.validate_uniqueness(dmds)
+        dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
+        PendingIndividualRoleInHousehold.objects.filter(
+            household_id__in=households_to_merge_ids, individual_id__in=individuals_to_merge_ids
+        ).update(rdi_merge_status=MergeStatusModel.MERGED)
+        PendingDocument.objects.filter(individual_id__in=individuals_to_merge_ids).update(
+            rdi_merge_status=MergeStatusModel.MERGED
+        )
+        PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individuals_to_merge_ids).update(
+            rdi_merge_status=MergeStatusModel.MERGED
+        )
+        PendingHousehold.objects.filter(id__in=households_to_merge_ids).update(
+            rdi_merge_status=MergeStatusModel.MERGED,
+            updated_at=timezone.now(),
+        )
+        PendingIndividual.objects.filter(id__in=individuals_to_merge_ids).update(
+            rdi_merge_status=MergeStatusModel.MERGED,
+            updated_at=timezone.now(),
+        )
+
+    def _clear_cache(self, business_area_slug: str) -> None:
+        with contextlib.suppress(ConnectionError, AttributeError):
+            for key in cache.keys("*"):
+                if key.startswith(
+                    (
+                        f"count_{business_area_slug}_HouseholdNodeConnection",
+                        f"count_{business_area_slug}_IndividualNodeConnection",
+                    )
+                ):
+                    cache.delete(key)
+
+    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
+        if obj_hct.program.biometric_deduplication_enabled:
+            dedupe_service = BiometricDeduplicationService()
+            dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+            dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
+            dedupe_service.report_individuals_status(
+                obj_hct.program,
+                [str(_id) for _id in individuals_to_merge_ids],
+                BiometricDeduplicationService.INDIVIDUALS_MERGED,
+            )
+
+    def _run_deduplication(
+        self, obj_hct: RegistrationDataImport, individuals: list, registration_data_import_id: str
+    ) -> None:
+        DeduplicateTask(obj_hct.business_area.slug, obj_hct.program.id).deduplicate_individuals_against_population(
+            individuals
+        )
+        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
+
+        golden_record_duplicates = Individual.objects.filter(
+            registration_data_import=obj_hct,
+            deduplication_golden_record_status=DUPLICATE,
+        )
+        logger.info(f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates")
+        create_needs_adjudication_tickets(
+            golden_record_duplicates,
+            "duplicates",
+            obj_hct.business_area,
+            registration_data_import=obj_hct,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
+        logger.info(f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates")
+
+        needs_adjudication = Individual.objects.filter(
+            registration_data_import=obj_hct,
+            deduplication_golden_record_status=NEEDS_ADJUDICATION,
+        )
+        logger.info(f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication")
+        create_needs_adjudication_tickets(
+            needs_adjudication,
+            "possible_duplicates",
+            obj_hct.business_area,
+            registration_data_import=obj_hct,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
+        logger.info(
+            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+        )
+
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -69,18 +166,7 @@ class RdiMergeTask:
                 obj_hct.save()
                 return
 
-            household_ids_to_exclude = []
-            for ids in chunks(household_ids, 1000):
-                households_chunks = PendingHousehold.objects.filter(id__in=ids)
-                for household in households_chunks:
-                    collided_id = obj_hct.program.collision_detector.detect_collision(household)
-                    if not collided_id:
-                        continue
-                    household_ids_to_exclude.append(household.id)
-                    obj_hct.program.collision_detector.update_household(household)
-                    updated_household = Household.objects.get(id=collided_id)
-                    updated_household.extra_rdis.add(obj_hct)
-            households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
+            households_to_merge_ids, household_ids_to_exclude = self._process_collisions(obj_hct, household_ids)
             individuals_to_merge_ids = list(
                 Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
                 .exclude(household__in=household_ids_to_exclude)
@@ -106,28 +192,7 @@ class RdiMergeTask:
                         f" Populated index for {len(households_to_merge_ids)} households"
                     )
 
-                    dmds = PendingAccount.objects.filter(
-                        individual_id__in=individuals_to_merge_ids,
-                    )
-                    PendingAccount.validate_uniqueness(dmds)
-                    dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingIndividualRoleInHousehold.objects.filter(
-                        household_id__in=households_to_merge_ids, individual_id__in=individuals_to_merge_ids
-                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingDocument.objects.filter(individual_id__in=individuals_to_merge_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individuals_to_merge_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingHousehold.objects.filter(id__in=households_to_merge_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED,
-                        updated_at=timezone.now(),
-                    )
-                    PendingIndividual.objects.filter(id__in=individuals_to_merge_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED,
-                        updated_at=timezone.now(),
-                    )
+                    self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
@@ -141,50 +206,7 @@ class RdiMergeTask:
                     )
 
                     if not obj_hct.business_area.postpone_deduplication and len(individuals):
-                        # DEDUPLICATION
-                        DeduplicateTask(
-                            obj_hct.business_area.slug, obj_hct.program.id
-                        ).deduplicate_individuals_against_population(individuals)
-                        logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
-                        golden_record_duplicates = Individual.objects.filter(
-                            registration_data_import=obj_hct,
-                            deduplication_golden_record_status=DUPLICATE,
-                        )
-                        logger.info(
-                            f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
-                        )
-
-                        create_needs_adjudication_tickets(
-                            golden_record_duplicates,
-                            "duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-                        )
-                        logger.info(
-                            f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)}"
-                            f" duplicates"
-                        )
-
-                        needs_adjudication = Individual.objects.filter(
-                            registration_data_import=obj_hct,
-                            deduplication_golden_record_status=NEEDS_ADJUDICATION,
-                        )
-                        logger.info(
-                            f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
-                        )
-
-                        create_needs_adjudication_tickets(
-                            needs_adjudication,
-                            "possible_duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-                        )
-                        logger.info(
-                            f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)}"
-                            f" needs adjudication"
-                        )
+                        self._run_deduplication(obj_hct, individuals, registration_data_import_id)
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list() and obj_hct.program.sanction_lists.exists():
@@ -196,18 +218,8 @@ class RdiMergeTask:
                         )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
-                    # synchronously deduplicate documents
                     deduplicate_documents(rdi_id=obj_hct.id)
-                    #  synchronously deduplicate biometrics
-                    if obj_hct.program.biometric_deduplication_enabled:
-                        dedupe_service = BiometricDeduplicationService()
-                        dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
-                        dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
-                        dedupe_service.report_individuals_status(
-                            obj_hct.program,
-                            [str(_id) for _id in individuals_to_merge_ids],
-                            BiometricDeduplicationService.INDIVIDUALS_MERGED,
-                        )
+                    self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
@@ -245,15 +257,7 @@ class RdiMergeTask:
                 remove_elasticsearch_documents_by_matching_ids(household_ids, HouseholdDocument)
                 raise
 
-            with contextlib.suppress(ConnectionError, AttributeError):
-                for key in cache.keys("*"):
-                    if key.startswith(
-                        (
-                            f"count_{obj_hct.business_area.slug}_HouseholdNodeConnection",
-                            f"count_{obj_hct.business_area.slug}_IndividualNodeConnection",
-                        )
-                    ):
-                        cache.delete(key)
+            self._clear_cache(obj_hct.business_area.slug)
 
         except Exception as e:
             logger.warning(e)
