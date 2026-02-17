@@ -621,3 +621,52 @@ def test_validate_field_type_invalid_but_household_id_can_be_empty():
         validator, "bad_value", "name_field", cell, "STRING", "Individuals", switch_dict, True
     )
     assert result is None
+
+
+# --- _process_row_household_data (float non-integer) ---
+
+
+def test_process_row_household_data_float_non_integer():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.household_ids = []
+    validator.head_of_household_count = defaultdict(int)
+    cell = MagicMock()
+    cell.value = 1.5
+    row = (cell,)
+    result = UploadXLSXInstanceValidator._process_row_household_data(validator, row, 0, None, "Individuals")
+    # 1.5 is float but NOT .is_integer() → NOT converted to int, stays as 1.5
+    assert result == 1.5
+    assert isinstance(result, float)
+
+
+# --- _count_individual_roles ---
+
+
+def test_count_individual_roles_head():
+    validator = MagicMock(spec=KoboProjectImportDataInstanceValidator)
+    h, p, a = KoboProjectImportDataInstanceValidator._count_individual_roles(
+        validator, "relationship_i_c", "head", 0, 0, 0
+    )
+    assert (h, p, a) == (1, 0, 0)
+
+
+def test_count_individual_roles_primary():
+    validator = MagicMock(spec=KoboProjectImportDataInstanceValidator)
+    h, p, a = KoboProjectImportDataInstanceValidator._count_individual_roles(validator, "role_i_c", "primary", 0, 0, 0)
+    assert (h, p, a) == (0, 1, 0)
+
+
+def test_count_individual_roles_alternate():
+    validator = MagicMock(spec=KoboProjectImportDataInstanceValidator)
+    h, p, a = KoboProjectImportDataInstanceValidator._count_individual_roles(
+        validator, "role_i_c", "alternate", 0, 0, 0
+    )
+    assert (h, p, a) == (0, 0, 1)
+
+
+def test_count_individual_roles_unrelated_field():
+    validator = MagicMock(spec=KoboProjectImportDataInstanceValidator)
+    h, p, a = KoboProjectImportDataInstanceValidator._count_individual_roles(
+        validator, "full_name_i_c", "John", 5, 3, 1
+    )
+    assert (h, p, a) == (5, 3, 1)  # unchanged

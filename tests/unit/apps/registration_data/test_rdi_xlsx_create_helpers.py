@@ -467,3 +467,79 @@ def test_handle_head_of_household_household_not_found(task):
     households_to_update = []
     task._handle_head_of_household_relationship(row, 1, "missing_id", obj, households_to_update)
     assert households_to_update == []
+
+
+# --- _finalize_row_object ---
+
+
+def test_finalize_row_object_households(task, rdi):
+    task.households = {}
+    obj = MagicMock()
+    row = (MagicMock(row=3),)
+    task._finalize_row_object(obj, row, (), "households", "HH-1", rdi)
+    assert task.households["HH-1"] == obj
+    assert obj.business_area == rdi.business_area
+
+
+def test_finalize_row_object_individuals_no_household_id(task, rdi):
+    from hope.apps.household.const import NON_BENEFICIARY
+
+    obj = MagicMock(birth_date="2000-01-01", flex_fields={})
+    row = (MagicMock(row=5),)
+    task.individuals = []
+    with (
+        patch.object(task, "_validate_birth_date", return_value=obj),
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.calculate_age_at_registration", return_value=25),
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.populate_pdu_with_null_values"),
+        patch.object(task, "handle_pdu_fields"),
+    ):
+        task._finalize_row_object(obj, row, (), "individuals", None, rdi)
+    assert obj.relationship == NON_BENEFICIARY
+    assert obj in task.individuals
+
+
+def test_finalize_row_object_individuals_with_household_id(task, rdi):
+    obj = MagicMock(birth_date="2000-01-01", flex_fields={})
+    row = (MagicMock(row=5),)
+    task.individuals = []
+    with (
+        patch.object(task, "_validate_birth_date", return_value=obj),
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.calculate_age_at_registration", return_value=25),
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.populate_pdu_with_null_values"),
+        patch.object(task, "handle_pdu_fields"),
+    ):
+        task._finalize_row_object(obj, row, (), "individuals", "HH-1", rdi)
+    # relationship should NOT be set to NON_BENEFICIARY when household_id is provided
+    assert obj in task.individuals
+
+
+# --- _bulk_save_and_finalize ---
+
+
+def test_bulk_save_and_finalize_households(task, rdi):
+    hh_mock = MagicMock()
+    task.households = {"HH-1": hh_mock}
+    with patch("hope.apps.registration_data.tasks.rdi_xlsx_create.PendingHousehold") as mock_ph:
+        task._bulk_save_and_finalize("households", [], rdi)
+    mock_ph.all_objects.bulk_create.assert_called_once()
+    args = mock_ph.all_objects.bulk_create.call_args[0][0]
+    assert list(args) == [hh_mock]
+
+
+def test_bulk_save_and_finalize_individuals(task, rdi):
+    task.individuals = [MagicMock()]
+    with (
+        patch.object(task, "execute_individuals_additional_steps"),
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.PendingIndividual") as mock_pi,
+        patch("hope.apps.registration_data.tasks.rdi_xlsx_create.PendingHousehold") as mock_ph,
+        patch.object(task, "_create_documents"),
+        patch.object(task, "_create_identities"),
+        patch.object(task, "_create_collectors"),
+        patch.object(task, "_create_accounts"),
+    ):
+        rdi.bulk_update_household_size = MagicMock()
+        households_to_update = [MagicMock()]
+        task._bulk_save_and_finalize("individuals", households_to_update, rdi)
+    mock_pi.all_objects.bulk_create.assert_called_once_with(task.individuals)
+    mock_ph.all_objects.bulk_update.assert_called_once_with(households_to_update, ["head_of_household"], 1000)
+    rdi.bulk_update_household_size.assert_called_once()

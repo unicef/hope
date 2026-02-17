@@ -234,3 +234,22 @@ def test_create_kobo_submissions_with_valid_kobo_data(
     result = task._create_kobo_submissions(households, rdi)
     assert len(result) == 1
     assert KoboImportedSubmission.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_process_collisions_no_collision_detected(
+    rdi: RegistrationDataImport,
+    pending_household: PendingHousehold,
+) -> None:
+    """When detect_collision returns None, household is NOT excluded and stays in merge list."""
+    mock_collision_detector = MagicMock()
+    mock_collision_detector.detect_collision.return_value = None
+
+    task = RdiMergeTask()
+    with patch.object(
+        type(rdi.program), "collision_detector", new_callable=lambda: property(lambda self: mock_collision_detector)
+    ):
+        households_to_merge_ids, household_ids_to_exclude = task._process_collisions(rdi, [pending_household.id])
+
+    assert pending_household.id not in household_ids_to_exclude
+    assert pending_household.id in households_to_merge_ids
+    mock_collision_detector.update_household.assert_not_called()

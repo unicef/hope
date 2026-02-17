@@ -371,3 +371,25 @@ def test_create_deduplication_tickets_creates_ticket(
     assert TicketNeedsAdjudicationDetails.objects.filter(
         golden_records_individual=grievance_individual_with_household_1,
     ).exists()
+
+
+def test_create_deduplication_tickets_skips_when_prepared_ticket_is_none(
+    task, rdi, grievance_individual_with_household_1, grievance_individual_with_household_2
+):
+    from unittest.mock import patch as mock_patch
+
+    from hope.apps.grievance.models import GrievanceTicket
+
+    doc1 = MagicMock()
+    doc1.individual = grievance_individual_with_household_1
+    doc2 = MagicMock()
+    doc2.individual = grievance_individual_with_household_2
+    ticket_data_dict = {
+        "sig1": {"original": doc1, "possible_duplicates": [doc2]},
+    }
+    dedup = HardDocumentDeduplication()
+    with mock_patch.object(dedup, "_prepare_grievance_ticket_documents_deduplication", return_value=None):
+        dedup._create_deduplication_tickets(ticket_data_dict, {}, rdi)
+    assert not GrievanceTicket.objects.filter(
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+    ).exists()
