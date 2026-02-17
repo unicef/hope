@@ -12,6 +12,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from extras.test_utils.factories import RoleAssignmentFactory
 from extras.test_utils.factories.core import FlexibleAttributeFactory
 from extras.test_utils.old_factories.geo import CountryFactory
 from extras.test_utils.old_factories.household import DocumentTypeFactory
@@ -458,13 +459,11 @@ def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
 
 @pytest.fixture
 def individual_api_context(
-    api_client: Any,
     individual_image_flex_attribute: FlexibleAttribute,
     individual_base64_image: str,
 ) -> dict[str, Any]:
     from extras.test_utils.factories import (
         BusinessAreaFactory,
-        RoleAssignmentFactory,
         RoleFactory,
         UserFactory,
     )
@@ -483,14 +482,18 @@ def individual_api_context(
     )
 
     user = UserFactory()
-    role = RoleFactory(name="API Role", subsystem="API", permissions=[Grant.API_RDI_CREATE.name])
+    role = RoleFactory(name="API Role", permissions=[Grant.API_RDI_CREATE.name])
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
     token = APITokenFactory(
         user=user,
         grants=[Grant.API_RDI_CREATE.name],
     )
     token.valid_for.set([business_area])
-    client = api_client(user)
+
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
     url = reverse("api:rdi-push-lax-individuals", args=[business_area.slug, str(rdi.id)])
 
     return {
