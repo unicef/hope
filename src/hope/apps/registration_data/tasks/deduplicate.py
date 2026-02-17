@@ -212,6 +212,80 @@ class DeduplicateTask:
             ).values_list("id", flat=True)
         ]
 
+    def _check_duplicates_threshold(
+        self,
+        duplicates_count: int,
+        max_allowed: int,
+        duplicates_set_size: int,
+        allowed_percentage_count: int,
+        individuals_count: int,
+        threshold_percentage: float,
+        context: str,
+    ) -> str | None:
+        if duplicates_count > max_allowed:
+            return (
+                f"The number of individuals deemed duplicate with an individual record of the {context} "
+                f"exceed the maximum allowed ({max_allowed})"
+            )
+        if (duplicates_set_size >= allowed_percentage_count) and individuals_count > 1:
+            return (
+                f"The percentage of records ({threshold_percentage}%), "
+                f"deemed as 'duplicate', within a {context} has reached the maximum number."
+            )
+        return None
+
+    def _finalize_successful_deduplication(
+        self,
+        registration_data_import: RegistrationDataImport,
+        duplicates_in_batch: set,
+        possible_duplicates_in_batch: set,
+        duplicates_in_population: set,
+        possible_duplicates_in_population: set,
+    ) -> None:
+        PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
+            id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
+        ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
+        PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
+            id__in=duplicates_in_population.union(possible_duplicates_in_population)
+        ).update(deduplication_golden_record_status=UNIQUE)
+
+        old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
+        registration_data_import.status = RegistrationDataImport.IN_REVIEW
+        registration_data_import.batch_duplicates = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_batch_status=DUPLICATE_IN_BATCH,
+        ).count()
+        registration_data_import.batch_possible_duplicates = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_batch_status=SIMILAR_IN_BATCH,
+        ).count()
+        registration_data_import.batch_unique = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_batch_status=UNIQUE_IN_BATCH,
+        ).count()
+        registration_data_import.golden_record_duplicates = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_golden_record_status=DUPLICATE,
+        ).count()
+        registration_data_import.golden_record_possible_duplicates = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_golden_record_status=NEEDS_ADJUDICATION,
+        ).count()
+        registration_data_import.golden_record_unique = PendingIndividual.objects.filter(
+            registration_data_import_id=registration_data_import.id,
+            deduplication_golden_record_status=UNIQUE,
+        ).count()
+        registration_data_import.error_message = ""
+        registration_data_import.save()
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            registration_data_import.program_id,
+            old_object=old_rdi,
+            new_object=registration_data_import,
+        )
+
     def deduplicate_pending_individuals(self, registration_data_import: RegistrationDataImport) -> None:
         pending_individuals = (
             PendingIndividual.objects.filter(registration_data_import=registration_data_import)
@@ -265,23 +339,17 @@ class DeduplicateTask:
             duplicates_in_batch.update(pending_deduplication_result.duplicates)
             possible_duplicates_in_batch.update(pending_deduplication_result.possible_duplicates)
 
-            if (
-                len(pending_deduplication_result.results_data["duplicates"])
-                > self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED
-            ):
-                message = (
-                    "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
-                )
-                self._set_error_message_and_status(registration_data_import, message)
-                break
-
-            if (len(duplicates_in_batch) >= allowed_duplicates_in_batch) and individuals_count > 1:
-                message = (
-                    f"The percentage of records ({self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
-                    "deemed as 'duplicate', within a batch has reached the maximum number."
-                )
-                self._set_error_message_and_status(registration_data_import, message)
+            error_msg = self._check_duplicates_threshold(
+                len(pending_deduplication_result.results_data["duplicates"]),
+                self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED,
+                len(duplicates_in_batch),
+                allowed_duplicates_in_batch,
+                individuals_count,
+                self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE,
+                "batch",
+            )
+            if error_msg:
+                self._set_error_message_and_status(registration_data_import, error_msg)
                 break
             # if it is collided household individual, we dont deduplicate against population,
             # because it will be just updating existing household
@@ -299,24 +367,17 @@ class DeduplicateTask:
             duplicates_in_population.update(deduplication_result.original_individuals_ids_duplicates)
             possible_duplicates_in_population.update(deduplication_result.original_individuals_ids_possible_duplicates)
 
-            if (
-                len(deduplication_result.results_data["duplicates"])
-                > self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
-            ):
-                message = (
-                    "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
-                )
-                self._set_error_message_and_status(registration_data_import, message)
-                break
-
-            if (len(duplicates_in_population) >= allowed_duplicates_in_population) and individuals_count > 1:
-                message = (
-                    f"The percentage of records ("
-                    f"{self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
-                    "deemed as 'duplicate', within a population has reached the maximum number."
-                )
-                self._set_error_message_and_status(registration_data_import, message)
+            error_msg = self._check_duplicates_threshold(
+                len(deduplication_result.results_data["duplicates"]),
+                self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED,
+                len(duplicates_in_population),
+                allowed_duplicates_in_population,
+                individuals_count,
+                self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE,
+                "population",
+            )
+            if error_msg:
+                self._set_error_message_and_status(registration_data_import, error_msg)
                 break
 
         PendingIndividual.objects.bulk_update(
@@ -339,47 +400,12 @@ class DeduplicateTask:
                 deduplication_golden_record_status=NOT_PROCESSED,
             )
         else:
-            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
-                id__in=duplicates_in_batch.union(possible_duplicates_in_batch)
-            ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
-            PendingIndividual.objects.filter(registration_data_import_id=registration_data_import.id).exclude(
-                id__in=duplicates_in_population.union(possible_duplicates_in_population)
-            ).update(deduplication_golden_record_status=UNIQUE)
-            old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
-            registration_data_import.status = RegistrationDataImport.IN_REVIEW
-            registration_data_import.batch_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=DUPLICATE_IN_BATCH,
-            ).count()
-            registration_data_import.batch_possible_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=SIMILAR_IN_BATCH,
-            ).count()
-            registration_data_import.batch_unique = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_batch_status=UNIQUE_IN_BATCH,
-            ).count()
-            registration_data_import.golden_record_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=DUPLICATE,
-            ).count()
-            registration_data_import.golden_record_possible_duplicates = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=NEEDS_ADJUDICATION,
-            ).count()
-            registration_data_import.golden_record_unique = PendingIndividual.objects.filter(
-                registration_data_import_id=registration_data_import.id,
-                deduplication_golden_record_status=UNIQUE,
-            ).count()
-            registration_data_import.error_message = ""
-            registration_data_import.save()
-            log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
-                "business_area",
-                None,
-                registration_data_import.program_id,
-                old_object=old_rdi,
-                new_object=registration_data_import,
+            self._finalize_successful_deduplication(
+                registration_data_import,
+                duplicates_in_batch,
+                possible_duplicates_in_batch,
+                duplicates_in_population,
+                possible_duplicates_in_population,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
@@ -732,22 +758,12 @@ class HardDocumentDeduplication:
                 .order_by("document_number", "created_at")
             )
 
-            documents_numbers = []
-            new_document_signatures = []
-
-            # use this dict for skip ticket creation for the same Individual with the same doc number
-            new_document_signatures_in_batch_per_individual_dict = defaultdict(list)
-            for d in documents_to_dedup:
-                new_document_signature = self._generate_signature(d)
-                documents_numbers.append(d.document_number)
-                new_document_signatures.append(new_document_signature)
-                new_document_signatures_in_batch_per_individual_dict[str(d.individual_id)].append(
-                    new_document_signature
-                )
-
-            new_document_signatures_duplicated_in_batch = [
-                d for d in new_document_signatures if new_document_signatures.count(d) > 1
-            ]
+            (
+                documents_numbers,
+                new_document_signatures,
+                new_document_signatures_in_batch_per_individual_dict,
+                new_document_signatures_duplicated_in_batch,
+            ) = self._build_document_signatures(documents_to_dedup)
 
             # added order_by because test was failed randomly
             all_matching_number_documents = (
@@ -801,61 +817,96 @@ class HardDocumentDeduplication:
                 )
                 raise
 
-            PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
-            possible_duplicates_through_existing_list = (
-                PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
-                .order_by("ticketneedsadjudicationdetails")
-                .values_list(
-                    "ticketneedsadjudicationdetails_id",
-                    "individual_id",
-                    "ticketneedsadjudicationdetails__golden_records_individual",
+            possible_duplicates_through_dict = self._get_existing_duplicates_through(
+                possible_duplicates_individuals_id_set
+            )
+
+            self._create_deduplication_tickets(
+                ticket_data_dict, possible_duplicates_through_dict, registration_data_import
+            )
+
+    def _build_document_signatures(self, documents_to_dedup: list) -> tuple[list, list, dict, list]:
+        documents_numbers = []
+        new_document_signatures = []
+        new_document_signatures_in_batch_per_individual_dict = defaultdict(list)
+        for d in documents_to_dedup:
+            new_document_signature = self._generate_signature(d)
+            documents_numbers.append(d.document_number)
+            new_document_signatures.append(new_document_signature)
+            new_document_signatures_in_batch_per_individual_dict[str(d.individual_id)].append(new_document_signature)
+        new_document_signatures_duplicated_in_batch = [
+            d for d in new_document_signatures if new_document_signatures.count(d) > 1
+        ]
+        return (
+            documents_numbers,
+            new_document_signatures,
+            new_document_signatures_in_batch_per_individual_dict,
+            new_document_signatures_duplicated_in_batch,
+        )
+
+    def _get_existing_duplicates_through(self, possible_duplicates_individuals_id_set: set) -> dict:
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa
+        possible_duplicates_through_existing_list = (
+            PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
+            .order_by("ticketneedsadjudicationdetails")
+            .values_list(
+                "ticketneedsadjudicationdetails_id",
+                "individual_id",
+                "ticketneedsadjudicationdetails__golden_records_individual",
+            )
+        )
+
+        possible_duplicates_through_dict = defaultdict(set)
+        for (
+            ticked_details_id,
+            individual_id,
+            main_individual_id,
+        ) in possible_duplicates_through_existing_list:
+            possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
+            possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
+        return possible_duplicates_through_dict
+
+    def _create_deduplication_tickets(
+        self,
+        ticket_data_dict: dict,
+        possible_duplicates_through_dict: dict,
+        registration_data_import: RegistrationDataImport | None,
+    ) -> None:
+        ticket_data_collected = []
+        tickets_programs = []
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
+        for ticket_data in ticket_data_dict.values():
+            main_individual = ticket_data["original"].individual
+            prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
+                main_individual=main_individual,
+                business_area=main_individual.business_area,
+                registration_data_import=registration_data_import,
+                possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
+                possible_duplicates_through_dict=possible_duplicates_through_dict,
+            )
+            if prepared_ticket is None:
+                continue
+            ticket_data_collected.append(prepared_ticket)
+            tickets_programs.append(
+                GrievanceTicketProgramThrough(
+                    grievanceticket=prepared_ticket.ticket,
+                    program_id=main_individual.program_id,
                 )
             )
 
-            possible_duplicates_through_dict = defaultdict(set)
-            for (
-                ticked_details_id,
-                individual_id,
-                main_individual_id,
-            ) in possible_duplicates_through_existing_list:
-                possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
-                possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
+        GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
+        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
 
-            ticket_data_collected = []
-            tickets_programs = []
-            GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
-            for ticket_data in ticket_data_dict.values():
-                main_individual = ticket_data["original"].individual
-                prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
-                    main_individual=main_individual,
-                    business_area=main_individual.business_area,
-                    registration_data_import=registration_data_import,
-                    possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
-                    possible_duplicates_through_dict=possible_duplicates_through_dict,
-                )
-                if prepared_ticket is None:
-                    continue
-                ticket_data_collected.append(prepared_ticket)
-                tickets_programs.append(
-                    GrievanceTicketProgramThrough(
-                        grievanceticket=prepared_ticket.ticket,
-                        program_id=main_individual.program_id,
-                    )
-                )
-
-            GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
-            GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
-
-            created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
-                [x.ticket_details for x in ticket_data_collected]
-            )
-            # makes flat list from list of lists models
-            duplicates_models_to_create_flat = list(
-                itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
-            )
-            PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
-            for created_ticket in created_tickets:
-                created_ticket.populate_cross_area_flag()
+        created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
+            [x.ticket_details for x in ticket_data_collected]
+        )
+        duplicates_models_to_create_flat = list(
+            itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
+        )
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through  # noqa: N806
+        PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
+        for created_ticket in created_tickets:
+            created_ticket.populate_cross_area_flag()
 
     def _deduplication_documents(
         self,

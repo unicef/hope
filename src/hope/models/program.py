@@ -215,6 +215,12 @@ class Program(
         default="hope.apps.program.collision_detectors.NoopCollisionDetector",
         help_text="Object which detects collisions",
     )
+    identification_key_individual_label = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Label for identification key used for individuals",
+    )
     # System fields
     is_visible = models.BooleanField(default=True, help_text="Program is visible in UI [sys]")
     household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
