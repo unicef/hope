@@ -727,6 +727,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         if self._should_skip_cell(header, cell.value, current_field, complex_fields, sheet_title):
                             continue
 
+                        value = self._cast_value(cell_value, header)
+                        if value in (None, ""):
+                            continue
+
                         if self._process_complex_field(
                             header,
                             cell_value,

@@ -64,7 +64,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> None:
         document_keys = DocumentType.objects.values_list("key", flat=True)
         self.DOCS_AND_IDENTITIES_FIELDS = [
-            f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
+            f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c", "type_i_c"]
         ]
         self.registration_data_import = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
@@ -289,7 +289,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         current_individual_docs_and_identities: dict,
         individual_obj: PendingIndividual,
     ) -> None:
-        key = i_field.replace("_photo_i_c", "").replace("_no_i_c", "").replace("_issuer_i_c", "").replace("_i_c", "")
+        key = (
+            i_field.replace("_photo_i_c", "")
+            .replace("_no_i_c", "")
+            .replace("_issuer_i_c", "")
+            .replace("_type_i_c", "")
+            .replace("_i_c", "")
+        )
         if i_field.endswith("_type_i_c"):
             value_key = "name"
         elif i_field.endswith("_photo_i_c"):

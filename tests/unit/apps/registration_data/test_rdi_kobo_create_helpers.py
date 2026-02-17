@@ -103,8 +103,8 @@ def test_process_doc_identity_field_type(kobo_task_pull_pictures):
     kobo_task_pull_pictures._process_doc_identity_field(
         "birth_certificate_type_i_c", "BIRTH_CERT", current, MagicMock()
     )
-    # key: "birth_certificate_type_i_c" → replace("_i_c","") → "birth_certificate_type"
-    assert current["birth_certificate_type"]["name"] == "BIRTH_CERT"
+    # key: "birth_certificate_type_i_c" → replace("_type_i_c","") → "birth_certificate"
+    assert current["birth_certificate"]["name"] == "BIRTH_CERT"
 
 
 def test_process_doc_identity_field_number(kobo_task_pull_pictures):
