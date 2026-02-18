@@ -4,256 +4,231 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.grievance import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
     GrievanceTicketFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    PartnerFactory,
+    ProgramFactory,
     TicketDeleteIndividualDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import ROLE_PRIMARY
-from hope.models import IndividualRoleInHousehold, Program, country as geo_models
-from hope.models.utils import MergeStatusModel
+from hope.models import Program
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
 
 
-class TestRoleReassignMutation:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner, first_name="TestUser")
-        self.user2 = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
+@pytest.fixture
+def common_context(api_client: Any) -> dict[str, Any]:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
+    )
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    partner = PartnerFactory(name="TestPartner")
+    user = UserFactory(partner=partner, first_name="TestUser")
+    client = api_client(user)
+    program = ProgramFactory(
+        business_area=business_area,
+        status=Program.ACTIVE,
+        name="program afghanistan 1",
+    )
+    area_type = AreaTypeFactory(
+        name="Admin type one",
+        country=country,
+        area_level=2,
+    )
+    admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+    return {
+        "business_area": business_area,
+        "user": user,
+        "client": client,
+        "program": program,
+        "admin_area": admin_area,
+    }
 
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
-        self.household = HouseholdFactory.build(program=self.program)
-        self.household.household_collection.save()
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.program = self.program
-        self.household.registration_data_import.save()
 
-        self.individual = IndividualFactory(
-            full_name="Benjamin Butler",
-            given_name="Benjamin",
-            family_name="Butler",
-            phone_no="(953)682-4596",
-            birth_date="1943-07-30",
-            household=None,
-            program=self.program,
-        )
+@pytest.fixture
+def delete_individual_context(common_context: dict[str, Any]) -> dict[str, Any]:
+    program = common_context["program"]
+    business_area = common_context["business_area"]
+    household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        create_role=False,
+    )
+    individual = household.head_of_household
+    role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=individual,
+        role=ROLE_PRIMARY,
+    )
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        admin2=common_context["admin_area"],
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    grievance_ticket.programs.set([program])
+    TicketDeleteIndividualDetailsFactory(
+        ticket=grievance_ticket,
+        individual=individual,
+        approve_status=True,
+    )
+    return {
+        **common_context,
+        "household": household,
+        "individual": individual,
+        "role": role,
+        "grievance_ticket": grievance_ticket,
+    }
 
-        self.household.head_of_household = self.individual
-        self.household.save()
 
-        self.individual.household = self.household
-        self.individual.save()
+@pytest.fixture
+def needs_adjudication_context(common_context: dict[str, Any]) -> dict[str, Any]:
+    program = common_context["program"]
+    business_area = common_context["business_area"]
+    household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        create_role=False,
+    )
+    individual_1 = household.head_of_household
+    individual_2 = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+        full_name="Andrew Jackson",
+        given_name="Andrew",
+        family_name="Jackson",
+        phone_no="(853)692-4696",
+        birth_date="1963-09-12",
+    )
+    role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=individual_1,
+        role=ROLE_PRIMARY,
+    )
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        admin2=common_context["admin_area"],
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    grievance_ticket.programs.set([program])
+    TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance_ticket,
+        golden_records_individual=individual_1,
+        possible_duplicate=individual_2,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    return {
+        **common_context,
+        "household": household,
+        "individual_1": individual_1,
+        "individual_2": individual_2,
+        "role": role,
+        "grievance_ticket": grievance_ticket,
+    }
 
-        self.household.refresh_from_db()
-        self.individual.refresh_from_db()
 
-        self.role = IndividualRoleInHousehold.objects.create(
-            household=self.household,
-            individual=self.individual,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-
-        self.grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin2=self.admin_area,
-            business_area=self.afghanistan,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        self.grievance_ticket.programs.set([self.program])
-        TicketDeleteIndividualDetailsFactory(
-            ticket=self.grievance_ticket,
-            individual=self.individual,
-            approve_status=True,
-        )
-
-    def test_role_reassignment(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        response = self.api_client.post(
-            reverse(
-                "api:grievance-tickets:grievance-tickets-global-reassign-role",
-                kwargs={
-                    "business_area_slug": self.afghanistan.slug,
-                    "pk": str(self.grievance_ticket.id),
-                },
-            ),
-            {
-                "household_id": str(self.household.id),
-                "individual_id": str(self.individual.id),
-                "role": ROLE_PRIMARY,
-                "version": self.grievance_ticket.version,
+def test_role_reassignment(
+    create_user_role_with_permissions: Any,
+    delete_individual_context: dict[str, Any],
+) -> None:
+    create_user_role_with_permissions(
+        delete_individual_context["user"],
+        [Permissions.GRIEVANCES_UPDATE],
+        delete_individual_context["business_area"],
+        delete_individual_context["program"],
+    )
+    response = delete_individual_context["client"].post(
+        reverse(
+            "api:grievance-tickets:grievance-tickets-global-reassign-role",
+            kwargs={
+                "business_area_slug": delete_individual_context["business_area"].slug,
+                "pk": str(delete_individual_context["grievance_ticket"].id),
             },
-            format="json",
-        )
-        resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in resp_data
+        ),
+        {
+            "household_id": str(delete_individual_context["household"].id),
+            "individual_id": str(delete_individual_context["individual"].id),
+            "role": ROLE_PRIMARY,
+            "version": delete_individual_context["grievance_ticket"].version,
+        },
+        format="json",
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert "id" in response_data
 
-        self.grievance_ticket.refresh_from_db()
-        ticket_details = self.grievance_ticket.delete_individual_ticket_details
-        role_reassign_data = ticket_details.role_reassign_data
-
-        expected_data = {
-            str(self.role.id): {
-                "role": "PRIMARY",
-                "household": str(self.household.id),
-                "individual": str(self.individual.id),
-            }
+    delete_individual_context["grievance_ticket"].refresh_from_db()
+    ticket_details = delete_individual_context["grievance_ticket"].delete_individual_ticket_details
+    expected_data = {
+        str(delete_individual_context["role"].id): {
+            "role": "PRIMARY",
+            "household": str(delete_individual_context["household"].id),
+            "individual": str(delete_individual_context["individual"].id),
         }
-        assert role_reassign_data == expected_data
+    }
+    assert ticket_details.role_reassign_data == expected_data
 
 
-class TestRoleReassignMutationNewTicket:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner, first_name="TestUser")
-        self.user2 = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
-
-        self.household = HouseholdFactory.build(program=self.program)
-        self.household.household_collection.save()
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.program = self.program
-        self.household.registration_data_import.save()
-
-        self.individual_1 = IndividualFactory(
-            full_name="Benjamin Butler",
-            given_name="Benjamin",
-            family_name="Butler",
-            phone_no="(953)682-4596",
-            birth_date="1943-07-30",
-            household=None,
-            program=self.program,
-        )
-
-        self.individual_2 = IndividualFactory(
-            full_name="Andrew Jackson",
-            given_name="Andrew",
-            family_name="Jackson",
-            phone_no="(853)692-4696",
-            birth_date="1963-09-12",
-            household=None,
-            program=self.program,
-        )
-
-        self.individual_3 = IndividualFactory(
-            full_name="Ulysses Grant",
-            given_name="Ulysses",
-            family_name="Grant",
-            phone_no="(953)682-1111",
-            birth_date="1913-01-31",
-            household=None,
-            program=self.program,
-        )
-
-        self.household.head_of_household = self.individual_1
-        self.household.save()
-
-        self.individual_1.household = self.household
-        self.individual_2.household = self.household
-
-        self.individual_1.save()
-        self.individual_2.save()
-
-        self.household.refresh_from_db()
-        self.individual_1.refresh_from_db()
-        self.individual_2.refresh_from_db()
-
-        self.role = IndividualRoleInHousehold.objects.create(
-            household=self.household,
-            individual=self.individual_1,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-
-        self.grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            admin2=self.admin_area,
-            business_area=self.afghanistan,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        self.grievance_ticket.programs.set([self.program])
-        TicketNeedsAdjudicationDetailsFactory(
-            ticket=self.grievance_ticket,
-            golden_records_individual=self.individual_1,
-            possible_duplicate=self.individual_2,
-            is_multiple_duplicates_version=True,
-            selected_individual=None,
-        )
-
-    def test_role_reassignment_new_ticket(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
-        response = self.api_client.post(
-            reverse(
-                "api:grievance-tickets:grievance-tickets-global-reassign-role",
-                kwargs={
-                    "business_area_slug": self.afghanistan.slug,
-                    "pk": str(self.grievance_ticket.id),
-                },
-            ),
-            {
-                "household_id": str(self.household.id),
-                "individual_id": str(self.individual_1.id),
-                "new_individual_id": str(self.individual_2.id),
-                "role": ROLE_PRIMARY,
-                "version": self.grievance_ticket.version,
+def test_role_reassignment_new_ticket(
+    create_user_role_with_permissions: Any,
+    needs_adjudication_context: dict[str, Any],
+) -> None:
+    create_user_role_with_permissions(
+        needs_adjudication_context["user"],
+        [Permissions.GRIEVANCES_UPDATE],
+        needs_adjudication_context["business_area"],
+        needs_adjudication_context["program"],
+    )
+    response = needs_adjudication_context["client"].post(
+        reverse(
+            "api:grievance-tickets:grievance-tickets-global-reassign-role",
+            kwargs={
+                "business_area_slug": needs_adjudication_context["business_area"].slug,
+                "pk": str(needs_adjudication_context["grievance_ticket"].id),
             },
-            format="json",
-        )
-        resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in resp_data
+        ),
+        {
+            "household_id": str(needs_adjudication_context["household"].id),
+            "individual_id": str(needs_adjudication_context["individual_1"].id),
+            "new_individual_id": str(needs_adjudication_context["individual_2"].id),
+            "role": ROLE_PRIMARY,
+            "version": needs_adjudication_context["grievance_ticket"].version,
+        },
+        format="json",
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert "id" in response_data
 
-        self.grievance_ticket.refresh_from_db()
-        ticket_details = self.grievance_ticket.ticket_details
-        role_reassign_data = ticket_details.role_reassign_data
-
-        expected_data = {
-            str(self.role.id): {
-                "role": "PRIMARY",
-                "household": str(self.household.id),
-                "individual": str(self.individual_1.id),
-                "new_individual": str(self.individual_2.id),
-            }
+    needs_adjudication_context["grievance_ticket"].refresh_from_db()
+    ticket_details = needs_adjudication_context["grievance_ticket"].ticket_details
+    expected_data = {
+        str(needs_adjudication_context["role"].id): {
+            "role": "PRIMARY",
+            "household": str(needs_adjudication_context["household"].id),
+            "individual": str(needs_adjudication_context["individual_1"].id),
+            "new_individual": str(needs_adjudication_context["individual_2"].id),
         }
-
-        assert role_reassign_data == expected_data
+    }
+    assert ticket_details.role_reassign_data == expected_data
