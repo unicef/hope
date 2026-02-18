@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 import csv
+import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any, Sequence, Union
 
@@ -40,6 +41,13 @@ if TYPE_CHECKING:
     from django.db.models.query import _QuerySet
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass(frozen=True)
+class CsvImportConfig:
+    partner: Partner
+    business_area: BusinessArea
+    role: Role
 
 
 class LoadUsersForm(forms.Form):
@@ -405,10 +413,7 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         self,
         request: HttpRequest,
         row: dict,
-        partner: Partner,
-        business_area: BusinessArea,
-        role: Role,
-        enable_kobo: bool,
+        config: CsvImportConfig,
     ) -> dict:
         try:
             email = row["email"].strip()
@@ -418,25 +423,21 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
         user_info = {
             "email": email,
             "is_new": False,
-            "kobo": False,
             "error": "",
         }
-        isnew, u = self._get_user(email, partner, row)
+        isnew, u = self._get_user(email, config.partner, row)
         if isnew:
             user_info["is_new"] = True
-            ur = u.role_assignments.create(business_area=business_area, role=role)
+            ur = u.role_assignments.create(business_area=config.business_area, role=config.role)
             self.log_addition(request, u, "User imported by CSV")
             self.log_addition(request, ur, "User Role added")
         else:
             try:
-                IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                ur, _ = u.role_assignments.get_or_create(business_area=business_area, role=role)
+                IncompatibleRoles.objects.validate_user_role(u, config.business_area, config.role)
+                ur, _ = u.role_assignments.get_or_create(business_area=config.business_area, role=config.role)
                 self.log_addition(request, ur, "User Role added")
             except ValidationError as e:
                 self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
-
-        if enable_kobo:
-            self._grant_kobo_accesss_to_user(u, sync=False)
 
         return user_info
 
@@ -465,18 +466,18 @@ class UserAdmin(HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
             if form.is_valid():
                 try:
                     context["processed"] = True
-                    partner = form.cleaned_data["partner"]
-                    business_area = form.cleaned_data["business_area"]
-                    role = form.cleaned_data["role"]
+                    config = CsvImportConfig(
+                        partner=form.cleaned_data["partner"],
+                        business_area=form.cleaned_data["business_area"],
+                        role=form.cleaned_data["role"],
+                    )
                     reader = self._parse_csv_file(form)
                     context["results"] = []
                     context["reader"] = reader
                     context["errors"] = []
                     with atomic():
                         for row in reader:
-                            user_info = self._process_csv_row(
-                                request, row, partner, business_area, role, enable_kobo=False
-                            )
+                            user_info = self._process_csv_row(request, row, config)
                             context["results"].append(user_info)
                 except (csv.Error, HTTPError, Error) as e:
                     logger.warning(e)
