@@ -146,12 +146,12 @@ def mock_elasticsearch(mocker: Any) -> None:
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
     )
     # Mock deduplication that uses ES
-    mocker.patch("hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
+    mocker.patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_pending_individuals")
     mocker.patch(
-        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_against_population"
     )
     mocker.patch(
-        "hope.apps.registration_datahub.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
+        "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
 
 
@@ -308,18 +308,8 @@ def disable_activity_log(request, monkeypatch):
         def __init__(self):
             self.programs = DummyPrograms()
 
+        def save(self, *args, **kwargs):
+            pass
+
     monkeypatch.setattr(LogEntry.objects, "create", lambda *a, **kw: DummyLog())
     yield
-
-
-# @pytest.fixture(autouse=True)
-# def ensure_contenttypes_and_permissions(db):
-#     ContentType.objects.clear_cache()
-#     for app_config in apps.get_app_configs():
-#         create_permissions(app_config, verbosity=0)
-
-
-# @pytest.fixture(scope="session", autouse=True)
-# def prevent_contenttype_flush(django_db_setup, django_db_blocker):
-#     with django_db_blocker.unblock():
-#         call_command("migrate", interactive=False, run_syncdb=True)

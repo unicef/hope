@@ -19,7 +19,7 @@ import { ReactElement } from 'react';
 
 export const PaymentModuleRoutes = (): ReactElement => {
   const { isSocialDctType } = useProgramContext();
-  let children = [];
+  let children;
 
   if (isSocialDctType) {
     children = [

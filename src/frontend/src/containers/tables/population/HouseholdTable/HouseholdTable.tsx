@@ -68,6 +68,7 @@ export const HouseholdTable = ({
       withdrawn: matchWithdrawnValue(),
       ordering: filter.orderBy,
       rdiMergeStatus: 'MERGED',
+      rdiId: filter.rdiId,
       page,
     };
   }, [
@@ -83,6 +84,7 @@ export const HouseholdTable = ({
     filter.residenceStatus,
     filter.withdrawn,
     filter.orderBy,
+    filter.rdiId,
     page,
   ]);
 
@@ -102,6 +104,7 @@ export const HouseholdTable = ({
     filter.residenceStatus,
     filter.withdrawn,
     filter.orderBy,
+    filter.rdiId,
   ]);
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {

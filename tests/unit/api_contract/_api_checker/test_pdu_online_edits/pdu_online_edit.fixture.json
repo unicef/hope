@@ -1,0 +1,179 @@
+{
+    "pdu_online_edit": {
+        "master": {
+            "model": "periodic_data_update.pduonlineedit",
+            "pk": 1,
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "celery_tasks_results_ids": {},
+                "name": "Online Edit 0",
+                "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
+                "program": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",
+                "status": "NEW",
+                "created_by": "af831988-1123-4e39-b679-8706f300cf11",
+                "approved_by": null,
+                "approved_at": null,
+                "edit_data": {},
+                "number_of_records": 10,
+                "authorized_users": []
+            }
+        },
+        "deps": [
+            {
+                "model": "core.businessarea",
+                "pk": "e609466f-4754-411e-8ad5-e6362ddad708",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            },
+            {
+                "model": "program.program",
+                "pk": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",
+                "fields": {
+                    "is_removed": false,
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "last_sync_at": null,
+                    "version": 1735688653315201,
+                    "data_collecting_type": 27,
+                    "beneficiary_group": "f88c93c6-c6b4-414a-8a7d-9a47da7c9693",
+                    "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
+                    "name": "Program 0",
+                    "programme_code": "679S",
+                    "status": "ACTIVE",
+                    "slug": "679s",
+                    "description": "",
+                    "start_date": "2025-01-01",
+                    "end_date": "2026-01-01",
+                    "sector": "MULTI_PURPOSE",
+                    "budget": "1000000.00",
+                    "frequency_of_payments": "ONE_OFF",
+                    "scope": null,
+                    "partner_access": "SELECTED_PARTNERS_ACCESS",
+                    "cash_plus": false,
+                    "population_goal": 1000,
+                    "administrative_areas_of_implementation": "",
+                    "biometric_deduplication_enabled": false,
+                    "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "is_visible": true,
+                    "household_count": 0,
+                    "individual_count": 0,
+                    "reconciliation_window_in_days": 0,
+                    "send_reconciliation_window_expiry_notifications": false,
+                    "admin_areas": [],
+                    "sanction_lists": []
+                }
+            },
+            {
+                "model": "core.datacollectingtype",
+                "pk": 27,
+                "fields": {
+                    "created": "2025-01-01T00:00:00Z",
+                    "modified": "2025-01-01T00:00:00Z",
+                    "code": "dct_0",
+                    "label": "DCT 0",
+                    "type": "STANDARD",
+                    "description": "",
+                    "active": true,
+                    "deprecated": false,
+                    "individual_filters_available": false,
+                    "household_filters_available": true,
+                    "recalculate_composition": false,
+                    "weight": 0,
+                    "compatible_types": [
+                        27
+                    ],
+                    "limit_to": []
+                }
+            },
+            {
+                "model": "program.beneficiarygroup",
+                "pk": "f88c93c6-c6b4-414a-8a7d-9a47da7c9693",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "name": "Group 0",
+                    "group_label": "Household",
+                    "group_label_plural": "Households",
+                    "member_label": "Individual",
+                    "member_label_plural": "Individuals",
+                    "master_detail": true
+                }
+            },
+            {
+                "model": "account.user",
+                "pk": "af831988-1123-4e39-b679-8706f300cf11",
+                "fields": {
+                    "password": "",
+                    "last_login": null,
+                    "is_superuser": true,
+                    "username": "user_0",
+                    "first_name": "",
+                    "last_name": "",
+                    "is_staff": true,
+                    "is_active": true,
+                    "date_joined": "2025-01-01T00:00:00Z",
+                    "azure_id": null,
+                    "display_name": "user_0",
+                    "status": "INVITED",
+                    "partner": 63,
+                    "email": "user_0@example.com",
+                    "custom_fields": {},
+                    "job_title": "",
+                    "last_modify_date": "2025-01-01T00:00:00Z",
+                    "groups": [],
+                    "user_permissions": []
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 63,
+                "fields": {
+                    "name": "Partner 0",
+                    "parent": null,
+                    "is_un": false,
+                    "lft": 1,
+                    "rght": 2,
+                    "tree_id": 2,
+                    "level": 0,
+                    "allowed_business_areas": []
+                }
+            }
+        ]
+    }
+}

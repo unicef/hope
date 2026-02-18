@@ -2,6 +2,7 @@
 
 from datetime import date, timedelta
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
@@ -16,10 +17,12 @@ from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
+    MergeStatusModel,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -90,6 +93,7 @@ class AccountFactory(DjangoModelFactory):
     data = factory.LazyFunction(dict)
     individual = factory.SubFactory(IndividualFactory)
     account_type = factory.SubFactory(AccountTypeFactory)
+    rdi_merge_status = MergeStatusModel.MERGED
 
 
 class PaymentFactory(DjangoModelFactory):
@@ -135,6 +139,17 @@ class PaymentPlanSplitFactory(DjangoModelFactory):
     payment_plan = factory.SubFactory(PaymentPlanFactory)
     split_type = PaymentPlanSplit.SplitType.NO_SPLIT
     order = 0
+
+
+class PaymentPlanSupportingDocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanSupportingDocument
+
+    title = factory.Sequence(lambda n: f"Supporting Document {n}")
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    file = factory.Sequence(
+        lambda n: SimpleUploadedFile(f"supporting_doc_{n}.pdf", b"abc", content_type="application/pdf")
+    )
 
 
 class PaymentVerificationPlanFactory(DjangoModelFactory):

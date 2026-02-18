@@ -45,21 +45,7 @@ class PDUDataExtractionService:
             age_to = self.age_filter.get("to")
             queryset = queryset.filter(age_to_birth_date_query("RANGE", [age_from, age_to]))
         if self.registration_date_filter:
-            registration_date_from = self.registration_date_filter.get("from")
-            registration_date_to = self.registration_date_filter.get("to")
-            if not registration_date_from and not registration_date_to:
-                pass
-            elif not registration_date_to:
-                queryset = queryset.filter(first_registration_date__gte=registration_date_from)
-            elif not registration_date_from:
-                queryset = queryset.filter(first_registration_date__lte=registration_date_to)
-            else:
-                queryset = queryset.filter(
-                    first_registration_date__range=[
-                        registration_date_from,
-                        registration_date_to,
-                    ]
-                )
+            queryset = self._set_registration_date_filter(queryset)
 
         if self.admin1_filter:
             queryset = queryset.filter(household__admin1__in=self.admin1_filter)
@@ -74,6 +60,24 @@ class PDUDataExtractionService:
         elif self.received_assistance_filter is False:
             queryset = self._get_received_assistance_filter(queryset, exclude=True)
         return queryset.distinct()
+
+    def _set_registration_date_filter(self, queryset: QuerySet[Individual]) -> QuerySet[Individual]:
+        registration_date_from = self.registration_date_filter.get("from")
+        registration_date_to = self.registration_date_filter.get("to")
+        if not registration_date_from and not registration_date_to:
+            pass
+        elif not registration_date_to:
+            queryset = queryset.filter(first_registration_date__gte=registration_date_from)
+        elif not registration_date_from:
+            queryset = queryset.filter(first_registration_date__lte=registration_date_to)
+        else:
+            queryset = queryset.filter(
+                first_registration_date__range=[
+                    registration_date_from,
+                    registration_date_to,
+                ]
+            )
+        return queryset
 
     def _get_grievance_ticket_filter(
         self, queryset: QuerySet[Individual], exclude: bool = False

@@ -75,12 +75,23 @@ from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.old_factories.account import RoleFactory, UserFactory
-from extras.test_utils.old_factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.old_factories.geo import (
+    generate_small_areas_for_afghanistan_only,
+)
 from extras.test_utils.old_factories.household import DocumentTypeFactory
 from extras.test_utils.old_factories.program import BeneficiaryGroupFactory
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
-from hope.models import BusinessArea, Country, DataCollectingType, DocumentType, Partner, Role, RoleAssignment, User
+from hope.models import (
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    DocumentType,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 
 HERE = Path(__file__).resolve().parent
 E2E_ROOT = HERE.parent
@@ -176,7 +187,7 @@ def pytest_configure(config) -> None:  # type: ignore
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
     if (not pytest.SESSION_ID) and (not pytest.CSRF):
         pytest.session.get(f"{host}")
-        pytest.CSRF = csrf if csrf else pytest.session.cookies.get_dict()["csrftoken"]
+        pytest.CSRF = csrf or pytest.session.cookies.get_dict()["csrftoken"]
     headers = {
         "X-CSRFToken": pytest.CSRF,
         "Cookie": f"csrftoken={pytest.CSRF}",
@@ -727,7 +738,7 @@ def attach(data=None, path=None, name="attachment", mime_type=None):
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
     SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
+    file_name = f"{node_id.rsplit('::', maxsplit=1)[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = SCREENSHOT_DIRECTORY / file_name

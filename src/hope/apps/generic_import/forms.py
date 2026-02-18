@@ -11,7 +11,7 @@ from hope.models import BusinessArea, Program, RoleAssignment
 class BusinessAreaSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:
@@ -30,7 +30,7 @@ class BusinessAreaSelectWidget(Select):
 class ProgramSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):  # noqa: PLR0913
         """Override to add data-slug attribute to options."""
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value:

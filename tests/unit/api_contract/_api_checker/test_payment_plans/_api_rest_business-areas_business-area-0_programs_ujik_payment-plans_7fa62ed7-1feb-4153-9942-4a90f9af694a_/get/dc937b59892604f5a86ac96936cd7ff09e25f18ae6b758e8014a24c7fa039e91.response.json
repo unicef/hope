@@ -1,0 +1,139 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PATCH, DELETE",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "2908"
+    },
+    "data": {
+        "id": "7fa62ed7-1feb-4153-9942-4a90f9af694a",
+        "unicef_id": "PP-BA0000-25-00000001",
+        "name": null,
+        "status": "OPEN",
+        "total_households_count": 0,
+        "total_individuals_count": 0,
+        "currency": null,
+        "excluded_ids": null,
+        "total_entitled_quantity": null,
+        "total_delivered_quantity": null,
+        "total_undelivered_quantity": null,
+        "dispersion_start_date": "2025-01-01",
+        "dispersion_end_date": "2025-01-31",
+        "is_follow_up": false,
+        "follow_ups": [],
+        "created_by": " ",
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+        "program": {
+            "id": "36cf1da3-ac38-499d-8275-37304d73ddd4",
+            "programme_code": "UJIK",
+            "slug": "ujik",
+            "name": "Program 0",
+            "status": "ACTIVE",
+            "screen_beneficiary": false
+        },
+        "version": 1735688653315202,
+        "background_action_status": null,
+        "background_action_status_display": null,
+        "start_date": null,
+        "end_date": null,
+        "program_cycle": {
+            "id": "4584423b-b69a-4fda-9483-76e010f39e69",
+            "title": "Default Programme Cycle"
+        },
+        "has_payment_list_export_file": false,
+        "has_fsp_delivery_mechanism_xlsx_template": false,
+        "imported_file_name": "",
+        "imported_file_date": null,
+        "payments_conflicts_count": 0,
+        "delivery_mechanism": null,
+        "volume_by_delivery_mechanism": [
+            {
+                "id": "7fa62ed7-1feb-4153-9942-4a90f9af694a",
+                "delivery_mechanism": null,
+                "volume": null,
+                "volume_usd": null
+            }
+        ],
+        "split_choices": [
+            {
+                "name": "By Admin Area 1",
+                "value": "BY_ADMIN_AREA1"
+            },
+            {
+                "name": "By Admin Area 2",
+                "value": "BY_ADMIN_AREA2"
+            },
+            {
+                "name": "By Admin Area 3",
+                "value": "BY_ADMIN_AREA3"
+            },
+            {
+                "name": "By Collector",
+                "value": "BY_COLLECTOR"
+            },
+            {
+                "name": "By Records",
+                "value": "BY_RECORDS"
+            },
+            {
+                "name": "No Split",
+                "value": "NO_SPLIT"
+            }
+        ],
+        "exclusion_reason": null,
+        "exclude_household_error": null,
+        "bank_reconciliation_success": 0,
+        "bank_reconciliation_error": 0,
+        "can_create_payment_verification_plan": false,
+        "available_payment_records_count": 0,
+        "reconciliation_summary": {
+            "delivered_fully": 0,
+            "delivered_partially": 0,
+            "not_delivered": 0,
+            "unsuccessful": 0,
+            "pending": 0,
+            "reconciled": 0,
+            "number_of_payments": 0
+        },
+        "excluded_households": [],
+        "excluded_individuals": [],
+        "can_create_follow_up": false,
+        "total_withdrawn_households_count": 0,
+        "unsuccessful_payments_count": 0,
+        "can_send_to_payment_gateway": false,
+        "can_split": false,
+        "supporting_documents": [],
+        "total_households_count_with_valid_phone_no": 0,
+        "is_payment_gateway_and_all_sent_to_fsp": false,
+        "fsp_communication_channel": "XLSX",
+        "financial_service_provider": null,
+        "can_export_xlsx": false,
+        "can_download_xlsx": false,
+        "can_send_xlsx_password": false,
+        "approval_process": [],
+        "total_entitled_quantity_usd": null,
+        "total_entitled_quantity_revised_usd": null,
+        "total_delivered_quantity_usd": null,
+        "total_undelivered_quantity_usd": null,
+        "male_children_count": 0,
+        "female_children_count": 0,
+        "male_adults_count": 0,
+        "female_adults_count": 0,
+        "steficon_rule": null,
+        "source_payment_plan": null,
+        "exchange_rate": null,
+        "eligible_payments_count": 0,
+        "funds_commitments": null,
+        "available_funds_commitments": [],
+        "payment_verification_plans": [],
+        "admin_url": "/api/unicorn/payment/paymentplan/7fa62ed7-1feb-4153-9942-4a90f9af694a/change/",
+        "abort_comment": ""
+    },
+    "content_type": "application/json"
+}

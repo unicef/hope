@@ -125,7 +125,8 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       : argument;
   };
 
-  const displayValueOrEmpty = (value) => (value ? value : 'Empty');
+  const displayValueOrEmpty = (value) =>
+    value !== null && value !== undefined && value !== '' ? value : 'Empty';
 
   let fieldElement;
 

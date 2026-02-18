@@ -169,16 +169,6 @@ Clear Cache,clear-cache/
         "",
         str,
     ),
-    "USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH": (
-        False,
-        "Use elastic search for individuals search",
-        bool,
-    ),
-    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
-        False,
-        "Use elastic search for households search",
-        bool,
-    ),
     "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
         False,
         "Automatically merge the population after server-triggered RDI import",

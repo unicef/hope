@@ -68,7 +68,7 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_datahub.services.biometric_deduplication import (
+from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
 from hope.models import (
@@ -180,8 +180,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
@@ -222,8 +222,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
@@ -267,8 +267,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            None,
-            program,
+            old_object=None,
+            new_object=program,
         )
 
         serializer.instance = program
@@ -301,8 +301,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         serializer.instance = program
@@ -337,8 +337,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            old_program,
-            program,
+            old_object=old_program,
+            new_object=program,
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
@@ -380,8 +380,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             program.pk,
-            None,
-            program,
+            old_object=None,
+            new_object=program,
         )
 
         return Response(
@@ -400,8 +400,8 @@ class ProgramViewSet(
             "business_area",
             self.request.user,
             instance.pk,
-            old_program,
-            instance,
+            old_object=old_program,
+            new_object=instance,
         )
 
     @action(detail=False, methods=["get"])

@@ -35,8 +35,7 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationKoboImportSerializer,
     RegistrationXlsxImportSerializer,
 )
-from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -45,7 +44,8 @@ from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
     registration_xlsx_import_task,
 )
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.filters import RegistrationDataImportFilter
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -152,8 +152,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -202,8 +202,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -249,8 +249,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -280,8 +280,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             rdi.program_id,
-            old_rdi,
-            rdi,
+            old_object=old_rdi,
+            new_object=rdi,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -333,8 +333,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             self.program.id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
@@ -427,8 +427,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(
@@ -508,8 +508,8 @@ class RegistrationDataImportViewSet(
             "business_area",
             request.user,
             registration_data_import.program_id,
-            None,
-            registration_data_import,
+            old_object=None,
+            new_object=registration_data_import,
         )
 
         return Response(

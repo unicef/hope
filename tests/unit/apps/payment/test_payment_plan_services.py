@@ -5,14 +5,15 @@ from unittest import mock
 from unittest.mock import patch
 
 from aniso8601 import parse_date
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
-from django_fsm import TransitionNotAllowed
 from freezegun import freeze_time
 import pytest
 from pytz import utc
 from rest_framework.exceptions import ValidationError
+from viewflow.fsm import TransitionNotAllowed
 
 from extras.test_utils.factories import (
     AccountFactory,
@@ -40,6 +41,7 @@ from hope.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     AccountType,
@@ -58,6 +60,17 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def test_update_fsp_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    result = service._update_fsp_and_delivery_mechanism(fsp_id="some-id", delivery_mechanism_code="some-code")
+    assert result is False
 
 
 @pytest.fixture
@@ -289,7 +302,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     }
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
-    assert str(error.value) == "Can't switch from state 'TP_OPEN' using method 'status_open'"
+    assert str(error.value) == 'Status_Open :: no transition from "TP_OPEN"'
 
     pp.status = PaymentPlan.Status.DRAFT
     pp.save()
@@ -721,13 +734,14 @@ def test_send_to_payment_gateway(
         financial_service_provider=pg_fsp,
         delivery_mechanism=dm_transfer_to_account,
     )
-    pp.background_action_status_send_to_payment_gateway()
+    flow = PaymentPlanFlow(pp)
+    flow.background_action_status_send_to_payment_gateway()
     pp.save()
 
     with pytest.raises(ValidationError, match="Sending in progress"):
         PaymentPlanService(pp).send_to_payment_gateway()
 
-    pp.background_action_status_none()
+    flow.background_action_status_none()
     pp.save()
 
     split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
@@ -742,6 +756,41 @@ def test_send_to_payment_gateway(
         pps.user = mock.MagicMock(pk="123")
         pps.send_to_payment_gateway()
         assert mock_task.call_count == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx.delay")
+def test_import_xlsx_per_fsp(
+    mock_task: Any,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    pp = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle,
+        background_action_status=None,
+    )
+
+    mock_file = SimpleUploadedFile(
+        "test.xlsx",
+        b"test file content",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    service = PaymentPlanService(pp)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        result = service.import_xlsx_per_fsp(user, mock_file)
+
+    assert mock_task.call_count == 1
+
+    pp.refresh_from_db()
+    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    assert pp.reconciliation_import_file is not None
+    assert result == pp
 
 
 @freeze_time("2020-10-10")
@@ -931,7 +980,7 @@ def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: Progra
     )
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).tp_lock()
-    assert str(error.value) == "Can't switch from state 'DRAFT' using method 'status_tp_lock'"
+    assert str(error.value) == 'Status_Tp_Lock :: no transition from "DRAFT"'
 
 
 def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
@@ -943,7 +992,7 @@ def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     )
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).tp_unlock()
-    assert str(error.value) == "Can't switch from state 'DRAFT' using method 'status_tp_open'"
+    assert str(error.value) == 'Status_Tp_Open :: no transition from "DRAFT"'
 
     payment_plan.status = PaymentPlan.Status.TP_LOCKED
     payment_plan.save()
@@ -998,7 +1047,7 @@ def test_draft_with_invalid_pp_status(
 
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).draft()
-    assert str(error.value) == "Can't switch from state 'DRAFT' using method 'status_draft'"
+    assert str(error.value) == 'Status_Draft :: no transition from "DRAFT"'
 
 
 def test_lock_if_no_valid_payments(user: User, business_area: Any, cycle: ProgramCycle) -> None:

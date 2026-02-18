@@ -184,6 +184,7 @@ class Payment(
         help_text="Use this field for reconciliation data",
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
+    extras = models.JSONField(default=dict, blank=True)
 
     vulnerability_score = models.DecimalField(
         blank=True,

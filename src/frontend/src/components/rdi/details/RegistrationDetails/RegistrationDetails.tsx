@@ -153,7 +153,7 @@ function RegistrationDetails({
       </Grid>
     );
   }
-  const showRegularDeduplicationResult =
+  const showBiographicalDeduplicationResult =
     registration.status !== RegistrationDataImportStatusEnum.DEDUPLICATION;
   const showBiometricDeduplicationResult =
     registration.biometricDeduplicationEnabled &&
@@ -232,27 +232,21 @@ function RegistrationDetails({
           </Grid>
           {numbersComponent}
           {registration.status ===
-            RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
-          (!showRegularDeduplicationResult &&
-            !showBiometricDeduplicationResult) ? null : (
+          RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
-                  {showRegularDeduplicationResult && (
-                    <Grid size={{ xs: 4 }}>
-                      <BoldGrey>{t('Biographical')}</BoldGrey>
-                    </Grid>
-                  )}
-                  {showBiometricDeduplicationResult && (
-                    <Grid size={{ xs: 4 }}>
-                      <BoldGrey>{t('Biometrics')}</BoldGrey>
-                    </Grid>
-                  )}
+                  <Grid size={{ xs: 4 }}>
+                    <BoldGrey>{t('Biographical')}</BoldGrey>
+                  </Grid>
+                  <Grid size={{ xs: 4 }}>
+                    <BoldGrey>{t('Biometrics')}</BoldGrey>
+                  </Grid>
                 </Grid>
                 <DedupeBox
-                  showRegularDeduplicationResult={
-                    showRegularDeduplicationResult
+                  showBiographicalDeduplicationResult={
+                    showBiographicalDeduplicationResult
                   }
                   showBiometricDeduplicationResult={
                     showBiometricDeduplicationResult
@@ -261,8 +255,8 @@ function RegistrationDetails({
                   options={withinBatchOptions}
                 />
                 <DedupeBox
-                  showRegularDeduplicationResult={
-                    showRegularDeduplicationResult
+                  showBiographicalDeduplicationResult={
+                    showBiographicalDeduplicationResult
                   }
                   showBiometricDeduplicationResult={
                     showBiometricDeduplicationResult

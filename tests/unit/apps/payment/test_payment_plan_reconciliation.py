@@ -22,7 +22,13 @@ from extras.test_utils.factories import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hope.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan, User
+from hope.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    User,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -84,6 +90,25 @@ def payment_verification_plan(payment_plan_finished: PaymentPlan) -> PaymentVeri
     return PaymentVerificationPlanFactory(
         payment_plan=payment_plan_finished,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
+    )
+
+
+@pytest.fixture
+def payment_for_extras(
+    payment_plan_finished: PaymentPlan,
+    base_context: dict[str, Any],
+) -> Payment:
+    household = HouseholdFactory(
+        business_area=base_context["business_area"],
+        program=base_context["program"],
+        registration_data_import=base_context["registration_data_import"],
+    )
+    return PaymentFactory(
+        parent=payment_plan_finished,
+        household=household,
+        collector=household.head_of_household,
+        entitlement_quantity=Decimal(500),
+        delivered_quantity=Decimal(400),
     )
 
 
@@ -215,7 +240,7 @@ def test_import_row_updates_payment_and_verification_status(
     Row = namedtuple("Row", ["value"])
 
     import_service._import_row(
-        [Row(str(payment_1.id)), Row(999), Row(pytz.utc.localize(datetime(2023, 5, 12)))],
+        [Row(str(payment_1.id)), Row(999), Row("2023/05/12")],
         1,
     )
     import_service._import_row(
@@ -254,3 +279,183 @@ def test_import_row_updates_payment_and_verification_status(
     assert payment_3.delivered_quantity == 2999
     assert verification_3.received_amount is None
     assert verification_3.status == PaymentVerification.STATUS_PENDING
+
+    # more coverage
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = [
+        "payment_id",
+        "delivered_quantity",
+        "reason_for_unsuccessful_payment",
+        "additional_collector_name",
+        "additional_document_type",
+        "additional_document_number",
+    ]
+    import_service.payments_dict = {
+        str(payment_1.pk): payment_1,
+    }
+
+    Row = namedtuple("Row", ["value"])
+
+    import_service._import_row(
+        [
+            Row(str(payment_1.id)),
+            Row(999),
+            Row("Reason for unsuccessful Payment"),
+            Row("Additional Collector"),
+            Row("Additional Document Type"),
+            Row("Additional Document Number"),
+        ],
+        1,
+    )
+    payment_1.save()
+    payment_1.refresh_from_db()
+
+    assert payment_1.delivered_quantity == 999
+    assert payment_1.reason_for_unsuccessful_payment == "Reason for unsuccessful Payment"
+    assert payment_1.additional_collector_name == "Additional Collector"
+    assert payment_1.additional_document_type == "Additional Document Type"
+    assert payment_1.additional_document_number == "Additional Document Number"
+
+
+def test_import_row_saves_extra_columns_to_extras(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1", "custom_field_2"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    import_service._import_row(
+        [Row(str(payment.id)), Row(450), Row("abc"), Row(42)],
+        1,
+    )
+    payment.save()
+    payment.refresh_from_db()
+
+    assert payment.extras == {"custom_field_1": "abc", "custom_field_2": 42}
+
+
+def test_import_row_empty_extras_stays_empty_dict(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    import_service._import_row(
+        [Row(str(payment.id)), Row(450), Row(None)],
+        1,
+    )
+    payment.save()
+    payment.refresh_from_db()
+
+    assert payment.extras == {}
+
+
+def test_validate_extras_sets_is_updated_when_extras_change(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row(str(payment.pk)), Row(500), Row("new_value")]
+
+    assert import_service.is_updated is False
+    import_service._validate_extras(row)
+    assert import_service.is_updated is True
+
+
+def test_known_columns_not_in_extras(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "currency", "fsp_name", "custom_extra"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row(str(payment.pk)), Row(450), Row("USD"), Row("Bank"), Row("extra_val")]
+
+    extras = import_service._get_extras_for_row(row)
+
+    assert extras == {"custom_extra": "extra_val"}
+
+
+@pytest.mark.parametrize(
+    ("input_value", "expected_value"),
+    [
+        pytest.param(Decimal("9.99"), 9.99, id="decimal_to_float"),
+        pytest.param(datetime(2024, 1, 15, 10, 30), "2024-01-15T10:30:00", id="datetime_to_isoformat"),
+        pytest.param(True, True, id="bool_passthrough"),
+    ],
+)
+def test_get_extras_for_row_converts_types(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+    input_value: object,
+    expected_value: object,
+) -> None:
+    payment = payment_for_extras
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_col"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row(str(payment.pk)), Row(450), Row(input_value)]
+
+    extras = import_service._get_extras_for_row(row)
+
+    assert extras == {"custom_col": expected_value}
+
+
+def test_validate_extras_skips_unknown_payment(
+    payment_plan_finished: PaymentPlan,
+) -> None:
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
+    import_service.payments_dict = {}
+
+    Row = namedtuple("Row", ["value"])
+    row = [Row("NONEXISTENT"), Row(500), Row("value")]
+
+    import_service._validate_extras(row)
+
+    assert import_service.is_updated is False
+
+
+def test_import_row_updates_payment_when_only_extras_change(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+    payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+    payment.extras = {}
+    payment.save()
+
+    import_service = XlsxPaymentPlanImportPerFspService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom"]
+    import_service.payments_dict = {str(payment.pk): payment}
+
+    Row = namedtuple("Row", ["value"])
+    import_service._import_row(
+        [Row(str(payment.pk)), Row(400), Row("val")],
+        1,
+    )
+
+    assert len(import_service.payments_to_save) == 1
+    assert payment.extras == {"custom": "val"}

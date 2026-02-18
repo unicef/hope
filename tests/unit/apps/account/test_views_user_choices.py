@@ -90,9 +90,7 @@ def test_get_choices(
     response = authenticated_client.get(choices_url)
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
-        "role_choices": [
-            {"name": role.name, "value": role.id, "subsystem": role.subsystem} for role in Role.objects.order_by("name")
-        ],
+        "role_choices": [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")],
         "status_choices": to_choice_object(USER_STATUS_CHOICES),
         "partner_choices": [
             {"name": partner.name, "value": partner.id}

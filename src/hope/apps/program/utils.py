@@ -75,7 +75,7 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        create_collection: bool = True,
+        **kwargs,
     ):
         """Copy the population data from a programme to another programme.
 
@@ -85,12 +85,13 @@ class CopyProgramPopulation:
         rdi_merge_status: rdi_merge_status for new objects
         create_collection: if True, new common collection will be created for original and copied object
         rdi: RegistrationDataImport object to which new objects will be assigned
+        kwargs: can has 'create_collection' bool  default True.
         """
         self.copy_from_individuals = copy_from_individuals
         self.copy_from_households = copy_from_households
         self.program = program
         self.rdi_merge_status = rdi_merge_status
-        self.create_collection = create_collection
+        self.create_collection = kwargs.get("create_collection", True)
         self.rdi = rdi
         self.manager = "objects" if rdi_merge_status == MergeStatusModel.MERGED else "pending_objects"
 
@@ -385,14 +386,50 @@ def create_roles_for_new_representation(
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
-def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
-    households_to_exclude = Household.objects.filter(
-        program=program,
-        unicef_id__in=households.values_list("unicef_id", flat=True),
-    ).values_list("unicef_id", flat=True)
-    households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
-    error_messages = []
-    rdi = RegistrationDataImport.objects.create(
+def _format_integrity_error(household_unicef_id: str, error: IntegrityError) -> str:
+    error_message = str(error)
+    if "unique_if_not_removed_and_valid_for_representations" in error_message:
+        if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
+            keys = document_data.group(1).split(", ")
+            values = document_data.group(2).split(", ")
+            document_dict = dict(zip(keys, values, strict=True))
+            error_message = f"Document already exists: {document_dict.get('document_number')}"
+    else:
+        detail_index = error_message.find("DETAIL")
+        if detail_index != -1:
+            error_message = error_message[:detail_index].strip()
+    return f"{household_unicef_id}: {error_message}"
+
+
+def _prepare_and_save_household_copy(
+    household: Household,
+    program: Program,
+    rdi: RegistrationDataImport,
+    individuals_dict: dict,
+    individuals_to_exclude_dict: dict,
+) -> None:
+    original_household_id = household.id
+    original_head_of_household_unicef_id = household.head_of_household.unicef_id
+    household.copied_from_id = original_household_id
+    household.pk = None
+    household.program = program
+    household.registration_data_import = rdi
+    household.total_cash_received = None
+    household.total_cash_received_usd = None
+    household.first_registration_date = timezone.now()
+    household.last_registration_date = timezone.now()
+
+    if original_head_of_household_unicef_id in individuals_dict:
+        household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
+    else:
+        copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
+        household.head_of_household_id = copied_individual_id
+
+    household.save()
+
+
+def _create_enrollment_rdi(program: Program, user_id: str) -> RegistrationDataImport:
+    return RegistrationDataImport.objects.create(
         status=RegistrationDataImport.MERGED,
         deduplication_engine_status=(
             RegistrationDataImport.DEDUP_ENGINE_PENDING if program.biometric_deduplication_enabled else None
@@ -406,6 +443,16 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
         program_id=program.id,
         name=generate_rdi_unique_name(program),
     )
+
+
+def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
+    households_to_exclude = Household.objects.filter(
+        program=program,
+        unicef_id__in=households.values_list("unicef_id", flat=True),
+    ).values_list("unicef_id", flat=True)
+    households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
+    error_messages = []
+    rdi = _create_enrollment_rdi(program, user_id)
     for household in households:
         try:
             with transaction.atomic():
@@ -445,24 +492,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                original_household_id = household.id
-                original_head_of_household_unicef_id = household.head_of_household.unicef_id
-                household.copied_from_id = original_household_id
-                household.pk = None
-                household.program = program
-                household.registration_data_import = rdi
-                household.total_cash_received = None
-                household.total_cash_received_usd = None
-                household.first_registration_date = timezone.now()
-                household.last_registration_date = timezone.now()
-
-                if original_head_of_household_unicef_id in individuals_dict:
-                    household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
-                else:
-                    copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
-                    household.head_of_household_id = copied_individual_id
-
-                household.save()
+                _prepare_and_save_household_copy(household, program, rdi, individuals_dict, individuals_to_exclude_dict)
                 entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
@@ -471,18 +501,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
 
                 create_roles_for_new_representation(household, program, rdi)
         except IntegrityError as e:
-            error_message = str(e)
-            if "unique_if_not_removed_and_valid_for_representations" in error_message:
-                if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
-                    keys = document_data.group(1).split(", ")
-                    values = document_data.group(2).split(", ")
-                    document_dict = dict(zip(keys, values, strict=True))
-                    error_message = f"Document already exists: {document_dict.get('document_number')}"
-            else:
-                detail_index = error_message.find("DETAIL")
-                if detail_index != -1:
-                    error_message = error_message[:detail_index].strip()
-            error_messages.append(f"{household.unicef_id}: {error_message}")
+            error_messages.append(_format_integrity_error(household.unicef_id, e))
     rdi.refresh_population_statistics()
     rdi.bulk_update_household_size()
     if error_messages:

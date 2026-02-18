@@ -1,0 +1,28 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "112"
+    },
+    "data": [
+        {
+            "name": "Active",
+            "value": "ACTIVE"
+        },
+        {
+            "name": "Finished",
+            "value": "FINISHED"
+        },
+        {
+            "name": "Pending",
+            "value": "PENDING"
+        }
+    ],
+    "content_type": "application/json"
+}

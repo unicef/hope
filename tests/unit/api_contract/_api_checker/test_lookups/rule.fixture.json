@@ -1,0 +1,26 @@
+{
+    "rule": {
+        "master": {
+            "model": "steficon.rule",
+            "pk": 1,
+            "fields": {
+                "version": 1,
+                "name": "Rule 0",
+                "definition": "result.value=0",
+                "description": null,
+                "enabled": false,
+                "deprecated": false,
+                "language": "python",
+                "security": 2,
+                "created_by": null,
+                "updated_by": null,
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "type": "TARGETING",
+                "flags": {},
+                "allowed_business_areas": []
+            }
+        },
+        "deps": []
+    }
+}

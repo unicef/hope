@@ -219,6 +219,11 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write("Generation canceled")
                     return
+        self._generate_role_assignment_and_program(business_area_amount, options, programs_amount)
+
+        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
+
+    def _generate_role_assignment_and_program(self, business_area_amount, options, programs_amount):
         if not RoleAssignment.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):
@@ -227,5 +232,3 @@ class Command(BaseCommand):
 
         if not options["noreindex"]:
             rebuild_search_index()
-
-        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")

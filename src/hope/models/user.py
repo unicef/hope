@@ -221,12 +221,16 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
         html_body: str | None = None,
         text_body: str | None = None,
         mailjet_template_id: int | None = None,
-        body_variables: dict[str, Any] | None = None,
-        from_email: str | None = None,
-        from_email_display: str | None = None,
-        ccs: list[str] | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Send email to this user via Mailjet."""
+        """Send email to this user via Mailjet.
+
+        kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
+        """
+        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        from_email: str | None = kwargs.get("from_email")
+        from_email_display: str | None = kwargs.get("from_email_display")
+        ccs: list[str] | None = kwargs.get("ccs")
         email = MailjetClient(
             recipients=[self.email],
             subject=subject,

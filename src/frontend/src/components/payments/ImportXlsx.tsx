@@ -1,22 +1,18 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
+import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { DropzoneField } from '@core/DropzoneField';
-import { LoadingButton } from '@core/LoadingButton';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
-import { showApiErrorMessages } from '@utils/utils';
-
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-  padding: 20px;
-`;
 
 const StyledButton = styled(Button)`
   width: 150px;
@@ -31,6 +27,7 @@ export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
 }: ImportXlsxProps): ReactElement => {
+  const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { showMessage } = useSnackbar();
   const { businessArea, programId: programSlug } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
@@ -63,24 +60,22 @@ export const ImportXlsx = ({
           'businessAreasProgramsPaymentVerificationsVerificationsList',
         ],
       });
+      setOpenImport(false);
+      showMessage(t('Your import was successful!'));
+      setXlsxError(null);
+    },
+    onError: (error: any) => {
+      setXlsxError(getApiErrorMessages(error));
     },
   });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
-      try {
-        await importMutation.mutateAsync({
-          file: fileToImport,
-        });
-        setOpenImport(false);
-        showMessage(t('Your import was successful!'));
-      } catch (error) {
-        showApiErrorMessages(error, showMessage);
-      }
+      await importMutation.mutateAsync({
+        file: fileToImport,
+      });
     }
   };
-  const errorWithBody = importMutation.error as any;
-  const errorBody = errorWithBody?.body;
 
   return (
     <>
@@ -123,18 +118,16 @@ export const ImportXlsx = ({
                 setFileToImport(file);
               }}
             />
-            {fileToImport && importMutation.error && (
-              <Error>
-                <p>Errors</p>
-                <p>{JSON.stringify(errorBody)}</p>
-              </Error>
-            )}
+            {fileToImport && xlsxError ? (
+              <XlsxErrorsDisplay errors={xlsxError} />
+            ) : null}
           </>
           <DialogActions>
             <Button
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setXlsxError(null);
               }}
             >
               CANCEL

@@ -119,17 +119,17 @@ export const IndividualBioData = ({
         <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Wallet Name')}>
             {individual?.walletName}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Blockchain Name')}>
             {individual?.blockchainName}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Wallet Address')}>
             {individual?.walletAddress}
           </LabelizedField>
@@ -304,6 +304,13 @@ export const IndividualBioData = ({
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
             )}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField
+            label={individual.identificationKeyLabel || t('Identification Key')}
+          >
+            {individual?.identificationKey}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 12 }}>
