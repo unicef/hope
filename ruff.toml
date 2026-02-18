@@ -64,7 +64,6 @@ ignore = [
     "SIM108", # Use ternary operator instead of...
     "PLR2004", # Magic value used in comparison
     "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
-    "PLR0912", # too many branches
     "PLR0911",  # too many returns
     "C901",  # too complex
     "PLC0415",  # `import` should be at the top-level of a file
