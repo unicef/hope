@@ -175,7 +175,6 @@ function Entitlement({
         queryClient.invalidateQueries({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         });
-        setFlatAmount('');
       },
       onError: (error: any) => {
         showApiErrorMessages(error, showMessage);
