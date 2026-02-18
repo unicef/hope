@@ -2,7 +2,7 @@
     "household": {
         "master": {
             "model": "household.household",
-            "pk": "9fc83a38-2e13-4da5-a733-21c1f73ae4aa",
+            "pk": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
             "fields": {
                 "rdi_merge_status": "MERGED",
                 "is_removed": false,
@@ -11,11 +11,11 @@
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
                 "version": 1735688653315202,
-                "unicef_id": "HH-25-0000.0001",
+                "unicef_id": "HH-25-0000.0003",
                 "internal_data": {},
-                "business_area": "7ef0beb6-a516-4d38-95cb-921c065dcf0a",
-                "program": "1a84af55-6252-4231-ac23-8831b8988555",
-                "registration_data_import": "e657badb-86e3-4230-84dc-2c5abc49d386",
+                "business_area": "49794f4c-cd8b-408c-a294-163b86dac92e",
+                "program": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
+                "registration_data_import": "e32990f3-a3d0-4893-be2b-d9d7f139f3a9",
                 "household_collection": null,
                 "storage_obj": null,
                 "copied_from": null,
@@ -25,7 +25,7 @@
                 "admin2": null,
                 "admin3": null,
                 "admin4": null,
-                "head_of_household": "1b8aa55f-507d-4406-941e-39d156f2f949",
+                "head_of_household": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
                 "consent_sign": "",
                 "consent": null,
                 "consent_sharing": "",
@@ -102,7 +102,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "7ef0beb6-a516-4d38-95cb-921c065dcf0a",
+                "pk": "49794f4c-cd8b-408c-a294-163b86dac92e",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -143,20 +143,20 @@
             },
             {
                 "model": "program.program",
-                "pk": "1a84af55-6252-4231-ac23-8831b8988555",
+                "pk": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315202,
-                    "data_collecting_type": 35,
-                    "beneficiary_group": "37eb5dae-e1d9-47d6-beae-fc543f643740",
-                    "business_area": "7ef0beb6-a516-4d38-95cb-921c065dcf0a",
+                    "data_collecting_type": 2,
+                    "beneficiary_group": "7c18dd81-aa40-418c-9e30-9c6cb17d5220",
+                    "business_area": "49794f4c-cd8b-408c-a294-163b86dac92e",
                     "name": "Program 0",
-                    "programme_code": "I-J-",
+                    "programme_code": "C6R4",
                     "status": "ACTIVE",
-                    "slug": "i-j-",
+                    "slug": "c6r4",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -170,6 +170,7 @@
                     "administrative_areas_of_implementation": "",
                     "biometric_deduplication_enabled": false,
                     "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "identification_key_individual_label": null,
                     "is_visible": true,
                     "household_count": 0,
                     "individual_count": 0,
@@ -181,7 +182,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 35,
+                "pk": 2,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -196,14 +197,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        35
+                        2
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "37eb5dae-e1d9-47d6-beae-fc543f643740",
+                "pk": "7c18dd81-aa40-418c-9e30-9c6cb17d5220",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -217,7 +218,7 @@
             },
             {
                 "model": "registration_data.registrationdataimport",
-                "pk": "e657badb-86e3-4230-84dc-2c5abc49d386",
+                "pk": "e32990f3-a3d0-4893-be2b-d9d7f139f3a9",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -225,10 +226,10 @@
                     "name": "RDI 0",
                     "status": "MERGED",
                     "deduplication_engine_status": null,
-                    "business_area": "7ef0beb6-a516-4d38-95cb-921c065dcf0a",
-                    "program": "1a84af55-6252-4231-ac23-8831b8988555",
+                    "business_area": "49794f4c-cd8b-408c-a294-163b86dac92e",
+                    "program": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
                     "import_date": "2025-01-01T00:00:00Z",
-                    "imported_by": "9c32ad20-3d54-44fe-b63e-98aaa6aebb9c",
+                    "imported_by": "8c063b49-ddca-441a-bdc3-2f08a68bc5f1",
                     "data_source": "XLS",
                     "import_data": null,
                     "import_from_ids": null,
@@ -254,22 +255,22 @@
             },
             {
                 "model": "account.user",
-                "pk": "9c32ad20-3d54-44fe-b63e-98aaa6aebb9c",
+                "pk": "8c063b49-ddca-441a-bdc3-2f08a68bc5f1",
                 "fields": {
                     "password": "",
                     "last_login": null,
-                    "is_superuser": true,
-                    "username": "user_0",
+                    "is_superuser": false,
+                    "username": "user_1",
                     "first_name": "",
                     "last_name": "",
-                    "is_staff": true,
+                    "is_staff": false,
                     "is_active": true,
                     "date_joined": "2025-01-01T00:00:00Z",
                     "azure_id": null,
-                    "display_name": "user_0",
+                    "display_name": "user_1",
                     "status": "INVITED",
-                    "partner": 80,
-                    "email": "user_0@example.com",
+                    "partner": 8,
+                    "email": "user_1@example.com",
                     "custom_fields": {},
                     "job_title": "",
                     "last_modify_date": "2025-01-01T00:00:00Z",
@@ -279,21 +280,21 @@
             },
             {
                 "model": "account.partner",
-                "pk": 80,
+                "pk": 8,
                 "fields": {
-                    "name": "Partner 0",
+                    "name": "Partner 1",
                     "parent": null,
                     "is_un": false,
                     "lft": 1,
                     "rght": 2,
-                    "tree_id": 2,
+                    "tree_id": 3,
                     "level": 0,
                     "allowed_business_areas": []
                 }
             },
             {
                 "model": "household.individual",
-                "pk": "1b8aa55f-507d-4406-941e-39d156f2f949",
+                "pk": "6c26b8a6-10a8-46db-b482-1701c9ed805e",
                 "fields": {
                     "rdi_merge_status": "MERGED",
                     "is_removed": false,
@@ -302,12 +303,12 @@
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315200,
-                    "unicef_id": "IND-25-0000.0001",
+                    "unicef_id": "IND-25-0000.0003",
                     "internal_data": {},
-                    "business_area": "7ef0beb6-a516-4d38-95cb-921c065dcf0a",
-                    "program": "1a84af55-6252-4231-ac23-8831b8988555",
-                    "registration_data_import": "e657badb-86e3-4230-84dc-2c5abc49d386",
-                    "household": "9fc83a38-2e13-4da5-a733-21c1f73ae4aa",
+                    "business_area": "49794f4c-cd8b-408c-a294-163b86dac92e",
+                    "program": "bd0ed8e5-adf7-4716-bd63-cc25bb150852",
+                    "registration_data_import": "e32990f3-a3d0-4893-be2b-d9d7f139f3a9",
+                    "household": "8031bdc0-34c9-469e-b9bb-5605bafe78c6",
                     "individual_collection": null,
                     "copied_from": null,
                     "individual_id": "",

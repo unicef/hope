@@ -35,8 +35,7 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationKoboImportSerializer,
     RegistrationXlsxImportSerializer,
 )
-from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -45,7 +44,8 @@ from hope.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
     registration_xlsx_import_task,
 )
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.filters import RegistrationDataImportFilter
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )

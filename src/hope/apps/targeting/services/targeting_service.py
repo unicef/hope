@@ -159,7 +159,7 @@ class TargetingIndividualRuleFilterBlockBase:
         for rule_filter in filters:
             filtered = True
             if rule_filter.field_name in ("observed_disability", "full_name"):
-                for arg in getattr(rule_filter, "parametrizer", []):
+                for arg in getattr(rule_filter, "arguments", []):
                     search_query &= SearchQuery(arg)
             else:
                 individuals_query &= rule_filter.get_query()

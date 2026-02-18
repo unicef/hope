@@ -553,7 +553,7 @@ class TestGrievanceUtils(TestCase):
         },
     )
     @patch(
-        "hope.apps.registration_datahub.services"
+        "hope.apps.registration_data.services"
         ".biometric_deduplication"
         ".BiometricDeduplicationService"
         ".report_false_positive_duplicate"

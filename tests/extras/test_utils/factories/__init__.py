@@ -10,6 +10,7 @@ from .account import (
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .activity_log import LogEntryFactory
 from .api import APITokenFactory
+from .aurora import OrganizationFactory, ProjectFactory, RecordFactory, RegistrationFactory
 from .changelog import ChangelogFactory
 from .core import (
     BeneficiaryGroupFactory,
@@ -83,7 +84,12 @@ from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
-from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from .targeting import (
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
+)
 from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -107,6 +113,8 @@ __all__ = [
     "FlexibleAttributeForPDUFactory",
     "GrievanceTicketFactory",
     "GrievanceComplaintTicketWithoutExtrasFactory",
+    "TargetingIndividualRuleFilterBlockFactory",
+    "TargetingIndividualBlockRuleFilterFactory",
     "TicketDeleteHouseholdDetailsFactory",
     "TicketDeleteIndividualDetailsFactory",
     "TicketComplaintDetailsFactory",
@@ -150,6 +158,10 @@ __all__ = [
     "PeriodicFieldDataFactory",
     "ProgramCycleFactory",
     "ProgramFactory",
+    "ProjectFactory",
+    "RecordFactory",
+    "OrganizationFactory",
+    "RegistrationFactory",
     "RegistrationDataImportFactory",
     "KoboImportDataFactory",
     "RoleAssignmentFactory",

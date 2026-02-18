@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.cache import cache
 from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
+from django.dispatch import Signal, receiver
 
 from hope.api.caches import get_or_create_cache_key
 from hope.models import RegistrationDataImport
@@ -21,3 +21,6 @@ def increment_registration_data_import_version_cache(
     get_or_create_cache_key(version_key, 0)
 
     cache.incr(version_key)
+
+
+rdi_merged = Signal()

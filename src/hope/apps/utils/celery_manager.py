@@ -102,7 +102,7 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
 
     @cached_property
     def celery_task(self) -> Task:
-        from hope.apps.registration_datahub.celery_tasks import (
+        from hope.apps.registration_data.celery_tasks import (
             registration_xlsx_import_task,
         )
 

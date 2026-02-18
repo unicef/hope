@@ -365,6 +365,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "screen_beneficiary",
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
+            "identification_key_individual_label",
         )
 
     def get_can_import_rdi(self, obj: Program) -> bool:
@@ -467,6 +468,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "status",
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
+            "identification_key_individual_label",
         )
 
     def validate_name(self, value: str) -> str:
@@ -571,6 +573,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "partner_access",
             "reconciliation_window_in_days",
             "send_reconciliation_window_expiry_notifications",
+            "identification_key_individual_label",
         )
 
     def validate_name(self, value: str) -> str:
