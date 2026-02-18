@@ -7,9 +7,7 @@ from django.core.files.base import ContentFile
 from openpyxl import Workbook
 import pytest
 
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
@@ -51,8 +49,12 @@ def admin2(district: AreaType) -> Area:
 
 
 @pytest.fixture
-def program(poland: Country, germany: Country) -> Program:
-    business_area = create_afghanistan()
+def business_area():
+    return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
+
+
+@pytest.fixture
+def program(poland: Country, germany: Country, business_area) -> Program:
     business_area.countries.add(poland, germany)
 
     return ProgramFactory(
@@ -64,41 +66,30 @@ def program(poland: Country, germany: Country) -> Program:
 
 @pytest.fixture
 def individuals(program: Program, admin1: Area, admin2: Area) -> Tuple[Individual, Individual]:
-    _, individuals = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0002",
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0022",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-            },
-        ],
+    household_1 = HouseholdFactory(
+        unicef_id="HH-20-0000.0002",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
     )
-    _, individuals2 = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0003",
-            "rdi_merge_status": "MERGED",
-            "business_area": program.business_area,
-            "program": program,
-            "admin1": admin1,
-        },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0033",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "sex": MALE,
-            },
-        ],
+    ind_1 = household_1.head_of_household
+    ind_1.unicef_id = "IND-00-0000.0022"
+    ind_1.sex = MALE
+    ind_1.save(update_fields=["unicef_id", "sex"])
+
+    household_2 = HouseholdFactory(
+        unicef_id="HH-20-0000.0003",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        admin1=admin1,
     )
-    return individuals[0], individuals2[0]
+    ind_2 = household_2.head_of_household
+    ind_2.unicef_id = "IND-00-0000.0033"
+    ind_2.sex = MALE
+    ind_2.save(update_fields=["unicef_id", "sex"])
+    return ind_1, ind_2
 
 
 def test_snapshot_json_contains_two_households(program: Program, individuals: Tuple[Individual]) -> None:
