@@ -27,6 +27,7 @@ class ProgramFactory(DjangoModelFactory):
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
+    biometric_deduplication_enabled = False
 
 
 class ProgramCycleFactory(DjangoModelFactory):
@@ -34,5 +35,6 @@ class ProgramCycleFactory(DjangoModelFactory):
         model = ProgramCycle
 
     program = factory.SubFactory(ProgramFactory)
+    title = factory.Sequence(lambda n: f"Programme Cycle {n}")
     start_date = factory.LazyFunction(date.today)
     status = ProgramCycle.ACTIVE

@@ -5,7 +5,12 @@ import pytest
 from rest_framework import status
 
 from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
     BusinessAreaFactory,
+    DataCollectingTypeFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
@@ -91,6 +96,69 @@ def payment_context(
     }
 
 
+@pytest.fixture
+def payment_people_context(
+    api_client: Any,
+    business_area: Any,
+    user: Any,
+) -> dict[str, Any]:
+    data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    program = ProgramFactory(
+        business_area=business_area,
+        status=Program.ACTIVE,
+        data_collecting_type=data_collecting_type,
+        beneficiary_group=beneficiary_group,
+    )
+    cycle = ProgramCycleFactory(program=program, title="Cycle Payments People")
+    payment_plan = PaymentPlanFactory(
+        name="Payment Plan",
+        business_area=business_area,
+        program_cycle=cycle,
+        status=PaymentPlan.Status.DRAFT,
+        created_by=user,
+    )
+    head = IndividualFactory(
+        full_name="Full Name Test123",
+        household=None,
+        program=program,
+        business_area=business_area,
+    )
+    household = HouseholdFactory(
+        head_of_household=head,
+        program=program,
+        business_area=business_area,
+        size=2,
+        create_role=False,
+    )
+    IndividualRoleInHouseholdFactory(household=household, individual=head, role=ROLE_ALTERNATE)
+    payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_SUCCESS,
+        delivered_quantity=999,
+        entitlement_quantity=112,
+        program=program,
+        household=household,
+        head_of_household=head,
+        collector=head,
+    )
+
+    url_kwargs = {
+        "business_area_slug": business_area.slug,
+        "program_slug": program.slug,
+        "payment_plan_pk": payment_plan.pk,
+    }
+    return {
+        "business_area": business_area,
+        "user": user,
+        "program_active": program,
+        "client": api_client(user),
+        "payment_plan": payment_plan,
+        "payment": payment,
+        "url_list": reverse("api:payments:payments-list", kwargs=url_kwargs),
+    }
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
@@ -122,26 +190,18 @@ def test_get_list(
 
 
 def test_get_list_for_people(
-    payment_context: dict[str, Any],
+    payment_people_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
-        payment_context["user"],
+        payment_people_context["user"],
         [Permissions.PM_VIEW_DETAILS],
-        payment_context["business_area"],
-        payment_context["program_active"],
+        payment_people_context["business_area"],
+        payment_people_context["program_active"],
     )
-    household = payment_context["payment"].household
-    head = household.head_of_household
-    head.full_name = "Full Name Test123"
-    head.save(update_fields=["full_name"])
-    household.individuals_and_roles.filter(individual=head).update(role=ROLE_ALTERNATE)
-    payment_context["program_active"].data_collecting_type.type = DataCollectingType.Type.SOCIAL
-    payment_context["program_active"].data_collecting_type.save()
-    payment_context["payment_plan"].refresh_from_db()
-    assert payment_context["payment_plan"].is_social_worker_program is True
+    assert payment_people_context["payment_plan"].is_social_worker_program is True
 
-    response = payment_context["client"].get(payment_context["url_list"])
+    response = payment_people_context["client"].get(payment_people_context["url_list"])
 
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()

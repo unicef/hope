@@ -1,0 +1,105 @@
+{
+    "partner_role_assignment": {
+        "master": {
+            "model": "account.roleassignment",
+            "pk": "ce781d73-0904-414a-ac8e-8e36a35a46ef",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "business_area": "600b7ec1-00b5-4d8d-9f0c-d515227b2aaa",
+                "user": null,
+                "partner": 3,
+                "role": "aa83030f-9689-4844-95ab-dff079468598",
+                "program": null,
+                "expiry_date": null,
+                "group": null
+            }
+        },
+        "deps": [
+            {
+                "model": "core.businessarea",
+                "pk": "600b7ec1-00b5-4d8d-9f0c-d515227b2aaa",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "code": "BA0000",
+                    "slug": "business-area-0",
+                    "name": "Business Area 0",
+                    "long_name": "Business Area 0 Long Name",
+                    "parent": null,
+                    "office_country": null,
+                    "is_split": false,
+                    "region_code": "64",
+                    "region_name": "TEST",
+                    "has_data_sharing_agreement": false,
+                    "is_accountability_applicable": false,
+                    "rdi_import_xlsx_disabled": false,
+                    "active": true,
+                    "enable_email_notification": true,
+                    "kobo_username": null,
+                    "kobo_token": null,
+                    "kobo_url": null,
+                    "rapid_pro_host": null,
+                    "rapid_pro_payment_verification_token": null,
+                    "rapid_pro_messages_token": null,
+                    "rapid_pro_survey_token": null,
+                    "postpone_deduplication": false,
+                    "deduplication_duplicate_score": 6.0,
+                    "deduplication_possible_duplicate_score": 6.0,
+                    "deduplication_batch_duplicates_percentage": 50,
+                    "deduplication_batch_duplicates_allowed": 5,
+                    "deduplication_golden_record_duplicates_percentage": 50,
+                    "deduplication_golden_record_duplicates_allowed": 5,
+                    "deduplication_ignore_withdraw": false,
+                    "biometric_deduplication_threshold": 0.0,
+                    "custom_fields": {},
+                    "countries": [],
+                    "payment_countries": []
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 3,
+                "fields": {
+                    "name": "UNICEF Partner for business-area-0",
+                    "parent": 1,
+                    "is_un": false,
+                    "lft": 4,
+                    "rght": 5,
+                    "tree_id": 1,
+                    "level": 1,
+                    "allowed_business_areas": [
+                        "600b7ec1-00b5-4d8d-9f0c-d515227b2aaa"
+                    ]
+                }
+            },
+            {
+                "model": "account.partner",
+                "pk": 1,
+                "fields": {
+                    "name": "UNICEF",
+                    "parent": null,
+                    "is_un": false,
+                    "lft": 1,
+                    "rght": 6,
+                    "tree_id": 1,
+                    "level": 0,
+                    "allowed_business_areas": []
+                }
+            },
+            {
+                "model": "account.role",
+                "pk": "aa83030f-9689-4844-95ab-dff079468598",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "name": "Role for UNICEF Partners",
+                    
+                    "permissions": "[\"RDI_VIEW_LIST\", \"RDI_VIEW_DETAILS\", \"POPULATION_VIEW_HOUSEHOLDS_LIST\", \"POPULATION_VIEW_HOUSEHOLDS_DETAILS\", \"POPULATION_VIEW_INDIVIDUALS_LIST\", \"POPULATION_VIEW_INDIVIDUALS_DETAILS\", \"DASHBOARD_VIEW_COUNTRY\", \"PROGRAMME_VIEW_LIST_AND_DETAILS\", \"TARGETING_VIEW_LIST\", \"TARGETING_VIEW_DETAILS\", \"PM_VIEW_LIST\", \"PM_VIEW_DETAILS\", \"PM_VIEW_PAYMENT_LIST\", \"PAYMENT_VERIFICATION_VIEW_LIST\", \"PAYMENT_VERIFICATION_VIEW_DETAILS\", \"GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE\", \"GRIEVANCES_VIEW_LIST_SENSITIVE\", \"GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE\", \"GRIEVANCES_VIEW_DETAILS_SENSITIVE\", \"GRIEVANCES_FEEDBACK_VIEW_LIST\", \"GRIEVANCES_FEEDBACK_VIEW_DETAILS\", \"GRIEVANCES_CROSS_AREA_FILTER\", \"USER_MANAGEMENT_VIEW_LIST\", \"ACTIVITY_LOG_VIEW\"]",
+                    "is_visible_on_ui": false,
+                    "is_available_for_partner": false
+                }
+            }
+        ]
+    }
+}

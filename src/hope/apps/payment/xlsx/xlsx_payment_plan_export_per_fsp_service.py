@@ -21,6 +21,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.utils.exceptions import log_and_raise
@@ -398,7 +399,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 self.payment_plan.remove_export_files()
                 file_temp_obj.file.save(zip_file_name, File(tmp_zip))
                 self.payment_plan.export_file_per_fsp = file_temp_obj
-                self.payment_plan.background_action_status_none()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.background_action_status_none()
                 self.payment_plan.save(update_fields=["background_action_status", "export_file_per_fsp", "updated_at"])
 
     @staticmethod

@@ -80,7 +80,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    def _create_hh_ind(  # noqa: PLR0912
+    def _create_hh_ind(
         self,
         obj_to_create: Any,
         row: Any,
@@ -110,14 +110,14 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
                 is_not_image = current_field.get("type") != "IMAGE"
-                cell_value = cell.value
-                if isinstance(cell_value, str):
-                    cell_value = cell_value.strip()
+                cell_value = self._cell_value_strip(cell.value)
+
                 is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
                 if is_not_required_and_empty:
                     continue
-                if header == "pp_index_id":
-                    self.index_id = int(cell_value)
+
+                self._set_index_id(cell_value, header)
+
                 if header in excluded:
                     continue
 
@@ -132,26 +132,20 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         household=obj_to_create if sheet_title == "households" else None,
                         is_field_required=current_field.get("required", False),
                     )
-                    if value is not None:
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            value,
-                        )
+                    self._process_complex_fields_value(current_field, obj_to_create, value)
                 elif header in self.FLEX_FIELDS[sheet_title]:
                     value = self._cast_value(cell_value, header)
                     type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
-                    if type_name in complex_types:
-                        fn_flex: Callable = complex_types[type_name]
-                        value = fn_flex(
-                            value=cell_value,
-                            cell=cell,
-                            header=header,
-                            is_flex_field=True,
-                            is_field_required=current_field.get("required", False),
-                        )
-                    if value is not None:
-                        obj_to_create.flex_fields[header] = value
+                    self._process_flex_field(
+                        cell,
+                        cell_value,
+                        complex_types,
+                        current_field,
+                        header,
+                        obj_to_create=obj_to_create,
+                        type_name=type_name,
+                        value=value,
+                    )
                 elif hasattr(
                     obj_to_create,
                     current_field["name"],
@@ -159,30 +153,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     value = self._cast_value(cell_value, header)
                     if value in (None, ""):
                         continue
-
-                    if header in (
-                        "pp_admin1_i_c",
-                        "pp_admin2_i_c",
-                        "pp_admin3_i_c",
-                        "pp_admin4_i_c",
-                    ):
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            Area.objects.get(p_code=cell.value),
-                        )
-                    elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            GeoCountry.objects.get(iso_code3=cell.value),
-                        )
-                    else:
-                        setattr(
-                            obj_to_create,
-                            current_field["name"],
-                            value,
-                        )
+                    self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
 
             except Exception as e:
                 raise Exception(
@@ -192,6 +163,33 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
+        self._post_processing(obj_to_create, registration_data_import, sheet_title)
+
+    def _process_flex_field(self, cell, cell_value, complex_types, current_field, header, **kwargs):
+        obj_to_create = kwargs["obj_to_create"]
+        type_name = kwargs["type_name"]
+        value = kwargs["value"]
+        if type_name in complex_types:
+            fn_flex: Callable = complex_types[type_name]
+            value = fn_flex(
+                value=cell_value,
+                cell=cell,
+                header=header,
+                is_flex_field=True,
+                is_field_required=current_field.get("required", False),
+            )
+        if value is not None:
+            obj_to_create.flex_fields[header] = value
+
+    def _process_complex_fields_value(self, current_field: dict[Any, Any] | Any, obj_to_create, value):
+        if value is not None:
+            setattr(
+                obj_to_create,
+                current_field["name"],
+                value,
+            )
+
+    def _post_processing(self, obj_to_create, registration_data_import, sheet_title):
         if sheet_title == "households":
             obj_to_create.set_admin_areas()
             obj_to_create.save()
@@ -210,6 +208,40 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 self.households_to_update.append(household)
 
             self.individuals.append(obj_to_create)
+
+    def _process_admin_areas_and_country(self, cell, current_field: dict[Any, Any] | Any, header, obj_to_create, value):
+        if header in (
+            "pp_admin1_i_c",
+            "pp_admin2_i_c",
+            "pp_admin3_i_c",
+            "pp_admin4_i_c",
+        ):
+            setattr(
+                obj_to_create,
+                current_field["name"],
+                Area.objects.get(p_code=cell.value),
+            )
+        elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
+            setattr(
+                obj_to_create,
+                current_field["name"],
+                GeoCountry.objects.get(iso_code3=cell.value),
+            )
+        else:
+            setattr(
+                obj_to_create,
+                current_field["name"],
+                value,
+            )
+
+    def _set_index_id(self, cell_value: str, header):
+        if header == "pp_index_id":
+            self.index_id = int(cell_value)
+
+    def _cell_value_strip(self, cell_value) -> str:
+        if isinstance(cell_value, str):
+            cell_value = cell_value.strip()
+        return cell_value
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: dict[str, dict[str, Callable]] = {

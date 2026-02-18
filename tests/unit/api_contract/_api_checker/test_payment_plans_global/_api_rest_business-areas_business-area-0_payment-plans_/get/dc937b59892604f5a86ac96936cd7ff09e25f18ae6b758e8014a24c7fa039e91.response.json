@@ -1,0 +1,48 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "784"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "b7975a05-c91c-47ae-8d3e-9f0beecac32c",
+                "unicef_id": "PP-BA0000-25-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2025-01-01",
+                "dispersion_end_date": "2025-01-31",
+                "is_follow_up": false,
+                "follow_ups": [],
+                "created_by": " ",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "program": {
+                    "id": "27a2901f-f1de-4989-a1af-8f8eec77813d",
+                    "programme_code": "VI-F",
+                    "slug": "vi-f",
+                    "name": "Program 0",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
