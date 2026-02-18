@@ -288,7 +288,7 @@ def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) ->
         set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
             with transaction.atomic():
-                exchange_rate = payment_plan.get_exchange_rate()
+                exchange_rate = payment_plan.exchange_rate
                 flat_amount_value = payment_plan.flat_amount_value
                 entitlement_quantity_usd = get_quantity_in_usd(
                     amount=flat_amount_value,

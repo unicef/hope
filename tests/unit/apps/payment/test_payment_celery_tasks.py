@@ -844,6 +844,7 @@ def test_payment_plan_set_entitlement_flat_amount_task(
         status=PaymentPlan.Status.LOCKED,
         background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
         flat_amount_value=1.22,
+        exchange_rate=2.00,
     )
     payment_plan.refresh_from_db()
     payment_1 = PaymentFactory(
@@ -885,22 +886,23 @@ def test_payment_plan_set_entitlement_flat_amount_invalid_pp_id_error(
     assert str(error) == str(["\u201cinvalid_pp_id\u201d is not a valid UUID."])
 
 
-@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount.retry")
-def test_payment_plan_set_entitlement_flat_amount_error_get_exchange_rate(
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
+def test_payment_plan_set_entitlement_flat_amount_error_get_quantity_in_usd(
+    mock_payment_plan_get_quantity_in_usd: Mock,
     mock_retry: Mock,
     mock_logger: Mock,
-    mock_payment_plan_get_exchange_rate: Mock,
     user,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
         background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
         flat_amount_value=1.12,
+        exchange_rate=1.0,
     )
     mock_retry.side_effect = Retry("retry")
-    mock_payment_plan_get_exchange_rate.side_effect = Exception("exchange error")
+    mock_payment_plan_get_quantity_in_usd.side_effect = Exception("exchange error")
 
     with pytest.raises(Retry):
         payment_plan_set_entitlement_flat_amount(str(payment_plan.pk))
