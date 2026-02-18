@@ -61,7 +61,8 @@
         "target_populations_count": 0,
         "screen_beneficiary": false,
         "reconciliation_window_in_days": 0,
-        "send_reconciliation_window_expiry_notifications": false
+        "send_reconciliation_window_expiry_notifications": false,
+        "identification_key_individual_label": null
     },
     "content_type": "application/json"
 }

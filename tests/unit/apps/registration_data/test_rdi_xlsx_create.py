@@ -2,8 +2,6 @@ import datetime
 from datetime import date
 from io import BytesIO
 from pathlib import Path
-import re
-from types import SimpleNamespace
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
@@ -25,7 +23,6 @@ from extras.test_utils.factories.core import (
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import (
     DocumentTypeFactory,
-    PendingHouseholdFactory,
     PendingIndividualFactory,
 )
 from extras.test_utils.factories.payment import AccountTypeFactory, FinancialInstitutionFactory
@@ -33,7 +30,6 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import ImportDataFactory, RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, SheetImageLoader
 from hope.apps.household.const import (
-    HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
 )
@@ -743,79 +739,6 @@ def test_create_delivery_mechanism_data(
     }
 
 
-def test_get_obj_and_validate_sheet_title_sheet(
-    rdi_setup: dict[str, object],
-    registration_data_import: object,
-    import_data: object,
-) -> None:
-    assert rdi_setup
-    task = RdiXlsxCreateTask()
-    wb = openpyxl.load_workbook(import_data.file, data_only=True)
-    obj_hh = task._get_obj_and_validate_sheet_title(registration_data_import, wb["Households"], "households")
-    assert obj_hh.func is PendingHousehold
-
-    obj_ind = task._get_obj_and_validate_sheet_title(registration_data_import, wb["Individuals"], "individuals")
-    assert obj_ind.func is PendingIndividual
-
-    with pytest.raises(ValueError, match=re.escape("Unhandled sheet label ''Individuals''")):
-        task._get_obj_and_validate_sheet_title(registration_data_import, wb["Individuals"], "Invalid")
-
-
-@pytest.mark.parametrize(
-    ("cell_value", "household_id", "expected_len"),
-    [
-        (None, "fake_id_123", 0),
-        (777, "fake_id_123", 0),
-        ("not_HEAD", "fake_id_123", 0),
-        (HEAD, "wrong_123_id", 0),
-        (HEAD, "fake_id_123", 1),
-    ],
-)
-def test_set_relationship_col(cell_value, household_id, expected_len) -> None:
-    task = RdiXlsxCreateTask()
-    task.households = {"fake_id_123": PendingHouseholdFactory()}
-    households_to_update: list = []
-    task._set_relationship_col(
-        household_id,
-        households_to_update,
-        PendingIndividualFactory(),
-        SimpleNamespace(value=cell_value),
-    )
-    assert len(households_to_update) == expected_len
-
-
-@pytest.mark.parametrize(
-    ("cell_value", "expected_id"),
-    [
-        (None, "hh_id"),
-        (1.0, "1"),
-    ],
-)
-def test_set_household_id_cell_if_no_value_or_wrong_value(cell_value, expected_id) -> None:
-    task = RdiXlsxCreateTask()
-    task.households = {"fake_id_777": PendingHouseholdFactory()}
-
-    hh_id = task._set_household_id_cell("hh_id", SimpleNamespace(value=cell_value), PendingHousehold, "sheet_title")
-    assert hh_id == expected_id
-
-
-def test_set_household_id_cell_sets_household() -> None:
-    task = RdiXlsxCreateTask()
-    household = PendingHouseholdFactory()
-    task.households = {"fake_id_777": household}
-
-    obj_to_create = PendingIndividualFactory(household=None)
-    assert obj_to_create.household is None
-    hh_id = task._set_household_id_cell(
-        "hh_id",
-        SimpleNamespace(value="fake_id_777"),
-        obj_to_create,
-        "individuals",
-    )
-    assert hh_id == "fake_id_777"
-    assert obj_to_create.household == household
-
-
 def test_exception_with_cell_processing(
     rdi_setup: dict[str, object],
     registration_data_import: object,
@@ -835,6 +758,6 @@ def test_exception_with_cell_processing(
         raise ValueError("boom")
 
     with patch.object(task, "_cast_value", side_effect=raise_cast_value):
-        with patch.object(task, "_process_household_id_and_relationship_column", return_value=None):
+        with patch.object(task, "_extract_household_id_from_row", return_value=None):
             with pytest.raises(Exception, match="Error processing cell"):
                 task._create_objects(sheet, registration_data_import)

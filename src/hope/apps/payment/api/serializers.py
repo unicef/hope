@@ -1216,6 +1216,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_collector_name",
             "transaction_reference_id",
             "snapshot_collector_account_data",
+            "extras",
         )
 
     @staticmethod

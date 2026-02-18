@@ -333,6 +333,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     roles_in_households = serializers.SerializerMethodField()
     flex_fields = serializers.SerializerMethodField()
     linked_grievances = serializers.SerializerMethodField()
+    identification_key_label = serializers.CharField(source="program.identification_key_individual_label", default=None)
 
     class Meta:
         model = Individual
@@ -388,6 +389,8 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "who_answers_phone",
             "who_answers_alt_phone",
             "payment_delivery_phone_no",
+            "identification_key",
+            "identification_key_label",
         )
 
     def get_role(self, obj: Individual) -> str | None:
