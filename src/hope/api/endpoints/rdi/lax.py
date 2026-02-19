@@ -500,68 +500,87 @@ class HouseholdSerializer(serializers.ModelSerializer):
 class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
     """API to import households with selected RDI."""
 
+    def _validate_and_collect_payloads(self, request_data):
+        valid_payloads = []
+        results = []
+        total_households = 0
+        total_errors = 0
+        country_codes = set()
+        saved_file_fields = []
+
+        for household_data in request_data:
+            total_households += 1
+            self.handle_household_flex_fields(
+                household_data,
+                reserved_fields={"members", "primary_collector", "alternate_collector"},
+            )
+            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
+            if serializer.is_valid():
+                data = dict(serializer.validated_data)
+                members: list[str] = data.pop("members", [])
+                primary_collector = data.pop("primary_collector")
+                alternate_collector = data.pop("alternate_collector", None)
+                consent_sign_file = self.get_photo(
+                    data.pop("consent_sign", None),
+                    self.selected_rdi.program.programme_code,
+                )
+                country_code, country_origin_code = self._process_country_codes(country_codes, data)
+
+                data["flex_fields"] = populate_pdu_with_null_values(
+                    self.selected_rdi.program, data.get("flex_fields")
+                )
+
+                household_instance = PendingHousehold(
+                    registration_data_import=self.selected_rdi,
+                    program_id=self.selected_rdi.program.id,
+                    business_area=self.selected_business_area,
+                    **data,
+                )
+                if consent_sign_file:
+                    household_instance.consent_sign.save(
+                        consent_sign_file.name,
+                        File(consent_sign_file),
+                        save=False,
+                    )
+                    saved_file_fields.append(household_instance.consent_sign)
+
+                valid_payloads.append(
+                    {
+                        "instance": household_instance,
+                        "members": members,
+                        "primary": primary_collector,
+                        "alternate": alternate_collector,
+                        "country_code": country_code,
+                        "country_origin_code": country_origin_code,
+                    }
+                )
+            else:
+                results.append(dict(serializer.errors))
+                total_errors += 1
+
+        return valid_payloads, results, total_households, total_errors, country_codes, saved_file_fields
+
+    @staticmethod
+    def _resolve_countries_and_persist(valid_payloads, country_codes):
+        if country_codes:
+            country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
+            for payload in valid_payloads:
+                hh: PendingHousehold = payload["instance"]
+                if cc := payload.get("country_code"):
+                    hh.country = country_map.get(cc)
+                if coc := payload.get("country_origin_code"):
+                    hh.country_origin = country_map.get(coc)
+        PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
+
     @extend_schema(request=HouseholdSerializer(many=True))
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
-        total_households = 0
-        total_errors = 0
         total_accepted = 0
-        results = []
-        country_map = {}
-
-        valid_payloads = []
-        country_codes = set()
         saved_file_fields = []
         try:
-            for household_data in request.data:
-                total_households += 1
-                self.handle_household_flex_fields(
-                    household_data,
-                    reserved_fields={"members", "primary_collector", "alternate_collector"},
-                )
-                serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
-                if serializer.is_valid():
-                    data = dict(serializer.validated_data)
-                    members: list[str] = data.pop("members", [])
-                    primary_collector = data.pop("primary_collector")
-                    alternate_collector = data.pop("alternate_collector", None)
-                    consent_sign_file = self.get_photo(
-                        data.pop("consent_sign", None),
-                        self.selected_rdi.program.programme_code,
-                    )
-                    country_code, country_origin_code = self._process_country_codes(country_codes, data)
-
-                    data["flex_fields"] = populate_pdu_with_null_values(
-                        self.selected_rdi.program, data.get("flex_fields")
-                    )
-
-                    household_instance = PendingHousehold(
-                        registration_data_import=self.selected_rdi,
-                        program_id=self.selected_rdi.program.id,
-                        business_area=self.selected_business_area,
-                        **data,
-                    )
-                    if consent_sign_file:
-                        household_instance.consent_sign.save(
-                            consent_sign_file.name,
-                            File(consent_sign_file),
-                            save=False,
-                        )
-                        saved_file_fields.append(household_instance.consent_sign)
-
-                    valid_payloads.append(
-                        {
-                            "instance": household_instance,
-                            "members": members,
-                            "primary": primary_collector,
-                            "alternate": alternate_collector,
-                            "country_code": country_code,
-                            "country_origin_code": country_origin_code,
-                        }
-                    )
-                else:
-                    results.append(dict(serializer.errors))
-                    total_errors += 1
+            valid_payloads, results, total_households, total_errors, country_codes, saved_file_fields = (
+                self._validate_and_collect_payloads(request.data)
+            )
 
             if not valid_payloads:
                 return Response(
@@ -575,17 +594,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, PhotoMixin):
                     status=status.HTTP_201_CREATED,
                 )
 
-            if country_codes:
-                country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
-
-            for payload in valid_payloads:
-                hh: PendingHousehold = payload["instance"]
-                if cc := payload.get("country_code"):
-                    hh.country = country_map.get(cc)
-                if coc := payload.get("country_origin_code"):
-                    hh.country_origin = country_map.get(coc)
-
-            PendingHousehold.objects.bulk_create([p["instance"] for p in valid_payloads], batch_size=BATCH_SIZE)
+            self._resolve_countries_and_persist(valid_payloads, country_codes)
 
             roles_to_create: list[IndividualRoleInHousehold] = []
             total_accepted = self._process_valid_payloads(results, roles_to_create, total_accepted, valid_payloads)

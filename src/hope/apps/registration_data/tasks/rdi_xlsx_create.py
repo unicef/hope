@@ -668,6 +668,40 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             obj_to_create.flex_fields[header] = value
         return True
 
+    @staticmethod
+    def _has_value(cell: Cell) -> bool:
+        if cell.value is None:
+            return False
+        if isinstance(cell.value, str):
+            return cell.value.strip() != ""
+        return True
+
+    def _process_cell(self, cell, header_cell, obj_to_create):
+        header = header_cell.value
+        if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
+            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
+            return
+
+        current_field = self.COMBINED_FIELDS.get(header, {})
+        cell_value = cell.value
+        if isinstance(cell_value, str):
+            cell_value = cell_value.strip()
+
+        if self._should_skip_cell(header, cell.value, current_field):
+            return
+
+        value = self._cast_value(cell_value, header)
+        if value in (None, ""):
+            return
+
+        if self._process_complex_field(header, cell_value, cell, obj_to_create, current_field):
+            return
+        if self._process_regular_field(header, cell_value, cell, obj_to_create):
+            return
+        if self._process_lookup_field(header, cell_value, obj_to_create):
+            return
+        self._process_flex_field(header, cell_value, cell, obj_to_create, current_field)
+
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         self.complex_fields, self.complex_types = self._build_complex_fields_config()
         self.rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
@@ -677,15 +711,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         households_to_update = []
         household_id_col_idx, relationship_col_idx = self._find_header_indices(first_row)
 
-        def has_value(cell: Cell) -> bool:
-            if cell.value is None:
-                return False
-            if isinstance(cell.value, str):
-                return cell.value.strip() != ""
-            return True
-
         for row in sheet.iter_rows(min_row=3):
-            if not any(has_value(cell) for cell in row):
+            if not any(self._has_value(cell) for cell in row):
                 continue
 
             try:
@@ -700,36 +727,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 for cell, header_cell in zip(row, first_row, strict=True):
                     try:
-                        header = header_cell.value
-                        if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
-                            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
-                            continue
-
-                        current_field = self.COMBINED_FIELDS.get(header, {})
-                        cell_value = cell.value
-                        if isinstance(cell_value, str):
-                            cell_value = cell_value.strip()
-
-                        if self._should_skip_cell(header, cell.value, current_field):
-                            continue
-
-                        value = self._cast_value(cell_value, header)
-                        if value in (None, ""):
-                            continue
-
-                        if self._process_complex_field(
-                            header,
-                            cell_value,
-                            cell,
-                            obj_to_create,
-                            current_field,
-                        ):
-                            continue
-                        if self._process_regular_field(header, cell_value, cell, obj_to_create):
-                            continue
-                        if self._process_lookup_field(header, cell_value, obj_to_create):
-                            continue
-                        self._process_flex_field(header, cell_value, cell, obj_to_create, current_field)
+                        self._process_cell(cell, header_cell, obj_to_create)
                     except Exception as e:
                         raise Exception(
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"

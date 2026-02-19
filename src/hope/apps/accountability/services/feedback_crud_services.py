@@ -6,8 +6,28 @@ from django.shortcuts import get_object_or_404
 
 from hope.models import Area, BusinessArea, Feedback, Household, Individual, Program
 
+_SIMPLE_FIELDS = ("comments", "area", "language", "consent")
+_FK_FIELDS = {
+    "household_lookup": Household,
+    "individual_lookup": Individual,
+    "admin2": Area,
+}
+
 
 class FeedbackCrudServices:
+    @staticmethod
+    def _has_value(input_data: dict, key: Any) -> bool:
+        return key in input_data and input_data[key] is not None and input_data[key] != ""
+
+    @classmethod
+    def _apply_fields(cls, obj: Feedback, input_data: dict) -> None:
+        for field in _SIMPLE_FIELDS:
+            if cls._has_value(input_data, field):
+                setattr(obj, field, input_data[field])
+        for field, model in _FK_FIELDS.items():
+            if cls._has_value(input_data, field):
+                setattr(obj, field, get_object_or_404(model, id=input_data[field]))
+
     @classmethod
     def validate_lookup(cls, feedback: Feedback) -> None:
         if (
@@ -24,33 +44,17 @@ class FeedbackCrudServices:
         business_area: BusinessArea,
         input_data: dict,
     ) -> Feedback:
-        def check(key: Any) -> bool:
-            return key in input_data and input_data[key] is not None and input_data[key] != ""
-
         obj = Feedback(
             business_area=business_area,
             issue_type=input_data["issue_type"],
             description=input_data["description"],
         )
-        if check("household_lookup"):
-            obj.household_lookup = get_object_or_404(Household, id=input_data["household_lookup"])
-        if check("individual_lookup"):
-            obj.individual_lookup = get_object_or_404(Individual, id=input_data["individual_lookup"])
-        if check("comments"):
-            obj.comments = input_data["comments"]
-        if check("admin2"):
-            obj.admin2 = get_object_or_404(Area, id=input_data["admin2"])
-        if check("area"):
-            obj.area = input_data["area"]
-        if check("language"):
-            obj.language = input_data["language"]
-        if check("consent"):
-            obj.consent = input_data["consent"]
+        cls._apply_fields(obj, input_data)
 
         if obj.household_lookup:
             obj.program = obj.household_lookup.program or obj.household_lookup.programs.first()
 
-        if not obj.program and check("program"):
+        if not obj.program and cls._has_value(input_data, "program"):
             obj.program = get_object_or_404(Program, id=input_data["program"])
         obj.created_by = user
         cls.validate_lookup(obj)
@@ -59,28 +63,11 @@ class FeedbackCrudServices:
 
     @classmethod
     def update(cls, feedback: Feedback, input_data: dict) -> Feedback:
-        def check(key: Any) -> bool:
-            return key in input_data and input_data[key] is not None and input_data[key] != ""
-
-        if check("issue_type"):
-            feedback.issue_type = input_data["issue_type"]
-        if check("description"):
-            feedback.description = input_data["description"]
-        if check("household_lookup"):
-            feedback.household_lookup = get_object_or_404(Household, id=input_data["household_lookup"])
-        if check("individual_lookup"):
-            feedback.individual_lookup = get_object_or_404(Individual, id=input_data["individual_lookup"])
-        if check("comments"):
-            feedback.comments = input_data["comments"]
-        if check("admin2"):
-            feedback.admin2 = get_object_or_404(Area, id=input_data["admin2"])
-        if check("area"):
-            feedback.area = input_data["area"]
-        if check("language"):
-            feedback.language = input_data["language"]
-        if check("consent"):
-            feedback.consent = input_data["consent"]
-        if check("program"):
+        for field in ("issue_type", "description"):
+            if cls._has_value(input_data, field):
+                setattr(feedback, field, input_data[field])
+        cls._apply_fields(feedback, input_data)
+        if cls._has_value(input_data, "program"):
             feedback.program = get_object_or_404(Program, id=input_data["program"])
         cls.validate_lookup(feedback)
         feedback.save()

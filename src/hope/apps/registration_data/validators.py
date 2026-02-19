@@ -172,7 +172,55 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:  # noqa: PLR0912
+    @staticmethod
+    def _make_doc_error(key_name: str, message: str, row_number: int | None, is_xlsx: bool) -> dict:
+        error: dict = {"header": key_name, "message": message}
+        if is_xlsx is True:
+            error["row_number"] = row_number
+        return error
+
+    def _validate_other_id_docs(
+        self, values: dict, key_name: str, issuing_countries: list, is_xlsx: bool
+    ) -> list:
+        errors = []
+        for name, value, validation_data, issuing_country in zip(
+            values["names"],
+            values["numbers"],
+            values["validation_data"],
+            issuing_countries,
+            strict=False,
+        ):
+            row_number = validation_data.get("row_number")
+            if not name and value:
+                errors.append(
+                    self._make_doc_error(
+                        key_name,
+                        f"Name for {key_name} is required, when number is provided: no: {value}",
+                        row_number,
+                        is_xlsx,
+                    )
+                )
+            if name and not value:
+                errors.append(
+                    self._make_doc_error(
+                        key_name,
+                        f"Number for {key_name} is required, when name is provided",
+                        row_number,
+                        is_xlsx,
+                    )
+                )
+            if (name or value) and not issuing_country:
+                errors.append(
+                    self._make_doc_error(
+                        key_name,
+                        f"Issuing country for {key_name} is required, when any document data are provided",
+                        row_number,
+                        is_xlsx,
+                    )
+                )
+        return errors
+
+    def documents_validator(self, documents_numbers_dict: dict, is_xlsx: bool = True) -> list:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -183,39 +231,7 @@ class ImportDataInstanceValidator:
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
-                    for name, value, validation_data, issuing_country in zip(
-                        values["names"],
-                        values["numbers"],
-                        values["validation_data"],
-                        issuing_countries,
-                        strict=False,
-                    ):
-                        row_number = validation_data.get("row_number")
-                        if not name and value:
-                            error = {
-                                "header": key_name,
-                                "message": f"Name for {key_name} is required, when number is provided: no: {value}",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if name and not value:
-                            error = {
-                                "header": key_name,
-                                "message": f"Number for {key_name} is required, when name is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if (name or value) and not issuing_country:
-                            error = {
-                                "header": key_name,
-                                "message": f"Issuing country for {key_name} is required, "
-                                "when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
+                    invalid_rows.extend(self._validate_other_id_docs(values, key_name, issuing_countries, is_xlsx))
                 else:
                     for validation_data, value, issuing_country in zip_longest(
                         values["validation_data"], values["numbers"], issuing_countries
@@ -224,22 +240,24 @@ class ImportDataInstanceValidator:
                             validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
                         )
                         if value and not issuing_country:
-                            error = {
-                                "header": key_name,
-                                "message": f"Issuing country for {key_name} is required,"
-                                f" when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
+                            invalid_rows.append(
+                                self._make_doc_error(
+                                    key_name,
+                                    f"Issuing country for {key_name} is required,"
+                                    f" when any document data are provided",
+                                    row_number,
+                                    is_xlsx,
+                                )
+                            )
                         elif issuing_country and not value:
-                            error = {
-                                "header": key_name,
-                                "message": f"Number for {key_name} is required, when issuing country is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
+                            invalid_rows.append(
+                                self._make_doc_error(
+                                    key_name,
+                                    f"Number for {key_name} is required, when issuing country is provided",
+                                    row_number,
+                                    is_xlsx,
+                                )
+                            )
 
             return invalid_rows
         except Exception as e:  # pragma: no cover
@@ -544,7 +562,51 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:  # noqa: PLR0912
+    @staticmethod
+    def _cell_has_value(cell: Cell) -> bool:
+        if cell.value is None:
+            return False
+        if isinstance(cell.value, str):
+            return cell.value.strip() != ""
+        return True
+
+    def _validate_row_cells(
+        self,
+        row: tuple,
+        first_row: tuple,
+        combined_fields: dict,
+        admin_area_code_tuples: list,
+    ) -> list:
+        errors = []
+        for cell, header in zip(row, first_row, strict=True):
+            current_field = combined_fields.get(header.value)
+            if not current_field:
+                continue
+
+            value = cell.value
+            if isinstance(value, float) and value.is_integer():
+                value = int(value)
+
+            household_id_can_be_empty = header.value == "household_id" and self.sheet_title != "Households"
+
+            admin_error = self._validate_admin_column(
+                header.value, cell.value, cell.row, admin_area_code_tuples
+            )
+            if admin_error:
+                errors.append(admin_error)
+
+            field_type = current_field["type"]
+            type_error = self._validate_field_type(
+                value, header.value, cell, field_type, household_id_can_be_empty
+            )
+            if type_error:
+                errors.append(type_error)
+
+            header_value_doc = header.value.removeprefix("pp_")
+            self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
+        return errors
+
+    def rows_validator(self, sheet: Worksheet, business_area_slug: str | None = None) -> None:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -572,60 +634,29 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             invalid_rows = []
             household_id_col_idx, relationship_col_idx = self._find_header_column_indices(first_row)
-            identities_numbers, documents_numbers = self._init_doc_identity_dicts()
-
-            def has_value(cell: Cell) -> bool:
-                if cell.value is None:
-                    return False
-                if isinstance(cell.value, str):
-                    return cell.value.strip() != ""
-                return True
+            self._identities_numbers, self._documents_numbers = self._init_doc_identity_dicts()
 
             admin_area_code_tuples = []
 
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
-                if not any(has_value(cell) for cell in row):
+                if not any(self._cell_has_value(cell) for cell in row):
                     continue
 
                 current_household_id = self._process_row_household_data(
                     row, household_id_col_idx, relationship_col_idx, sheet.title
                 )
 
-                for cell, header in zip(row, first_row, strict=True):
-                    current_field = combined_fields.get(header.value)
-                    if not current_field:
-                        continue
-
-                    row_number = cell.row
-
-                    value = cell.value
-                    if isinstance(value, float) and value.is_integer():
-                        value = int(value)
-
-                    household_id_can_be_empty = header.value == "household_id" and sheet.title != "Households"
-
-                    admin_error = self._validate_admin_column(
-                        header.value, cell.value, row_number, admin_area_code_tuples
-                    )
-                    if admin_error:
-                        invalid_rows.append(admin_error)
-
-                    field_type = current_field["type"]
-                    type_error = self._validate_field_type(
-                        value, header.value, cell, field_type, household_id_can_be_empty
-                    )
-                    if type_error:
-                        invalid_rows.append(type_error)
-
-                    header_value_doc = header.value.removeprefix("pp_")
-                    self._process_document_number(header_value_doc, value, documents_numbers, identities_numbers)
+                row_number = row[0].row
+                invalid_rows.extend(
+                    self._validate_row_cells(row, first_row, combined_fields, admin_area_code_tuples)
+                )
 
                 household_ref_error = self._validate_row_household_reference(current_household_id, row_number)
                 if household_ref_error:
                     invalid_rows.append(household_ref_error)
 
-                self._accumulate_doc_identity_validation_data(row, identities_numbers, documents_numbers)
+                self._accumulate_doc_identity_validation_data(row)
                 self.errors.extend(self._validate_pdu(row, first_row, row_number))
 
             if sheet.title == "Individuals":
@@ -636,9 +667,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
 
-            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(
-                sheet.title, documents_numbers, identities_numbers
-            )
+            invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
 
         except Exception as e:  # pragma: no cover
@@ -821,12 +850,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             }
         return None
 
-    def _accumulate_doc_identity_validation_data(
-        self, row: tuple, identities_numbers: dict, documents_numbers: dict[str, dict[str, Any]]
-    ) -> None:
+    def _accumulate_doc_identity_validation_data(self, row: tuple) -> None:
         for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
             documents_or_identity_dict = (
-                identities_numbers if header_value_doc in identities_numbers else documents_numbers
+                self._identities_numbers if header_value_doc in self._identities_numbers else self._documents_numbers
             )
             documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
 
@@ -855,14 +882,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 )
         return invalid_rows
 
-    def _run_document_identity_validation(
-        self, sheet_title: str, documents_numbers: dict[str, dict[str, Any]], identities_numbers: dict
-    ) -> tuple[list, list]:
+    def _run_document_identity_validation(self, sheet_title: str) -> tuple[list, list]:
         invalid_doc_rows = []
         invalid_ident_rows = []
         if sheet_title in ["Individuals", "People"]:
-            invalid_doc_rows = self.documents_validator(documents_numbers)
-            invalid_ident_rows = self.identity_validator(identities_numbers)
+            invalid_doc_rows = self.documents_validator(self._documents_numbers)
+            invalid_ident_rows = self.identity_validator(self._identities_numbers)
         return invalid_doc_rows, invalid_ident_rows
 
     def validate_admin_areas(
@@ -1775,7 +1800,92 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
-    def validate_everything(  # noqa: PLR0912
+    def _validate_household(
+        self,
+        household: dict[str, Any],
+        skip_validate_pictures: bool | None,
+        documents_numbers: dict,
+        identities_numbers: dict,
+        docs_and_identities_to_validate: list,
+    ) -> list[dict[str, str]]:
+        errors: list[dict[str, str]] = []
+        head_of_hh_counter = 0
+        primary_collector_counter = 0
+        alternate_collector_counter = 0
+        expected_hh_fields = {
+            *self.expected_household_fields,
+        }
+        attachments = household.get("_attachments", [])
+        hh_value: list[dict]
+        household_collectors_data = []
+        for hh_field, hh_value in household.items():
+            expected_hh_fields.discard(hh_field)
+            if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
+                individual: dict
+                for individual in hh_value:
+                    if individual.get("role_i_c") in ["primary", "alternate"]:
+                        household_collectors_data.append(individual)
+                    expected_i_fields = {
+                        *self.expected_individuals_fields,
+                    }
+                    current_individual_docs_and_identities = defaultdict(dict)
+                    i_field: str
+                    for i_field, i_value in individual.items():
+                        self._process_individual_doc_identity_kobo(
+                            i_field, i_value, documents_numbers, identities_numbers
+                        )
+                        head_of_hh_counter, primary_collector_counter, alternate_collector_counter = (
+                            self._count_individual_roles(
+                                i_field,
+                                i_value,
+                                head_of_hh_counter,
+                                primary_collector_counter,
+                                alternate_collector_counter,
+                            )
+                        )
+                        expected_i_fields.discard(i_field)
+                        error = self._get_field_type_error(
+                            i_field,
+                            i_value,
+                            attachments,
+                            skip_validate_pictures,
+                        )
+                        if error:
+                            errors.append(error)
+
+                    docs_and_identities_to_validate.append(current_individual_docs_and_identities)
+
+                    i_expected_field_errors = [
+                        {
+                            "header": field,
+                            "message": f"Missing individual required field {field}",
+                        }
+                        for field in expected_i_fields
+                    ]
+                    errors.extend(i_expected_field_errors)
+
+                errors.extend(
+                    self._validate_household_roles(
+                        head_of_hh_counter, primary_collector_counter, alternate_collector_counter
+                    )
+                )
+            else:
+                error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
+                if error:
+                    errors.append(error)
+        if collectors_error := self.validate_collectors_unique(household_collectors_data):
+            errors.append(collectors_error)
+        hh_expected_field_errors = [
+            {
+                "header": field,
+                "message": f"Missing household required field {field}",
+            }
+            for field in expected_hh_fields
+        ]
+        errors.extend(hh_expected_field_errors)
+        return errors
+
+    def validate_everything(
         self,
         submissions: list,
         business_area: BusinessArea,
@@ -1797,80 +1907,15 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 if is_duplicate:
                     continue
                 household_hash_list.append(household_hash)
-                head_of_hh_counter = 0
-                primary_collector_counter = 0
-                alternate_collector_counter = 0
-                expected_hh_fields = {
-                    *self.expected_household_fields,
-                }
-                attachments = household.get("_attachments", [])
-                hh_value: list[dict]
-                household_collectors_data = []
-                for hh_field, hh_value in household.items():
-                    expected_hh_fields.discard(hh_field)
-                    if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
-                        individual: dict
-                        for individual in hh_value:
-                            if individual.get("role_i_c") in ["primary", "alternate"]:
-                                household_collectors_data.append(individual)
-                            expected_i_fields = {
-                                *self.expected_individuals_fields,
-                            }
-                            current_individual_docs_and_identities = defaultdict(dict)
-                            i_field: str
-                            for i_field, i_value in individual.items():
-                                self._process_individual_doc_identity_kobo(
-                                    i_field, i_value, documents_numbers, identities_numbers
-                                )
-                                head_of_hh_counter, primary_collector_counter, alternate_collector_counter = (
-                                    self._count_individual_roles(
-                                        i_field,
-                                        i_value,
-                                        head_of_hh_counter,
-                                        primary_collector_counter,
-                                        alternate_collector_counter,
-                                    )
-                                )
-                                expected_i_fields.discard(i_field)
-                                error = self._get_field_type_error(
-                                    i_field,
-                                    i_value,
-                                    attachments,
-                                    skip_validate_pictures,
-                                )
-                                if error:
-                                    errors.append(error)
-
-                            docs_and_identities_to_validate.append(current_individual_docs_and_identities)
-
-                            i_expected_field_errors = [
-                                {
-                                    "header": field,
-                                    "message": f"Missing individual required field {field}",
-                                }
-                                for field in expected_i_fields
-                            ]
-                            errors.extend(i_expected_field_errors)
-
-                        errors.extend(
-                            self._validate_household_roles(
-                                head_of_hh_counter, primary_collector_counter, alternate_collector_counter
-                            )
-                        )
-                    else:
-                        error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
-                        if error:
-                            errors.append(error)
-                if collectors_error := self.validate_collectors_unique(household_collectors_data):
-                    errors.append(collectors_error)
-                hh_expected_field_errors = [
-                    {
-                        "header": field,
-                        "message": f"Missing household required field {field}",
-                    }
-                    for field in expected_hh_fields
-                ]
-                errors.extend(hh_expected_field_errors)
+                errors.extend(
+                    self._validate_household(
+                        household,
+                        skip_validate_pictures,
+                        documents_numbers,
+                        identities_numbers,
+                        docs_and_identities_to_validate,
+                    )
+                )
 
             document_errors = self.documents_validator(documents_numbers, is_xlsx=False)
             identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)

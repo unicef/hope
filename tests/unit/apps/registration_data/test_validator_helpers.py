@@ -451,8 +451,10 @@ def test_run_doc_identity_validation_individuals_calls_validators():
     validator.identity_validator = MagicMock(return_value=[{"error": "ident_error"}])
     docs = {"some_doc": {}}
     idents = {"some_ident": {}}
+    validator._documents_numbers = docs
+    validator._identities_numbers = idents
     invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
-        validator, "Individuals", docs, idents
+        validator, "Individuals"
     )
     validator.documents_validator.assert_called_once_with(docs)
     validator.identity_validator.assert_called_once_with(idents)
@@ -464,8 +466,10 @@ def test_run_doc_identity_validation_households_returns_empty():
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
     validator.documents_validator = MagicMock()
     validator.identity_validator = MagicMock()
+    validator._documents_numbers = {}
+    validator._identities_numbers = {}
     invalid_doc_rows, invalid_ident_rows = UploadXLSXInstanceValidator._run_document_identity_validation(
-        validator, "Households", {}, {}
+        validator, "Households"
     )
     validator.documents_validator.assert_not_called()
     validator.identity_validator.assert_not_called()
@@ -496,15 +500,15 @@ def test_accumulate_data_adds_to_lists():
         "tax_id_no_i_c": {"validation_data": []},
         "other_id_type_i_c": {"validation_data": []},
     }
+    validator._identities_numbers = identities_numbers
+    validator._documents_numbers = documents_numbers
 
     # Create a mock row where row[0].row returns a row number
     first_cell = MagicMock()
     first_cell.row = 7
     row = (first_cell,)
 
-    UploadXLSXInstanceValidator._accumulate_doc_identity_validation_data(
-        validator, row, identities_numbers, documents_numbers
-    )
+    UploadXLSXInstanceValidator._accumulate_doc_identity_validation_data(validator, row)
 
     # Each value in the mapping should have had a validation_data entry appended
     assert {"row_number": 7} in identities_numbers["unhcr_id_no_i_c"]["validation_data"]
