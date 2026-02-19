@@ -275,5 +275,10 @@ export type IndividualDetail = {
      * Beneficiary contact phone number
      */
     paymentDeliveryPhoneNo?: string | null;
+    /**
+     * Key used to identify Collisions in the system
+     */
+    identificationKey?: string | null;
+    identificationKeyLabel?: string;
 };
 

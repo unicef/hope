@@ -60,35 +60,11 @@ def targeting_flag_data(business_area):
     }
 
 
-@pytest.mark.parametrize(
-    ("member_dup", "rep_dup", "ticket_status", "household_count"),
-    [
-        (True, False, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (True, False, GrievanceTicket.STATUS_CLOSED, 2),
-        (False, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (False, True, GrievanceTicket.STATUS_CLOSED, 2),
-        (True, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (True, True, GrievanceTicket.STATUS_CLOSED, 2),
-    ],
-)
-def test_flag_exclude_if_active_adjudication_ticket_duplicate(
-    targeting_flag_data,
-    member_dup,
-    rep_dup,
-    ticket_status,
-    household_count,
-):
-    if member_dup:
-        t = targeting_flag_data["ticket_member"]
-        t.ticket.status = ticket_status
-        t.ticket.save()
-        t.possible_duplicates.set([targeting_flag_data["individuals2"][0]])
-
-    if rep_dup:
-        t = targeting_flag_data["ticket_rep"]
-        t.ticket.status = ticket_status
-        t.ticket.save()
-        t.possible_duplicates.set([targeting_flag_data["representative2"]])
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_member_dup_inprogress(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["individuals2"][0]])
 
     assert Household.objects.count() == 2
 
@@ -96,46 +72,188 @@ def test_flag_exclude_if_active_adjudication_ticket_duplicate(
     criteria.flag_exclude_if_active_adjudication_ticket = True
 
     qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
-    assert qs.count() == household_count
+    assert qs.count() == 1
 
 
-@pytest.mark.parametrize(
-    ("member_gr", "rep_gr", "ticket_status", "household_count"),
-    [
-        (True, False, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (True, False, GrievanceTicket.STATUS_CLOSED, 2),
-        (False, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (False, True, GrievanceTicket.STATUS_CLOSED, 2),
-        (True, True, GrievanceTicket.STATUS_IN_PROGRESS, 1),
-        (True, True, GrievanceTicket.STATUS_CLOSED, 2),
-    ],
-)
-def test_flag_exclude_if_active_adjudication_ticket_golden_record(
-    targeting_flag_data,
-    member_gr,
-    rep_gr,
-    ticket_status,
-    household_count,
-):
-    if member_gr:
-        t = targeting_flag_data["ticket_member"]
-        t.ticket.status = ticket_status
-        t.ticket.save()
-        t.golden_records_individual = targeting_flag_data["individuals2"][0]
-        t.save()
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_member_dup_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["individuals2"][0]])
 
-    if rep_gr:
-        t = targeting_flag_data["ticket_rep"]
-        t.ticket.status = ticket_status
-        t.ticket.save()
-        t.golden_records_individual = targeting_flag_data["representative2"]
-        t.save()
+    assert Household.objects.count() == 2
 
     criteria = TargetingCriteriaQueryingBase()
     criteria.flag_exclude_if_active_adjudication_ticket = True
 
     qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
-    assert qs.count() == household_count
+    assert qs.count() == 2
+
+
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_rep_dup_inprogress(targeting_flag_data):
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["representative2"]])
+
+    assert Household.objects.count() == 2
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_rep_dup_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["representative2"]])
+
+    assert Household.objects.count() == 2
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 2
+
+
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_member_and_rep_dup_inprogress(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["individuals2"][0]])
+
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["representative2"]])
+
+    assert Household.objects.count() == 2
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_active_adjudication_ticket_duplicate_member_and_rep_dup_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["individuals2"][0]])
+
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.possible_duplicates.set([targeting_flag_data["representative2"]])
+
+    assert Household.objects.count() == 2
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 2
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_member_in_progress(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["individuals2"][0]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_member_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["individuals2"][0]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 2
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_rep_inprogress(targeting_flag_data):
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["representative2"]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_rep_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["representative2"]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 2
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_member_and_rep_inprogress(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["individuals2"][0]
+    t.save()
+
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["representative2"]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_active_adjudication_ticket_golden_record_member_and_rep_closed(targeting_flag_data):
+    t = targeting_flag_data["ticket_member"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["individuals2"][0]
+    t.save()
+
+    t = targeting_flag_data["ticket_rep"]
+    t.ticket.status = GrievanceTicket.STATUS_CLOSED
+    t.ticket.save()
+    t.golden_records_individual = targeting_flag_data["representative2"]
+    t.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_active_adjudication_ticket = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_active_adjudication_ticket())
+    assert qs.count() == 2
 
 
 def test_flag_exclude_if_active_adjudication_ticket_no_ticket():
@@ -146,33 +264,51 @@ def test_flag_exclude_if_active_adjudication_ticket_no_ticket():
     assert qs.count() == Household.objects.count()
 
 
-@pytest.mark.parametrize(
-    ("member_sanctioned", "rep_sanctioned", "household_count"),
-    [
-        (True, False, 1),
-        (False, True, 1),
-        (True, True, 1),
-        (False, False, 2),
-    ],
-)
-def test_flag_exclude_if_on_sanction_list(
-    targeting_flag_data,
-    member_sanctioned,
-    rep_sanctioned,
-    household_count,
-):
-    if member_sanctioned:
-        ind = targeting_flag_data["individuals2"][0]
-        ind.sanction_list_confirmed_match = True
-        ind.save()
-
-    if rep_sanctioned:
-        rep = targeting_flag_data["representative2"]
-        rep.sanction_list_confirmed_match = True
-        rep.save()
+def test_flag_exclude_if_on_sanction_list_with_member_sanctioned(targeting_flag_data):
+    ind = targeting_flag_data["individuals2"][0]
+    ind.sanction_list_confirmed_match = True
+    ind.save()
 
     criteria = TargetingCriteriaQueryingBase()
     criteria.flag_exclude_if_on_sanction_list = True
 
     qs = Household.objects.filter(criteria.apply_flag_exclude_if_on_sanction_list())
-    assert qs.count() == household_count
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_on_sanction_list_with_rep_sanctioned(
+    targeting_flag_data,
+):
+    rep = targeting_flag_data["representative2"]
+    rep.sanction_list_confirmed_match = True
+    rep.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_on_sanction_list = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_on_sanction_list())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_on_sanction_list_with_member_sanctioned_and_rep_sanctioned(targeting_flag_data):
+    ind = targeting_flag_data["individuals2"][0]
+    ind.sanction_list_confirmed_match = True
+    ind.save()
+
+    rep = targeting_flag_data["representative2"]
+    rep.sanction_list_confirmed_match = True
+    rep.save()
+
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_on_sanction_list = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_on_sanction_list())
+    assert qs.count() == 1
+
+
+def test_flag_exclude_if_on_sanction_list_without_anybody_sanctioned(targeting_flag_data):
+    criteria = TargetingCriteriaQueryingBase()
+    criteria.flag_exclude_if_on_sanction_list = True
+
+    qs = Household.objects.filter(criteria.apply_flag_exclude_if_on_sanction_list())
+    assert qs.count() == 2

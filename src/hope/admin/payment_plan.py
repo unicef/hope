@@ -110,6 +110,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "export_file_per_fsp",
         "export_pdf_file_summary",
         "source_payment_plan",
+        "reconciliation_import_file",
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"

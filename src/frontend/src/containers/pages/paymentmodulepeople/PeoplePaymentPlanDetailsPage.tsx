@@ -6,7 +6,7 @@ import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanD
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
+import Entitlement from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 import { PaymentPlanDetails } from '@components/paymentmodulepeople/PaymentPlanDetails/PaymentPlanDetails';
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';

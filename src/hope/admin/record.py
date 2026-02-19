@@ -155,7 +155,7 @@ class RecordAdmin(HOPEModelAdminBase):
         ("fields", JsonFieldFilter),
         QueryStringFilter,
     )
-    change_form_template = "registration_datahub/admin/record/change_form.html"
+    change_form_template = "registration_data/admin/record/change_form.html"
 
     actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
@@ -276,7 +276,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = CreateRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_add_records")
     def add_to_existing_rdi(self, request: HttpRequest) -> HttpResponse:
@@ -327,7 +327,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = AmendRDIForm(request=request)
 
         ctx["form"] = form
-        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
+        return render(request, "registration_data/admin/record/create_rdi.html", ctx)
 
     @button(permission="aurora.can_fetch_data")
     def fetch(self, request: HttpRequest) -> TemplateResponse:
@@ -358,7 +358,7 @@ class RecordAdmin(HOPEModelAdminBase):
             form = FetchForm(initial=FetchForm.get_saved_config(request))
 
         ctx["form"] = form
-        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        response = TemplateResponse(request, "registration_data/admin/record/fetch.html", ctx)
         if cookies:
             for k, v in cookies.items():
                 response.set_cookie(k, v)

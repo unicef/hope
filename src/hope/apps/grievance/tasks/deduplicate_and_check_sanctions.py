@@ -9,7 +9,7 @@ from hope.apps.household.const import (
     NEEDS_ADJUDICATION,
 )
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.registration_datahub.tasks.deduplicate import (
+from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )

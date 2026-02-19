@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
-    qs = queryset.iterator()
+def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+    qs = queryset.iterator(chunk_size=chunk_size)
     doc().update(qs, parallel=parallel)
 
 

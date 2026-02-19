@@ -62,7 +62,8 @@
                 "status_date": "2025-01-01T00:00:00Z",
                 "is_cash_assist": false,
                 "flag_exclude_if_active_adjudication_ticket": false,
-                "flag_exclude_if_on_sanction_list": false
+                "flag_exclude_if_on_sanction_list": false,
+                "flat_amount_value": null
             }
         },
         "deps": [

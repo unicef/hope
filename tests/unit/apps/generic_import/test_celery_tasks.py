@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.generic_import.celery_tasks import process_generic_import_task
 from hope.apps.generic_import.generic_upload_service.importer import format_validation_errors
-from hope.apps.registration_datahub.exceptions import AlreadyRunningError
+from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.models import BusinessArea, Household, ImportData, Individual, Program, RegistrationDataImport, User
 
 

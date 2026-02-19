@@ -1,358 +1,410 @@
+from typing import Any
+
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
-from hope.apps.core.base_test_case import BaseTestCase
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    ProgramFactory,
+    UserFactory,
+)
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
-from hope.apps.household.const import (
-    RELATIONSHIP_UNKNOWN,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
+from hope.apps.household.const import RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.models import Individual, IndividualRoleInHousehold
-from hope.models.utils import MergeStatusModel
+
+pytestmark = pytest.mark.django_db
 
 
-class TestReassignRolesOnUpdate(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.business_area = create_afghanistan()
-        cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
+@pytest.fixture
+def base_context() -> dict[str, Any]:
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
+    household = HouseholdFactory(
+        program=program_one,
+        business_area=business_area,
+        create_role=False,
+    )
 
-        cls.household = HouseholdFactory.build(program=cls.program_one)
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = cls.program_one
-        cls.household.registration_data_import.save()
+    primary_collector_individual = household.head_of_household
+    primary_role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=primary_collector_individual,
+        role=ROLE_PRIMARY,
+    )
 
-        cls.primary_collector_individual = IndividualFactory(household=None, program=cls.program_one)
-        cls.household.head_of_household = cls.primary_collector_individual
-        cls.household.save()
-        cls.primary_collector_individual.household = cls.household
-        cls.primary_collector_individual.save()
-        cls.household.refresh_from_db()
-        cls.primary_collector_individual.refresh_from_db()
+    alternate_collector_individual = IndividualFactory(
+        household=household,
+        program=program_one,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    alternate_role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=alternate_collector_individual,
+        role=ROLE_ALTERNATE,
+    )
 
-        cls.primary_role = IndividualRoleInHousehold.objects.create(
-            household=cls.household,
-            individual=cls.primary_collector_individual,
+    no_role_individual = IndividualFactory(
+        household=household,
+        program=program_one,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    user = UserFactory()
+
+    return {
+        "business_area": business_area,
+        "program_one": program_one,
+        "household": household,
+        "primary_collector_individual": primary_collector_individual,
+        "primary_role": primary_role,
+        "alternate_collector_individual": alternate_collector_individual,
+        "alternate_role": alternate_role,
+        "no_role_individual": no_role_individual,
+        "user": user,
+    }
+
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context: dict[str, Any]) -> None:
+    duplicated_individuals = Individual.objects.filter(id=base_context["primary_collector_individual"].id)
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    reassign_roles_on_marking_as_duplicate_individual_service(
+        role_reassign_data,
+        base_context["user"],
+        duplicated_individuals,
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(
+            household=base_context["household"],
+            individual=base_context["no_role_individual"],
             role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
+        ).count()
+        == 1
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(
+            household=base_context["household"],
+            individual=base_context["primary_collector_individual"],
+            role=ROLE_PRIMARY,
+        ).count()
+        == 0
+    )
+    base_context["household"].refresh_from_db()
+    assert base_context["household"].head_of_household == base_context["no_role_individual"]
+    for individual in base_context["household"].individuals.exclude(id=base_context["no_role_individual"].id):
+        assert individual.relationship == RELATIONSHIP_UNKNOWN
+
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(base_context: dict[str, Any]) -> None:
+    program_two = ProgramFactory(name="Test program TWO", business_area=base_context["business_area"])
+    base_context["no_role_individual"].program = program_two
+    base_context["no_role_individual"].save(update_fields=["program"])
+    duplicated_individuals = Individual.objects.filter(id=base_context["primary_collector_individual"].id)
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
+    assert str(error.value.detail[0]) == "Cannot reassign role to individual from different program"
 
-        cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
-        cls.alternate_collector_individual.household = cls.household
-        cls.alternate_collector_individual.save()
 
-        cls.alternate_role = IndividualRoleInHousehold.objects.create(
-            household=cls.household,
-            individual=cls.alternate_collector_individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.none()
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
+    assert (
+        str(error.value.detail[0])
+        == f"Individual ({base_context['primary_collector_individual'].unicef_id}) was not marked as duplicated"
+    )
 
-        cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
-        cls.user = UserFactory()
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service(self) -> None:
-        duplicated_individuals = Individual.objects.filter(id=self.primary_collector_individual.id)
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
-        assert (
-            IndividualRoleInHousehold.objects.filter(
-                household=self.household,
-                individual=self.no_role_individual,
-                role=ROLE_PRIMARY,
-            ).count()
-            == 1
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(
+        id__in=[
+            base_context["no_role_individual"].id,
+            base_context["primary_collector_individual"].id,
+        ]
+    )
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
-        assert (
-            IndividualRoleInHousehold.objects.filter(
-                household=self.household,
-                individual=self.primary_collector_individual,
-                role=ROLE_PRIMARY,
-            ).count()
-            == 0
+    assert (
+        str(error.value.detail[0])
+        == f"Individual({base_context['no_role_individual'].unicef_id}) which get role PRIMARY was marked as duplicated"
+    )
+
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_alternate_to_primary(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["alternate_collector_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+
+    reassign_roles_on_marking_as_duplicate_individual_service(
+        role_reassign_data,
+        base_context["user"],
+        duplicated_individuals,
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(
+            household=base_context["household"],
+            individual=base_context["alternate_collector_individual"],
+            role=ROLE_PRIMARY,
+        ).count()
+        == 1
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(
+            household=base_context["household"],
+            individual=base_context["alternate_collector_individual"],
+        ).count()
+        == 1
+    )
+
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_primary_to_alternate(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["alternate_collector_individual"].id])
+    role_reassign_data = {
+        ROLE_ALTERNATE: {
+            "role": ROLE_ALTERNATE,
+            "new_individual": str(base_context["primary_collector_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["alternate_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
-        self.household.refresh_from_db()
-        assert self.household.head_of_household == self.no_role_individual
-        for individual in self.household.individuals.exclude(id=self.no_role_individual.id):
-            assert individual.relationship == RELATIONSHIP_UNKNOWN
+    assert str(error.value.detail[0]) == "Cannot reassign the role. Selected individual has primary collector role."
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(
-        self,
-    ) -> None:
-        program_two = ProgramFactory(name="Test program TWO", business_area=self.business_area)
-        self.no_role_individual.program = program_two
-        self.no_role_individual.save()
-        duplicated_individuals = Individual.objects.filter(id=self.primary_collector_individual.id)
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert str(error.value.detail[0]) == "Cannot reassign role to individual from different program"
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.none()
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert (
-            str(error.value.detail[0])
-            == f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated"
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": "WRONG_ROLE",
+            "new_individual": str(base_context["alternate_collector_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
+    assert str(error.value.detail[0]) == "Invalid role name"
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(
-            id__in=[self.no_role_individual.id, self.primary_collector_individual.id]
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["alternate_collector_individual"].id])
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["primary_collector_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["alternate_collector_individual"].id),
+        },
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
+    assert (
+        str(error.value.detail[0])
+        == f"Individual with unicef_id {base_context['alternate_collector_individual'].unicef_id} does not have role "
+        f"PRIMARY in household with unicef_id {base_context['household'].unicef_id}"
+    )
 
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert (
-            str(error.value.detail[0])
-            == f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated"
+
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
+    role_reassign_data = {
+        ROLE_PRIMARY: {
+            "role": ROLE_PRIMARY,
+            "new_individual": str(base_context["alternate_collector_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
+    assert (
+        str(error.value.detail[0]) == f"Role for head of household in household with unicef_id "
+        f"{base_context['household'].unicef_id} was not reassigned, when individual "
+        f"({base_context['primary_collector_individual'].unicef_id}) was marked as "
+        f"duplicated"
+    )
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_alternate_to_primary(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.alternate_collector_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
 
-        reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
-        assert (
-            IndividualRoleInHousehold.objects.filter(
-                household=self.household,
-                individual=self.alternate_collector_individual,
-                role=ROLE_PRIMARY,
-            ).count()
-            == 1
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
+    base_context: dict[str, Any],
+) -> None:
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
+    role_reassign_data = {
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    with pytest.raises(ValidationError) as error:
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            role_reassign_data,
+            base_context["user"],
+            duplicated_individuals,
         )
-        assert (
-            IndividualRoleInHousehold.objects.filter(
-                household=self.household, individual=self.alternate_collector_individual
-            ).count()
-            == 1
-        )
+    assert (
+        str(error.value.detail[0])
+        == f"Primary role in household with unicef_id {base_context['household'].unicef_id} is still assigned to "
+        f"duplicated individual({base_context['primary_collector_individual'].unicef_id})"
+    )
 
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_primary_to_alternate(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.alternate_collector_individual.id])
-        role_reassign_data = {
-            ROLE_ALTERNATE: {
-                "role": ROLE_ALTERNATE,
-                "new_individual": str(self.primary_collector_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.alternate_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
 
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert str(error.value.detail[0]) == "Cannot reassign the role. Selected individual has primary collector role."
-
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": "WRONG_ROLE",
-                "new_individual": str(self.alternate_collector_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert str(error.value.detail[0]) == "Invalid role name"
-
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.alternate_collector_individual.id])
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.primary_collector_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.alternate_collector_individual.id),
-            },
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert (
-            str(error.value.detail[0])
-            == f"Individual with unicef_id {self.alternate_collector_individual.unicef_id} does not have role PRIMARY "
-            f"in household with unicef_id {self.household.unicef_id}"
-        )
-
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
-        role_reassign_data = {
-            ROLE_PRIMARY: {
-                "role": ROLE_PRIMARY,
-                "new_individual": str(self.alternate_collector_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert (
-            str(error.value.detail[0]) == f"Role for head of household in household with unicef_id "
-            f"{self.household.unicef_id} was not reassigned, when individual "
-            f"({self.primary_collector_individual.unicef_id}) was marked as "
-            f"duplicated"
-        )
-
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
-        self,
-    ) -> None:
-        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
-        role_reassign_data = {
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        with pytest.raises(ValidationError) as error:
-            reassign_roles_on_marking_as_duplicate_individual_service(
-                role_reassign_data, self.user, duplicated_individuals
-            )
-        assert (
-            str(error.value.detail[0])
-            == f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated "
-            f"individual({self.primary_collector_individual.unicef_id})"
-        )
-
-    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_hh_withdrawn(
-        self,
-    ) -> None:
-        self.household.withdrawn = True
-        self.household.save()
-        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
-        role_reassign_data = {
-            str(self.primary_collector_individual.id): {
-                "role": "HEAD",
-                "new_individual": str(self.no_role_individual.id),
-                "household": str(self.household.id),
-                "individual": str(self.primary_collector_individual.id),
-            },
-        }
-        reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
-        assert IndividualRoleInHousehold.objects.filter(individual=self.primary_collector_individual).count() == 1
+def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_hh_withdrawn(
+    base_context: dict[str, Any],
+) -> None:
+    base_context["household"].withdrawn = True
+    base_context["household"].save(update_fields=["withdrawn"])
+    duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
+    role_reassign_data = {
+        str(base_context["primary_collector_individual"].id): {
+            "role": "HEAD",
+            "new_individual": str(base_context["no_role_individual"].id),
+            "household": str(base_context["household"].id),
+            "individual": str(base_context["primary_collector_individual"].id),
+        },
+    }
+    reassign_roles_on_marking_as_duplicate_individual_service(
+        role_reassign_data,
+        base_context["user"],
+        duplicated_individuals,
+    )
+    assert (
+        IndividualRoleInHousehold.objects.filter(individual=base_context["primary_collector_individual"]).count() == 1
+    )

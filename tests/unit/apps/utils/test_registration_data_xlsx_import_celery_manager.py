@@ -108,7 +108,7 @@ def test_querysets(mock_get_all_tasks, programs) -> None:
     assert manager.in_progress_queryset.first() == rdi_importing
 
 
-@mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@mock.patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
 def test_add_scheduled_to_queue(
     mock_get_all_celery_tasks: mock.MagicMock,
@@ -142,7 +142,7 @@ def test_add_scheduled_to_queue(
     )
 
 
-@mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@mock.patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
 def test_revert_status_rdi_with_importing_status(
     mock_get_all_celery_tasks: mock.MagicMock,
@@ -176,7 +176,7 @@ def test_revert_status_rdi_with_importing_status(
     )
 
 
-@mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@mock.patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
 def test_not_start_importing_tasks(
     mock_get_all_celery_tasks: mock.MagicMock,
@@ -204,7 +204,7 @@ def test_not_start_importing_tasks(
 
     mock_get_all_celery_tasks.return_value = [
         {
-            "name": "hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task",
+            "name": "hope.apps.registration_data.celery_tasks.registration_xlsx_import_task",
             "kwargs": kwargs,
             "status": "active",
         }
@@ -216,7 +216,7 @@ def test_not_start_importing_tasks(
     assert mock_registration_xlsx_import_task_delay.call_count == 0
 
 
-@mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@mock.patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
 def test_not_start_already_scheduled(
     mock_get_all_celery_tasks: mock.MagicMock,
@@ -244,7 +244,7 @@ def test_not_start_already_scheduled(
 
     mock_get_all_celery_tasks.return_value = [
         {
-            "name": "hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task",
+            "name": "hope.apps.registration_data.celery_tasks.registration_xlsx_import_task",
             "kwargs": kwargs,
             "status": "queued",
         }
@@ -256,7 +256,7 @@ def test_not_start_already_scheduled(
     assert mock_registration_xlsx_import_task_delay.call_count == 0
 
 
-@mock.patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@mock.patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 @mock.patch("hope.apps.utils.celery_manager.get_all_celery_tasks")
 def test_parametrized_by_business_area(
     mock_get_all_celery_tasks: mock.MagicMock,

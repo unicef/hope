@@ -42,7 +42,7 @@ class TestMarkSubmissions(TestCase):
 
     @classmethod
     def _create_submission(cls, status: str) -> None:
-        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_data/test_file/kobo_submissions.json").read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
         import_data = ImportData.objects.create(
             file=file,

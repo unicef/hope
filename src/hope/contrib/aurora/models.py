@@ -5,7 +5,7 @@ from django.db import models
 from strategy_field.fields import StrategyField
 import swapper
 
-from hope.apps.registration_datahub.utils import combine_collections
+from hope.apps.registration_data.utils import combine_collections
 from hope.contrib.aurora.rdi import registry
 from hope.models.utils import TimeStampedModel
 

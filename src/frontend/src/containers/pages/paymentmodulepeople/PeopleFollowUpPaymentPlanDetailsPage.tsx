@@ -7,8 +7,6 @@ import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlan
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
-import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
@@ -22,6 +20,8 @@ import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import Entitlement from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
+import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 
 export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();

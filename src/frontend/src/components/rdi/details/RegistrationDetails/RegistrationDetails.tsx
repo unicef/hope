@@ -232,23 +232,17 @@ function RegistrationDetails({
           </Grid>
           {numbersComponent}
           {registration.status ===
-            RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ||
-          (!showBiographicalDeduplicationResult &&
-            !showBiometricDeduplicationResult) ? null : (
+          RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
-                  {showBiographicalDeduplicationResult && (
-                    <Grid size={{ xs: 4 }}>
-                      <BoldGrey>{t('Biographical')}</BoldGrey>
-                    </Grid>
-                  )}
-                  {showBiometricDeduplicationResult && (
-                    <Grid size={{ xs: 4 }}>
-                      <BoldGrey>{t('Biometrics')}</BoldGrey>
-                    </Grid>
-                  )}
+                  <Grid size={{ xs: 4 }}>
+                    <BoldGrey>{t('Biographical')}</BoldGrey>
+                  </Grid>
+                  <Grid size={{ xs: 4 }}>
+                    <BoldGrey>{t('Biometrics')}</BoldGrey>
+                  </Grid>
                 </Grid>
                 <DedupeBox
                   showBiographicalDeduplicationResult={

@@ -18,7 +18,6 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.household import create_household
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
     FlexibleAttribute,
@@ -211,11 +210,15 @@ def households_pdu(user, business_area):
 
     # Create households with individuals
     def create_hh(flex_data):
-        hh, inds = create_household(
-            {"size": 1, "business_area": business_area, "program": program},
-            {"flex_fields": flex_data, "business_area": business_area},
+        hh = HouseholdFactory(
+            size=1,
+            business_area=business_area,
+            program=program,
         )
-        return hh, inds[0]
+        ind = hh.head_of_household
+        ind.flex_fields = flex_data
+        ind.save()
+        return hh, ind
 
     ind1_data = {
         pdu_string.name: {"1": {"value": None}, "2": {"value": None}},

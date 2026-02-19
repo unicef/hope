@@ -10,6 +10,7 @@ from .account import (
 from .accountability import CommunicationMessageFactory, FeedbackFactory, FeedbackMessageFactory, SurveyFactory
 from .activity_log import LogEntryFactory
 from .api import APITokenFactory
+from .aurora import OrganizationFactory, ProjectFactory, RecordFactory, RegistrationFactory
 from .changelog import ChangelogFactory
 from .core import (
     BeneficiaryGroupFactory,
@@ -28,9 +29,11 @@ from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
     TicketComplaintDetailsFactory,
     TicketDeleteHouseholdDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
@@ -80,10 +83,20 @@ from .periodic_data_update import (
     PDUXlsxUploadFactory,
 )
 from .program import ProgramCycleFactory, ProgramFactory
-from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
+from .registration_data import (
+    DeduplicationEngineSimilarityPairFactory,
+    ImportDataFactory,
+    KoboImportDataFactory,
+    RegistrationDataImportFactory,
+)
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
-from .targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from .targeting import (
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
+)
 from .vision import FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -107,8 +120,12 @@ __all__ = [
     "FlexibleAttributeForPDUFactory",
     "GrievanceTicketFactory",
     "GrievanceComplaintTicketWithoutExtrasFactory",
+    "TargetingIndividualRuleFilterBlockFactory",
+    "TargetingIndividualBlockRuleFilterFactory",
     "TicketDeleteHouseholdDetailsFactory",
     "TicketDeleteIndividualDetailsFactory",
+    "TicketAddIndividualDetailsFactory",
+    "TicketHouseholdDataUpdateDetailsFactory",
     "TicketComplaintDetailsFactory",
     "TicketIndividualDataUpdateDetailsFactory",
     "TicketNeedsAdjudicationDetailsFactory",
@@ -122,6 +139,7 @@ __all__ = [
     "HouseholdCollectionFactory",
     "IndividualCollectionFactory",
     "ImportDataFactory",
+    "DeduplicationEngineSimilarityPairFactory",
     "IndividualFactory",
     "IndividualIdentityFactory",
     "IndividualRoleInHouseholdFactory",
@@ -150,6 +168,10 @@ __all__ = [
     "PeriodicFieldDataFactory",
     "ProgramCycleFactory",
     "ProgramFactory",
+    "ProjectFactory",
+    "RecordFactory",
+    "OrganizationFactory",
+    "RegistrationFactory",
     "RegistrationDataImportFactory",
     "KoboImportDataFactory",
     "RoleAssignmentFactory",

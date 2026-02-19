@@ -2,18 +2,19 @@ from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
 from django.conf import settings
-from django.test import TestCase
 import pytest
 from strategy_field.utils import fqn
 
-from extras.test_utils.old_factories.geo import CountryFactory
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    CountryFactory,
     DocumentFactory,
     DocumentTypeFactory,
-    create_household_and_individuals,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
@@ -23,160 +24,164 @@ from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import 
 )
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import BusinessArea, Individual, country as geo_models
+from hope.models import Individual
 
 if TYPE_CHECKING:
     from hope.models import SanctionList
 
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.elasticsearch,
+]
 
 
 @pytest.fixture
 def sanction_list(db: Any) -> "SanctionList":
-    from extras.test_utils.old_factories.sanction_list import SanctionListFactory
+    from extras.test_utils.factories import SanctionListFactory
 
-    return SanctionListFactory(strategy=fqn(UNSanctionList))
+    sanction_list = SanctionListFactory(strategy=fqn(UNSanctionList))
+    full_path = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files/full_sanction_list.xml"
+
+    task = LoadSanctionListXMLTask(sanction_list)
+    task.load_from_file(full_path)
+
+    return sanction_list
+
+
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(
+        code="0060",
+        name="Afghanistan",
+        slug="afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        has_data_sharing_agreement=True,
+    )
+
+
+@pytest.fixture
+def country():
+    return CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
+    )
+
+
+@pytest.fixture
+def program(business_area, sanction_list):
+    program = ProgramFactory(business_area=business_area)
+    program.sanction_lists.add(sanction_list)
+    return program
+
+
+@pytest.fixture
+def registration_data_import(business_area, program):
+    return RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+    )
+
+
+@pytest.fixture
+def household_with_individuals(program, registration_data_import, business_area):
+    household = HouseholdFactory(
+        program=program,
+        registration_data_import=registration_data_import,
+        business_area=business_area,
+    )
+    # update Head_of_household data >> # DUPLICATE Ind
+    ind_1 = household.head_of_household
+    ind_1.given_name = "Alias"
+    ind_1.family_name = "Name2"
+    ind_1.full_name = "Alias Name2"
+    ind_1.middle_name = ""
+    ind_1.birth_date = "1922-04-11"
+    ind_1.save()
+    individuals_data = [
+        # other Individuals
+        ("Choo", "Choo Ryoong", "", "Ryong", "1960-04-04"),
+        ("Tescik", "Tescik Testowski", "", "Testowski", "1996-12-12"),
+        ("Tessta", "Tessta Testowski", "", "Testowski", "1997-07-07"),  # DUPLICATE
+        ("Test", "Test Testowski", "", "Testowski", "1955-09-04"),  # DUPLICATE
+        ("Test", "Test Example", "", "Example", "1997-08-08"),
+        ("Tessta", "Tessta Testowski", "", "Testowski", "1997-07-07"),  # DUPLICATE
+        ("Abdul", "Abdul Afghanistan", "", "Afghanistan", "1997-07-07"),
+    ]
+    for given, full, middle, family, birth in individuals_data:
+        IndividualFactory(
+            household=household,
+            program=program,
+            given_name=given,
+            full_name=full,
+            middle_name=middle,
+            family_name=family,
+            birth_date=birth,
+            business_area=business_area,
+        )
+    return household
+
+
+@pytest.fixture
+def national_id_document(program, country):
+    ind = Individual.objects.get(full_name="Abdul Afghanistan")
+    doc_type = DocumentTypeFactory(
+        label="National ID",
+        key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+    )
+    DocumentFactory(
+        document_number="55130",
+        individual=ind,
+        type=doc_type,
+        country=country,
+        program=program,
+    )
+
+
+@pytest.fixture
+def prepare_search_index(
+    sanction_list,
+    household_with_individuals,
+    national_id_document,
+):
+    rebuild_search_index()
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
-@pytest.mark.elasticsearch
-class TestSanctionListPreMerge(TestCase):
-    TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
+def test_execute(program, prepare_search_index):
+    check_against_sanction_list_pre_merge(program_id=program.id)
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        from extras.test_utils.old_factories.sanction_list import SanctionListFactory
+    expected = [
+        {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": False},
+        {"full_name": "Alias Name2", "sanction_list_possible_match": True},
+        {"full_name": "Choo Ryoong", "sanction_list_possible_match": False},
+        {"full_name": "Tescik Testowski", "sanction_list_possible_match": False},
+        {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
+        {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
+        {"full_name": "Test Example", "sanction_list_possible_match": False},
+        {"full_name": "Test Testowski", "sanction_list_possible_match": False},
+    ]
 
-        full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
-        sanction_list = SanctionListFactory()
-        sanction_list.save()
-        task = LoadSanctionListXMLTask(sanction_list)
-        task.load_from_file(full_sanction_list_path)
+    result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
+    assert result == expected
 
-        cls.business_area = BusinessArea.objects.create(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            has_data_sharing_agreement=True,
-        )
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        cls.program = ProgramFactory(business_area=cls.business_area)
-        cls.program.sanction_lists.add(sanction_list)
-        cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area, program=cls.program
-        )
-        cls.household, cls.individuals = create_household_and_individuals(
-            household_data={
-                "registration_data_import": cls.registration_data_import,
-                "program": cls.program,
-            },
-            individuals_data=[
-                {
-                    # DUPLICATE
-                    "given_name": "Alias",
-                    "full_name": "Alias Name2",
-                    "middle_name": "",
-                    "family_name": "Name2",
-                    "birth_date": "1922-04-11",
-                },
-                {
-                    "given_name": "Choo",
-                    "full_name": "Choo Ryoong",
-                    "middle_name": "",
-                    "family_name": "Ryong",
-                    "birth_date": "1960-04-04",
-                },
-                {
-                    "given_name": "Tescik",
-                    "full_name": "Tescik Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "birth_date": "1996-12-12",
-                },
-                {
-                    # DUPLICATE
-                    "given_name": "Tessta",
-                    "full_name": "Tessta Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "birth_date": "1997-07-07",
-                },
-                {
-                    # DUPLICATE
-                    "given_name": "Test",
-                    "full_name": "Test Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "birth_date": "1955-09-04",
-                },
-                {
-                    "given_name": "Test",
-                    "full_name": "Test Example",
-                    "middle_name": "",
-                    "family_name": "Example",
-                    "birth_date": "1997-08-08",
-                },
-                {
-                    # DUPLICATE
-                    "given_name": "Tessta",
-                    "full_name": "Tessta Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "birth_date": "1997-07-07",
-                },
-                {
-                    "given_name": "Abdul",
-                    "full_name": "Abdul Afghanistan",
-                    "middle_name": "",
-                    "family_name": "Afghanistan",
-                    "birth_date": "1997-07-07",
-                },
-            ],
-        )
 
-        ind = Individual.objects.get(full_name="Abdul Afghanistan")
-        country = geo_models.Country.objects.get(iso_code3="AFG")
-        doc_type = DocumentTypeFactory(
-            label="National ID",
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-        )
-        DocumentFactory(
-            document_number="55130",
-            individual=ind,
-            type=doc_type,
-            country=country,
-            program=ind.program,
-        )
-        rebuild_search_index()
+@override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+def test_create_system_flag_tickets(program, household_with_individuals, prepare_search_index):
+    check_against_sanction_list_pre_merge(program_id=program.id)
 
-    def test_execute(self) -> None:
-        check_against_sanction_list_pre_merge(program_id=self.program.id)
+    tickets = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING)
 
-        expected = [
-            {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": False},
-            {"full_name": "Alias Name2", "sanction_list_possible_match": True},
-            {"full_name": "Choo Ryoong", "sanction_list_possible_match": False},
-            {"full_name": "Tescik Testowski", "sanction_list_possible_match": False},
-            {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
-            {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
-            {"full_name": "Test Example", "sanction_list_possible_match": False},
-            {"full_name": "Test Testowski", "sanction_list_possible_match": False},
-        ]
+    assert tickets.count() == 1
 
-        result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
-        assert result == expected
+    ticket = tickets.first()
+    assert ticket.programs.count() == 1
+    assert ticket.programs.first() == program
 
-    def test_create_system_flag_tickets(self) -> None:
-        check_against_sanction_list_pre_merge(program_id=self.program.id)
-        assert GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count() == 1
-        for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            assert grievance_ticket.programs.count() == 1
-            assert grievance_ticket.programs.first() == self.program
-
-        self.household.refresh_from_db()
-        for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            assert grievance_ticket.household_unicef_id == self.household.unicef_id
+    household_with_individuals.refresh_from_db()
+    assert ticket.household_unicef_id == household_with_individuals.unicef_id

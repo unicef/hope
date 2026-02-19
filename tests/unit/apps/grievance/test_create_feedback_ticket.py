@@ -1,83 +1,100 @@
-from typing import Any
+from typing import Any, Callable
 
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
+    ProgramFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Program, country as geo_models
+from hope.models import Area, BusinessArea, Program, User
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
 
 
-class TestGrievanceCreateFeedbackTicket:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner, first_name="TestUser")
-        self.user2 = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
-        self.household, self.individuals = create_household(
-            {"size": 1, "business_area": self.afghanistan},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        self.list_url = reverse(
-            "api:grievance-tickets:grievance-tickets-global-list",
-            kwargs={"business_area_slug": self.afghanistan.slug},
-        )
+@pytest.fixture
+def afghanistan() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
 
-    def test_create_negative_feedback_ticket_not_supported(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-        input_data = {
-            "description": "Test Feedback AaaaQwooL",
-            "assigned_to": str(self.user.id),
-            "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            "admin": str(self.admin_area.id),
-            "language": "Polish, English",
-            "consent": True,
-        }
 
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
+@pytest.fixture
+def user() -> User:
+    return UserFactory(first_name="TestUser")
 
-    def test_create_positive_feedback_ticket_not_supported(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
 
-        input_data = {
-            "description": "Test Feedback AaaaQwooL",
-            "assigned_to": str(self.user.id),
-            "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            "admin": str(self.admin_area.id),
-            "language": "Polish, English",
-            "consent": True,
-        }
+@pytest.fixture
+def authenticated_client(api_client: Callable, user: User) -> Any:
+    return api_client(user)
 
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
+
+@pytest.fixture
+def program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="program afghanistan 1",
+    )
+
+
+@pytest.fixture
+def admin_area() -> Area:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
+    )
+    area_type = AreaTypeFactory(
+        name="Admin type one",
+        country=country,
+        area_level=2,
+    )
+    return AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+
+
+@pytest.fixture
+def list_url(afghanistan: BusinessArea) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-list",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+
+
+@pytest.mark.parametrize(
+    "category",
+    [
+        GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+        GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+    ],
+)
+def test_create_feedback_ticket_not_supported(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    afghanistan: BusinessArea,
+    program: Program,
+    user: User,
+    admin_area: Area,
+    list_url: str,
+    category: int,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], afghanistan, program)
+    input_data = {
+        "description": "Test Feedback AaaaQwooL",
+        "assigned_to": str(user.id),
+        "category": category,
+        "admin": str(admin_area.id),
+        "language": "Polish, English",
+        "consent": True,
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Feedback tickets are not allowed to be created through this mutation." in response.json()

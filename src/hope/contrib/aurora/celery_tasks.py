@@ -5,7 +5,7 @@ from constance import config
 from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     locked_cache,
     merge_registration_data_import_task,

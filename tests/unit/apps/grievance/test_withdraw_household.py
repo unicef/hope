@@ -4,108 +4,113 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.grievance import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
     GrievanceTicketFactory,
+    HouseholdFactory,
+    PartnerFactory,
+    ProgramFactory,
     TicketDeleteIndividualDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import BusinessArea, Household, Individual, Program, country as geo_models
+from hope.models import Household, Individual, Program
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
 
 
-class TestWithdrawHousehold:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.business_area = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
+@pytest.fixture
+def business_area() -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
 
-        self.program = ProgramFactory(
-            business_area=self.business_area,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
 
-        self.program = ProgramFactory(
-            status=Program.ACTIVE,
-            business_area=BusinessArea.objects.first(),
-        )
+@pytest.fixture
+def program(business_area: Any) -> Program:
+    return ProgramFactory(
+        business_area=business_area,
+        status=Program.ACTIVE,
+        name="program afghanistan 1",
+    )
 
-    def test_withdraw_household_when_withdraw_last_individual_empty(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_UPDATE,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-            ],
-            self.business_area,
-            self.program,
-        )
-        household = HouseholdFactory.build(program=self.program)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = self.program
-        household.registration_data_import.save()
-        household.program = self.program
-        individual_data = {
-            "full_name": "Test Example",
-            "given_name": "Test",
-            "family_name": "Example",
-            "phone_no": "+18773523904",
-            "birth_date": "1965-03-15",
-            "household": household,
-            "program": self.program,
-        }
 
-        individual = IndividualFactory(**individual_data)
-        household.head_of_household = individual
-        household.save()
+@pytest.fixture
+def area_1() -> Any:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
+    )
+    area_type = AreaTypeFactory(
+        name="Admin type one",
+        country=country,
+        area_level=2,
+    )
+    return AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
 
-        ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin2=self.area_1,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        ticket.programs.set([self.program])
-        TicketDeleteIndividualDetailsFactory(
-            ticket=ticket,
-            individual=individual,
-            role_reassign_data={},
-            approve_status=True,
-        )
 
-        url = reverse(
-            "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={
-                "business_area_slug": self.business_area.slug,
-                "pk": str(ticket.id),
-            },
-        )
-        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
-        assert response.status_code == status.HTTP_202_ACCEPTED
+@pytest.fixture
+def user_and_client(api_client: Any) -> dict[str, Any]:
+    partner = PartnerFactory(name="TestPartner")
+    user = UserFactory(partner=partner)
+    return {"user": user, "client": api_client(user)}
 
-        ind = Individual.objects.filter(id=individual.id).first()
-        hh = Household.objects.filter(id=household.id).first()
 
-        assert ind.withdrawn is True
-        assert hh.withdrawn is True
+def test_withdraw_household_when_withdraw_last_individual_empty(
+    create_user_role_with_permissions: Any,
+    business_area: Any,
+    program: Program,
+    area_1: Any,
+    user_and_client: dict[str, Any],
+) -> None:
+    user = user_and_client["user"]
+    client = user_and_client["client"]
+
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
+        business_area,
+        program,
+    )
+
+    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual = household.head_of_household
+
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        admin2=area_1,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    ticket.programs.set([program])
+    TicketDeleteIndividualDetailsFactory(
+        ticket=ticket,
+        individual=individual,
+        role_reassign_data={},
+        approve_status=True,
+    )
+
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-status-change",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "pk": str(ticket.id),
+        },
+    )
+    response = client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+    assert response.status_code == status.HTTP_202_ACCEPTED
+
+    withdrawn_individual = Individual.objects.get(id=individual.id)
+    withdrawn_household = Household.objects.get(id=household.id)
+
+    assert withdrawn_individual.withdrawn is True
+    assert withdrawn_household.withdrawn is True

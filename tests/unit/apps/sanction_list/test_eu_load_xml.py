@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from extras.test_utils.old_factories.geo import CountryFactory
+from extras.test_utils.factories import CountryFactory
 from hope.models import (
     SanctionListIndividual,
     SanctionListIndividualAliasName,

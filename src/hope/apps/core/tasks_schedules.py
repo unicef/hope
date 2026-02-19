@@ -22,7 +22,7 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute=0, hour=0),
     },
     "check_rdi_import_periodic_task": {
-        "task": "hope.apps.registration_datahub.celery_tasks.check_rdi_import_periodic_task",
+        "task": "hope.apps.registration_data.celery_tasks.check_rdi_import_periodic_task",
         "schedule": crontab(minute="*/15"),
     },
     "clean_old_record_files_task": {

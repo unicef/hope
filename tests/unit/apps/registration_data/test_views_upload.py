@@ -135,7 +135,7 @@ def test_upload_xlsx_file_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.validate_xlsx_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.validate_xlsx_import_task.delay")
 def test_upload_xlsx_file(
     mock_validate_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -194,7 +194,7 @@ def test_save_kobo_import_data_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.pull_kobo_submissions_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.pull_kobo_submissions_task.delay")
 def test_save_kobo_import_data(
     mock_pull_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:

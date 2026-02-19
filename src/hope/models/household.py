@@ -18,6 +18,7 @@ from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.currencies import CURRENCY_CHOICES
+from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
 )
@@ -652,11 +653,20 @@ class Household(
         db_index=True,
         help_text="Household unhcr id",
     )
+    # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
     detail_id = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID",
+    )
+    originating_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        validators=[validate_originating_id],
+        help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
+                     and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
     )
     start = models.DateTimeField(blank=True, null=True, help_text="Data collection start date")
 
@@ -740,6 +750,7 @@ class Household(
         default=BLANK,
         help_text="Household org name enumerator [sys]",
     )
+    # TODO: kobo_submission_uuid and kobo_submission_time are deprecated, will be removed soon.
     kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
     kobo_submission_time = models.DateTimeField(
         max_length=150,
@@ -810,6 +821,11 @@ class Household(
                 & Q(identification_key__isnull=False)
                 & Q(rdi_merge_status=SoftDeletableMergeStatusModel.MERGED),
                 name="identification_key_unique_constraint",
+            ),
+            UniqueConstraint(
+                fields=["originating_id"],
+                condition=Q(is_removed=False) & Q(originating_id__isnull=False),
+                name="originating_id_hh_unique_constraint",
             ),
         ]
 

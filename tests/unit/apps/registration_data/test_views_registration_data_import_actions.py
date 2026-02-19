@@ -30,7 +30,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.documents import IndividualDocumentAfghanistan, get_individual_doc
-from hope.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     BusinessArea,
     DataCollectingType,
@@ -169,7 +169,7 @@ def test_run_deduplication_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.deduplication_engine_process.delay")
+@patch("hope.apps.registration_data.celery_tasks.deduplication_engine_process.delay")
 def test_run_deduplication(
     mock_deduplication_engine_process: Mock,
     api_client: APIClient,
@@ -199,7 +199,7 @@ def test_run_deduplication(
     assert resp.json() == ["Biometric deduplication is not enabled for this program"]
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
+@patch("hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
 def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-webhook-deduplication",
@@ -230,7 +230,7 @@ def test_merge_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_task.delay")
 def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=business_area,
@@ -546,7 +546,7 @@ def test_deduplicate_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.rdi_deduplication_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.rdi_deduplication_task.delay")
 def test_deduplicate_rdi(
     mock_deduplicate_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea
 ) -> None:
@@ -640,7 +640,7 @@ def test_registration_xlsx_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_xlsx_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
 def test_registration_xlsx_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -796,7 +796,7 @@ def test_registration_kobo_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_kobo_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_task.delay")
 def test_registration_kobo_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -932,7 +932,7 @@ def test_registration_kobo_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in response.data
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1015,7 +1015,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1098,7 +1098,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_without_permission(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1144,7 +1144,7 @@ def test_create_registration_data_import_without_permission(
     mock_registration_task.assert_not_called()
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1212,7 +1212,7 @@ def test_create_registration_data_import(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_with_ids_filter(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1279,7 +1279,7 @@ def test_create_registration_data_import_with_ids_filter(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_invalid_bg(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1328,7 +1328,7 @@ def test_create_registration_data_import_invalid_bg(
     assert "Cannot import data from a program with a different Beneficiary Group." in str(response.data)
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_invalid_dct(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1377,7 +1377,7 @@ def test_create_registration_data_import_invalid_dct(
     assert "Cannot import data from a program with not compatible data collecting type." in str(response.data)
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_program_finished(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1429,7 +1429,7 @@ def test_create_registration_data_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in str(response.data)
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_cannot_check_against_sanction_list(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1484,7 +1484,7 @@ def test_create_registration_data_import_cannot_check_against_sanction_list(
     assert "Cannot check against sanction list." in str(response.data)
 
 
-@patch("hope.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
 def test_create_registration_data_import_0_objects(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,

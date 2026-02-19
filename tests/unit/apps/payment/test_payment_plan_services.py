@@ -62,6 +62,17 @@ from hope.models import (
 pytestmark = pytest.mark.django_db
 
 
+def test_update_fsp_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    result = service._update_fsp_and_delivery_mechanism(fsp_id="some-id", delivery_mechanism_code="some-code")
+    assert result is False
+
+
 @pytest.fixture
 def business_area() -> Any:
     return BusinessAreaFactory(slug="afghanistan")

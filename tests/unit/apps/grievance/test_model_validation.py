@@ -1,214 +1,231 @@
+import re
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.http import QueryDict
-from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.grievance import GrievanceTicketFactory
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    generate_delivery_mechanisms,
+    GrievanceTicketFactory,
+    UserFactory,
 )
 from hope.admin.fsp import FspXlsxTemplatePerDeliveryMechanismForm
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.models import BusinessArea, DeliveryMechanism, FinancialServiceProvider
+from hope.models import FinancialServiceProvider
+
+pytestmark = pytest.mark.django_db
 
 
-class TestGrievanceModelValidation(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.base_model_data = {
-            "status": GrievanceTicket.STATUS_NEW,
-            "description": "test description",
-            "area": "test area",
-            "language": "english",
-            "consent": True,
-            "business_area": BusinessArea.objects.first(),
-            "assigned_to": cls.user,
-            "created_by": cls.user,
-        }
-
-        cls.valid_model_data = {
-            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
-            "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-        }
-
-        cls.valid_model_2_data = {
-            "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            "issue_type": None,
-        }
-
-        cls.invalid_model_data = {
-            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
-            "issue_type": None,
-        }
-
-        cls.invalid_model_2_data = {
-            "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-        }
-
-    def test_valid_issue_types(self) -> None:
-        grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.valid_model_data)
-        grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.valid_model_2_data)
-
-        grievance_ticket_1.save()
-        grievance_ticket_2.save()
-
-        assert self.valid_model_data["issue_type"] == grievance_ticket_1.issue_type
-        assert self.valid_model_2_data["issue_type"] == grievance_ticket_2.issue_type
-
-    def test_invalid_issue_types(self) -> None:
-        grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.invalid_model_data)
-        grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.invalid_model_2_data)
-
-        self.assertRaisesMessage(
-            ValidationError,
-            "{'issue_type': ['Invalid issue type for selected category']}",
-            grievance_ticket_1.save,
-        )
-        self.assertRaisesMessage(
-            ValidationError,
-            "{'issue_type': ['Invalid issue type for selected category']}",
-            grievance_ticket_2.save,
-        )
+@pytest.fixture
+def user() -> Any:
+    return UserFactory()
 
 
-class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        generate_delivery_mechanisms()
-        cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
+@pytest.fixture
+def business_area() -> Any:
+    return BusinessAreaFactory(slug="afghanistan")
 
-    def test_admin_form_clean(self) -> None:
-        fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory()
-        fsp = FinancialServiceProviderFactory(
-            name="Test FSP",
-            vision_vendor_number="123",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        )
-        fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
 
-        # test valid form
-        form_data_standalone = {
-            "financial_service_provider": fsp.id,
-            "delivery_mechanism": self.dm_transfer_to_account.id,
-            "xlsx_template": fsp_xls_template.id,
-        }
-        form_data_standalone_query_dict = QueryDict(mutable=True)
-        for key, value in form_data_standalone.items():
-            form_data_standalone_query_dict[key] = value
+@pytest.fixture
+def base_model_data(user: Any, business_area: Any) -> dict[str, Any]:
+    return {
+        "status": GrievanceTicket.STATUS_NEW,
+        "description": "test description",
+        "area": "test area",
+        "language": "english",
+        "consent": True,
+        "business_area": business_area,
+        "assigned_to": user,
+        "created_by": user,
+    }
 
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
-        assert form.is_valid()
+
+@pytest.fixture
+def transfer_to_account_delivery_mechanism() -> Any:
+    return DeliveryMechanismFactory(
+        code="transfer_to_account",
+        name="Transfer to Account",
+    )
+
+
+@pytest.fixture
+def fsp_xlsx_template() -> Any:
+    return FinancialServiceProviderXlsxTemplateFactory()
+
+
+@pytest.fixture
+def fsp() -> Any:
+    return FinancialServiceProviderFactory(
+        name="Test FSP",
+        vision_vendor_number="123",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+    )
+
+
+@pytest.mark.parametrize(
+    ("category", "issue_type"),
+    [
+        (
+            GrievanceTicket.CATEGORY_DATA_CHANGE,
+            GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        ),
+        (
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            None,
+        ),
+    ],
+)
+def test_valid_issue_types(base_model_data: dict[str, Any], category: int, issue_type: int | None) -> None:
+    grievance_ticket = GrievanceTicket(**base_model_data, category=category, issue_type=issue_type)
+    grievance_ticket.save()
+    assert grievance_ticket.issue_type == issue_type
+
+
+@pytest.mark.parametrize(
+    ("category", "issue_type"),
+    [
+        (
+            GrievanceTicket.CATEGORY_DATA_CHANGE,
+            None,
+        ),
+        (
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        ),
+    ],
+)
+def test_invalid_issue_types(base_model_data: dict[str, Any], category: int, issue_type: int | None) -> None:
+    grievance_ticket = GrievanceTicket(**base_model_data, category=category, issue_type=issue_type)
+    with pytest.raises(ValidationError, match="Invalid issue type for selected category"):
+        grievance_ticket.save()
+
+
+def test_admin_form_clean_standalone_valid(
+    fsp_xlsx_template: Any,
+    fsp: Any,
+    transfer_to_account_delivery_mechanism: Any,
+) -> None:
+    fsp.delivery_mechanisms.add(transfer_to_account_delivery_mechanism)
+    form_data = QueryDict(mutable=True)
+    form_data["financial_service_provider"] = str(fsp.id)
+    form_data["delivery_mechanism"] = str(transfer_to_account_delivery_mechanism.id)
+    form_data["xlsx_template"] = str(fsp_xlsx_template.id)
+
+    form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data)
+    assert form.is_valid()
+    form.clean()
+
+
+def test_admin_form_clean_inline_valid(
+    fsp_xlsx_template: Any,
+    fsp: Any,
+    transfer_to_account_delivery_mechanism: Any,
+) -> None:
+    fsp.delivery_mechanisms.add(transfer_to_account_delivery_mechanism)
+    form_data = QueryDict(mutable=True)
+    form_data["financial_service_provider"] = str(fsp.id)
+    form_data["delivery_mechanism"] = str(transfer_to_account_delivery_mechanism.id)
+    form_data["xlsx_template"] = str(fsp_xlsx_template.id)
+    form_data.setlist("delivery_mechanisms", [str(transfer_to_account_delivery_mechanism.id)])
+
+    form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data)
+    assert form.is_valid()
+    form.clean()
+
+
+def test_admin_form_clean_delivery_mechanism_not_supported(
+    fsp_xlsx_template: Any,
+    fsp: Any,
+    transfer_to_account_delivery_mechanism: Any,
+) -> None:
+    form_data = QueryDict(mutable=True)
+    form_data["financial_service_provider"] = str(fsp.id)
+    form_data["delivery_mechanism"] = str(transfer_to_account_delivery_mechanism.id)
+    form_data["xlsx_template"] = str(fsp_xlsx_template.id)
+
+    form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data)
+    assert not form.is_valid()
+
+    error_message = (
+        f"Delivery Mechanism {transfer_to_account_delivery_mechanism} is not supported by Financial Service Provider "
+        f"{fsp}"
+    )
+    with pytest.raises(ValidationError, match=re.escape(error_message)):
         form.clean()
 
-        # test inline form data valid
-        form_data_inline = {
-            "financial_service_provider": fsp.id,
-            "delivery_mechanism": self.dm_transfer_to_account.id,
-            "xlsx_template": fsp_xls_template.id,
-            "delivery_mechanisms": [str(self.dm_transfer_to_account.id)],
-        }
 
-        form_data_inline_query_dict = QueryDict(mutable=True)
-        for key, value in form_data_inline.items():
-            if isinstance(value, list):
-                form_data_inline_query_dict.setlist(key, value)
-                continue
-            form_data_inline_query_dict[key] = value
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        assert form.is_valid()
+def test_admin_form_clean_inline_invalid_delivery_mechanisms(
+    fsp_xlsx_template: Any,
+    fsp: Any,
+    transfer_to_account_delivery_mechanism: Any,
+) -> None:
+    form_data = QueryDict(mutable=True)
+    form_data["financial_service_provider"] = str(fsp.id)
+    form_data["delivery_mechanism"] = str(transfer_to_account_delivery_mechanism.id)
+    form_data["xlsx_template"] = str(fsp_xlsx_template.id)
+    form_data.setlist("delivery_mechanisms", ["12313213123"])
+
+    form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data)
+    assert not form.is_valid()
+
+    error_message = (
+        f"Delivery Mechanism {transfer_to_account_delivery_mechanism} is not supported by Financial Service Provider "
+        f"{fsp}"
+    )
+    with pytest.raises(ValidationError, match=re.escape(error_message)):
         form.clean()
 
-        # test delivery mechanism not supported
-        fsp.delivery_mechanisms.remove(self.dm_transfer_to_account)
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
-        assert not form.is_valid()
-        with self.assertRaisesMessage(
-            ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
-            "Test FSP (123): API']",
-        ):
-            form.clean()
 
-        # test inline form data invalid
-        form_data_inline = {
-            "financial_service_provider": fsp.id,
-            "delivery_mechanism": self.dm_transfer_to_account.id,
-            "xlsx_template": fsp_xls_template.id,
-            "delivery_mechanisms": ["12313213123"],
-        }
-        form_data_inline_query_dict = QueryDict(mutable=True)
-        for key, value in form_data_inline.items():
-            form_data_inline_query_dict[key] = value
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
-        assert not form.is_valid()
-        with self.assertRaisesMessage(
-            ValidationError,
-            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider "
-            "Test FSP (123): API']",
-        ):
-            form.clean()
+def test_non_dict_input_raises_graphql_error() -> None:
+    with pytest.raises(DRFValidationError, match="Fields must be a dictionary"):
+        DataChangeValidator.verify_approve_data("not a dict")  # type: ignore[arg-type]
 
 
-class TestDataChangeValidator:
-    def test_non_dict_input_raises_graphql_error(self) -> None:
-        with pytest.raises(DRFValidationError, match="Fields must be a dictionary"):
-            DataChangeValidator.verify_approve_data("not a dict")  # type: ignore
-
-    def test_missing_individual_id_raises_graphql_error(self) -> None:
-        data = {"roles": [{"approve_status": True}]}
-        with pytest.raises(DRFValidationError, match="individual_id in role"):
-            DataChangeValidator.verify_approve_data(data)
-
-    def test_missing_approve_status_raises_graphql_error(self) -> None:
-        data = {"roles": [{"individual_id": "123"}]}
-        with pytest.raises(DRFValidationError, match="approve_status in role"):
-            DataChangeValidator.verify_approve_data(data)
-
-    def test_non_boolean_approve_status_raises_graphql_error(self) -> None:
-        data = {"roles": [{"individual_id": "123", "approve_status": "yes"}]}
-        with pytest.raises(DRFValidationError, match="approve_status must be boolean"):
-            DataChangeValidator.verify_approve_data(data)
-
-    def test_non_boolean_top_level_field_raises_graphql_error(self) -> None:
-        data = {
-            "village": "yes",
-            "roles": [{"individual_id": "123", "approve_status": True}],
-        }
-        with pytest.raises(DRFValidationError, match="Values must be booleans"):
-            DataChangeValidator.verify_approve_data(data)
+def test_missing_individual_id_raises_graphql_error() -> None:
+    data = {"roles": [{"approve_status": True}]}
+    with pytest.raises(DRFValidationError, match="individual_id in role"):
+        DataChangeValidator.verify_approve_data(data)
 
 
-@pytest.mark.django_db
+def test_missing_approve_status_raises_graphql_error() -> None:
+    data = {"roles": [{"individual_id": "123"}]}
+    with pytest.raises(DRFValidationError, match="approve_status in role"):
+        DataChangeValidator.verify_approve_data(data)
+
+
+def test_non_boolean_approve_status_raises_graphql_error() -> None:
+    data = {"roles": [{"individual_id": "123", "approve_status": "yes"}]}
+    with pytest.raises(DRFValidationError, match="approve_status must be boolean"):
+        DataChangeValidator.verify_approve_data(data)
+
+
+def test_non_boolean_top_level_field_raises_graphql_error() -> None:
+    data = {
+        "village": "yes",
+        "roles": [{"individual_id": "123", "approve_status": True}],
+    }
+    with pytest.raises(DRFValidationError, match="Values must be booleans"):
+        DataChangeValidator.verify_approve_data(data)
+
+
 def test_can_change_status_beneficiary_ticket() -> None:
-    """Test that Beneficiary tickets follow BENEFICIARY_STATUS_FLOW."""
-    create_afghanistan()
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_BENEFICIARY,
+        issue_type=None,
         status=GrievanceTicket.STATUS_NEW,
     )
 
-    # NEW -> ASSIGNED allowed
     assert ticket.can_change_status(GrievanceTicket.STATUS_ASSIGNED) is True
-    # NEW -> IN_PROGRESS not allowed
     assert ticket.can_change_status(GrievanceTicket.STATUS_IN_PROGRESS) is False
 
     ticket.status = GrievanceTicket.STATUS_ASSIGNED
-    # ASSIGNED -> IN_PROGRESS allowed
     assert ticket.can_change_status(GrievanceTicket.STATUS_IN_PROGRESS) is True
 
     ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-    # IN_PROGRESS -> CLOSED allowed (feedback flow)
     assert ticket.can_change_status(GrievanceTicket.STATUS_CLOSED) is True

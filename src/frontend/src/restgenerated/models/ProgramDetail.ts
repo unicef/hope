@@ -106,5 +106,9 @@ export type ProgramDetail = {
     readonly screenBeneficiary: boolean;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 

@@ -1,115 +1,175 @@
-from typing import Any, Dict, Optional
+from typing import Any, Callable
 
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
+    UserFactory,
+)
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import BusinessArea, Program, country as geo_models
+from hope.models import Area, BusinessArea, Program, User
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
 
 
-class TestGrievanceCreateReferralTicket:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.business_area = create_afghanistan()
-        partner = PartnerFactory(name="Partner")
-        self.user = UserFactory.create(partner=partner)
-        self.api_client = api_client(self.user)
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+@pytest.fixture
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
 
-        self.household, self.individuals = create_household(
-            {"size": 1, "business_area": self.business_area},
-            {
-                "given_name": "John",
-                "family_name": "Doe",
-                "middle_name": "",
-                "full_name": "John Doe",
-            },
-        )
-        self.list_url = reverse(
-            "api:grievance-tickets:grievance-tickets-global-list",
-            kwargs={"business_area_slug": self.business_area.slug},
-        )
 
-    def _prepare_input(self, extras: Optional[Dict] = None) -> Dict:
+@pytest.fixture
+def user() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def authenticated_client(api_client: Callable, user: User) -> Any:
+    return api_client(user)
+
+
+@pytest.fixture
+def program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+
+
+@pytest.fixture
+def admin_area() -> Area:
+    return AreaFactory(name="City Test", p_code="asdfgfhghkjltr")
+
+
+@pytest.fixture
+def household_context(business_area: BusinessArea, program: Program) -> dict[str, Any]:
+    household = HouseholdFactory(
+        business_area=business_area,
+        program=program,
+        create_role=False,
+    )
+    individual = IndividualFactory(
+        household=household,
+        business_area=business_area,
+        program=program,
+        registration_data_import=household.registration_data_import,
+        given_name="John",
+        family_name="Doe",
+        middle_name="",
+        full_name="John Doe",
+    )
+    household.head_of_household = individual
+    household.save(update_fields=["head_of_household"])
+    return {"household": household, "individual": individual}
+
+
+@pytest.fixture
+def list_url(business_area: BusinessArea) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-list",
+        kwargs={"business_area_slug": business_area.slug},
+    )
+
+
+@pytest.fixture
+def referral_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, Any]]:
+    def _build(extras: dict[str, Any] | None = None) -> dict[str, Any]:
         input_data = {
             "description": "Test Feedback",
-            "assigned_to": str(self.user.id),
+            "assigned_to": str(user.id),
             "category": GrievanceTicket.CATEGORY_REFERRAL,
-            "admin": str(self.admin_area.id),
+            "admin": str(admin_area.id),
             "language": "Polish, English",
             "consent": True,
             "business_area": "afghanistan",
         }
-
-        if extras:
+        if extras is not None:
             input_data["extras"] = {"category": {"referral_ticket_extras": extras}}
-
         return input_data
 
-    def test_create_referral_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+    return _build
 
-        input_data = self._prepare_input()
 
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
+def test_create_referral_ticket_without_extras(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    referral_input_builder: Callable[..., dict[str, Any]],
+    list_url: str,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
+    input_data = referral_input_builder()
 
-    def test_create_referral_ticket_with_household_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
 
-        extras = {
-            "household": str(self.household.id),
+
+def test_create_referral_ticket_with_household_extras(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    household_context: dict[str, Any],
+    referral_input_builder: Callable[..., dict[str, Any]],
+    list_url: str,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
+    household = household_context["household"]
+    input_data = referral_input_builder(extras={"household": str(household.id)})
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()[0]["household"]["unicef_id"] == household.unicef_id
+    assert response.json()[0]["individual"] is None
+
+
+def test_create_referral_ticket_with_individual_extras(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    household_context: dict[str, Any],
+    referral_input_builder: Callable[..., dict[str, Any]],
+    list_url: str,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
+    individual = household_context["individual"]
+    input_data = referral_input_builder(extras={"individual": str(individual.id)})
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()[0]["individual"]["unicef_id"] == individual.unicef_id
+    assert response.json()[0]["household"] is None
+
+
+def test_create_referral_ticket_with_household_and_individual_extras(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    household_context: dict[str, Any],
+    referral_input_builder: Callable[..., dict[str, Any]],
+    list_url: str,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
+    household = household_context["household"]
+    individual = household_context["individual"]
+    input_data = referral_input_builder(
+        extras={
+            "household": str(household.id),
+            "individual": str(individual.id),
         }
-        input_data = self._prepare_input(extras)
+    )
 
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.json()[0]["household"]["unicef_id"] == self.household.unicef_id
-        assert response.json()[0]["individual"] is None
-
-    def test_create_referral_ticket_with_individual_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
-
-        extras = {
-            "individual": str(self.individuals[0].id),
-        }
-        input_data = self._prepare_input(extras)
-
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.json()[0]["individual"]["unicef_id"] == self.individuals[0].unicef_id
-        assert response.json()[0]["household"] is None
-
-    def test_create_referral_ticket_with_household_and_individual_extras(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
-
-        extras = {
-            "household": str(self.household.id),
-            "individual": str(self.individuals[0].id),
-        }
-        input_data = self._prepare_input(extras)
-
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.json()[0]["individual"]["unicef_id"] == self.individuals[0].unicef_id
-        assert response.json()[0]["household"]["unicef_id"] == self.household.unicef_id
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()[0]["individual"]["unicef_id"] == individual.unicef_id
+    assert response.json()[0]["household"]["unicef_id"] == household.unicef_id

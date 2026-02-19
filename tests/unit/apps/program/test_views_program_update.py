@@ -276,6 +276,7 @@ def base_expected_response_without_changes(
     return {
         **base_payload_for_update_without_changes,
         "budget": f"{program.budget:.2f}",
+        "identification_key_individual_label": None,
         "pdu_fields": [
             {
                 **pdu_field_data,

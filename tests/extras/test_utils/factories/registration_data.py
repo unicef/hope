@@ -1,9 +1,12 @@
 """Registration data related factories."""
 
+from decimal import Decimal
+from typing import Any
+
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import ImportData, KoboImportData, RegistrationDataImport
+from hope.models import DeduplicationEngineSimilarityPair, ImportData, KoboImportData, RegistrationDataImport
 
 from .account import UserFactory
 from .core import BusinessAreaFactory
@@ -44,3 +47,29 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     imported_by = factory.SubFactory(UserFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
     program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+
+
+class DeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
+    class Meta:
+        model = DeduplicationEngineSimilarityPair
+
+    program = factory.SubFactory(ProgramFactory)
+    individual1 = factory.SubFactory(
+        "extras.test_utils.factories.household.IndividualFactory",
+        program=factory.SelfAttribute("..program"),
+    )
+    individual2 = factory.SubFactory(
+        "extras.test_utils.factories.household.IndividualFactory",
+        program=factory.SelfAttribute("..program"),
+    )
+    similarity_score = Decimal("55.55")
+    status_code = DeduplicationEngineSimilarityPair.StatusCode.STATUS_200
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> DeduplicationEngineSimilarityPair:
+        individual1 = kwargs.get("individual1")
+        individual2 = kwargs.get("individual2")
+        if individual1 and individual2 and individual1.id > individual2.id:
+            kwargs["individual1"], kwargs["individual2"] = individual2, individual1
+
+        return super()._create(model_class, *args, **kwargs)

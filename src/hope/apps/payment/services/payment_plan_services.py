@@ -543,22 +543,14 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: dict) -> PaymentPlan:
-        program = self.payment_plan.program_cycle.program
-        should_update_money_stats = False
-        should_rebuild_list = False
-        vulnerability_filter = False
-
-        name = input_data.get("name")
-        vulnerability_score_min = input_data.get("vulnerability_score_min")
-        vulnerability_score_max = input_data.get("vulnerability_score_max")
+    def _validate_update_permissions(self, input_data: dict) -> None:
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
         rules = input_data.get("rules")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
-        fsp_id = input_data.get("fsp_id")
-        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         self._validate_pp_status(
             dispersion_end_date,
@@ -570,6 +562,44 @@ class PaymentPlanService:
             vulnerability_score_max=vulnerability_score_max,
             vulnerability_score_min=vulnerability_score_min,
         )
+
+    def _update_fsp_and_delivery_mechanism(self, fsp_id: str | None, delivery_mechanism_code: str | None) -> bool:
+        if not self.payment_plan.is_population_open():
+            return False
+
+        current_fsp = self.payment_plan.financial_service_provider
+        current_dm = self.payment_plan.delivery_mechanism
+        has_current_values = current_fsp is not None or current_dm is not None
+
+        if not (fsp_id and delivery_mechanism_code) and has_current_values:
+            self.payment_plan.financial_service_provider = None
+            self.payment_plan.delivery_mechanism = None
+            return True
+        if fsp_id and delivery_mechanism_code:
+            fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+            if current_fsp != fsp or current_dm != delivery_mechanism:
+                self.payment_plan.financial_service_provider = fsp
+                self.payment_plan.delivery_mechanism = delivery_mechanism
+                return True
+        return False
+
+    def update(self, input_data: dict) -> PaymentPlan:
+        program = self.payment_plan.program_cycle.program
+        should_update_money_stats = False
+        should_rebuild_list = False
+        vulnerability_filter = False
+
+        self._validate_update_permissions(input_data)
+
+        name = input_data.get("name")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        rules = input_data.get("rules")
+        dispersion_start_date = input_data.get("dispersion_start_date")
+        dispersion_end_date = input_data.get("dispersion_end_date")
+        fsp_id = input_data.get("fsp_id")
+        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -594,8 +624,10 @@ class PaymentPlanService:
             self._set_additional_flags_for_tp(input_data, targeting_criteria_input)
             should_rebuild_list = True
             self.payment_plan.rules.all().delete()
-            # Use create_targeting_criteria to set flags and rules
             self.create_targeting_criteria(targeting_criteria_input, program)
+
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
@@ -612,22 +644,8 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self.payment_plan.is_population_open():
-            current_fsp = self.payment_plan.financial_service_provider
-            current_dm = self.payment_plan.delivery_mechanism
-            has_current_values = current_fsp is not None or current_dm is not None
-
-            if not (fsp_id and delivery_mechanism_code) and has_current_values:
-                self.payment_plan.financial_service_provider = None
-                self.payment_plan.delivery_mechanism = None
-                should_rebuild_list = True
-            if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
-                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                if current_fsp != fsp or current_dm != delivery_mechanism:
-                    self.payment_plan.financial_service_provider = fsp
-                    self.payment_plan.delivery_mechanism = delivery_mechanism
-                    should_rebuild_list = True
+        if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
+            should_rebuild_list = True
 
         self.payment_plan.save()
 

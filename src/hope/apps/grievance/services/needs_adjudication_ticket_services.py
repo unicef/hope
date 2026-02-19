@@ -19,7 +19,7 @@ from hope.apps.grievance.utils import (
 )
 from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
-from hope.apps.registration_datahub.tasks.deduplicate import HardDocumentDeduplication
+from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -87,7 +87,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         and not duplicate_individuals
         and distinct_individuals
     ):
-        from hope.apps.registration_datahub.services.biometric_deduplication import (
+        from hope.apps.registration_data.services.biometric_deduplication import (
             BiometricDeduplicationService,
         )
 

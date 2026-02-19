@@ -145,6 +145,7 @@ def expected_response_standard(
         "description": "",
         "status": Program.DRAFT,
         "budget": "1000000.00",
+        "identification_key_individual_label": None,
         "partners": [
             {
                 "id": unicef_hq.id,

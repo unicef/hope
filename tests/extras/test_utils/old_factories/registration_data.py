@@ -14,7 +14,6 @@ from hope.models import (
     KoboImportData,
     Program,
     RegistrationDataImport,
-    RegistrationDataImportDatahub,
     User,
 )
 
@@ -54,20 +53,6 @@ class RegistrationDataImportFactory(DjangoModelFactory):
             obj.created_at = created_at
             obj.save()
         return obj
-
-
-class RegistrationDataImportDatahubFactory(DjangoModelFactory):
-    class Meta:
-        model = RegistrationDataImportDatahub
-
-    factory.LazyFunction(
-        lambda: f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"
-    )
-    import_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        tzinfo=utc,
-    )
 
 
 def generate_rdi() -> None:

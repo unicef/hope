@@ -176,7 +176,6 @@ PROJECT_APPS = [
     "hope.apps.changelog.apps.ChangelogConfig",
     "hope.apps.targeting.apps.TargetingConfig",
     "hope.apps.utils.apps.UtilsConfig",
-    "hope.apps.registration_datahub.apps.Config",
     "hope.apps.registration_data.apps.RegistrationDataConfig",
     "hope.apps.generic_import.apps.Config",
     "hope.apps.sanction_list.apps.SanctionListConfig",

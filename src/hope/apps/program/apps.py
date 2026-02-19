@@ -10,7 +10,7 @@ class ProgramConfig(AppConfig):
         from hope.apps.household import signals as household_signals
         from hope.apps.program import signals as program_signals
         from hope.apps.program.signals import adjust_program_size
-        from hope.apps.registration_datahub import signals as rdi_signals
+        from hope.apps.registration_data import signals as rdi_signals
 
         rdi_signals.rdi_merged.connect(
             lambda sender, instance, **kwargs: adjust_program_size(instance.program),

@@ -23,7 +23,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_task
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
-from hope.apps.registration_datahub.celery_tasks import (
+from hope.apps.registration_data.celery_tasks import (
     merge_registration_data_import_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
@@ -90,11 +90,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hope.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+                from hope.apps.registration_data.celery_tasks import registration_xlsx_import_task
 
                 celery_task = registration_xlsx_import_task
             else:
-                from hope.apps.registration_datahub.celery_tasks import registration_kobo_import_task
+                from hope.apps.registration_data.celery_tasks import registration_kobo_import_task
 
                 celery_task = registration_kobo_import_task
 

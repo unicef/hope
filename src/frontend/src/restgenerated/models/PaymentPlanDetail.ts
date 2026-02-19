@@ -267,6 +267,7 @@ export type PaymentPlanDetail = {
      * * `XLSX_EXPORT_ERROR` - Export XLSX file Error
      * * `XLSX_IMPORT_ERROR` - Import XLSX file Error
      * * `XLSX_IMPORTING_ENTITLEMENTS` - Importing Entitlements XLSX file
+     * * `IMPORTING_ENTITLEMENTS` - Importing Entitlements flat amount
      * * `XLSX_IMPORTING_RECONCILIATION` - Importing Reconciliation XLSX file
      * * `EXCLUDE_BENEFICIARIES` - Exclude Beneficiaries Running
      * * `EXCLUDE_BENEFICIARIES_ERROR` - Exclude Beneficiaries Error
@@ -371,5 +372,9 @@ export type PaymentPlanDetail = {
      * Reason for aborting
      */
     abortComment?: string;
+    /**
+     * Apply a fixed amount of entitlement for all payment records within a payment plan
+     */
+    flatAmountValue?: string | null;
 };
 

@@ -25,7 +25,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.admin.program import ProgramAdmin, ProgramAdminForm, bulk_upload_individuals_photos_action
-from hope.apps.registration_datahub.apis.deduplication_engine import DeduplicationEngineAPI
+from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
