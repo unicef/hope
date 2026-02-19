@@ -552,6 +552,49 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     )
 
 
+@patch("hope.apps.grievance.services.needs_adjudication_ticket_services.logger")
+@patch(
+    "hope.apps.registration_data.services"
+    ".biometric_deduplication"
+    ".BiometricDeduplicationService"
+    ".report_false_positive_duplicate"
+)
+def test_close_needs_adjudication_ticket_service_for_biometrics_if_only_one_individual_distinct(
+    report_false_positive_duplicate_mock: MagicMock,
+    mock_logger: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+) -> None:
+    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual = household.head_of_household
+    individual.photo = ContentFile(b"abc", name="ind1.png")
+    individual.save(update_fields=["photo"])
+
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+    )
+    grievance.programs.add(program)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_distinct.add(individual)
+
+    close_needs_adjudication_ticket_service(grievance, user)
+
+    report_false_positive_duplicate_mock.assert_not_called()
+    mock_logger.error.assert_called_once_with(
+        "Failed to report false positive duplicate to Deduplication Engine found just one distinct Individual"
+    )
+
+
 def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: Any, program: Any) -> None:
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
     main_individual = household.head_of_household
