@@ -435,3 +435,5 @@ INDIVIDUAL_FLAGS_CHOICES = (
     (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
     (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
 )
+
+RDI_SOURCES = ("KOB", "AUR", "XLS", "API")

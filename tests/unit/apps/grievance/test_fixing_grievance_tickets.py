@@ -1,129 +1,114 @@
 from typing import Any
 
-from parameterized import parameterized
+import pytest
 
-from extras.test_utils.old_factories.account import BusinessAreaFactory, UserFactory
-from extras.test_utils.old_factories.grievance import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     GrievanceTicketFactory,
+    IndividualFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.grievance.management.commands.fix_grievance_tickets import (
-    fix_disability_fields,
-)
+from hope.apps.grievance.management.commands.fix_grievance_tickets import fix_disability_fields
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.household.const import DISABLED, HEAD, MALE, NOT_DISABLED
+from hope.apps.household.const import DISABLED, NOT_DISABLED
+from hope.models import BusinessArea, Individual, Program, RegistrationDataImport
+
+pytestmark = pytest.mark.django_db
 
 
-class TestFixingGrievanceTickets(BaseTestCase):
-    @parameterized.expand(
-        [
-            (True, DISABLED),
-            (False, NOT_DISABLED),
-        ]
+@pytest.fixture
+def business_area() -> BusinessArea:
+    return BusinessAreaFactory(
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        slug="afghanistan",
     )
-    def test_wrong_value_in_disability_field(self, previous_value: Any, new_value: Any) -> None:
-        self.user = UserFactory.create()
-        self.business_area = BusinessAreaFactory(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            slug="afghanistan",
-            has_data_sharing_agreement=True,
-        )
-        self.registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
 
-        (_, individuals) = create_household_and_individuals(
-            household_data={
-                "registration_data_import": self.registration_data_import,
-                "business_area": self.business_area,
-            },
-            individuals_data=[
-                {
-                    "registration_data_import": self.registration_data_import,
-                    "given_name": "Test",
-                    "full_name": "Test Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "phone_no": "123-123-123",
-                    "phone_no_alternative": "",
-                    "relationship": HEAD,
-                    "sex": MALE,
-                    "birth_date": "1955-09-07",
-                },
-            ],
-        )
-        self.individual = individuals[0]
 
-        assert GrievanceTicket.objects.count() == 0
-        ticket = GrievanceTicketFactory(
-            business_area=self.business_area,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-        )
-        assert GrievanceTicket.objects.count() == 1
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=ticket,
-            individual=self.individual,
-            individual_data={
-                "disability": {
-                    "value": previous_value,
-                }
-            },
-        )
-        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == previous_value
+@pytest.fixture
+def program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=business_area)
 
-        fix_disability_fields()
 
-        ticket.refresh_from_db()
-        assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == new_value
+@pytest.fixture
+def registration_data_import(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(business_area=business_area, program=program)
 
-    def test_skipping_when_ind_data_update_ticket_details_does_not_exist(self) -> None:
-        self.user = UserFactory.create()
-        self.business_area = BusinessAreaFactory(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            slug="afghanistan",
-            has_data_sharing_agreement=True,
-        )
-        self.registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
 
-        (_, individuals) = create_household_and_individuals(
-            household_data={
-                "registration_data_import": self.registration_data_import,
-                "business_area": self.business_area,
-            },
-            individuals_data=[
-                {
-                    "registration_data_import": self.registration_data_import,
-                    "given_name": "Test",
-                    "full_name": "Test Testowski",
-                    "middle_name": "",
-                    "family_name": "Testowski",
-                    "phone_no": "123-123-123",
-                    "phone_no_alternative": "",
-                    "relationship": HEAD,
-                    "sex": MALE,
-                    "birth_date": "1955-09-07",
-                },
-            ],
-        )
-        self.individual = individuals[0]
+@pytest.fixture
+def individual(
+    business_area: BusinessArea,
+    program: Program,
+    registration_data_import: RegistrationDataImport,
+) -> Individual:
+    return IndividualFactory(
+        business_area=business_area,
+        program=program,
+        registration_data_import=registration_data_import,
+        given_name="Test",
+        full_name="Test Testowski",
+        middle_name="",
+        family_name="Testowski",
+        phone_no="123-123-123",
+        phone_no_alternative="",
+    )
 
-        assert GrievanceTicket.objects.count() == 0
-        GrievanceTicketFactory(
-            business_area=self.business_area,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-        )
-        assert GrievanceTicket.objects.count() == 1
 
-        fix_disability_fields()
-        # didn't throw, so it skipped ticket with not existing TicketIndividualDataUpdateDetailsFactory
+@pytest.mark.parametrize(
+    ("previous_value", "new_value"),
+    [
+        (True, DISABLED),
+        (False, NOT_DISABLED),
+    ],
+)
+def test_wrong_value_in_disability_field(
+    previous_value: Any,
+    new_value: str,
+    business_area: BusinessArea,
+    individual: Individual,
+) -> None:
+    assert GrievanceTicket.objects.count() == 0
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    assert GrievanceTicket.objects.count() == 1
+    TicketIndividualDataUpdateDetailsFactory(
+        ticket=ticket,
+        individual=individual,
+        individual_data={
+            "disability": {
+                "value": previous_value,
+            }
+        },
+    )
+    assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == previous_value
+
+    fix_disability_fields()
+
+    ticket.refresh_from_db()
+    assert ticket.individual_data_update_ticket_details.individual_data["disability"]["value"] == new_value
+
+
+def test_skipping_when_ind_data_update_ticket_details_does_not_exist(
+    business_area: BusinessArea,
+) -> None:
+    assert GrievanceTicket.objects.count() == 0
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    assert GrievanceTicket.objects.count() == 1
+
+    fix_disability_fields()
+    ticket.refresh_from_db()
+    assert GrievanceTicket.objects.filter(id=ticket.id).exists()
+    with pytest.raises(GrievanceTicket.individual_data_update_ticket_details.RelatedObjectDoesNotExist):
+        _ = ticket.individual_data_update_ticket_details

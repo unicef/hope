@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.household.documents import HouseholdDocument, get_individual_doc
-from hope.apps.registration_datahub.tasks.deduplicate import (
+from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
