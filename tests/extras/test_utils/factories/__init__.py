@@ -29,9 +29,11 @@ from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
     TicketComplaintDetailsFactory,
     TicketDeleteHouseholdDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
@@ -81,7 +83,12 @@ from .periodic_data_update import (
     PDUXlsxUploadFactory,
 )
 from .program import ProgramCycleFactory, ProgramFactory
-from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
+from .registration_data import (
+    DeduplicationEngineSimilarityPairFactory,
+    ImportDataFactory,
+    KoboImportDataFactory,
+    RegistrationDataImportFactory,
+)
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
 from .targeting import (
@@ -117,6 +124,8 @@ __all__ = [
     "TargetingIndividualBlockRuleFilterFactory",
     "TicketDeleteHouseholdDetailsFactory",
     "TicketDeleteIndividualDetailsFactory",
+    "TicketAddIndividualDetailsFactory",
+    "TicketHouseholdDataUpdateDetailsFactory",
     "TicketComplaintDetailsFactory",
     "TicketIndividualDataUpdateDetailsFactory",
     "TicketNeedsAdjudicationDetailsFactory",
@@ -130,6 +139,7 @@ __all__ = [
     "HouseholdCollectionFactory",
     "IndividualCollectionFactory",
     "ImportDataFactory",
+    "DeduplicationEngineSimilarityPairFactory",
     "IndividualFactory",
     "IndividualIdentityFactory",
     "IndividualRoleInHouseholdFactory",
