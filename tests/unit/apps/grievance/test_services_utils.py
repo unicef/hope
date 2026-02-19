@@ -544,11 +544,12 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
 
     ticket_details.selected_distinct.set([individual_1, individual_2])
     ticket_details.selected_individuals.set([])
+    ticket_details.save()
     close_needs_adjudication_ticket_service(ticket, user)
     report_false_positive_duplicate_mock.assert_called_once_with(
         str(individual_1.photo.name),
         str(individual_2.photo.name),
-        str(program.unicef_id),
+        str(program.slug),
     )
 
 
