@@ -11,9 +11,8 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q, QuerySet, Value
+from django.db.models import Q, QuerySet
 from django.db.models.constraints import UniqueConstraint
-from django.db.models.functions import Concat, Lower
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 from strategy_field.fields import StrategyField
@@ -34,25 +33,6 @@ from hope.models.utils import (
     SoftDeletableIsVisibleManager,
     TimeStampedUUIDModel,
 )
-
-
-class ProgramQuerySet(QuerySet):
-    UNICEF_ID_ANNOTATION = "annotated_unicef_id"
-
-    def with_unicef_id(self) -> "ProgramQuerySet":
-        return self.annotate(
-            **{self.UNICEF_ID_ANNOTATION: Concat("business_area__slug", Value("-"), Lower("programme_code"))}
-        )
-
-    def get_by_unicef_id(self, unicef_id: str) -> "Program":
-        try:
-            return self.with_unicef_id().get(**{self.UNICEF_ID_ANNOTATION: unicef_id})
-        except Program.DoesNotExist:
-            raise Program.DoesNotExist(f"Program matching unicef_id '{unicef_id}' does not exist.") from None
-
-
-class ProgramManager(SoftDeletableIsVisibleManager.from_queryset(ProgramQuerySet)):
-    pass
 
 
 class Program(
@@ -234,7 +214,7 @@ class Program(
         default=False, help_text="Send Payment Plan reconciliation window expiry notifications"
     )
 
-    objects: ProgramManager = ProgramManager()
+    objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:
         super().clean()
@@ -271,10 +251,6 @@ class Program(
 
     def generate_slug(self) -> str:
         return self.programme_code.lower()
-
-    @property
-    def unicef_id(self) -> str:
-        return f"{self.business_area.slug}-{self.generate_slug()}"
 
     @staticmethod
     def get_total_number_of_households_from_payments(
