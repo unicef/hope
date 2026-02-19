@@ -82,7 +82,7 @@ def test_create_deduplication_set(
     )
     mock_create_deduplication_set.assert_called_once_with(
         DeduplicationSet(
-            reference_pk=str(program.unicef_id),
+            reference_pk=str(program.slug),
             notification_url=notification_url,
         )
     )
@@ -95,7 +95,7 @@ def test_get_deduplication_set_results(
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
     service.get_deduplication_set_results(program, ["1", "2"])
-    mock_get_duplicates.assert_called_once_with(program.unicef_id, ["1", "2"])
+    mock_get_duplicates.assert_called_once_with(program, ["1", "2"])
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
@@ -110,7 +110,7 @@ def test_get_deduplication_set(
     data = service.get_deduplication_set(program)
     assert data == DeduplicationSetData(state="Ready", error="")
 
-    mock_get_deduplication_set.assert_called_once_with(program.unicef_id)
+    mock_get_deduplication_set.assert_called_once_with(program)
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
@@ -135,7 +135,7 @@ def test_upload_individuals_success(
     service = BiometricDeduplicationService()
     service.upload_individuals(program, rdi)
     mock_bulk_upload_images.assert_called_once_with(
-        str(program.unicef_id),
+        program,
         [DeduplicationImage(reference_pk=str(individual.id), filename="some_photo.jpg")],
     )
 
@@ -216,7 +216,7 @@ def test_process_deduplication_set(
 
     mock_process_deduplication.return_value = ({}, 200)
     service.process_deduplication_set(program, RegistrationDataImport.objects.all())
-    mock_process_deduplication.assert_called_once_with(str(program.unicef_id))
+    mock_process_deduplication.assert_called_once_with(program)
     rdi.refresh_from_db()
     assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
 
@@ -240,7 +240,7 @@ def test_delete_deduplication_set(
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
     service.delete_deduplication_set(program)
-    mock_delete_deduplication_set.assert_called_once_with(program.unicef_id)
+    mock_delete_deduplication_set.assert_called_once_with(program.slug)
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
@@ -348,7 +348,7 @@ def test_store_results_no_individuals(biometric_deduplication_context: dict[str,
         SimilarityPair(score=0.0, status_code="404"),
     ]
 
-    service.store_similarity_pairs(program.unicef_id, similarity_pairs)
+    service.store_similarity_pairs(program.slug, similarity_pairs)
     assert program.deduplication_engine_similarity_pairs.count() == 0
 
 
@@ -665,8 +665,8 @@ def test_fetch_biometric_deduplication_results_and_process_success(
 
     service.fetch_biometric_deduplication_results_and_process(program)
 
-    service.get_deduplication_set.assert_called_once_with(program)
-    service.get_deduplication_set_results.assert_called_once_with(program, [])
+    service.get_deduplication_set.assert_called_once_with(program.slug)
+    service.get_deduplication_set_results.assert_called_once_with(program.slug, [])
     service.store_similarity_pairs.assert_called_once_with(
         program,
         [
@@ -693,7 +693,7 @@ def test_fetch_biometric_deduplication_results_and_process_error(
 
     service.fetch_biometric_deduplication_results_and_process(program)
 
-    service.get_deduplication_set.assert_called_once_with(program)
+    service.get_deduplication_set.assert_called_once_with(program.slug)
     service.mark_rdis_as_error.assert_called_once_with(program)
 
 
@@ -708,7 +708,7 @@ def test_fetch_biometric_deduplication_results_and_process_dedup_engine_error(
 
     service.fetch_biometric_deduplication_results_and_process(program)
 
-    service.get_deduplication_set.assert_called_once_with(program)
+    service.get_deduplication_set.assert_called_once_with(program.slug)
     service.mark_rdis_as_error.assert_called_once_with(program)
 
 
@@ -927,7 +927,7 @@ def test_report_false_positive_duplicate(
     service.report_false_positive_duplicate("123", "456", program)
     mock_report_false_positive_duplicate.assert_called_once_with(
         IgnoredFilenamesPair(first="123", second="456"),
-        program.unicef_id,
+        program,
     )
 
 
@@ -935,8 +935,8 @@ def test_report_false_positive_duplicate(
 def test_report_withdrawn(mock_report_withdrawn: mock.Mock, biometric_deduplication_context: dict[str, object]) -> None:
     program = biometric_deduplication_context["program"]
     service = BiometricDeduplicationService()
-    service.report_individuals_status(program, ["abc"], "refused")
+    service.report_individuals_status(program.slug, ["abc"], "refused")
     mock_report_withdrawn.assert_called_once_with(
-        str(program.unicef_id),
+        str(program.slug),
         {"action": "refused", "targets": ["abc"]},
     )

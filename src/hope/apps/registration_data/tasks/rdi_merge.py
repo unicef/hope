@@ -107,7 +107,7 @@ class RdiMergeTask:
             dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
             dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
             dedupe_service.report_individuals_status(
-                obj_hct.program,
+                obj_hct.program.slug,
                 [str(_id) for _id in individuals_to_merge_ids],
                 BiometricDeduplicationService.INDIVIDUALS_MERGED,
             )
