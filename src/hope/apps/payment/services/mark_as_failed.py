@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 def mark_as_failed(payment_item: Payment) -> None:
+    payment_item.validate_payment_fsp_communication_channel()
     payment_item.mark_as_failed()
     payment_item.save()
 
@@ -19,6 +20,7 @@ def mark_as_failed(payment_item: Payment) -> None:
 
 
 def revert_mark_as_failed(payment_item: Payment, delivered_quantity: Decimal, delivery_date: datetime.datetime) -> None:
+    payment_item.validate_payment_fsp_communication_channel()
     payment_item.revert_mark_as_failed(delivered_quantity, delivery_date)
     payment_item.delivered_quantity_usd = get_quantity_in_usd(
         amount=delivered_quantity,

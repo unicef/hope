@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
     DataCollectingTypeFactory,
+    FinancialServiceProviderFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
@@ -45,12 +46,22 @@ def cycle(program_active: Program) -> Any:
 
 
 @pytest.fixture
+def fsp_xlsx() -> Any:
+    return FinancialServiceProviderFactory(
+        name="Test FSP",
+        vision_vendor_number="123",
+        communication_channel="XLSX",
+    )
+
+
+@pytest.fixture
 def payment_context(
     api_client: Any,
     business_area: Any,
     user: Any,
     program_active: Program,
     cycle: Any,
+    fsp_xlsx: Any,
 ) -> dict[str, Any]:
     payment_plan = PaymentPlanFactory(
         name="Payment Plan",
@@ -58,6 +69,7 @@ def payment_context(
         program_cycle=cycle,
         status=PaymentPlan.Status.DRAFT,
         created_by=user,
+        financial_service_provider=fsp_xlsx,
     )
     payment = PaymentFactory(
         parent=payment_plan,
@@ -65,6 +77,7 @@ def payment_context(
         delivered_quantity=999,
         entitlement_quantity=112,
         program=program_active,
+        financial_service_provider=fsp_xlsx,
     )
     payment.refresh_from_db()
 
