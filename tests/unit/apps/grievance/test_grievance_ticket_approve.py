@@ -83,7 +83,6 @@ def user(partner: Partner) -> User:
     return UserFactory(partner=partner)
 
 
-
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
     program = ProgramFactory(
