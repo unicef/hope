@@ -102,7 +102,7 @@ class TicketAddIndividualDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
-    household = factory.SubFactory("extras.test_utils.factories.household.HouseholdFactory")
+    household = factory.SubFactory(HouseholdFactory)
     individual_data = factory.LazyFunction(dict)
     approve_status = True
 
@@ -127,7 +127,7 @@ class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
     )
-    household = factory.SubFactory("extras.test_utils.factories.household.HouseholdFactory")
+    household = factory.SubFactory(HouseholdFactory)
     household_data = factory.LazyFunction(dict)
 
 
@@ -176,33 +176,6 @@ class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
     individual = factory.SubFactory(IndividualFactory)
-
-
-class TicketAddIndividualDetailsFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketAddIndividualDetails
-
-    ticket = factory.SubFactory(
-        GrievanceTicketFactory,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    )
-    household = factory.SubFactory(HouseholdFactory)
-    approve_status = True
-    individual_data = {}
-
-
-class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
-    class Meta:
-        model = TicketHouseholdDataUpdateDetails
-
-    ticket = factory.SubFactory(
-        GrievanceTicketFactory,
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-    )
-    household = factory.SubFactory(HouseholdFactory)
-    household_data = {}
 
 
 class GrievanceDocumentFactory(DjangoModelFactory):
