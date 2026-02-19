@@ -720,9 +720,12 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
         screenshot(browser, request.node.nodeid)
 
 
-def attach(data=None, path=None, name="attachment", mime_type=None):
-    """Drop-in replacement for pytest_html_reporter's attach()"""
-    item = pytest._current_item
+def attach(data=None, path=None, name="attachment", mime_type=None, request=None):
+    """Drop-in replacement for pytest_html_reporter's attach()."""
+    if request is None:  # fallback: can't attach without test context
+        return
+
+    item = request.nod
     if not hasattr(item, "_html_extra_list"):
         return
 
