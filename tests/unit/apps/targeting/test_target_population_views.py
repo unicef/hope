@@ -1,5 +1,4 @@
 import json
-from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -9,262 +8,324 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
+    PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
     UserFactory,
 )
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.models import PaymentPlan
 
-pytestmark = pytest.mark.django_db()
+pytestmark = pytest.mark.django_db
 
 
-@freezegun.freeze_time("2022-01-01")
-class TestTargetPopulationViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
-        self.afghanistan = afghanistan
-        self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
-        self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(slug="afghanistan")
 
-        self.tp1 = PaymentPlanFactory(
-            business_area=self.afghanistan,
-            program_cycle=self.program1.cycles.first(),
+
+@pytest.fixture
+def partner():
+    return PartnerFactory(name="TestPartner")
+
+
+@pytest.fixture
+def user(partner):
+    return UserFactory(partner=partner)
+
+
+@pytest.fixture
+def api_client_for_user(api_client, user):
+    return api_client(user)
+
+
+@pytest.fixture
+def programs(business_area):
+    program1 = ProgramFactory(business_area=business_area, name="Program1")
+    program2 = ProgramFactory(business_area=business_area, name="Program2")
+
+    return program1, program2
+
+
+@pytest.fixture
+def target_populations(business_area, programs):
+    program1, program2 = programs
+    ProgramCycleFactory(program=program1)
+    ProgramCycleFactory(program=program2)
+    with freezegun.freeze_time("2022-01-01"):
+        tp1 = PaymentPlanFactory(
+            business_area=business_area,
+            program_cycle=program1.cycles.first(),
             status=PaymentPlan.Status.TP_OPEN,
             name="Test TP 1",
         )
-        self.tp1.created_at = "2022-01-01T04:00:00Z"
-        self.tp1.save()
+        tp1.created_at = "2022-01-01T04:00:00Z"
+        tp1.save()
 
-        self.tp2 = PaymentPlanFactory(
-            business_area=self.afghanistan,
-            program_cycle=self.program1.cycles.first(),
+        tp2 = PaymentPlanFactory(
+            business_area=business_area,
+            program_cycle=program1.cycles.first(),
             status=PaymentPlan.Status.TP_LOCKED,
             name="Test TP 2",
         )
-        self.tp2.created_at = "2022-01-01T03:00:00Z"
-        self.tp2.save()
+        tp2.created_at = "2022-01-01T03:00:00Z"
+        tp2.save()
 
-        self.tp3 = PaymentPlanFactory(
-            business_area=self.afghanistan,
-            program_cycle=self.program1.cycles.first(),
+        tp3 = PaymentPlanFactory(
+            business_area=business_area,
+            program_cycle=program1.cycles.first(),
             status=PaymentPlan.Status.OPEN,
             name="Test 3 TP",
         )
-        self.tp3.created_at = "2022-01-01T02:00:00Z"
-        self.tp3.save()
+        tp3.created_at = "2022-01-01T02:00:00Z"
+        tp3.save()
 
-        self.tp_program2 = PaymentPlanFactory(
-            business_area=self.afghanistan,
-            program_cycle=self.program2.cycles.first(),
+        tp_program2 = PaymentPlanFactory(
+            business_area=business_area,
+            program_cycle=program2.cycles.first(),
             status=PaymentPlan.Status.OPEN,
             name="Test TP Program 2",
         )
-        self.tp_program2.created_at = "2022-01-01T01:00:00Z"
-        self.tp_program2.save()
+        tp_program2.created_at = "2022-01-01T01:00:00Z"
+        tp_program2.save()
 
-        self.url_list = reverse(
-            "api:payments:target-populations-list",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program1.slug,
-            },
-        )
+    return tp1, tp2, tp3, tp_program2
 
-    @pytest.mark.parametrize(
-        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
-        [
-            ([], [], True, status.HTTP_403_FORBIDDEN),
-            ([Permissions.TARGETING_VIEW_LIST], [], True, status.HTTP_200_OK),
-            ([], [Permissions.TARGETING_VIEW_LIST], True, status.HTTP_200_OK),
-            (
-                [Permissions.TARGETING_VIEW_LIST],
-                [Permissions.TARGETING_VIEW_LIST],
-                True,
-                status.HTTP_200_OK,
-            ),
-            ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.TARGETING_VIEW_LIST], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.TARGETING_VIEW_LIST], False, status.HTTP_403_FORBIDDEN),
-            (
-                [Permissions.TARGETING_VIEW_LIST],
-                [Permissions.TARGETING_VIEW_LIST],
-                False,
-                status.HTTP_403_FORBIDDEN,
-            ),
-        ],
+
+@pytest.fixture
+def list_url(business_area, programs):
+    program1, _ = programs
+    return reverse(
+        "api:payments:target-populations-list",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_slug": program1.slug,
+        },
     )
-    def test_list_target_populations_permission(
-        self,
-        permissions: list,
-        partner_permissions: list,
-        access_to_program: bool,
-        expected_status: str,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-        create_partner_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        if access_to_program:
-            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
-            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
-        else:
-            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
-            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
-        response = self.client.get(self.url_list)
-        assert response.status_code == expected_status
 
-    def test_list_target_populations(
-        self,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
+@pytest.mark.parametrize(
+    ("permissions", "partner_permissions", "expected_status"),
+    [
+        ([], [], status.HTTP_403_FORBIDDEN),
+        ([Permissions.TARGETING_VIEW_LIST], [], status.HTTP_200_OK),
+        ([], [Permissions.TARGETING_VIEW_LIST], status.HTTP_200_OK),
+        (
             [Permissions.TARGETING_VIEW_LIST],
-            self.afghanistan,
-            self.program1,
-        )
-        response = self.client.get(self.url_list)
+            [Permissions.TARGETING_VIEW_LIST],
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+def test_list_target_populations_permission_with_access_to_program(
+    permissions,
+    partner_permissions,
+    expected_status,
+    api_client_for_user,
+    user,
+    partner,
+    business_area,
+    programs,
+    list_url,
+    create_user_role_with_permissions,
+    create_partner_role_with_permissions,
+):
+    program1, _ = programs
+
+    create_user_role_with_permissions(user, permissions, business_area)
+    create_user_role_with_permissions(user, permissions, business_area, program1)
+    create_partner_role_with_permissions(partner, partner_permissions, business_area, program1)
+
+    response = api_client_for_user.get(list_url)
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "partner_permissions", "expected_status"),
+    [
+        ([], [], status.HTTP_403_FORBIDDEN),
+        ([Permissions.TARGETING_VIEW_LIST], [], status.HTTP_403_FORBIDDEN),
+        ([], [Permissions.TARGETING_VIEW_LIST], status.HTTP_403_FORBIDDEN),
+        (
+            [Permissions.TARGETING_VIEW_LIST],
+            [Permissions.TARGETING_VIEW_LIST],
+            status.HTTP_403_FORBIDDEN,
+        ),
+    ],
+)
+def test_list_target_populations_permission_without_access_to_program(
+    permissions,
+    partner_permissions,
+    expected_status,
+    api_client_for_user,
+    user,
+    partner,
+    business_area,
+    programs,
+    list_url,
+    create_user_role_with_permissions,
+    create_partner_role_with_permissions,
+):
+    program1, _ = programs
+
+    create_user_role_with_permissions(user, permissions, business_area)
+    create_partner_role_with_permissions(partner, partner_permissions, business_area)
+
+    response = api_client_for_user.get(list_url)
+    assert response.status_code == expected_status
+
+
+def test_list_target_populations(
+    api_client_for_user,
+    user,
+    business_area,
+    programs,
+    list_url,
+    target_populations,
+    create_user_role_with_permissions,
+):
+    program1, _ = programs
+    tp1, tp2, tp3, _ = target_populations
+
+    create_user_role_with_permissions(
+        user,
+        [Permissions.TARGETING_VIEW_LIST],
+        business_area,
+        program1,
+    )
+
+    response = api_client_for_user.get(list_url)
+    assert response.status_code == status.HTTP_200_OK
+
+    response_json = response.json()["results"]
+    assert len(response_json) == 3
+
+    expected_1 = {
+        "name": tp1.name,
+        "status": tp1.get_status_display().upper(),
+        "created_by": tp1.created_by.get_full_name(),
+        "created_at": "2022-01-01T04:00:00Z",
+        "total_households_count": tp1.total_households_count,
+        "total_individuals_count": tp1.total_individuals_count,
+        "updated_at": "2022-01-01T00:00:00Z",
+    }
+    for key, value in expected_1.items():
+        assert response_json[0][key] == value
+
+    expected_2 = {
+        "name": tp2.name,
+        "status": tp2.get_status_display().upper(),
+        "created_by": tp2.created_by.get_full_name(),
+        "created_at": "2022-01-01T03:00:00Z",
+    }
+    for key, value in expected_2.items():
+        assert response_json[1][key] == value
+
+    expected_3 = {
+        "name": tp3.name,
+        "status": "ASSIGNED",
+        "created_by": tp3.created_by.get_full_name(),
+        "created_at": "2022-01-01T02:00:00Z",
+    }
+    assert "id" in response_json[2]
+    for key, value in expected_3.items():
+        assert response_json[2][key] == value
+
+
+def test_list_target_populations_filter(
+    api_client_for_user,
+    user,
+    business_area,
+    programs,
+    list_url,
+    target_populations,
+    create_user_role_with_permissions,
+):
+    program1, _ = programs
+
+    create_user_role_with_permissions(
+        user,
+        [Permissions.TARGETING_VIEW_LIST],
+        business_area,
+        program1,
+    )
+
+    response = api_client_for_user.get(list_url, {"status": PaymentPlan.Status.TP_OPEN})
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == 1
+
+
+def test_list_target_populations_search_by_name(
+    api_client_for_user,
+    user,
+    business_area,
+    programs,
+    list_url,
+    target_populations,
+    create_user_role_with_permissions,
+):
+    program1, _ = programs
+
+    create_user_role_with_permissions(
+        user,
+        [Permissions.TARGETING_VIEW_LIST],
+        business_area,
+        program1,
+    )
+
+    response = api_client_for_user.get(list_url, {"name": "Test TP"})
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == 2
+
+
+def test_list_target_populations_caching(
+    api_client_for_user,
+    user,
+    business_area,
+    programs,
+    list_url,
+    target_populations,
+    create_user_role_with_permissions,
+):
+    program1, _ = programs
+    tp1, _, _, _ = target_populations
+
+    create_user_role_with_permissions(
+        user,
+        [Permissions.TARGETING_VIEW_LIST],
+        business_area,
+        program1,
+    )
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = api_client_for_user.get(list_url)
         assert response.status_code == status.HTTP_200_OK
+        etag = response.headers["etag"]
+        assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+        assert len(ctx.captured_queries) == 18
 
-        response_json = response.json()["results"]
-        assert len(response_json) == 3
-        self.tp1.refresh_from_db()
-        expected = {
-            "name": self.tp1.name,
-            "status": self.tp1.get_status_display().upper(),
-            "created_by": self.tp1.created_by.get_full_name(),
-            "created_at": "2022-01-01T04:00:00Z",
-            "total_households_count": self.tp1.total_households_count,
-            "total_individuals_count": self.tp1.total_individuals_count,
-            "updated_at": "2022-01-01T00:00:00Z",
-        }
-        for key, value in expected.items():
-            assert response_json[0][key] == value
-
-        expected_2 = {
-            "name": self.tp2.name,
-            "status": self.tp2.get_status_display().upper(),
-            "created_by": self.tp2.created_by.get_full_name(),
-            "created_at": "2022-01-01T03:00:00Z",
-        }
-        for key, value in expected_2.items():
-            assert response_json[1][key] == value
-
-        expected_3 = {
-            "name": self.tp3.name,
-            "status": "ASSIGNED",
-            "created_by": self.tp3.created_by.get_full_name(),
-            "created_at": "2022-01-01T02:00:00Z",
-        }
-        assert "id" in response_json[2]
-        for key, value in expected_3.items():
-            assert response_json[2][key] == value
-
-    def test_list_target_populations_filter(
-        self,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.TARGETING_VIEW_LIST],
-            self.afghanistan,
-            self.program1,
-        )
-        response = self.client.get(self.url_list, {"status": PaymentPlan.Status.TP_OPEN})
+    with CaptureQueriesContext(connection) as ctx:
+        response = api_client_for_user.get(list_url)
         assert response.status_code == status.HTTP_200_OK
+        assert len(ctx.captured_queries) == 7
+        assert response.headers["etag"] == etag
 
-        response_json = response.json()["results"]
-        assert len(response_json) == 1
+    tp1.status = PaymentPlan.Status.TP_PROCESSING
+    tp1.save()
 
-    def test_list_target_populations_search_by_name(
-        self,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.TARGETING_VIEW_LIST],
-            self.afghanistan,
-            self.program1,
-        )
-        response = self.client.get(self.url_list, {"name": "Test TP"})
+    with CaptureQueriesContext(connection) as ctx:
+        response = api_client_for_user.get(list_url)
+        etag_call_after_update = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
+        assert len(ctx.captured_queries) == 12
+        assert etag != etag_call_after_update
 
-        response_json = response.json()["results"]
-        assert len(response_json) == 2
-
-    def test_list_target_populations_caching(
-        self,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan)
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.TARGETING_VIEW_LIST],
-            self.afghanistan,
-            self.program1,
-        )
-        with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.url_list)
-            assert response.status_code == status.HTTP_200_OK
-
-            etag = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 18
-
-        # Test that reoccurring requests use cached data
-        with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.url_list)
-            assert response.status_code == status.HTTP_200_OK
-
-            etag_second_call = response.headers["etag"]
-            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
-
-            assert etag_second_call == etag
-
-        # After update, it does not use the cached data
-        self.tp1.status = PaymentPlan.Status.TP_PROCESSING
-        self.tp1.save()
-        with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.url_list)
-            assert response.status_code == status.HTTP_200_OK
-
-            etag_call_after_update = response.headers["etag"]
-            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
-            # FIXME check and fix: assert etag_call_after_update != etag
-
-        # Cached data again
-        with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.url_list)
-            assert response.status_code == status.HTTP_200_OK
-
-            etag_call_after_update_second_call = response.headers["etag"]
-            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
-
-            assert etag_call_after_update_second_call == etag_call_after_update
+    with CaptureQueriesContext(connection) as ctx:
+        response = api_client_for_user.get(list_url)
+        etag_call_after_update_second_call = response.headers["etag"]
+        assert response.status_code == status.HTTP_200_OK
+        assert len(ctx.captured_queries) == 7
+        assert etag_call_after_update == etag_call_after_update_second_call

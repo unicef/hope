@@ -1,22 +1,19 @@
 import datetime
-from typing import Any, Dict, List
 
 from dateutil.relativedelta import relativedelta
 from flaky import flaky
+import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import FlexibleAttributeFactory, create_afghanistan
-from extras.test_utils.old_factories.household import (
-    create_household,
-    create_household_and_individuals,
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    FlexibleAttributeFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentPlanFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
-from extras.test_utils.old_factories.targeting import TargetingCriteriaRuleFactory
-from hope.apps.core.base_test_case import BaseTestCase
 from hope.models import (
-    BusinessArea,
     Household,
-    Individual,
     PaymentPlan,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -24,433 +21,264 @@ from hope.models import (
     TargetingIndividualRuleFilterBlock,
 )
 
-
-class TestTargetingCriteriaQuery(BaseTestCase):
-    @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict, payment_plan: PaymentPlan) -> PaymentPlan:
-        rule = TargetingCriteriaRule(payment_plan=payment_plan)
-        rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
-        rule_filter.save()
-        return payment_plan
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        from hope.models import FlexibleAttribute
-
-        FlexibleAttributeFactory(
-            name="unaccompanied_child_h_f",
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-            type=FlexibleAttribute.STRING,
-        )
-        FlexibleAttributeFactory(
-            name="treatment_facility_h_f",
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-            type=FlexibleAttribute.SELECT_MANY,
-        )
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.first()
-
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
-        )
-        (household, individuals) = create_household(
-            {
-                "size": 2,
-                "residence_status": "REFUGEE",
-                "business_area": cls.business_area,
-            },
-        )
-
-        assert Household.objects.all().distinct().count() == 2
-
-    @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> PaymentPlan:
-        payment_plan = PaymentPlanFactory(
-            name="tp",
-            created_by=cls.user,
-            business_area=cls.business_area,
-        )
-        return cls.get_targeting_criteria_for_rule(*args, payment_plan=payment_plan, **kwargs)
-
-    def test_size(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "comparison_method": "EQUALS",
-                        "arguments": [2],
-                        "field_name": "size",
-                        "flex_field_classification": "NOT_FLEX_FIELD",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
-        )
-
-    def test_residence_status(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "comparison_method": "EQUALS",
-                        "arguments": ["REFUGEE"],
-                        "field_name": "residence_status",
-                        "flex_field_classification": "NOT_FLEX_FIELD",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
-        )
-
-    def test_flex_field_variables(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "comparison_method": "EQUALS",
-                        "arguments": ["0"],
-                        "field_name": "unaccompanied_child_h_f",
-                        "flex_field_classification": "FLEX_FIELD_BASIC",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 0
-        )
-
-    def test_select_many_variables(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "comparison_method": "CONTAINS",
-                        "arguments": ["other_public", "pharmacy", "other_private"],
-                        "field_name": "treatment_facility_h_f",
-                        "flex_field_classification": "FLEX_FIELD_BASIC",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 0
-        )
+pytestmark = pytest.mark.django_db
 
 
-class TestTargetingCriteriaIndividualRules(BaseTestCase):
-    @staticmethod
-    def get_targeting_criteria_for_filters(filters: List[Dict], payment_plan: PaymentPlan) -> PaymentPlan:
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(slug="afghanistan")
+
+
+@pytest.fixture
+def user():
+    return UserFactory()
+
+
+@pytest.fixture
+def payment_plan(user, business_area):
+    return PaymentPlanFactory(
+        name="tp", created_by=user, business_area=business_area, status=PaymentPlan.Status.TP_OPEN
+    )
+
+
+@pytest.fixture
+def base_households(business_area):
+    HouseholdFactory(size=1, residence_status="HOST", business_area=business_area)
+    HouseholdFactory(size=2, residence_status="REFUGEE", business_area=business_area)
+    return Household.objects.all()
+
+
+@pytest.fixture
+def household_flex_fields():
+    from hope.models import FlexibleAttribute
+
+    FlexibleAttributeFactory(
+        name="unaccompanied_child_h_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        type=FlexibleAttribute.STRING,
+    )
+    FlexibleAttributeFactory(
+        name="treatment_facility_h_f",
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        type=FlexibleAttribute.SELECT_MANY,
+    )
+
+
+@pytest.fixture
+def apply_household_rule(payment_plan):
+    def _apply(rule_filter: dict):
         rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
-        filter_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
-        for _filter in filters:
-            block_filter = TargetingIndividualBlockRuleFilter(**_filter, individuals_filters_block=filter_block)
-            block_filter.save()
+        TargetingCriteriaRuleFilter.objects.create(
+            targeting_criteria_rule=rule,
+            **rule_filter,
+        )
         return payment_plan
 
-    @classmethod
-    def create_criteria(cls, filters: List[Dict]) -> PaymentPlan:
-        payment_plan = PaymentPlanFactory(
-            name="tp",
-            created_by=cls.user,
-            business_area=cls.business_area,
-        )
+    return _apply
 
-        return cls.get_targeting_criteria_for_filters(filters, payment_plan)
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.first()
+@pytest.fixture
+def households_with_individuals(business_area):
+    ind_1 = IndividualFactory(
+        household=None,
+        sex="MALE",
+        marital_status="MARRIED",
+        birth_date=datetime.date.today() - relativedelta(years=20, days=5),
+        observed_disability=["HEARING"],
+    )
+    hh1 = HouseholdFactory(business_area=business_area, head_of_household=ind_1, size=1)
+    ind_1.household = hh1
+    ind_1.save()
 
-        (household, individuals1) = create_household_and_individuals(
-            {"business_area": cls.business_area},
-            [
-                {
-                    "sex": "MALE",
-                    "marital_status": "MARRIED",
-                    "observed_disability": [
-                        "SEEING",
-                        "HEARING",
-                        "WALKING",
-                        "MEMORY",
-                        "SELF_CARE",
-                        "COMMUNICATING",
-                    ],
-                    "seeing_disability": "LOT_DIFFICULTY",
-                    "hearing_disability": "SOME_DIFFICULTY",
-                    "physical_disability": "SOME_DIFFICULTY",
-                    "memory_disability": "LOT_DIFFICULTY",
-                    "selfcare_disability": "CANNOT_DO",
-                    "comms_disability": "SOME_DIFFICULTY",
-                    "business_area": cls.business_area,
-                },
-            ],
-        )
-        (household, individuals2) = create_household_and_individuals(
-            {"business_area": cls.business_area},
-            [
-                {
-                    "sex": "MALE",
-                    "marital_status": "SINGLE",
-                    "business_area": cls.business_area,
-                },
-                {
-                    "sex": "FEMALE",
-                    "marital_status": "MARRIED",
-                    "business_area": cls.business_area,
-                },
-            ],
-        )
+    ind_2 = IndividualFactory(
+        household=None,
+        sex="MALE",
+        marital_status="SINGLE",
+        birth_date=datetime.date.today() - relativedelta(years=24, days=5),
+        observed_disability=["NONE"],
+    )
+    hh2 = HouseholdFactory(business_area=business_area, head_of_household=ind_2, size=2)
+    ind_2.household = hh2
+    ind_2.save()
+    IndividualFactory(
+        household=hh2,
+        sex="FEMALE",
+        marital_status="MARRIED",
+        birth_date=datetime.date.today() - relativedelta(years=26, days=-5),
+        observed_disability=["NONE"],
+    )
 
-        individuals1[0].birth_date = datetime.date.today() - relativedelta(years=+20, days=+5)  # age 20
-        individuals2[0].birth_date = datetime.date.today() - relativedelta(years=+24, days=+5)  # age 24
-        individuals2[1].birth_date = datetime.date.today() - relativedelta(years=+26, days=-5)  # age 25
-        Individual.objects.bulk_update(individuals1 + individuals2, ["birth_date"])
+    return Household.objects.all()
 
-        assert Household.objects.all().distinct().count() == 2
 
-    def test_marital_status(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "EQUALS",
-                            "arguments": ["MARRIED"],
-                            "field_name": "marital_status",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                        {
-                            "comparison_method": "EQUALS",
-                            "arguments": ["MALE"],
-                            "field_name": "sex",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
+@pytest.fixture
+def apply_individual_rules(payment_plan):
+    def _apply(filters: list[dict]):
+        rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan, household_ids="", individual_ids="")
+        ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
+        for filter_ in filters:
+            TargetingIndividualBlockRuleFilter.objects.create(
+                individuals_filters_block=ind_block,
+                **filter_,
             )
-            .distinct()
-            .count()
-            == 1
-        )
+        return payment_plan
 
-    def test_observed_disability(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "CONTAINS",
-                            "arguments": [
-                                "COMMUNICATING",
-                                "HEARING",
-                                "MEMORY",
-                                "SEEING",
-                                "WALKING",
-                                "SELF_CARE",
-                            ],
-                            "field_name": "observed_disability",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
-        )
-
-    def test_ranges(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "RANGE",
-                            "arguments": [20, 25],
-                            "field_name": "age",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
-        )
-
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "RANGE",
-                            "arguments": [22, 26],
-                            "field_name": "age",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
-        )
-
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "LESS_THAN",
-                            "arguments": [20],
-                            "field_name": "age",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
-        )
-
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "LESS_THAN",
-                            "arguments": [24],
-                            "field_name": "age",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
-        )
-
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    [
-                        {
-                            "comparison_method": "GREATER_THAN",
-                            "arguments": [20],
-                            "field_name": "age",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        },
-                    ]
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
-        )
+    return _apply
 
 
-class TestTargetingCriteriaByIdQuery(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.first()
+@pytest.fixture
+def three_households(business_area):
+    hh1 = HouseholdFactory(size=1, residence_status="HOST", business_area=business_area)
+    hh2 = HouseholdFactory(size=2, residence_status="REFUGEE", business_area=business_area)
+    hh3 = HouseholdFactory(size=3, residence_status="REFUGEE", business_area=business_area)
+    return hh1, hh2, hh3
 
-        cls.hh_1, individuals = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
-        )
-        cls.hh_2, individuals = create_household(
+
+def test_size(base_households, apply_household_rule):
+    plan = apply_household_rule(
+        {
+            "comparison_method": "EQUALS",
+            "arguments": [2],
+            "field_name": "size",
+            "flex_field_classification": "NOT_FLEX_FIELD",
+        }
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
+
+
+def test_residence_status(base_households, apply_household_rule):
+    plan = apply_household_rule(
+        {
+            "comparison_method": "EQUALS",
+            "arguments": ["REFUGEE"],
+            "field_name": "residence_status",
+            "flex_field_classification": "NOT_FLEX_FIELD",
+        }
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
+
+
+def test_flex_field_variables(base_households, household_flex_fields, apply_household_rule):
+    plan = apply_household_rule(
+        {
+            "comparison_method": "EQUALS",
+            "arguments": ["0"],
+            "field_name": "unaccompanied_child_h_f",
+            "flex_field_classification": "FLEX_FIELD_BASIC",
+        }
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 0
+
+
+def test_select_many_variables(base_households, household_flex_fields, apply_household_rule):
+    plan = apply_household_rule(
+        {
+            "comparison_method": "CONTAINS",
+            "arguments": ["other_public", "pharmacy", "other_private"],
+            "field_name": "treatment_facility_h_f",
+            "flex_field_classification": "FLEX_FIELD_BASIC",
+        }
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 0
+
+
+def test_marital_status(households_with_individuals, apply_individual_rules):
+    plan = apply_individual_rules(
+        [
             {
-                "size": 2,
-                "residence_status": "REFUGEE",
-                "business_area": cls.business_area,
+                "comparison_method": "EQUALS",
+                "arguments": ["MARRIED"],
+                "field_name": "marital_status",
+                "flex_field_classification": "NOT_FLEX_FIELD",
             },
-        )
-        cls.hh_3, individuals = create_household(
             {
-                "size": 3,
-                "residence_status": "REFUGEE",
-                "business_area": cls.business_area,
+                "comparison_method": "EQUALS",
+                "arguments": ["MALE"],
+                "field_name": "sex",
+                "flex_field_classification": "NOT_FLEX_FIELD",
             },
-        )
+        ]
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
-        assert Household.objects.all().distinct().count() == 3
 
-    def test_household_ids(self) -> None:
-        payment_plan = PaymentPlanFactory(
-            name="tp",
-            created_by=self.user,
-            business_area=self.business_area,
-        )
-        TargetingCriteriaRuleFactory(
-            payment_plan=payment_plan,
-            household_ids=f"{self.hh_1.unicef_id}",
-            individual_ids="",
-        )
+def test_observed_disability(households_with_individuals, apply_individual_rules):
+    plan = apply_individual_rules(
+        [
+            {
+                "comparison_method": "CONTAINS",
+                "arguments": ["HEARING"],
+                "field_name": "observed_disability",
+                "flex_field_classification": "NOT_FLEX_FIELD",
+            }
+        ]
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
-        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
-        payment_plan2 = PaymentPlanFactory(
-            name="tp",
-            created_by=self.user,
-            business_area=self.business_area,
-        )
-        TargetingCriteriaRuleFactory(
-            payment_plan=payment_plan2,
-            household_ids=f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
-            individual_ids="",
-        )
-        assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
-    @flaky(max_runs=3, min_passes=1)
-    def test_individual_ids(self) -> None:
-        payment_plan = PaymentPlanFactory(
-            name="tp",
-            created_by=self.user,
-            business_area=self.business_area,
-        )
-        TargetingCriteriaRuleFactory(
-            payment_plan=payment_plan,
-            household_ids="",
-            individual_ids=f"{self.hh_1.individuals.first().unicef_id}",
-        )
-        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
-        payment_plan2 = PaymentPlanFactory(
-            name="tp",
-            created_by=self.user,
-            business_area=self.business_area,
-        )
-        TargetingCriteriaRuleFactory(
-            payment_plan=payment_plan2,
-            household_ids="",
-            individual_ids=f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
-        )
+@pytest.mark.parametrize(
+    ("comparison_method", "arguments", "expected_count"),
+    [
+        ("GREATER_THAN", [18], 2),
+        ("LESS_THAN", [25], 2),
+        ("RANGE", [18, 30], 2),
+        ("EQUALS", [20], 1),
+        ("NOT_EQUALS", [20], 1),
+    ],
+)
+def test_range(
+    households_with_individuals,
+    apply_individual_rules,
+    comparison_method,
+    arguments,
+    expected_count,
+):
+    plan = apply_individual_rules(
+        [
+            {
+                "comparison_method": comparison_method,
+                "arguments": arguments,
+                "field_name": "age",
+                "flex_field_classification": "NOT_FLEX_FIELD",
+            }
+        ]
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == expected_count
 
-        assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
-    @flaky(max_runs=3, min_passes=1)
-    def test_household_and_individual_ids(self) -> None:
-        payment_plan = PaymentPlanFactory(
-            name="tp",
-            created_by=self.user,
-            business_area=self.business_area,
-        )
-        TargetingCriteriaRuleFactory(
-            payment_plan=payment_plan,
-            household_ids=f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
-            individual_ids=f"{self.hh_3.individuals.first().unicef_id}",
-        )
+def test_household_ids(user, business_area, three_households):
+    hh1, _, _ = three_households
+    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    TargetingCriteriaRule.objects.create(
+        payment_plan=plan,
+        household_ids=str(hh1.unicef_id),
+        individual_ids="",
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
-        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 3
+
+@flaky
+def test_individual_ids(user, business_area, three_households):
+    hh1, _, _ = three_households
+    individual = IndividualFactory(household=hh1)
+
+    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    TargetingCriteriaRule.objects.create(
+        payment_plan=plan,
+        household_ids="",
+        individual_ids=str(individual.unicef_id),
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1
+
+
+def test_household_and_individual_ids(user, business_area, three_households):
+    hh1, _, _ = three_households
+    individual = IndividualFactory(household=hh1)
+
+    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    TargetingCriteriaRule.objects.create(
+        payment_plan=plan,
+        household_ids=str(hh1.unicef_id),
+        individual_ids=str(individual.unicef_id),
+    )
+    assert Household.objects.filter(plan.get_query()).distinct().count() == 1

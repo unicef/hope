@@ -36,6 +36,7 @@ from hope.apps.payment.celery_tasks import (
     send_to_payment_gateway,
     update_exchange_rate_on_release_payments,
 )
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -140,7 +141,8 @@ class PaymentPlanService:
         return self.actions_map.get(self.action)
 
     def send_for_approval(self) -> PaymentPlan:
-        self.payment_plan.status_send_to_approval()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
         ApprovalProcess.objects.create(
@@ -171,15 +173,16 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
-        self.payment_plan.status_tp_lock()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_tp_lock()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
 
         return self.payment_plan
 
     def tp_unlock(self) -> PaymentPlan:
-        self.payment_plan.status_tp_open()
-
-        self.payment_plan.build_status_pending()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_tp_open()
+        flow.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date", "updated_at"))
         transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
 
@@ -192,7 +195,8 @@ class PaymentPlanService:
         ]:
             raise ValidationError("Can only Rebuild Population for Locked or Open Population status")
 
-        self.payment_plan.build_status_pending()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
         transaction.on_commit(lambda: payment_plan_full_rebuild.delay(str(self.payment_plan.id)))
         return self.payment_plan
@@ -200,12 +204,14 @@ class PaymentPlanService:
     def draft(self) -> PaymentPlan:
         if not self.payment_plan.financial_service_provider:
             raise ValidationError("Can only promote to Payment Plan if DM/FSP is chosen.")
-        self.payment_plan.status_draft()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
         return self.payment_plan
 
     def open(self, input_data: dict) -> PaymentPlan:
-        self.payment_plan.status_open()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_open()
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
@@ -241,7 +247,8 @@ class PaymentPlanService:
         self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update(
             conflicted=True
         )
-        self.payment_plan.status_lock()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
 
@@ -251,7 +258,8 @@ class PaymentPlanService:
 
     def unlock(self) -> PaymentPlan:
         self.payment_plan.payment_items.all().update(conflicted=False)
-        self.payment_plan.status_unlock()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
         self.payment_plan.remove_export_files()
@@ -274,13 +282,15 @@ class PaymentPlanService:
         if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
             raise ValidationError("All Payments must have entitlement quantity set.")
 
-        self.payment_plan.status_lock_fsp()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_lock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
-        self.payment_plan.status_unlock_fsp()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_unlock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan
@@ -364,27 +374,31 @@ class PaymentPlanService:
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
             notification_action = None
             if approval_type == Approval.APPROVAL:
-                self.payment_plan.status_approve()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.status_approve()
                 approval_process.sent_for_authorization_by = self.user
                 approval_process.sent_for_authorization_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.APPROVE
 
             if approval_type == Approval.AUTHORIZATION:
-                self.payment_plan.status_authorize()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.status_authorize()
                 approval_process.sent_for_finance_release_by = self.user
                 approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.AUTHORIZE
 
             if approval_type == Approval.FINANCE_RELEASE:
-                self.payment_plan.status_mark_as_reviewed()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
                 # AB#272790
                 transaction.on_commit(lambda: update_exchange_rate_on_release_payments.delay(str(self.payment_plan.id)))
 
             if approval_type == Approval.REJECT:
-                self.payment_plan.status_reject()
+                flow = PaymentPlanFlow(self.payment_plan)
+                flow.status_reject()
 
             if notification_action:
                 send_payment_notification_emails.delay(
@@ -529,22 +543,14 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: dict) -> PaymentPlan:
-        program = self.payment_plan.program_cycle.program
-        should_update_money_stats = False
-        should_rebuild_list = False
-        vulnerability_filter = False
-
-        name = input_data.get("name")
-        vulnerability_score_min = input_data.get("vulnerability_score_min")
-        vulnerability_score_max = input_data.get("vulnerability_score_max")
+    def _validate_update_permissions(self, input_data: dict) -> None:
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
         rules = input_data.get("rules")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
-        fsp_id = input_data.get("fsp_id")
-        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         self._validate_pp_status(
             dispersion_end_date,
@@ -556,6 +562,44 @@ class PaymentPlanService:
             vulnerability_score_max=vulnerability_score_max,
             vulnerability_score_min=vulnerability_score_min,
         )
+
+    def _update_fsp_and_delivery_mechanism(self, fsp_id: str | None, delivery_mechanism_code: str | None) -> bool:
+        if not self.payment_plan.is_population_open():
+            return False
+
+        current_fsp = self.payment_plan.financial_service_provider
+        current_dm = self.payment_plan.delivery_mechanism
+        has_current_values = current_fsp is not None or current_dm is not None
+
+        if not (fsp_id and delivery_mechanism_code) and has_current_values:
+            self.payment_plan.financial_service_provider = None
+            self.payment_plan.delivery_mechanism = None
+            return True
+        if fsp_id and delivery_mechanism_code:
+            fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+            if current_fsp != fsp or current_dm != delivery_mechanism:
+                self.payment_plan.financial_service_provider = fsp
+                self.payment_plan.delivery_mechanism = delivery_mechanism
+                return True
+        return False
+
+    def update(self, input_data: dict) -> PaymentPlan:
+        program = self.payment_plan.program_cycle.program
+        should_update_money_stats = False
+        should_rebuild_list = False
+        vulnerability_filter = False
+
+        self._validate_update_permissions(input_data)
+
+        name = input_data.get("name")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        rules = input_data.get("rules")
+        dispersion_start_date = input_data.get("dispersion_start_date")
+        dispersion_end_date = input_data.get("dispersion_end_date")
+        fsp_id = input_data.get("fsp_id")
+        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -580,8 +624,10 @@ class PaymentPlanService:
             self._set_additional_flags_for_tp(input_data, targeting_criteria_input)
             should_rebuild_list = True
             self.payment_plan.rules.all().delete()
-            # Use create_targeting_criteria to set flags and rules
             self.create_targeting_criteria(targeting_criteria_input, program)
+
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
@@ -598,22 +644,8 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if self.payment_plan.is_population_open():
-            current_fsp = self.payment_plan.financial_service_provider
-            current_dm = self.payment_plan.delivery_mechanism
-            has_current_values = current_fsp is not None or current_dm is not None
-
-            if not (fsp_id and delivery_mechanism_code) and has_current_values:
-                self.payment_plan.financial_service_provider = None
-                self.payment_plan.delivery_mechanism = None
-                should_rebuild_list = True
-            if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
-                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                if current_fsp != fsp or current_dm != delivery_mechanism:
-                    self.payment_plan.financial_service_provider = fsp
-                    self.payment_plan.delivery_mechanism = delivery_mechanism
-                    should_rebuild_list = True
+        if self._update_fsp_and_delivery_mechanism(fsp_id, delivery_mechanism_code):
+            should_rebuild_list = True
 
         self.payment_plan.save()
 
@@ -720,7 +752,8 @@ class PaymentPlanService:
                 self.payment_plan.program_cycle.set_draft()
 
             # with new proces just update status and not remove Payments and PaymentPlan
-            self.payment_plan.status_draft()
+            flow = PaymentPlanFlow(self.payment_plan)
+            flow.status_draft()
 
         if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
             self.payment_plan.payment_items.all().delete()
@@ -731,7 +764,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def export_xlsx(self, user_id: "UUID") -> PaymentPlan:
-        self.payment_plan.background_action_status_xlsx_exporting()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
         create_payment_plan_payment_list_xlsx.delay(payment_plan_id=str(self.payment_plan.pk), user_id=str(user_id))
@@ -739,7 +773,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: str | None) -> PaymentPlan:
-        self.payment_plan.background_action_status_xlsx_exporting()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.background_action_status_xlsx_exporting()
         self.payment_plan.save(update_fields=["background_action_status"])
 
         create_payment_plan_payment_list_xlsx_per_fsp.delay(
@@ -756,7 +791,8 @@ class PaymentPlanService:
                 created_by=user,
                 file=file,
             )
-            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
+            flow = PaymentPlanFlow(self.payment_plan)
+            flow.background_action_status_xlsx_importing_reconciliation()
             self.payment_plan.reconciliation_import_file = file_temp
             self.payment_plan.save()
 
@@ -945,7 +981,8 @@ class PaymentPlanService:
 
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
 
-        payment_plan.build_status_pending()
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_pending()
         payment_plan.save(update_fields=("build_status", "built_at", "updated_at"))
 
         if rebuild_full_list:
@@ -1010,7 +1047,8 @@ class PaymentPlanService:
     def close(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:
             raise ValidationError(f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}")
-        self.payment_plan.status_close()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_close()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan
@@ -1026,7 +1064,8 @@ class PaymentPlanService:
 
         if self.payment_plan.status not in allowed_statuses:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
-        self.payment_plan.status_abort()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_abort()
         self.payment_plan.abort_comment = abort_comment
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
@@ -1037,7 +1076,8 @@ class PaymentPlanService:
             raise ValidationError(
                 f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
             )
-        self.payment_plan.status_reactivate_abort()
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_reactivate_abort()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
 

@@ -75,5 +75,9 @@ export type ProgramCreate = {
     readonly status: string;
     reconciliationWindowInDays?: number;
     sendReconciliationWindowExpiryNotifications?: boolean;
+    /**
+     * Label for identification key used for individuals
+     */
+    identificationKeyIndividualLabel?: string | null;
 };
 
