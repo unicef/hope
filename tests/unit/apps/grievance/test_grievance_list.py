@@ -88,11 +88,6 @@ def area2(admin_type: Any) -> Area:
 
 
 @pytest.fixture
-def area3(admin_type: Any) -> Area:
-    return AreaFactory(parent=None, p_code="AF010101", area_type=admin_type)
-
-
-@pytest.fixture
 def grievance_tickets(
     afghanistan: BusinessArea,
     user: User,

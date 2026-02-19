@@ -418,19 +418,6 @@ def household_ticket_detail_url(
 
 
 @pytest.fixture
-def household_ticket_status_change_url(
-    afghanistan: BusinessArea, household_data_change_grievance_ticket: GrievanceTicket
-) -> str:
-    return reverse(
-        "api:grievance-tickets:grievance-tickets-global-status-change",
-        kwargs={
-            "business_area_slug": afghanistan.slug,
-            "pk": str(household_data_change_grievance_ticket.pk),
-        },
-    )
-
-
-@pytest.fixture
 def complaint_ticket_detail_url(afghanistan: BusinessArea, complaint_ticket: GrievanceTicket) -> str:
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-detail",

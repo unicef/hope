@@ -83,10 +83,6 @@ def user(partner: Partner) -> User:
     return UserFactory(partner=partner)
 
 
-@pytest.fixture
-def user2(partner: Partner) -> User:
-    return UserFactory(first_name="SecondUser", partner=partner)
-
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
@@ -320,44 +316,6 @@ def household_data_change_ticket(
         },
     )
     return ticket
-
-
-@pytest.fixture
-def bulk_grievance_tickets(
-    afghanistan: BusinessArea,
-    program: Program,
-    user: User,
-    user2: User,
-) -> tuple:
-    ticket1 = GrievanceTicketFactory(
-        description="Test 1",
-        assigned_to=user,
-        priority=1,
-        urgency=1,
-        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        language="PL",
-        status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        created_by=user2,
-        business_area=afghanistan,
-        issue_type=GrievanceTicket.ISSUE_TYPE_OTHER_COMPLAINT,
-    )
-    ticket1.programs.set([program])
-
-    ticket2 = GrievanceTicketFactory(
-        description="Test 2",
-        assigned_to=user,
-        priority=1,
-        urgency=1,
-        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        language="PL",
-        status=GrievanceTicket.STATUS_NEW,
-        created_by=user2,
-        business_area=afghanistan,
-        issue_type=GrievanceTicket.ISSUE_TYPE_OTHER_COMPLAINT,
-    )
-    ticket2.programs.set([program])
-
-    return (ticket1, ticket2)
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
