@@ -284,6 +284,15 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
+    ADMIN_COLUMNS_ALL = (
+        "pp_admin1_i_c",
+        "pp_admin2_i_c",
+        "pp_admin3_i_c",
+        "admin1_h_c",
+        "admin2_h_c",
+        "admin3_h_c",
+    )
+
     def __init__(self, program: Program) -> None:
         super().__init__(program)
         self.is_social_worker_program = program.is_social_worker_program
@@ -558,6 +567,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "LIST_OF_IDS": self.list_of_integer_validator,
             }
 
+            self.sheet_title = sheet.title
+            self.switch_dict = switch_dict
+
             invalid_rows = []
             household_id_col_idx, relationship_col_idx = self._find_header_column_indices(first_row)
             identities_numbers, documents_numbers = self._init_doc_identity_dicts()
@@ -601,7 +613,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     field_type = current_field["type"]
                     type_error = self._validate_field_type(
-                        value, header.value, cell, field_type, sheet.title, switch_dict, household_id_can_be_empty
+                        value, header.value, cell, field_type, household_id_can_be_empty
                     )
                     if type_error:
                         invalid_rows.append(type_error)
@@ -730,14 +742,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def _validate_admin_column(
         self, header_value: str, cell_value: Any, row_number: int, admin_area_code_tuples: list
     ) -> dict | None:
-        people_admin_columns = (
-            "pp_admin1_i_c",
-            "pp_admin2_i_c",
-            "pp_admin3_i_c",
-        )
-        hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
-        admin_columns_all = people_admin_columns + hh_admin_columns
-        if header_value in admin_columns_all:
+        if header_value in self.ADMIN_COLUMNS_ALL:
             if cell_value:
                 admin_area_code_tuples.append((row_number, header_value, cell_value))
             # admin3 is not required for now
@@ -758,26 +763,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         header_value: str,
         cell: Cell,
         field_type: str,
-        sheet_title: str,
-        switch_dict: dict[str, Callable],
         household_id_can_be_empty: bool,
     ) -> dict | None:
-        people_admin_columns = (
-            "pp_admin1_i_c",
-            "pp_admin2_i_c",
-            "pp_admin3_i_c",
-        )
-        hh_admin_columns = ("admin1_h_c", "admin2_h_c", "admin3_h_c")
-        admin_columns_all = people_admin_columns + hh_admin_columns
-        fn: Callable = switch_dict[field_type]
+        fn: Callable = self.switch_dict[field_type]
 
         if (
             fn(value, header_value, cell) is False
             and household_id_can_be_empty is False
-            and header_value not in admin_columns_all
+            and header_value not in self.ADMIN_COLUMNS_ALL
         ):
             message = (
-                f"Sheet: {sheet_title!r}, Unexpected value: "
+                f"Sheet: {self.sheet_title!r}, Unexpected value: "
                 f"{value} for type "
                 f"{field_type.replace('_', ' ').lower()} "
                 f"of field {header_value}"
