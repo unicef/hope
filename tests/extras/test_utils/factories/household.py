@@ -173,6 +173,7 @@ class EntitlementCardFactory(DjangoModelFactory):
 class DocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = DocumentType
+        django_get_or_create = ("key",)
 
     label = factory.Sequence(lambda n: f"Document Type {n}")
     key = factory.Sequence(lambda n: f"doc_type_{n}")
