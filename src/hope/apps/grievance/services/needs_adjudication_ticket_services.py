@@ -102,7 +102,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 service.report_false_positive_duplicate(
                     photos[0],
                     photos[1],
-                    str(ticket_details.ticket.registration_data_import.program.unicef_id),
+                    str(ticket_details.ticket.registration_data_import.program.slug),
                 )
             except service.api.API_EXCEPTION_CLASS:  # pragma no cover
                 logger.exception("Failed to report false positive duplicate to Deduplication Engine")
