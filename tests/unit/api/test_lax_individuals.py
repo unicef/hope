@@ -91,6 +91,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
                     "expiry_date": "2030-01-01",
                 }
             ],
+            "originating_id": "AUR#123#123",
         }
 
         response = self.client.post(self.url, [individual_data], format="json")
@@ -107,6 +108,7 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert individual.family_name == "Doe"
         assert individual.observed_disability == ["NONE"]
         assert individual.marital_status == "SINGLE"
+        assert individual.originating_id == "AUR#123#123"
 
     def test_create_single_individual_accounts(self) -> None:
         individual_data = {

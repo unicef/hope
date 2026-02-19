@@ -179,7 +179,8 @@
             "available_funds_commitments": [],
             "payment_verification_plans": [],
             "admin_url": "/api/unicorn/payment/paymentplan/911e9fb2-a41a-4d07-97c2-29722c9d749a/change/",
-            "abort_comment": ""
+            "abort_comment": "",
+            "flat_amount_value": null
         },
         "admin_url": "/api/unicorn/payment/payment/f533f1fa-fbb4-4719-a515-6c99d493fe57/change/",
         "source_payment": null,

@@ -211,7 +211,8 @@
                 }
             ],
             "admin_url": "/api/unicorn/payment/paymentplan/f6fdb805-6ec5-476d-b72a-d0e8c13b0321/change/",
-            "abort_comment": ""
+            "abort_comment": "",
+            "flat_amount_value": null
         },
         "admin_url": "/api/unicorn/payment/payment/b318df4f-09db-4e5e-ad03-e60fbf4e0da8/change/",
         "source_payment": null,
