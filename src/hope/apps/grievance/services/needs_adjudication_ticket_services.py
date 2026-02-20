@@ -88,11 +88,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         and distinct_individuals
     ):
         photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-        if len(photos) < 2:
-            logger.error(
-                "Failed to report false positive duplicate to Deduplication Engine found just one distinct Individual"
-            )
-        else:
+        if len(photos) == 2:
             from hope.apps.registration_data.services.biometric_deduplication import (
                 BiometricDeduplicationService,
             )
@@ -104,7 +100,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                     photos[1],
                     str(ticket_details.ticket.registration_data_import.program.slug),
                 )
-            except service.api.API_EXCEPTION_CLASS:  # pragma no cover
+            except service.api.API_EXCEPTION_CLASS:
                 logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
