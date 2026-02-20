@@ -253,6 +253,7 @@ export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCame
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingEnumCamelCase } from './models/PaymentVerificationPlanSamplingEnum';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
+export type { PaymentVerificationSampleSize as PaymentVerificationSampleSizeCamelCase } from './models/PaymentVerificationSampleSize';
 export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';

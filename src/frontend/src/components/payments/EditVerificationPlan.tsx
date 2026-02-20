@@ -62,14 +62,14 @@ const TabsContainer = styled.div`
 
 export interface Props {
   paymentVerificationPlanNode: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 // Helper function to prepare sample size request for REST API
 function prepareSampleSizeRequest(
   selectedTab: number,
   formValues: any,
-  cashOrPaymentPlanId: string,
+  paymentPlanId: string,
 ): MessageSampleSize {
   const samplingType =
     selectedTab === 0
@@ -102,7 +102,7 @@ function prepareSampleSizeRequest(
       : undefined;
 
   return {
-    paymentPlan: cashOrPaymentPlanId,
+    paymentPlan: paymentPlanId,
     samplingType,
     fullListArguments,
     randomSamplingArguments,
@@ -111,7 +111,7 @@ function prepareSampleSizeRequest(
 
 export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: Props): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -182,7 +182,7 @@ export const EditVerificationPlan = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
+          id: paymentPlanId,
           programSlug: programSlug,
           verificationPlanId: paymentVerificationPlanNode.id,
           requestBody: requestData,
@@ -194,7 +194,7 @@ export const EditVerificationPlan = ({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
+          paymentPlanId,
           programSlug,
         ],
       });
@@ -268,7 +268,7 @@ export const EditVerificationPlan = ({
       const requestBody = prepareSampleSizeRequest(
         selectedTab,
         formValues,
-        cashOrPaymentPlanId,
+        paymentPlanId,
       );
 
       const result =
@@ -292,7 +292,7 @@ export const EditVerificationPlan = ({
     programSlug,
     selectedTab,
     formValues,
-    cashOrPaymentPlanId,
+    paymentPlanId,
     showMessage,
   ]);
 
@@ -360,7 +360,7 @@ export const EditVerificationPlan = ({
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
 
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${cashOrPaymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${paymentPlanId}`,
             },
           });
         }
