@@ -189,19 +189,15 @@ class TestRdiKoboCreateTask(TestCase):
         individuals = PendingIndividual.objects.all()
         assert individuals.count() == 2
 
-        # Both individuals have phone numbers without country codes ("333111445", "333444555")
-        # which are invalid per phonenumbers library
-        for individual in individuals:
-            assert individual.phone_no_valid is False, (
-                f"Expected phone_no_valid=False for {individual.full_name} with phone '{individual.phone_no}'"
-            )
-
-        # Test Testowski has phone_no_alternative "999888777" (invalid, no country code) -> False
+        # Test Testowski has phone_no "333111445" (invalid, no country code) -> False
+        # and phone_no_alternative "999888777" (invalid, no country code) -> False
         test_ind = individuals.get(full_name="Test Testowski")
+        assert test_ind.phone_no_valid is False
         assert test_ind.phone_no_alternative_valid is False
 
-        # Tesa Testowski has no phone_no_alternative -> remains None
+        # Tesa Testowski has no phone_no and no phone_no_alternative -> remains None
         tesa_ind = individuals.get(full_name="Tesa Testowski")
+        assert tesa_ind.phone_no_valid is None
         assert tesa_ind.phone_no_alternative_valid is None
 
     @mock.patch(
