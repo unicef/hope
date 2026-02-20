@@ -18,12 +18,12 @@ import { showApiErrorMessages } from '@utils/utils';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: DiscardVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -37,7 +37,7 @@ export function DiscardVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
+          id: paymentPlanId,
           programSlug: programSlug,
           verificationPlanId: paymentVerificationPlanId,
         },
@@ -48,14 +48,14 @@ export function DiscardVerificationPlan({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
+          paymentPlanId,
           programSlug,
         ],
       });
     },
   });
 
-  const discard = async(): Promise<void> => {
+  const discard = async (): Promise<void> => {
     try {
       await discardVerificationPlanMutation.mutateAsync();
       setDiscardDialogOpen(false);
