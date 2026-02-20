@@ -74,7 +74,7 @@ def test_base_api_post_success_returns_json(mock_post, api_instance):
 
     assert status_code == 200
     assert result == {"key": "value"}
-    mock_post.assert_called_once_with("http://test-hope.com/test-endpoint", json={"key": "value"})
+    mock_post.assert_called_once_with("/test-endpoint", json={"key": "value"})
 
 
 @patch.object(Session, "post")
@@ -89,7 +89,7 @@ def test_base_api_post_invalid_json_returns_empty_dict(mock_post, api_instance):
 
     assert status_code == 200
     assert result == {}
-    mock_post.assert_called_once_with("http://test-hope.com/test-endpoint", json={"key": "value"})
+    mock_post.assert_called_once_with("/test-endpoint", json={"key": "value"})
 
 
 @patch.object(Session, "get")
@@ -104,7 +104,7 @@ def test_base_api_get_success_returns_json(mock_get, api_instance):
 
     assert status_code == 200
     assert result == {"key": "value"}
-    mock_get.assert_called_once_with("http://test-hope.com/test-endpoint", params={"param": "value"})
+    mock_get.assert_called_once_with("/test-endpoint", params={"param": "value"})
 
 
 @patch.object(Session, "delete")
@@ -119,7 +119,7 @@ def test_base_api_delete_success_returns_json(mock_delete, api_instance):
 
     assert status_code == 200
     assert result == {"key": "value"}
-    mock_delete.assert_called_once_with("http://test-hope.com/test-endpoint", params={"param": "value"})
+    mock_delete.assert_called_once_with("/test-endpoint", params={"param": "value"})
 
 
 @patch.object(Session, "delete")
@@ -134,4 +134,4 @@ def test_base_api_delete_invalid_json_returns_empty_dict(mock_delete, api_instan
 
     assert status_code == 200
     assert result == {}
-    mock_delete.assert_called_once_with("http://test-hope.com/test-endpoint", params={"param": "value"})
+    mock_delete.assert_called_once_with("/test-endpoint", params={"param": "value"})

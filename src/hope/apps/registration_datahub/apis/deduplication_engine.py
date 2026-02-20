@@ -70,25 +70,27 @@ class DeduplicationEngineAPI(BaseAPI):
         IGNORED_FILENAMES = "deduplication_sets/{program_unicef_id}/ignored/filenames/"  # POST/GET
 
     def delete_deduplication_set(self, program_unicef_id: str) -> dict:
-        response_data, _ = self._delete(
-            self.Endpoints.DELETE_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id)
-        )
+        url = self.get_url(self.Endpoints.DELETE_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._delete(url)
         return response_data
 
     def create_deduplication_set(self, deduplication_set: DeduplicationSet) -> dict:
+        url = self.get_url(self.Endpoints.CREATE_DEDUPLICATION_SET)
         response_data, _ = self._post(
-            self.Endpoints.CREATE_DEDUPLICATION_SET,
+            url,
             dataclasses.asdict(deduplication_set),
         )
         return response_data
 
     def get_deduplication_set(self, program_unicef_id: str) -> dict:
-        response_data, _ = self._get(self.Endpoints.GET_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
+        url = self.get_url(self.Endpoints.GET_DEDUPLICATION_SET.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._get(url)
         return response_data
 
     def _bulk_upload_image_batch(self, program_unicef_id: str, images: tuple[DeduplicationImage, ...]) -> list:
+        url = self.get_url(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id))
         response_data, _ = self._post(
-            self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id),
+            url,
             [dataclasses.asdict(image) for image in images],
         )
         # API returns a list of objects
@@ -105,18 +107,21 @@ class DeduplicationEngineAPI(BaseAPI):
         return reduce(add, response_data, [])
 
     def bulk_delete_images(self, program_unicef_id: str) -> dict:
-        response_data, _ = self._delete(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id))
+        url = self.get_url(self.Endpoints.BULK_UPLOAD_IMAGES.format(program_unicef_id=program_unicef_id))
+        response_data, _ = self._delete(url)
         return response_data
 
     def get_duplicates(self, program_unicef_id: str, individual_ids: list[str]) -> list[dict]:
+        url = self.get_url(self.Endpoints.GET_DUPLICATES.format(program_unicef_id=program_unicef_id))
         return self._get_paginated(
-            self.Endpoints.GET_DUPLICATES.format(program_unicef_id=program_unicef_id),
+            url,
             params={"reference_pk": ",".join(individual_ids)},
         )
 
     def process_deduplication(self, program_unicef_id: str) -> tuple[dict, int]:
+        url = self.get_url(self.Endpoints.PROCESS_DEDUPLICATION.format(program_unicef_id=program_unicef_id))
         response_data, status = self._post(
-            self.Endpoints.PROCESS_DEDUPLICATION.format(program_unicef_id=program_unicef_id),
+            url,
             validate_response=False,
         )
         return response_data, status
@@ -124,13 +129,15 @@ class DeduplicationEngineAPI(BaseAPI):
     def report_false_positive_duplicate(
         self, false_positive_pair: IgnoredFilenamesPair, program_unicef_id: str
     ) -> None:
+        url = self.get_url(self.Endpoints.IGNORED_FILENAMES.format(program_unicef_id=program_unicef_id))
         self._post(
-            self.Endpoints.IGNORED_FILENAMES.format(program_unicef_id=program_unicef_id),
+            url,
             dataclasses.asdict(false_positive_pair),
         )
 
     def report_individuals_status(self, program_unicef_id: str, data: dict) -> None:
+        url = self.get_url(self.Endpoints.INDIVIDUALS_STATUS.format(program_unicef_id=program_unicef_id))
         self._post(
-            self.Endpoints.INDIVIDUALS_STATUS.format(program_unicef_id=program_unicef_id),
+            url,
             data,
         )

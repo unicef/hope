@@ -51,6 +51,9 @@ class BaseAPI:
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
+    def get_url(self, endpoint: str) -> str:
+        return f"{self.api_url}{endpoint}"
+
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
             raise self.API_EXCEPTION_CLASS(
@@ -61,11 +64,11 @@ class BaseAPI:
 
     def _post(
         self,
-        endpoint: str,
+        url: str,
         data: dict | list | None = None,
         validate_response: bool = True,
     ) -> tuple[dict, int]:
-        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
+        response = self._client.post(url, json=data)
         if validate_response:
             response = self.validate_response(response)
         try:
@@ -84,13 +87,13 @@ class BaseAPI:
             params = None  # pass params only in the first call
         return results
 
-    def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
+    def _get(self, url: str, params: dict | None = None) -> tuple[dict, int]:
+        response = self._client.get(url, params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
 
-    def _delete(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
-        response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
+    def _delete(self, url: str, params: dict | None = None) -> tuple[dict, int]:
+        response = self._client.delete(url, params=params)
         response = self.validate_response(response)
         try:
             return response.json(), response.status_code
