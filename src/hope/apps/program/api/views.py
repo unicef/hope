@@ -36,6 +36,7 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
+from hope.apps.payment.api.filters import PaymentSearchFilter
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
@@ -454,12 +455,19 @@ class ProgramViewSet(
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
-        page = self.paginate_queryset(payments)
+        filterset = PaymentSearchFilter(
+            request.GET,
+            queryset=payments,
+            request=request,
+        )
+        queryset = filterset.qs.distinct()
+
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(payments, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
