@@ -195,8 +195,14 @@ class TestRdiKoboCreateTask(TestCase):
             assert individual.phone_no_valid is False, (
                 f"Expected phone_no_valid=False for {individual.full_name} with phone '{individual.phone_no}'"
             )
-            # Neither individual has phone_no_alternative set, so it should remain None
-            assert individual.phone_no_alternative_valid is None
+
+        # Test Testowski has phone_no_alternative "999888777" (invalid, no country code) -> False
+        test_ind = individuals.get(full_name="Test Testowski")
+        assert test_ind.phone_no_alternative_valid is False
+
+        # Tesa Testowski has no phone_no_alternative -> remains None
+        tesa_ind = individuals.get(full_name="Tesa Testowski")
+        assert tesa_ind.phone_no_alternative_valid is None
 
     @mock.patch(
         "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
