@@ -1086,6 +1086,54 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+def test_api_get_delivery_mechanisms(get_mock: Any) -> None:
+    get_mock.return_value = (
+        [
+            {
+                "id": 1,
+                "code": "cash",
+                "name": "Cash",
+                "transfer_type": "CASH",
+                "account_type": None,
+            }
+        ],
+        200,
+    )
+
+    api = PaymentGatewayAPI()
+    response_data = api.get_delivery_mechanisms()
+
+    get_mock.assert_called_once_with(api.get_url(api.Endpoints.GET_DELIVERY_MECHANISMS))
+    assert isinstance(response_data[0], DeliveryMechanismData)
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+def test_api_get_records_for_payment_instruction(get_mock: Any) -> None:
+    get_mock.return_value = (
+        [
+            {
+                "id": 1,
+                "remote_id": "remote-id",
+                "created": "2024-01-01T00:00:00Z",
+                "modified": "2024-01-01T00:00:00Z",
+                "parent": "pi-remote-id",
+                "status": "PENDING",
+                "auth_code": "auth",
+                "record_code": "record",
+                "fsp_code": "fsp",
+            }
+        ],
+        200,
+    )
+
+    api = PaymentGatewayAPI()
+    response_data = api.get_records_for_payment_instruction("pi-remote-id")
+
+    get_mock.assert_called_once_with(f"{api.api_url}{api.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id=pi-remote-id")
+    assert isinstance(response_data[0], PaymentRecordData)
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
 def test_api_get_record(get_mock: Any) -> None:
     get_mock.return_value = (
         [

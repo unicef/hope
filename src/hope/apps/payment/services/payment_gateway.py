@@ -408,7 +408,7 @@ class PaymentGatewayAPI(BaseAPI):
         return AddRecordsResponseData.create_from_dict(response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> list[PaymentRecordData]:
-        url = self.api_url(f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}")
+        url = self.get_url(f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}")
         response_data, _ = self._get(url)
         return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]
 
