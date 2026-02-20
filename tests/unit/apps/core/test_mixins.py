@@ -104,7 +104,7 @@ def test_base_api_get_success_returns_json(mock_get, api_instance):
 
     assert status_code == 200
     assert result == {"key": "value"}
-    mock_get.assert_called_once_with("http://test-hope.com/test-endpoint", params={"param": "value"})
+    mock_get.assert_called_once_with("/test-endpoint", params={"param": "value"})
 
 
 @patch.object(Session, "delete")
