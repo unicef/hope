@@ -1,0 +1,18 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "POST, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "42"
+    },
+    "data": {
+        "number_of_recipients": 0,
+        "sample_size": 0
+    },
+    "content_type": "application/json"
+}
