@@ -570,34 +570,31 @@ def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplicati
     program: Any,
 ) -> None:
     rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
-    household_1 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
+    individual = household.head_of_household
+    individual.photo = ContentFile(b"abc", name="ind1.png")
+    individual.save(update_fields=["photo"])
     household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
-    individual_1 = household_1.head_of_household
     individual_2 = household_2.head_of_household
-    individual_1.photo = ContentFile(b"...", name="1.png")
-    individual_2.photo = ContentFile(b"...", name="2.png")
-    individual_1.save(update_fields=["photo"])
+    individual_2.photo = ContentFile(b"aaa", name="ind2.png")
     individual_2.save(update_fields=["photo"])
 
-    ticket, ticket_details = create_grievance_ticket_with_details(
-        main_individual=individual_1,
-        possible_duplicate=individual_2,
-        business_area=business_area,
-        registration_data_import=household_1.registration_data_import,
-        possible_duplicates=[individual_2],
-        is_multiple_duplicates_version=True,
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        dedup_engine_similarity_pair=DeduplicationEngineSimilarityPairFactory(
-            program=program,
-            individual1=individual_1,
-            individual2=individual_2,
-            similarity_score=90.55,
-            status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
-        ),
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="GrievanceTicket",
+        registration_data_import=rdi,
     )
-    ticket.registration_data_import = rdi
-    ticket.save(update_fields=["registration_data_import"])
-    ticket_details.selected_distinct.set([individual_1, individual_2])
+    grievance.programs.add(program)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=individual,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.selected_distinct.add(individual)
 
     mock_service = biometric_dedup_service_mock.return_value
 
@@ -607,10 +604,16 @@ def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplicati
     mock_service.api.API_EXCEPTION_CLASS = FakeAPIError
     mock_service.report_false_positive_duplicate.side_effect = FakeAPIError()
 
-    close_needs_adjudication_ticket_service(ticket, user)
+    # check with one Individual
+    # skip report false positive duplicate to Deduplication Engine
+    close_needs_adjudication_ticket_service(grievance, user)
+    mock_service.report_false_positive_duplicate.assert_not_called()
+
+    # process with two Inds
+    ticket_details.selected_distinct.add(individual_2)
+    close_needs_adjudication_ticket_service(grievance, user)
 
     mock_service.report_false_positive_duplicate.assert_called_once()
-
     mock_logger.exception.assert_called_once_with("Failed to report false positive duplicate to Deduplication Engine")
 
 
