@@ -55,7 +55,7 @@ pytestmark = pytest.mark.django_db
 def mock_payment_gateway_env_vars() -> None:
     with mock.patch.dict(
         os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
+        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST/"},
     ):
         yield
 
@@ -745,7 +745,7 @@ def test_api_add_records_to_payment_instruction(
     payment_plan.save()
     PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
     post_mock.assert_called_once_with(
-        "payment_instructions/123/add_records/",
+        "TEST/payment_instructions/123/add_records/",
         [
             {
                 "remote_id": str(payments[0].id),
@@ -814,7 +814,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
 
     PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
     post_mock.assert_called_once_with(
-        "payment_instructions/123/add_records/",
+        "TEST/payment_instructions/123/add_records/",
         [
             {
                 "remote_id": str(payments[0].id),
@@ -933,7 +933,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     }
     PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
     actual_args, actual_kwargs = post_mock.call_args
-    assert actual_args[0] == "payment_instructions/123/add_records/"
+    assert actual_args[0] == "TEST/payment_instructions/123/add_records/"
     assert normalize(actual_args[1][0]) == normalize(expected_body)
     assert actual_kwargs["validate_response"] is True
 
@@ -971,7 +971,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     expected_body["extra_data"] = payments[0].household_snapshot.snapshot_data
 
     actual_args, actual_kwargs = post_mock.call_args
-    assert actual_args[0] == "payment_instructions/123/add_records/"
+    assert actual_args[0] == "TEST/payment_instructions/123/add_records/"
     assert normalize(actual_args[1][0]) == normalize(expected_body)
     assert actual_kwargs["validate_response"] is True
     post_mock.reset_mock()
