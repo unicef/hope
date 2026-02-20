@@ -361,6 +361,41 @@ class CreateLaxIndividualsTests(HOPEApiTestCase):
         assert document.photo.name.startswith(self.program.programme_code)
         assert document.photo.name.endswith(".png")
 
+    def test_phone_number_validation_flags(self) -> None:
+        individuals_data = [
+            {
+                "individual_id": "IND_VALID_PHONE",
+                "full_name": "Valid Phone",
+                "given_name": "Valid",
+                "family_name": "Phone",
+                "birth_date": "1990-01-01",
+                "sex": "MALE",
+                "phone_no": "+48609456789",
+                "phone_no_alternative": "+48500100200",
+            },
+            {
+                "individual_id": "IND_NO_PHONE",
+                "full_name": "No Phone",
+                "given_name": "No",
+                "family_name": "Phone",
+                "birth_date": "1990-01-01",
+                "sex": "MALE",
+            },
+        ]
+
+        response = self.client.post(self.url, individuals_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+        assert response.data["accepted"] == 2
+
+        valid = PendingIndividual.objects.get(full_name="Valid Phone")
+        assert valid.phone_no_valid is True
+        assert valid.phone_no_alternative_valid is True
+
+        no_phone = PendingIndividual.objects.get(full_name="No Phone")
+        # calculate_phone_numbers_validity always runs; empty string is invalid
+        assert no_phone.phone_no_valid is False
+        assert no_phone.phone_no_alternative_valid is False
+
     def test_file_cleanup_on_failure(self) -> None:
         individual_data = {
             "individual_id": "IND_CLEANUP",

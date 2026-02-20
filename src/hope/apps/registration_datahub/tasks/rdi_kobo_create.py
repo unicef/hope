@@ -31,6 +31,7 @@ from hope.apps.registration_datahub.utils import (
     find_attachment_in_kobo,
 )
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
+from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import (
     Account,
     Area,
@@ -373,6 +374,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.set_admin_areas(save=False)
         households_to_create.append(household_obj)
         self._set_registration_date_and_detail_id(current_individuals, household_obj, registration_date)
+        for individual in individuals_to_create_list:
+            if individual.phone_no:
+                individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
+            if individual.phone_no_alternative:
+                individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
         PendingIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_documents_and_identities(documents_and_identities_to_create)
 
