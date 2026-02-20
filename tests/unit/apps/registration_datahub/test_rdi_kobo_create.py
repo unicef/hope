@@ -179,6 +179,31 @@ class TestRdiKoboCreateTask(TestCase):
         "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
+    def test_phone_number_validation_flags(self) -> None:
+        self.business_area.postpone_deduplication = True
+        self.business_area.save()
+
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+        task.execute(self.import_data.id, self.program.id)
+
+        individuals = PendingIndividual.objects.all()
+        assert individuals.count() == 2
+
+        # Test Testowski has phone_no "333111445" (invalid, no country code) -> False
+        # and phone_no_alternative "999888777" (invalid, no country code) -> False
+        test_ind = individuals.get(full_name="Test Testowski")
+        assert test_ind.phone_no_valid is False
+        assert test_ind.phone_no_alternative_valid is False
+
+        # Tesa Testowski has no phone_no and no phone_no_alternative -> remains None
+        tesa_ind = individuals.get(full_name="Tesa Testowski")
+        assert tesa_ind.phone_no_valid is None
+        assert tesa_ind.phone_no_alternative_valid is None
+
+    @mock.patch(
+        "hope.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        _return_test_image,
+    )
     def test_execute_multiple_collectors(self) -> None:
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.execute(self.import_data_collectors.id, self.program.id)

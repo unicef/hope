@@ -283,6 +283,45 @@ class TestGenericRegistrationService(TestCase):
         assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
         assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count() == 1
 
+    def test_phone_number_validation_flags(self) -> None:
+        individual_valid_phone = {
+            **self.individual_with_bank_account_and_tax_and_disability,
+            "phone_no_i_c": "+393892781511",
+        }
+        individual_no_phone = {
+            **self.individual_with_no_tax,
+            "given_name_i_c": "NoPhone",
+            "family_name_i_c": "Test",
+            "phone_no_i_c": "",
+            "email": "no_phone@mail.com",
+        }
+        records = Record.objects.bulk_create(
+            [
+                Record(
+                    **self.defaults,
+                    source_id=10,
+                    fields={"household": self.household, "individuals": [individual_valid_phone]},
+                    files=json.dumps(self.files).encode(),
+                ),
+                Record(
+                    **self.defaults,
+                    source_id=11,
+                    fields={"household": self.household, "individuals": [individual_no_phone]},
+                    files=json.dumps({}).encode(),
+                ),
+            ]
+        )
+        service = GenericRegistrationService(self.registration)
+        rdi = service.create_rdi(self.user, f"generic rdi phone {datetime.datetime.now()}")
+        service.process_records(rdi.id, [r.id for r in records])
+
+        valid = PendingIndividual.objects.get(given_name="Jan")
+        assert valid.phone_no_valid is True
+
+        no_phone = PendingIndividual.objects.get(given_name="NoPhone")
+        # Empty phone_no through form.save() triggers recalculate_phone_numbers_validity
+        assert no_phone.phone_no_valid is False
+
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
             Record(
