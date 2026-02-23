@@ -114,6 +114,7 @@ class ProgramViewSet(
         "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "deduplication_flags": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
+        "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
     queryset = Program.objects.all()
     serializer_classes_by_action = {
