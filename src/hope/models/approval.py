@@ -46,8 +46,7 @@ class Approval(TimeStampedUUIDModel):
 
         return (
             f"{types_map.get(self.type)} by "
-            f"{user.first_name} {user.last_name}"
-            + (f" ({user.job_title})" if user.job_title else "")
+            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
             if (user := self.created_by)
             else types_map.get(self.type, "")
         )

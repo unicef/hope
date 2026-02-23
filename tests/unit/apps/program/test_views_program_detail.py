@@ -14,6 +14,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     FlexibleAttributeForPDUFactory,
     PartnerFactory,
+    PaymentFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -42,6 +43,15 @@ def afghanistan(db: Any) -> BusinessArea:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        partner_access=Program.SELECTED_PARTNERS_ACCESS,
+    )
+
+
+@pytest.fixture
+def program_2(afghanistan: BusinessArea) -> Program:
     return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
@@ -137,9 +147,58 @@ def payment_plan(program: Program) -> PaymentPlan:
 
 
 @pytest.fixture
+def payment_plan_2(program_2: Program) -> PaymentPlan:
+    program_cycle = ProgramCycleFactory(program=program_2)
+    return PaymentPlanFactory(program_cycle=program_cycle)
+
+
+@pytest.fixture
+def payments(afghanistan: BusinessArea, payment_plan: PaymentPlan, payment_plan_2: PaymentPlan):
+    # program 1
+    p1 = PaymentFactory(
+        business_area=afghanistan,
+        parent=payment_plan,
+    )
+    p2 = PaymentFactory(
+        business_area=afghanistan,
+        parent=payment_plan,
+        currency="PLN",
+    )
+    # program 2
+    p3 = PaymentFactory(
+        business_area=afghanistan,
+        parent=payment_plan_2,
+        currency="PLN",
+    )
+    return p1, p2, p3
+
+
+@pytest.fixture
 def detail_url(afghanistan: BusinessArea, program: Program) -> str:
     return reverse(
         "api:programs:programs-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "slug": program.slug,
+        },
+    )
+
+
+@pytest.fixture
+def payments_url(afghanistan: BusinessArea, program: Program, payments) -> str:
+    return reverse(
+        "api:programs:programs-payments",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "slug": program.slug,
+        },
+    )
+
+
+@pytest.fixture
+def payments_count_url(afghanistan: BusinessArea, program: Program, payments) -> str:
+    return reverse(
+        "api:programs:programs-payments-count",
         kwargs={
             "business_area_slug": afghanistan.slug,
             "slug": program.slug,
@@ -317,46 +376,39 @@ def test_program_detail(
     assert response_data["population_goal"] == program.population_goal
 
 
-def test_program_detail_can_import_rdi(
+def test_program_detail_get_payments(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    detail_url: str,
+    payments_url: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        [Permissions.PM_VIEW_PAYMENT_LIST],
         afghanistan,
         program,
     )
-    program.biometric_deduplication_enabled = True
-    program.save()
-
-    # No registration data imports
-    response = authenticated_client.get(detail_url)
+    response = authenticated_client.get(payments_url)
     assert response.status_code == status.HTTP_200_OK
-    response_data = response.json()
-    assert response_data["can_import_rdi"] is True
+    assert len(response.json()["results"]) == 2
 
-    # Deduplicated RDI in review
-    rdi = RegistrationDataImportFactory(
-        program=program,
-        business_area=afghanistan,
-        status=RegistrationDataImport.IN_REVIEW,
-        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+
+def test_program_get_payments_count(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    payments_count_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_LIST],
+        afghanistan,
+        program,
     )
-
-    response = authenticated_client.get(detail_url)
+    response = authenticated_client.get(payments_count_url)
     assert response.status_code == status.HTTP_200_OK
-    response_data = response.json()
-    assert response_data["can_import_rdi"] is False
-
-    # Deduplicated RDI merged
-    rdi.status = RegistrationDataImport.MERGED
-    rdi.save()
-    response = authenticated_client.get(detail_url)
-    assert response.status_code == status.HTTP_200_OK
-    response_data = response.json()
-    assert response_data["can_import_rdi"] is True
+    assert response.json()["count"] == 2
