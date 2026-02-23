@@ -513,3 +513,28 @@ def test_process_individual_try_except(business_area: object, registration_data_
             submission_meta_data=submission_meta_data,
             household_count=1,
         )
+
+
+def test_phone_number_validation_flags(
+    business_area: object,
+    registration_data_import: object,
+    import_data: object,
+    program: object,
+) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        side_effect=_mock_get_attached_file(),
+    ):
+        task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+        task.execute(import_data.id, program.id)
+
+    individuals = PendingIndividual.objects.all()
+    assert individuals.count() == 2
+
+    test_ind = individuals.get(full_name="Test Testowski")
+    assert test_ind.phone_no_valid is False
+    assert test_ind.phone_no_alternative_valid is False
+
+    tesa_ind = individuals.get(full_name="Tesa Testowski")
+    assert tesa_ind.phone_no_valid is None
+    assert tesa_ind.phone_no_alternative_valid is None
