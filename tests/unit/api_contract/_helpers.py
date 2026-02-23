@@ -50,6 +50,16 @@ class HopeRecorder(Recorder):
         pass
 
 
+class JsonPostRecorder(HopeRecorder):
+    """Recorder for POST endpoints that send JSON bodies."""
+
+    @property
+    def client(self):
+        c = super().client
+        c.default_format = "json"
+        return c
+
+
 class PostRecorder(HopeRecorder):
     """Recorder for POST endpoints where newly-created object IDs are non-deterministic."""
 

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any
 
 from django import forms
@@ -17,6 +18,16 @@ from hope.models.document_type import DocumentType
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment import Payment, logger
 from hope.models.utils import TimeStampedUUIDModel
+
+
+@dataclass
+class SnapshotContext:
+    household_data: dict[str, Any]
+    primary_collector: dict[str, Any]
+    alternate_collector: dict[str, Any]
+    collector_data: dict[str, Any]
+    admin_areas_dict: dict[str, dict[str, Any]]
+    countries_dict: dict[str, dict[str, Any]]
 
 
 class FlexFieldArrayField(ArrayField):
@@ -121,45 +132,39 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @staticmethod
     def _resolve_snapshot_field(
-        household_data: dict[str, Any],
         snapshot_field_path: str,
-        primary_collector: dict[str, Any],
-        alternate_collector: dict[str, Any],
-        collector_data: dict[str, Any],
-        admin_areas_dict: dict[str, dict[str, Any]],
-        countries_dict: dict[str, dict[str, Any]],
+        ctx: SnapshotContext,
     ) -> str | None:
         snapshot_field_path_split = snapshot_field_path.split("__")
-        main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
+        main_key = snapshot_field_path_split[0] if len(snapshot_field_path_split) > 0 else None
 
         area_keys = {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}
         country_keys = {"country_origin_id", "country_id"}
         if main_key in country_keys:
-            country = countries_dict.get(household_data.get(main_key))  # type: ignore
+            country = ctx.countries_dict.get(ctx.household_data.get(main_key))  # type: ignore
             return country["iso_code3"] if country else None
 
         if main_key in area_keys:
-            area = admin_areas_dict.get(household_data.get(main_key))  # type: ignore
+            area = ctx.admin_areas_dict.get(ctx.household_data.get(main_key))  # type: ignore
             return f"{area['p_code']} - {area['name']}" if area else None
 
         if main_key == "roles":
-            lookup_id = primary_collector.get("id") or alternate_collector.get("id")
+            lookup_id = ctx.primary_collector.get("id") or ctx.alternate_collector.get("id")
             if lookup_id:
-                for role in household_data.get("roles", []):
+                for role in ctx.household_data.get("roles", []):
                     individual = role.get("individual", {})
                     if individual.get("id") == lookup_id:
                         return role.get("role")
-            return None
 
         if main_key in {"primary_collector", "alternate_collector"}:
-            return household_data.get(main_key, {}).get("id")
+            return ctx.household_data.get(main_key, {}).get("id")
 
         if main_key == "documents":
             doc_type, doc_lookup = (
                 snapshot_field_path_split[1],
                 snapshot_field_path_split[2],
             )
-            documents_list = collector_data.get("documents", [])
+            documents_list = ctx.collector_data.get("documents", [])
             documents_dict = {doc.get("type"): doc for doc in documents_list}
             return documents_dict.get(doc_type, {}).get(doc_lookup)
 
@@ -179,14 +184,17 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         lookup = core_field["lookup"]
         snapshot_field_path = core_field.get("snapshot_field")
         if snapshot_field_path:
+            ctx = SnapshotContext(
+                household_data=household_data,
+                primary_collector=primary_collector,
+                alternate_collector=alternate_collector,
+                collector_data=collector_data,
+                admin_areas_dict=admin_areas_dict,
+                countries_dict=countries_dict,
+            )
             return FinancialServiceProviderXlsxTemplate._resolve_snapshot_field(
-                household_data,
                 snapshot_field_path,
-                primary_collector,
-                alternate_collector,
-                collector_data,
-                admin_areas_dict,
-                countries_dict,
+                ctx,
             )
 
         if core_field["associated_with"] == _INDIVIDUAL:

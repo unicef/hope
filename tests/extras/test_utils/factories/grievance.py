@@ -4,20 +4,25 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
+    TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNote,
     TicketPaymentVerificationDetails,
+    TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
 from hope.models import PaymentVerification
 
 from .core import BusinessAreaFactory
-from .household import IndividualFactory
+from .household import HouseholdFactory, IndividualFactory
 from .sanction_list import SanctionListIndividualFactory
 
 
@@ -54,6 +59,17 @@ class TicketComplaintDetailsFactory(DjangoModelFactory):
     )
 
 
+class TicketReferralDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketReferralDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+    )
+
+
 class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
@@ -77,6 +93,20 @@ class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
 
 
+class TicketAddIndividualDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketAddIndividualDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+    household = factory.SubFactory(HouseholdFactory)
+    individual_data = factory.LazyFunction(dict)
+    approve_status = True
+
+
 class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
     class Meta:
         model = TicketDeleteHouseholdDetails
@@ -86,6 +116,19 @@ class TicketDeleteHouseholdDetailsFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
     )
+
+
+class TicketHouseholdDataUpdateDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketHouseholdDataUpdateDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+    )
+    household = factory.SubFactory(HouseholdFactory)
+    household_data = factory.LazyFunction(dict)
 
 
 class TicketSystemFlaggingDetailsFactory(DjangoModelFactory):
@@ -133,3 +176,21 @@ class TicketIndividualDataUpdateDetailsFactory(DjangoModelFactory):
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
     individual = factory.SubFactory(IndividualFactory)
+
+
+class GrievanceDocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = GrievanceDocument
+
+    name = factory.Sequence(lambda n: f"Document {n}")
+    grievance_ticket = factory.SubFactory(GrievanceTicketFactory)
+    content_type = "image/jpeg"
+    file_size = 1024
+
+
+class TicketNoteFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNote
+
+    ticket = factory.SubFactory(GrievanceTicketFactory)
+    description = factory.Sequence(lambda n: f"Note {n}")

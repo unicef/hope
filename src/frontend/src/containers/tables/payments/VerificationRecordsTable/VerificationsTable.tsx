@@ -21,7 +21,6 @@ interface VerificationsTableProps {
 }
 
 export function VerificationsTable({
-  // ...existing code...
   paymentPlanId,
   filter,
   canViewRecordDetails,

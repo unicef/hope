@@ -179,9 +179,7 @@ class ImportDataInstanceValidator:
             error["row_number"] = row_number
         return error
 
-    def _validate_other_id_docs(
-        self, values: dict, key_name: str, issuing_countries: list, is_xlsx: bool
-    ) -> list:
+    def _validate_other_id_docs(self, values: dict, key_name: str, issuing_countries: list, is_xlsx: bool) -> list:
         errors = []
         for name, value, validation_data, issuing_country in zip(
             values["names"],
@@ -243,8 +241,7 @@ class ImportDataInstanceValidator:
                             invalid_rows.append(
                                 self._make_doc_error(
                                     key_name,
-                                    f"Issuing country for {key_name} is required,"
-                                    f" when any document data are provided",
+                                    f"Issuing country for {key_name} is required, when any document data are provided",
                                     row_number,
                                     is_xlsx,
                                 )
@@ -589,16 +586,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             household_id_can_be_empty = header.value == "household_id" and self.sheet_title != "Households"
 
-            admin_error = self._validate_admin_column(
-                header.value, cell.value, cell.row, admin_area_code_tuples
-            )
+            admin_error = self._validate_admin_column(header.value, cell.value, cell.row, admin_area_code_tuples)
             if admin_error:
                 errors.append(admin_error)
 
             field_type = current_field["type"]
-            type_error = self._validate_field_type(
-                value, header.value, cell, field_type, household_id_can_be_empty
-            )
+            type_error = self._validate_field_type(value, header.value, cell, field_type, household_id_can_be_empty)
             if type_error:
                 errors.append(type_error)
 
@@ -648,9 +641,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 )
 
                 row_number = row[0].row
-                invalid_rows.extend(
-                    self._validate_row_cells(row, first_row, combined_fields, admin_area_code_tuples)
-                )
+                invalid_rows.extend(self._validate_row_cells(row, first_row, combined_fields, admin_area_code_tuples))
 
                 household_ref_error = self._validate_row_household_reference(current_household_id, row_number)
                 if household_ref_error:

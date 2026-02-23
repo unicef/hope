@@ -16,6 +16,7 @@ export type { AddIndividualData as AddIndividualDataCamelCase } from './models/A
 export type { AddIndividualIssueTypeExtras as AddIndividualIssueTypeExtrasCamelCase } from './models/AddIndividualIssueTypeExtras';
 export type { Age as AgeCamelCase } from './models/Age';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
+export type { ApplyFlatAmountEntitlement as ApplyFlatAmountEntitlementCamelCase } from './models/ApplyFlatAmountEntitlement';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
 export type { Area as AreaCamelCase } from './models/Area';
 export type { AreaChildrenTree as AreaChildrenTreeCamelCase } from './models/AreaChildrenTree';
@@ -253,6 +254,7 @@ export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCame
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingEnumCamelCase } from './models/PaymentVerificationPlanSamplingEnum';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
+export type { PaymentVerificationSampleSize as PaymentVerificationSampleSizeCamelCase } from './models/PaymentVerificationSampleSize';
 export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';

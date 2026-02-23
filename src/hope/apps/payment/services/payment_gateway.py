@@ -245,7 +245,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
         mapping = {
             "PENDING": Payment.STATUS_SENT_TO_PG,
             "TRANSFERRED_TO_FSP": Payment.STATUS_SENT_TO_FSP,
-            "TRANSFERRED_TO_BENEFICIARY": lambda: get_transferred_status_based_on_delivery_amount(),
+            "TRANSFERRED_TO_BENEFICIARY": get_transferred_status_based_on_delivery_amount,
             "REFUND": Payment.STATUS_NOT_DISTRIBUTED,
             "PURGED": Payment.STATUS_NOT_DISTRIBUTED,
             "ERROR": Payment.STATUS_ERROR,
@@ -468,9 +468,7 @@ class PaymentGatewayService:
     def _add_records_to_container(self, payments: QuerySet[Payment], container: PaymentPlanSplit) -> None:
         add_records_error = None
         for payments_chunk in chunks(payments, self.ADD_RECORDS_CHUNK_SIZE):
-            response = self.api.add_records_to_payment_instruction(
-                payments_chunk, container.id, validate_response=True
-            )
+            response = self.api.add_records_to_payment_instruction(payments_chunk, container.id, validate_response=True)
             if response.errors:
                 add_records_error = response.errors
                 self._handle_pg_errors(response, payments_chunk)

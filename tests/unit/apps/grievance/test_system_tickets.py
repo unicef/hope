@@ -1,55 +1,48 @@
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.grievance import (
-    GrievanceTicketFactory,
+import pytest
+
+from extras.test_utils.factories import (
+    IndividualFactory,
+    SanctionListIndividualFactory,
     TicketSystemFlaggingDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.household import create_household
-from extras.test_utils.old_factories.sanction_list import SanctionListIndividualFactory
-from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.services.system_ticket_service import (
-    close_system_flagging_ticket_service,
-)
+from hope.apps.grievance.services.system_ticket_service import close_system_flagging_ticket_service
 from hope.models import Individual
 
+pytestmark = pytest.mark.django_db
 
-class TestSystemTickets(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        _, individuals = create_household({"size": 1})
-        cls.individual = individuals[0]
 
-        cls.grievance_ticket = GrievanceTicketFactory(
-            id="43c59eda-6664-41d6-9339-05efcb11da82",
-            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        cls.sanction_list_individual = SanctionListIndividualFactory.create()
+@pytest.fixture
+def system_ticket_context() -> dict:
+    user = UserFactory()
+    individual = IndividualFactory()
+    sanction_list_individual = SanctionListIndividualFactory()
+    return {
+        "user": user,
+        "individual": individual,
+        "sanction_list_individual": sanction_list_individual,
+    }
 
-    def test_close_system_flagging_ticket_with_approve_status(self) -> None:
-        ticket_details = TicketSystemFlaggingDetailsFactory(
-            ticket=self.grievance_ticket,
-            golden_records_individual=self.individual,
-            sanction_list_individual=self.sanction_list_individual,
-            approve_status=True,
-        )
 
-        close_system_flagging_ticket_service(ticket_details.ticket, self.user)
-        individual = Individual.objects.get(pk=self.individual.pk)
-        assert individual.sanction_list_confirmed_match
+def test_close_system_flagging_ticket_with_approve_status(system_ticket_context: dict) -> None:
+    ticket_details = TicketSystemFlaggingDetailsFactory(
+        golden_records_individual=system_ticket_context["individual"],
+        sanction_list_individual=system_ticket_context["sanction_list_individual"],
+        approve_status=True,
+    )
 
-    def test_close_system_flagging_ticket_without_approve_status(self) -> None:
-        ticket_details = TicketSystemFlaggingDetailsFactory(
-            ticket=self.grievance_ticket,
-            golden_records_individual=self.individual,
-            sanction_list_individual=self.sanction_list_individual,
-            approve_status=False,
-        )
+    close_system_flagging_ticket_service(ticket_details.ticket, system_ticket_context["user"])
+    individual = Individual.objects.get(pk=system_ticket_context["individual"].pk)
+    assert individual.sanction_list_confirmed_match
 
-        close_system_flagging_ticket_service(ticket_details.ticket, self.user)
-        individual = Individual.objects.get(pk=self.individual.pk)
-        assert not individual.sanction_list_confirmed_match
+
+def test_close_system_flagging_ticket_without_approve_status(system_ticket_context: dict) -> None:
+    ticket_details = TicketSystemFlaggingDetailsFactory(
+        golden_records_individual=system_ticket_context["individual"],
+        sanction_list_individual=system_ticket_context["sanction_list_individual"],
+        approve_status=False,
+    )
+
+    close_system_flagging_ticket_service(ticket_details.ticket, system_ticket_context["user"])
+    individual = Individual.objects.get(pk=system_ticket_context["individual"].pk)
+    assert not individual.sanction_list_confirmed_match

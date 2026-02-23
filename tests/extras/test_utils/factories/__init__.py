@@ -28,13 +28,18 @@ from .core import (
 from .geo import AreaFactory, AreaTypeFactory, CountryFactory
 from .grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
+    GrievanceDocumentFactory,
     GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
     TicketComplaintDetailsFactory,
     TicketDeleteHouseholdDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
+    TicketNoteFactory,
     TicketPaymentVerificationDetailsFactory,
+    TicketReferralDetailsFactory,
     TicketSensitiveDetailsFactory,
     TicketSystemFlaggingDetailsFactory,
 )
@@ -81,7 +86,12 @@ from .periodic_data_update import (
     PDUXlsxUploadFactory,
 )
 from .program import ProgramCycleFactory, ProgramFactory
-from .registration_data import ImportDataFactory, KoboImportDataFactory, RegistrationDataImportFactory
+from .registration_data import (
+    DeduplicationEngineSimilarityPairFactory,
+    ImportDataFactory,
+    KoboImportDataFactory,
+    RegistrationDataImportFactory,
+)
 from .sanction_list import SanctionListFactory, SanctionListIndividualFactory
 from .steficon import RuleCommitFactory, RuleFactory
 from .targeting import (
@@ -111,16 +121,23 @@ __all__ = [
     "FlexibleAttributeChoiceFactory",
     "FlexibleAttributeFactory",
     "FlexibleAttributeForPDUFactory",
+    "GrievanceDocumentFactory",
     "GrievanceTicketFactory",
     "GrievanceComplaintTicketWithoutExtrasFactory",
+    "TicketAddIndividualDetailsFactory",
     "TargetingIndividualRuleFilterBlockFactory",
     "TargetingIndividualBlockRuleFilterFactory",
     "TicketDeleteHouseholdDetailsFactory",
     "TicketDeleteIndividualDetailsFactory",
+    "TicketAddIndividualDetailsFactory",
+    "TicketHouseholdDataUpdateDetailsFactory",
     "TicketComplaintDetailsFactory",
+    "TicketHouseholdDataUpdateDetailsFactory",
     "TicketIndividualDataUpdateDetailsFactory",
     "TicketNeedsAdjudicationDetailsFactory",
+    "TicketNoteFactory",
     "TicketPaymentVerificationDetailsFactory",
+    "TicketReferralDetailsFactory",
     "TicketSensitiveDetailsFactory",
     "TicketSystemFlaggingDetailsFactory",
     "DocumentFactory",
@@ -130,6 +147,7 @@ __all__ = [
     "HouseholdCollectionFactory",
     "IndividualCollectionFactory",
     "ImportDataFactory",
+    "DeduplicationEngineSimilarityPairFactory",
     "IndividualFactory",
     "IndividualIdentityFactory",
     "IndividualRoleInHouseholdFactory",

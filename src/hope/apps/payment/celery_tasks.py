@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 import logging
 from typing import Any
 
@@ -273,6 +274,51 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 
     except Exception as e:
         logger.exception("PaymentPlan Unexpected Error import from xlsx")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_set_entitlement_flat_amount(self: Any, payment_plan_id: str) -> None:
+    try:
+        from hope.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        try:
+            with transaction.atomic():
+                exchange_rate = payment_plan.exchange_rate
+                flat_amount_value = payment_plan.flat_amount_value
+                entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=flat_amount_value,
+                    currency=payment_plan.currency,
+                    exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
+                # update values
+                payment_plan.eligible_payments.update(
+                    entitlement_quantity=flat_amount_value,
+                    entitlement_quantity_usd=entitlement_quantity_usd,
+                    entitlement_date=timezone.now(),
+                )
+                # update background_action_status and money fields
+                flow = PaymentPlanFlow(payment_plan)
+                flow.background_action_status_none()
+                payment_plan.remove_export_files()
+                payment_plan.save()
+                payment_plan.update_money_fields()
+            # invalidate cache for program cycle list
+            payment_plan.program_cycle.save()
+        except Exception as e:
+            logger.exception("PaymentPlan Error set entitlement flat amount")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_import_error()
+            payment_plan.save()
+            raise self.retry(exc=e)
+
+    except Exception as e:
+        logger.exception("PaymentPlan Unexpected Error from set entitlement flat amount")
         raise self.retry(exc=e)
 
 

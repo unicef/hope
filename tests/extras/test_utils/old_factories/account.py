@@ -26,8 +26,8 @@ class PartnerFactory(DjangoModelFactory):
 
 
 class BusinessAreaFactory(DjangoModelFactory):
-    name = factory.Sequence(lambda x: "BusinessArea{}".format(x))
-    code = factory.Sequence(lambda x: str(x))
+    name = factory.Sequence("BusinessArea{}".format)
+    code = factory.Sequence(str)
     active = True
 
     class Meta:

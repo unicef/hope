@@ -1,1 +1,1 @@
-export { Entitlement } from './Entitlement';
+export { default } from './Entitlement';

@@ -686,6 +686,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payment_verification_plans",
             "admin_url",
             "abort_comment",
+            "flat_amount_value",
         )
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
@@ -1346,6 +1347,11 @@ class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
 
 
+class PaymentVerificationSampleSizeSerializer(serializers.Serializer):
+    number_of_recipients = serializers.IntegerField(read_only=True)
+    sample_size = serializers.IntegerField(read_only=True)
+
+
 class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
@@ -1473,6 +1479,11 @@ class TargetPopulationCopySerializer(serializers.Serializer):
 
 class ApplyEngineFormulaSerializer(serializers.Serializer):
     engine_formula_rule_id = serializers.CharField()
+    version = serializers.IntegerField(required=False)
+
+
+class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
+    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     version = serializers.IntegerField(required=False)
 
 

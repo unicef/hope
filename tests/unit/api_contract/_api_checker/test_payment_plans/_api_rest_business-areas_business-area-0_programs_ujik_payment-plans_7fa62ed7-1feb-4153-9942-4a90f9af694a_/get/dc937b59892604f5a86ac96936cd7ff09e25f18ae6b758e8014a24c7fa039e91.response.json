@@ -133,7 +133,8 @@
         "available_funds_commitments": [],
         "payment_verification_plans": [],
         "admin_url": "/api/unicorn/payment/paymentplan/7fa62ed7-1feb-4153-9942-4a90f9af694a/change/",
-        "abort_comment": ""
+        "abort_comment": "",
+        "flat_amount_value": null
     },
     "content_type": "application/json"
 }

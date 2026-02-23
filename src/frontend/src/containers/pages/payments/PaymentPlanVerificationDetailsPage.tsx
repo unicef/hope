@@ -175,7 +175,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       <>
         {canCreate && (
           <CreateVerificationPlan
-            cashOrPaymentPlanId={paymentPlan.id}
+            paymentPlanId={paymentPlan.id}
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }

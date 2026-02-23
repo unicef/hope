@@ -98,6 +98,7 @@ class PaymentPlan(
             "excluded_ids",
             "abort_comment",
             "reconciliation_import_file",
+            "flat_amount_value",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -181,6 +182,10 @@ class PaymentPlan(
         XLSX_IMPORTING_ENTITLEMENTS = (
             "XLSX_IMPORTING_ENTITLEMENTS",
             "Importing Entitlements XLSX file",
+        )
+        IMPORTING_ENTITLEMENTS = (
+            "IMPORTING_ENTITLEMENTS",
+            "Importing Entitlements flat amount",
         )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
@@ -380,6 +385,14 @@ class PaymentPlan(
         max_length=255,
         blank=True,
         help_text="Reason for aborting",
+    )
+    flat_amount_value = models.DecimalField(
+        decimal_places=2,
+        max_digits=15,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
+        help_text="Apply a fixed amount of entitlement for all payment records within a payment plan",
     )
     # System fields
     status = models.CharField(
@@ -599,10 +612,10 @@ class PaymentPlan(
             )
 
     def is_population_open(self) -> bool:
-        return self.status in (self.Status.TP_OPEN,)
+        return self.status == self.Status.TP_OPEN
 
     def is_population_finalized(self) -> bool:
-        return self.status in (self.Status.TP_PROCESSING,)
+        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (
