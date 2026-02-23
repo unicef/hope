@@ -9131,6 +9131,7 @@ export class RestService {
         paymentPlanPk,
         programSlug,
         collectorFullName,
+        collectorId,
         householdUnicefId,
         individualUnicefId,
         limit,
@@ -9141,6 +9142,7 @@ export class RestService {
         paymentPlanPk: string,
         programSlug: string,
         collectorFullName?: string,
+        collectorId?: string,
         householdUnicefId?: string,
         individualUnicefId?: string,
         /**
@@ -9163,6 +9165,7 @@ export class RestService {
             },
             query: {
                 'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
                 'limit': limit,
@@ -9262,6 +9265,7 @@ export class RestService {
         paymentPlanPk,
         programSlug,
         collectorFullName,
+        collectorId,
         householdUnicefId,
         individualUnicefId,
         paymentUnicefId,
@@ -9270,6 +9274,7 @@ export class RestService {
         paymentPlanPk: string,
         programSlug: string,
         collectorFullName?: string,
+        collectorId?: string,
         householdUnicefId?: string,
         individualUnicefId?: string,
         paymentUnicefId?: string,
@@ -9284,6 +9289,7 @@ export class RestService {
             },
             query: {
                 'collector_full_name': collectorFullName,
+                'collector_id': collectorId,
                 'household_unicef_id': householdUnicefId,
                 'individual_unicef_id': individualUnicefId,
                 'payment_unicef_id': paymentUnicefId,
