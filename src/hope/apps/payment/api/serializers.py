@@ -686,6 +686,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payment_verification_plans",
             "admin_url",
             "abort_comment",
+            "flat_amount_value",
         )
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
@@ -1216,6 +1217,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_collector_name",
             "transaction_reference_id",
             "snapshot_collector_account_data",
+            "extras",
         )
 
     @staticmethod
@@ -1477,6 +1479,11 @@ class TargetPopulationCopySerializer(serializers.Serializer):
 
 class ApplyEngineFormulaSerializer(serializers.Serializer):
     engine_formula_rule_id = serializers.CharField()
+    version = serializers.IntegerField(required=False)
+
+
+class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
+    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     version = serializers.IntegerField(required=False)
 
 

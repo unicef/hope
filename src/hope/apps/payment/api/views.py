@@ -52,6 +52,7 @@ from hope.apps.payment.api.filters import (
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
@@ -91,6 +92,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
+    payment_plan_set_entitlement_flat_amount,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -691,6 +693,7 @@ class PaymentPlanViewSet(
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
+        "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
@@ -722,6 +725,10 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        "entitlement_flat_amount": [
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+        ],
         "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
         "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -1061,6 +1068,44 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        request=ApplyFlatAmountEntitlementSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="entitlement-flat-amount",
+    )
+    @transaction.atomic
+    def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise ValidationError("User can only set entitlements for LOCKED Payment Plan")
+        if payment_plan.background_action_status is not None:
+            raise ValidationError("Import in progress")
+
+        if serializer.is_valid():
+            flat_amount_value = serializer.validated_data["flat_amount_value"]
+            if version := serializer.validated_data.get("version"):
+                check_concurrency_version_in_mutation(version, payment_plan)
+            # PaymentPlan entitlement
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_importing_entitlements()
+            payment_plan.flat_amount_value = flat_amount_value
+            payment_plan.save()
+            payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,

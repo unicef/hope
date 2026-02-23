@@ -1,9 +1,12 @@
-"""Sanction list related factories."""
-
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.models import SanctionList, SanctionListIndividual
+from hope.models import (
+    SanctionList,
+    SanctionListIndividual,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+)
 
 
 class SanctionListFactory(DjangoModelFactory):
@@ -26,3 +29,19 @@ class SanctionListIndividualFactory(DjangoModelFactory):
     full_name = factory.Sequence(lambda n: f"First{n} Last{n}")
     reference_number = factory.Sequence(lambda n: f"REF-{n}")
     list_type = factory.Sequence(lambda n: f"Type {n}")
+
+
+class SanctionListIndividualDateOfBirthFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualDateOfBirth
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+
+
+class SanctionListIndividualDocumentFactory(DjangoModelFactory):
+    class Meta:
+        model = SanctionListIndividualDocument
+
+    individual = factory.SubFactory(SanctionListIndividualFactory)
+    document_number = factory.Sequence(lambda n: f"DOC-{n}")
+    type_of_document = factory.Sequence(lambda n: f"Type{n}")

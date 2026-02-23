@@ -7,11 +7,15 @@ from django.test import Client as DjangoClient
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.steficon import RuleFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    RuleFactory,
+    UserFactory,
+)
 from hope.admin.steficon import AutocompleteWidget
 from hope.apps.steficon.forms import RuleTestForm
 from hope.models import Program, Rule
@@ -160,10 +164,21 @@ def test_test_button_with_file(rule_test_setup: tuple) -> None:
     assert results[1]["result"].value == 30
 
 
+@pytest.fixture
+def business_area():
+    return BusinessAreaFactory(
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        has_data_sharing_agreement=True,
+    )
+
+
 @pytest.mark.django_db
-def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient, Rule]) -> None:
+def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient, Rule], business_area) -> None:
     client, rule = rule_test_setup
-    business_area = create_afghanistan()
     pp = PaymentPlanFactory(business_area=business_area)
 
     hoh1 = IndividualFactory(household=None)
@@ -177,8 +192,8 @@ def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient,
     hoh2.household = hh2
     hoh2.save()
 
-    PaymentFactory(parent=pp, household=hh1)
-    PaymentFactory(parent=pp, household=hh2)
+    PaymentFactory(parent=pp, household=hh1, collector=hoh1)
+    PaymentFactory(parent=pp, household=hh2, collector=hoh2)
 
     rule.definition = 'result.value = context["data"]["household"]'
     rule.save()
