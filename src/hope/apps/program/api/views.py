@@ -6,8 +6,8 @@ from constance import config
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
@@ -72,6 +72,7 @@ from hope.apps.program.utils import (
 from hope.apps.registration_data.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
+from hope.apps.utils.filterset_to_openapi_params import filterset_to_openapi_params
 from hope.models import (
     BeneficiaryGroup,
     FlexibleAttribute,
@@ -447,6 +448,7 @@ class ProgramViewSet(
         )
 
     @extend_schema(
+        parameters=filterset_to_openapi_params(PaymentSearchFilter),
         responses={
             200: PaymentListSerializer(many=True),
         },
@@ -469,6 +471,32 @@ class ProgramViewSet(
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        parameters=filterset_to_openapi_params(PaymentSearchFilter),
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="ProgramPaymentsCountResponse",
+                fields={"count": serializers.IntegerField()},
+            )
+        },
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="payments/count",
+    )
+    def payments_count(self, request: Request, *args, **kwargs) -> Response:
+        program = self.get_object()
+        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        filterset = PaymentSearchFilter(
+            request.GET,
+            queryset=payments,
+            request=request,
+        )
+        queryset = filterset.qs.distinct()
+
+        return Response({"count": queryset.count()}, status=status.HTTP_200_OK)
 
 
 class ProgramCycleViewSet(
