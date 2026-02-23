@@ -75,7 +75,15 @@ function PaymentDetailsPage(): ReactElement {
         payment.status === PaymentStatusEnum.FORCE_FAILED
           ? RevertForceFailedButton
           : ForceFailedButton;
-      return <ButtonComponent paymentId={payment.id} />;
+      return (
+        <ButtonComponent
+          paymentId={payment.id}
+          disabled={
+            payment.parent?.financialServiceProvider?.communicationChannel !==
+            'XLSX'
+          }
+        />
+      );
     }
     return null;
   };
