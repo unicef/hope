@@ -1,204 +1,229 @@
+from typing import Any
+
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.household import (
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
-    create_household_and_individuals,
+    IndividualRoleInHouseholdFactory,
+    ProgramFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from hope.apps.core.base_test_case import BaseTestCase
-from hope.apps.grievance.services.reassign_roles_services import (
-    reassign_roles_on_disable_individual_service,
-)
-from hope.apps.household.const import (
-    HEAD,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
-from hope.models import BusinessArea, IndividualRoleInHousehold
-from hope.models.utils import MergeStatusModel
+from hope.apps.grievance.services.reassign_roles_services import reassign_roles_on_disable_individual_service
+from hope.apps.household.const import HEAD, ROLE_ALTERNATE, ROLE_PRIMARY
+from hope.models import IndividualRoleInHousehold
+
+pytestmark = pytest.mark.django_db
 
 
-class TestReassignRolesOnDisableIndividual(BaseTestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
+@pytest.fixture
+def base_context() -> dict[str, Any]:
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    program = ProgramFactory(name="Test program ONE", business_area=business_area)
+    user = UserFactory()
 
-        cls.household = HouseholdFactory.build(program=cls.program_one)
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = cls.program_one
-        cls.household.registration_data_import.save()
+    household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        create_role=False,
+    )
+    primary_collector_individual = household.head_of_household
+    primary_role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=primary_collector_individual,
+        role=ROLE_PRIMARY,
+    )
 
-        cls.primary_collector_individual = IndividualFactory(household=None, program=cls.program_one)
-        cls.household.head_of_household = cls.primary_collector_individual
-        cls.household.save()
-        cls.primary_collector_individual.household = cls.household
-        cls.primary_collector_individual.save()
+    alternate_collector_individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    alternate_role = IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=alternate_collector_individual,
+        role=ROLE_ALTERNATE,
+    )
 
-        cls.household.refresh_from_db()
-        cls.primary_collector_individual.refresh_from_db()
+    no_role_individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
 
-        cls.primary_role = IndividualRoleInHousehold.objects.create(
-            household=cls.household,
-            individual=cls.primary_collector_individual,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
+    return {
+        "business_area": business_area,
+        "program": program,
+        "user": user,
+        "household": household,
+        "primary_collector_individual": primary_collector_individual,
+        "primary_role": primary_role,
+        "alternate_collector_individual": alternate_collector_individual,
+        "alternate_role": alternate_role,
+        "no_role_individual": no_role_individual,
+    }
 
-        cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
-        cls.alternate_collector_individual.household = cls.household
-        cls.alternate_collector_individual.save()
 
-        cls.alternate_role = IndividualRoleInHousehold.objects.create(
-            household=cls.household,
-            individual=cls.alternate_collector_individual,
-            role=ROLE_ALTERNATE,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
+def test_reassign_role_to_another_individual(base_context: dict[str, Any]) -> None:
+    household = base_context["household"]
+    program = base_context["program"]
+    business_area = base_context["business_area"]
+    individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
 
-        cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
+    role_reassign_data = {
+        "HEAD": {
+            "role": "HEAD",
+            "household": household.id,
+            "individual": individual.id,
+        },
+        str(base_context["primary_role"].id): {
+            "role": "PRIMARY",
+            "household": household.id,
+            "individual": individual.id,
+        },
+    }
 
-    def test_reassign_role_to_another_individual(self) -> None:
-        individual = IndividualFactory(household=self.household, program=self.program_one)
+    reassign_roles_on_disable_individual_service(
+        base_context["primary_collector_individual"],
+        role_reassign_data,
+        base_context["user"],
+        program,
+    )
 
-        role_reassign_data = {
-            "HEAD": {
-                "role": "HEAD",
-                "household": self.household.id,
-                "individual": individual.id,
-            },
-            str(self.primary_role.id): {
-                "role": "PRIMARY",
-                "household": self.household.id,
-                "individual": individual.id,
-            },
-        }
+    individual.refresh_from_db()
+    household.refresh_from_db()
+    assert household.head_of_household == individual
+    assert individual.relationship == HEAD
+    role = IndividualRoleInHousehold.objects.get(household=household, individual=individual).role
+    assert role == ROLE_PRIMARY
 
+
+def test_reassign_alternate_role_to_primary_collector(base_context: dict[str, Any]) -> None:
+    household = base_context["household"]
+    role_reassign_data = {
+        str(base_context["alternate_role"].id): {
+            "role": "ALTERNATE",
+            "household": household.id,
+            "individual": base_context["primary_collector_individual"].id,
+        },
+    }
+
+    with pytest.raises(ValidationError, match="Cannot reassign the role"):
         reassign_roles_on_disable_individual_service(
-            self.primary_collector_individual,
+            base_context["alternate_collector_individual"],
             role_reassign_data,
-            UserFactory(),
-            self.program_one,
+            base_context["user"],
+            base_context["program"],
         )
 
-        individual.refresh_from_db()
-        self.household.refresh_from_db()
 
-        assert self.household.head_of_household == individual
-        assert individual.relationship == HEAD
-        role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        assert role == ROLE_PRIMARY
+def test_reassign_alternate_role(base_context: dict[str, Any]) -> None:
+    household = base_context["household"]
+    program = base_context["program"]
+    business_area = base_context["business_area"]
+    individual = IndividualFactory(
+        household=household,
+        program=program,
+        business_area=business_area,
+        registration_data_import=household.registration_data_import,
+    )
 
-    def test_reassign_alternate_role_to_primary_collector(self) -> None:
-        role_reassign_data = {
-            str(self.alternate_role.id): {
-                "role": "ALTERNATE",
-                "household": self.household.id,
-                "individual": self.primary_collector_individual.id,
-            },
-        }
+    role_reassign_data = {
+        str(base_context["alternate_role"].id): {
+            "role": "ALTERNATE",
+            "household": household.id,
+            "individual": individual.id,
+        },
+    }
+    reassign_roles_on_disable_individual_service(
+        base_context["alternate_collector_individual"],
+        role_reassign_data,
+        base_context["user"],
+        program,
+    )
+    role = IndividualRoleInHousehold.objects.get(household=household, individual=individual).role
+    assert role == ROLE_ALTERNATE
 
-        with pytest.raises(ValidationError) as context:
-            reassign_roles_on_disable_individual_service(
-                self.alternate_collector_individual,
-                role_reassign_data,
-                UserFactory(),
-                self.program_one,
-            )
 
-        assert "Cannot reassign the role" in str(context.value)
+def test_reassign_primary_role_to_current_alternate_collector(base_context: dict[str, Any]) -> None:
+    household = base_context["household"]
+    household.head_of_household = base_context["no_role_individual"]
+    household.save(update_fields=["head_of_household"])
 
-    def test_reassign_alternate_role(self) -> None:
-        individual = IndividualFactory(household=self.household, program=self.program_one)
+    role_reassign_data = {
+        str(base_context["primary_role"].id): {
+            "role": "PRIMARY",
+            "household": household.id,
+            "individual": base_context["alternate_collector_individual"].id,
+        },
+    }
 
-        role_reassign_data = {
-            str(self.alternate_role.id): {
-                "role": "ALTERNATE",
-                "household": self.household.id,
-                "individual": individual.id,
-            },
-        }
-        reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual,
-            role_reassign_data,
-            UserFactory(),
-            self.program_one,
-        )
-        role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
-        assert role == ROLE_ALTERNATE
+    reassign_roles_on_disable_individual_service(
+        base_context["primary_collector_individual"],
+        role_reassign_data,
+        base_context["user"],
+        base_context["program"],
+    )
 
-    def test_reassign_primary_role_to_current_alternate_collector(self) -> None:
-        # change HOH so that the individual can be disabled
-        self.household.head_of_household = self.no_role_individual
-        self.household.save()
+    role = IndividualRoleInHousehold.objects.get(
+        household=household,
+        individual=base_context["alternate_collector_individual"],
+    ).role
+    assert role == ROLE_PRIMARY
 
-        role_reassign_data = {
-            str(self.primary_role.id): {
-                "role": "PRIMARY",
-                "household": self.household.id,
-                "individual": self.alternate_collector_individual.id,
-            },
-        }
+    previous_role = IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).first()
+    assert previous_role is None
 
-        reassign_roles_on_disable_individual_service(
-            self.primary_collector_individual,
-            role_reassign_data,
-            UserFactory(),
-            self.program_one,
-        )
 
-        role = IndividualRoleInHousehold.objects.get(
-            household=self.household, individual=self.alternate_collector_individual
-        ).role
-        assert role == ROLE_PRIMARY
+def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
+    base_context: dict[str, Any],
+) -> None:
+    program = base_context["program"]
+    business_area = base_context["business_area"]
+    household = base_context["household"]
+    external_household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        create_role=False,
+    )
+    IndividualRoleInHouseholdFactory(
+        household=external_household,
+        individual=base_context["no_role_individual"],
+        role=ROLE_PRIMARY,
+    )
 
-        previous_role = IndividualRoleInHousehold.objects.filter(household=self.household, role=ROLE_ALTERNATE).first()
-        assert previous_role is None
+    role_reassign_data = {
+        str(base_context["alternate_role"].id): {
+            "role": "ALTERNATE",
+            "household": household.id,
+            "individual": base_context["no_role_individual"].id,
+        },
+    }
 
-    def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
-        self,
-    ) -> None:
-        household, _ = create_household_and_individuals(
-            household_data={
-                "business_area": self.business_area,
-                "program_id": self.program_one.pk,
-            },
-            individuals_data=[{}],
-        )
+    reassign_roles_on_disable_individual_service(
+        base_context["alternate_collector_individual"],
+        role_reassign_data,
+        base_context["user"],
+        program,
+    )
 
-        IndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=self.no_role_individual,
-            role=ROLE_PRIMARY,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
+    role = IndividualRoleInHousehold.objects.get(
+        household=household,
+        individual=base_context["no_role_individual"],
+    ).role
+    assert role == ROLE_ALTERNATE
 
-        role_reassign_data = {
-            str(self.alternate_role.id): {
-                "role": "ALTERNATE",
-                "household": self.household.id,
-                "individual": self.no_role_individual.id,
-            },
-        }
-
-        reassign_roles_on_disable_individual_service(
-            self.alternate_collector_individual,
-            role_reassign_data,
-            UserFactory(),
-            self.program_one,
-        )
-
-        role = IndividualRoleInHousehold.objects.get(household=self.household, individual=self.no_role_individual).role
-        assert role == ROLE_ALTERNATE
-
-        external_role = IndividualRoleInHousehold.objects.get(
-            household=household, individual=self.no_role_individual
-        ).role
-        assert external_role == ROLE_PRIMARY  # still with primary role in another household
+    external_role = IndividualRoleInHousehold.objects.get(
+        household=external_household,
+        individual=base_context["no_role_individual"],
+    ).role
+    assert external_role == ROLE_PRIMARY

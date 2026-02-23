@@ -79,6 +79,41 @@ class FlexibleAttributeImporter:
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
+    def _handle_calculate_field(
+        self,
+        object_type_to_add: str,
+        header_name: str,
+        row,
+        row_number: int,
+        value: Any,
+    ) -> None:
+        is_calculate_field = (
+            object_type_to_add == "attribute"
+            and header_name == "calculated_result_field_type"
+            and str(row[0].value) == "calculate"
+            and any(self.object_fields_to_create["name"].endswith(suffix) for suffix in self.FLEX_FIELD_SUFFIXES)
+        )
+        if not is_calculate_field:
+            return
+
+        choice_key = str(value).strip() if value else None
+        if choice_key is None:
+            msg = (
+                f"Survey Sheet: Row {row_number}: "
+                "Calculated result field type must be provided for calculate type fields"
+            )
+            logger.warning(msg)
+            raise ValidationError(msg)
+        if choice_key not in self.CALCULATE_TYPE_CHOICE_MAP:
+            msg = (
+                f"Survey Sheet: Row {row_number}: "
+                f"Invalid type: {choice_key} for calculate field, valid choices are "
+                f"{', '.join(self.CALCULATE_TYPE_CHOICE_MAP.keys())}"
+            )
+            logger.warning(msg)
+            raise ValidationError(msg)
+        self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
+
     def _assign_field_values(
         self,
         value: Any,
@@ -127,31 +162,32 @@ class FlexibleAttributeImporter:
 
                 self.object_fields_to_create[header_name] = str(value) if value else ""
 
-        # Handle calculated fields
-        is_calculate_field = (
-            object_type_to_add == "attribute"
-            and header_name == "calculated_result_field_type"
-            and str(row[0].value) == "calculate"
-            and any(self.object_fields_to_create["name"].endswith(suffix) for suffix in self.FLEX_FIELD_SUFFIXES)
-        )
-        if is_calculate_field:
-            choice_key = str(value).strip() if value else None
-            if choice_key is None:
-                msg = (
-                    f"Survey Sheet: Row {row_number}: "
-                    "Calculated result field type must be provided for calculate type fields"
-                )
-                logger.warning(msg)
-                raise ValidationError(msg)
-            if choice_key not in self.CALCULATE_TYPE_CHOICE_MAP:
-                msg = (
-                    f"Survey Sheet: Row {row_number}: "
-                    f"Invalid type: {choice_key} for calculate field, valid choices are "
-                    f"{', '.join(self.CALCULATE_TYPE_CHOICE_MAP.keys())}"
-                )
-                logger.warning(msg)
-                raise ValidationError(msg)
-            self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
+        self._handle_calculate_field(object_type_to_add, header_name, row, row_number, value)
+
+    def _handle_group_object(self, repeatable: bool, parent: FlexibleAttributeGroup | None) -> FlexibleAttributeGroup:
+        obj = FlexibleAttributeGroup.all_objects.filter(
+            name=self.object_fields_to_create["name"],
+        ).first()
+
+        if obj:
+            obj.label = self.json_fields_to_create["label"]
+            obj.hint = self.json_fields_to_create["hint"]
+            obj.repeatable = repeatable
+            obj.parent = parent
+            obj.is_removed = False
+            obj.save()
+            group = obj
+        else:
+            group = FlexibleAttributeGroup.objects.create(
+                **self.object_fields_to_create,
+                **self.json_fields_to_create,
+                repeatable=repeatable,
+                parent=parent,
+            )
+
+        self.current_group_tree.append(group)
+        FlexibleAttributeGroup.objects.rebuild()
+        return group
 
     def _validate_empty_name(self, is_attribute_name_empty, is_choice_list_name_empty, row_number):
         if is_attribute_name_empty:
@@ -351,28 +387,7 @@ class FlexibleAttributeImporter:
 
             # Handle group objects
             if object_type_to_add == "group":
-                obj = FlexibleAttributeGroup.all_objects.filter(
-                    name=self.object_fields_to_create["name"],
-                ).first()
-
-                if obj:
-                    obj.label = self.json_fields_to_create["label"]
-                    obj.hint = self.json_fields_to_create["hint"]
-                    obj.repeatable = repeatable
-                    obj.parent = parent
-                    obj.is_removed = False
-                    obj.save()
-                    group = obj
-                else:
-                    group = FlexibleAttributeGroup.objects.create(
-                        **self.object_fields_to_create,
-                        **self.json_fields_to_create,
-                        repeatable=repeatable,
-                        parent=parent,
-                    )
-
-                self.current_group_tree.append(group)
-                FlexibleAttributeGroup.objects.rebuild()
+                group = self._handle_group_object(repeatable, parent)
                 all_groups.append(group)
 
             # Handle attribute objects

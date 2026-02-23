@@ -2,20 +2,20 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "a4087bf4-b6e4-4432-888f-ea7e8bab390e",
+            "pk": "b2e0d8d6-0278-4276-b23f-3dca1641e806",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
                 "version": 1735688653315200,
-                "data_collecting_type": 26,
-                "beneficiary_group": "299c8a30-f4e3-4dab-8ff3-199eddfded4c",
-                "business_area": "90c27157-44d5-4d30-ae7c-6c4a8a4c8b81",
+                "data_collecting_type": 1,
+                "beneficiary_group": "e9124770-edc2-4621-a3cb-5380ee47a06b",
+                "business_area": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
                 "name": "Program 0",
-                "programme_code": "8V1S",
+                "programme_code": "PC95",
                 "status": "ACTIVE",
-                "slug": "8v1s",
+                "slug": "pc95",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -29,6 +29,7 @@
                 "administrative_areas_of_implementation": "",
                 "biometric_deduplication_enabled": false,
                 "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "identification_key_individual_label": null,
                 "is_visible": true,
                 "household_count": 0,
                 "individual_count": 0,
@@ -41,7 +42,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 26,
+                "pk": 1,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +57,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        26
+                        1
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "299c8a30-f4e3-4dab-8ff3-199eddfded4c",
+                "pk": "e9124770-edc2-4621-a3cb-5380ee47a06b",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +78,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "90c27157-44d5-4d30-ae7c-6c4a8a4c8b81",
+                "pk": "3575277d-e9c6-4d1d-8b19-6fe3e8fb636f",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

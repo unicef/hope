@@ -1,163 +1,221 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any, Callable
 
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from extras.test_utils.old_factories.account import PartnerFactory, UserFactory
-from extras.test_utils.old_factories.core import create_afghanistan
-from extras.test_utils.old_factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.old_factories.grievance import (
+from extras.test_utils.factories import (
+    AreaFactory,
+    AreaTypeFactory,
+    BusinessAreaFactory,
+    CountryFactory,
     GrievanceTicketFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    ProgramFactory,
     TicketIndividualDataUpdateDetailsFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.old_factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import AUNT_UNCLE, BROTHER_SISTER, HEAD
-from hope.models import Program, country as geo_models
-
-if TYPE_CHECKING:
-    from hope.models import Individual
+from hope.models import Area, BusinessArea, Program, User
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
-    pytest.mark.django_db(),
+    pytest.mark.django_db,
 ]
 
 
-class TestChangeHeadOfHousehold:
-    @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any) -> None:
-        CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-        self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner, first_name="TestUser")
-        self.user2 = UserFactory(partner=self.partner)
-        self.api_client = api_client(self.user)
+@pytest.fixture
+def afghanistan() -> BusinessArea:
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
 
-        self.program = ProgramFactory(
-            business_area=self.afghanistan,
-            status=Program.ACTIVE,
-            name="program afghanistan 1",
-        )
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
-            name="Admin type one",
-            country=country,
-            area_level=2,
-        )
-        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdeeed")
 
-        self.household = HouseholdFactory.build()
-        self.household.program.save()
-        self.household.household_collection.save()
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.program = self.household.program
-        self.household.registration_data_import.save()
+@pytest.fixture
+def user() -> User:
+    return UserFactory(first_name="TestUser")
 
-        self.individual1: Individual = IndividualFactory(household=self.household, program=self.household.program)
-        self.individual2: Individual = IndividualFactory(household=self.household, program=self.household.program)
-        self.individual1.relationship = HEAD
-        self.individual2.relationship = BROTHER_SISTER
-        self.individual1.save()
-        self.individual2.save()
 
-        self.household.head_of_household = self.individual1
-        self.household.save()
+@pytest.fixture
+def authenticated_client(api_client: Callable, user: User) -> Any:
+    return api_client(user)
 
-        self.grievance_ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area,
-            business_area=self.afghanistan,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        self.grievance_ticket.programs.set([self.program])
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=self.grievance_ticket,
-            individual=self.individual2,
-            individual_data={
-                "relationship": {
-                    "value": "HEAD",
-                    "approve_status": True,
-                    "previous_value": "BROTHER_SISTER",
-                }
-            },
-        )
 
-    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        url = reverse(
-            "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "pk": str(self.grievance_ticket.pk),
-            },
-        )
-        create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-                Permissions.GRIEVANCES_UPDATE,
-            ],
-            self.afghanistan,
-            self.program,
-        )
-        self.individual1.relationship = HEAD
-        self.individual1.save()
+@pytest.fixture
+def program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="program afghanistan 1",
+    )
 
-        self.household.head_of_household = self.individual1
-        self.household.save()
 
-        self.individual1.refresh_from_db()
-        self.individual2.refresh_from_db()
-        assert self.individual1.relationship == "HEAD"
-        assert self.individual2.relationship == "BROTHER_SISTER"
+@pytest.fixture
+def admin_area() -> Area:
+    country = CountryFactory(
+        name="Afghanistan",
+        short_name="Afghanistan",
+        iso_code2="AF",
+        iso_code3="AFG",
+        iso_num="0004",
+    )
+    area_type = AreaTypeFactory(
+        name="Admin type one",
+        country=country,
+        area_level=2,
+    )
+    return AreaFactory(name="City Test", area_type=area_type, p_code="asdeeed")
 
-        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        self.individual1.refresh_from_db()
-        self.individual2.save()
-        self.individual2.refresh_from_db()
+@pytest.fixture
+def grievance_context(
+    afghanistan: BusinessArea,
+    program: Program,
+    admin_area: Area,
+    user: User,
+) -> dict[str, Any]:
+    household = HouseholdFactory(
+        business_area=afghanistan,
+        program=program,
+        create_role=False,
+    )
+    individual1 = IndividualFactory(
+        household=household,
+        business_area=afghanistan,
+        program=program,
+        registration_data_import=household.registration_data_import,
+        relationship=HEAD,
+    )
+    individual2 = IndividualFactory(
+        household=household,
+        business_area=afghanistan,
+        program=program,
+        registration_data_import=household.registration_data_import,
+        relationship=BROTHER_SISTER,
+    )
+    household.head_of_household = individual1
+    household.save(update_fields=["head_of_household"])
 
-        assert "There is one head of household. First, you need to change its role." in response.json()
-        assert self.individual1.relationship == "HEAD"
-        assert self.individual2.relationship == "BROTHER_SISTER"
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        admin2=admin_area,
+        business_area=afghanistan,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        created_by=user,
+    )
+    grievance_ticket.programs.set([program])
+    TicketIndividualDataUpdateDetailsFactory(
+        ticket=grievance_ticket,
+        individual=individual2,
+        individual_data={
+            "relationship": {
+                "value": "HEAD",
+                "approve_status": True,
+                "previous_value": "BROTHER_SISTER",
+            }
+        },
+    )
+    return {
+        "household": household,
+        "individual1": individual1,
+        "individual2": individual2,
+        "grievance_ticket": grievance_ticket,
+    }
 
-    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
-        self, create_user_role_with_permissions: Any
-    ) -> None:
-        url = reverse(
-            "api:grievance-tickets:grievance-tickets-global-status-change",
-            kwargs={
-                "business_area_slug": self.afghanistan.slug,
-                "pk": str(self.grievance_ticket.pk),
-            },
-        )
-        create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-                Permissions.GRIEVANCES_UPDATE,
-            ],
-            self.afghanistan,
-            self.program,
-        )
-        self.individual1.relationship = AUNT_UNCLE
-        self.individual1.save()
 
-        self.household.head_of_household = self.individual1
-        self.household.save()
+@pytest.fixture
+def close_ticket_url(afghanistan: BusinessArea, grievance_context: dict[str, Any]) -> str:
+    grievance_ticket = grievance_context["grievance_ticket"]
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-status-change",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(grievance_ticket.pk),
+        },
+    )
 
-        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
-        assert response.status_code == status.HTTP_202_ACCEPTED
 
-        self.individual1.refresh_from_db()
-        self.individual2.refresh_from_db()
+def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    afghanistan: BusinessArea,
+    program: Program,
+    user: User,
+    grievance_context: dict[str, Any],
+    close_ticket_url: str,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_UPDATE,
+        ],
+        afghanistan,
+        program,
+    )
+    household = grievance_context["household"]
+    individual1 = grievance_context["individual1"]
+    individual2 = grievance_context["individual2"]
+    individual1.relationship = HEAD
+    individual1.save(update_fields=["relationship"])
+    household.head_of_household = individual1
+    household.save(update_fields=["head_of_household"])
 
-        assert self.individual1.relationship == "AUNT_UNCLE"
-        assert self.individual2.relationship == "HEAD"
+    individual1.refresh_from_db()
+    individual2.refresh_from_db()
+    assert individual1.relationship == HEAD
+    assert individual2.relationship == BROTHER_SISTER
+
+    response = authenticated_client.post(
+        close_ticket_url,
+        {"status": GrievanceTicket.STATUS_CLOSED},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "There is one head of household. First, you need to change its role." in response.json()
+
+    individual1.refresh_from_db()
+    individual2.refresh_from_db()
+    assert individual1.relationship == HEAD
+    assert individual2.relationship == BROTHER_SISTER
+
+
+def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
+    authenticated_client: Any,
+    create_user_role_with_permissions: Callable,
+    afghanistan: BusinessArea,
+    program: Program,
+    user: User,
+    grievance_context: dict[str, Any],
+    close_ticket_url: str,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_UPDATE,
+        ],
+        afghanistan,
+        program,
+    )
+    household = grievance_context["household"]
+    individual1 = grievance_context["individual1"]
+    individual2 = grievance_context["individual2"]
+    individual1.relationship = AUNT_UNCLE
+    individual1.save(update_fields=["relationship"])
+    household.head_of_household = individual1
+    household.save(update_fields=["head_of_household"])
+
+    response = authenticated_client.post(
+        close_ticket_url,
+        {"status": GrievanceTicket.STATUS_CLOSED},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_202_ACCEPTED
+
+    individual1.refresh_from_db()
+    individual2.refresh_from_db()
+    assert individual1.relationship == AUNT_UNCLE
+    assert individual2.relationship == HEAD
