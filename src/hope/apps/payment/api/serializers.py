@@ -1347,6 +1347,11 @@ class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     rapid_pro_arguments = RapidProSerializer(allow_null=True)
 
 
+class PaymentVerificationSampleSizeSerializer(serializers.Serializer):
+    number_of_recipients = serializers.IntegerField(read_only=True)
+    sample_size = serializers.IntegerField(read_only=True)
+
+
 class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 

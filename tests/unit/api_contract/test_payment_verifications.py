@@ -2,7 +2,7 @@ from pathlib import Path
 
 from drf_api_checker.pytest import frozenfixture
 import pytest
-from unit.api_contract._helpers import HopeRecorder
+from unit.api_contract._helpers import HopeRecorder, JsonPostRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
@@ -63,4 +63,19 @@ def test_retrieve_payment_verification(superuser, business_area, program, role_a
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
         f"/payment-verifications/{payment_plan.pk}/"
+    )
+
+
+def test_sample_size(superuser, business_area, program, role_assignment, payment_plan):
+    recorder = JsonPostRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertPOST(
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/payment-verifications/{payment_plan.pk}/sample-size/",
+        data={
+            "sampling": "FULL_LIST",
+            "verification_channel": "MANUAL",
+            "full_list_arguments": {"excluded_admin_areas": []},
+            "random_sampling_arguments": None,
+            "rapid_pro_arguments": None,
+        },
     )

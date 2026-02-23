@@ -43,6 +43,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.errors: list[XlsxError] = []
         self.payments_dict: dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: list = list(self.payments_dict.keys())
+        self.payment_ids_from_xlsx: list = []
         self.payments_to_save: list = []
         self.payment_verifications_to_save: list = []
         self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
@@ -84,6 +85,15 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
                 )
             )
+        if cell.value in self.payment_ids_from_xlsx:
+            self.errors.append(
+                XlsxError(
+                    self.sheetname,
+                    cell.coordinate,
+                    f"Payment id {cell.value} appears multiple times in the import file",
+                )
+            )
+        self.payment_ids_from_xlsx.append(cell.value)
 
     def _validate_delivered_quantity(self, row: Row) -> None:
         """Define when possible for a user to upload a file.

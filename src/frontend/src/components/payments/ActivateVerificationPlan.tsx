@@ -15,12 +15,12 @@ import { useProgramContext } from '../../programContext';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashOrPaymentPlanId: string;
+  paymentPlanId: string;
 }
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-  cashOrPaymentPlanId,
+  paymentPlanId,
 }: ActivateVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
@@ -34,7 +34,7 @@ export function ActivateVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: cashOrPaymentPlanId,
+          id: paymentPlanId,
           programSlug: programSlug,
           verificationPlanId: paymentVerificationPlanId,
         },
@@ -45,7 +45,7 @@ export function ActivateVerificationPlan({
         queryKey: [
           'PaymentVerificationPlanDetails',
           businessArea,
-          cashOrPaymentPlanId,
+          paymentPlanId,
           programSlug,
         ],
       });
