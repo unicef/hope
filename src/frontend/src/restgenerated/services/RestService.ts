@@ -123,6 +123,7 @@ import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificat
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
 import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
+import type { PaymentVerificationSampleSize } from '../models/PaymentVerificationSampleSize';
 import type { PDUOnlineEditCreate } from '../models/PDUOnlineEditCreate';
 import type { PDUOnlineEditDetail } from '../models/PDUOnlineEditDetail';
 import type { PDUOnlineEditSaveData } from '../models/PDUOnlineEditSaveData';
@@ -11080,6 +11081,36 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentVerificationSampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsSampleSizeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentVerificationPlanCreate,
+    }): CancelablePromise<PaymentVerificationSampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
             },
             body: requestBody,
             mediaType: 'application/json',
