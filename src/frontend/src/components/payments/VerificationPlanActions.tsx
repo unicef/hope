@@ -160,7 +160,7 @@ export function VerificationPlanActions({
             <Box mr={2}>
               {canDelete && (
                 <DeleteVerificationPlan
-                  cashOrPaymentPlanId={paymentPlanNode.id}
+                  paymentPlanId={paymentPlanNode.id}
                   paymentVerificationPlanId={verificationPlan.id}
                 />
               )}
@@ -168,14 +168,14 @@ export function VerificationPlanActions({
             {canEdit && (
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
-                cashOrPaymentPlanId={paymentPlanNode.id}
+                paymentPlanId={paymentPlanNode.id}
               />
             )}
             {canActivate && (
               <Box alignItems="center" display="flex">
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
-                  cashOrPaymentPlanId={paymentPlanNode.id}
+                  paymentPlanId={paymentPlanNode.id}
                 />
               </Box>
             )}
@@ -252,7 +252,7 @@ export function VerificationPlanActions({
                   <Box p={2} data-cy="import-xlsx">
                     <ImportXlsx
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={paymentPlanNode.id}
+                      paymentPlanId={paymentPlanNode.id}
                     />
                   </Box>
                 )}
@@ -260,7 +260,7 @@ export function VerificationPlanActions({
                 {canFinish && verificationPlan.xlsxFileImported && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    cashOrPaymentPlanId={paymentPlanNode.id}
+                    paymentPlanId={paymentPlanNode.id}
                   />
                 )}
                 {canDiscard &&
@@ -268,7 +268,7 @@ export function VerificationPlanActions({
                   !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashOrPaymentPlanId={paymentPlanNode.id}
+                      paymentPlanId={paymentPlanNode.id}
                     />
                   )}
                 {canMarkInvalid && (
@@ -301,13 +301,13 @@ export function VerificationPlanActions({
                 {canFinish && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    cashOrPaymentPlanId={paymentPlanNode.id}
+                    paymentPlanId={paymentPlanNode.id}
                   />
                 )}
                 {canDiscard && (
                   <DiscardVerificationPlan
                     paymentVerificationPlanId={verificationPlan.id}
-                    cashOrPaymentPlanId={paymentPlanNode.id}
+                    paymentPlanId={paymentPlanNode.id}
                   />
                 )}
               </>
