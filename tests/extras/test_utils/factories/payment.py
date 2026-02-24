@@ -176,10 +176,12 @@ class PaymentVerificationFactory(DjangoModelFactory):
 class DeliveryMechanismFactory(DjangoModelFactory):
     class Meta:
         model = DeliveryMechanism
+        django_get_or_create = ("code",)
 
     code = factory.Sequence(lambda n: f"DM{n:04d}")
     name = factory.Sequence(lambda n: f"Delivery Mechanism {n}")
     payment_gateway_id = factory.Sequence(lambda n: f"dm-{n}")
+    transfer_type = factory.Iterator([t.value for t in DeliveryMechanism.TransferType])
 
 
 class FinancialServiceProviderFactory(DjangoModelFactory):
