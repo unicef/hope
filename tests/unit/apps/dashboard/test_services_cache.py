@@ -610,3 +610,42 @@ def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> Non
     refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=years_to_refresh_recent)
 
     assert refreshed_data == []
+
+
+@pytest.mark.django_db
+def test_partial_refresh_with_no_cache(afghanistan: BusinessArea) -> None:
+    """
+    Test partial refresh when there are no payments matching the query,
+    but there is existing data in cache for other years.
+    """
+    ba_slug = afghanistan.slug
+    other_year = CURRENT_YEAR - 5
+    existing_data = [
+        {
+            "year": other_year,
+            "month": "January",
+            "admin1": "SomeProvince",
+            "program": "SomeProgram",
+            "sector": "SomeSector",
+            "fsp": "SomeFSP",
+            "delivery_types": "SomeType",
+            "status": "Success",
+            "currency": "USD",
+            "total_delivered_quantity_usd": "100.00",
+            "total_delivered_quantity": "100.00",
+            "payments": 1,
+            "households": 1,
+            "individuals": 5,
+            "children_counts": 2,
+            "pwd_counts": 0,
+            "reconciled": 0,
+            "finished_payment_plans": 1,
+            "total_payment_plans": 1,
+            "total_planned_usd": "100.00",
+        }
+    ]
+    cache.set(DashboardDataCache.get_cache_key(ba_slug), json.dumps(existing_data))
+    Payment.objects.filter(business_area=afghanistan).delete()
+    years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
+    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=years_to_refresh_recent)
+    assert refreshed_data == existing_data
