@@ -24,7 +24,7 @@ def filterset_to_openapi_params(filterset_class):
 
     for name, filter_field in filterset_class.base_filters.items():
         openapi_type = OpenApiTypes.STR  # by default let's use string
-        for filter_class, schema_type in FILTER_TYPE_MAPPING.items():
+        for filter_class, schema_type in FILTER_TYPE_MAPPING.items():  # pragma no cover
             if isinstance(filter_field, filter_class):
                 openapi_type = schema_type
                 break
